@@ -3,6 +3,13 @@ import "~/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import {
+  ClerkProvider,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 
 export const metadata = {
   title: "Create T3 App",
@@ -16,11 +23,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
-      <body>
-        {children}
-        <SpeedInsights />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={`${GeistSans.variable}`}>
+        <body>
+          <SignedOut>
+            <SignInButton />
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+          {children}
+          <SpeedInsights />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
