@@ -8,6 +8,7 @@ import {
   balancesMock,
   institutionsMock,
 } from "./data/open-banking.mock";
+import { pensionFundsMock } from "./data/pension-fund.mock";
 
 const queryClient = postgres(env.DATABASE_URL);
 const db = drizzle(queryClient);
@@ -22,6 +23,10 @@ await db.insert(schema.accounts).values(accountsMock);
 // eslint-disable-next-line drizzle/enforce-delete-with-where
 await db.delete(schema.balances);
 await db.insert(schema.balances).values(balancesMock);
+
+// eslint-disable-next-line drizzle/enforce-delete-with-where
+await db.delete(schema.pensionFunds);
+await db.insert(schema.pensionFunds).values(pensionFundsMock);
 console.log("Seed done");
 
 // closing connection
