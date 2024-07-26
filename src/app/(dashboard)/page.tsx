@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 
-import { AuthShowcase } from "./_components/auth-showcase";
+import { AuthShowcase } from "../_components/auth-showcase";
 import {
   CreatePostForm,
   PostCardSkeleton,
   PostList,
-} from "./_components/posts";
-import { readPostList } from "./actions";
+} from "../_components/posts";
+import { readPostList } from "../actions";
 
 export default function HomePage() {
   // You can await this here if you don't want to show Suspense fallback below
@@ -18,7 +18,6 @@ export default function HomePage() {
         <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
           Create <span className="text-primary">T3</span> App
         </h1>
-        <AuthShowcase />
 
         <CreatePostForm />
         <div className="w-full max-w-2xl overflow-y-scroll">

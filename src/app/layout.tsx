@@ -1,17 +1,14 @@
 import "~/styles/globals.css";
 
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
 import { Toaster } from "~/components/ui/sonner";
+import { TailwindIndicator } from "../components/tailwind-indicator";
+import { ThemeProvider } from "../components/theme-provider";
 
 export const metadata = {
   title: "Create T3 App",
@@ -28,8 +25,12 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <body>
-          {children}
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            {children}
+            <TailwindIndicator />
+          </ThemeProvider>
           <Toaster />
+          <Analytics />
           <SpeedInsights />
         </body>
       </html>
