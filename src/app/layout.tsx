@@ -1,15 +1,17 @@
 import "~/styles/globals.css";
 
-import { GeistSans } from "geist/font/sans";
-
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import {
   ClerkProvider,
-  SignInButton,
   SignedIn,
   SignedOut,
+  SignInButton,
   UserButton,
 } from "@clerk/nextjs";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
+
+import { Toaster } from "~/components/ui/sonner";
 
 export const metadata = {
   title: "Create T3 App",
@@ -19,20 +21,15 @@ export const metadata = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <ClerkProvider>
-      <html lang="en" className={`${GeistSans.variable}`}>
+      <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <body>
-          <SignedOut>
-            <SignInButton />
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
           {children}
+          <Toaster />
           <SpeedInsights />
         </body>
       </html>
