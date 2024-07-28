@@ -35,8 +35,9 @@ export const accounts = createTable("accounts", {
 
   // FK
   institutionId: integer("institution_id"),
+  userId: varchar("user_id", { length: 128 }).notNull(),
 
-  name: varchar("name", { length: 256 }),
+  name: varchar("name", { length: 256 }).notNull(),
   accountId: varchar("account_id", { length: 64 }),
   expires: timestamp("expires", { mode: "date" }),
 });

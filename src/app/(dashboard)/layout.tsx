@@ -1,20 +1,23 @@
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
-import { GaugeIcon } from "lucide-react";
+import { HandCoinsIcon } from "lucide-react";
 
 import { SiteFooter } from "~/components/footer";
 import { Sidebar } from "./_components/sidebar";
+import { SidebarAccounts } from "./_components/sidebar-accounts";
 
-export default function DashboardLayout(props: { children: React.ReactNode }) {
+export default async function DashboardLayout(props: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="min-h-screen overflow-hidden rounded-[0.5rem]">
-      <nav className="border-b pb-2">
+      <nav className="border-b">
         <div className="flex h-16 items-center justify-between px-6">
           <Link
             href="/"
-            className="relative z-20 flex items-center gap-2 text-lg font-bold tracking-tight"
+            className="relative z-20 flex items-center gap-3 text-xl font-bold tracking-tight"
           >
-            <GaugeIcon />
+            <HandCoinsIcon />
             Badget.
           </Link>
           <div className="flex items-center">
@@ -22,10 +25,13 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
           </div>
         </div>
       </nav>
-      <main className="flex">
-        <Sidebar className="hidden w-[250px] min-w-[250px] lg:block" />
-        {props.children}
-      </main>
+      <div className="flex">
+        <nav className="flex w-[250px] flex-col gap-2 py-4">
+          <Sidebar />
+          <SidebarAccounts />
+        </nav>
+        <main className="grow">{props.children}</main>
+      </div>
       <SiteFooter />
     </div>
   );
