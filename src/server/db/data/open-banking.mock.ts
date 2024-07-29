@@ -22,6 +22,7 @@ export const accountsMock = [
     name: "Revolut",
     expires: new Date(2024, 12, 31),
     institutionId: 1,
+    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
   },
 ] satisfies InferInsertModel<typeof schema.accounts>[];
 

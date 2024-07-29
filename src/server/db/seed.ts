@@ -14,15 +14,15 @@ const queryClient = postgres(env.DATABASE_URL);
 const db = drizzle(queryClient);
 
 console.log("Seed start");
-// eslint-disable-next-line drizzle/enforce-delete-with-where
-await db.delete(schema.institutions);
-await db.insert(schema.institutions).values(institutionsMock);
-// eslint-disable-next-line drizzle/enforce-delete-with-where
-await db.delete(schema.accounts);
-await db.insert(schema.accounts).values(accountsMock);
-// eslint-disable-next-line drizzle/enforce-delete-with-where
-await db.delete(schema.balances);
-await db.insert(schema.balances).values(balancesMock);
+// // eslint-disable-next-line drizzle/enforce-delete-with-where
+// await db.delete(schema.institutions);
+// await db.insert(schema.institutions).values(institutionsMock);
+// // eslint-disable-next-line drizzle/enforce-delete-with-where
+// await db.delete(schema.accounts);
+// await db.insert(schema.accounts).values(accountsMock);
+// // eslint-disable-next-line drizzle/enforce-delete-with-where
+// await db.delete(schema.balances);
+// await db.insert(schema.balances).values(balancesMock);
 
 // eslint-disable-next-line drizzle/enforce-delete-with-where
 await db.delete(schema.pensionFunds);

@@ -6,10 +6,14 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { PensionAccountList } from "./_components/pension-accounts";
 
 export default function PensionPage() {
   return (
-    <Tabs defaultValue="overview" className="w-full">
+    <Tabs
+      defaultValue="overview"
+      className="flex w-full flex-col justify-center"
+    >
       <div className="flex items-center justify-between">
         <header>
           <h1 className="text-2xl font-semibold">Savings</h1>
@@ -20,7 +24,7 @@ export default function PensionPage() {
           <TabsTrigger value="pension">Pension</TabsTrigger>
         </TabsList>
       </div>
-      <TabsContent value="overview">
+      <TabsContent value="overview" className="flex-1">
         <Card>
           <CardHeader>
             <CardTitle>Overview</CardTitle>
@@ -29,7 +33,7 @@ export default function PensionPage() {
           <CardContent className="space-y-2">Overview</CardContent>
         </Card>
       </TabsContent>
-      <TabsContent value="emergency">
+      <TabsContent value="emergency" className="flex-1">
         <Card>
           <CardHeader>
             <CardTitle>Emergency</CardTitle>
@@ -38,13 +42,11 @@ export default function PensionPage() {
           <CardContent className="space-y-2">Emergency</CardContent>
         </Card>
       </TabsContent>
-      <TabsContent value="pension">
-        <Card>
-          <CardHeader>
-            <CardTitle>Pension</CardTitle>
-            <CardDescription>Pension Description</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">Pension</CardContent>
+      <TabsContent value="pension" className="flex flex-1">
+        <Card className="w-full">
+          <CardContent>
+            <PensionAccountList />
+          </CardContent>
         </Card>
       </TabsContent>
     </Tabs>
