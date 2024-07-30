@@ -2,8 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { ShieldCheckIcon } from "lucide-react";
 
-import { Button } from "~/components/ui/button";
 import { db, schema } from "~/server/db";
+import { AddPensionAccountDialog } from "./add-pension-account";
 
 async function getPensionAccountsByUserId() {
   const session = auth();
@@ -18,8 +18,13 @@ async function getPensionAccountsByUserId() {
     .where(eq(schema.pensionAccounts.userId, session.userId));
 }
 
+async function findAllPensionFunds() {
+  return await db.select().from(schema.pensionFunds);
+}
+
 export async function PensionAccountList() {
   const pensionAccounts = await getPensionAccountsByUserId();
+  const pensionFundsPromise = findAllPensionFunds();
 
   if (pensionAccounts.length === 0) {
     return (
@@ -31,7 +36,7 @@ export async function PensionAccountList() {
             Let&apos;s start by adding a pension fund
           </p>
         </div>
-        <Button>Add Pension Account</Button>
+        <AddPensionAccountDialog />
       </div>
     );
   }
