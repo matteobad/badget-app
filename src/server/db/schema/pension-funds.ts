@@ -99,15 +99,9 @@ export const pensionAccounts = createTable("pension_accounts", {
   userId: varchar("name", { length: 512 }).notNull(),
 
   joinedAt: timestamp("joined_at"),
-  baseTFRPercentage: decimal("base_tfr_percentage", { precision: 2 }).default(
-    "0",
-  ),
-  baseEmployeePercentage: decimal("base_employee_percentage", {
-    precision: 2,
-  }).default("0"),
-  baseEmployerPercentage: decimal("base_employer_percentage", {
-    precision: 2,
-  }).default("0"),
+  baseTFRPercentage: real("base_tfr_percentage").default(0),
+  baseEmployeePercentage: real("base_employee_percentage").default(0),
+  baseEmployerPercentage: real("base_employer_percentage").default(0),
 });
 
 export const pensionAccountsRelations = relations(
@@ -116,6 +110,15 @@ export const pensionAccountsRelations = relations(
     contributions: many(pensionAccountContributions),
   }),
 );
+
+export const ContributionContributor = {
+  TFR: "TFR",
+  EMPLOYEE: "EMPLOYEE",
+  EMPLOYER: "EMPLOYER",
+  UNKNOWN: "UNKNOWN",
+} as const;
+export type ContributionContributor =
+  (typeof ContributionContributor)[keyof typeof ContributionContributor];
 
 export const pensionAccountContributions = createTable(
   "pension_account_contributions",
@@ -129,10 +132,9 @@ export const pensionAccountContributions = createTable(
     // FK
     pensionAccountId: integer("pension_account_id").notNull(),
 
-    year: integer("year"),
-    tfrPercentage: decimal("tfr_percentage").default("0"),
-    employeePercentage: decimal("employee_percentage").default("0"),
-    employerPercentage: decimal("employer_percentage").default("0"),
+    amount: decimal("amount").default("0"),
+    contributor: text("contributor").$type<ContributionContributor>(),
+    date: timestamp("date", { withTimezone: true }),
     consolidated_at: timestamp("consolidated_at", { withTimezone: true }),
   },
 );

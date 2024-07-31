@@ -46,7 +46,10 @@ export async function PensionAccountList() {
   }
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div className="flex w-full flex-col gap-4 py-6">
+      <div className="self-end">
+        <AddPensionAccountDialog pensionFundsPromise={pensionFundsPromise} />
+      </div>
       {pensionAccounts.map((account) => {
         return <span key={account.id}>{account.id}</span>;
       })}

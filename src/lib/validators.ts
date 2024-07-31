@@ -17,10 +17,11 @@ export const deletePostSchema = z.object({
 
 // pension
 export const CreatePensionAccountSchema = z.object({
-  pensionFundId: z.number({ message: "Pension fund is required" }),
-  investmentBranchId: z.number({ message: "Investment branch is required" }),
-  joinedAt: z.date().default(new Date()),
-  baseTFRPercentage: z.number().default(0),
-  baseEmployeePercentage: z.number().default(0),
-  baseEmployerPercentage: z.number().default(0),
+  pensionFundId: z.coerce.number(),
+  investmentBranchId: z.coerce.number(),
+  joinedAt: z.coerce.date().default(new Date()),
+  baseTFRPercentage: z.coerce.number().default(0),
+  baseEmployeePercentage: z.coerce.number().default(0),
+  baseEmployerPercentage: z.coerce.number().default(0),
+  baseContribution: z.string().optional(),
 });

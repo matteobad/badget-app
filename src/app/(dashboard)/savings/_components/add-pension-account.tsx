@@ -3,20 +3,13 @@
 import { use, useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import {
-  CalendarIcon,
-  Check,
-  ChevronsUpDown,
-  PercentIcon,
-  PlusIcon,
-  TrendingUpIcon,
-} from "lucide-react";
+import { CalendarIcon, Check, ChevronsUpDown, PercentIcon } from "lucide-react";
 import { useFormState } from "react-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
 
-import { createPostAction } from "~/app/actions";
+import MoneyInput from "~/components/custom/money-input";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import {
@@ -58,31 +51,32 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 import { CreatePensionAccountSchema } from "~/lib/validators";
-import { type schema } from "~/server/db";
+import { createPensionAccountAction } from "~/server/action/pension-account.action";
+import { type investmentBranchesSelect, type schema } from "~/server/db";
 
 export function CreatePensionAccountForm(props: {
   pensionFunds: (typeof schema.pensionFunds.$inferSelect & {
-    investmentsBranches: (typeof schema.investmentBranches.$inferSelect)[];
+    investmentsBranches: investmentBranchesSelect[];
   })[];
 }) {
   const [selectedPFID, setSelectedPFID] = useState<number>();
-  const [selectedIB, setSelectedIB] =
-    useState<typeof schema.investmentBranches.$inferSelect>();
+  const [selectedIB, setSelectedIB] = useState<investmentBranchesSelect>();
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [state, formAction] = useFormState(createPostAction, {
+  const [state, formAction] = useFormState(createPensionAccountAction, {
     message: "",
   });
 
   const form = useForm<z.output<typeof CreatePensionAccountSchema>>({
     resolver: zodResolver(CreatePensionAccountSchema),
     defaultValues: {
-      pensionFundId: -1,
-      investmentBranchId: -1,
+      pensionFundId: undefined,
+      investmentBranchId: undefined,
+      joinedAt: new Date(),
       baseTFRPercentage: 0,
       baseEmployeePercentage: 0,
       baseEmployerPercentage: 0,
-      joinedAt: new Date(),
+      baseContribution: "",
       ...(state?.fields ?? {}),
     },
   });
@@ -111,6 +105,8 @@ export function CreatePensionAccountForm(props: {
           name="pensionFundId"
           render={({ field }) => (
             <FormItem className="flex flex-col">
+              {/* Hack to post data with server actions */}
+              <input type="hidden" name={field.name} value={field.value} />
               <FormLabel>Pension Fund</FormLabel>
               <Popover modal={true}>
                 <PopoverTrigger asChild>
@@ -174,36 +170,29 @@ export function CreatePensionAccountForm(props: {
           name="investmentBranchId"
           render={({ field }) => (
             <FormItem className="flex flex-col">
+              {/* Hack to post data with server actions */}
+              <input type="hidden" name={field.name} value={field.value} />
               <FormLabel className="flex justify-between">
                 Branch
-                <div className="grid grid-cols-4 gap-1 divide-x text-xs font-light text-slate-500">
+                <div className="flex gap-1 divide-x text-xs font-light text-slate-500">
                   {selectedIB ? (
                     <>
                       <div className="flex items-center justify-center gap-1">
-                        <span>ISC2</span>
-                        {selectedIB?.isc2}
-                      </div>
-                      <div className="flex items-center justify-center gap-1">
-                        <span>ISC5</span>
-                        {selectedIB?.isc5}
-                      </div>
-                      <div className="flex items-center justify-center gap-1">
-                        <span>ISC10</span>
-                        {selectedIB?.isc10}
-                      </div>
-                      <div className="flex items-center justify-center gap-1">
-                        <span>ISC35</span>
-                        {selectedIB?.isc35}
+                        <span>ISC</span>
+                        {selectedIB?.isc35 ??
+                          selectedIB?.isc10 ??
+                          selectedIB?.isc5 ??
+                          selectedIB?.isc2}
+                        {"%"}
                       </div>
                     </>
                   ) : (
-                    <span className="col-span-4">
-                      Select a branch to see medium ISCs
-                    </span>
+                    <span>Select a branch to see medium ISCs</span>
                   )}
                 </div>
               </FormLabel>
               <Select
+                disabled={!selectedPFID}
                 onValueChange={(value) => {
                   setSelectedIB(
                     props.pensionFunds
@@ -212,9 +201,9 @@ export function CreatePensionAccountForm(props: {
                         (ib) => ib.id.toString() === value,
                       ),
                   );
-                  field.onChange(value);
+                  field.onChange(parseInt(value, 10));
                 }}
-                defaultValue={field.value.toString()}
+                defaultValue={field.value?.toString()}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -247,6 +236,12 @@ export function CreatePensionAccountForm(props: {
           name="joinedAt"
           render={({ field }) => (
             <FormItem className="flex flex-col">
+              {/* Hack to post data with server actions */}
+              <input
+                type="hidden"
+                name={field.name}
+                value={field.value?.toISOString()}
+              />
               <FormLabel>Date of registration</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
@@ -329,6 +324,13 @@ export function CreatePensionAccountForm(props: {
             )}
           />
         </div>
+        <MoneyInput
+          form={form}
+          label="Current Pricipal"
+          name="baseContribution"
+          placeholder="Current pension account balance"
+        />
+
         <Button className="mt-4 self-end">Start tracking!</Button>
       </form>
     </Form>
