@@ -4,6 +4,7 @@ import {
   date,
   decimal,
   integer,
+  real,
   serial,
   text,
   timestamp,
@@ -50,6 +51,7 @@ export const BranchCategory = {
   BIL: "BIL",
   GAR: "GAR",
   OBB: "OBB",
+  UNKNOWN: "UNKNOWN",
 } as const;
 export type BranchCategory =
   (typeof BranchCategory)[keyof typeof BranchCategory];
@@ -64,13 +66,13 @@ export const investmentBranches = createTable("investment_branches", {
   // FK
   pensionFundId: integer("pension_fund_id"),
 
-  description: varchar("description", { length: 256 }).notNull(),
-  category: text("category").$type<BranchCategory>().notNull(),
-  isc2: decimal("isc_2", { precision: 2 }),
-  isc5: decimal("isc_5", { precision: 2 }),
-  isc10: decimal("isc_10", { precision: 2 }),
-  isc35: decimal("isc_35", { precision: 2 }),
-  averageReturns: decimal("average_returns", { precision: 2 }),
+  description: varchar("description", { length: 256 }),
+  category: text("category").$type<BranchCategory>(),
+  isc2: real("isc_2"),
+  isc5: real("isc_5"),
+  isc10: real("isc_10"),
+  isc35: real("isc_35"),
+  averageReturns: real("average_returns"),
 });
 
 export const investmentBranchesRelations = relations(

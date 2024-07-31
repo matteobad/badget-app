@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
+import {
+  CalendarIcon,
+  Check,
+  ChevronsUpDown,
+  PercentIcon,
+  PlusIcon,
+  TrendingUpIcon,
+} from "lucide-react";
 import { useFormState } from "react-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -51,20 +58,16 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 import { CreatePensionAccountSchema } from "~/lib/validators";
+import { type schema } from "~/server/db";
 
-const languages = [
-  { label: "English", value: "en" },
-  { label: "French", value: "fr" },
-  { label: "German", value: "de" },
-  { label: "Spanish", value: "es" },
-  { label: "Portuguese", value: "pt" },
-  { label: "Russian", value: "ru" },
-  { label: "Japanese", value: "ja" },
-  { label: "Korean", value: "ko" },
-  { label: "Chinese", value: "zh" },
-] as const;
-
-export function CreatePensionAccountForm() {
+export function CreatePensionAccountForm(props: {
+  pensionFunds: (typeof schema.pensionFunds.$inferSelect & {
+    investmentsBranches: (typeof schema.investmentBranches.$inferSelect)[];
+  })[];
+}) {
+  const [selectedPFID, setSelectedPFID] = useState<number>();
+  const [selectedIB, setSelectedIB] =
+    useState<typeof schema.investmentBranches.$inferSelect>();
   const formRef = useRef<HTMLFormElement>(null);
 
   const [state, formAction] = useFormState(createPostAction, {
@@ -74,8 +77,8 @@ export function CreatePensionAccountForm() {
   const form = useForm<z.output<typeof CreatePensionAccountSchema>>({
     resolver: zodResolver(CreatePensionAccountSchema),
     defaultValues: {
-      pensionFundId: "",
-      investmentBranchId: "",
+      pensionFundId: -1,
+      investmentBranchId: -1,
       baseTFRPercentage: 0,
       baseEmployeePercentage: 0,
       baseEmployerPercentage: 0,
@@ -93,7 +96,7 @@ export function CreatePensionAccountForm() {
   return (
     <Form {...form}>
       <form
-        className="flex w-full max-w-2xl flex-col gap-4"
+        className="flex w-full max-w-2xl flex-col gap-4 overflow-auto"
         ref={formRef}
         action={formAction}
         onSubmit={(evt) => {
@@ -103,96 +106,142 @@ export function CreatePensionAccountForm() {
           })(evt);
         }}
       >
-        <div className="grid grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="pensionFundId"
-            render={({ field }) => (
-              <FormItem className="col-span-2 flex flex-col">
-                <FormLabel>Pension Fund</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "w-[full] justify-between",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
-                        {field.value
-                          ? languages.find(
-                              (language) => language.value === field.value,
-                            )?.label
-                          : "Select pension fund"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[200px] p-0">
-                    <Command>
-                      <CommandInput placeholder="Search pension fund..." />
-                      <CommandList>
-                        <CommandEmpty>No pension fund found.</CommandEmpty>
-                        <CommandGroup>
-                          {languages.map((pensionFund) => (
-                            <CommandItem
-                              value={pensionFund.label}
-                              key={pensionFund.value}
-                              onSelect={() => {
-                                form.setValue(
-                                  "pensionFundId",
-                                  pensionFund.value,
-                                );
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  pensionFund.value === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              {pensionFund.label}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="investmentBranchId"
-            render={({ field }) => (
-              <FormItem className="col-span-1 flex flex-col">
-                <FormLabel>Branch</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+        <FormField
+          control={form.control}
+          name="pensionFundId"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Pension Fund</FormLabel>
+              <Popover modal={true}>
+                <PopoverTrigger asChild>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select..." />
-                    </SelectTrigger>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        "relative w-[full] justify-between",
+                        !field.value && "text-muted-foreground",
+                      )}
+                    >
+                      <span className="max-w-[93%] truncate">
+                        {field.value
+                          ? props.pensionFunds.find(
+                              (item) => item.id === field.value,
+                            )?.name ?? "Select pension fund"
+                          : "Select pension fund"}
+                      </span>
+                      <ChevronsUpDown className="absolute right-3 ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="m@example.com">m@example.com</SelectItem>
-                    <SelectItem value="m@google.com">m@google.com</SelectItem>
-                    <SelectItem value="m@support.com">m@support.com</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-[375px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search pension fund..." />
+                    <CommandList>
+                      <CommandEmpty>No pension fund found.</CommandEmpty>
+                      <CommandGroup>
+                        {props.pensionFunds.map((pensionFund) => (
+                          <CommandItem
+                            value={pensionFund.name}
+                            key={pensionFund.id}
+                            onSelect={() => {
+                              setSelectedPFID(pensionFund.id);
+                              form.setValue("pensionFundId", pensionFund.id);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                pensionFund.id === field.value
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                            {pensionFund.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="investmentBranchId"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel className="flex justify-between">
+                Branch
+                <div className="grid grid-cols-4 gap-1 divide-x text-xs font-light text-slate-500">
+                  {selectedIB ? (
+                    <>
+                      <div className="flex items-center justify-center gap-1">
+                        <span>ISC2</span>
+                        {selectedIB?.isc2}
+                      </div>
+                      <div className="flex items-center justify-center gap-1">
+                        <span>ISC5</span>
+                        {selectedIB?.isc5}
+                      </div>
+                      <div className="flex items-center justify-center gap-1">
+                        <span>ISC10</span>
+                        {selectedIB?.isc10}
+                      </div>
+                      <div className="flex items-center justify-center gap-1">
+                        <span>ISC35</span>
+                        {selectedIB?.isc35}
+                      </div>
+                    </>
+                  ) : (
+                    <span className="col-span-4">
+                      Select a branch to see medium ISCs
+                    </span>
+                  )}
+                </div>
+              </FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  setSelectedIB(
+                    props.pensionFunds
+                      .find((pf) => pf.id === selectedPFID)
+                      ?.investmentsBranches.find(
+                        (ib) => ib.id.toString() === value,
+                      ),
+                  );
+                  field.onChange(value);
+                }}
+                defaultValue={field.value.toString()}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {selectedPFID
+                    ? props.pensionFunds
+                        .find((pf) => pf.id === selectedPFID)
+                        ?.investmentsBranches.map((branch) => {
+                          return (
+                            <SelectItem
+                              value={branch.id.toString()}
+                              key={branch.id}
+                            >
+                              {branch.description}
+                            </SelectItem>
+                          );
+                        })
+                    : null}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="joinedAt"
@@ -238,7 +287,10 @@ export function CreatePensionAccountForm() {
               <FormItem>
                 <FormLabel>TFR</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="0" />
+                  <div className="relative">
+                    <Input {...field} placeholder="0" />
+                    <PercentIcon className="absolute right-3 top-3 h-4 w-4" />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -251,7 +303,10 @@ export function CreatePensionAccountForm() {
               <FormItem>
                 <FormLabel>Employee</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Employee contribution (%)" />
+                  <div className="relative">
+                    <Input {...field} placeholder="Employee contribution (%)" />
+                    <PercentIcon className="absolute right-3 top-3 h-4 w-4" />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -264,7 +319,10 @@ export function CreatePensionAccountForm() {
               <FormItem>
                 <FormLabel>Employer</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Employer contribution (%)" />
+                  <div className="relative">
+                    <Input {...field} placeholder="Employer contribution (%)" />
+                    <PercentIcon className="absolute right-3 top-3 h-4 w-4" />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -277,7 +335,15 @@ export function CreatePensionAccountForm() {
   );
 }
 
-export function AddPensionAccountDialog() {
+export function AddPensionAccountDialog(props: {
+  pensionFundsPromise: Promise<
+    (typeof schema.pensionFunds.$inferSelect & {
+      investmentsBranches: (typeof schema.investmentBranches.$inferSelect)[];
+    })[]
+  >;
+}) {
+  const pensionFunds = use(props.pensionFundsPromise);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -292,7 +358,7 @@ export function AddPensionAccountDialog() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 pt-4">
-          <CreatePensionAccountForm />
+          <CreatePensionAccountForm pensionFunds={pensionFunds} />
         </div>
         {/* <DialogFooter>
           <Button type="submit">Start tracking!</Button>

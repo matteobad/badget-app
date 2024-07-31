@@ -8,7 +8,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { PensionAccountList } from "./_components/pension-accounts";
 
-export default function PensionPage() {
+export default function SavingsPage() {
   return (
     <Tabs
       defaultValue="overview"

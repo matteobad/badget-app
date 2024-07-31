@@ -19,7 +19,11 @@ async function getPensionAccountsByUserId() {
 }
 
 async function findAllPensionFunds() {
-  return await db.select().from(schema.pensionFunds);
+  return await db.query.pensionFunds.findMany({
+    with: {
+      investmentsBranches: true,
+    },
+  });
 }
 
 export async function PensionAccountList() {
@@ -36,7 +40,7 @@ export async function PensionAccountList() {
             Let&apos;s start by adding a pension fund
           </p>
         </div>
-        <AddPensionAccountDialog />
+        <AddPensionAccountDialog pensionFundsPromise={pensionFundsPromise} />
       </div>
     );
   }

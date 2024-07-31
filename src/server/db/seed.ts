@@ -26,7 +26,25 @@ console.log("Seed start");
 
 // eslint-disable-next-line drizzle/enforce-delete-with-where
 await db.delete(schema.pensionFunds);
-await db.insert(schema.pensionFunds).values(pensionFundsMock);
+// eslint-disable-next-line drizzle/enforce-delete-with-where
+await db.delete(schema.investmentBranches);
+
+for (const [_, { investmentBranches, ...rest }] of pensionFundsMock) {
+  const inserted = await db
+    .insert(schema.pensionFunds)
+    .values(rest)
+    .returning({ insertedId: schema.pensionFunds.id });
+
+  await db.insert(schema.investmentBranches).values(
+    investmentBranches.map((iv) => {
+      return {
+        ...iv,
+        pensionFundId: inserted[0]?.insertedId,
+      };
+    }),
+  );
+}
+
 console.log("Seed done");
 
 // closing connection
