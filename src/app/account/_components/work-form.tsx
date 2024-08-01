@@ -31,7 +31,7 @@ export default function WorkForm() {
   });
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <Table>
         <TableHeader>
           <TableRow>
@@ -154,6 +154,7 @@ export default function WorkForm() {
           </TableRow>
         </TableBody>
       </Table>
+      <Button className="self-start">Add Working Record</Button>
     </div>
   );
 }

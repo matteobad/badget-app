@@ -5,6 +5,7 @@ import { env } from "~/env";
 import * as openBanking from "./schema/open-banking";
 import * as pensionFund from "./schema/pension-funds";
 import * as post from "./schema/post";
+import * as workingRecord from "./schema/working-records";
 
 /**
  * Cache the database connection in development. This avoids creating a new connection on every HMR
@@ -23,5 +24,10 @@ export type PensionAccountSelect = typeof schema.pensionAccounts.$inferSelect;
 export type investmentBranchesSelect =
   typeof schema.investmentBranches.$inferSelect;
 
-export const schema = { ...post, ...openBanking, ...pensionFund };
+export const schema = {
+  ...post,
+  ...openBanking,
+  ...pensionFund,
+  ...workingRecord,
+};
 export const db = drizzle(conn, { schema });

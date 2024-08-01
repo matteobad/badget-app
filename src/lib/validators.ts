@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { ContractType } from "~/server/db/schema/working-records";
+
 export type FormState = {
   message: string;
   fields?: Record<string, string>;
@@ -24,4 +26,16 @@ export const CreatePensionAccountSchema = z.object({
   baseEmployeePercentage: z.coerce.number().default(0),
   baseEmployerPercentage: z.coerce.number().default(0),
   baseContribution: z.string().optional(),
+});
+
+// work
+export const CreateWorkSchema = z.object({
+  company: z.string().optional(),
+  contract: z.nativeEnum(ContractType),
+  ral: z.number(),
+  date: z.object({
+    from: z.date(),
+    to: z.date().optional(),
+  }),
+  toDate: z.date().optional(),
 });

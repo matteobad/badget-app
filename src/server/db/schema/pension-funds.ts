@@ -96,7 +96,7 @@ export const pensionAccounts = createTable("pension_accounts", {
   // FK
   pensionFundId: integer("pension_fund_id").notNull(),
   investmentBranchId: integer("investment_branch_id").notNull(),
-  userId: varchar("name", { length: 512 }).notNull(),
+  userId: varchar("user_id", { length: 512 }).notNull(),
 
   joinedAt: timestamp("joined_at"),
   baseTFRPercentage: real("base_tfr_percentage").default(0),
