@@ -42,14 +42,15 @@ export async function PensionAccountList() {
   const pensionAccounts = await getPensionAccountsByUserId();
   const pensionFundsPromise = findAllPensionFunds();
 
-  if (pensionAccounts.length === 0) {
+  if (pensionAccounts.length === 1) {
     return (
-      <div className="relative flex w-full flex-1 flex-col items-center justify-center gap-6 pt-6">
-        <ShieldCheckIcon className="h-16 w-16 rounded-full bg-slate-100 p-4" />
+      <div className="flex flex-1 flex-col items-center justify-center gap-6 rounded-lg border border-dashed shadow-sm">
         <div className="flex flex-col items-center gap-2">
-          <p className="text-xl font-bold">No pension accounts yet</p>
-          <p className="text-sm text-slate-500">
-            Let&apos;s start by adding a pension fund
+          <h3 className="text-2xl font-bold tracking-tight">
+            No pension accounts yet
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Let&apos;s start by adding your first pension account.
           </p>
         </div>
         <AddPensionAccountDialog pensionFundsPromise={pensionFundsPromise} />

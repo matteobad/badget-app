@@ -3,7 +3,13 @@
 import { use, useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, Check, ChevronsUpDown, PercentIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  Check,
+  ChevronsUpDown,
+  PercentIcon,
+  PlusCircleIcon,
+} from "lucide-react";
 import { useFormState } from "react-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -349,7 +355,10 @@ export function AddPensionAccountDialog(props: {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Add Account</Button>
+        <Button size="sm" className="flex items-center gap-2">
+          <PlusCircleIcon className="h-4 w-4" />
+          Add Account
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

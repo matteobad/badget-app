@@ -18,19 +18,20 @@ export default function SavingsPage() {
   return (
     <Tabs
       defaultValue="overview"
-      className="flex w-full flex-col justify-center"
+      className="flex w-full flex-col justify-center gap-2"
     >
-      <div className="mb-6 flex items-center justify-between">
-        <header>
-          <h1 className="text-2xl font-semibold">Savings</h1>
-        </header>
+      <div className="mb-4 flex items-center justify-between">
+        <TabsList className="self-start">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="emergency">Emergency</TabsTrigger>
+          <TabsTrigger value="pension">Pension</TabsTrigger>
+        </TabsList>
+
         <AddPensionAccountDialog pensionFundsPromise={pensionFundsPromise} />
       </div>
-      <TabsList className="self-start">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="emergency">Emergency</TabsTrigger>
-        <TabsTrigger value="pension">Pension</TabsTrigger>
-      </TabsList>
+      <header>
+        <h1 className="text-2xl font-semibold">Savings</h1>
+      </header>
       <TabsContent value="overview" className="flex-1">
         <Card>
           <CardHeader>
