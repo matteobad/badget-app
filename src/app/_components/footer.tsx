@@ -2,8 +2,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { GaugeIcon } from "lucide-react";
 
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import { Button } from "./ui/button";
 
 const ThemeToggle = dynamic(() => import("~/components/theme-toggle"), {
   ssr: false,
