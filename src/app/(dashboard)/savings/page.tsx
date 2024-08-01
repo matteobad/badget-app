@@ -6,24 +6,31 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { PensionAccountList } from "./_components/pension-accounts";
+import { AddPensionAccountDialog } from "./_components/add-pension-account";
+import {
+  findAllPensionFunds,
+  PensionAccountList,
+} from "./_components/pension-accounts";
 
 export default function SavingsPage() {
+  const pensionFundsPromise = findAllPensionFunds();
+
   return (
     <Tabs
       defaultValue="overview"
       className="flex w-full flex-col justify-center"
     >
-      <div className="flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <header>
           <h1 className="text-2xl font-semibold">Savings</h1>
         </header>
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="emergency">Emergency</TabsTrigger>
-          <TabsTrigger value="pension">Pension</TabsTrigger>
-        </TabsList>
+        <AddPensionAccountDialog pensionFundsPromise={pensionFundsPromise} />
       </div>
+      <TabsList className="self-start">
+        <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="emergency">Emergency</TabsTrigger>
+        <TabsTrigger value="pension">Pension</TabsTrigger>
+      </TabsList>
       <TabsContent value="overview" className="flex-1">
         <Card>
           <CardHeader>
@@ -43,11 +50,11 @@ export default function SavingsPage() {
         </Card>
       </TabsContent>
       <TabsContent value="pension" className="flex flex-1">
-        <Card className="w-full">
-          <CardContent>
-            <PensionAccountList />
-          </CardContent>
-        </Card>
+        {/* <Card className="w-full">
+          <CardContent> */}
+        <PensionAccountList />
+        {/* </CardContent>
+        </Card> */}
       </TabsContent>
     </Tabs>
   );

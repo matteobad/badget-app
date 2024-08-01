@@ -349,7 +349,7 @@ export function AddPensionAccountDialog(props: {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Pension Fund</Button>
+        <Button>Add Account</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
