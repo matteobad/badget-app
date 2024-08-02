@@ -13,8 +13,8 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { db, schema } from "~/server/db";
-import { PensionAccountChart } from "./pension-account-chart";
-import { PensionAccountTable } from "./pension-account-table";
+import { PensionAccountChart } from "../_components/pension-account-chart";
+import { PensionAccountTable } from "../_components/pension-account-table";
 
 async function getPensionAccountsByUserId() {
   const session = auth();
@@ -37,11 +37,11 @@ export async function findAllPensionFunds() {
   });
 }
 
-export async function PensionAccountList() {
+export default async function PensionPage() {
   const pensionAccounts = await getPensionAccountsByUserId();
   const pensionFundsPromise = findAllPensionFunds();
 
-  if (pensionAccounts.length === 0) {
+  if (pensionAccounts.length === 1) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-6 rounded-lg border border-dashed shadow-sm">
         <div className="flex flex-col items-center gap-2">

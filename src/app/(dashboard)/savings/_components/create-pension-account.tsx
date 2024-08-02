@@ -1,15 +1,10 @@
 "use client";
 
 import { use, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import {
-  CalendarIcon,
-  Check,
-  ChevronsUpDown,
-  PercentIcon,
-  PlusCircleIcon,
-} from "lucide-react";
+import { CalendarIcon, Check, ChevronsUpDown, PercentIcon } from "lucide-react";
 import { useFormState } from "react-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -26,14 +21,6 @@ import {
   CommandItem,
   CommandList,
 } from "~/components/ui/command";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -58,13 +45,21 @@ import {
 import { cn } from "~/lib/utils";
 import { CreatePensionAccountSchema } from "~/lib/validators";
 import { createPensionAccountAction } from "~/server/action/pension-account.action";
-import { type investmentBranchesSelect, type schema } from "~/server/db";
+import {
+  type investmentBranchesSelect,
+  type PensionFundsSelect,
+} from "~/server/db";
 
 export function CreatePensionAccountForm(props: {
-  pensionFunds: (typeof schema.pensionFunds.$inferSelect & {
-    investmentsBranches: investmentBranchesSelect[];
-  })[];
+  pensionFundsPromise: Promise<
+    (PensionFundsSelect & {
+      investmentsBranches: investmentBranchesSelect[];
+    })[]
+  >;
 }) {
+  const router = useRouter();
+
+  const pensionFunds = use(props.pensionFundsPromise);
   const [selectedPFID, setSelectedPFID] = useState<number>();
   const [selectedIB, setSelectedIB] = useState<investmentBranchesSelect>();
   const formRef = useRef<HTMLFormElement>(null);
@@ -127,9 +122,8 @@ export function CreatePensionAccountForm(props: {
                     >
                       <span className="max-w-[93%] truncate">
                         {field.value
-                          ? props.pensionFunds.find(
-                              (item) => item.id === field.value,
-                            )?.name ?? "Select pension fund"
+                          ? pensionFunds.find((item) => item.id === field.value)
+                              ?.name ?? "Select pension fund"
                           : "Select pension fund"}
                       </span>
                       <ChevronsUpDown className="absolute right-3 ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -142,7 +136,7 @@ export function CreatePensionAccountForm(props: {
                     <CommandList>
                       <CommandEmpty>No pension fund found.</CommandEmpty>
                       <CommandGroup>
-                        {props.pensionFunds.map((pensionFund) => (
+                        {pensionFunds.map((pensionFund) => (
                           <CommandItem
                             value={pensionFund.name}
                             key={pensionFund.id}
@@ -201,7 +195,7 @@ export function CreatePensionAccountForm(props: {
                 disabled={!selectedPFID}
                 onValueChange={(value) => {
                   setSelectedIB(
-                    props.pensionFunds
+                    pensionFunds
                       .find((pf) => pf.id === selectedPFID)
                       ?.investmentsBranches.find(
                         (ib) => ib.id.toString() === value,
@@ -218,7 +212,7 @@ export function CreatePensionAccountForm(props: {
                 </FormControl>
                 <SelectContent>
                   {selectedPFID
-                    ? props.pensionFunds
+                    ? pensionFunds
                         .find((pf) => pf.id === selectedPFID)
                         ?.investmentsBranches.map((branch) => {
                           return (
@@ -337,44 +331,13 @@ export function CreatePensionAccountForm(props: {
           placeholder="Current pension account balance"
         />
 
-        <Button className="mt-4 self-end">Start tracking!</Button>
+        <div className="mt-4 flex gap-4 self-end">
+          <Button type="button" variant="outline" onClick={() => router.back()}>
+            Cancel
+          </Button>
+          <Button>Start tracking!</Button>
+        </div>
       </form>
     </Form>
-  );
-}
-
-export function AddPensionAccountDialog(props: {
-  pensionFundsPromise: Promise<
-    (typeof schema.pensionFunds.$inferSelect & {
-      investmentsBranches: (typeof schema.investmentBranches.$inferSelect)[];
-    })[]
-  >;
-}) {
-  const pensionFunds = use(props.pensionFundsPromise);
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button size="sm" className="flex items-center gap-2">
-          <PlusCircleIcon className="h-4 w-4" />
-          Add Account
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Add Pension Fund</DialogTitle>
-          <DialogDescription>
-            To reliably track you pension account we need some informations.
-            Click save when you&apos;re done.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 pt-4">
-          <CreatePensionAccountForm pensionFunds={pensionFunds} />
-        </div>
-        {/* <DialogFooter>
-          <Button type="submit">Start tracking!</Button>
-        </DialogFooter> */}
-      </DialogContent>
-    </Dialog>
   );
 }

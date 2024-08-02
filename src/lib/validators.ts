@@ -17,7 +17,13 @@ export const deletePostSchema = z.object({
   id: z.number(),
 });
 
-// pension
+// savings
+export const addSavingsAccountFormSchema = z.object({
+  type: z.enum(["pension", "emergency"], {
+    required_error: "Please select an account type.",
+  }),
+});
+
 export const CreatePensionAccountSchema = z.object({
   pensionFundId: z.coerce.number(),
   investmentBranchId: z.coerce.number(),

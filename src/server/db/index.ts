@@ -21,6 +21,7 @@ if (env.NODE_ENV !== "production") globalForDb.conn = conn;
 // export insert and select types
 export type PensionAccountInsert = typeof schema.pensionAccounts.$inferInsert;
 export type PensionAccountSelect = typeof schema.pensionAccounts.$inferSelect;
+export type PensionFundsSelect = typeof schema.pensionFunds.$inferSelect;
 export type investmentBranchesSelect =
   typeof schema.investmentBranches.$inferSelect;
 
