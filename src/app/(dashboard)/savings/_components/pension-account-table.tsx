@@ -247,11 +247,6 @@ export function PensionAccountTable() {
           </TableBody>
         </Table>
       </CardContent>
-      <CardFooter>
-        <div className="flex w-full items-start gap-2 text-sm">
-          <Button>Add Pension Account</Button>
-        </div>
-      </CardFooter>
     </Card>
   );
 }

@@ -1,47 +1,46 @@
-import { auth } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
-import { TrendingUp } from "lucide-react";
+import { startOfYear } from "date-fns";
 
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
-import { db, schema } from "~/server/db";
+  findAllPensionFunds,
+  getPensionAccountsByUserId,
+  getPensionFunsContributions,
+} from "~/lib/data";
+import { type DateRange } from "~/lib/validators";
+import { DashboardFacetedFilter } from "../_components/faceted-filter";
 import { PensionAccountChart } from "../_components/pension-account-chart";
 import { PensionAccountTable } from "../_components/pension-account-table";
+import { ContributionList } from "./_components/contribution-list";
 
-async function getPensionAccountsByUserId() {
-  const session = auth();
+const getFacetedValues = (searchParams: Record<string, string | string[]>) => {
+  const { from, to, funds } = searchParams;
 
-  if (!session?.userId) {
-    throw new Error("UNAUTHORIZED");
-  }
+  const defaultTimeframe = {
+    from: from ? new Date(from as string) : startOfYear(new Date()),
+    to: to ? new Date(to as string) : new Date(),
+  } satisfies DateRange;
 
-  return await db
-    .select()
-    .from(schema.pensionAccounts)
-    .where(eq(schema.pensionAccounts.userId, session.userId));
-}
+  const defaulFunds = (funds as string[]) ?? [];
 
-export async function findAllPensionFunds() {
-  return await db.query.pensionFunds.findMany({
-    with: {
-      investmentsBranches: true,
-    },
-  });
-}
+  return {
+    timeframe: defaultTimeframe,
+    funds: defaulFunds,
+  };
+};
 
-export default async function PensionPage() {
+export default async function PensionPage(props: {
+  searchParams: Record<string, string | string[]>;
+}) {
+  const facets = getFacetedValues(props.searchParams);
   const pensionAccounts = await getPensionAccountsByUserId();
   const pensionFundsPromise = findAllPensionFunds();
+  const pensionFunsContributionsPromise = getPensionFunsContributions(
+    facets.timeframe,
+    facets.funds,
+  );
 
-  if (pensionAccounts.length === 1) {
+  if (pensionAccounts.length === 0) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-6 rounded-lg border border-dashed shadow-sm">
         <div className="flex flex-col items-center gap-2">
@@ -59,7 +58,18 @@ export default async function PensionPage() {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="self-end"></div>
+      <div className="flex items-end justify-between">
+        <header className="flex flex-col gap-1">
+          <h2 className="text-2xl tracking-tight">Pension funds</h2>
+          <p className="text-sm font-light text-muted-foreground">
+            Overview of all the pension accounts you have.
+          </p>
+        </header>
+
+        <div>
+          <DashboardFacetedFilter />
+        </div>
+      </div>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -111,142 +121,15 @@ export default async function PensionPage() {
           </CardContent>
         </Card>
         <PensionAccountChart />
-        <Card className="col-span-2 row-span-2">
-          <CardHeader className="flex flex-row items-start justify-between">
-            <div>
-              <CardTitle className="text-lg">Recent Transactions</CardTitle>
-              <CardDescription>
-                You made 6 transactions this year.
-              </CardDescription>
-            </div>
-            <Button variant="outline" className="!m-0">
-              Contribute
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-8">
-              <div className="flex items-center">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                  <AvatarFallback>OM</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    Olivia Martin
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    olivia.martin@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$1,999.00</div>
-              </div>
-              <div className="flex items-center">
-                <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-                  <AvatarImage src="/avatars/02.png" alt="Avatar" />
-                  <AvatarFallback>JL</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    Jackson Lee
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    jackson.lee@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$39.00</div>
-              </div>
-              <div className="flex items-center">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src="/avatars/03.png" alt="Avatar" />
-                  <AvatarFallback>IN</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    Isabella Nguyen
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    isabella.nguyen@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$299.00</div>
-              </div>
-              <div className="flex items-center">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src="/avatars/04.png" alt="Avatar" />
-                  <AvatarFallback>WK</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    William Kim
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    will@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$99.00</div>
-              </div>
-              <div className="flex items-center">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src="/avatars/05.png" alt="Avatar" />
-                  <AvatarFallback>SD</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    Sofia Davis
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    sofia.davis@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$39.00</div>
-              </div>
-              <div className="flex items-center">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src="/avatars/05.png" alt="Avatar" />
-                  <AvatarFallback>SD</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    Test Jhonson
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    test.jhonson@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$462.00</div>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <div className="flex w-full items-start gap-2 text-sm">
-              <div className="grid gap-2">
-                <div className="flex items-center gap-2 font-medium leading-none">
-                  Total contribution this year € 5.100
-                  <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="flex items-center gap-2 leading-none text-muted-foreground">
-                  January - June 2024
-                </div>
-              </div>
-            </div>
-          </CardFooter>
-        </Card>
+        <ContributionList
+          promise={pensionFunsContributionsPromise}
+          facets={facets}
+        />
         <PensionAccountTable />
       </div>
     </div>
   );
 }
 
-export function AccountCard(props: {
-  account: typeof schema.accounts.$inferSelect;
-}) {
-  return (
-    <div className="flex flex-row rounded-lg bg-muted p-4">
-      <div className="flex-grow">
-        <h2 className="text-2xl font-bold text-primary">
-          {props.account.name}
-        </h2>
-      </div>
-    </div>
-  );
-}
+// export usefull inferred types
+export type DashboardFacets = ReturnType<typeof getFacetedValues>;

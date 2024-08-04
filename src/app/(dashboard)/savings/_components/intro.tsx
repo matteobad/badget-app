@@ -113,7 +113,9 @@ export default function Intro() {
                 )}
               />
 
-              <Button type="submit">Add Fund</Button>
+              <Button type="submit" className="capitalize">
+                Add {form.getValues().type} fund
+              </Button>
             </form>
           </Form>
         </motion.div>

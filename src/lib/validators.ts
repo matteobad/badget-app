@@ -8,6 +8,11 @@ export type FormState = {
   errors?: Record<string, string[]>;
 };
 
+export type DateRange = {
+  from: Date;
+  to: Date;
+};
+
 export const CreatePostSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   content: z.string().min(1, { message: "Content is required" }),

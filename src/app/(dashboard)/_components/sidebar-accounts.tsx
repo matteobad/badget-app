@@ -4,7 +4,6 @@ import { eq } from "drizzle-orm";
 import { PlusIcon } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
 import { db, schema } from "~/server/db";
 import { AccountList } from "./accounts";
 import { SidebarItemSkeleton } from "./sidebar-item";
