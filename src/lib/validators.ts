@@ -30,13 +30,13 @@ export const addSavingsAccountFormSchema = z.object({
 });
 
 export const CreatePensionAccountSchema = z.object({
-  pensionFundId: z.coerce.number(),
-  investmentBranchId: z.coerce.number(),
-  joinedAt: z.coerce.date().default(new Date()),
+  pensionFundId: z.number(),
+  investmentBranchId: z.number(),
+  joinedAt: z.date().default(new Date()),
   baseTFRPercentage: z.coerce.number().default(0),
   baseEmployeePercentage: z.coerce.number().default(0),
-  baseEmployerPercentage: z.coerce.number().default(0),
-  baseContribution: z.string().optional(),
+  baseEmployerPercentage: z.number().default(0),
+  baseContribution: z.string(),
 });
 
 // work

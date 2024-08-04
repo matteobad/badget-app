@@ -1,11 +1,10 @@
 "use client";
 
-import { use, useEffect, useRef, useState } from "react";
+import { use, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon, Check, ChevronsUpDown, PercentIcon } from "lucide-react";
-import { useFormState } from "react-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
@@ -44,7 +43,7 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 import { CreatePensionAccountSchema } from "~/lib/validators";
-import { createPensionAccountAction } from "~/server/action/pension-account.action";
+import { createPensionAccountFormAction } from "~/server/action/pension-account.action";
 import {
   type investmentBranchesSelect,
   type PensionFundsSelect,
@@ -64,10 +63,6 @@ export function CreatePensionAccountForm(props: {
   const [selectedIB, setSelectedIB] = useState<investmentBranchesSelect>();
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [state, formAction] = useFormState(createPensionAccountAction, {
-    message: "",
-  });
-
   const form = useForm<z.output<typeof CreatePensionAccountSchema>>({
     resolver: zodResolver(CreatePensionAccountSchema),
     defaultValues: {
@@ -78,28 +73,30 @@ export function CreatePensionAccountForm(props: {
       baseEmployeePercentage: 0,
       baseEmployerPercentage: 0,
       baseContribution: "",
-      ...(state?.fields ?? {}),
     },
   });
-
-  // NOTE: use effect could be avoided if we inline error message in the form
-  useEffect(() => {
-    if (state.message && state.errors) toast.error(state.message);
-    if (state.message && !state.errors) toast.success(state.message);
-  }, [state]);
 
   return (
     <Form {...form}>
       <form
         className="flex w-full max-w-2xl flex-col gap-4 overflow-auto"
         ref={formRef}
-        action={formAction}
-        onSubmit={(evt) => {
-          evt.preventDefault();
-          void form.handleSubmit(() => {
-            formAction(new FormData(formRef.current!));
-          })(evt);
-        }}
+        onSubmit={form.handleSubmit(async (data) => {
+          const result = await createPensionAccountFormAction(data);
+
+          if (result?.serverError) {
+            toast.error(result.serverError);
+            return;
+          }
+
+          if (result?.data?.message) {
+            toast.success(result?.data?.message);
+            // update client-side cache
+            router.refresh();
+            // reset dirty fields
+            form.reset(form.getValues());
+          }
+        })}
       >
         <FormField
           control={form.control}
