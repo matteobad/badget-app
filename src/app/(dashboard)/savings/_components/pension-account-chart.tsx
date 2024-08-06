@@ -40,7 +40,7 @@ const chartConfig = {
 
 export function PensionAccountChart() {
   return (
-    <Card className="col-span-2 lg:row-start-2">
+    <Card className="or col-span-2 lg:row-start-2">
       <CardHeader>
         <CardTitle className="text-lg">Controvalore</CardTitle>
         <CardDescription>

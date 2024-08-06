@@ -1,4 +1,4 @@
-﻿N. Albo;Tipo;Società;Fondo;Comparto;Note;Categ. comparto;ISC a 2 anni;ISC a 5 anni;ISC a 10 anni;ISC a 35 anni
+﻿id;type;company;name;branch;note;category;isc_2;isc_5;isc_10;isc_35
 1;Fondo negoziale;;FONDO PENSIONE FONCHIM;CRESCITA;(2);AZN;0,82;0,44;0,27;0,14
 1;Fondo negoziale;;FONDO PENSIONE FONCHIM;GARANTITO;(1);GAR;1,23;0,85;0,69;0,56
 1;Fondo negoziale;;FONDO PENSIONE FONCHIM;STABILITÀ;(2);OBB;0,81;0,43;0,27;0,14

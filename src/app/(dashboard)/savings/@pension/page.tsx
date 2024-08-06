@@ -1,17 +1,18 @@
 import { startOfYear } from "date-fns";
 
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   findAllPensionFunds,
   getPensionAccountsByUserId,
+  getPensionAccountTotal,
   getPensionFunsContributions,
 } from "~/lib/data";
 import { type DateRange } from "~/lib/validators";
-import { DashboardFacetedFilter } from "../_components/faceted-filter";
 import { PensionAccountChart } from "../_components/pension-account-chart";
 import { PensionAccountTable } from "../_components/pension-account-table";
-import { ContributionList } from "./_components/contribution-list";
+import { CardReturn } from "./_components/card-return";
+import { CardTotal } from "./_components/card-total";
+import { CardContributions } from "./_components/contribution-list";
 
 const getFacetedValues = (searchParams: Record<string, string | string[]>) => {
   const { from, to, funds } = searchParams;
@@ -36,6 +37,10 @@ export default async function PensionPage(props: {
   const pensionAccounts = await getPensionAccountsByUserId();
   const pensionFundsPromise = findAllPensionFunds();
   const pensionFunsContributionsPromise = getPensionFunsContributions(
+    facets.timeframe,
+    facets.funds,
+  );
+  const pensionTotalPromise = getPensionAccountTotal(
     facets.timeframe,
     facets.funds,
   );
@@ -66,65 +71,15 @@ export default async function PensionPage(props: {
           </p>
         </header>
 
-        <div>
+        {/* <div>
           <DashboardFacetedFilter />
-        </div>
+        </div> */}
       </div>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Principal
-            </CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% from the start
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">IRPEF Savings</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <rect width="20" height="14" x="2" y="5" rx="2" />
-              <path d="M2 10h20" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+12,234</div>
-            <p className="text-xs text-muted-foreground">
-              +19% from last month
-            </p>
-          </CardContent>
-        </Card>
+        <CardTotal />
+        <CardReturn />
+        <CardContributions />
         <PensionAccountChart />
-        <ContributionList
-          promise={pensionFunsContributionsPromise}
-          facets={facets}
-        />
         <PensionAccountTable />
       </div>
     </div>

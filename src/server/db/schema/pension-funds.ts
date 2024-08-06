@@ -1,9 +1,9 @@
 import { relations, sql } from "drizzle-orm";
 import {
-  boolean,
   date,
   decimal,
   integer,
+  numeric,
   real,
   serial,
   text,
@@ -34,7 +34,7 @@ export const pensionFunds = createTable("pension_funds", {
 
   name: varchar("name", { length: 512 }).notNull(),
   type: text("type").$type<PensionFundType>().notNull(),
-  registrationNumber: integer("registration_number").notNull(),
+  registrationNumber: integer("registration_number").unique().notNull(),
   registrationOffice: varchar("registered_office", { length: 128 }),
   registrationDate: date("registration_date", { mode: "string" }),
   legalForm: varchar("legal_form", { length: 128 }),
@@ -77,10 +77,38 @@ export const investmentBranches = createTable("investment_branches", {
 
 export const investmentBranchesRelations = relations(
   investmentBranches,
-  ({ one }) => ({
+  ({ one, many }) => ({
     pensionFund: one(pensionFunds, {
       fields: [investmentBranches.pensionFundId],
       references: [pensionFunds.id],
+    }),
+    performances: many(investmentBranchPerformances),
+  }),
+);
+
+export const investmentBranchPerformances = createTable(
+  "pension_fund_performances",
+  {
+    id: serial("id").primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+
+    // FK
+    investmentBranchId: integer("investment_branch_id").notNull(),
+
+    averageReturns: real("average_returns"),
+    year: numeric("year"),
+  },
+);
+
+export const investmentBranchPerformancesRelations = relations(
+  investmentBranchPerformances,
+  ({ one }) => ({
+    investmentBranch: one(investmentBranches, {
+      fields: [investmentBranchPerformances.investmentBranchId],
+      references: [investmentBranches.id],
     }),
   }),
 );
@@ -106,8 +134,12 @@ export const pensionAccounts = createTable("pension_accounts", {
 
 export const pensionAccountsRelations = relations(
   pensionAccounts,
-  ({ many }) => ({
-    contributions: many(pensionAccountContributions),
+  ({ one, many }) => ({
+    contributions: many(pensionContributions),
+    pensionFund: one(pensionFunds, {
+      fields: [pensionAccounts.pensionFundId],
+      references: [pensionFunds.id],
+    }),
   }),
 );
 
@@ -120,30 +152,27 @@ export const ContributionContributor = {
 export type ContributionContributor =
   (typeof ContributionContributor)[keyof typeof ContributionContributor];
 
-export const pensionAccountContributions = createTable(
-  "pension_account_contributions",
-  {
-    id: serial("id").primaryKey(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }),
+export const pensionContributions = createTable("pension_contributions", {
+  id: serial("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
 
-    // FK
-    pensionAccountId: integer("pension_account_id").notNull(),
+  // FK
+  pensionAccountId: integer("pension_account_id").notNull(),
 
-    amount: decimal("amount").default("0"),
-    contributor: text("contributor").$type<ContributionContributor>(),
-    date: timestamp("date", { withTimezone: true }),
-    consolidated_at: timestamp("consolidated_at", { withTimezone: true }),
-  },
-);
+  amount: decimal("amount").default("0"),
+  contributor: text("contributor").$type<ContributionContributor>(),
+  date: timestamp("date", { withTimezone: true }),
+  consolidatedAt: timestamp("consolidated_at", { withTimezone: true }),
+});
 
-export const pensionAccountContributionsRelations = relations(
-  pensionAccountContributions,
+export const pensionContributionsRelations = relations(
+  pensionContributions,
   ({ one }) => ({
-    pensionFund: one(pensionAccounts, {
-      fields: [pensionAccountContributions.pensionAccountId],
+    pensionAccount: one(pensionAccounts, {
+      fields: [pensionContributions.pensionAccountId],
       references: [pensionAccounts.id],
     }),
   }),

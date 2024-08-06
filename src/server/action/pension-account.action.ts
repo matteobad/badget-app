@@ -32,11 +32,11 @@ export const createPensionAccountFormAction = authActionClient
           return;
         }
 
-        await tx.insert(schema.pensionAccountContributions).values({
+        await tx.insert(schema.pensionContributions).values({
           pensionAccountId: inserted.insertedId,
           amount: baseContribution?.replaceAll(".", "").replace(",", "."),
           contributor: ContributionContributor.EMPLOYEE,
-          consolidated_at: new Date(),
+          consolidatedAt: new Date(),
           date: new Date(),
         });
       });
