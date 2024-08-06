@@ -1,12 +1,7 @@
 import { startOfYear } from "date-fns";
 
 import { Button } from "~/components/ui/button";
-import {
-  findAllPensionFunds,
-  getPensionAccountsByUserId,
-  getPensionAccountTotal,
-  getPensionFunsContributions,
-} from "~/lib/data";
+import { getPensionAccountsByUserId } from "~/lib/data";
 import { type DateRange } from "~/lib/validators";
 import { PensionAccountChart } from "../_components/pension-account-chart";
 import { PensionAccountTable } from "../_components/pension-account-table";
@@ -30,20 +25,10 @@ const getFacetedValues = (searchParams: Record<string, string | string[]>) => {
   };
 };
 
-export default async function PensionPage(props: {
+export default async function PensionPage(_props: {
   searchParams: Record<string, string | string[]>;
 }) {
-  const facets = getFacetedValues(props.searchParams);
   const pensionAccounts = await getPensionAccountsByUserId();
-  const pensionFundsPromise = findAllPensionFunds();
-  const pensionFunsContributionsPromise = getPensionFunsContributions(
-    facets.timeframe,
-    facets.funds,
-  );
-  const pensionTotalPromise = getPensionAccountTotal(
-    facets.timeframe,
-    facets.funds,
-  );
 
   if (pensionAccounts.length === 0) {
     return (

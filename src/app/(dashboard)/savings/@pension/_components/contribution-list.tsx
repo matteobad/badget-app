@@ -36,26 +36,23 @@ function Loading() {
 
 async function CardContributionsServer() {
   const session = auth();
-  const contributions = await unstable_cache(
-    async (_userId: string) => {
-      return await db.query.pensionContributions.findMany({
+  const contributions = await db.query.pensionContributions.findMany({
+    with: {
+      pensionAccount: {
+        columns: {},
         with: {
-          pensionAccount: {
-            columns: {},
-            with: {
-              pensionFund: {
-                columns: {
-                  name: true,
-                },
-              },
+          pensionFund: {
+            columns: {
+              name: true,
             },
           },
         },
-        where: isNotNull(schema.pensionContributions.consolidatedAt),
-      });
+      },
     },
-    [""], // TODO: cache keys
-  )(session.userId!);
+    where: isNotNull(schema.pensionContributions.consolidatedAt),
+  });
+
+  console.log(contributions);
 
   return (
     <Card className="col-span-2 row-span-2">

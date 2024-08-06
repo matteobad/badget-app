@@ -82,32 +82,33 @@ export const investmentBranchesRelations = relations(
       fields: [investmentBranches.pensionFundId],
       references: [pensionFunds.id],
     }),
-    performances: many(investmentBranchPerformances),
+    performances: many(investmentBranchesPerf),
   }),
 );
 
-export const investmentBranchPerformances = createTable(
-  "pension_fund_performances",
-  {
-    id: serial("id").primaryKey(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }),
+export const investmentBranchesPerf = createTable("investment_branches_perf", {
+  id: serial("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
 
-    // FK
-    investmentBranchId: integer("investment_branch_id").notNull(),
+  // FK
+  branchId: integer("investment_branch_id").notNull(),
 
-    averageReturns: real("average_returns"),
-    year: numeric("year"),
-  },
-);
+  date: timestamp("date", { withTimezone: true }),
+  yield1: real("yield_1"),
+  yield3: real("yield_3"),
+  yield5: real("yield_5"),
+  yield10: real("yield_10"),
+  yield20: real("yield_20"),
+});
 
-export const investmentBranchPerformancesRelations = relations(
-  investmentBranchPerformances,
+export const investmentBranchesPerfRelations = relations(
+  investmentBranchesPerf,
   ({ one }) => ({
     investmentBranch: one(investmentBranches, {
-      fields: [investmentBranchPerformances.investmentBranchId],
+      fields: [investmentBranchesPerf.branchId],
       references: [investmentBranches.id],
     }),
   }),

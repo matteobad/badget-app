@@ -2,6 +2,7 @@ import fs from "fs";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { parse } from "csv-parse";
+import { endOfYear, subYears } from "date-fns";
 
 import { type schema } from "..";
 import { BranchCategory, PensionFundType } from "../schema/pension-funds";
@@ -25,52 +26,72 @@ type PensionFund = Pick<
   "name" | "type" | "registrationNumber"
 >;
 
-type PensionFundWithBranches = PensionFund & {
-  investmentBranches: (typeof schema.investmentBranches.$inferInsert)[];
+type PensionFundWithBranchesAndPerformances = PensionFund & {
+  investmentBranches: (typeof schema.investmentBranches.$inferInsert & {
+    performances: (typeof schema.investmentBranchesPerf.$inferInsert)[];
+  })[];
 };
 
 const processFile = async () => {
-  const records = new Map<string, PensionFundWithBranches>();
+  const records = new Map<string, PensionFundWithBranchesAndPerformances>();
   const parser = fs
-    .createReadStream(`${__dirname}/31072024-COVIP-pension_funds_with_isc.csv`)
+    .createReadStream(`${__dirname}/31122023-pension_funds.csv`)
     .pipe(parse({ from_line: 2, relax_quotes: true, delimiter: ";" }));
 
   for await (const record of parser) {
     const [
-      registrationNumber,
+      id,
       type,
-      _company,
+      company,
       name,
-      branchDescription,
+      branch,
       _note,
-      branchCategory,
+      category,
       isc2,
       isc5,
       isc10,
       isc35,
+      _col2,
+      yield3,
+      yield5,
+      yield1,
+      _note2,
+      yield10,
+      yield20,
     ] = record as string[];
 
-    if (!name || !registrationNumber) continue;
+    if (!name || !id) continue;
 
-    const pensionfund: PensionFundWithBranches = records.get(
-      registrationNumber,
+    const pensionfund: PensionFundWithBranchesAndPerformances = records.get(
+      id,
     ) ?? {
       type: mapPensionFundType(type),
       name,
-      registrationNumber: parseInt(registrationNumber, 10),
+      registrationNumber: parseInt(id, 10),
       investmentBranches: [],
     };
 
     pensionfund.investmentBranches.push({
-      category: mapInvestmentBranchCategory(branchCategory),
-      description: branchDescription,
+      category: mapInvestmentBranchCategory(category),
+      description: branch,
       isc2: parseFloat(isc2?.replace(",", ".") ?? "0"),
       isc5: parseFloat(isc5?.replace(",", ".") ?? "0"),
       isc10: parseFloat(isc10?.replace(",", ".") ?? "0"),
       isc35: parseFloat(isc35?.replace(",", ".") ?? "0"),
+      performances: [
+        {
+          date: endOfYear(subYears(new Date(), 1)),
+          yield1: parseFloat(yield1?.replace(",", ".") ?? "0"),
+          yield3: parseFloat(yield3?.replace(",", ".") ?? "0"),
+          yield5: parseFloat(yield5?.replace(",", ".") ?? "0"),
+          yield10: parseFloat(yield10?.replace(",", ".") ?? "0"),
+          yield20: parseFloat(yield20?.replace(",", ".") ?? "0"),
+          branchId: -1,
+        },
+      ],
     });
 
-    records.set(registrationNumber, pensionfund);
+    records.set(id, pensionfund);
   }
 
   return records;
