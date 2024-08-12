@@ -1,34 +1,24 @@
-import { startOfYear } from "date-fns";
+import { PlusCircleIcon } from "lucide-react";
 
+import { BaseContributionChoice } from "~/components/forms/base-contribution-choice";
+import { CreatePensionAccountForm } from "~/components/forms/create-pension-account-form";
+import { RecurringContributionChoice } from "~/components/forms/recurring-contribution-choice";
+import { TrackPensionAccountDone } from "~/components/forms/track-pension-account-done";
 import { Button } from "~/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "~/components/ui/dialog";
 import { getPensionAccountsByUserId } from "~/lib/data";
-import { type DateRange } from "~/lib/validators";
 import { PensionAccountChart } from "../_components/pension-account-chart";
 import { PensionAccountTable } from "../_components/pension-account-table";
 import { CardReturn } from "./_components/card-return";
 import { CardTotal } from "./_components/card-total";
 import { CardContributions } from "./_components/contribution-list";
+import { CreateAccountServer } from "./_components/create-account.server";
 
-const getFacetedValues = (searchParams: Record<string, string | string[]>) => {
-  const { from, to, funds } = searchParams;
-
-  const defaultTimeframe = {
-    from: from ? new Date(from as string) : startOfYear(new Date()),
-    to: to ? new Date(to as string) : new Date(),
-  } satisfies DateRange;
-
-  const defaulFunds = (funds as string[]) ?? [];
-
-  return {
-    timeframe: defaultTimeframe,
-    funds: defaulFunds,
-  };
-};
-
-export default async function PensionPage(_props: {
+export default async function PensionPage(props: {
   searchParams: Record<string, string | string[]>;
 }) {
   const pensionAccounts = await getPensionAccountsByUserId();
+  const step = props.searchParams.step;
 
   if (pensionAccounts.length === 0) {
     return (
@@ -41,7 +31,23 @@ export default async function PensionPage(_props: {
             Let&apos;s start by adding your first pension account.
           </p>
         </div>
-        <Button>Add Pension Fund</Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button size="sm" className="flex items-center gap-2">
+              <PlusCircleIcon className="h-4 w-4" />
+              Add Account
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="min-h-[526px] sm:max-w-[425px]">
+            {!step && <CreateAccountServer />}
+            {step === "choice-base" && <BaseContributionChoice />}
+            {step === "choice-recurring" && <RecurringContributionChoice />}
+            {step === "done" && <TrackPensionAccountDone />}
+            {/* <DialogFooter>
+          <Button type="submit">Start tracking!</Button>
+        </DialogFooter> */}
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
@@ -70,6 +76,3 @@ export default async function PensionPage(_props: {
     </div>
   );
 }
-
-// export usefull inferred types
-export type DashboardFacets = ReturnType<typeof getFacetedValues>;

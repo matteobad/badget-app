@@ -19,7 +19,7 @@ export default function SavingsLayout(props: {
             <TabsTrigger value="pension">Pension</TabsTrigger>
           </TabsList>
 
-          <AddFundDialog />
+          {/* <AddFundDialog /> */}
         </div>
         <TabsContent value="overview" className="flex-1">
           {props.children}

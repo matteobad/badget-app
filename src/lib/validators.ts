@@ -33,10 +33,7 @@ export const CreatePensionAccountSchema = z.object({
   pensionFundId: z.number(),
   investmentBranchId: z.number(),
   joinedAt: z.date().default(new Date()),
-  baseTFRPercentage: z.coerce.number().default(0),
-  baseEmployeePercentage: z.coerce.number().default(0),
-  baseEmployerPercentage: z.number().default(0),
-  baseContribution: z.string(),
+  baseContribution: z.number().default(0),
 });
 
 // work
