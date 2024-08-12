@@ -8,9 +8,15 @@ export const env = createEnv({
    */
   server: {
     DATABASE_URL: z.string().url(),
+    KV_URL: z.string().url(),
+    KV_REST_API_URL: z.string().url(),
+    KV_REST_API_TOKEN: z.string().min(1),
+    KV_REST_API_READ_ONLY_TOKEN: z.string().min(1),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    GOCARDLESS_SECRET_ID: z.string().min(1),
+    GOCARDLESS_SECRET_KEY: z.string().min(1),
   },
 
   /**
@@ -28,7 +34,13 @@ export const env = createEnv({
    */
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
+    KV_URL: process.env.KV_URL,
+    KV_REST_API_URL: process.env.KV_REST_API_URL,
+    KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
+    KV_REST_API_READ_ONLY_TOKEN: process.env.KV_REST_API_READ_ONLY_TOKEN,
     NODE_ENV: process.env.NODE_ENV,
+    GOCARDLESS_SECRET_ID: process.env.GOCARDLESS_SECRET_ID,
+    GOCARDLESS_SECRET_KEY: process.env.GOCARDLESS_SECRET_KEY,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

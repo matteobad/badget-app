@@ -4,7 +4,7 @@ import { use } from "react";
 import { ArrowUpRightFromSquareIcon } from "lucide-react";
 
 import { type schema } from "~/server/db";
-import { SidebarItem, SidebarItemSkeleton } from "./sidebar-item";
+import { SidebarItem } from "./sidebar-item";
 
 export function AccountList(props: {
   accounts: Promise<(typeof schema.accounts.$inferSelect)[]>;

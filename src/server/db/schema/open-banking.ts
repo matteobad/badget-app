@@ -19,7 +19,7 @@ export const institutions = createTable("instituions", {
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 
   name: varchar("name", { length: 256 }),
-  bic: varchar("bic", { length: 256 }),
+  logo: varchar("logo", { length: 2048 }),
 });
 
 export const institutionsRelations = relations(institutions, ({ many }) => ({

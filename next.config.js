@@ -6,7 +6,17 @@ await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
 const config = {
-    transpilePackages: ["geist"]
+  transpilePackages: ["geist"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn-logos.gocardless.com',
+        port: '',
+        pathname: '/ais/**',
+      },
+    ],
+  }
 };
 
 export default config;
