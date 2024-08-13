@@ -1,8 +1,10 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   decimal,
   integer,
   numeric,
+  real,
   serial,
   text,
   timestamp,
@@ -11,23 +13,61 @@ import {
 
 import { createTable } from "./_table";
 
+export const Provider = {
+  GOCARDLESS: "GOCARDLESS",
+  PLAID: "PLAID",
+  TELLER: "TELLER",
+} as const;
+export type Provider = (typeof Provider)[keyof typeof Provider];
+
 export const institutions = createTable("instituions", {
-  id: serial("id").primaryKey(),
+  id: varchar("id").primaryKey(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 
-  name: varchar("name", { length: 256 }),
+  name: varchar("name", { length: 256 }).notNull(),
   logo: varchar("logo", { length: 2048 }),
+  provider: text("provider").$type<Provider>().notNull(),
+  availableHistory: integer("available_history"),
+  popularity: integer("popularity").default(0),
 });
 
 export const institutionsRelations = relations(institutions, ({ many }) => ({
-  accounts: many(accounts),
+  accounts: many(bankAccounts),
 }));
 
-export const accounts = createTable("accounts", {
-  id: serial("id").primaryKey(),
+export const bankAccounts = createTable("bank_accounts", {
+  id: varchar("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+
+  // FK
+  connectionId: integer("connection_id"),
+  institutionId: varchar("institution_id"),
+  userId: varchar("user_id", { length: 128 }).notNull(),
+
+  name: varchar("name", { length: 256 }).notNull(),
+  manual: boolean("manual").default(false),
+  enabled: boolean("enabled").default(true),
+  currency: varchar("currency", { length: 4 }).notNull(),
+  balance: real("balance"),
+  type: varchar("type", { length: 256 }).notNull(),
+});
+
+export const ConnectionStatus = {
+  CONNECTED: "CONNECTED",
+  DISCONNECTED: "DISCONNECTED",
+  UNKNOWN: "UNKNOWN",
+} as const;
+export type ConnectionStatus =
+  (typeof ConnectionStatus)[keyof typeof ConnectionStatus];
+
+export const bankConnections = createTable("bank_connections", {
+  id: varchar("id").primaryKey(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -37,41 +77,30 @@ export const accounts = createTable("accounts", {
   institutionId: integer("institution_id"),
   userId: varchar("user_id", { length: 128 }).notNull(),
 
-  name: varchar("name", { length: 256 }).notNull(),
-  accountId: varchar("account_id", { length: 64 }),
-  expires: timestamp("expires", { mode: "date" }),
+  name: varchar("name", { length: 128 }).notNull(),
+  logoUrl: varchar("logo_url", { length: 2048 }),
+  provider: text("provider").$type<Provider>().notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  enrollmentId: varchar("enrollment_id", { length: 256 }),
+  lastAccessed: timestamp("last_accessed", { withTimezone: true }),
+  error: varchar("error", { length: 128 }),
+  status: text("status").$type<Provider>().notNull(),
 });
 
-export const accountsRelations = relations(accounts, ({ many, one }) => ({
-  balances: many(balances),
-  transactions: many(transactions),
-  institution: one(institutions, {
-    fields: [accounts.institutionId],
-    references: [institutions.id],
+export const bankAccountsRelations = relations(
+  bankAccounts,
+  ({ many, one }) => ({
+    transactions: many(transactions),
+    institution: one(institutions, {
+      fields: [bankAccounts.institutionId],
+      references: [institutions.id],
+    }),
+    connection: one(bankConnections, {
+      fields: [bankAccounts.connectionId],
+      references: [bankConnections.id],
+    }),
   }),
-}));
-
-export const balances = createTable("balances", {
-  id: serial("id").primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }),
-
-  // FK
-  accountId: integer("account_id"),
-  institutionId: integer("institution_id"),
-
-  amount: numeric("amount", { precision: 2 }),
-  currency: varchar("currency", { length: 64 }),
-});
-
-export const balancesRelations = relations(balances, ({ one }) => ({
-  account: one(accounts, {
-    fields: [balances.accountId],
-    references: [accounts.id],
-  }),
-}));
+);
 
 export const CategoryType = {
   INCOME: "INCOME",
@@ -115,9 +144,9 @@ export const transactions = createTable("transactions", {
 });
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({
-  account: one(accounts, {
+  account: one(bankAccounts, {
     fields: [transactions.accountId],
-    references: [accounts.id],
+    references: [bankAccounts.id],
   }),
   category: one(categories, {
     fields: [transactions.accountId],

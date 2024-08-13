@@ -5,6 +5,7 @@ import { env } from "~/env";
 import { schema } from ".";
 import { getInstitutions } from "../tasks/get-institutions";
 import { pensionFundsMock } from "./data/pension-fund";
+import { Provider } from "./schema/open-banking";
 
 const queryClient = postgres(env.DATABASE_URL);
 const db = drizzle(queryClient);
@@ -62,8 +63,12 @@ try {
   await db.insert(schema.institutions).values(
     documents.map((doc) => {
       return {
+        id: doc.id,
         name: doc.name,
         logo: doc.logo,
+        provider: doc.provider,
+        popularity: doc.popularity,
+        availableHistory: doc.available_history,
       } satisfies typeof schema.institutions.$inferInsert;
     }),
   );

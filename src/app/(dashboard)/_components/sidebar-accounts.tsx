@@ -17,8 +17,8 @@ async function getAccountsByUserId() {
 
   return await db
     .select()
-    .from(schema.accounts)
-    .where(eq(schema.accounts.userId, session.userId));
+    .from(schema.bankAccounts)
+    .where(eq(schema.bankAccounts.userId, session.userId));
 }
 
 export function SidebarAccounts() {
