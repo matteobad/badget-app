@@ -4,8 +4,6 @@ import postgres from "postgres";
 import { env } from "~/env";
 import { schema } from ".";
 import { getInstitutions } from "../tasks/get-institutions";
-import { pensionFundsMock } from "./data/pension-fund";
-import { Provider } from "./schema/open-banking";
 
 const queryClient = postgres(env.DATABASE_URL);
 const db = drizzle(queryClient);
@@ -59,6 +57,7 @@ const documents = await getInstitutions();
 
 try {
   // await typesense.collections().create(schema);
+  // eslint-disable-next-line drizzle/enforce-delete-with-where
   await db.delete(schema.institutions);
   await db.insert(schema.institutions).values(
     documents.map((doc) => {

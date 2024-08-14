@@ -1,15 +1,16 @@
 import type { InferInsertModel } from "drizzle-orm";
 
 import type { schema } from "..";
+import { Provider } from "../schema/enum";
 
 export const institutionsMock = [
   {
-    id: 1,
+    id: "1",
     createdAt: new Date(2024, 1, 1),
     updatedAt: new Date(2024, 1, 1),
 
     name: "Revolut",
-    bic: "BICXXX",
+    provider: Provider.GOCARDLESS,
   },
 ] satisfies InferInsertModel<typeof schema.institutions>[];
 
@@ -20,11 +21,10 @@ export const accountsMock = [
     updatedAt: new Date(2024, 1, 1),
 
     name: "Revolut",
-    expires: new Date(2024, 12, 31),
-    institutionId: 1,
+    institutionId: "1",
     userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
   },
-] satisfies InferInsertModel<typeof schema.accounts>[];
+] satisfies InferInsertModel<typeof schema.bankAccounts>[];
 
 export const balancesMock = [
   {
@@ -32,8 +32,8 @@ export const balancesMock = [
     createdAt: new Date(2024, 1, 1),
     updatedAt: new Date(2024, 1, 1),
 
-    accountId: 1,
-    amount: "1000",
+    bankAccountId: 1,
+    amount: 1000,
     currency: "EUR",
   },
-] satisfies InferInsertModel<typeof schema.balances>[];
+] satisfies InferInsertModel<typeof schema.bankAccountBalances>[];

@@ -5,8 +5,9 @@ import { auth } from "@clerk/nextjs/server";
 
 import type { FormState } from "~/lib/validators";
 import { CreateWorkSchema } from "~/lib/validators";
-import { db, schema } from "../db";
-import { ContributionContributor } from "../db/schema/pension-funds";
+
+// import { db, schema } from "../db";
+// import { ContributionContributor } from "../db/schema/pension-funds";
 
 export async function createWorkAction(
   _prevState: FormState,
@@ -41,30 +42,30 @@ export async function createWorkAction(
 
   try {
     // Mutate data
-    const { baseContribution, ...values } = parsed;
+    // const { ...values } = parsed;
 
-    await db.transaction(async (tx) => {
-      const [inserted] = await tx
-        .insert(schema.pensionAccounts)
-        .values({
-          ...values,
-          userId: session.userId,
-        })
-        .returning({ insertedId: schema.pensionAccounts.id });
+    // await db.transaction(async (tx) => {
+    //   const [inserted] = await tx
+    //     .insert(schema.pensionAccounts)
+    //     .values({
+    //       ...values,
+    //       userId: session.userId,
+    //     })
+    //     .returning({ insertedId: schema.pensionAccounts.id });
 
-      if (!inserted?.insertedId) {
-        tx.rollback();
-        return;
-      }
+    //   if (!inserted?.insertedId) {
+    //     tx.rollback();
+    //     return;
+    //   }
 
-      await tx.insert(schema.pensionContributions).values({
-        pensionAccountId: inserted.insertedId,
-        amount: baseContribution?.replaceAll(".", "").replace(",", "."),
-        contributor: ContributionContributor.EMPLOYEE,
-        consolidatedAt: new Date(),
-        date: new Date(),
-      });
-    });
+    //   await tx.insert(schema.pensionContributions).values({
+    //     pensionAccountId: inserted.insertedId,
+    //     amount: baseContribution?.replaceAll(".", "").replace(",", "."),
+    //     contributor: ContributionContributor.EMPLOYEE,
+    //     consolidatedAt: new Date(),
+    //     date: new Date(),
+    //   });
+    // });
 
     // Invalidate cache
     revalidatePath("/savings");

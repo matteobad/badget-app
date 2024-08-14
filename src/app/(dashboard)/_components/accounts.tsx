@@ -7,7 +7,7 @@ import { type schema } from "~/server/db";
 import { SidebarItem } from "./sidebar-item";
 
 export function AccountList(props: {
-  accounts: Promise<(typeof schema.accounts.$inferSelect)[]>;
+  accounts: Promise<(typeof schema.bankAccounts.$inferSelect)[]>;
 }) {
   const accounts = use(props.accounts);
 
@@ -36,7 +36,7 @@ export function AccountList(props: {
 }
 
 export function AccountCard(props: {
-  account: typeof schema.accounts.$inferSelect;
+  account: typeof schema.bankAccounts.$inferSelect;
 }) {
   return (
     <div className="flex flex-row rounded-lg bg-muted p-4">

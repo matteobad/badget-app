@@ -34,14 +34,12 @@ export async function findAllPensionFunds() {
 }
 
 export const getPensionFunsContributions = cache(
-  async (timeframe: DateRange, fundIds: string[]) => {
+  async (_timeframe: DateRange, fundIds: string[]) => {
     const session = auth();
 
     if (!session?.userId) {
       throw new Error("UNAUTHORIZED");
     }
-
-    const { from, to } = timeframe;
 
     const result = await db.query.pensionAccounts.findMany({
       where: (pensionAccounts, { and, eq, inArray }) =>
@@ -52,13 +50,7 @@ export const getPensionFunsContributions = cache(
           eq(pensionAccounts.userId, session.userId),
         ),
       with: {
-        contributions: {
-          where: (contributions, { gt, lt, and }) =>
-            and(
-              gt(contributions.consolidated_at, from),
-              lt(contributions.consolidated_at, to),
-            ),
-        },
+        contributions: true,
       },
     });
 

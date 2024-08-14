@@ -1,13 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { RocketIcon } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 
 export function RecurringContributionChoice() {
-  const router = useRouter();
-
   return (
     <div className="flex flex-col">
       <div className="flex flex-col items-center gap-10 px-4 py-10 text-center text-xl">

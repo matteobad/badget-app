@@ -34,7 +34,7 @@ export const createPensionAccountFormAction = authActionClient
 
         await tx.insert(schema.pensionContributions).values({
           pensionAccountId: inserted.insertedId,
-          amount: baseContribution?.replaceAll(".", "").replace(",", "."),
+          amount: baseContribution.toFixed(2),
           contributor: ContributionContributor.EMPLOYEE,
           consolidatedAt: new Date(),
           date: new Date(),

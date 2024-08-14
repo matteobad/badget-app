@@ -13,7 +13,7 @@ import { euroFormat, getInitials } from "~/lib/utils";
 import { connectBankAccountSchema } from "~/lib/validators";
 import { connectBankAccountAction } from "~/server/actions/connect-bank-account-action";
 import { getAccounts } from "~/server/actions/institutions/get-accounts";
-import { BankAccountType, Provider } from "~/server/db/schema/enum";
+import { Provider } from "~/server/db/schema/enum";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {

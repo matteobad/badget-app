@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { BankAccountType, Provider } from "~/server/db/schema/enum";
+import { Provider } from "~/server/db/schema/enum";
 import { ContractType } from "~/server/db/schema/working-records";
 
 export type FormState = {

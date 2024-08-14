@@ -1,15 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import confetti from "canvas-confetti";
 import { PartyPopperIcon } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 
 export function TrackPensionAccountDone() {
-  const router = useRouter();
-
   useEffect(() => {
     void confetti({
       particleCount: 80,

@@ -39,7 +39,6 @@ export async function findAllPensionFunds() {
 
 export async function PensionAccountList() {
   const pensionAccounts = await getPensionAccountsByUserId();
-  const pensionFundsPromise = findAllPensionFunds();
 
   if (pensionAccounts.length === 0) {
     return (
@@ -238,7 +237,7 @@ export async function PensionAccountList() {
 }
 
 export function AccountCard(props: {
-  account: typeof schema.accounts.$inferSelect;
+  account: typeof schema.bankAccounts.$inferSelect;
 }) {
   return (
     <div className="flex flex-row rounded-lg bg-muted p-4">

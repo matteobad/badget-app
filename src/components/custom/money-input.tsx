@@ -16,6 +16,7 @@ import {
 import { Input } from "../ui/input"; // Shandcn UI Input
 
 type TextInputProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: UseFormReturn<any>;
   name: string;
   label: string;
@@ -29,15 +30,18 @@ const moneyFormatter = Intl.NumberFormat("it-IT", {
 });
 
 export default function MoneyInput(props: TextInputProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const initialValue = props.form.getValues()[props.name]
-    ? moneyFormatter.format(props.form.getValues()[props.name])
+    ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+      moneyFormatter.format(props.form.getValues()[props.name])
     : "";
 
-  const [value, setValue] = useReducer((_: any, next: string) => {
+  const [value, setValue] = useReducer((_: unknown, next: string) => {
     const digits = next.replace(/\D/g, "");
     return moneyFormatter.format(Number(digits) / 100);
   }, initialValue);
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   function handleChange(realChangeFn: Function, formattedValue: string) {
     const digits = formattedValue.replace(/\D/g, "");
     const realValue = Number(digits) / 100;

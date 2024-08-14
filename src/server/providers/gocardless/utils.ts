@@ -13,7 +13,7 @@ export function isError(error: unknown) {
 
   return {
     code:
-      goCardLessError.response.data.type ||
+      goCardLessError.response.data.type ??
       goCardLessError.response.data.summary,
     message: goCardLessError.response.data.detail,
   };

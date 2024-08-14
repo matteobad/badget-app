@@ -16,7 +16,7 @@ import { Input } from "~/components/ui/input";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useConnectParams } from "~/hooks/use-connect-params";
 import { getInstitutions } from "~/server/actions/institutions/get-institutions";
-import { type Provider } from "~/server/db/schema/open-banking";
+import { type Provider } from "~/server/db/schema/enum";
 import { BankLogo } from "../bank-logo";
 import { ConnectBankProvider } from "../connect-bank-provider";
 import { InstitutionInfo } from "../institution-info";
@@ -143,7 +143,7 @@ export function ConnectBankModal({
 
             <DialogDescription>
               We work with a variety of banking providers to support as many
-              banks as possible. If you can't find yours,{" "}
+              banks as possible. If you can&apos;t find yours,{" "}
               <button
                 type="button"
                 className="underline"
@@ -207,7 +207,7 @@ export function ConnectBankModal({
                   <div className="flex min-h-[350px] flex-col items-center justify-center">
                     <p className="mb-2 font-medium">No banks found</p>
                     <p className="text-center text-sm text-[#878787]">
-                      We couldn't find a bank matching your criteria.
+                      We couldn&apos;t find a bank matching your criteria.
                       <br /> Let us know, or start with manual import.
                     </p>
 

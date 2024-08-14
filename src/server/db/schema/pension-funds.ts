@@ -3,7 +3,6 @@ import {
   date,
   decimal,
   integer,
-  numeric,
   real,
   serial,
   text,

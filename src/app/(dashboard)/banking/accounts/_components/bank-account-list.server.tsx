@@ -49,7 +49,7 @@ type BankAccount = Awaited<
 export async function BankAccountList() {
   const data = await getUserBankAccounts();
 
-  const manualAccounts = data.filter((item) => item.bank_accounts.manual);
+  // const manualAccounts = data.filter((item) => item.bank_accounts.manual);
 
   const bankMap: Record<string, { accounts: BankAccount[] }> = {};
 

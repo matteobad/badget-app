@@ -9,7 +9,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "~/components/ui/hover-card";
-import { type findAllInstitutions } from "~/lib/cached-queries";
+import { type findAllInstitutions } from "~/server/db/queries/cached-queries";
 
 type Institution = Awaited<ReturnType<typeof findAllInstitutions>>[number];
 

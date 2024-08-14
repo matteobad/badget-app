@@ -38,6 +38,7 @@ const config = {
         }
       }
     ],
+    "@typescript-eslint/prefer-nullish-coalescing": "warn",
     "drizzle/enforce-delete-with-where": [
       "error",
       {

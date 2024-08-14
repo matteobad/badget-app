@@ -1,6 +1,6 @@
 "use server";
 
-import { findAllInstitutions } from "~/lib/cached-queries";
+import { findAllInstitutions } from "~/server/db/queries/cached-queries";
 import { ConnectBankAccounts } from "./connect-bank-accounts";
 
 export async function AddBankAccountsServer({ query }: { query?: string }) {

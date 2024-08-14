@@ -1,7 +1,5 @@
 "use server";
 
-import { eq } from "drizzle-orm";
-
 import { logger } from "~/lib/utils";
 import { db, schema } from "~/server/db";
 

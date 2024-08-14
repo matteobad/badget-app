@@ -1,7 +1,5 @@
 import { Suspense } from "react";
-import { unstable_cache } from "next/cache";
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
 import { format } from "date-fns";
 import { isNotNull } from "drizzle-orm";
 import { ExternalLink, TrendingUp } from "lucide-react";
@@ -35,7 +33,6 @@ function Loading() {
 }
 
 async function CardContributionsServer() {
-  const session = auth();
   const contributions = await db.query.pensionContributions.findMany({
     with: {
       pensionAccount: {

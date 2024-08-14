@@ -1,5 +1,4 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { AddFundDialog } from "./_components/add-fund-dialog";
 
 export default function SavingsLayout(props: {
   children: React.ReactNode;
