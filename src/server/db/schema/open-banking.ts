@@ -60,7 +60,7 @@ export const bankAccounts = createTable("bank_accounts", {
 export const bankAccountsRelations = relations(
   bankAccounts,
   ({ many, one }) => ({
-    transactions: many(transactions),
+    transactions: many(bankTransactions),
     balance: one(bankAccountBalances, {
       fields: [bankAccounts.bankAccountBalanceId],
       references: [bankAccountBalances.id],
@@ -139,10 +139,10 @@ export const categories = createTable("categories", {
 });
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
-  transactions: many(transactions),
+  transactions: many(bankTransactions),
 }));
 
-export const transactions = createTable("transactions", {
+export const bankTransactions = createTable("bank_transactions", {
   id: serial("id").primaryKey(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
@@ -150,22 +150,34 @@ export const transactions = createTable("transactions", {
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 
   // FK
-  accountId: integer("account_id"),
+  accountId: varchar("account_id"),
   categoryId: integer("category_id"),
+  userId: varchar("user_id", { length: 128 }).notNull(),
 
-  amount: decimal("amount", { precision: 2 }),
+  transactionId: varchar("transaction_id").unique(),
+  amount: decimal("amount"),
   currency: varchar("currency", { length: 64 }),
   date: timestamp("date", { withTimezone: true }),
+  name: varchar("name", { length: 256 }),
   description: varchar("description", { length: 256 }),
+  category: varchar("category", { length: 64 }),
+  method: varchar("method", { length: 64 }),
+  currencyRate: decimal("currency_rate"),
+  currencySource: varchar("currency_source", { length: 64 }),
+  balance: decimal("balance"),
+  status: varchar("status", { length: 64 }),
 });
 
-export const transactionsRelations = relations(transactions, ({ one }) => ({
-  account: one(bankAccounts, {
-    fields: [transactions.accountId],
-    references: [bankAccounts.id],
+export const bankTransactionsRelations = relations(
+  bankTransactions,
+  ({ one }) => ({
+    account: one(bankAccounts, {
+      fields: [bankTransactions.accountId],
+      references: [bankAccounts.accountId],
+    }),
+    category: one(categories, {
+      fields: [bankTransactions.accountId],
+      references: [categories.id],
+    }),
   }),
-  category: one(categories, {
-    fields: [transactions.accountId],
-    references: [categories.id],
-  }),
-}));
+);

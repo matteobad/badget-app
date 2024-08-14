@@ -77,3 +77,8 @@ export const connectBankAccountSchema = z.object({
     }),
   ),
 });
+
+export const importBankTransactionSchema = z.object({
+  bankAccountIds: z.array(z.string()), // GoCardLess
+  latest: z.boolean(),
+});

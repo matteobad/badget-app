@@ -3,15 +3,16 @@
 import type z from "zod";
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { CircleCheckIcon, Loader2, Loader2Icon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { useConnectParams } from "~/hooks/use-connect-params";
-import { euroFormat, getInitials } from "~/lib/utils";
+import { cn, euroFormat, getInitials } from "~/lib/utils";
 import { connectBankAccountSchema } from "~/lib/validators";
 import { connectBankAccountAction } from "~/server/actions/connect-bank-account-action";
+import { importBankTransactionAction } from "~/server/actions/import-bank-transaction-action";
 import { getAccounts } from "~/server/actions/institutions/get-accounts";
 import { Provider } from "~/server/db/schema/enum";
 import { Avatar, AvatarFallback } from "../ui/avatar";
@@ -49,13 +50,59 @@ function RowsSkeleton() {
   );
 }
 
+function LoadingTransactions({ bankAccountIds }: { bankAccountIds: string[] }) {
+  const [loading, setLoading] = useState(true);
+
+  const importTransactionAction = useAction(importBankTransactionAction, {
+    onError: () => {
+      toast.error("Something went wrong please try again.", {
+        duration: 3500,
+      });
+    },
+    onSuccess: () => {
+      setLoading(false);
+    },
+  });
+
+  useEffect(() => {
+    const { hasErrored, hasSucceeded } = importTransactionAction;
+    if (bankAccountIds.length > 0 && !hasErrored && !hasSucceeded) {
+      importTransactionAction.execute({ bankAccountIds, latest: false });
+    }
+  }, [bankAccountIds]);
+
+  return (
+    <div className="flex flex-col gap-8">
+      <h2 className="text-lg font-semibold leading-none tracking-tight">
+        Setting up account
+      </h2>
+
+      <ul className="text-md space-y-4 text-slate-900 transition-all">
+        <li
+          className={cn(
+            "flex items-center gap-2 opacity-50 dark:opacity-20",
+            loading && "!opacity-100",
+          )}
+        >
+          {loading ? (
+            <Loader2Icon className="h-4 w-4 animate-spin" />
+          ) : (
+            <CircleCheckIcon className="h-4 w-4" />
+          )}
+          Recupero le transazioni
+        </li>
+      </ul>
+    </div>
+  );
+}
+
 type AccountsData = NonNullable<Awaited<ReturnType<typeof getAccounts>>>;
 
 export function SelectBankAccountsModal() {
   const [accounts, setAccounts] = useState<AccountsData>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"select-accounts" | "loading">(
-    "select-accounts",
+    "loading",
   );
 
   const { step, error, setParams, provider, ref, institution_id } =
@@ -103,10 +150,6 @@ export function SelectBankAccountsModal() {
       accounts: [],
     },
   });
-
-  async function onSubmit(values: z.infer<typeof connectBankAccountSchema>) {
-    connectBankAction.execute(values);
-  }
 
   useEffect(() => {
     async function fetchData() {
@@ -164,7 +207,7 @@ export function SelectBankAccountsModal() {
 
                 <Form {...form}>
                   <form
-                    onSubmit={form.handleSubmit(onSubmit)}
+                    onSubmit={form.handleSubmit(connectBankAction.execute)}
                     className="scrollbar-hide relative h-[300px] space-y-6 overflow-auto pb-[80px]"
                   >
                     {loading && <RowsSkeleton />}
@@ -259,7 +302,7 @@ export function SelectBankAccountsModal() {
             </TabsContent>
 
             <TabsContent value="loading">
-              <Skeleton />
+              <LoadingTransactions bankAccountIds={accounts.map((a) => a.id)} />
             </TabsContent>
           </Tabs>
         </div>

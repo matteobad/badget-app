@@ -138,7 +138,7 @@ export const transformTransaction = (
     : null;
 
   return {
-    id: transaction.internalTransactionId,
+    id: transaction.internalTransactionId ?? transaction.transactionId,
     date: transaction.bookingDate,
     name,
     method,
