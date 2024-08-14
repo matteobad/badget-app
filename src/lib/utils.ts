@@ -105,3 +105,19 @@ export function createErrorResponse(error: unknown, requestId: string) {
     code: "unknown",
   };
 }
+
+export function getInitials(value?: string) {
+  if (!value) return "CC";
+
+  const formatted = value.toUpperCase().replace(/[\s.-]/g, "") ?? "";
+
+  if (formatted.split(" ").length > 1) {
+    return `${formatted.charAt(0)}${formatted.charAt(1)}`;
+  }
+
+  if (value.length > 1) {
+    return formatted.charAt(0) + formatted.charAt(1);
+  }
+
+  return formatted.charAt(0);
+}

@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { BankAccountType, Provider } from "~/server/db/schema/enum";
 import { ContractType } from "~/server/db/schema/working-records";
 
 export type FormState = {
@@ -57,4 +58,22 @@ export const createGoCardLessLinkSchema = z.object({
 
 export const updateInstitutionUsageSchema = z.object({
   institutionId: z.string(),
+});
+
+export const connectBankAccountSchema = z.object({
+  referenceId: z.string().nullable().optional(), // GoCardLess
+  provider: z.nativeEnum(Provider),
+  accounts: z.array(
+    z.object({
+      account_id: z.string(),
+      bank_name: z.string(),
+      balance: z.string().default("0"),
+      currency: z.string().default("EUR"),
+      name: z.string(),
+      institution_id: z.string(),
+      enabled: z.boolean(),
+      logo_url: z.string(),
+      // type: z.nativeEnum(BankAccountType).optional(),
+    }),
+  ),
 });

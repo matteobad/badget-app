@@ -1,18 +1,18 @@
 import { useAction } from "next-safe-action/hooks";
 
-import { useConnectParams } from "~/hooks/use-connect-params";
 import { updateInstitutionUsageAction } from "~/server/actions/institutions/update-institution-usage";
-import { Provider } from "~/server/db/schema/open-banking";
+import { Provider } from "~/server/db/schema/enum";
 import { GoCardLessConnect } from "./gocardless-connect";
 
-type Props = {
+export function ConnectBankProvider({
+  id,
+  provider,
+  availableHistory,
+}: {
   id: string;
   provider: Provider;
   availableHistory: number;
-};
-
-export function ConnectBankProvider({ id, provider, availableHistory }: Props) {
-  const { setParams } = useConnectParams();
+}) {
   const updateInstitutionUsage = useAction(updateInstitutionUsageAction);
 
   const updateUsage = () => {

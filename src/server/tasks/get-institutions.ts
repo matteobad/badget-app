@@ -1,7 +1,7 @@
 import { kv } from "@vercel/kv";
 
 import { env } from "~/env";
-import { Provider } from "../db/schema/open-banking";
+import { Provider } from "../db/schema/enum";
 import { GoCardLessApi } from "../providers/gocardless/gocardless-api";
 
 export async function getGoCardLessInstitutions() {
@@ -19,7 +19,7 @@ export async function getGoCardLessInstitutions() {
     return {
       id: institution.id,
       name: institution.name,
-      logo: `https://cdn-logos.gocardless.com/ais/${institution.id}.png`,
+      logo: institution.logo,
       countries: institution.countries,
       available_history: +institution.transaction_total_days,
       popularity: 0,

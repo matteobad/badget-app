@@ -40,7 +40,7 @@ import {
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 import { CreatePensionAccountSchema } from "~/lib/validators";
-import { createPensionAccountFormAction } from "~/server/action/pension-account.action";
+import { createPensionAccountFormAction } from "~/server/actions/pension-account.action";
 import {
   type investmentBranchesSelect,
   type PensionFundsSelect,

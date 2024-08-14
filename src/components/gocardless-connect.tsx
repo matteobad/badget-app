@@ -25,7 +25,7 @@ export function GoCardLessConnect({ onSelect, id, availableHistory }: Props) {
     createGoCardLessLink.execute({
       institutionId: id,
       availableHistory: availableHistory,
-      redirectBase: window.location.origin,
+      redirectBase: window.location.origin + window.location.pathname,
     });
   };
 

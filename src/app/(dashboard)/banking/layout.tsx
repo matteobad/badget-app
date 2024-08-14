@@ -22,12 +22,24 @@ export default async function DashboardLayout(props: {
     },
   );
 
+  const SelectBankAccountsModal = dynamic(
+    () =>
+      import("~/components/dialogs/select-bank-accounts-modal").then(
+        (mod) => mod.SelectBankAccountsModal,
+      ),
+    {
+      ssr: false,
+    },
+  );
+
   return (
     <div className="flex min-h-[calc(100vh-130px)] flex-col gap-6 overflow-hidden p-6">
       <Topbar items={bankingTopbarItems} />
       <div className="flex flex-1">{props.children}</div>
 
+      {/* Modals triggered by url search params */}
       <ConnectBankModal countryCode={"IT"} />
+      <SelectBankAccountsModal />
     </div>
   );
 }
