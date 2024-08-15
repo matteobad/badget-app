@@ -1,6 +1,9 @@
+import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+import { schema } from "~/server/db";
 import { Provider } from "~/server/db/schema/enum";
+import { categories } from "~/server/db/schema/open-banking";
 import { ContractType } from "~/server/db/schema/working-records";
 
 export type FormState = {
@@ -81,4 +84,15 @@ export const connectBankAccountSchema = z.object({
 export const importBankTransactionSchema = z.object({
   bankAccountIds: z.array(z.string()), // GoCardLess
   latest: z.boolean(),
+});
+
+// Schema for inserting a category - can be used to validate API requests
+export const insertCategorySchema = createInsertSchema(categories).pick({
+  name: true,
+  type: true,
+  icon: true,
+});
+
+export const deleteCategorySchema = z.object({
+  categoryId: z.number(),
 });

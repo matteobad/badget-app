@@ -39,3 +39,19 @@ export async function getTransactionsQuery(params: GetTransactionsParams) {
 
   return date;
 }
+
+export type GetCategoriesParams = {
+  userId: string;
+};
+
+export async function getCategoriesQuery(params: GetCategoriesParams) {
+  const { userId } = params;
+
+  const data = await db
+    .select()
+    .from(schema.categories)
+    .where(eq(schema.categories.userId, userId))
+    .orderBy(desc(schema.categories.manual));
+
+  return data;
+}

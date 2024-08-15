@@ -1,5 +1,9 @@
 import { addDays } from "date-fns";
+import { eq } from "drizzle-orm";
+import { type z } from "zod";
 
+import type { CategoryType } from "../schema/enum";
+import { type insertCategorySchema } from "~/lib/validators";
 import { getAccessValidForDays } from "~/server/providers/gocardless/utils";
 import { db, schema } from "..";
 import { ConnectionStatus, Provider } from "../schema/enum";
@@ -96,4 +100,42 @@ export async function createBankAccounts({
         },
       });
   }
+}
+
+type InsertCategoryPayload = z.infer<typeof insertCategorySchema> & {
+  userId: string;
+};
+
+export async function insertCategory({
+  name,
+  type,
+  icon,
+  userId,
+}: InsertCategoryPayload) {
+  return await db
+    .insert(schema.categories)
+    .values({
+      name,
+      type: type as CategoryType,
+      icon,
+      userId,
+    })
+    .onConflictDoUpdate({
+      target: schema.categories.id,
+      set: {
+        name,
+        type: type as CategoryType,
+        icon,
+      },
+    });
+}
+
+type DeleteCategoryPayload = {
+  categoryId: number;
+};
+
+export async function deleteCategory({ categoryId }: DeleteCategoryPayload) {
+  return await db
+    .delete(schema.categories)
+    .where(eq(schema.categories.id, categoryId));
 }

@@ -3,7 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 
 import type { GetTransactionsParams, GetUserBankAccountsParams } from ".";
 import { db, schema } from "~/server/db";
-import { getTransactionsQuery, getUserBankAccountsQuery } from ".";
+import {
+  getCategoriesQuery,
+  getTransactionsQuery,
+  getUserBankAccountsQuery,
+} from ".";
 
 export async function findAllInstitutions() {
   return unstable_cache(
@@ -60,6 +64,27 @@ export const getUserTransactions = async (
     {
       revalidate: 180,
       tags: [`transactions_${session.userId}`],
+    },
+  )();
+};
+
+export const getUserCategories = async (
+  params: Omit<GetTransactionsParams, "userId">,
+) => {
+  const session = auth();
+
+  if (!session.userId) {
+    return [];
+  }
+
+  return unstable_cache(
+    async () => {
+      return getCategoriesQuery({ ...params, userId: session.userId });
+    },
+    ["categories", session.userId],
+    {
+      revalidate: 180,
+      tags: [`categories_${session.userId}`],
     },
   )();
 };

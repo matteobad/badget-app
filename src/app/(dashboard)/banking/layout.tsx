@@ -7,6 +7,7 @@ const bankingTopbarItems = [
   { title: "Overview", href: "/banking" },
   { title: "Conti", href: "/banking/accounts" },
   { title: "Transazioni", href: "/banking/transactions" },
+  { title: "Categorie", href: "/banking/categories" },
 ] satisfies TopbarItem[];
 
 export default async function DashboardLayout(props: {
@@ -32,6 +33,16 @@ export default async function DashboardLayout(props: {
     },
   );
 
+  const AddCategoryModal = dynamic(
+    () =>
+      import("~/components/dialogs/add-category-modal").then(
+        (mod) => mod.AddCategoryModal,
+      ),
+    {
+      ssr: false,
+    },
+  );
+
   return (
     <div className="flex min-h-[calc(100vh-130px)] flex-col gap-6 overflow-hidden p-6">
       <Topbar items={bankingTopbarItems} />
@@ -40,6 +51,7 @@ export default async function DashboardLayout(props: {
       {/* Modals triggered by url search params */}
       <ConnectBankModal countryCode={"IT"} />
       <SelectBankAccountsModal />
+      <AddCategoryModal />
     </div>
   );
 }

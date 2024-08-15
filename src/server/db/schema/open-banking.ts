@@ -117,8 +117,13 @@ export const categories = createTable("categories", {
     .notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 
-  name: varchar("name", { length: 64 }),
+  // FK
+  userId: varchar("user_id", { length: 128 }).notNull(),
+
+  name: varchar("name", { length: 64 }).notNull(),
   type: text("type").$type<CategoryType>().notNull(),
+  icon: varchar("icon", { length: 32 }),
+  manual: boolean("manual").default(true),
 });
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
