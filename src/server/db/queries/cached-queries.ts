@@ -1,9 +1,9 @@
 import { unstable_cache } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 
-import type { GetUserBankAccountsParams } from ".";
+import type { GetTransactionsParams, GetUserBankAccountsParams } from ".";
 import { db, schema } from "~/server/db";
-import { getUserBankAccountsQuery } from ".";
+import { getTransactionsQuery, getUserBankAccountsQuery } from ".";
 
 export async function findAllInstitutions() {
   return unstable_cache(
@@ -39,6 +39,27 @@ export const getUserBankAccounts = async (
     {
       tags: [`bank_accounts_${session.userId}`],
       revalidate: 180,
+    },
+  )();
+};
+
+export const getUserTransactions = async (
+  params: Omit<GetTransactionsParams, "userId">,
+) => {
+  const session = auth();
+
+  if (!session.userId) {
+    return [];
+  }
+
+  return unstable_cache(
+    async () => {
+      return getTransactionsQuery({ ...params, userId: session.userId });
+    },
+    ["transactions", session.userId],
+    {
+      revalidate: 180,
+      tags: [`transactions_${session.userId}`],
     },
   )();
 };
