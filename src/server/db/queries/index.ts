@@ -12,15 +12,14 @@ export async function getUserBankAccountsQuery(
 ) {
   const { userId } = params;
 
-  const query = db
-    .select()
-    .from(schema.bankAccounts)
-    .where(eq(schema.bankAccounts.userId, userId))
-    .orderBy(asc(schema.bankAccounts.createdAt), desc(schema.bankAccounts.name))
-    .leftJoin(
-      schema.institutions,
-      eq(schema.bankAccounts.institutionId, schema.institutions.id),
-    );
+  const data = await db.query.bankConnections.findMany({
+    where: eq(schema.bankConnections.userId, userId),
+    with: {
+      bankAccount: {
+        orderBy: desc(schema.bankAccounts.amount),
+      },
+    },
+  });
 
-  return query;
+  return data;
 }

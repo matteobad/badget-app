@@ -1,4 +1,17 @@
+import Image from "next/image";
+import { format } from "date-fns";
+import { EllipsisIcon, PlugZapIcon, RefreshCwIcon } from "lucide-react";
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
+import { euroFormat, getInitials } from "~/lib/utils";
 import { getUserBankAccounts } from "~/server/db/queries/cached-queries";
 import { AddBankAccountButton } from "./add-bank-account-button";
 
@@ -42,53 +55,11 @@ export function BankAccountListLoading() {
   );
 }
 
-type BankAccount = Awaited<
-  ReturnType<typeof getUserBankAccounts>
->[number]["bank_accounts"];
-
 export async function BankAccountList() {
   const data = await getUserBankAccounts();
-
   // const manualAccounts = data.filter((item) => item.bank_accounts.manual);
 
-  const bankMap: Record<string, { accounts: BankAccount[] }> = {};
-
-  for (const item of data) {
-    const institutionId = item.instituions?.id;
-
-    if (!institutionId) {
-      continue;
-    }
-
-    if (!bankMap[institutionId]) {
-      // If the bank is not in the map, add it
-      bankMap[institutionId] = {
-        ...item.bank_accounts,
-        accounts: [],
-      };
-    }
-
-    // Add the account to the bank's accounts array
-    bankMap[institutionId].accounts.push(item.bank_accounts);
-  }
-
-  // Convert the map to an array
-  const result = Object.values(bankMap);
-
-  function sortAccountsByEnabled(accounts: BankAccount[]) {
-    return accounts.sort((a, b) =>
-      a.enabled === b.enabled ? 0 : a.enabled ? -1 : 1,
-    );
-  }
-
-  // Sort the accounts within each bank in the result array
-  for (const bank of result) {
-    if (Array.isArray(bank.accounts)) {
-      bank.accounts = sortAccountsByEnabled(bank.accounts);
-    }
-  }
-
-  if (result.length === 0) {
+  if (data.length === 0) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-6 rounded-lg border border-dashed shadow-sm">
         <div className="flex flex-col items-center gap-2">
@@ -103,9 +74,82 @@ export async function BankAccountList() {
   }
 
   return (
-    <>
-      {/* <BankConnections data={result} />
-      <ManualAccounts data={manualAccounts} /> */}
-    </>
+    <div className="flex flex-col items-end gap-6">
+      <Accordion type="single" collapsible className="w-full">
+        {data.map((item) => {
+          return (
+            <AccordionItem value={item.name} key={item.id}>
+              <AccordionTrigger className="flex flex-row-reverse justify-end gap-4 hover:no-underline">
+                <div className="flex w-full items-center gap-4">
+                  <Image
+                    src={item.logoUrl!}
+                    alt="Logo"
+                    width={40}
+                    height={40}
+                    className="row-span-2"
+                  />
+                  <div className="flex flex-col text-left">
+                    <span>{item.name}</span>
+                    <span className="text-sm font-light">
+                      Aggiornato il{" "}
+                      {format(item.updatedAt ?? item.createdAt, "dd MMM yyy")}
+                    </span>
+                  </div>
+                  <span className="flex-1"></span>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="rounded-full"
+                  >
+                    <PlugZapIcon className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="rounded-full"
+                  >
+                    <RefreshCwIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="4 ml-10 mt-4">
+                {item.bankAccount.map((account) => {
+                  return (
+                    <div
+                      className="mb-4 flex w-full items-center gap-4"
+                      key={account.id}
+                    >
+                      <Avatar>
+                        <AvatarFallback>
+                          {getInitials(account.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col text-left">
+                        <span>{account.name}</span>
+                        <span className="text-sm font-light">
+                          {account.type}
+                        </span>
+                      </div>
+                      <span className="flex-1"></span>
+                      <span className="">
+                        {euroFormat(account.amount ?? "0")}
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="rounded-full"
+                      >
+                        <EllipsisIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
+      <AddBankAccountButton />
+    </div>
   );
 }

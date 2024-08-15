@@ -20,6 +20,12 @@ const config = {
         port: '',
         pathname: '/ais/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   }
 };

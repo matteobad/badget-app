@@ -72,44 +72,28 @@ export async function createBankAccounts({
     .returning({ insertedId: schema.bankConnections.id });
 
   for (const bankAccount of accounts) {
-    await db.transaction(async (tx) => {
-      const insertedBankAccount = await tx
-        .insert(schema.bankAccounts)
-        .values({
-          userId,
-          bankConnectionId: bankConnection[0]?.insertedId,
-          accountId: bankAccount.account_id,
-          name: bankAccount.name,
-          type: "CREDIT",
-          enabled: bankAccount.enabled,
-        })
-        .onConflictDoUpdate({
-          target: schema.bankAccounts.accountId,
-          set: {
-            name: bankAccount.name,
-            enabled: bankAccount.enabled,
-            updatedAt,
-          },
-        })
-        .returning({ id: schema.bankAccounts.id });
-
-      if (!insertedBankAccount[0]) tx.rollback();
-
-      await tx
-        .insert(schema.bankAccountBalances)
-        .values({
-          bankAccountId: insertedBankAccount[0]!.id,
-          amount: parseFloat(bankAccount.balance),
+    await db
+      .insert(schema.bankAccounts)
+      .values({
+        userId,
+        bankConnectionId: bankConnection[0]?.insertedId,
+        institutionId: bankAccount.institution_id,
+        accountId: bankAccount.account_id,
+        amount: bankAccount.balance,
+        currency: bankAccount.currency,
+        name: bankAccount.name,
+        type: "CREDIT", // TODO: map this field
+        enabled: bankAccount.enabled,
+      })
+      .onConflictDoUpdate({
+        target: schema.bankAccounts.accountId,
+        set: {
+          amount: bankAccount.balance,
           currency: bankAccount.currency,
-        })
-        .onConflictDoUpdate({
-          target: schema.bankAccountBalances.bankAccountId,
-          set: {
-            amount: parseFloat(bankAccount.balance),
-            currency: bankAccount.currency,
-            updatedAt,
-          },
-        });
-    });
+          name: bankAccount.name,
+          enabled: bankAccount.enabled,
+          updatedAt,
+        },
+      });
   }
 }

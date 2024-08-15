@@ -3,7 +3,6 @@ import {
   boolean,
   decimal,
   integer,
-  real,
   serial,
   text,
   timestamp,
@@ -37,69 +36,6 @@ export const institutionsRelations = relations(institutions, ({ many }) => ({
   accounts: many(bankAccounts),
 }));
 
-export const bankAccounts = createTable("bank_accounts", {
-  id: serial("id").primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }),
-
-  // FK
-  bankAccountBalanceId: integer("bank_account_balance_id"),
-  bankConnectionId: integer("bank_connection_id"),
-  institutionId: varchar("institution_id"),
-  userId: varchar("user_id", { length: 128 }).notNull(),
-
-  accountId: varchar("account_id").unique(),
-  name: varchar("name", { length: 256 }).notNull(),
-  manual: boolean("manual").default(false),
-  enabled: boolean("enabled").default(true),
-  type: text("type").$type<BankAccountType>(),
-});
-
-export const bankAccountsRelations = relations(
-  bankAccounts,
-  ({ many, one }) => ({
-    transactions: many(bankTransactions),
-    balance: one(bankAccountBalances, {
-      fields: [bankAccounts.bankAccountBalanceId],
-      references: [bankAccountBalances.id],
-    }),
-    institution: one(institutions, {
-      fields: [bankAccounts.institutionId],
-      references: [institutions.id],
-    }),
-    connection: one(bankConnections, {
-      fields: [bankAccounts.bankConnectionId],
-      references: [bankConnections.id],
-    }),
-  }),
-);
-
-export const bankAccountBalances = createTable("bank_account_balances", {
-  id: serial("id").primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }),
-
-  // FK
-  bankAccountId: integer("bank_account_id").unique(),
-
-  amount: real("amount"),
-  currency: varchar("currency", { length: 4 }),
-});
-
-export const bankAccountBalancesRelations = relations(
-  bankAccountBalances,
-  ({ one }) => ({
-    account: one(bankAccounts, {
-      fields: [bankAccountBalances.bankAccountId],
-      references: [bankAccounts.id],
-    }),
-  }),
-);
-
 export const bankConnections = createTable(
   "bank_connections",
   {
@@ -124,6 +60,53 @@ export const bankConnections = createTable(
   },
   (t) => ({
     user_institution_unq: unique().on(t.institutionId, t.userId),
+  }),
+);
+
+export const bankConnectionsRelations = relations(
+  bankConnections,
+  ({ many, one }) => ({
+    bankAccount: many(bankAccounts),
+    institution: one(institutions, {
+      fields: [bankConnections.institutionId],
+      references: [institutions.id],
+    }),
+  }),
+);
+
+export const bankAccounts = createTable("bank_accounts", {
+  id: serial("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+
+  // FK
+  bankConnectionId: integer("bank_connection_id"),
+  institutionId: varchar("institution_id"),
+  userId: varchar("user_id", { length: 128 }).notNull(),
+
+  accountId: varchar("account_id").unique(),
+  amount: decimal("amount"),
+  currency: varchar("currency", { length: 4 }),
+  name: varchar("name", { length: 256 }).notNull(),
+  manual: boolean("manual").default(false),
+  enabled: boolean("enabled").default(true),
+  type: text("type").$type<BankAccountType>(),
+});
+
+export const bankAccountsRelations = relations(
+  bankAccounts,
+  ({ many, one }) => ({
+    transactions: many(bankTransactions),
+    institution: one(institutions, {
+      fields: [bankAccounts.institutionId],
+      references: [institutions.id],
+    }),
+    connection: one(bankConnections, {
+      fields: [bankAccounts.bankConnectionId],
+      references: [bankConnections.id],
+    }),
   }),
 );
 
