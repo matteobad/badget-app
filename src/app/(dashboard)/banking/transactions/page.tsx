@@ -9,8 +9,6 @@ import {
 } from "nuqs/server";
 
 import { ErrorFallback } from "~/components/error-fallback";
-import { TransactionsTableServer } from "~/components/tables/transactions-table";
-import { TransactionsTableLoading } from "~/components/tables/trasactions-table.loading";
 import {
   Card,
   CardContent,
@@ -18,6 +16,9 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { AddTransactionButton } from "./_components/add-transaction-button";
+import { TransactionsTableLoading } from "./_components/transactions-table.loading";
+import { TransactionsTableServer } from "./_components/transactions-table.server";
 
 const searchParamsCache = createSearchParamsCache({
   q: parseAsString,
@@ -51,29 +52,16 @@ export default async function TransactionsPage({
 
   return (
     <Card className="h-fit w-full">
-      <CardHeader>
-        <CardTitle>Transazioni</CardTitle>
-        <CardDescription>
-          Manage bank transactions, update or add new ones.
-        </CardDescription>
+      <CardHeader className="flex flex-row justify-between gap-6">
+        <div className="flex flex-col space-y-1.5">
+          <CardTitle>Transazioni</CardTitle>
+          <CardDescription>
+            Manage bank transactions, update or add new ones.
+          </CardDescription>
+        </div>
+        <AddTransactionButton />
       </CardHeader>
       <CardContent className="space-y-2">
-        <div className="flex justify-between py-6">
-          {/* <TransactionsSearchFilter
-            placeholder="Search or type filter"
-            validFilters={VALID_FILTERS}
-            categories={categoriesData?.data?.map((category) => ({
-              slug: category.slug,
-              name: category.name,
-            }))}
-            accounts={accountsData?.data?.map((account) => ({
-              id: account.id,
-              name: account.name,
-              currency: account.currency,
-            }))}
-          />
-          <TransactionsActions isEmpty={isEmpty} /> */}
-        </div>
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense fallback={<TransactionsTableLoading />} key={loadingKey}>
             <TransactionsTableServer />

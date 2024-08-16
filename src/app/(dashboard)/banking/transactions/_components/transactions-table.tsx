@@ -12,9 +12,11 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { format } from "date-fns";
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
@@ -40,44 +42,54 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { cn } from "~/lib/utils";
+import { cn, euroFormat } from "~/lib/utils";
 import { deleteCategoryAction } from "~/server/actions/insert-category-action";
-import { type getUserCategories } from "~/server/db/queries/cached-queries";
+import { type getUserTransactions } from "~/server/db/queries/cached-queries";
 
-export type Category = Awaited<ReturnType<typeof getUserCategories>>[number];
+export type Transaction = Awaited<
+  ReturnType<typeof getUserTransactions>
+>[number];
 
-export const columns: ColumnDef<Category>[] = [
+export const columns: ColumnDef<Transaction>[] = [
   {
-    accessorKey: "name",
-    header: "Categoria",
-    cell: ({ row }) => (
-      <div className="capitalize">
-        <div className="flex items-center gap-2">
-          <Icon
-            name={row.original.icon as keyof typeof dynamicIconImports}
-            className="h-4 w-4"
-          />
-
-          {row.getValue("name")}
-          {!row.original.manual && <Badge variant="secondary">system</Badge>}
-        </div>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "type",
+    accessorKey: "date",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Tipo
+          Data
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("type")}</div>,
+    cell: ({ row }) => (
+      <div className="whitespace-nowrap">
+        {format(row.getValue("date"), "dd MMM yyyy")}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "description",
+    header: "Descrizione",
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("description")}</div>
+    ),
+  },
+  {
+    accessorKey: "category",
+    header: "Categoria",
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("category")}</div>
+    ),
+  },
+  {
+    accessorKey: "amount",
+    header: "Importo",
+    cell: ({ row }) => (
+      <div className="lowercase">{euroFormat(row.getValue("amount"))}</div>
+    ),
   },
   {
     id: "actions",
@@ -121,7 +133,7 @@ export const columns: ColumnDef<Category>[] = [
   },
 ];
 
-export function CategoryTable({ data }: { data: Category[] }) {
+export function TransactionsTable({ data }: { data: Transaction[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -135,6 +147,7 @@ export function CategoryTable({ data }: { data: Category[] }) {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
@@ -149,7 +162,7 @@ export function CategoryTable({ data }: { data: Category[] }) {
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter categories..."
+          placeholder="Cerca transazioni..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
@@ -193,9 +206,9 @@ export function CategoryTable({ data }: { data: Category[] }) {
                     <TableHead
                       key={header.id}
                       className={cn({
+                        "pl-5": header.id === "date",
+                        "text-right": header.id === "amount",
                         "pr-9 text-right": header.id === "actions",
-                        "pl-0": header.id === "type",
-                        "pl-9": header.id === "name",
                       })}
                     >
                       {header.isPlaceholder
@@ -218,8 +231,9 @@ export function CategoryTable({ data }: { data: Category[] }) {
                     <TableCell
                       key={cell.id}
                       className={cn({
+                        "pl-9": cell.id.includes("date"),
+                        "text-right": cell.id.includes("amount"),
                         "pr-9 text-right": cell.id.includes("actions"),
-                        "pl-9": cell.id.includes("name"),
                       })}
                     >
                       {flexRender(
@@ -242,8 +256,29 @@ export function CategoryTable({ data }: { data: Category[] }) {
             )}
           </TableBody>
         </Table>
-        <div className="mt-4 w-full text-center text-sm font-light text-slate-500">
-          Hai {data.length} categorie in totale
+        <div className="flex items-center justify-end space-x-2 px-8 pt-4">
+          <div className="flex-1 text-sm text-muted-foreground">
+            {table.getFilteredSelectedRowModel().rows.length} of{" "}
+            {table.getFilteredRowModel().rows.length} row(s) selected.
+          </div>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
     </div>

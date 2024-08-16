@@ -3,9 +3,9 @@
 import { Skeleton } from "~/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
-import { TransactionsTableHeader } from "./transactions-table-header";
+import { TransactionsTableHeader } from "../../../../../components/tables/transactions-table-header";
 
-const data = [...Array(40)].map((_, i) => ({ id: i.toString() }));
+const data = [...Array<unknown>(40)].map((_, i) => ({ id: i.toString() }));
 
 export function TransactionsTableLoading({ isEmpty }: { isEmpty?: boolean }) {
   return (

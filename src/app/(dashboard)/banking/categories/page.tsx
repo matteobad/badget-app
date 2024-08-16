@@ -1,5 +1,7 @@
 import { Suspense } from "react";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 
+import { ErrorFallback } from "~/components/error-fallback";
 import {
   Card,
   CardContent,
@@ -24,9 +26,11 @@ export default function CategoriesPage() {
         <AddCategoryButton />
       </CardHeader>
       <CardContent className="space-y-2">
-        <Suspense fallback={<CategoryListLoading />}>
-          <CategoryListServer />
-        </Suspense>
+        <ErrorBoundary errorComponent={ErrorFallback}>
+          <Suspense fallback={<CategoryListLoading />}>
+            <CategoryListServer />
+          </Suspense>
+        </ErrorBoundary>
       </CardContent>
     </Card>
   );
