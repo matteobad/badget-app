@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { schema } from "~/server/db";
 import { Provider } from "~/server/db/schema/enum";
-import { categories } from "~/server/db/schema/open-banking";
+import { categories, categoryBudgets } from "~/server/db/schema/open-banking";
 import { ContractType } from "~/server/db/schema/working-records";
 
 export type FormState = {
@@ -87,11 +87,18 @@ export const importBankTransactionSchema = z.object({
 });
 
 // Schema for inserting a category - can be used to validate API requests
-export const insertCategorySchema = createInsertSchema(categories).pick({
-  name: true,
-  type: true,
-  icon: true,
-});
+export const insertCategorySchema = createInsertSchema(categories)
+  .pick({
+    name: true,
+    type: true,
+    icon: true,
+  })
+  .merge(
+    createInsertSchema(categoryBudgets).pick({
+      budget: true,
+      period: true,
+    }),
+  );
 
 export const deleteCategorySchema = z.object({
   categoryId: z.number(),

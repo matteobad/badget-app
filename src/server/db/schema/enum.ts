@@ -31,3 +31,11 @@ export const CategoryType = {
   TRANSFERS: "TRANSFERS",
 } as const;
 export type CategoryType = (typeof CategoryType)[keyof typeof CategoryType];
+
+export const BudgetPeriod = {
+  WEEK: "WEEK",
+  MONTH: "MONTH",
+  YEAR: "YEAR",
+  UNKNOWN: "UNKNOWN",
+} as const;
+export type BudgetPeriod = (typeof BudgetPeriod)[keyof typeof BudgetPeriod];

@@ -1,9 +1,9 @@
 "use client";
 
+import type dynamicIconImports from "lucide-react/dynamicIconImports";
 import type z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleDashedIcon, Loader2 } from "lucide-react";
-import dynamicIconImports from "lucide-react/dynamicIconImports";
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryState } from "nuqs";
 import { useForm } from "react-hook-form";
@@ -11,7 +11,8 @@ import { toast } from "sonner";
 
 import { insertCategorySchema } from "~/lib/validators";
 import { insertCategoryAction } from "~/server/actions/insert-category-action";
-import { CategoryType } from "~/server/db/schema/enum";
+import { BudgetPeriod, CategoryType } from "~/server/db/schema/enum";
+import MoneyInput from "../custom/money-input";
 import Icon from "../icons";
 import { Button } from "../ui/button";
 import {
@@ -78,7 +79,6 @@ export function AddCategoryModal() {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="max-w-xs"
         onPointerDownOutside={(event) => event.preventDefault()}
         onEscapeKeyDown={(event) => event.preventDefault()}
       >
@@ -93,17 +93,20 @@ export function AddCategoryModal() {
             onSubmit={form.handleSubmit(execute)}
             className="scrollbar-hide relative overflow-auto"
           >
-            <div className="flex items-end gap-4">
+            <div className="flex items-end">
               <FormField
                 control={form.control}
                 name="icon"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Icona</FormLabel>
                     <FormControl>
                       <Popover>
                         <PopoverTrigger asChild className="flex">
-                          <Button variant="outline" size="icon">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="rounded-r-none"
+                          >
                             <Icon
                               name={
                                 field.value as keyof typeof dynamicIconImports
@@ -124,9 +127,10 @@ export function AddCategoryModal() {
                               </p>
                             </div>
                             <div className="grid gap-4">
-                              {CATEGORY_ICONS.map((icon) => {
+                              {CATEGORY_ICONS.map((icon, index) => {
                                 return (
                                   <Button
+                                    key={index}
                                     variant="outline"
                                     size="icon"
                                     onClick={() => form.setValue("icon", icon)}
@@ -145,57 +149,99 @@ export function AddCategoryModal() {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>Nome</FormLabel>
+                  <FormItem className="flex-1">
+                    <FormLabel className="-ml-10">
+                      Nome della categoria
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="Holidays" {...field} />
+                      <Input
+                        placeholder="Holidays"
+                        {...field}
+                        className="rounded-l-none rounded-r-none border-l-0 border-r-0"
+                      />
                     </FormControl>
                     <FormDescription />
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem className="flex-1 self-start">
+                    <FormLabel>&nbsp;</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="rounded-l-none">
+                          <SelectValue placeholder="Select a verified email to display" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(CategoryType).map((type, index) => {
+                          return (
+                            <SelectItem value={type} key={index}>
+                              {type}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a verified email to display" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.values(CategoryType).map((type, index) => {
-                        return (
-                          <SelectItem value={type} key={index}>
-                            {type}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="bg-background pt-6">
+            <div className="flex items-center gap-4">
+              <FormField
+                control={form.control}
+                name="period"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Periodo</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleziona un periodo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(BudgetPeriod).map((period, index) => {
+                          return (
+                            <SelectItem value={period} key={index}>
+                              {period}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <MoneyInput
+                form={form}
+                label="Budget"
+                name="budget"
+                placeholder="100"
+              />
+            </div>
+            <div className="flex justify-end pt-6">
               <Button type="submit" disabled={status === "executing"}>
                 {status === "executing" ? (
                   <Loader2 className="pointer-events-none h-4 w-4 animate-spin" />
                 ) : (
-                  "Save"
+                  "Crea categoria"
                 )}
               </Button>
             </div>

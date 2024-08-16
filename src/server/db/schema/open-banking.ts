@@ -13,6 +13,7 @@ import {
 import { createTable } from "./_table";
 import {
   type BankAccountType,
+  type BudgetPeriod,
   type CategoryType,
   type ConnectionStatus,
   type Provider,
@@ -110,26 +111,6 @@ export const bankAccountsRelations = relations(
   }),
 );
 
-export const categories = createTable("categories", {
-  id: serial("id").primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }),
-
-  // FK
-  userId: varchar("user_id", { length: 128 }).notNull(),
-
-  name: varchar("name", { length: 64 }).notNull(),
-  type: text("type").$type<CategoryType>().notNull(),
-  icon: varchar("icon", { length: 32 }),
-  manual: boolean("manual").default(true),
-});
-
-export const categoriesRelations = relations(categories, ({ many }) => ({
-  transactions: many(bankTransactions),
-}));
-
 export const bankTransactions = createTable("bank_transactions", {
   id: serial("id").primaryKey(),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -169,3 +150,40 @@ export const bankTransactionsRelations = relations(
     }),
   }),
 );
+
+export const categories = createTable("categories", {
+  id: serial("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+
+  // FK
+  userId: varchar("user_id", { length: 128 }).notNull(),
+
+  name: varchar("name", { length: 64 }).notNull(),
+  type: text("type").$type<CategoryType>().notNull(),
+  icon: varchar("icon", { length: 32 }),
+  manual: boolean("manual").default(true),
+});
+
+export const categoriesRelations = relations(categories, ({ many }) => ({
+  transactions: many(bankTransactions),
+  budgets: many(categoryBudgets),
+}));
+
+export const categoryBudgets = createTable("category_budgets", {
+  id: serial("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+
+  // FK
+  userId: varchar("user_id", { length: 128 }).notNull(),
+  categoryId: integer("category_id").notNull(),
+
+  budget: decimal("budget").default("0"),
+  period: text("period").$type<BudgetPeriod>().notNull(),
+  active_at: timestamp("active_at", { withTimezone: true }).notNull(),
+});
