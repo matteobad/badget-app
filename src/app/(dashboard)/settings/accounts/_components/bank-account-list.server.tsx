@@ -132,7 +132,7 @@ export async function BankAccountList() {
                       </div>
                       <span className="flex-1"></span>
                       <span className="">
-                        {euroFormat(account.amount ?? "0")}
+                        {euroFormat(account.balance ?? "0")}
                       </span>
                       <Button
                         size="icon"

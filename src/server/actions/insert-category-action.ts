@@ -8,15 +8,23 @@ import { deleteCategory, insertCategory } from "../db/mutations";
 
 export const insertCategoryAction = authActionClient
   .schema(insertCategorySchema)
-  .action(async ({ parsedInput: { name, type }, ctx: { userId } }) => {
-    await insertCategory({
-      name,
-      type,
-      userId: userId,
-    });
+  .action(
+    async ({
+      parsedInput: { name, type, period, budget, icon },
+      ctx: { userId },
+    }) => {
+      await insertCategory({
+        name,
+        type,
+        userId: userId,
+        period,
+        budget,
+        icon,
+      });
 
-    revalidateTag(`bank_categories_${userId}`);
-  });
+      revalidateTag(`bank_categories_${userId}`);
+    },
+  );
 
 export const deleteCategoryAction = authActionClient
   .schema(deleteCategorySchema)

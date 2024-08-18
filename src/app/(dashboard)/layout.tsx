@@ -18,6 +18,16 @@ export default async function DashboardLayout(props: {
     },
   );
 
+  const AddBankAccountModal = dynamic(
+    () =>
+      import("~/components/dialogs/add-bank-account-modal").then(
+        (mod) => mod.AddBankAccountModal,
+      ),
+    {
+      ssr: false,
+    },
+  );
+
   const SelectBankAccountsModal = dynamic(
     () =>
       import("~/components/dialogs/select-bank-accounts-modal").then(
@@ -55,6 +65,7 @@ export default async function DashboardLayout(props: {
       {/* Modals triggered by url search params */}
       <ConnectBankModal countryCode={"IT"} />
       <SelectBankAccountsModal />
+      <AddBankAccountModal />
       <AddCategoryModal />
     </>
   );

@@ -88,8 +88,8 @@ export const bankAccounts = createTable("bank_accounts", {
   userId: varchar("user_id", { length: 128 }).notNull(),
 
   accountId: varchar("account_id").unique(),
-  amount: decimal("amount"),
-  currency: varchar("currency", { length: 4 }),
+  balance: decimal("balance").default("0"),
+  currency: varchar("currency", { length: 4 }).notNull(),
   name: varchar("name", { length: 256 }).notNull(),
   manual: boolean("manual").default(false),
   enabled: boolean("enabled").default(true),

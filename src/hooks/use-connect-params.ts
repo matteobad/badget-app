@@ -9,7 +9,7 @@ import { Provider } from "~/server/db/schema/enum";
 
 export function useConnectParams(initialCountryCode?: string) {
   const [params, setParams] = useQueryStates({
-    step: parseAsStringLiteral(["connect", "account"]),
+    step: parseAsStringLiteral(["connect", "manual"]),
     countryCode: parseAsString.withDefault(initialCountryCode ?? ""),
     provider: parseAsStringEnum<Provider>(Object.values(Provider)),
     institution_id: parseAsString,

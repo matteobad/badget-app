@@ -147,7 +147,7 @@ export function ConnectBankModal({
               <button
                 type="button"
                 className="underline"
-                onClick={() => setParams({ step: "import" })}
+                onClick={() => setParams({ step: "manual" })}
               >
                 manual import
               </button>{" "}

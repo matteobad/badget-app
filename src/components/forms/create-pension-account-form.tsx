@@ -113,9 +113,9 @@ export function CreatePensionAccountForm(props: {
                           <div className="flex w-full gap-2">
                             <span className="max-w-[75%] truncate">
                               {field.value
-                                ? props.pensionFunds.find(
+                                ? (props.pensionFunds.find(
                                     (item) => item.id === field.value,
-                                  )?.name ?? "Seleziona un fondo"
+                                  )?.name ?? "Seleziona un fondo")
                                 : "Seleziona un fondo"}
                             </span>
                             {selectedIB && (

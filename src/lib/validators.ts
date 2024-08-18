@@ -1,9 +1,12 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-import { schema } from "~/server/db";
 import { Provider } from "~/server/db/schema/enum";
-import { categories, categoryBudgets } from "~/server/db/schema/open-banking";
+import {
+  bankAccounts,
+  categories,
+  categoryBudgets,
+} from "~/server/db/schema/open-banking";
 import { ContractType } from "~/server/db/schema/working-records";
 
 export type FormState = {
@@ -87,6 +90,13 @@ export const importBankTransactionSchema = z.object({
 });
 
 // Schema for inserting a category - can be used to validate API requests
+export const createBankAccountSchema = createInsertSchema(bankAccounts).pick({
+  name: true,
+  balance: true,
+  currency: true,
+});
+
+// Category
 export const insertCategorySchema = createInsertSchema(categories)
   .pick({
     name: true,

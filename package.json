@@ -73,6 +73,7 @@
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "use-debounce": "^10.0.2",
+    "vaul": "^0.9.1",
     "xior": "^0.5.5",
     "zod": "^3.23.8"
   },

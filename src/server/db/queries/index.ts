@@ -16,7 +16,7 @@ export async function getUserBankAccountsQuery(
     where: eq(schema.bankConnections.userId, userId),
     with: {
       bankAccount: {
-        orderBy: desc(schema.bankAccounts.amount),
+        orderBy: desc(schema.bankAccounts.balance),
       },
     },
   });

@@ -34,17 +34,3 @@ export function AccountList(props: {
     </div>
   );
 }
-
-export function AccountCard(props: {
-  account: typeof schema.bankAccounts.$inferSelect;
-}) {
-  return (
-    <div className="flex flex-row rounded-lg bg-muted p-4">
-      <div className="flex-grow">
-        <h2 className="text-2xl font-bold text-primary">
-          {props.account.name}
-        </h2>
-      </div>
-    </div>
-  );
-}

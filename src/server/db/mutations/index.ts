@@ -3,7 +3,10 @@ import { eq } from "drizzle-orm";
 import { type z } from "zod";
 
 import type { CategoryType } from "../schema/enum";
-import { type insertCategorySchema } from "~/lib/validators";
+import {
+  type createBankAccountSchema,
+  type insertCategorySchema,
+} from "~/lib/validators";
 import { getAccessValidForDays } from "~/server/providers/gocardless/utils";
 import { db, schema } from "..";
 import { ConnectionStatus, Provider } from "../schema/enum";
@@ -83,7 +86,7 @@ export async function createBankAccounts({
         bankConnectionId: bankConnection[0]?.insertedId,
         institutionId: bankAccount.institution_id,
         accountId: bankAccount.account_id,
-        amount: bankAccount.balance,
+        balance: bankAccount.balance,
         currency: bankAccount.currency,
         name: bankAccount.name,
         type: "CREDIT", // TODO: map this field
@@ -92,7 +95,7 @@ export async function createBankAccounts({
       .onConflictDoUpdate({
         target: schema.bankAccounts.accountId,
         set: {
-          amount: bankAccount.balance,
+          balance: bankAccount.balance,
           currency: bankAccount.currency,
           name: bankAccount.name,
           enabled: bankAccount.enabled,
@@ -100,6 +103,34 @@ export async function createBankAccounts({
         },
       });
   }
+}
+
+type CreateBankAccountPayload = z.infer<typeof createBankAccountSchema> & {
+  userId: string;
+};
+
+export async function createBankAccount({
+  name,
+  balance,
+  currency,
+  userId,
+}: CreateBankAccountPayload) {
+  return await db
+    .insert(schema.bankAccounts)
+    .values({
+      name,
+      balance,
+      currency,
+      userId,
+    })
+    .onConflictDoUpdate({
+      target: schema.bankAccounts.id,
+      set: {
+        name,
+        balance,
+        currency,
+      },
+    });
 }
 
 type InsertCategoryPayload = z.infer<typeof insertCategorySchema> & {
