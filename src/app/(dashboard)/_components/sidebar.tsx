@@ -14,7 +14,7 @@ interface SidebarItemProps {
   link: string;
   label?: string;
   icon: LucideIcon;
-  variant: "default" | "ghost";
+  variant: "default" | "ghost" | "secondary";
 }
 
 function SidebarItem({ title, link, label, icon, variant }: SidebarItemProps) {
@@ -26,7 +26,7 @@ function SidebarItem({ title, link, label, icon, variant }: SidebarItemProps) {
       className={cn(
         buttonVariants({ variant, size: "sm" }),
         "w-full px-4",
-        variant === "default" &&
+        variant === "secondary" &&
           "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white",
         "justify-start",
       )}
@@ -37,7 +37,7 @@ function SidebarItem({ title, link, label, icon, variant }: SidebarItemProps) {
         <span
           className={cn(
             "ml-auto",
-            variant === "default" && "text-background dark:text-white",
+            variant === "secondary" && "text-background dark:text-white",
           )}
         >
           {label}
@@ -54,7 +54,10 @@ export function Sidebar() {
     <div className="space-y-2">
       <div className="px-3 py-2">
         <div className="space-y-1">
-          <Button variant="secondary" className="w-full justify-start gap-2">
+          <Button
+            variant={pathname === "/" ? "secondary" : "ghost"}
+            className="w-full justify-start gap-2"
+          >
             <LayoutDashboardIcon className="h-4 w-4" />
             Dashboard
           </Button>
@@ -70,7 +73,7 @@ export function Sidebar() {
                 icon={item.icon}
                 title={item.title}
                 link={item.link}
-                variant={active ? "default" : "ghost"}
+                variant={active ? "secondary" : "ghost"}
                 label={item.label}
               />
             );

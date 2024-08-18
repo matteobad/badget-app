@@ -14,13 +14,13 @@ export function AccountList(props: {
   if (accounts.length === 0) {
     return (
       <div className="relative flex w-full flex-col gap-4">
-        <p className="text-2xl font-bold text-white">No accounts yet</p>
+        <p className="text-2xl font-bold text-white">Nessun Conto</p>
       </div>
     );
   }
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div className="flex w-full flex-col gap-1">
       {accounts.map((account) => {
         return (
           <SidebarItem

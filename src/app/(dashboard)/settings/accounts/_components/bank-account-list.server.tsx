@@ -2,6 +2,7 @@ import Image from "next/image";
 import { format } from "date-fns";
 import { EllipsisIcon, PlugZapIcon, RefreshCwIcon } from "lucide-react";
 
+import { AddBankAccountButton } from "~/app/(dashboard)/_components/add-bank-account-button";
 import {
   Accordion,
   AccordionContent,
@@ -13,7 +14,6 @@ import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { euroFormat, getInitials } from "~/lib/utils";
 import { getUserBankAccounts } from "~/server/db/queries/cached-queries";
-import { AddBankAccountButton } from "./add-bank-account-button";
 
 // import { BankConnections } from "./bank-connections";
 // import { ManualAccounts } from "./manual-accounts";
@@ -68,7 +68,7 @@ export async function BankAccountList() {
             Cominciamo aggiungendo il tuo primo conto corrente.
           </p>
         </div>
-        <AddBankAccountButton />
+        <AddBankAccountButton label="Aggiungi Conto" />
       </div>
     );
   }
@@ -149,7 +149,7 @@ export async function BankAccountList() {
           );
         })}
       </Accordion>
-      <AddBankAccountButton />
+      <AddBankAccountButton label="Aggiungi Conto" />
     </div>
   );
 }

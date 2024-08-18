@@ -2,8 +2,8 @@ import { type Metadata } from "next";
 import Image from "next/image";
 
 import { Separator } from "~/components/ui/separator";
-import { SiteFooter } from "../_components/footer";
-import { TopbarNav } from "../_components/topbar-nav";
+import { SiteFooter } from "../../_components/footer";
+import { TopbarNav } from "../../_components/topbar-nav";
 import { SidebarNav } from "./_components/sidebar-nav";
 
 export const metadata: Metadata = {

@@ -6,6 +6,7 @@ import { PlusIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { db, schema } from "~/server/db";
 import { AccountList } from "./accounts";
+import { AddBankAccountButton } from "./add-bank-account-button";
 import { SidebarItemSkeleton } from "./sidebar-item";
 
 async function getAccountsByUserId() {
@@ -26,12 +27,14 @@ export function SidebarAccounts() {
 
   return (
     <div className="space-y-2">
-      <div className="px-3 py-2">
+      <div className="px-3">
         <div className="space-y-1">
-          <Button variant="ghost" className="w-full justify-start gap-2">
-            <PlusIcon className="h-4 w-4" />
-            Add account
-          </Button>
+          <div className="flex items-center justify-between pl-4">
+            <h3 className="text-sm font-semibold text-slate-500">
+              Collegamenti
+            </h3>
+            <AddBankAccountButton size="icon" variant="ghost" />
+          </div>
           <Suspense
             fallback={
               <div className="flex w-full flex-col gap-4">
