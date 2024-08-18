@@ -14,6 +14,7 @@ import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { euroFormat, getInitials } from "~/lib/utils";
 import { getUserBankAccounts } from "~/server/db/queries/cached-queries";
+import { Provider } from "~/server/db/schema/enum";
 
 // import { BankConnections } from "./bank-connections";
 // import { ManualAccounts } from "./manual-accounts";
@@ -81,13 +82,20 @@ export async function BankAccountList() {
             <AccordionItem value={item.name} key={item.id}>
               <AccordionTrigger className="flex flex-row-reverse justify-end gap-4 hover:no-underline">
                 <div className="flex w-full items-center gap-4">
-                  <Image
-                    src={item.logoUrl!}
-                    alt="Logo"
-                    width={40}
-                    height={40}
-                    className="row-span-2"
-                  />
+                  {item.logoUrl ? (
+                    <Image
+                      src={item.logoUrl}
+                      alt="Logo"
+                      width={40}
+                      height={40}
+                      className="row-span-2"
+                    />
+                  ) : (
+                    <Avatar>
+                      <AvatarFallback>{"MA"}</AvatarFallback>
+                    </Avatar>
+                  )}
+
                   <div className="flex flex-col text-left">
                     <span>{item.name}</span>
                     <span className="text-sm font-light">
@@ -96,23 +104,28 @@ export async function BankAccountList() {
                     </span>
                   </div>
                   <span className="flex-1"></span>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="rounded-full"
-                  >
-                    <PlugZapIcon className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="rounded-full"
-                  >
-                    <RefreshCwIcon className="h-4 w-4" />
-                  </Button>
+                  {item.provider !== Provider.NONE && (
+                    <>
+                      {" "}
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="rounded-full"
+                      >
+                        <PlugZapIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="rounded-full"
+                      >
+                        <RefreshCwIcon className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="4 ml-10 mt-4">
+              <AccordionContent className="4 ml-8 mt-4">
                 {item.bankAccount.map((account) => {
                   return (
                     <div
@@ -126,7 +139,7 @@ export async function BankAccountList() {
                       </Avatar>
                       <div className="flex flex-col text-left">
                         <span>{account.name}</span>
-                        <span className="text-sm font-light">
+                        <span className="text-sm font-light lowercase">
                           {account.type}
                         </span>
                       </div>

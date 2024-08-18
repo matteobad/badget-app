@@ -1,16 +1,13 @@
 "use client";
 
-import { use } from "react";
-import { ArrowUpRightFromSquareIcon } from "lucide-react";
-
-import { type schema } from "~/server/db";
+import { type getUserBankAccounts } from "~/server/db/queries/cached-queries";
 import { SidebarItem } from "./sidebar-item";
 
-export function AccountList(props: {
-  accounts: Promise<(typeof schema.bankAccounts.$inferSelect)[]>;
+export function AccountList({
+  accounts,
+}: {
+  accounts: Awaited<ReturnType<typeof getUserBankAccounts>>;
 }) {
-  const accounts = use(props.accounts);
-
   if (accounts.length === 0) {
     return (
       <div className="relative flex w-full flex-col gap-4">
@@ -21,15 +18,17 @@ export function AccountList(props: {
 
   return (
     <div className="flex w-full flex-col gap-1">
-      {accounts.map((account) => {
-        return (
-          <SidebarItem
-            key={account.id}
-            title={account.name}
-            icon={ArrowUpRightFromSquareIcon}
-            variant="ghost"
-          />
-        );
+      {accounts.map((connection) => {
+        return connection.bankAccount.map((account) => {
+          return (
+            <SidebarItem
+              key={account.id}
+              title={account.name}
+              icon={connection.logoUrl}
+              variant="ghost"
+            />
+          );
+        });
       })}
     </div>
   );

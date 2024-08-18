@@ -187,3 +187,13 @@ export const categoryBudgets = createTable("category_budgets", {
   period: text("period").$type<BudgetPeriod>().notNull(),
   active_at: timestamp("active_at", { withTimezone: true }).notNull(),
 });
+
+export const categoryBudgetsRelations = relations(
+  categoryBudgets,
+  ({ one }) => ({
+    category: one(categories, {
+      fields: [categoryBudgets.categoryId],
+      references: [categories.id],
+    }),
+  }),
+);

@@ -1,27 +1,12 @@
 import { Suspense } from "react";
-import { auth } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
 
-import { db, schema } from "~/server/db";
+import { getUserBankAccounts } from "~/server/db/queries/cached-queries";
 import { AccountList } from "./accounts";
 import { AddBankAccountButton } from "./add-bank-account-button";
 import { SidebarItemSkeleton } from "./sidebar-item";
 
-async function getAccountsByUserId() {
-  const session = auth();
-
-  if (!session?.userId) {
-    throw new Error("UNAUTHORIZED");
-  }
-
-  return await db
-    .select()
-    .from(schema.bankAccounts)
-    .where(eq(schema.bankAccounts.userId, session.userId));
-}
-
-export function SidebarAccounts() {
-  const accounts = getAccountsByUserId();
+export async function SidebarAccounts() {
+  const accounts = await getUserBankAccounts();
 
   return (
     <div className="space-y-2">

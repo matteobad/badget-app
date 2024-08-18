@@ -115,6 +115,26 @@ export async function createBankAccount({
   currency,
   userId,
 }: CreateBankAccountPayload) {
+  const bankConnection = await db
+    .insert(schema.bankConnections)
+    .values({
+      name: "Manual",
+      provider: Provider.NONE,
+      institutionId: "MANUAL",
+      userId,
+      status: ConnectionStatus.UNKNOWN,
+    })
+    .onConflictDoUpdate({
+      target: [
+        schema.bankConnections.institutionId,
+        schema.bankConnections.userId,
+      ],
+      set: {
+        updatedAt: new Date(),
+      },
+    })
+    .returning({ insertedId: schema.bankConnections.id });
+
   return await db
     .insert(schema.bankAccounts)
     .values({
@@ -122,6 +142,7 @@ export async function createBankAccount({
       balance,
       currency,
       userId,
+      bankConnectionId: bankConnection[0]?.insertedId,
     })
     .onConflictDoUpdate({
       target: schema.bankAccounts.id,

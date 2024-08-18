@@ -2,6 +2,7 @@ export const Provider = {
   GOCARDLESS: "GOCARDLESS",
   PLAID: "PLAID",
   TELLER: "TELLER",
+  NONE: "NONE",
 } as const;
 export type Provider = (typeof Provider)[keyof typeof Provider];
 
