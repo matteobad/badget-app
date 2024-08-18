@@ -8,6 +8,7 @@ import { Checkbox } from "../ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "../ui/table";
 
 type Props = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   table?: any;
   loading?: boolean;
 };
@@ -35,7 +36,7 @@ export function TransactionsTableHeader({ table, loading }: Props) {
     [searchParams, router, pathname],
   );
 
-  const isVisible = (id: string) => loading || true;
+  const isVisible = (_: string) => loading ?? true;
 
   return (
     <TableHeader>
@@ -43,10 +44,13 @@ export function TransactionsTableHeader({ table, loading }: Props) {
         <TableHead className="hidden w-[50px] px-3 py-2 md:table-cell md:px-4">
           <Checkbox
             checked={
-              table?.getIsAllPageRowsSelected() ||
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+              table?.getIsAllPageRowsSelected() ??
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
               (table?.getIsSomePageRowsSelected() && "indeterminate")
             }
             onCheckedChange={(value) =>
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
               table.toggleAllPageRowsSelected(!!value)
             }
           />

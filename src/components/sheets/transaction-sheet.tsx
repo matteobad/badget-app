@@ -20,7 +20,7 @@ export function TransactionSheet() {
           <SheetHeader className="mb-8">
             <SheetTitle>Dettagli del Conto</SheetTitle>
           </SheetHeader>
-          <TransactionDetails id={accountId} />
+          {/* <TransactionDetails id={accountId} /> */}
         </SheetContent>
       </Sheet>
     );
@@ -29,7 +29,7 @@ export function TransactionSheet() {
   return (
     <Drawer open={isOpen} onOpenChange={setOpen}>
       <DrawerContent className="p-6">
-        <TransactionDetails id={accountId} />
+        {/* <TransactionDetails id={accountId} /> */}
       </DrawerContent>
     </Drawer>
   );

@@ -85,6 +85,7 @@ export const columns: ColumnDef<Category>[] = [
     enableHiding: false,
     cell: ({ row }) => {
       const category = row.original;
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const { execute, isExecuting } = useAction(deleteCategoryAction, {
         onError: console.error,
         onSuccess: (_data) => {

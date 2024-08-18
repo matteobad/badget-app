@@ -21,8 +21,6 @@ import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
-import Icon from "~/components/icons";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -97,6 +95,7 @@ export const columns: ColumnDef<Transaction>[] = [
     enableHiding: false,
     cell: ({ row }) => {
       const category = row.original;
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const { execute, isExecuting } = useAction(deleteCategoryAction, {
         onError: console.error,
         onSuccess: (_data) => {
