@@ -291,7 +291,7 @@ export function TransactionsTable({
         <TransactionSheet
           isOpen={Boolean(transactionId)}
           setOpen={setOpen}
-          data={selectedTransaction!}
+          data={selectedTransaction}
           categories={categories}
         />
       </div>

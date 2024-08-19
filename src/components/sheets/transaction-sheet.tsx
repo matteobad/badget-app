@@ -10,7 +10,7 @@ import { Sheet, SheetContent } from "../ui/sheet";
 type TransactionSheetProps = {
   setOpen: (open: string) => void;
   isOpen: boolean;
-  data: Transaction;
+  data?: Transaction;
   categories: Category[];
 };
 
@@ -21,6 +21,8 @@ export function TransactionSheet({
   categories,
 }: TransactionSheetProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  if (!data) return <></>;
 
   if (isDesktop) {
     return (
