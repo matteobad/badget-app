@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Provider } from "~/server/db/schema/enum";
 import {
   bankAccounts,
+  bankTransactions,
   categories,
   categoryBudgets,
 } from "~/server/db/schema/open-banking";
@@ -94,6 +95,15 @@ export const createBankAccountSchema = createInsertSchema(bankAccounts).pick({
   name: true,
   balance: true,
   currency: true,
+});
+
+// Transaction
+export const editBankTransactionSchema = createInsertSchema(
+  bankTransactions,
+).pick({
+  categoryId: true,
+  description: true,
+  amount: true,
 });
 
 // Category

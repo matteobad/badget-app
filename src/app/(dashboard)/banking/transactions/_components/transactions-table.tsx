@@ -7,7 +7,6 @@ import type {
   VisibilityState,
 } from "@tanstack/react-table";
 import * as React from "react";
-import Image from "next/image";
 import {
   flexRender,
   getCoreRowModel,
@@ -17,19 +16,17 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
+import { ArrowUpDown, ChevronDown } from "lucide-react";
+import { useQueryState } from "nuqs";
 
+import type { getUserTransactions } from "~/server/db/queries/cached-queries";
+import { TransactionSheet } from "~/components/sheets/transaction-sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
@@ -42,12 +39,14 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { cn, euroFormat } from "~/lib/utils";
-import { deleteCategoryAction } from "~/server/actions/insert-category-action";
-import { type getUserTransactions } from "~/server/db/queries/cached-queries";
+import { getUserCategories } from "~/server/db/queries/cached-queries";
+import { categories } from "~/server/db/schema/open-banking";
 
 export type Transaction = Awaited<
   ReturnType<typeof getUserTransactions>
 >[number];
+
+export type Category = Awaited<ReturnType<typeof getUserCategories>>[number];
 
 export const columns: ColumnDef<Transaction>[] = [
   {
@@ -73,7 +72,12 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "description",
     header: "Descrizione",
     cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("description")}</div>
+      <div className="flex flex-col">
+        <span>{row.original.name}</span>
+        <span className="text-xs text-slate-500">
+          {row.original.description}
+        </span>
+      </div>
     ),
   },
   {
@@ -81,13 +85,6 @@ export const columns: ColumnDef<Transaction>[] = [
     header: "Categoria",
     cell: ({ row }) => (
       <div className="lowercase">{row.getValue("category")}</div>
-    ),
-  },
-  {
-    accessorKey: "amount",
-    header: "Importo",
-    cell: ({ row }) => (
-      <div className="lowercase">{euroFormat(row.getValue("amount"))}</div>
     ),
   },
   {
@@ -112,53 +109,31 @@ export const columns: ColumnDef<Transaction>[] = [
     },
   },
   {
-    id: "actions",
-    header: "Azioni",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const transaction = row.original;
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const { execute, isExecuting } = useAction(deleteCategoryAction, {
-        onError: console.error,
-        onSuccess: (_data) => {
-          toast.success("Categoria eliminata");
-        },
-      });
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => execute({ categoryId: transaction.id })}
-            >
-              Modifica
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              disabled={isExecuting}
-              onClick={() => execute({ categoryId: transaction.id })}
-            >
-              Elimina
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    accessorKey: "amount",
+    header: "Importo",
+    cell: ({ row }) => (
+      <div className="lowercase">{euroFormat(row.getValue("amount"))}</div>
+    ),
   },
 ];
 
-export function TransactionsTable({ data }: { data: Transaction[] }) {
+export function TransactionsTable({
+  data,
+  categories,
+}: {
+  data: Transaction[];
+  categories: Category[];
+}) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
+
+  const [transactionId, setTransactionId] = useQueryState("id");
+  const selectedTransaction = data.find(
+    (transaction) => transaction.transactionId === transactionId,
+  );
+
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
 
@@ -179,14 +154,24 @@ export function TransactionsTable({ data }: { data: Transaction[] }) {
     },
   });
 
+  const setOpen = (id: string) => {
+    if (id) {
+      void setTransactionId(id);
+    } else {
+      void setTransactionId(null);
+    }
+  };
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
           placeholder="Cerca transazioni..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          value={
+            (table.getColumn("description")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn("description")?.setFilterValue(event.target.value)
           }
           className="max-w-xs"
         />
@@ -256,6 +241,7 @@ export function TransactionsTable({ data }: { data: Transaction[] }) {
                         "text-right": cell.id.includes("amount"),
                         "pr-9 text-right": cell.id.includes("actions"),
                       })}
+                      onClick={() => setOpen(row.original.transactionId!)}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -301,6 +287,13 @@ export function TransactionsTable({ data }: { data: Transaction[] }) {
             </Button>
           </div>
         </div>
+
+        <TransactionSheet
+          isOpen={Boolean(transactionId)}
+          setOpen={setOpen}
+          data={selectedTransaction!}
+          categories={categories}
+        />
       </div>
     </div>
   );

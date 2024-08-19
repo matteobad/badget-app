@@ -3,10 +3,11 @@ import { eq } from "drizzle-orm";
 import { type z } from "zod";
 
 import type { CategoryType } from "../schema/enum";
-import {
-  type createBankAccountSchema,
-  type insertCategorySchema,
+import type {
+  createBankAccountSchema,
+  insertCategorySchema,
 } from "~/lib/validators";
+import { editBankTransactionSchema } from "~/lib/validators";
 import { getAccessValidForDays } from "~/server/providers/gocardless/utils";
 import { db, schema } from "..";
 import { ConnectionStatus, Provider } from "../schema/enum";
@@ -152,6 +153,20 @@ export async function createBankAccount({
         currency,
       },
     });
+}
+
+type EditTransactionPayload = z.infer<typeof editBankTransactionSchema>;
+
+export async function editBankTransaction({
+  categoryId,
+  amount,
+  description,
+}: EditTransactionPayload) {
+  return await db.update(schema.bankTransactions).set({
+    categoryId,
+    amount,
+    description,
+  });
 }
 
 type InsertCategoryPayload = z.infer<typeof insertCategorySchema> & {
