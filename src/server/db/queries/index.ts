@@ -31,13 +31,37 @@ export type GetTransactionsParams = {
 export async function getTransactionsQuery(params: GetTransactionsParams) {
   const { userId } = params;
 
-  const date = await db
+  // NOTE: used only for institution logo. Remove in the future
+  const bankConnections = await db
+    .select()
+    .from(schema.bankConnections)
+    .where(eq(schema.bankConnections.userId, userId));
+
+  const data = await db
     .select()
     .from(schema.bankTransactions)
     .where(eq(schema.bankTransactions.userId, userId))
+    .leftJoin(
+      schema.bankAccounts,
+      eq(schema.bankTransactions.accountId, schema.bankAccounts.accountId),
+    )
+    .limit(10)
     .orderBy(desc(schema.bankTransactions.date));
 
-  return date;
+  return data.map((item) => {
+    const connection = bankConnections.find(
+      (bc) => bc.id === item.bank_accounts?.bankConnectionId,
+    );
+
+    return {
+      ...item.bank_transactions,
+      bankAccount: {
+        institution: connection?.name,
+        logoUrl: connection?.logoUrl,
+        name: item.bank_accounts?.name,
+      },
+    };
+  });
 }
 
 export type GetCategoriesParams = {

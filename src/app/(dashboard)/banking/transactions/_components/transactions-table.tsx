@@ -6,8 +6,8 @@ import type {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table";
-import type dynamicIconImports from "lucide-react/dynamicIconImports";
 import * as React from "react";
+import Image from "next/image";
 import {
   flexRender,
   getCoreRowModel,
@@ -21,6 +21,7 @@ import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -90,11 +91,32 @@ export const columns: ColumnDef<Transaction>[] = [
     ),
   },
   {
+    accessorKey: "bankAccount",
+    header: "Conto",
+    cell: ({ row }) => {
+      const { bankAccount } = row.original;
+      return (
+        <div className="flex items-center gap-2">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={bankAccount.logoUrl ?? ""} />
+            <AvatarFallback>M</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span>{bankAccount.name}</span>
+            <span className="text-xs text-slate-500">
+              {bankAccount.institution}
+            </span>
+          </div>
+        </div>
+      );
+    },
+  },
+  {
     id: "actions",
     header: "Azioni",
     enableHiding: false,
     cell: ({ row }) => {
-      const category = row.original;
+      const transaction = row.original;
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const { execute, isExecuting } = useAction(deleteCategoryAction, {
         onError: console.error,
@@ -115,13 +137,13 @@ export const columns: ColumnDef<Transaction>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => execute({ categoryId: category.id })}
+              onClick={() => execute({ categoryId: transaction.id })}
             >
               Modifica
             </DropdownMenuItem>
             <DropdownMenuItem
               disabled={isExecuting}
-              onClick={() => execute({ categoryId: category.id })}
+              onClick={() => execute({ categoryId: transaction.id })}
             >
               Elimina
             </DropdownMenuItem>

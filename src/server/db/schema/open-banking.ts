@@ -119,7 +119,7 @@ export const bankTransactions = createTable("bank_transactions", {
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 
   // FK
-  accountId: varchar("account_id"),
+  accountId: integer("account_id"),
   categoryId: integer("category_id"),
   userId: varchar("user_id", { length: 128 }).notNull(),
 
