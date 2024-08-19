@@ -4,7 +4,6 @@ import Topbar from "../_components/topbar";
 const bankingTopbarItems = [
   { title: "Overview", href: "/banking" },
   { title: "Transazioni", href: "/banking/transactions" },
-  { title: "Categorie", href: "/banking/categories" },
 ] satisfies TopbarItem[];
 
 export default async function DashboardLayout(props: {

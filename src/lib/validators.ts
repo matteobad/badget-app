@@ -110,8 +110,10 @@ export const editBankTransactionSchema = createInsertSchema(
 export const insertCategorySchema = createInsertSchema(categories)
   .pick({
     name: true,
-    type: true,
     icon: true,
+    color: true,
+    macro: true,
+    type: true,
   })
   .merge(
     createInsertSchema(categoryBudgets).pick({

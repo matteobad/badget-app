@@ -119,7 +119,7 @@ export const bankTransactions = createTable("bank_transactions", {
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 
   // FK
-  accountId: integer("account_id"),
+  accountId: varchar("account_id"),
   categoryId: integer("category_id"),
   userId: varchar("user_id", { length: 128 }).notNull(),
 
@@ -161,9 +161,11 @@ export const categories = createTable("categories", {
   // FK
   userId: varchar("user_id", { length: 128 }).notNull(),
 
-  name: varchar("name", { length: 64 }).notNull(),
-  type: text("type").$type<CategoryType>().notNull(),
+  color: varchar("color", { length: 32 }),
   icon: varchar("icon", { length: 32 }),
+  name: varchar("name", { length: 64 }).notNull(),
+  macro: varchar("macro", { length: 64 }).notNull(),
+  type: text("type").$type<CategoryType>().notNull(),
   manual: boolean("manual").default(true),
 });
 

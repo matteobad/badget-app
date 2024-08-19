@@ -16,13 +16,7 @@ export function SettingsTopbarNav({
   ...props
 }: TopbarNavProps) {
   return (
-    <nav
-      className={cn(
-        "flex flex-row space-x-2 pt-1.5 lg:flex-col lg:space-x-0 lg:space-y-1",
-        className,
-      )}
-      {...props}
-    >
+    <nav className={cn("flex flex-row space-x-2 pt-1.5", className)} {...props}>
       <AnimatedBackground
         defaultValue={items[0]?.href}
         className="rounded-lg bg-slate-100 dark:bg-slate-800"

@@ -57,7 +57,7 @@ export default function MoneyInput(props: TextInputProps) {
         const _change = field.onChange;
 
         return (
-          <FormItem>
+          <FormItem className="flex-1">
             <FormLabel>{props.label}</FormLabel>
             <FormControl>
               <div className="relative">

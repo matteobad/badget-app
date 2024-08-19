@@ -2,19 +2,31 @@
 
 import type dynamicIconImports from "lucide-react/dynamicIconImports";
 import type z from "zod";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryState } from "nuqs";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
+import { cn } from "~/lib/utils";
 import { insertCategorySchema } from "~/lib/validators";
 import { insertCategoryAction } from "~/server/actions/insert-category-action";
 import { BudgetPeriod, CategoryType } from "~/server/db/schema/enum";
+import { InputColor } from "../color-input";
 import MoneyInput from "../custom/money-input";
 import Icon from "../icons";
 import { Button } from "../ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../ui/command";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +43,6 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   Select,
@@ -43,10 +54,14 @@ import {
 
 const CATEGORY_ICONS = ["link"] as const;
 
-export function AddCategoryModal() {
+export function AddCategoryModal({ categories }: { categories: Category[] }) {
+  const [macroSearch, setMacroSearch] = useState("");
+
   const [step, setStep] = useQueryState("step", parseAsString);
 
   const isOpen = step === "insert";
+
+  const macros = categories.map((category) => category.macro);
 
   const onClose = () => {
     void setStep(null);
@@ -71,7 +86,8 @@ export function AddCategoryModal() {
     mode: "onChange",
     defaultValues: {
       name: "",
-      type: CategoryType.CATEGORY_BUDGETS,
+      macro: CategoryType.OUTCOME.toLowerCase(),
+      type: CategoryType.OUTCOME,
       icon: "circle-dashed",
     },
   });
@@ -91,7 +107,7 @@ export function AddCategoryModal() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(execute)}
-            className="scrollbar-hide relative overflow-auto"
+            className="flex flex-col space-y-4"
           >
             <div className="flex items-end">
               <FormField
@@ -115,7 +131,7 @@ export function AddCategoryModal() {
                             />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-80">
+                        <PopoverContent className="w-80" align="start">
                           <div className="grid gap-4">
                             <div className="space-y-2">
                               <h4 className="font-medium leading-none">
@@ -158,13 +174,89 @@ export function AddCategoryModal() {
                       Nome della categoria
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Holidays"
-                        {...field}
-                        className="rounded-l-none rounded-r-none border-l-0 border-r-0"
+                      <InputColor
+                        autoFocus
+                        placeholder="Viaggi"
+                        onChange={({ name, color }) => {
+                          field.onChange(name);
+                          form.setValue("color", color);
+                        }}
+                        defaultValue={field.value}
+                        defaultColor={form.watch("color")}
                       />
                     </FormControl>
                     <FormDescription />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex items-end gap-4">
+              <FormField
+                control={form.control}
+                name="macro"
+                render={({ field }) => (
+                  <FormItem className="flex-1 flex-col">
+                    <FormLabel>Macro Categoria</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              "w-full justify-between",
+                              !field.value && "text-muted-foreground",
+                            )}
+                          >
+                            {field.value || "Seleziona gruppo"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px] p-0">
+                        <Command>
+                          <CommandInput
+                            placeholder="Cerca gruppo..."
+                            onValueChange={setMacroSearch}
+                          />
+                          <CommandList>
+                            <CommandEmpty>
+                              <Button
+                                className="w-full"
+                                variant="ghost"
+                                onClick={() =>
+                                  form.setValue("macro", macroSearch)
+                                }
+                              >
+                                Crea '{macroSearch}'
+                              </Button>
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {macros.map((macro) => (
+                                <CommandItem
+                                  value={macro}
+                                  key={macro}
+                                  onSelect={() => {
+                                    form.setValue("macro", macro);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      macro === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0",
+                                    )}
+                                  />
+                                  {macro}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -173,15 +265,15 @@ export function AddCategoryModal() {
                 control={form.control}
                 name="type"
                 render={({ field }) => (
-                  <FormItem className="flex-1 self-start">
-                    <FormLabel>&nbsp;</FormLabel>
+                  <FormItem className="flex-1">
+                    <FormLabel>Tipo</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="rounded-l-none">
-                          <SelectValue placeholder="Select a verified email to display" />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Outcome" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -199,7 +291,7 @@ export function AddCategoryModal() {
                 )}
               />
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-end gap-4">
               <FormField
                 control={form.control}
                 name="period"
