@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import AnimatedBackground from "~/components/custom/animated-background";
 import { cn } from "~/lib/utils";
@@ -15,11 +18,16 @@ export function SettingsTopbarNav({
   items,
   ...props
 }: TopbarNavProps) {
+  const pathname = usePathname();
+
   return (
-    <nav className={cn("flex flex-row space-x-2 pt-1.5", className)} {...props}>
+    <nav
+      className={cn("flex w-fit flex-row space-x-2 pt-1.5", className)}
+      {...props}
+    >
       <AnimatedBackground
         defaultValue={items[0]?.href}
-        className="rounded-lg bg-slate-100 dark:bg-slate-800"
+        className="rounded bg-slate-200 dark:bg-slate-800"
         transition={{
           type: "spring",
           bounce: 0.2,
@@ -34,8 +42,12 @@ export function SettingsTopbarNav({
             href={item.href}
             type="button"
             className={cn(
-              "p-2 py-0.5 text-slate-600 transition-colors duration-300 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50",
-              { "underline underline-offset-[12px]": index === 0 },
+              "p-2 py-0.5 text-base font-light text-slate-600 transition-colors duration-300 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50",
+              {
+                "underline underline-offset-[12px]": pathname.includes(
+                  item.href,
+                ),
+              },
             )}
           >
             {item.title}

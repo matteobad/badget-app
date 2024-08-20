@@ -3,7 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboardIcon } from "lucide-react";
+import { LayoutDashboardIcon, SettingsIcon } from "lucide-react";
 
 import { sidebarItems } from "~/app/config";
 import { Button, buttonVariants } from "~/components/ui/button";
@@ -78,6 +78,16 @@ export function Sidebar() {
               />
             );
           })}
+        </div>
+      </div>
+      <div className="px-3 py-2">
+        <div className="space-y-1">
+          <SidebarItem
+            icon={SettingsIcon}
+            title={"Impostazioni"}
+            link={"/settings/accounts"}
+            variant={pathname.includes("settings") ? "secondary" : "ghost"}
+          />
         </div>
       </div>
     </div>
