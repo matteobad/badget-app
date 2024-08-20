@@ -1,11 +1,11 @@
-import { addDays } from "date-fns";
-import { eq } from "drizzle-orm";
+import { addDays, startOfMonth, startOfYear, subYears } from "date-fns";
+import { and, eq } from "drizzle-orm";
 import { type z } from "zod";
 
-import type { CategoryType } from "../schema/enum";
+import type { BudgetPeriod, CategoryType } from "../schema/enum";
 import type {
   createBankAccountSchema,
-  insertCategorySchema,
+  upsertCategorySchema,
 } from "~/lib/validators";
 import { editBankTransactionSchema } from "~/lib/validators";
 import { getAccessValidForDays } from "~/server/providers/gocardless/utils";
@@ -169,40 +169,90 @@ export async function editBankTransaction({
   });
 }
 
-type InsertCategoryPayload = z.infer<typeof insertCategorySchema> & {
+type InsertCategoryPayload = z.infer<typeof upsertCategorySchema> & {
   userId: string;
 };
 
 export async function insertCategory({
   name,
+  macro,
   type,
   icon,
+  color,
+  budgets,
   userId,
 }: InsertCategoryPayload) {
-  return await db
-    .insert(schema.categories)
-    .values({
-      name,
-      type: type as CategoryType,
-      icon,
-      userId,
-    })
-    .onConflictDoUpdate({
-      target: schema.categories.id,
-      set: {
+  return await db.transaction(async (tx) => {
+    const inserted = await tx
+      .insert(schema.categories)
+      .values({
         name,
+        macro,
         type: type as CategoryType,
         icon,
-      },
+        color,
+        userId,
+      })
+      .onConflictDoUpdate({
+        target: [schema.categories.userId, schema.categories.name],
+        set: {
+          macro,
+          type: type as CategoryType,
+          icon,
+          color,
+        },
+      })
+      .returning({ insertedId: schema.categories.id });
+
+    if (!inserted[0]?.insertedId) return tx.rollback();
+
+    await tx.insert(schema.categoryBudgets).values({
+      budget: budgets[0]?.budget,
+      period: budgets[0]?.period as BudgetPeriod,
+      activeFrom: startOfYear(subYears(new Date(), 2)), // first budget should compreend everything
+      categoryId: inserted[0].insertedId,
+      userId: userId,
     });
+  });
 }
 
 type DeleteCategoryPayload = {
   categoryId: number;
+  userId: string;
 };
 
-export async function deleteCategory({ categoryId }: DeleteCategoryPayload) {
-  return await db
-    .delete(schema.categories)
-    .where(eq(schema.categories.id, categoryId));
+export async function deleteCategory({
+  categoryId,
+  userId,
+}: DeleteCategoryPayload) {
+  return await db.transaction(async (tx) => {
+    await tx
+      .delete(schema.categoryBudgets)
+      .where(eq(schema.categoryBudgets.categoryId, categoryId));
+
+    const defaultCategory = await tx
+      .select({
+        id: schema.categories.id,
+      })
+      .from(schema.categories)
+      .where(
+        and(
+          eq(schema.categories.userId, userId),
+          eq(schema.categories.name, "uncategorized"),
+        ),
+      );
+
+    if (!defaultCategory[0]?.id) return tx.rollback();
+
+    await tx
+      .update(schema.bankTransactions)
+      .set({
+        categoryId: defaultCategory[0].id,
+      })
+      .where(eq(schema.bankTransactions.categoryId, categoryId));
+
+    await tx
+      .delete(schema.categories)
+      .where(eq(schema.categories.id, categoryId));
+  });
 }

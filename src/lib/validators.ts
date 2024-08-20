@@ -107,7 +107,10 @@ export const editBankTransactionSchema = createInsertSchema(
 });
 
 // Category
-export const insertCategorySchema = createInsertSchema(categories)
+export const upsertCategorySchema = createInsertSchema(categories, {
+  name: (schema) => schema.name.toLowerCase(),
+  macro: (schema) => schema.macro.toLowerCase(),
+})
   .pick({
     name: true,
     icon: true,
@@ -115,12 +118,15 @@ export const insertCategorySchema = createInsertSchema(categories)
     macro: true,
     type: true,
   })
-  .merge(
-    createInsertSchema(categoryBudgets).pick({
-      budget: true,
-      period: true,
-    }),
-  );
+  .extend({
+    budgets: z.array(
+      createInsertSchema(categoryBudgets).pick({
+        budget: true,
+        period: true,
+        activeFrom: true,
+      }),
+    ),
+  });
 
 export const deleteCategorySchema = z.object({
   categoryId: z.number(),

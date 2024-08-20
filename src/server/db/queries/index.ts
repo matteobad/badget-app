@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, gte, lt } from "drizzle-orm";
 
 import { db, schema } from "..";
 
@@ -71,11 +71,22 @@ export type GetCategoriesParams = {
 export async function getCategoriesQuery(params: GetCategoriesParams) {
   const { userId } = params;
 
-  const data = await db
-    .select()
-    .from(schema.categories)
-    .where(eq(schema.categories.userId, userId))
-    .orderBy(desc(schema.categories.manual));
+  const data = await db.query.categories.findMany({
+    with: {
+      budgets: {
+        columns: {
+          budget: true,
+          period: true,
+          activeFrom: true,
+        },
+        where: lt(schema.categoryBudgets.activeFrom, new Date()),
+        orderBy: desc(schema.categoryBudgets.activeFrom),
+        limit: 1,
+      },
+    },
+    where: eq(schema.categories.userId, userId),
+    orderBy: desc(schema.categories.manual),
+  });
 
   return data;
 }

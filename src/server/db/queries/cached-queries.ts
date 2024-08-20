@@ -81,10 +81,10 @@ export const getUserCategories = async (
     async () => {
       return getCategoriesQuery({ ...params, userId: session.userId });
     },
-    ["categories", session.userId],
+    ["bank_categories_", session.userId],
     {
       revalidate: 180,
-      tags: [`categories_${session.userId}`],
+      tags: [`bank_categories_${session.userId}`],
     },
   )();
 };

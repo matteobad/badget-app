@@ -7,6 +7,7 @@ import type {
 } from "@tanstack/react-table";
 import type dynamicIconImports from "lucide-react/dynamicIconImports";
 import * as React from "react";
+import { useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -14,8 +15,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useQueryState } from "nuqs";
 
 import Icon from "~/components/icons";
+import { CategorySheet } from "~/components/sheets/category-sheet";
 import { Badge } from "~/components/ui/badge";
 import { Input } from "~/components/ui/input";
 import {
@@ -26,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { cn } from "~/lib/utils";
+import { cn, euroFormat } from "~/lib/utils";
 import { type getUserCategories } from "~/server/db/queries/cached-queries";
 
 export type Category = Awaited<ReturnType<typeof getUserCategories>>[number];
@@ -61,13 +64,32 @@ export const columns: ColumnDef<Category>[] = [
       </div>
     ),
   },
+  {
+    accessorKey: "budgets",
+    header: "Budget",
+    cell: ({ row }) => {
+      const budget = row.original.budgets[0];
+
+      if (!budget) return "No Budget";
+
+      return (
+        <div className="flex flex-col text-right capitalize">
+          <span>{euroFormat(budget.budget ?? 0)}</span>
+          <div className="text-xs lowercase text-slate-500">
+            {budget.period}
+          </div>
+        </div>
+      );
+    },
+  },
 ];
 
 export function CategoryTable({ data }: { data: Category[] }) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const [categoryId, setCategoryId] = useQueryState("id");
+  const setOpen = setCategoryId;
 
   const table = useReactTable({
     data,
@@ -105,8 +127,7 @@ export function CategoryTable({ data }: { data: Category[] }) {
                     <TableHead
                       key={header.id}
                       className={cn({
-                        "pr-9 text-right": header.id === "actions",
-                        "pl-0": header.id === "type",
+                        "pr-9 text-right": header.id === "budgets",
                         "pl-9": header.id === "name",
                       })}
                     >
@@ -125,12 +146,15 @@ export function CategoryTable({ data }: { data: Category[] }) {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  onClick={() => setCategoryId(row.original.id.toString())}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
                       className={cn({
-                        "pr-9 text-right": cell.id.includes("actions"),
+                        "pr-9 text-right": cell.id.includes("budgets"),
                         "pl-9": cell.id.includes("name"),
                       })}
                     >
@@ -157,6 +181,13 @@ export function CategoryTable({ data }: { data: Category[] }) {
         <div className="mt-4 w-full text-center text-sm font-light text-slate-500">
           Hai {data.length} categorie in totale
         </div>
+
+        <CategorySheet
+          isOpen={Boolean(categoryId)}
+          setOpen={setOpen}
+          id={categoryId}
+          categories={data}
+        />
       </div>
     </div>
   );

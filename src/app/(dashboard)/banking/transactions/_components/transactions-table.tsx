@@ -40,7 +40,6 @@ import {
 } from "~/components/ui/table";
 import { cn, euroFormat } from "~/lib/utils";
 import { getUserCategories } from "~/server/db/queries/cached-queries";
-import { categories } from "~/server/db/schema/open-banking";
 
 export type Transaction = Awaited<
   ReturnType<typeof getUserTransactions>

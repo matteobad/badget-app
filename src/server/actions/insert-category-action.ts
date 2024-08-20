@@ -3,23 +3,24 @@
 import { revalidateTag } from "next/cache";
 
 import { authActionClient } from "~/lib/safe-action";
-import { deleteCategorySchema, insertCategorySchema } from "~/lib/validators";
+import { deleteCategorySchema, upsertCategorySchema } from "~/lib/validators";
 import { deleteCategory, insertCategory } from "../db/mutations";
 
 export const insertCategoryAction = authActionClient
-  .schema(insertCategorySchema)
+  .schema(upsertCategorySchema)
   .action(
     async ({
-      parsedInput: { name, type, period, budget, icon },
+      parsedInput: { name, macro, type, budgets, icon, color },
       ctx: { userId },
     }) => {
       await insertCategory({
         name,
+        macro,
         type,
         userId: userId,
-        period,
-        budget,
+        budgets,
         icon,
+        color,
       });
 
       revalidateTag(`bank_categories_${userId}`);
@@ -31,6 +32,7 @@ export const deleteCategoryAction = authActionClient
   .action(async ({ parsedInput: { categoryId }, ctx: { userId } }) => {
     await deleteCategory({
       categoryId: Number(categoryId),
+      userId,
     });
 
     revalidateTag(`bank_categories_${userId}`);

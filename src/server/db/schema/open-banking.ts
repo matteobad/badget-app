@@ -151,23 +151,30 @@ export const bankTransactionsRelations = relations(
   }),
 );
 
-export const categories = createTable("categories", {
-  id: serial("id").primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }),
+export const categories = createTable(
+  "categories",
+  {
+    id: serial("id").primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
 
-  // FK
-  userId: varchar("user_id", { length: 128 }).notNull(),
+    // FK
+    userId: varchar("user_id", { length: 128 }).notNull(),
 
-  color: varchar("color", { length: 32 }),
-  icon: varchar("icon", { length: 32 }),
-  name: varchar("name", { length: 64 }).notNull(),
-  macro: varchar("macro", { length: 64 }).notNull(),
-  type: text("type").$type<CategoryType>().notNull(),
-  manual: boolean("manual").default(true),
-});
+    color: varchar("color", { length: 32 }),
+    icon: varchar("icon", { length: 32 }),
+    name: varchar("name", { length: 64 }).notNull(),
+    macro: varchar("macro", { length: 64 }).notNull(),
+    type: text("type").$type<CategoryType>().notNull(),
+    manual: boolean("manual").default(true),
+  },
+  (t) => ({
+    userId_name_unq: unique().on(t.userId, t.name),
+    userId_macro_unq: unique().on(t.userId, t.macro),
+  }),
+);
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
   transactions: many(bankTransactions),
@@ -185,9 +192,9 @@ export const categoryBudgets = createTable("category_budgets", {
   userId: varchar("user_id", { length: 128 }).notNull(),
   categoryId: integer("category_id").notNull(),
 
-  budget: decimal("budget").default("0"),
+  budget: decimal("budget").default("0").notNull(),
   period: text("period").$type<BudgetPeriod>().notNull(),
-  active_at: timestamp("active_at", { withTimezone: true }).notNull(),
+  activeFrom: timestamp("active_from", { withTimezone: true }).notNull(),
 });
 
 export const categoryBudgetsRelations = relations(
