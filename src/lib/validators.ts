@@ -112,6 +112,7 @@ export const upsertCategorySchema = createInsertSchema(categories, {
   macro: (schema) => schema.macro.toLowerCase(),
 })
   .pick({
+    id: true,
     name: true,
     icon: true,
     color: true,
@@ -127,6 +128,30 @@ export const upsertCategorySchema = createInsertSchema(categories, {
       }),
     ),
   });
+
+export const updateCategorySchema = createInsertSchema(categories, {
+  name: (schema) => schema.name.toLowerCase(),
+  macro: (schema) => schema.macro.toLowerCase(),
+}).pick({
+  id: true,
+  name: true,
+  icon: true,
+  color: true,
+  macro: true,
+  type: true,
+});
+
+export const upsertCategoryBudgetSchema = z.object({
+  budgets: z.array(
+    createInsertSchema(categoryBudgets).pick({
+      id: true,
+      budget: true,
+      period: true,
+      activeFrom: true,
+      categoryId: true,
+    }),
+  ),
+});
 
 export const deleteCategorySchema = z.object({
   categoryId: z.number(),

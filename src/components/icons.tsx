@@ -2,6 +2,9 @@ import dynamic from "next/dynamic";
 import { type LucideProps } from "lucide-react";
 import dynamicIconImports from "lucide-react/dynamicIconImports";
 
+import { cn } from "~/lib/utils";
+import { Skeleton } from "./ui/skeleton";
+
 export type Icon = (props: LucideProps) => JSX.Element;
 
 export const System: Icon = (props) => (
@@ -19,7 +22,9 @@ interface IconProps extends LucideProps {
 }
 
 const Icon = ({ name, ...props }: IconProps) => {
-  const LucideIcon = dynamic(dynamicIconImports[name]);
+  const LucideIcon = dynamic(dynamicIconImports[name], {
+    loading: () => <Skeleton className={cn(props.className, "rounded-full")} />,
+  });
 
   return <LucideIcon {...props} />;
 };

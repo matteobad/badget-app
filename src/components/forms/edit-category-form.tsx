@@ -4,30 +4,18 @@ import type dynamicIconImports from "lucide-react/dynamicIconImports";
 import type z from "zod";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
 import { cn } from "~/lib/utils";
-import { upsertCategorySchema } from "~/lib/validators";
-import {
-  deleteCategoryAction,
-  insertCategoryAction,
-} from "~/server/actions/insert-category-action";
-import { BudgetPeriod, CategoryType } from "~/server/db/schema/enum";
+import { updateCategorySchema } from "~/lib/validators";
+import { editCategoryAction } from "~/server/actions/insert-category-action";
+import { CategoryType } from "~/server/db/schema/enum";
 import { InputColor } from "../color-input";
-import MoneyInput from "../custom/money-input";
 import Icon from "../icons";
-import MonthPicker from "../month-picker";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../ui/accordion";
 import { Button } from "../ui/button";
 import {
   Command,
@@ -69,7 +57,7 @@ export function EditCategoryForm({
   const macros = categories.map((category) => category.macro);
   const category = categories.find((c) => c.id.toString() === id);
 
-  const { execute, status } = useAction(insertCategoryAction, {
+  const updateAction = useAction(editCategoryAction, {
     onError: () => {
       toast.error("Something went wrong please try again.", {
         duration: 3500,
@@ -77,28 +65,14 @@ export function EditCategoryForm({
     },
     onSuccess: () => {
       // TODO: close sheet
-      toast.success("Categoria creata!", {
+      toast.success("Categoria aggiornata!", {
         duration: 3500,
       });
     },
   });
 
-  const deleteAction = useAction(deleteCategoryAction, {
-    onError: () => {
-      toast.error("Something went wrong please try again.", {
-        duration: 3500,
-      });
-    },
-    onSuccess: () => {
-      // TODO: close sheet
-      toast.success("Categoria eliminata!", {
-        duration: 3500,
-      });
-    },
-  });
-
-  const form = useForm<z.infer<typeof upsertCategorySchema>>({
-    resolver: zodResolver(upsertCategorySchema),
+  const form = useForm<z.infer<typeof updateCategorySchema>>({
+    resolver: zodResolver(updateCategorySchema),
     mode: "onChange",
     defaultValues: {
       ...category,
@@ -108,8 +82,8 @@ export function EditCategoryForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(execute)}
-        className="flex flex-col space-y-4"
+        onSubmit={form.handleSubmit(updateAction.execute)}
+        className="flex flex-col space-y-2"
       >
         <div className="flex items-end">
           <FormField
@@ -147,7 +121,9 @@ export function EditCategoryForm({
                                 key={index}
                                 variant="outline"
                                 size="icon"
-                                onClick={() => form.setValue("icon", icon)}
+                                onClick={() => {
+                                  form.setValue("icon", icon);
+                                }}
                               >
                                 <Icon name={icon} className="h-4 w-4" />
                               </Button>
@@ -221,7 +197,9 @@ export function EditCategoryForm({
                           <Button
                             className="w-full"
                             variant="ghost"
-                            onClick={() => form.setValue("macro", macroSearch)}
+                            onClick={() => {
+                              form.setValue("macro", macroSearch);
+                            }}
                           >
                             Crea '{macroSearch}'
                           </Button>
@@ -262,7 +240,9 @@ export function EditCategoryForm({
               <FormItem className="flex-1">
                 <FormLabel>Tipo</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
+                  onValueChange={(e) => {
+                    field.onChange(e);
+                  }}
                   defaultValue={field.value}
                 >
                   <FormControl>
@@ -286,99 +266,20 @@ export function EditCategoryForm({
           />
         </div>
 
-        <Accordion type="multiple" className="w-full">
-          <AccordionItem value="item-1">
-            <AccordionTrigger>Budgets</AccordionTrigger>
-            <AccordionContent>
-              {category?.budgets.map((_budget, index) => {
-                return (
-                  <div className="flex items-end gap-4" key={index}>
-                    <FormField
-                      control={form.control}
-                      name={`budgets.${index}.activeFrom`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormLabel>Da</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="outline">
-                                {format(field.value, "LLL yyyy")}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-60" align="start">
-                              <MonthPicker
-                                currentMonth={field.value}
-                                onMonthChange={(from) => {
-                                  field.onChange(from);
-                                  form.setValue(
-                                    `budgets.${index}.activeFrom`,
-                                    from,
-                                  );
-                                }}
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`budgets.${index}.period`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormLabel>Periodo</FormLabel>
-                          <Select
-                            onValueChange={(period) => {
-                              field.onChange(period);
-                              form.setValue(`budgets.${index}.period`, period);
-                            }}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleziona un periodo" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {Object.values(BudgetPeriod).map(
-                                (period, index) => {
-                                  return (
-                                    <SelectItem value={period} key={index}>
-                                      {period}
-                                    </SelectItem>
-                                  );
-                                },
-                              )}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <MoneyInput
-                      form={form}
-                      label="Budget"
-                      name={`budgets.${index}.budget`}
-                      placeholder="100"
-                    />
-                  </div>
-                );
-              })}
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="item-2">
-            <AccordionTrigger>Danger Zone</AccordionTrigger>
-            <AccordionContent>
-              <Button
-                variant="destructive"
-                onClick={() => deleteAction.execute({ categoryId: Number(id) })}
-              >
-                Elimina Categoria
-              </Button>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <div className="flex justify-end pt-6">
+          <Button
+            type="submit"
+            disabled={
+              updateAction.status === "executing" || !form.formState.isDirty
+            }
+          >
+            {updateAction.status === "executing" ? (
+              <Loader2 className="pointer-events-none h-4 w-4 animate-spin" />
+            ) : (
+              "Aggiorna Categoria"
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );

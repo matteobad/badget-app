@@ -78,6 +78,7 @@ export async function getCategoriesQuery(params: GetCategoriesParams) {
           budget: true,
           period: true,
           activeFrom: true,
+          categoryId: true,
         },
         where: lt(schema.categoryBudgets.activeFrom, new Date()),
         orderBy: desc(schema.categoryBudgets.activeFrom),

@@ -1,10 +1,12 @@
 import { addDays, startOfMonth, startOfYear, subYears } from "date-fns";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, or, sql, SQL } from "drizzle-orm";
 import { type z } from "zod";
 
 import type { BudgetPeriod, CategoryType } from "../schema/enum";
 import type {
   createBankAccountSchema,
+  updateCategorySchema,
+  upsertCategoryBudgetSchema,
   upsertCategorySchema,
 } from "~/lib/validators";
 import { editBankTransactionSchema } from "~/lib/validators";
@@ -214,6 +216,68 @@ export async function insertCategory({
       userId: userId,
     });
   });
+}
+
+type EditCategoryPayload = z.infer<typeof updateCategorySchema> & {
+  userId: string;
+};
+
+export async function editCategory({
+  id,
+  name,
+  icon,
+  color,
+  macro,
+  type,
+  userId,
+}: EditCategoryPayload) {
+  await db
+    .update(schema.categories)
+    .set({
+      id,
+      name,
+      macro,
+      type: type as CategoryType,
+      icon,
+      color,
+    })
+    .where(
+      and(eq(schema.categories.id, id!), eq(schema.categories.userId, userId)),
+    );
+}
+
+type UpdateCategoryBudgetPayload = z.infer<
+  typeof upsertCategoryBudgetSchema
+> & {
+  userId: string;
+};
+
+export async function upsertCategoryBudget({
+  budgets,
+  userId,
+}: UpdateCategoryBudgetPayload) {
+  const updatedAt = new Date();
+
+  await db
+    .insert(schema.categoryBudgets)
+    .values(
+      budgets.map((budget) => {
+        return {
+          ...budget,
+          period: budget.period as BudgetPeriod,
+          userId,
+        };
+      }),
+    )
+    .onConflictDoUpdate({
+      target: schema.categoryBudgets.id,
+      set: {
+        budget: sql.raw(`excluded.${schema.categoryBudgets.budget}`),
+        period: sql.raw(`excluded.${schema.categoryBudgets.period}`),
+        activeFrom: sql.raw(`excluded.${schema.categoryBudgets.activeFrom}`),
+        updatedAt,
+      },
+    });
 }
 
 type DeleteCategoryPayload = {
