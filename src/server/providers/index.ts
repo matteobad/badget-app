@@ -26,26 +26,6 @@ export class Provider {
     }
   }
 
-  async getHealthCheck(
-    params: Omit<ProviderParams, "provider">,
-  ): Promise<GetHealthCheckResponse> {
-    const gocardless = new GoCardLessProvider(params);
-
-    try {
-      const [isGocardlessHealthy] = await Promise.all([
-        gocardless.getHealthCheck(),
-      ]);
-
-      return {
-        gocardless: {
-          healthy: isGocardlessHealthy,
-        },
-      };
-    } catch {
-      throw Error("Something went wrong");
-    }
-  }
-
   async getTransactions(params: GetTransactionsRequest) {
     logger(
       "getTransactions:",

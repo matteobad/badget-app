@@ -1,9 +1,14 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-import { Provider } from "~/server/db/schema/enum";
+import {
+  BankAccountType,
+  ConnectionStatus,
+  Provider,
+} from "~/server/db/schema/enum";
 import {
   bankAccounts,
+  bankConnections,
   bankTransactions,
   categories,
   categoryBudgets,
@@ -24,10 +29,6 @@ export type DateRange = {
 export const CreatePostSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   content: z.string().min(1, { message: "Content is required" }),
-});
-
-export const deletePostSchema = z.object({
-  id: z.number(),
 });
 
 // savings
@@ -90,6 +91,18 @@ export const importBankTransactionSchema = z.object({
   latest: z.boolean(),
 });
 
+// Bank Connections
+export const upsertBankConnectionsSchema = createInsertSchema(bankConnections, {
+  provider: z.nativeEnum(Provider),
+  status: z.nativeEnum(ConnectionStatus),
+}).extend({
+  accounts: z.array(
+    createInsertSchema(bankAccounts, {
+      type: z.nativeEnum(BankAccountType),
+    }),
+  ),
+});
+
 // Schema for inserting a category - can be used to validate API requests
 export const createBankAccountSchema = createInsertSchema(bankAccounts).pick({
   name: true,
@@ -111,6 +124,8 @@ export const toggleBankAccountSchema = createInsertSchema(bankAccounts).pick({
 });
 
 // Transaction
+export const insertBankTransactionSchema = createInsertSchema(bankTransactions);
+
 export const editBankTransactionSchema = createInsertSchema(
   bankTransactions,
 ).pick({

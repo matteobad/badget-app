@@ -1,5 +1,7 @@
 import { type VercelKV } from "@vercel/kv";
 
+import { bankAccounts, bankTransactions } from "../db/schema/open-banking";
+
 export type Providers = "gocardless";
 
 export type ProviderParams = {
@@ -83,9 +85,9 @@ export type DeleteAccountsRequest = {
   accessToken?: string; // Teller & Plaid
 };
 
-export type GetTransactionsResponse = Transaction[];
+export type GetTransactionsResponse = (typeof bankTransactions.$inferInsert)[];
 
-export type GetAccountsResponse = Account[];
+export type GetAccountsResponse = (typeof bankAccounts.$inferInsert)[];
 
 export type GetInstitutionsResponse = {
   id: string;

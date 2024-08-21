@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { addDays, startOfYear, subYears } from "date-fns";
 import { and, eq, sql } from "drizzle-orm";
 import { type z } from "zod";
@@ -10,17 +11,62 @@ import type {
 import type {
   createBankAccountSchema,
   deleteCategorySchema,
+  insertBankTransactionSchema,
   toggleBankAccountSchema,
   updateBankAccountSchema,
   updateCategorySchema,
+  upsertBankConnectionsSchema,
   upsertCategoryBudgetSchema,
   upsertCategorySchema,
 } from "~/lib/validators";
 import { editBankTransactionSchema } from "~/lib/validators";
+import { buildConflictUpdateColumns } from "~/server/db/utils";
 import { getAccessValidForDays } from "~/server/providers/gocardless/utils";
 import { db, schema } from "..";
 import { ConnectionStatus, Provider } from "../schema/enum";
+import { bankAccounts, bankConnections } from "../schema/open-banking";
 
+// Bank Connection
+type UpsertBankConnectionsAndAccountsPayload = z.infer<
+  typeof upsertBankConnectionsSchema
+>;
+
+export async function upsertBankConnections(
+  payload: UpsertBankConnectionsAndAccountsPayload,
+) {
+  await db.transaction(async (tx) => {
+    const { accounts, ...connection } = payload;
+    const updatedAt = new Date();
+
+    // upsert connection
+    const upserted = await tx
+      .insert(bankConnections)
+      .values({ ...connection })
+      .onConflictDoUpdate({
+        target: bankConnections.id,
+        set: { ...connection, updatedAt },
+      })
+      .returning({ id: bankConnections.id });
+
+    if (!upserted[0]?.id) tx.rollback();
+
+    // upsert accounts
+    await tx
+      .insert(bankAccounts)
+      .values(accounts)
+      .onConflictDoUpdate({
+        target: bankAccounts.accountId,
+        set: buildConflictUpdateColumns(bankAccounts, [
+          "balance",
+          "currency",
+          "type",
+          "updatedAt", // TODO: update this value
+        ]),
+      });
+  });
+}
+
+// Bank Account
 type CreateBankAccountsPayload = {
   accounts: {
     account_id: string;
@@ -229,11 +275,37 @@ export async function editBankTransaction({
   });
 }
 
+// Bank Transactions
+type InsertBankTransactionsPayload = z.infer<
+  typeof insertBankTransactionSchema
+>[];
+
+export async function upsertTransactions(
+  payload: InsertBankTransactionsPayload,
+) {
+  await db
+    .insert(schema.bankTransactions)
+    .values(payload)
+    .onConflictDoUpdate({
+      target: schema.bankTransactions.transactionId,
+      set: buildConflictUpdateColumns(schema.bankTransactions, [
+        "amount",
+        "currency",
+        "date",
+        "description",
+      ]),
+    });
+
+  // invalidate cache key for given user
+  // NOTE: works only if payload is from same user!
+  revalidateTag(`bank_transactions_${payload[0]?.userId}`);
+}
+
+// Categories
 type InsertCategoryPayload = z.infer<typeof upsertCategorySchema> & {
   userId: string;
 };
 
-// Categories
 export async function insertCategory({
   name,
   macro,

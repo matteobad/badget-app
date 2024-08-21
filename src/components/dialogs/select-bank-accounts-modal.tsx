@@ -10,11 +10,14 @@ import { toast } from "sonner";
 
 import { useConnectParams } from "~/hooks/use-connect-params";
 import { cn, euroFormat, getInitials } from "~/lib/utils";
-import { connectBankAccountSchema } from "~/lib/validators";
+import {
+  connectBankAccountSchema,
+  upsertBankConnectionsSchema,
+} from "~/lib/validators";
 import { connectBankAccountAction } from "~/server/actions/connect-bank-account-action";
 import { importBankTransactionAction } from "~/server/actions/import-bank-transaction-action";
 import { getAccounts } from "~/server/actions/institutions/get-accounts";
-import { Provider } from "~/server/db/schema/enum";
+import { BankAccountType, Provider } from "~/server/db/schema/enum";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
@@ -143,8 +146,8 @@ export function SelectBankAccountsModal() {
     },
   });
 
-  const form = useForm<z.infer<typeof connectBankAccountSchema>>({
-    resolver: zodResolver(connectBankAccountSchema),
+  const form = useForm<z.infer<typeof upsertBankConnectionsSchema>>({
+    resolver: zodResolver(upsertBankConnectionsSchema),
     mode: "onChange",
     defaultValues: {
       accounts: [],
@@ -170,7 +173,7 @@ export function SelectBankAccountsModal() {
           institution_id: account.institution.id,
           enabled: true,
           logo_url: account.institution.logo,
-          // type: BankAccountType.CREDIT,
+          type: BankAccountType.DEPOSITORY,
         })),
       });
 
@@ -252,13 +255,13 @@ export function SelectBankAccountsModal() {
                                     checked={
                                       field.value.find(
                                         (value) =>
-                                          value.account_id === account.id,
-                                      )?.enabled
+                                          value.accountId === account.id,
+                                      )?.enabled ?? false
                                     }
                                     onCheckedChange={(checked) => {
                                       return field.onChange(
                                         field.value.map((value) => {
-                                          if (value.account_id === account.id) {
+                                          if (value.accountId === account.id) {
                                             return {
                                               ...value,
                                               enabled: checked,

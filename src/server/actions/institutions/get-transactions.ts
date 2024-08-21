@@ -27,8 +27,10 @@ export async function getTransactions({
     latest,
   });
 
-  return data?.sort(
-    (a, b) =>
-      new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime(),
+  return (
+    data?.sort(
+      (a, b) =>
+        new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime(),
+    ) ?? []
   );
 }

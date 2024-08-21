@@ -50,16 +50,6 @@ export class GoCardLessApi {
     this.#secretKey = params.envs.GOCARDLESS_SECRET_KEY;
   }
 
-  async getHealthCheck() {
-    try {
-      await this.#get("/api/v2/swagger.json");
-
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
   async #getRefreshToken(refresh: string): Promise<string> {
     const response = await this.#post<GetRefreshTokenResponse>(
       "/api/v2/token/refresh/",

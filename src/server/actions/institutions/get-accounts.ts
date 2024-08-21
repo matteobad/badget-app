@@ -22,7 +22,9 @@ export async function getAccounts({ id }: GetAccountParams) {
     id,
   });
 
-  return data?.sort(
-    (a, b) => Number(b.balance?.amount) - Number(a.balance?.amount),
+  return (
+    data?.sort(
+      (a, b) => Number(b.balance?.amount) - Number(a.balance?.amount),
+    ) ?? []
   );
 }

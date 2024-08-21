@@ -1,4 +1,4 @@
-import { desc, eq, gte, lt } from "drizzle-orm";
+import { desc, eq, lt } from "drizzle-orm";
 
 import { db, schema } from "..";
 

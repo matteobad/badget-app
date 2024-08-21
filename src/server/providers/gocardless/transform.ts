@@ -15,6 +15,8 @@ import type {
   TransformInstitution,
   TransformTransaction,
 } from "./types";
+import { schema } from "~/server/db";
+import { BankAccountType } from "~/server/db/schema/enum";
 
 export const mapTransactionCategory = (transaction: Transaction) => {
   if (+transaction.transactionAmount.amount > 0) {
@@ -105,9 +107,7 @@ const transformDescription = ({
   return null;
 };
 
-export const transformTransaction = (
-  transaction: TransformTransaction,
-): BaseTransaction => {
+export const transformTransaction = (transaction: TransformTransaction) => {
   const method = mapTransactionMethod(
     transaction?.proprietaryBankTransactionCode,
   );
@@ -134,23 +134,26 @@ export const transformTransaction = (
   const name = transformTransactionName(transaction);
   const description = transformDescription({ transaction, name }) ?? null;
   const balance = transaction?.balanceAfterTransaction?.balanceAmount?.amount
-    ? +transaction.balanceAfterTransaction.balanceAmount.amount
+    ? transaction.balanceAfterTransaction.balanceAmount.amount
     : null;
 
   return {
-    id: transaction.internalTransactionId ?? transaction.transactionId,
-    date: transaction.bookingDate,
-    name,
-    method,
-    amount: +transaction.transactionAmount.amount,
-    currency: transaction.transactionAmount.currency,
-    category: mapTransactionCategory(transaction),
-    currency_rate: currencyExchange?.rate ?? null,
-    currency_source: currencyExchange?.currency ?? null,
+    userId: "",
+    accountId: "",
+    amount: transaction.transactionAmount.amount,
     balance,
+    category: mapTransactionCategory(transaction),
+    currency: transaction.transactionAmount.currency,
+    currencyRate: currencyExchange?.rate?.toString() ?? null,
+    currencySource: currencyExchange?.currency ?? null,
+    date: new Date(transaction.bookingDate),
     description,
+    method,
+    name,
     status: "posted",
-  };
+    transactionId:
+      transaction.internalTransactionId ?? transaction.transactionId,
+  } satisfies typeof schema.bankTransactions.$inferInsert;
 };
 
 const transformAccountName = (account: TransformAccountName) => {
@@ -170,19 +173,19 @@ export const transformAccount = ({
   account,
   balance,
   institution,
-}: TransformAccount): BaseAccount => {
+}: TransformAccount) => {
   return {
-    id,
-    type: "depository",
+    userId: "",
+    accountId: id,
+    type: BankAccountType.DEPOSITORY,
     name: transformAccountName({
       name: account.name,
       product: account.product,
     }),
     currency: account.currency,
-    enrollment_id: null,
-    balance: transformAccountBalance(balance),
-    institution: transformInstitution(institution),
-  };
+    balance: transformAccountBalance(balance).amount.toString(),
+    institutionId: transformInstitution(institution).id,
+  } satisfies typeof schema.bankAccounts.$inferInsert;
 };
 
 export const transformAccountBalance = (
