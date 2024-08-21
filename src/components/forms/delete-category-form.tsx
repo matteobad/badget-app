@@ -10,9 +10,20 @@ import { toast } from "sonner";
 import { deleteCategorySchema } from "~/lib/validators";
 import { deleteCategoryAction } from "~/server/actions/insert-category-action";
 import { Button } from "../ui/button";
-import { Form } from "../ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import { Input } from "../ui/input";
 
-export function DeleteCategoryForm({ id }: { id: string }) {
+type DeleteCategoryFormProps = { id: string; name: string };
+
+export function DeleteCategoryForm({ id, name }: DeleteCategoryFormProps) {
   const deleteAction = useAction(deleteCategoryAction, {
     onError: () => {
       toast.error("Something went wrong please try again.", {
@@ -20,7 +31,6 @@ export function DeleteCategoryForm({ id }: { id: string }) {
       });
     },
     onSuccess: () => {
-      // TODO: close sheet
       toast.success("Categoria eliminata!", {
         duration: 3500,
       });
@@ -31,6 +41,7 @@ export function DeleteCategoryForm({ id }: { id: string }) {
     resolver: zodResolver(deleteCategorySchema),
     mode: "onChange",
     defaultValues: {
+      name: "",
       categoryId: Number(id),
     },
   });
@@ -39,15 +50,49 @@ export function DeleteCategoryForm({ id }: { id: string }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(deleteAction.execute)}
-        className="flex flex-col space-y-4"
+        className="flex flex-col"
       >
-        <div>TODO FORM</div>
-        <div className="flex justify-end pt-6">
-          <Button type="submit" disabled={deleteAction.status === "executing"}>
+        <FormField
+          control={form.control}
+          name="categoryId"
+          render={({ field }) => (
+            <FormItem className="hidden">
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Holidays" {...field} />
+              </FormControl>
+              <FormDescription>
+                Digita '{name}' per eliminare definitivamente la categoria
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            variant="destructive"
+            disabled={
+              deleteAction.status === "executing" ||
+              form.getValues("name") !== name
+            }
+          >
             {deleteAction.status === "executing" ? (
               <Loader2 className="pointer-events-none h-4 w-4 animate-spin" />
             ) : (
-              "Salva"
+              "Elimina"
             )}
           </Button>
         </div>

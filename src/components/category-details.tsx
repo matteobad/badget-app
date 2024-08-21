@@ -21,7 +21,9 @@ type CategoryDetailsProps = {
 };
 
 export function CategoryDetails({ id, categories }: CategoryDetailsProps) {
-  const category = categories.find((c) => c.id.toString() === id)!;
+  const category = categories.find((c) => c.id.toString() === id);
+
+  if (!category) return;
 
   return (
     <div className="flex flex-col gap-6">
@@ -62,14 +64,14 @@ export function CategoryDetails({ id, categories }: CategoryDetailsProps) {
           <AccordionContent>
             <EditCategoryBudgetForm
               categoryId={id}
-              budgets={category.budgets}
+              budgets={category?.budgets}
             />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-3">
           <AccordionTrigger>Danger Zone</AccordionTrigger>
           <AccordionContent>
-            <DeleteCategoryForm id={id} />
+            <DeleteCategoryForm name={category.name} id={id} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

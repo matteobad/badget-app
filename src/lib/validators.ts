@@ -154,5 +154,6 @@ export const upsertCategoryBudgetSchema = z.object({
 });
 
 export const deleteCategorySchema = z.object({
+  name: z.string(),
   categoryId: z.number(),
 });

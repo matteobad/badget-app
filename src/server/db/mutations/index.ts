@@ -1,10 +1,11 @@
-import { addDays, startOfMonth, startOfYear, subYears } from "date-fns";
-import { and, eq, inArray, or, sql, SQL } from "drizzle-orm";
+import { addDays, startOfYear, subYears } from "date-fns";
+import { and, eq, sql } from "drizzle-orm";
 import { type z } from "zod";
 
 import type { BudgetPeriod, CategoryType } from "../schema/enum";
 import type {
   createBankAccountSchema,
+  deleteCategorySchema,
   updateCategorySchema,
   upsertCategoryBudgetSchema,
   upsertCategorySchema,
@@ -175,6 +176,7 @@ type InsertCategoryPayload = z.infer<typeof upsertCategorySchema> & {
   userId: string;
 };
 
+// Categories
 export async function insertCategory({
   name,
   macro,
@@ -246,6 +248,55 @@ export async function editCategory({
     );
 }
 
+type DeleteCategoryPayload = z.infer<typeof deleteCategorySchema> & {
+  userId: string;
+};
+
+export async function deleteCategory({
+  categoryId,
+  name,
+  userId,
+}: DeleteCategoryPayload) {
+  return await db.transaction(async (tx) => {
+    await tx
+      .delete(schema.categoryBudgets)
+      .where(eq(schema.categoryBudgets.categoryId, categoryId));
+
+    const defaultCategory = await tx
+      .select({
+        id: schema.categories.id,
+      })
+      .from(schema.categories)
+      .where(
+        and(
+          eq(schema.categories.userId, userId),
+          eq(schema.categories.name, "uncategorized"),
+        ),
+      );
+
+    if (!defaultCategory[0]?.id) return tx.rollback();
+
+    await tx
+      .update(schema.bankTransactions)
+      .set({
+        categoryId: defaultCategory[0].id,
+      })
+      .where(eq(schema.bankTransactions.categoryId, categoryId));
+
+    console.log(name);
+
+    await tx
+      .delete(schema.categories)
+      .where(
+        and(
+          eq(schema.categories.id, categoryId),
+          eq(schema.categories.name, name),
+        ),
+      );
+  });
+}
+
+// Category Budgets
 type UpdateCategoryBudgetPayload = z.infer<
   typeof upsertCategoryBudgetSchema
 > & {
@@ -278,45 +329,4 @@ export async function upsertCategoryBudget({
         updatedAt,
       },
     });
-}
-
-type DeleteCategoryPayload = {
-  categoryId: number;
-  userId: string;
-};
-
-export async function deleteCategory({
-  categoryId,
-  userId,
-}: DeleteCategoryPayload) {
-  return await db.transaction(async (tx) => {
-    await tx
-      .delete(schema.categoryBudgets)
-      .where(eq(schema.categoryBudgets.categoryId, categoryId));
-
-    const defaultCategory = await tx
-      .select({
-        id: schema.categories.id,
-      })
-      .from(schema.categories)
-      .where(
-        and(
-          eq(schema.categories.userId, userId),
-          eq(schema.categories.name, "uncategorized"),
-        ),
-      );
-
-    if (!defaultCategory[0]?.id) return tx.rollback();
-
-    await tx
-      .update(schema.bankTransactions)
-      .set({
-        categoryId: defaultCategory[0].id,
-      })
-      .where(eq(schema.bankTransactions.categoryId, categoryId));
-
-    await tx
-      .delete(schema.categories)
-      .where(eq(schema.categories.id, categoryId));
-  });
 }

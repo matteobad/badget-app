@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { authActionClient } from "~/lib/safe-action";
 import {
@@ -71,11 +72,13 @@ export const upsertCategoryBudgetAction = authActionClient
 
 export const deleteCategoryAction = authActionClient
   .schema(deleteCategorySchema)
-  .action(async ({ parsedInput: { categoryId }, ctx: { userId } }) => {
+  .action(async ({ parsedInput: { categoryId, name }, ctx: { userId } }) => {
     await deleteCategory({
       categoryId: Number(categoryId),
+      name,
       userId,
     });
 
     revalidateTag(`bank_categories_${userId}`);
+    redirect("/settings/categories");
   });

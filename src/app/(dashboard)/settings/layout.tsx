@@ -42,7 +42,6 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
       <div className="hidden min-h-[calc(100vh-134px)] flex-col space-y-6 py-6 md:flex">
         {children}
       </div>
-      <SiteFooter />
     </div>
   );
 }
