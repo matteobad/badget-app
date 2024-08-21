@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider afterSignOutUrl={"/sign-in"}>
       <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <body>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

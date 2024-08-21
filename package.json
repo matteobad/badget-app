@@ -23,7 +23,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@clerk/nextjs": "^5.3.1",
+    "@clerk/elements": "^0.14.0",
+    "@clerk/nextjs": "^5.3.2",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-avatar": "^1.1.0",
