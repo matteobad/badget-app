@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const sidebarNavItems = [
   {
-    title: "Profile",
+    title: "Profilo",
     href: "/settings/profile",
   },
   {
@@ -22,12 +22,8 @@ const sidebarNavItems = [
     href: "/settings/categories",
   },
   {
-    title: "Works",
+    title: "Lavoro",
     href: "/settings/work",
-  },
-  {
-    title: "Appearance",
-    href: "/account/settings/appearance",
   },
 ];
 

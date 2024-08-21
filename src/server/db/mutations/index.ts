@@ -6,6 +6,7 @@ import type { BudgetPeriod, CategoryType } from "../schema/enum";
 import type {
   createBankAccountSchema,
   deleteCategorySchema,
+  toggleBankAccountSchema,
   updateCategorySchema,
   upsertCategoryBudgetSchema,
   upsertCategorySchema,
@@ -156,6 +157,28 @@ export async function createBankAccount({
         currency,
       },
     });
+}
+
+type ToggleBankAccountPayload = z.infer<typeof toggleBankAccountSchema> & {
+  userId: string;
+};
+
+export async function toggleBankAccount({
+  id,
+  enabled,
+  userId,
+}: ToggleBankAccountPayload) {
+  return await db
+    .update(schema.bankAccounts)
+    .set({
+      enabled,
+    })
+    .where(
+      and(
+        eq(schema.bankAccounts.userId, userId),
+        eq(schema.bankAccounts.id, id!),
+      ),
+    );
 }
 
 type EditTransactionPayload = z.infer<typeof editBankTransactionSchema>;

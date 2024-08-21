@@ -3,8 +3,11 @@
 import { revalidateTag } from "next/cache";
 
 import { authActionClient } from "~/lib/safe-action";
-import { createBankAccountSchema } from "~/lib/validators";
-import { createBankAccount } from "../db/mutations";
+import {
+  createBankAccountSchema,
+  toggleBankAccountSchema,
+} from "~/lib/validators";
+import { createBankAccount, toggleBankAccount } from "../db/mutations";
 
 export const createBankAccountAction = authActionClient
   .schema(createBankAccountSchema)
@@ -20,6 +23,18 @@ export const createBankAccountAction = authActionClient
       revalidateTag(`bank_accounts_${userId}`);
     },
   );
+
+export const toggleBankAccountAction = authActionClient
+  .schema(toggleBankAccountSchema)
+  .action(async ({ parsedInput: { id, enabled }, ctx: { userId } }) => {
+    await toggleBankAccount({
+      id,
+      enabled,
+      userId: userId,
+    });
+
+    revalidateTag(`bank_accounts_${userId}`);
+  });
 
 // export const deleteBankAccountAction = authActionClient
 //   .schema(deleteCategorySchema)

@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { EllipsisIcon, PlugZapIcon, RefreshCwIcon } from "lucide-react";
 
 import { AddBankAccountButton } from "~/app/(dashboard)/_components/add-bank-account-button";
+import { ToggleBankAccountSwitchProps } from "~/components/forms/accounts/toggle-bank-account-switch";
 import {
   Accordion,
   AccordionContent,
@@ -15,9 +16,6 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { euroFormat, getInitials } from "~/lib/utils";
 import { getUserBankAccounts } from "~/server/db/queries/cached-queries";
 import { Provider } from "~/server/db/schema/enum";
-
-// import { BankConnections } from "./bank-connections";
-// import { ManualAccounts } from "./manual-accounts";
 
 export function BankAccountListLoading() {
   return (
@@ -58,7 +56,6 @@ export function BankAccountListLoading() {
 
 export async function BankAccountList() {
   const data = await getUserBankAccounts();
-  // const manualAccounts = data.filter((item) => item.bank_accounts.manual);
 
   if (data.length === 0) {
     return (
@@ -151,9 +148,14 @@ export async function BankAccountList() {
                         size="icon"
                         variant="ghost"
                         className="rounded-full"
+                        disabled={!account.enabled}
                       >
                         <EllipsisIcon className="h-4 w-4" />
                       </Button>
+                      <ToggleBankAccountSwitchProps
+                        id={account.id}
+                        enabled={!!account.enabled}
+                      />
                     </div>
                   );
                 })}
