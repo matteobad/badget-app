@@ -18,9 +18,9 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 import { createBankAccountSchema } from "~/lib/validators";
 import { createBankAccountAction } from "~/server/actions/bank-account.action";
-import { Input } from "../ui/input";
 
 export function AddBankAccountForm() {
   const pathname = usePathname();

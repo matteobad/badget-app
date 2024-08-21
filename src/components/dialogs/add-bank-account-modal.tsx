@@ -1,7 +1,7 @@
 "use client";
 
 import { useConnectParams } from "~/hooks/use-connect-params";
-import { AddBankAccountForm } from "../forms/add-bank-account-form";
+import { AddBankAccountForm } from "../forms/accounts/add-bank-account-form";
 import {
   Dialog,
   DialogContent,
