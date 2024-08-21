@@ -1,8 +1,9 @@
 import Image from "next/image";
 import { format } from "date-fns";
-import { EllipsisIcon, PlugZapIcon, RefreshCwIcon } from "lucide-react";
+import { MoreHorizontal, PlugZapIcon, RefreshCwIcon } from "lucide-react";
 
 import { AddBankAccountButton } from "~/app/(dashboard)/_components/add-bank-account-button";
+import { UpdateBankAccountModal } from "~/components/dialogs/update-bank-account-modal";
 import { ToggleBankAccountSwitchProps } from "~/components/forms/accounts/toggle-bank-account-switch";
 import {
   Accordion,
@@ -12,6 +13,13 @@ import {
 } from "~/components/ui/accordion";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Skeleton } from "~/components/ui/skeleton";
 import { euroFormat, getInitials } from "~/lib/utils";
 import { getUserBankAccounts } from "~/server/db/queries/cached-queries";
@@ -144,14 +152,23 @@ export async function BankAccountList() {
                       <span className="">
                         {euroFormat(account.balance ?? "0")}
                       </span>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="rounded-full"
-                        disabled={!account.enabled}
-                      >
-                        <EllipsisIcon className="h-4 w-4" />
-                      </Button>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                          <DropdownMenuItem>
+                            <UpdateBankAccountModal bankAccount={account} />
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>Elimina</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       <ToggleBankAccountSwitchProps
                         id={account.id}
                         enabled={!!account.enabled}

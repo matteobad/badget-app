@@ -97,6 +97,14 @@ export const createBankAccountSchema = createInsertSchema(bankAccounts).pick({
   currency: true,
 });
 
+export const updateBankAccountSchema = createInsertSchema(bankAccounts).pick({
+  id: true,
+  name: true,
+  type: true,
+  balance: true,
+  currency: true,
+});
+
 export const toggleBankAccountSchema = createInsertSchema(bankAccounts).pick({
   id: true,
   enabled: true,

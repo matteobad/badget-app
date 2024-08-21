@@ -46,6 +46,9 @@ export const getUserBankAccounts = async (
     },
   )();
 };
+export type BankAccount = Awaited<
+  ReturnType<typeof getUserBankAccounts>
+>[number];
 
 export const getUserTransactions = async (
   params: Omit<GetTransactionsParams, "userId">,

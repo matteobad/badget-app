@@ -1,13 +1,19 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { authActionClient } from "~/lib/safe-action";
 import {
   createBankAccountSchema,
   toggleBankAccountSchema,
+  updateBankAccountSchema,
 } from "~/lib/validators";
-import { createBankAccount, toggleBankAccount } from "../db/mutations";
+import {
+  createBankAccount,
+  toggleBankAccount,
+  updateBankAccount,
+} from "../db/mutations";
 
 export const createBankAccountAction = authActionClient
   .schema(createBankAccountSchema)
@@ -21,6 +27,28 @@ export const createBankAccountAction = authActionClient
       });
 
       revalidateTag(`bank_accounts_${userId}`);
+    },
+  );
+
+export const updateBankAccountAction = authActionClient
+  .schema(updateBankAccountSchema)
+  .action(
+    async ({
+      parsedInput: { id, name, type, balance, currency },
+      ctx: { userId },
+    }) => {
+      console.log(id, name, type, balance, currency);
+      await updateBankAccount({
+        id,
+        name,
+        type,
+        balance,
+        currency,
+        userId: userId,
+      });
+
+      revalidateTag(`bank_accounts_${userId}`);
+      redirect("/settings/accounts");
     },
   );
 

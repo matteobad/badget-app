@@ -2,11 +2,16 @@ import { addDays, startOfYear, subYears } from "date-fns";
 import { and, eq, sql } from "drizzle-orm";
 import { type z } from "zod";
 
-import type { BudgetPeriod, CategoryType } from "../schema/enum";
+import type {
+  BankAccountType,
+  BudgetPeriod,
+  CategoryType,
+} from "../schema/enum";
 import type {
   createBankAccountSchema,
   deleteCategorySchema,
   toggleBankAccountSchema,
+  updateBankAccountSchema,
   updateCategorySchema,
   upsertCategoryBudgetSchema,
   upsertCategorySchema,
@@ -157,6 +162,35 @@ export async function createBankAccount({
         currency,
       },
     });
+}
+
+type UpdateBankAccountPayload = z.infer<typeof updateBankAccountSchema> & {
+  userId: string;
+};
+
+export async function updateBankAccount({
+  id,
+  name,
+  type,
+  balance,
+  currency,
+  userId,
+}: UpdateBankAccountPayload) {
+  return await db
+    .update(schema.bankAccounts)
+    .set({
+      name,
+      type: type as BankAccountType,
+      balance,
+      currency,
+      userId,
+    })
+    .where(
+      and(
+        eq(schema.bankAccounts.userId, userId),
+        eq(schema.bankAccounts.id, id!),
+      ),
+    );
 }
 
 type ToggleBankAccountPayload = z.infer<typeof toggleBankAccountSchema> & {
