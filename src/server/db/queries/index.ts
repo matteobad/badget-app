@@ -1,7 +1,10 @@
-import { ItemText } from "@radix-ui/react-select";
-import { desc, eq, lt } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
+import { endOfMonth, startOfMonth } from "date-fns";
+import { and, desc, eq, gt, lt, sql } from "drizzle-orm";
 
 import { db, schema } from "..";
+import { CategoryType } from "../schema/enum";
+import { bankTransactions, categories } from "../schema/open-banking";
 
 export type GetUserBankAccountsParams = {
   userId: string;
@@ -98,6 +101,51 @@ export async function getCategoriesQuery(params: GetCategoriesParams) {
     where: eq(schema.categories.userId, userId),
     orderBy: desc(schema.categories.manual),
   });
+
+  return data;
+}
+
+export type GetBankOverviewChartParams = {
+  userId: string;
+  // startDate: Date;
+  // endDate: Date;
+};
+
+export async function getBankOverviewChartQuery({
+  userId,
+}: GetBankOverviewChartParams) {
+  // TODO: temp
+  const startDate = startOfMonth(new Date());
+  const endDate = endOfMonth(new Date());
+
+  const data = await db
+    .select({
+      date: sql`date_trunc('day', ${bankTransactions.date})`.as("date"),
+      income_sum:
+        sql`SUM(CASE WHEN ${categories.type} = 'INCOME' THEN ${bankTransactions.amount} ELSE 0 END)`.as(
+          "income_sum",
+        ),
+      outcome_sum:
+        sql`SUM(CASE WHEN ${categories.type} = 'OUTCOME' THEN ${bankTransactions.amount} ELSE 0 END)`.as(
+          "outcome_sum",
+        ),
+    })
+    .from(bankTransactions)
+    .innerJoin(
+      schema.categories,
+      eq(bankTransactions.categoryId, schema.categories.id),
+    )
+    .where(
+      and(
+        eq(bankTransactions.userId, userId),
+        gt(bankTransactions.date, startDate),
+        lt(bankTransactions.date, endDate),
+      ),
+    )
+    .groupBy(sql`date_trunc('day', ${bankTransactions.date})`)
+    .orderBy(sql`date_trunc('day', ${bankTransactions.date})`);
+
+  console.log(data);
 
   return data;
 }

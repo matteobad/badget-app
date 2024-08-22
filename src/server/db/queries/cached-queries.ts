@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import type { GetTransactionsParams, GetUserBankAccountsParams } from ".";
 import { db, schema } from "~/server/db";
 import {
+  getBankOverviewChartQuery,
   getCategoriesQuery,
   getTransactionsQuery,
   getUserBankAccountsQuery,
@@ -88,6 +89,27 @@ export const getUserCategories = async (
     {
       revalidate: 180,
       tags: [`bank_categories_${session.userId}`],
+    },
+  )();
+};
+
+export const getBankOverviewChart = async (
+  params: Omit<GetTransactionsParams, "userId">,
+) => {
+  const session = auth();
+
+  if (!session.userId) {
+    return [];
+  }
+
+  return unstable_cache(
+    async () => {
+      return getBankOverviewChartQuery({ ...params, userId: session.userId });
+    },
+    ["bank_overview_", session.userId],
+    {
+      revalidate: 180,
+      tags: [`bank_overview_${session.userId}`],
     },
   )();
 };

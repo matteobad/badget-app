@@ -17,7 +17,7 @@ export const env = createEnv({
       .default("development"),
     GOCARDLESS_SECRET_ID: z.string().min(1),
     GOCARDLESS_SECRET_KEY: z.string().min(1),
-    CRON_SECRET: z.string().min(1)
+    CRON_SECRET: z.string().min(1),
   },
 
   /**
@@ -42,7 +42,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     GOCARDLESS_SECRET_ID: process.env.GOCARDLESS_SECRET_ID,
     GOCARDLESS_SECRET_KEY: process.env.GOCARDLESS_SECRET_KEY,
-    CRON_SECRET: process.env.CRON_SECRET
+    CRON_SECRET: process.env.CRON_SECRET,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
