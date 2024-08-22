@@ -129,7 +129,6 @@ export const bankTransactions = createTable("bank_transactions", {
   date: timestamp("date", { withTimezone: true }),
   name: varchar("name", { length: 256 }),
   description: varchar("description", { length: 256 }),
-  category: varchar("category", { length: 64 }),
   method: varchar("method", { length: 64 }),
   currencyRate: decimal("currency_rate"),
   currencySource: varchar("currency_source", { length: 64 }),
@@ -145,7 +144,7 @@ export const bankTransactionsRelations = relations(
       references: [bankAccounts.accountId],
     }),
     category: one(categories, {
-      fields: [bankTransactions.accountId],
+      fields: [bankTransactions.categoryId],
       references: [categories.id],
     }),
   }),

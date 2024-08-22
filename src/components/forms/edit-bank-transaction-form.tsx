@@ -1,17 +1,21 @@
 "use client";
 
+import type dynamicIconImports from "lucide-react/dynamicIconImports";
+import { useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, ChevronsUpDown } from "lucide-react";
-import dynamicIconImports from "lucide-react/dynamicIconImports";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
+import { type z } from "zod";
 
+import {
+  type Category,
+  type Transaction,
+} from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
 import { cn } from "~/lib/utils";
 import { editBankTransactionSchema } from "~/lib/validators";
 import { editBankTransactionAction } from "~/server/actions/bank-transaction-action";
-import { getUserCategories } from "~/server/db/queries/cached-queries";
 import Icon from "../icons";
 import { Button } from "../ui/button";
 import {
@@ -30,20 +34,28 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
+import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 type EditTransactionCategoryFormProps = {
-  categories: Awaited<ReturnType<typeof getUserCategories>>;
+  transaction: Transaction;
+  categories: Category[];
 };
 
 export function EditTransactionCategoryForm({
+  transaction,
   categories,
 }: EditTransactionCategoryFormProps) {
+  const formRef = useRef<HTMLFormElement>(null);
+
   const form = useForm<z.infer<typeof editBankTransactionSchema>>({
     resolver: zodResolver(editBankTransactionSchema),
+    defaultValues: {
+      ...transaction,
+    },
   });
 
-  const { execute, status } = useAction(editBankTransactionAction, {
+  const { execute, isExecuting } = useAction(editBankTransactionAction, {
     onError: () => {
       toast.error("Something went wrong please try again.", {
         duration: 3500,
@@ -53,7 +65,23 @@ export function EditTransactionCategoryForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(execute)} className="mt-4 space-y-6">
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(execute)}
+        className="mt-4 space-y-6"
+      >
+        <FormField
+          control={form.control}
+          name={`id`}
+          render={({ field }) => (
+            <FormItem className="hidden">
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="categoryId"
@@ -66,6 +94,7 @@ export function EditTransactionCategoryForm({
                     <Button
                       variant="outline"
                       role="combobox"
+                      disabled={isExecuting}
                       className={cn(
                         "w-full justify-between",
                         !field.value && "text-muted-foreground",
@@ -74,9 +103,12 @@ export function EditTransactionCategoryForm({
                       {field.value
                         ? categories
                             .filter((category) => category.id === field.value)
-                            .map((selectedCategory) => {
+                            .map((selectedCategory, index) => {
                               return (
-                                <div className="flex items-center gap-2">
+                                <div
+                                  className="flex items-center gap-2"
+                                  key={index}
+                                >
                                   <Icon
                                     className="h-4 w-4"
                                     name={
@@ -105,6 +137,7 @@ export function EditTransactionCategoryForm({
                             key={category.id}
                             onSelect={() => {
                               form.setValue("categoryId", category.id);
+                              formRef.current?.requestSubmit();
                             }}
                           >
                             <div className="flex items-center gap-2">

@@ -129,9 +129,11 @@ export const insertBankTransactionSchema = createInsertSchema(bankTransactions);
 export const editBankTransactionSchema = createInsertSchema(
   bankTransactions,
 ).pick({
+  id: true,
   categoryId: true,
   description: true,
   amount: true,
+  userId: true,
 });
 
 // Category

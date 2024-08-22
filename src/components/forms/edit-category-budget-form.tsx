@@ -8,7 +8,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
+import { type Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
 import { cn } from "~/lib/utils";
 import { upsertCategoryBudgetSchema } from "~/lib/validators";
 import {
@@ -91,7 +91,7 @@ export function EditCategoryBudgetForm({
       >
         {budgets.map((_budget, index) => {
           return (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2" key={index}>
               <div className="flex items-end gap-4" key={index}>
                 <FormField
                   control={form.control}

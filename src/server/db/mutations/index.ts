@@ -19,7 +19,7 @@ import type {
   upsertCategoryBudgetSchema,
   upsertCategorySchema,
 } from "~/lib/validators";
-import { editBankTransactionSchema } from "~/lib/validators";
+import { type editBankTransactionSchema } from "~/lib/validators";
 import { buildConflictUpdateColumns } from "~/server/db/utils";
 import { getAccessValidForDays } from "~/server/providers/gocardless/utils";
 import { db, schema } from "..";
@@ -264,15 +264,26 @@ export async function toggleBankAccount({
 type EditTransactionPayload = z.infer<typeof editBankTransactionSchema>;
 
 export async function editBankTransaction({
+  id,
   categoryId,
-  amount,
-  description,
+  userId,
 }: EditTransactionPayload) {
-  return await db.update(schema.bankTransactions).set({
-    categoryId,
-    amount,
-    description,
-  });
+  console.log(id, categoryId);
+  await db
+    .update(schema.bankTransactions)
+    .set({
+      categoryId,
+      // amount,
+      // description,
+    })
+    .where(
+      and(
+        eq(schema.bankTransactions.id, id!),
+        eq(schema.bankTransactions.userId, userId),
+      ),
+    );
+
+  revalidateTag(`bank_transactions_${userId}`);
 }
 
 // Bank Transactions

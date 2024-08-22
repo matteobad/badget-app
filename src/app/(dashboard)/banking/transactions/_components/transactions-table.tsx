@@ -6,6 +6,7 @@ import type {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table";
+import type dynamicIconImports from "lucide-react/dynamicIconImports";
 import * as React from "react";
 import {
   flexRender,
@@ -20,6 +21,7 @@ import { ArrowUpDown, ChevronDown } from "lucide-react";
 import { useQueryState } from "nuqs";
 
 import type { getUserTransactions } from "~/server/db/queries/cached-queries";
+import Icon from "~/components/icons";
 import { TransactionSheet } from "~/components/sheets/transaction-sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -39,7 +41,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { cn, euroFormat } from "~/lib/utils";
-import { getUserCategories } from "~/server/db/queries/cached-queries";
+import { type getUserCategories } from "~/server/db/queries/cached-queries";
 
 export type Transaction = Awaited<
   ReturnType<typeof getUserTransactions>
@@ -82,9 +84,20 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "category",
     header: "Categoria",
-    cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("category")}</div>
-    ),
+    cell: ({ row }) => {
+      const category = row.original.category;
+
+      return (
+        <div className="flex items-center justify-start gap-2">
+          <Icon
+            name={category.icon as keyof typeof dynamicIconImports}
+            className="h-4 w-4"
+          />
+
+          <span className="whitespace-nowrap">{category.name}</span>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "bankAccount",

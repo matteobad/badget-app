@@ -1,10 +1,6 @@
 import { capitalCase } from "change-case";
 
-import type {
-  Account as BaseAccount,
-  Balance as BaseAccountBalance,
-  Transaction as BaseTransaction,
-} from "../types";
+import type { Balance as BaseAccountBalance } from "../types";
 import type {
   Institution,
   Transaction,
@@ -15,7 +11,7 @@ import type {
   TransformInstitution,
   TransformTransaction,
 } from "./types";
-import { schema } from "~/server/db";
+import { type schema } from "~/server/db";
 import { BankAccountType } from "~/server/db/schema/enum";
 
 export const mapTransactionCategory = (transaction: Transaction) => {
@@ -139,10 +135,10 @@ export const transformTransaction = (transaction: TransformTransaction) => {
 
   return {
     userId: "",
-    accountId: "",
+    // accountId: "",
     amount: transaction.transactionAmount.amount,
     balance,
-    category: mapTransactionCategory(transaction),
+    // category: mapTransactionCategory(transaction),
     currency: transaction.transactionAmount.currency,
     currencyRate: currencyExchange?.rate?.toString() ?? null,
     currencySource: currencyExchange?.currency ?? null,

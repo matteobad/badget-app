@@ -1,3 +1,4 @@
+import { ItemText } from "@radix-ui/react-select";
 import { desc, eq, lt } from "drizzle-orm";
 
 import { db, schema } from "..";
@@ -45,6 +46,10 @@ export async function getTransactionsQuery(params: GetTransactionsParams) {
       schema.bankAccounts,
       eq(schema.bankTransactions.accountId, schema.bankAccounts.accountId),
     )
+    .leftJoin(
+      schema.categories,
+      eq(schema.bankTransactions.categoryId, schema.categories.id),
+    )
     .limit(10)
     .orderBy(desc(schema.bankTransactions.date));
 
@@ -59,6 +64,11 @@ export async function getTransactionsQuery(params: GetTransactionsParams) {
         institution: connection?.name,
         logoUrl: connection?.logoUrl,
         name: item.bank_accounts?.name,
+      },
+      category: {
+        icon: item.categories?.icon,
+        color: item.categories?.color,
+        name: item.categories?.name,
       },
     };
   });

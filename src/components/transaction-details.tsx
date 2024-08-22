@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  Category,
-  Transaction,
+  type Category,
+  type Transaction,
 } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
 import { euroFormat } from "~/lib/utils";
 import { EditTransactionCategoryForm } from "./forms/edit-bank-transaction-form";
@@ -34,7 +34,7 @@ export function TransactionDetails({
           {euroFormat(data.amount ?? 0)}
         </span>
       </div>
-      <EditTransactionCategoryForm categories={categories} />
+      <EditTransactionCategoryForm transaction={data} categories={categories} />
     </div>
   );
 }
