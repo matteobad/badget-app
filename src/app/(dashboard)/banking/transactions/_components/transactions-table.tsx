@@ -99,7 +99,7 @@ export function TransactionsTable({
             </span>
           </div>
           <Button size="sm">
-            <DownloadIcon className="h-4 w-4" />
+            <DownloadIcon className="mr-2 h-4 w-4" />
             Download
           </Button>
         </div>
