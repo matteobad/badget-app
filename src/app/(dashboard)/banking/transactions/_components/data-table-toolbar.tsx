@@ -105,7 +105,7 @@ export function DataTableToolbar<TData>({
               aria-label="Toggle columns"
               variant="outline"
               size="icon"
-              className="hidden lg:flex"
+              className="hidden size-9 lg:flex"
             >
               <SlidersHorizontalIcon className="size-4" />
             </Button>

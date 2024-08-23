@@ -2,15 +2,24 @@
 
 import type dynamicIconImports from "lucide-react/dynamicIconImports";
 import * as React from "react";
-import { DownloadIcon } from "lucide-react";
+import { DownloadIcon, ShapesIcon } from "lucide-react";
 
 import type {
   getFilteredTransactions,
   getUserBankAccounts,
 } from "~/server/db/queries/cached-queries";
 import { DateRangePicker } from "~/components/data-range-picker";
+import Icon from "~/components/icons";
 import { DataTable } from "~/components/tables/data-tables";
 import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { Separator } from "~/components/ui/separator";
 import { type DataTableFilterField } from "~/configs/data-table";
 import { useDataTable } from "~/hooks/use-data-table";
 import { euroFormat } from "~/lib/utils";
@@ -98,10 +107,38 @@ export function TransactionsTable({
               )}
             </span>
           </div>
-          <Button size="sm">
-            <DownloadIcon className="mr-2 h-4 w-4" />
-            Download
-          </Button>
+          <div className="flex gap-4">
+            <Button size="sm">
+              <DownloadIcon className="mr-2 h-4 w-4" />
+              Download
+            </Button>
+            <Separator orientation="vertical" className="h-9" />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <ShapesIcon className="mr-2 h-4 w-4" />
+                  Categorizza
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end">
+                <DropdownMenuGroup>
+                  {categories.map((category) => {
+                    return (
+                      <DropdownMenuItem key={category.id}>
+                        <Icon
+                          name={
+                            category.icon as keyof typeof dynamicIconImports
+                          }
+                          className="mr-2 h-4 w-4"
+                        />
+                        <span className="capitalize">{category.name}</span>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       )}
       <DataTableToolbar table={table} filterFields={filterFields}>
