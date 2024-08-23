@@ -1,14 +1,9 @@
 import dynamic from "next/dynamic";
 
+import DashboardLayout from "~/components/dashboard-layout";
 import { getUserCategories } from "~/server/db/queries/cached-queries";
-import { SiteFooter } from "../_components/footer";
-import { TopbarNav } from "../_components/topbar-nav";
-import { Sidebar } from "./_components/sidebar";
-import { SidebarAccounts } from "./_components/sidebar-accounts";
 
-export default async function DashboardLayout(props: {
-  children: React.ReactNode;
-}) {
+export default async function Layout(props: { children: React.ReactNode }) {
   const userCategories = await getUserCategories({});
 
   const ConnectBankModal = dynamic(
@@ -53,17 +48,7 @@ export default async function DashboardLayout(props: {
 
   return (
     <>
-      <div className="min-h-screen overflow-hidden rounded-[0.5rem]">
-        <TopbarNav />
-        <div className="flex">
-          <nav className="flex w-[250px] flex-col gap-2 py-4">
-            <Sidebar />
-            {/* <SidebarAccounts /> */}
-          </nav>
-          <main className="grow">{props.children}</main>
-        </div>
-        <SiteFooter />
-      </div>
+      <DashboardLayout>{props.children}</DashboardLayout>
 
       {/* Modals triggered by url search params */}
       <ConnectBankModal countryCode={"IT"} />
