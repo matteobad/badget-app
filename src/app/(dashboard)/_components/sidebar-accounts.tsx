@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 
-import { getUserBankAccounts } from "~/server/db/queries/cached-queries";
+import { getUserBankConnections } from "~/server/db/queries/cached-queries";
 import { AccountList } from "./accounts";
 import { AddBankAccountButton } from "./add-bank-account-button";
 import { SidebarItemSkeleton } from "./sidebar-item";
 
 export async function SidebarAccounts() {
-  const accounts = await getUserBankAccounts();
+  const accounts = await getUserBankConnections();
 
   return (
     <div className="space-y-2">

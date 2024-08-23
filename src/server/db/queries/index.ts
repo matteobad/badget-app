@@ -1,17 +1,36 @@
-import { auth } from "@clerk/nextjs/server";
+import type { SQL } from "drizzle-orm";
 import { endOfMonth, startOfMonth } from "date-fns";
-import { and, desc, eq, gt, lt, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  gte,
+  lt,
+  lte,
+  or,
+  sql,
+} from "drizzle-orm";
+import { type z } from "zod";
 
+import { filterColumn } from "~/lib/utils";
+import { type transactionsSearchParamsSchema } from "~/lib/validators";
 import { db, schema } from "..";
-import { CategoryType } from "../schema/enum";
-import { bankTransactions, categories } from "../schema/open-banking";
+import {
+  bankAccounts,
+  bankTransactions,
+  categories,
+} from "../schema/open-banking";
+import { type DrizzleWhere } from "../utils";
 
 export type GetUserBankAccountsParams = {
   userId: string;
   enabled?: boolean;
 };
 
-export async function getUserBankAccountsQuery(
+export async function getUserBankConnectionsQuery(
   params: GetUserBankAccountsParams,
 ) {
   const { userId } = params;
@@ -23,6 +42,18 @@ export async function getUserBankAccountsQuery(
         orderBy: desc(schema.bankAccounts.balance),
       },
     },
+  });
+
+  return data;
+}
+
+export async function getUserBankAccountsQuery(
+  params: GetUserBankAccountsParams,
+) {
+  const { userId } = params;
+
+  const data = await db.query.bankAccounts.findMany({
+    where: eq(schema.bankAccounts.userId, userId),
   });
 
   return data;
@@ -75,6 +106,128 @@ export async function getTransactionsQuery(params: GetTransactionsParams) {
       },
     };
   });
+}
+
+export async function getFilteredTransactionsQuery({
+  params,
+  userId,
+}: {
+  params: z.infer<typeof transactionsSearchParamsSchema>;
+  userId: string;
+}) {
+  const { page, per_page, sort, query, operator, from, to, category, account } =
+    params;
+
+  // Offset to paginate the results
+  const offset = (page - 1) * per_page;
+  // Column and order to sort by
+  // Spliting the sort string by "." to get the column and order
+  // Example: "title.desc" => ["title", "desc"]
+  const [column, order] = (sort?.split(".").filter(Boolean) ?? [
+    "date",
+    "desc",
+  ]) as [
+    keyof typeof bankTransactions.$inferSelect | undefined,
+    "asc" | "desc" | undefined,
+  ];
+
+  // Convert the date strings to date objects
+  const fromDay = from ? sql`to_date(${from}, 'yyyy-mm-dd')` : undefined;
+  const toDay = to ? sql`to_date(${to}, 'yyy-mm-dd')` : undefined;
+
+  const expressions: (SQL<unknown> | undefined)[] = [
+    query
+      ? filterColumn({
+          column: bankTransactions.name,
+          value: query,
+        })
+      : undefined,
+    !!category
+      ? filterColumn({
+          column: bankTransactions.categoryId,
+          value: category,
+          isSelectable: true,
+        })
+      : undefined,
+    !!account
+      ? filterColumn({
+          column: bankTransactions.accountId,
+          value: account,
+          isSelectable: true,
+        })
+      : undefined,
+    // Filter by date
+    fromDay && toDay
+      ? and(
+          gte(bankTransactions.date, fromDay),
+          lte(bankTransactions.date, toDay),
+        )
+      : undefined,
+  ];
+
+  const where: DrizzleWhere<typeof bankTransactions.$inferSelect> =
+    !operator || operator === "and" ? and(...expressions) : or(...expressions);
+
+  // Transaction is used to ensure both queries are executed in a single transaction
+  const { data, total } = await db.transaction(async (tx) => {
+    // NOTE: used only for institution logo. Remove in the future
+    const bankConnections = await tx
+      .select()
+      .from(schema.bankConnections)
+      .where(eq(schema.bankConnections.userId, userId));
+
+    const data = await tx
+      .select()
+      .from(bankTransactions)
+      .limit(per_page)
+      .offset(offset)
+      .where(where)
+      .leftJoin(
+        bankAccounts,
+        eq(bankAccounts.accountId, bankTransactions.accountId),
+      )
+      .leftJoin(categories, eq(categories.id, bankTransactions.categoryId))
+      .orderBy(
+        column && column in bankTransactions
+          ? order === "asc"
+            ? asc(bankTransactions[column])
+            : desc(bankTransactions[column])
+          : desc(bankTransactions.id),
+      );
+
+    const total = await tx
+      .select({ count: count() })
+      .from(bankTransactions)
+      .where(where)
+      .execute()
+      .then((res) => res[0]?.count ?? 0);
+
+    return {
+      data: data.map((item) => {
+        const connection = bankConnections.find(
+          (bc) => bc.id === item.bank_accounts?.bankConnectionId,
+        );
+
+        return {
+          ...item.bank_transactions,
+          bankAccount: {
+            institution: connection?.name,
+            logoUrl: connection?.logoUrl,
+            name: item.bank_accounts?.name,
+          },
+          category: {
+            icon: item.categories?.icon,
+            color: item.categories?.color,
+            name: item.categories?.name,
+          },
+        };
+      }),
+      total,
+    };
+  });
+
+  const pageCount = Math.ceil(total / per_page);
+  return { data, pageCount };
 }
 
 export type GetCategoriesParams = {

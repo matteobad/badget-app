@@ -22,7 +22,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Skeleton } from "~/components/ui/skeleton";
 import { euroFormat, getInitials } from "~/lib/utils";
-import { getUserBankAccounts } from "~/server/db/queries/cached-queries";
+import { getUserBankConnections } from "~/server/db/queries/cached-queries";
 import { Provider } from "~/server/db/schema/enum";
 
 export function BankAccountListLoading() {
@@ -63,7 +63,7 @@ export function BankAccountListLoading() {
 }
 
 export async function BankAccountList() {
-  const data = await getUserBankAccounts();
+  const data = await getUserBankConnections();
 
   if (data.length === 0) {
     return (

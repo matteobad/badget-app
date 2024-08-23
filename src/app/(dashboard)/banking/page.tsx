@@ -3,12 +3,12 @@ import { OverviewChart } from "~/components/widgets/banking/overview-chart";
 import RecentTransactionTable from "~/components/widgets/banking/recent-transactions-table";
 import TotalBalanceCard from "~/components/widgets/banking/total-balance-card";
 import {
-  getUserBankAccounts,
+  getUserBankConnections,
   getUserTransactions,
 } from "~/server/db/queries/cached-queries";
 
 export default async function PensionPage() {
-  const data = await getUserBankAccounts({});
+  const data = await getUserBankConnections({});
   const transactions = await getUserTransactions({});
 
   const totalBalance = data.reduce((acc, connection) => {

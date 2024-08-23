@@ -1,7 +1,14 @@
 import type { SQL } from "drizzle-orm";
-import { getTableColumns, sql } from "drizzle-orm";
-import { type PgTable } from "drizzle-orm/pg-core";
+import type { PgSelect, PgTable } from "drizzle-orm/pg-core";
+import { asc, eq, getTableColumns, sql } from "drizzle-orm";
+import { PgTableWithColumns } from "drizzle-orm/pg-core";
 import { type SQLiteTable } from "drizzle-orm/sqlite-core";
+
+import {
+  bankAccounts,
+  bankTransactions,
+  categories,
+} from "./schema/open-banking";
 
 export const buildConflictUpdateColumns = <
   T extends PgTable | SQLiteTable,
@@ -20,3 +27,30 @@ export const buildConflictUpdateColumns = <
     {} as Record<Q, SQL>,
   );
 };
+
+export function withAccounts<T extends PgSelect>(qb: T) {
+  return qb.leftJoin(
+    bankAccounts,
+    eq(bankAccounts.accountId, bankTransactions.accountId),
+  );
+}
+
+export function withCategories<T extends PgSelect>(qb: T) {
+  return qb.leftJoin(
+    categories,
+    eq(categories.id, bankTransactions.categoryId),
+  );
+}
+
+export function withPagination<T extends PgSelect>(
+  qb: T,
+  page = 1,
+  pageSize = 10,
+) {
+  return qb.limit(pageSize).offset((page - 1) * pageSize);
+}
+
+export type DrizzleWhere<T> =
+  | SQL<unknown>
+  | ((aliases: T) => SQL<T> | undefined)
+  | undefined;

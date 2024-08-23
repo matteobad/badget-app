@@ -187,3 +187,15 @@ export const deleteCategorySchema = z.object({
   name: z.string(),
   categoryId: z.number(),
 });
+
+export const transactionsSearchParamsSchema = z.object({
+  page: z.coerce.number().default(1),
+  per_page: z.coerce.number().default(10),
+  query: z.string().optional(),
+  sort: z.string().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  operator: z.enum(["and", "or"]).optional(),
+  category: z.string().optional(),
+  account: z.string().optional(),
+});

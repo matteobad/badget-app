@@ -1,13 +1,17 @@
-import { unstable_cache } from "next/cache";
+import { unstable_cache, unstable_noStore } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
+import { type z } from "zod";
 
 import type { GetTransactionsParams, GetUserBankAccountsParams } from ".";
+import { type transactionsSearchParamsSchema } from "~/lib/validators";
 import { db, schema } from "~/server/db";
 import {
   getBankOverviewChartQuery,
   getCategoriesQuery,
+  getFilteredTransactionsQuery,
   getTransactionsQuery,
   getUserBankAccountsQuery,
+  getUserBankConnectionsQuery,
 } from ".";
 
 export async function findAllInstitutions() {
@@ -26,6 +30,30 @@ export async function findAllInstitutions() {
 export type GetPensionAccountsReturnType = ReturnType<
   typeof findAllInstitutions
 >;
+
+export const getUserBankConnections = async (
+  params?: Omit<GetUserBankAccountsParams, "userId">,
+) => {
+  const session = auth();
+
+  if (!session.userId) {
+    return [];
+  }
+
+  return unstable_cache(
+    async () => {
+      return getUserBankConnectionsQuery({ ...params, userId: session.userId });
+    },
+    ["bank_connections", session.userId],
+    {
+      tags: [`bank_connections_${session.userId}`],
+      revalidate: 180,
+    },
+  )();
+};
+export type BankAccount = Awaited<
+  ReturnType<typeof getUserBankConnections>
+>[number];
 
 export const getUserBankAccounts = async (
   params?: Omit<GetUserBankAccountsParams, "userId">,
@@ -47,9 +75,6 @@ export const getUserBankAccounts = async (
     },
   )();
 };
-export type BankAccount = Awaited<
-  ReturnType<typeof getUserBankAccounts>
->[number];
 
 export const getUserTransactions = async (
   params: Omit<GetTransactionsParams, "userId">,
@@ -70,6 +95,22 @@ export const getUserTransactions = async (
       tags: [`transactions_${session.userId}`],
     },
   )();
+};
+
+export const getFilteredTransactions = async (
+  params: z.infer<typeof transactionsSearchParamsSchema>,
+) => {
+  const session = auth();
+
+  if (!session.userId) {
+    return {
+      data: [],
+      pageCount: 0,
+    };
+  }
+
+  unstable_noStore();
+  return getFilteredTransactionsQuery({ params, userId: session.userId });
 };
 
 export const getUserCategories = async (

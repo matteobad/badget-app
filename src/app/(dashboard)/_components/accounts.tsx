@@ -1,12 +1,12 @@
 "use client";
 
-import { type getUserBankAccounts } from "~/server/db/queries/cached-queries";
+import { type getUserBankConnections } from "~/server/db/queries/cached-queries";
 import { SidebarItem } from "./sidebar-item";
 
 export function AccountList({
   accounts,
 }: {
-  accounts: Awaited<ReturnType<typeof getUserBankAccounts>>;
+  accounts: Awaited<ReturnType<typeof getUserBankConnections>>;
 }) {
   if (accounts.length === 0) {
     return (
