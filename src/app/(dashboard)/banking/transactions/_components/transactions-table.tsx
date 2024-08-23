@@ -2,18 +2,21 @@
 
 import type dynamicIconImports from "lucide-react/dynamicIconImports";
 import * as React from "react";
+import { DownloadIcon } from "lucide-react";
 
 import type {
   getFilteredTransactions,
   getUserBankAccounts,
 } from "~/server/db/queries/cached-queries";
+import { DateRangePicker } from "~/components/data-range-picker";
 import { DataTable } from "~/components/tables/data-tables";
+import { Button } from "~/components/ui/button";
 import { type DataTableFilterField } from "~/configs/data-table";
 import { useDataTable } from "~/hooks/use-data-table";
+import { euroFormat } from "~/lib/utils";
 import { type getUserCategories } from "~/server/db/queries/cached-queries";
 import { DataTableToolbar } from "./data-table-toolbar";
 import { getColumns } from "./transactions-table-columns";
-import { TasksTableToolbarActions } from "./transactions-table-toolbar-actions";
 
 export type Transaction = Awaited<
   ReturnType<typeof getFilteredTransactions>
@@ -34,7 +37,7 @@ export function TransactionsTable({
   accounts: Account[];
 }) {
   // Memoize the columns so they don't re-render on every render
-  const columns = React.useMemo(() => getColumns(), []);
+  const columns = React.useMemo(() => getColumns(categories), [categories]);
 
   const filterFields: DataTableFilterField<Transaction>[] = [
     {
@@ -77,11 +80,38 @@ export function TransactionsTable({
     getRowId: (originalRow, index) => `${originalRow.id}-${index}`,
   });
 
+  // const selected = table.getFilteredSelectedRowModel().rows
+
   return (
-    <DataTable table={table}>
+    <div className="relative flex flex-col gap-2">
+      {table.getFilteredSelectedRowModel().rows.length > 0 && (
+        <div className="absolute -top-16 right-0 flex items-center gap-6 self-center py-2">
+          <div className="flex gap-2 text-sm text-slate-900">
+            <span>
+              {table.getFilteredSelectedRowModel().rows.length} Transazioni
+            </span>
+            <span>
+              {euroFormat(
+                table.getFilteredSelectedRowModel().rows.reduce((tot, item) => {
+                  return (tot += parseFloat(item.original.amount ?? "0"));
+                }, 0),
+              )}
+            </span>
+          </div>
+          <Button size="sm">
+            <DownloadIcon className="h-4 w-4" />
+            Download
+          </Button>
+        </div>
+      )}
       <DataTableToolbar table={table} filterFields={filterFields}>
-        <TasksTableToolbarActions table={table} />
+        <DateRangePicker
+          triggerSize="sm"
+          triggerClassName="ml-auto w-56 sm:w-60"
+          align="end"
+        />
       </DataTableToolbar>
-    </DataTable>
+      <DataTable table={table}></DataTable>
+    </div>
   );
 }

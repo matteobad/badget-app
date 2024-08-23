@@ -4,12 +4,12 @@ import type dynamicIconImports from "lucide-react/dynamicIconImports";
 import * as React from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { ArrowUpDown, EllipsisIcon } from "lucide-react";
+import { EllipsisIcon } from "lucide-react";
 
 import Icon from "~/components/icons";
+import { TransactionSheet } from "~/components/sheets/transaction-sheet";
 import { DataTableColumnHeader } from "~/components/tables/data-table-column-header";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
@@ -21,9 +21,9 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { euroFormat } from "~/lib/utils";
-import { type Transaction } from "./transactions-table";
+import { type Category, type Transaction } from "./transactions-table";
 
-export function getColumns(): ColumnDef<Transaction>[] {
+export function getColumns(categories: Category[]): ColumnDef<Transaction>[] {
   return [
     {
       id: "select",
@@ -52,6 +52,7 @@ export function getColumns(): ColumnDef<Transaction>[] {
     },
     {
       accessorKey: "date",
+      maxSize: 100,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Data" />
       ),
@@ -143,12 +144,13 @@ export function getColumns(): ColumnDef<Transaction>[] {
 
         return (
           <>
-            {/* <TransactionSheet
+            <TransactionSheet
               open={showUpdateTaskSheet}
               onOpenChange={setShowUpdateTaskSheet}
-              task={row.original}
+              data={row.original}
+              categories={categories}
             />
-            <DeleteTasksDialog
+            {/* <DeleteTasksDialog
               open={showDeleteTaskDialog}
               onOpenChange={setShowDeleteTaskDialog}
               tasks={[row.original]}

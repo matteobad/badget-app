@@ -1,22 +1,22 @@
 "use client";
 
 import type { Transaction } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
-import { Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
+import { type Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
 import { useMediaQuery } from "~/hooks/use-media-query";
 import { TransactionDetails } from "../transaction-details";
 import { Drawer, DrawerContent } from "../ui/drawer";
 import { Sheet, SheetContent } from "../ui/sheet";
 
 type TransactionSheetProps = {
-  setOpen: (open: string) => void;
-  isOpen: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   data?: Transaction;
   categories: Category[];
 };
 
 export function TransactionSheet({
-  setOpen,
-  isOpen,
+  open,
+  onOpenChange,
   data,
   categories,
 }: TransactionSheetProps) {
@@ -26,7 +26,7 @@ export function TransactionSheet({
 
   if (isDesktop) {
     return (
-      <Sheet open={!!isOpen} onOpenChange={() => setOpen("")}>
+      <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent className="bottom-4 right-4 top-4 h-auto rounded">
           <TransactionDetails data={data} categories={categories} />
         </SheetContent>
@@ -35,7 +35,7 @@ export function TransactionSheet({
   }
 
   return (
-    <Drawer open={isOpen} onOpenChange={() => setOpen("")}>
+    <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="p-6">
         <TransactionDetails data={data} categories={categories} />
       </DrawerContent>
