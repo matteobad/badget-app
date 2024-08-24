@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MenuIcon, PanelsTopLeft } from "lucide-react";
+import { HandCoinsIcon, MenuIcon, PanelsTopLeft } from "lucide-react";
 
 import { Menu } from "./menu";
 import { Button } from "./ui/button";
@@ -27,8 +27,8 @@ export function SheetMenu() {
             asChild
           >
             <Link href="/dashboard" className="flex items-center gap-2">
-              <PanelsTopLeft className="mr-1 h-6 w-6" />
-              <SheetTitle className="text-lg font-bold">Brand</SheetTitle>
+              <HandCoinsIcon className="mr-1 h-6 w-6" />
+              <SheetTitle className="text-lg font-bold">Badget.</SheetTitle>
             </Link>
           </Button>
         </SheetHeader>

@@ -1,18 +1,13 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BanknoteIcon,
-  Bookmark,
   BuildingIcon,
   CandlestickChartIcon,
   CreditCardIcon,
   LayersIcon,
   LayoutGrid,
   LeafIcon,
-  Settings,
   ShapesIcon,
-  SquarePen,
-  SquareStackIcon,
-  Tag,
   Users,
 } from "lucide-react";
 
@@ -28,6 +23,8 @@ type Menu = {
   active: boolean;
   icon: LucideIcon;
   submenus: Submenu[];
+  enabled?: boolean;
+  badge?: string;
 };
 
 type Group = {
@@ -83,6 +80,8 @@ export function getMenuList(pathname: string): Group[] {
           label: "Investimenti",
           active: pathname.includes("/investments"),
           icon: CandlestickChartIcon,
+          enabled: false,
+          badge: "soon",
           submenus: [],
         },
         {
@@ -90,6 +89,8 @@ export function getMenuList(pathname: string): Group[] {
           label: "Assets",
           active: pathname.includes("/assets"),
           icon: BuildingIcon,
+          enabled: false,
+          badge: "soon",
           submenus: [],
         },
         {
@@ -97,6 +98,8 @@ export function getMenuList(pathname: string): Group[] {
           label: "Liabilities",
           active: pathname.includes("/liabilities"),
           icon: CreditCardIcon,
+          enabled: false,
+          badge: "soon",
           submenus: [],
         },
       ],
