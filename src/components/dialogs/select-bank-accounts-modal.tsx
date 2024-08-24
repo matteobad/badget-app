@@ -105,13 +105,15 @@ export function SelectBankAccountsModal() {
   const [accounts, setAccounts] = useState<AccountsData>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"select-accounts" | "loading">(
-    "loading",
+    "select-accounts",
   );
 
   const { step, error, setParams, provider, ref, institution_id } =
     useConnectParams();
 
   const isOpen = step === "account";
+
+  console.log(step);
 
   useEffect(() => {
     if (error) {

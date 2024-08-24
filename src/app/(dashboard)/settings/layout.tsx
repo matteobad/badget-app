@@ -1,6 +1,5 @@
 import { type Metadata } from "next";
 
-import { SiteFooter } from "../../_components/footer";
 import { SettingsTopbarNav } from "./_components/topbar-nav";
 
 export const metadata: Metadata = {
