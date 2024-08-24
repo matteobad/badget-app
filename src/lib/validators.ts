@@ -188,6 +188,11 @@ export const deleteCategorySchema = z.object({
   categoryId: z.number(),
 });
 
+export const dashboardSearchParamsSchema = z.object({
+  from: z.string().optional(),
+  to: z.string().optional(),
+});
+
 export const transactionsSearchParamsSchema = z.object({
   page: z.coerce.number().default(1),
   per_page: z.coerce.number().default(10),

@@ -1,5 +1,4 @@
 import type { SQL } from "drizzle-orm";
-import { endOfMonth, startOfMonth } from "date-fns";
 import {
   and,
   asc,
@@ -18,10 +17,12 @@ import { type z } from "zod";
 import { filterColumn } from "~/lib/utils";
 import { type transactionsSearchParamsSchema } from "~/lib/validators";
 import { db, schema } from "..";
+import { type CategoryType } from "../schema/enum";
 import {
   bankAccounts,
   bankTransactions,
   categories,
+  categoryBudgets,
 } from "../schema/open-banking";
 import { type DrizzleWhere } from "../utils";
 
@@ -103,6 +104,7 @@ export async function getTransactionsQuery(params: GetTransactionsParams) {
         icon: item.categories?.icon,
         color: item.categories?.color,
         name: item.categories?.name,
+        type: item.categories?.type,
       },
     };
   });
@@ -258,47 +260,73 @@ export async function getCategoriesQuery(params: GetCategoriesParams) {
   return data;
 }
 
-export type GetBankOverviewChartParams = {
-  userId: string;
-  // startDate: Date;
-  // endDate: Date;
-};
-
-export async function getBankOverviewChartQuery({
-  userId,
-}: GetBankOverviewChartParams) {
-  // TODO: temp
-  const startDate = startOfMonth(new Date());
-  const endDate = endOfMonth(new Date());
+export async function getCategoryBudgetsQuery(params: GetCategoriesParams) {
+  const { userId } = params;
 
   const data = await db
-    .select({
-      date: sql`date_trunc('day', ${bankTransactions.date})`.as("date"),
-      income_sum:
-        sql`SUM(CASE WHEN ${categories.type} = 'INCOME' THEN ${bankTransactions.amount} ELSE 0 END)`.as(
-          "income_sum",
-        ),
-      outcome_sum:
-        sql`SUM(CASE WHEN ${categories.type} = 'OUTCOME' THEN ${bankTransactions.amount} ELSE 0 END)`.as(
-          "outcome_sum",
-        ),
-    })
-    .from(bankTransactions)
-    .innerJoin(
-      schema.categories,
-      eq(bankTransactions.categoryId, schema.categories.id),
-    )
-    .where(
-      and(
-        eq(bankTransactions.userId, userId),
-        gt(bankTransactions.date, startDate),
-        lt(bankTransactions.date, endDate),
-      ),
-    )
-    .groupBy(sql`date_trunc('day', ${bankTransactions.date})`)
-    .orderBy(sql`date_trunc('day', ${bankTransactions.date})`);
+    .select()
+    .from(categoryBudgets)
+    .where(eq(categoryBudgets.userId, userId))
+    .orderBy(desc(categoryBudgets.activeFrom))
+    .limit(1);
 
-  console.log(data);
+  return data;
+}
+
+export async function getSpendingByCategoryTypeQuery({
+  from,
+  to,
+  type,
+  userId,
+}: {
+  from: Date;
+  to: Date;
+  type: CategoryType;
+  userId: string;
+}) {
+  const data = await db.transaction(async (tx) => {
+    const actual = await tx
+      .select({
+        actual:
+          sql<number>`SUM(CASE WHEN ${categories.type} = ${type.toUpperCase()} THEN ${bankTransactions.amount} ELSE 0 END)`.as(
+            "actual",
+          ),
+      })
+      .from(bankTransactions)
+      .innerJoin(
+        schema.categories,
+        eq(bankTransactions.categoryId, schema.categories.id),
+      )
+      .where(
+        and(
+          eq(bankTransactions.userId, userId),
+          gt(bankTransactions.date, from),
+          lt(bankTransactions.date, to),
+        ),
+      );
+
+    const cats = await tx.query.categories.findMany({
+      columns: {},
+      where: and(eq(categories.type, type), eq(categories.userId, userId)),
+      with: {
+        budgets: {
+          columns: {
+            budget: true,
+          },
+          where: lt(categoryBudgets.activeFrom, to),
+          orderBy: desc(categoryBudgets.activeFrom),
+          limit: 1,
+        },
+      },
+    });
+
+    return {
+      actual: actual[0]?.actual ?? 0,
+      budget: cats
+        .flatMap((c) => c.budgets.map((b) => b.budget))
+        .reduce((acc, value) => (acc += +value), 0),
+    };
+  });
 
   return data;
 }

@@ -6,13 +6,15 @@ import type { GetTransactionsParams, GetUserBankAccountsParams } from ".";
 import { type transactionsSearchParamsSchema } from "~/lib/validators";
 import { db, schema } from "~/server/db";
 import {
-  getBankOverviewChartQuery,
   getCategoriesQuery,
+  getCategoryBudgetsQuery,
   getFilteredTransactionsQuery,
+  getSpendingByCategoryTypeQuery,
   getTransactionsQuery,
   getUserBankAccountsQuery,
   getUserBankConnectionsQuery,
 } from ".";
+import { type CategoryType } from "../schema/enum";
 
 export async function findAllInstitutions() {
   return unstable_cache(
@@ -134,7 +136,7 @@ export const getUserCategories = async (
   )();
 };
 
-export const getBankOverviewChart = async (
+export const getUserCategoryBudgets = async (
   params: Omit<GetTransactionsParams, "userId">,
 ) => {
   const session = auth();
@@ -145,12 +147,41 @@ export const getBankOverviewChart = async (
 
   return unstable_cache(
     async () => {
-      return getBankOverviewChartQuery({ ...params, userId: session.userId });
+      return getCategoryBudgetsQuery({ ...params, userId: session.userId });
     },
-    ["bank_overview_", session.userId],
+    ["transactions", session.userId],
     {
       revalidate: 180,
-      tags: [`bank_overview_${session.userId}`],
+      tags: [`transactions_${session.userId}`],
+    },
+  )();
+};
+
+export const getSpendingByCategoryType = async (params: {
+  from: Date;
+  to: Date;
+  type: CategoryType;
+}) => {
+  const session = auth();
+
+  if (!session.userId) {
+    return {
+      actual: 0,
+      budget: 0,
+    };
+  }
+
+  return unstable_cache(
+    async () => {
+      return getSpendingByCategoryTypeQuery({
+        ...params,
+        userId: session.userId,
+      });
+    },
+    [params.type.toLowerCase(), session.userId],
+    {
+      revalidate: 180,
+      tags: [`category_${params.type.toLowerCase()}_${session.userId}`],
     },
   )();
 };
