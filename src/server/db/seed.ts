@@ -4,24 +4,26 @@ import postgres from "postgres";
 import { env } from "~/env";
 import { schema } from ".";
 import { getInstitutions } from "../tasks/get-institutions";
-import { DEFAULT_CATEGORIES } from "./data/categories";
+import { buildConflictUpdateColumns } from "./utils";
 
-const queryClient = postgres(env.DATABASE_URL);
+// import { DEFAULT_CATEGORIES } from "./data/categories";
+
+const queryClient = postgres(env.POSTGRES_URL);
 const db = drizzle(queryClient);
 
 console.log("Seed start");
 
 // eslint-disable-next-line drizzle/enforce-delete-with-where
-await db.delete(schema.categories);
-await db.insert(schema.categories).values(
-  DEFAULT_CATEGORIES.map((c) => {
-    return {
-      ...c,
-      manual: false,
-      userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
-    };
-  }),
-);
+// await db.delete(schema.categories);
+// await db.insert(schema.categories).values(
+//   DEFAULT_CATEGORIES.map((c) => {
+//     return {
+//       ...c,
+//       manual: false,
+//       userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
+//     };
+//   }),
+// );
 // // eslint-disable-next-line drizzle/enforce-delete-with-where
 // await db.delete(schema.institutions);
 // await db.insert(schema.institutions).values(institutionsMock);
@@ -64,27 +66,36 @@ await db.insert(schema.categories).values(
 //   }
 // }
 
-// const documents = await getInstitutions();
+const documents = await getInstitutions();
 
-// try {
-//   // eslint-disable-next-line drizzle/enforce-delete-with-where
-//   await db.delete(schema.institutions);
-//   await db.insert(schema.institutions).values(
-//     documents.map((doc) => {
-//       return {
-//         id: doc.id,
-//         name: doc.name,
-//         logo: doc.logo,
-//         provider: doc.provider,
-//         popularity: doc.popularity,
-//         availableHistory: doc.available_history,
-//       } satisfies typeof schema.institutions.$inferInsert;
-//     }),
-//   );
-// } catch (error) {
-//   // @ts-expect-error no typings
-//   console.log(error.importResults);
-// }
+try {
+  // eslint-disable-next-line drizzle/enforce-delete-with-where
+  await db
+    .insert(schema.institutions)
+    .values(
+      documents.map((doc) => {
+        return {
+          id: doc.id,
+          name: doc.name,
+          logo: doc.logo,
+          provider: doc.provider,
+          popularity: doc.popularity,
+          availableHistory: doc.available_history,
+        } satisfies typeof schema.institutions.$inferInsert;
+      }),
+    )
+    .onConflictDoUpdate({
+      target: schema.institutions.id,
+      set: buildConflictUpdateColumns(schema.institutions, [
+        "name",
+        "logo",
+        "availableHistory",
+      ]),
+    });
+} catch (error) {
+  // @ts-expect-error no typings
+  console.log(error.importResults);
+}
 
 console.log("Seed done");
 

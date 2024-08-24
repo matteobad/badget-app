@@ -6,7 +6,7 @@ export default {
   schema: "./src/server/db/schema",
   dialect: "postgresql",
   dbCredentials: {
-    url: env.DATABASE_URL,
+    url: env.POSTGRES_URL,
   },
   tablesFilter: ["badget-app_*"],
 } satisfies Config;
