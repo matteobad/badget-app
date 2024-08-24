@@ -3,6 +3,7 @@
 import type z from "zod";
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { addDays } from "date-fns";
 import { CircleCheckIcon, Loader2, Loader2Icon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
@@ -17,7 +18,12 @@ import {
 import { connectBankAccountAction } from "~/server/actions/connect-bank-account-action";
 import { importBankTransactionAction } from "~/server/actions/import-bank-transaction-action";
 import { getAccounts } from "~/server/actions/institutions/get-accounts";
-import { BankAccountType, Provider } from "~/server/db/schema/enum";
+import {
+  BankAccountType,
+  ConnectionStatus,
+  Provider,
+} from "~/server/db/schema/enum";
+import { getAccessValidForDays } from "~/server/providers/gocardless/utils";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
@@ -161,20 +167,40 @@ export function SelectBankAccountsModal() {
       setAccounts(data ?? []);
       setLoading(false);
 
+      // Get first account to create a bank connection
+      const account = data?.at(0);
+
+      if (!account) {
+        return;
+      }
+
+      // NOTE: GoCardLess connection expires after 90-180 days
+      const expiresAt =
+        provider === Provider.GOCARDLESS
+          ? addDays(
+              new Date(),
+              getAccessValidForDays({ institutionId: account.institution_id }),
+            )
+          : undefined;
+
       form.reset({
         provider: Provider.GOCARDLESS,
         referenceId: ref!,
+        expiresAt,
+        institutionId: account.institution_id,
+        name: account.institution.name,
+        logoUrl: account.institution.logo,
+        status: ConnectionStatus.CONNECTED,
+        userId: "user_id_placeholder", // TODO: fine tune zod schema
         accounts: data?.map((account) => ({
           accountId: account.id,
-          bank_name: account.institution.name,
           balance: account.balance?.amount,
           currency: account.balance?.currency,
           name: account.account.name || "Conto Corrente",
-          institution_id: account.institution.id,
+          institutionId: account.institution.id,
           enabled: true,
-          logo_url: account.institution.logo,
           type: BankAccountType.DEPOSITORY,
-          userId: "user_id",
+          userId: "user_id_placeholder", // TODO: fine tune zod schema
         })),
       });
 
@@ -215,6 +241,10 @@ export function SelectBankAccountsModal() {
                     className="scrollbar-hide relative h-[300px] space-y-6 overflow-auto pb-[80px]"
                   >
                     {loading && <RowsSkeleton />}
+
+                    <pre className="w-full">
+                      {JSON.stringify(form.formState.errors, null, 2)}
+                    </pre>
 
                     {accounts.map((account) => (
                       <FormField
@@ -286,6 +316,7 @@ export function SelectBankAccountsModal() {
                         type="submit"
                         disabled={
                           connectBankAction.status === "executing" ||
+                          !form.formState.isValid ||
                           !form
                             .getValues("accounts")
                             .find((account) => account.enabled)
