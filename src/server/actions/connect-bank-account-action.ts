@@ -17,7 +17,7 @@ export const connectBankAccountAction = authActionClient
 
       await upsertBankConnections({
         ...connection,
-        accounts,
+        accounts: accounts.map((a) => ({ ...a, userId })),
         userId,
       });
     },

@@ -113,8 +113,6 @@ export function SelectBankAccountsModal() {
 
   const isOpen = step === "account";
 
-  console.log(step);
-
   useEffect(() => {
     if (error) {
       // NOTE: On GoCardLess cancel flow
@@ -167,7 +165,7 @@ export function SelectBankAccountsModal() {
         provider: Provider.GOCARDLESS,
         referenceId: ref!,
         accounts: data?.map((account) => ({
-          account_id: account.id,
+          accountId: account.id,
           bank_name: account.institution.name,
           balance: account.balance?.amount,
           currency: account.balance?.currency,
@@ -176,6 +174,7 @@ export function SelectBankAccountsModal() {
           enabled: true,
           logo_url: account.institution.logo,
           type: BankAccountType.DEPOSITORY,
+          userId: "user_id",
         })),
       });
 
@@ -251,32 +250,30 @@ export function SelectBankAccountsModal() {
                                 </div>
                               </FormLabel>
 
-                              <div>
-                                <FormControl>
-                                  <Switch
-                                    checked={
-                                      field.value.find(
-                                        (value) =>
-                                          value.accountId === account.id,
-                                      )?.enabled ?? false
-                                    }
-                                    onCheckedChange={(checked) => {
-                                      return field.onChange(
-                                        field.value.map((value) => {
-                                          if (value.accountId === account.id) {
-                                            return {
-                                              ...value,
-                                              enabled: checked,
-                                            };
-                                          }
+                              <FormControl>
+                                <Switch
+                                  checked={
+                                    field.value.find(
+                                      (value) => value.accountId === account.id,
+                                    )?.enabled ?? false
+                                  }
+                                  onCheckedChange={(checked) => {
+                                    console.log(field.value);
+                                    return field.onChange(
+                                      field.value.map((value) => {
+                                        if (value.accountId === account.id) {
+                                          return {
+                                            ...value,
+                                            enabled: checked,
+                                          };
+                                        }
 
-                                          return value;
-                                        }),
-                                      );
-                                    }}
-                                  />
-                                </FormControl>
-                              </div>
+                                        return value;
+                                      }),
+                                    );
+                                  }}
+                                />
+                              </FormControl>
                             </FormItem>
                           );
                         }}
@@ -297,7 +294,7 @@ export function SelectBankAccountsModal() {
                         {connectBankAction.status === "executing" ? (
                           <Loader2 className="pointer-events-none h-4 w-4 animate-spin" />
                         ) : (
-                          "Save"
+                          "Salva"
                         )}
                       </Button>
                     </div>
