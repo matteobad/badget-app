@@ -9,6 +9,7 @@ import {
   getCategoriesQuery,
   getCategoryBudgetsQuery,
   getFilteredTransactionsQuery,
+  getSpendingByCategoryQuery,
   getSpendingByCategoryTypeQuery,
   getTransactionsQuery,
   getUserBankAccountsQuery,
@@ -171,17 +172,32 @@ export const getSpendingByCategoryType = async (params: {
     };
   }
 
-  return unstable_cache(
-    async () => {
-      return getSpendingByCategoryTypeQuery({
-        ...params,
-        userId: session.userId,
-      });
-    },
-    [params.type.toLowerCase(), session.userId],
-    {
-      revalidate: 180,
-      tags: [`category_${params.type.toLowerCase()}_${session.userId}`],
-    },
-  )();
+  unstable_noStore();
+  return getSpendingByCategoryTypeQuery({
+    ...params,
+    userId: session.userId,
+  });
+};
+
+export const getSpendingByCategory = async (params: {
+  from: Date;
+  to: Date;
+}) => {
+  const session = auth();
+
+  if (!session.userId) {
+    return [
+      {
+        category: "",
+        actual: 0,
+        budget: 0,
+      },
+    ];
+  }
+
+  unstable_noStore();
+  return getSpendingByCategoryQuery({
+    ...params,
+    userId: session.userId,
+  });
 };

@@ -144,7 +144,11 @@ export function DateRangePicker({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className={cn("w-auto p-0", className)} {...props}>
+        <PopoverContent
+          align="end"
+          className={cn("w-auto p-0", className)}
+          {...props}
+        >
           <Calendar
             initialFocus
             mode="range"

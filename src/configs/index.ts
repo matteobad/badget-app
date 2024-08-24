@@ -73,6 +73,11 @@ export function getMenuList(pathname: string): Group[] {
               label: "Pensione",
               active: pathname === "/savings/pension",
             },
+            {
+              href: "/savings/emergency",
+              label: "Fondo emergenza",
+              active: pathname === "/savings/emergency",
+            },
           ],
         },
         {

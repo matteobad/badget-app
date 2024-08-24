@@ -9,6 +9,7 @@ import {
   gte,
   lt,
   lte,
+  ne,
   or,
   sql,
 } from "drizzle-orm";
@@ -17,7 +18,7 @@ import { type z } from "zod";
 import { filterColumn } from "~/lib/utils";
 import { type transactionsSearchParamsSchema } from "~/lib/validators";
 import { db, schema } from "..";
-import { type CategoryType } from "../schema/enum";
+import { CategoryType } from "../schema/enum";
 import {
   bankAccounts,
   bankTransactions,
@@ -326,6 +327,70 @@ export async function getSpendingByCategoryTypeQuery({
         .flatMap((c) => c.budgets.map((b) => b.budget))
         .reduce((acc, value) => (acc += +value), 0),
     };
+  });
+
+  return data;
+}
+
+export async function getSpendingByCategoryQuery({
+  from,
+  to,
+  userId,
+}: {
+  from: Date;
+  to: Date;
+  userId: string;
+}) {
+  const data = await db.transaction(async (tx) => {
+    const actuals = await tx
+      .select({
+        categoryId: bankTransactions.categoryId,
+        actual: sql<number>`sum(${bankTransactions.amount})`.as("actual"),
+      })
+      .from(bankTransactions)
+      .where(
+        and(
+          eq(bankTransactions.userId, userId),
+          gt(bankTransactions.date, from),
+          lt(bankTransactions.date, to),
+        ),
+      )
+      .groupBy((schema) => schema.categoryId);
+
+    const budgets = await tx.query.categories.findMany({
+      where: and(
+        eq(categories.userId, userId),
+        ne(categories.type, CategoryType.TRANSFERS),
+      ),
+      with: {
+        budgets: {
+          columns: {
+            budget: true,
+            categoryId: true,
+          },
+          where: lt(categoryBudgets.activeFrom, to),
+          orderBy: desc(categoryBudgets.activeFrom),
+          limit: 1,
+        },
+      },
+    });
+
+    return budgets.map((categoryBudget) => {
+      const { budgets, ...category } = categoryBudget;
+      return {
+        category: category.name,
+        actual: Math.abs(
+          Number(
+            actuals.find((a) => a.categoryId === category.id)?.actual ?? 0,
+          ),
+        ),
+        budget: Math.abs(
+          Number(
+            budgets.find((b) => b.categoryId === category.id)?.budget ?? 0,
+          ),
+        ),
+      };
+    });
   });
 
   return data;
