@@ -5,6 +5,7 @@ import xior from "xior";
 
 import type { GetInstitutionsRequest, ProviderParams } from "../types";
 import type {
+  AccountDetails,
   DeleteRequistionResponse,
   GetAccessTokenResponse,
   GetAccountBalanceResponse,
@@ -36,6 +37,7 @@ export class GoCardLessApi {
   #accessTokenCacheKey = "gocardless_access_token";
   #refreshTokenCacheKey = "gocardless_refresh_token";
   #institutionsCacheKey = "gocardless_institutions";
+  #accountCacheKey = "gocardless_account";
 
   #kv: VercelKV;
 
@@ -107,14 +109,32 @@ export class GoCardLessApi {
     GetAccountBalanceResponse["balances"][0]["balanceAmount"] | undefined
   > {
     const token = await this.#getAccessToken();
+    const cacheKey = `${this.#accountCacheKey}_balance_${accountId}`;
+
+    const balances = await this.#kv?.get<GetAccountBalanceResponse>(cacheKey);
+
+    if (balances) {
+      console.log("[GoCardless] balance reading from cache:", accountId);
+      const foundAccount = balances.balances?.find(
+        (account) => account.balanceType === "interimAvailable",
+      );
+
+      return foundAccount?.balanceAmount;
+    }
 
     try {
-      const { balances } = await this.#get<GetAccountBalanceResponse>(
+      const response = await this.#get<GetAccountBalanceResponse>(
         `/api/v2/accounts/${accountId}/balances/`,
         token,
       );
 
-      const foundAccount = balances?.find(
+      // cache for 6 hours (gocardless limit to 4 call a day)
+      // TODO: better implemenetation reading response headers
+      void this.#kv?.set(cacheKey, JSON.stringify(response), {
+        ex: this.#oneHour * 6,
+      });
+
+      const foundAccount = response.balances?.find(
         (account) => account.balanceType === "interimAvailable",
       );
 
@@ -208,8 +228,23 @@ export class GoCardLessApi {
 
   async getAccountDetails(id: string): Promise<GetAccountDetailsResponse> {
     const token = await this.#getAccessToken();
+    const cacheKey = `${this.#accountCacheKey}_account_${id}`;
 
-    const [account, details] = await Promise.all([
+    const accounts =
+      await this.#kv?.get<
+        [GetAccountResponse, GetAccountResponse & AccountDetails]
+      >(cacheKey);
+
+    if (accounts) {
+      console.log("[GoCardless] details reading from cache:", id);
+
+      return {
+        ...accounts[0],
+        ...accounts[1],
+      };
+    }
+
+    const response = await Promise.all([
       this.#get<GetAccountResponse>(`/api/v2/accounts/${id}/`, token),
       this.#get<GetAccountDetailsResponse>(
         `/api/v2/accounts/${id}/details/`,
@@ -217,9 +252,15 @@ export class GoCardLessApi {
       ),
     ]);
 
+    // cache for 6 hours (gocardless limit to 4 call a day)
+    // TODO: better implemenetation reading response headers
+    void this.#kv?.set(cacheKey, JSON.stringify(response), {
+      ex: this.#oneHour * 6,
+    });
+
     return {
-      ...account,
-      ...details,
+      ...response[0],
+      ...response[1],
     };
   }
 
@@ -273,6 +314,14 @@ export class GoCardLessApi {
     GetTransactionsResponse["transactions"]["booked"] | undefined
   > {
     const token = await this.#getAccessToken();
+    const cacheKey = `${this.#accountCacheKey}_transactions_${accountId}`;
+
+    const transactions = await this.#kv?.get<GetTransactionsResponse>(cacheKey);
+
+    if (transactions) {
+      console.log("[GoCardless] transactions reading from cache:", accountId);
+      return transactions?.transactions?.booked;
+    }
 
     try {
       const response = await this.#get<GetTransactionsResponse>(
@@ -286,6 +335,12 @@ export class GoCardLessApi {
             }
           : undefined,
       );
+
+      // cache for 6 hours (gocardless limit to 4 call a day)
+      // TODO: better implemenetation reading response headers
+      void this.#kv?.set(cacheKey, JSON.stringify(response), {
+        ex: this.#oneHour * 6,
+      });
 
       return response?.transactions?.booked;
     } catch (error) {

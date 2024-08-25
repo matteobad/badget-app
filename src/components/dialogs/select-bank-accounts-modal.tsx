@@ -11,10 +11,7 @@ import { toast } from "sonner";
 
 import { useConnectParams } from "~/hooks/use-connect-params";
 import { cn, euroFormat, getInitials } from "~/lib/utils";
-import {
-  connectBankAccountSchema,
-  upsertBankConnectionsSchema,
-} from "~/lib/validators";
+import { upsertBankConnectionsSchema } from "~/lib/validators";
 import { connectBankAccountAction } from "~/server/actions/connect-bank-account-action";
 import { importBankTransactionAction } from "~/server/actions/import-bank-transaction-action";
 import { getAccounts } from "~/server/actions/institutions/get-accounts";

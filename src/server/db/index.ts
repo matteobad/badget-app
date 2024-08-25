@@ -18,6 +18,8 @@ const conn = globalForDb.conn ?? postgres(env.POSTGRES_URL);
 if (env.NODE_ENV !== "production") globalForDb.conn = conn;
 
 // export insert and select types
+export type Transaction = typeof schema.bankTransactions.$inferInsert;
+export type Category = typeof schema.categories.$inferInsert;
 export type PensionAccountInsert = typeof schema.pensionAccounts.$inferInsert;
 export type PensionAccountSelect = typeof schema.pensionAccounts.$inferSelect;
 export type PensionFundsSelect = typeof schema.pensionFunds.$inferSelect;
