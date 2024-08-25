@@ -43,7 +43,7 @@ export async function upsertBankConnections(
       .insert(bankConnections)
       .values({ ...connection })
       .onConflictDoUpdate({
-        target: bankConnections.id,
+        target: [bankConnections.institutionId, bankConnections.userId],
         set: { ...connection, updatedAt },
       })
       .returning({ id: bankConnections.id });
@@ -53,10 +53,16 @@ export async function upsertBankConnections(
     // upsert accounts
     await tx
       .insert(bankAccounts)
-      .values(accounts)
+      .values(
+        accounts.map((account) => ({
+          ...account,
+          bankConnectionId: upserted[0]?.id,
+        })),
+      )
       .onConflictDoUpdate({
         target: bankAccounts.accountId,
         set: buildConflictUpdateColumns(bankAccounts, [
+          "bankConnectionId",
           "balance",
           "currency",
           "type",

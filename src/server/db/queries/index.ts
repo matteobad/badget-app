@@ -139,6 +139,11 @@ export async function getFilteredTransactionsQuery({
   const toDay = to ? sql`to_date(${to}, 'yyy-mm-dd')` : undefined;
 
   const expressions: (SQL<unknown> | undefined)[] = [
+    filterColumn({
+      column: bankTransactions.userId,
+      value: userId,
+      isSelectable: true,
+    }),
     query
       ? filterColumn({
           column: bankTransactions.name,

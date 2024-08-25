@@ -119,7 +119,7 @@ export class GoCardLessApi {
         (account) => account.balanceType === "interimAvailable",
       );
 
-      return foundAccount?.balanceAmount;
+      return foundAccount?.balanceAmount ?? balances.balances[0]?.balanceAmount;
     }
 
     try {
@@ -138,7 +138,7 @@ export class GoCardLessApi {
         (account) => account.balanceType === "interimAvailable",
       );
 
-      return foundAccount?.balanceAmount;
+      return foundAccount?.balanceAmount ?? response.balances[0]?.balanceAmount;
     } catch (error) {
       const parsedError = isError(error);
 

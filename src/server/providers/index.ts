@@ -2,7 +2,6 @@ import type {
   DeleteAccountsRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
-  GetHealthCheckResponse,
   GetInstitutionsRequest,
   GetTransactionsRequest,
   ProviderParams,

@@ -180,6 +180,8 @@ export function SelectBankAccountsModal() {
             )
           : undefined;
 
+      console.log(provider, expiresAt);
+
       form.reset({
         provider: Provider.GOCARDLESS,
         referenceId: ref!,
@@ -238,10 +240,6 @@ export function SelectBankAccountsModal() {
                     className="scrollbar-hide relative h-[300px] space-y-6 overflow-auto pb-[80px]"
                   >
                     {loading && <RowsSkeleton />}
-
-                    <pre className="w-full">
-                      {JSON.stringify(form.formState.errors, null, 2)}
-                    </pre>
 
                     {accounts.map((account) => (
                       <FormField

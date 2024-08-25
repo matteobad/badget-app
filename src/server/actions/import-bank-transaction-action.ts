@@ -16,6 +16,8 @@ export const importBankTransactionAction = authActionClient
           latest,
         });
 
+        if (transactions.length === 0) continue;
+
         await upsertTransactions(
           transactions.map(transformTransaction).map((t) => ({
             ...t,
