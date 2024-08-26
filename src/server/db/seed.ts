@@ -14,8 +14,8 @@ const db = drizzle(queryClient);
 console.log("Seed start");
 
 // eslint-disable-next-line drizzle/enforce-delete-with-where
-// await db.delete(schema.categories);
-// await db.insert(schema.categories).values(
+// await db.delete(schema.category);
+// await db.insert(schema.category).values(
 //   DEFAULT_CATEGORIES.map((c) => {
 //     return {
 //       ...c,

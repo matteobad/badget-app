@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import { readStreamableValue } from "ai/rsc";
 import { isNull, sql } from "drizzle-orm";
 
-import { findMatchingCategory } from "~/server/actions/ai/find-matching-category";
 import { db, schema } from "~/server/db";
 import { bankTransactions } from "~/server/db/schema/open-banking";
 
 export async function GET(_req: Request) {
   // get all connections
-  const categories = await db.select().from(schema.categories);
+  const categories = await db.select().from(schema.category);
 
   const transactions = await db
     .select({

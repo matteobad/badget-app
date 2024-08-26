@@ -1,6 +1,7 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+import { category, categoryBudgets } from "~/server/db/schema/categorization";
 import {
   BankAccountType,
   ConnectionStatus,
@@ -10,8 +11,6 @@ import {
   bankAccounts,
   bankConnections,
   bankTransactions,
-  categories,
-  categoryBudgets,
 } from "~/server/db/schema/open-banking";
 import { ContractType } from "~/server/db/schema/working-records";
 
@@ -137,7 +136,7 @@ export const editBankTransactionSchema = createInsertSchema(
 });
 
 // Category
-export const upsertCategorySchema = createInsertSchema(categories, {
+export const upsertCategorySchema = createInsertSchema(category, {
   name: (schema) => schema.name.toLowerCase(),
   macro: (schema) => schema.macro.toLowerCase(),
 })
@@ -159,7 +158,7 @@ export const upsertCategorySchema = createInsertSchema(categories, {
     ),
   });
 
-export const updateCategorySchema = createInsertSchema(categories, {
+export const updateCategorySchema = createInsertSchema(category, {
   name: (schema) => schema.name.toLowerCase(),
   macro: (schema) => schema.macro.toLowerCase(),
 }).pick({

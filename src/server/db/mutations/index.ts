@@ -334,7 +334,7 @@ export async function insertCategory({
 }: InsertCategoryPayload) {
   return await db.transaction(async (tx) => {
     const inserted = await tx
-      .insert(schema.categories)
+      .insert(schema.category)
       .values({
         name,
         macro,
@@ -344,7 +344,7 @@ export async function insertCategory({
         userId,
       })
       .onConflictDoUpdate({
-        target: [schema.categories.userId, schema.categories.name],
+        target: [schema.category.userId, schema.category.name],
         set: {
           macro,
           type: type as CategoryType,
@@ -352,7 +352,7 @@ export async function insertCategory({
           color,
         },
       })
-      .returning({ insertedId: schema.categories.id });
+      .returning({ insertedId: schema.category.id });
 
     if (!inserted[0]?.insertedId) return tx.rollback();
 
@@ -380,7 +380,7 @@ export async function editCategory({
   userId,
 }: EditCategoryPayload) {
   await db
-    .update(schema.categories)
+    .update(schema.category)
     .set({
       id,
       name,
@@ -390,7 +390,7 @@ export async function editCategory({
       color,
     })
     .where(
-      and(eq(schema.categories.id, id!), eq(schema.categories.userId, userId)),
+      and(eq(schema.category.id, id!), eq(schema.category.userId, userId)),
     );
 }
 
@@ -410,13 +410,13 @@ export async function deleteCategory({
 
     const defaultCategory = await tx
       .select({
-        id: schema.categories.id,
+        id: schema.category.id,
       })
-      .from(schema.categories)
+      .from(schema.category)
       .where(
         and(
-          eq(schema.categories.userId, userId),
-          eq(schema.categories.name, "uncategorized"),
+          eq(schema.category.userId, userId),
+          eq(schema.category.name, "uncategorized"),
         ),
       );
 
@@ -432,12 +432,9 @@ export async function deleteCategory({
     console.log(name);
 
     await tx
-      .delete(schema.categories)
+      .delete(schema.category)
       .where(
-        and(
-          eq(schema.categories.id, categoryId),
-          eq(schema.categories.name, name),
-        ),
+        and(eq(schema.category.id, categoryId), eq(schema.category.name, name)),
       );
   });
 }

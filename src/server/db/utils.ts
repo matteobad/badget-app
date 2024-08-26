@@ -1,14 +1,10 @@
 import type { SQL } from "drizzle-orm";
 import type { PgSelect, PgTable } from "drizzle-orm/pg-core";
-import { asc, eq, getTableColumns, sql } from "drizzle-orm";
-import { PgTableWithColumns } from "drizzle-orm/pg-core";
+import { eq, getTableColumns, sql } from "drizzle-orm";
 import { type SQLiteTable } from "drizzle-orm/sqlite-core";
 
-import {
-  bankAccounts,
-  bankTransactions,
-  categories,
-} from "./schema/open-banking";
+import { category } from "./schema/categorization";
+import { bankAccounts, bankTransactions } from "./schema/open-banking";
 
 export const buildConflictUpdateColumns = <
   T extends PgTable | SQLiteTable,
@@ -36,10 +32,7 @@ export function withAccounts<T extends PgSelect>(qb: T) {
 }
 
 export function withCategories<T extends PgSelect>(qb: T) {
-  return qb.leftJoin(
-    categories,
-    eq(categories.id, bankTransactions.categoryId),
-  );
+  return qb.leftJoin(category, eq(category.id, bankTransactions.categoryId));
 }
 
 export function withPagination<T extends PgSelect>(

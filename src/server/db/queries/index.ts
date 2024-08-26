@@ -18,13 +18,9 @@ import { type z } from "zod";
 import { filterColumn } from "~/lib/utils";
 import { type transactionsSearchParamsSchema } from "~/lib/validators";
 import { db, schema } from "..";
+import { category, categoryBudgets } from "../schema/categorization";
 import { CategoryType } from "../schema/enum";
-import {
-  bankAccounts,
-  bankTransactions,
-  categories,
-  categoryBudgets,
-} from "../schema/open-banking";
+import { bankAccounts, bankTransactions } from "../schema/open-banking";
 import { type DrizzleWhere } from "../utils";
 
 export type GetUserBankAccountsParams = {
@@ -83,8 +79,8 @@ export async function getTransactionsQuery(params: GetTransactionsParams) {
       eq(schema.bankTransactions.accountId, schema.bankAccounts.accountId),
     )
     .leftJoin(
-      schema.categories,
-      eq(schema.bankTransactions.categoryId, schema.categories.id),
+      schema.category,
+      eq(schema.bankTransactions.categoryId, schema.category.id),
     )
     .limit(10)
     .orderBy(desc(schema.bankTransactions.date));
@@ -102,10 +98,10 @@ export async function getTransactionsQuery(params: GetTransactionsParams) {
         name: item.bank_accounts?.name,
       },
       category: {
-        icon: item.categories?.icon,
-        color: item.categories?.color,
-        name: item.categories?.name,
-        type: item.categories?.type,
+        icon: item.category?.icon,
+        color: item.category?.color,
+        name: item.category?.name,
+        type: item.category?.type,
       },
     };
   });
@@ -139,11 +135,13 @@ export async function getFilteredTransactionsQuery({
   const toDay = to ? sql`to_date(${to}, 'yyy-mm-dd')` : undefined;
 
   const expressions: (SQL<unknown> | undefined)[] = [
-    filterColumn({
-      column: bankTransactions.userId,
-      value: userId,
-      isSelectable: true,
-    }),
+    userId
+      ? filterColumn({
+          column: bankTransactions.userId,
+          value: userId,
+          isSelectable: true,
+        })
+      : undefined,
     query
       ? filterColumn({
           column: bankTransactions.name,
@@ -194,7 +192,10 @@ export async function getFilteredTransactionsQuery({
         bankAccounts,
         eq(bankAccounts.accountId, bankTransactions.accountId),
       )
-      .leftJoin(categories, eq(categories.id, bankTransactions.categoryId))
+      .leftJoin(
+        schema.category,
+        eq(schema.category.id, bankTransactions.categoryId),
+      )
       .orderBy(
         column && column in bankTransactions
           ? order === "asc"
@@ -224,9 +225,9 @@ export async function getFilteredTransactionsQuery({
             name: item.bank_accounts?.name,
           },
           category: {
-            icon: item.categories?.icon,
-            color: item.categories?.color,
-            name: item.categories?.name,
+            icon: item.category?.icon,
+            color: item.category?.color,
+            name: item.category?.name,
           },
         };
       }),
@@ -245,7 +246,7 @@ export type GetCategoriesParams = {
 export async function getCategoriesQuery(params: GetCategoriesParams) {
   const { userId } = params;
 
-  const data = await db.query.categories.findMany({
+  const data = await db.query.category.findMany({
     with: {
       budgets: {
         columns: {
@@ -259,8 +260,8 @@ export async function getCategoriesQuery(params: GetCategoriesParams) {
         limit: 1,
       },
     },
-    where: eq(schema.categories.userId, userId),
-    orderBy: desc(schema.categories.manual),
+    where: eq(schema.category.userId, userId),
+    orderBy: desc(schema.category.manual),
   });
 
   return data;
@@ -294,14 +295,14 @@ export async function getSpendingByCategoryTypeQuery({
     const actual = await tx
       .select({
         actual:
-          sql<number>`SUM(CASE WHEN ${categories.type} = ${type.toUpperCase()} THEN ${bankTransactions.amount} ELSE 0 END)`.as(
+          sql<number>`SUM(CASE WHEN ${schema.category.type} = ${type.toUpperCase()} THEN ${bankTransactions.amount} ELSE 0 END)`.as(
             "actual",
           ),
       })
       .from(bankTransactions)
       .innerJoin(
-        schema.categories,
-        eq(bankTransactions.categoryId, schema.categories.id),
+        schema.category,
+        eq(bankTransactions.categoryId, schema.category.id),
       )
       .where(
         and(
@@ -311,9 +312,12 @@ export async function getSpendingByCategoryTypeQuery({
         ),
       );
 
-    const cats = await tx.query.categories.findMany({
+    const cats = await tx.query.category.findMany({
       columns: {},
-      where: and(eq(categories.type, type), eq(categories.userId, userId)),
+      where: and(
+        eq(schema.category.type, type),
+        eq(schema.category.userId, userId),
+      ),
       with: {
         budgets: {
           columns: {
@@ -362,10 +366,10 @@ export async function getSpendingByCategoryQuery({
       )
       .groupBy((schema) => schema.categoryId);
 
-    const budgets = await tx.query.categories.findMany({
+    const budgets = await tx.query.category.findMany({
       where: and(
-        eq(categories.userId, userId),
-        ne(categories.type, CategoryType.TRANSFERS),
+        eq(category.userId, userId),
+        ne(category.type, CategoryType.TRANSFERS),
       ),
       with: {
         budgets: {

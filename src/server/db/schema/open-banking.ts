@@ -11,10 +11,9 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { createTable } from "./_table";
+import { category } from "./categorization";
 import {
   type BankAccountType,
-  type BudgetPeriod,
-  type CategoryType,
   type ConnectionStatus,
   type Provider,
 } from "./enum";
@@ -143,65 +142,9 @@ export const bankTransactionsRelations = relations(
       fields: [bankTransactions.accountId],
       references: [bankAccounts.accountId],
     }),
-    category: one(categories, {
+    category: one(category, {
       fields: [bankTransactions.categoryId],
-      references: [categories.id],
-    }),
-  }),
-);
-
-export const categories = createTable(
-  "categories",
-  {
-    id: serial("id").primaryKey(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }),
-
-    // FK
-    userId: varchar("user_id", { length: 128 }).notNull(),
-
-    color: varchar("color", { length: 32 }),
-    icon: varchar("icon", { length: 32 }),
-    name: varchar("name", { length: 64 }).notNull(),
-    macro: varchar("macro", { length: 64 }).notNull(),
-    type: text("type").$type<CategoryType>().notNull(),
-    manual: boolean("manual").default(true),
-  },
-  (t) => ({
-    userId_name_unq: unique().on(t.userId, t.name),
-    userId_macro_unq: unique().on(t.userId, t.macro),
-  }),
-);
-
-export const categoriesRelations = relations(categories, ({ many }) => ({
-  transactions: many(bankTransactions),
-  budgets: many(categoryBudgets),
-}));
-
-export const categoryBudgets = createTable("category_budgets", {
-  id: serial("id").primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }),
-
-  // FK
-  userId: varchar("user_id", { length: 128 }).notNull(),
-  categoryId: integer("category_id").notNull(),
-
-  budget: decimal("budget").default("0").notNull(),
-  period: text("period").$type<BudgetPeriod>().notNull(),
-  activeFrom: timestamp("active_from", { withTimezone: true }).notNull(),
-});
-
-export const categoryBudgetsRelations = relations(
-  categoryBudgets,
-  ({ one }) => ({
-    category: one(categories, {
-      fields: [categoryBudgets.categoryId],
-      references: [categories.id],
+      references: [category.id],
     }),
   }),
 );

@@ -14,18 +14,6 @@ import type {
 import { type schema } from "~/server/db";
 import { BankAccountType } from "~/server/db/schema/enum";
 
-export const mapTransactionCategory = (transaction: Transaction) => {
-  if (+transaction.transactionAmount.amount > 0) {
-    return "income";
-  }
-
-  if (transaction?.proprietaryBankTransactionCode === "Transfer") {
-    return "transfer";
-  }
-
-  return null;
-};
-
 export const mapTransactionMethod = (type?: string) => {
   switch (type) {
     case "Payment":

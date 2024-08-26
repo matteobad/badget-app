@@ -1,10 +1,10 @@
-import { InferInsertModel } from "drizzle-orm";
+import { type InferInsertModel } from "drizzle-orm";
 
-import { schema } from "..";
+import { type schema } from "..";
 import { CategoryType } from "../schema/enum";
 
 export const DEFAULT_CATEGORIES: Omit<
-  InferInsertModel<typeof schema.categories>,
+  InferInsertModel<typeof schema.category>,
   "userId"
 >[] = [
   {
