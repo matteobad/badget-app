@@ -1,8 +1,8 @@
-import { Category, Transaction } from "~/server/db";
-import { Categorizer } from "../interface";
+import { type Category, type Transaction } from "~/server/db";
+import { type Categorizer } from "../interface";
 
 export class QuickCategorizer implements Categorizer {
-  priority: number = 1;
+  priority = 1;
 
   async categorize(transaction: Transaction, categories: Category[]) {
     console.log("QuickCategorizer", { input: transaction.id });

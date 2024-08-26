@@ -1,4 +1,9 @@
-import { Category, Transaction } from "~/server/db";
+import { type Category, type Transaction } from "~/server/db";
+
+export interface UserRule {
+  keywords: Record<string, number>; // keyword -> relevance score
+  category: string;
+}
 
 export interface Categorizer {
   priority: number;
