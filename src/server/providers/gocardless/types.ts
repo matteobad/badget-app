@@ -1,6 +1,6 @@
-import type { Providers } from "../types";
+import { type Provider } from "~/server/db/schema/enum";
 
-export type Transaction = {
+export type GocardlessTransaction = {
   transactionAmount: { amount: string; currency: string };
   currencyExchange?: {
     exchangeRate: string;
@@ -12,6 +12,7 @@ export type Transaction = {
   remittanceInformationUnstructured?: string;
   remittanceInformationUnstructuredArray?: string[];
   proprietaryBankTransactionCode?: string;
+  bankTransactionCode?: string;
   entryReference?: string;
   transactionId?: string;
   internalTransactionId: string;
@@ -97,7 +98,7 @@ export type GetAccountResponse = {
   last_accessed: string;
   iban?: string;
   institution_id: string;
-  status: string;
+  status: "enabled" | "deleted" | "blocked";
   owner_name?: string;
 };
 
@@ -105,10 +106,13 @@ export type Account = {
   resourceId: string;
   iban: string;
   currency: string;
-  ownerName: string;
-  name: string;
-  product: string;
-  cashAccountType: string;
+  cashAccountType: string; // TODO: map to: https://www.iso20022.org/catalogue-messages/additional-content-messages/external-code-sets
+  ownerName?: string;
+  product?: string;
+  displayName?: string;
+  name?: string;
+  status?: "enabled" | "deleted" | "blocked";
+  usage?: "PRIV" | "ORGA";
 };
 
 export type AccountDetails = {
@@ -177,23 +181,21 @@ export type GetTransactionsRequest = {
 
 export type GetTransactionsResponse = {
   transactions: {
-    booked: Transaction[];
-    posted: Transaction[];
+    booked: GocardlessTransaction[];
+    posted: GocardlessTransaction[];
   };
 };
 
 export type TransactionDescription = {
-  transaction: Transaction;
+  transaction: GocardlessTransaction;
   name?: string;
 };
-
-export type TransformTransaction = Transaction;
 
 export type TransformInstitution = {
   id: string;
   name: string;
   logo: string | null;
-  provider: Providers;
+  provider: Provider;
 };
 
 export type TransformAccount = GetAccountsResponse[0];

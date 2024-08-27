@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { type Transaction as GocardlessTransaction } from "~/server/providers/gocardless/types";
+import { type GocardlessTransaction } from "~/server/providers/gocardless/types";
 import { categorizeGocardless } from "./gocardless-categorizer";
 
 const mockTransaction: GocardlessTransaction = {

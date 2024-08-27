@@ -31,6 +31,7 @@ import {
 } from "~/components/ui/table";
 import { cn, euroFormat } from "~/lib/utils";
 import { type getUserCategories } from "~/server/db/queries/cached-queries";
+import { BudgetPeriod } from "~/server/db/schema/enum";
 
 export type Category = Awaited<ReturnType<typeof getUserCategories>>[number];
 
@@ -70,7 +71,8 @@ export const columns: ColumnDef<Category>[] = [
     cell: ({ row }) => {
       const budget = row.original.budgets[0];
 
-      if (!budget) return "No Budget";
+      console.log(budget);
+      if (!budget || Number(budget.budget) === 0) return "No Budget";
 
       return (
         <div className="flex flex-col text-right capitalize">

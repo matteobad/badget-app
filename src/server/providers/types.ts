@@ -1,11 +1,13 @@
 import { type VercelKV } from "@vercel/kv";
 
-import { bankAccounts, bankTransactions } from "../db/schema/open-banking";
-
-export type Providers = "gocardless";
+import { type Provider } from "../db/schema/enum";
+import {
+  type bankAccounts,
+  type bankTransactions,
+} from "../db/schema/open-banking";
 
 export type ProviderParams = {
-  provider: Providers;
+  provider: Provider;
   kv: VercelKV;
   envs: {
     GOCARDLESS_SECRET_KEY: string;
@@ -13,26 +15,11 @@ export type ProviderParams = {
   };
 };
 
-export type Transaction = {
-  id: string;
-  amount: number;
-  currency: string;
-  date: string;
-  status: "posted" | "pending";
-  balance: number | null;
-  category: string | null;
-  method: string;
-  name: string;
-  description: string | null;
-  currency_rate: number | null;
-  currency_source: string | null;
-};
-
 export type Institution = {
   id: string;
   name: string;
   logo: string | null;
-  provider: Providers;
+  provider: Provider;
 };
 
 export type AccountType =
@@ -49,7 +36,6 @@ export type Account = {
   type: AccountType;
   institution: Institution;
   balance: Balance;
-  enrollment_id: string | null; // Teller
 };
 
 export type Balance = {
@@ -60,19 +46,15 @@ export type Balance = {
 export type GetTransactionsRequest = {
   accountId: string;
   latest?: boolean;
-  accessToken?: string; // Teller & Plaid
   accountType: AccountType;
 };
 
 export type GetAccountsRequest = {
   id?: string; // GoCardLess
-  accessToken?: string; // Teller & Plaid
-  institutionId?: string; // Plaid
 };
 
 export type GetAccountBalanceRequest = {
   accountId: string;
-  accessToken?: string; // Teller & Plaid
 };
 
 export type GetAccountBalanceResponse = {
@@ -82,7 +64,6 @@ export type GetAccountBalanceResponse = {
 
 export type DeleteAccountsRequest = {
   accountId?: string; // GoCardLess
-  accessToken?: string; // Teller & Plaid
 };
 
 export type GetTransactionsResponse = (typeof bankTransactions.$inferInsert)[];
@@ -93,17 +74,9 @@ export type GetInstitutionsResponse = {
   id: string;
   name: string;
   logo: string | null;
-  provider: Providers;
+  provider: Provider;
 }[];
 
 export type GetInstitutionsRequest = {
   countryCode?: string;
-};
-
-export type HealthCheckResponse = {
-  healthy: boolean;
-};
-
-export type GetHealthCheckResponse = {
-  gocardless: HealthCheckResponse;
 };

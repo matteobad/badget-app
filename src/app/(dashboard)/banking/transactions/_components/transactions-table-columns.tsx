@@ -72,8 +72,8 @@ export function getColumns(categories: Category[]): ColumnDef<Transaction>[] {
       cell: ({ row }) => {
         return (
           <div className="flex space-x-2">
-            <span className="max-w-[31.25rem] truncate font-medium">
-              {row.original.name}
+            <span className="max-w-[200px] truncate font-medium">
+              {row.original.description}
             </span>
           </div>
         );

@@ -21,7 +21,7 @@ import {
   Provider,
 } from "~/server/db/schema/enum";
 import { getAccessValidForDays } from "~/server/providers/gocardless/utils";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -59,6 +59,8 @@ function RowsSkeleton() {
 function LoadingTransactions({ bankAccountIds }: { bankAccountIds: string[] }) {
   const [loading, setLoading] = useState(true);
 
+  const { setParams } = useConnectParams();
+
   const importTransactionAction = useAction(importBankTransactionAction, {
     onError: () => {
       toast.error("Something went wrong please try again.", {
@@ -67,6 +69,13 @@ function LoadingTransactions({ bankAccountIds }: { bankAccountIds: string[] }) {
     },
     onSuccess: () => {
       setLoading(false);
+      void setParams({
+        step: null,
+        error: null,
+        details: null,
+        ref: null,
+        provider: null,
+      });
     },
   });
 
@@ -254,6 +263,7 @@ export function SelectBankAccountsModal() {
                             >
                               <FormLabel className="mr-8 flex w-full items-center space-x-4">
                                 <Avatar className="size-[34px]">
+                                  <AvatarImage src={account.institution.logo} />
                                   <AvatarFallback className="text-[11px]">
                                     {getInitials(account.account.name)}
                                   </AvatarFallback>
@@ -262,10 +272,11 @@ export function SelectBankAccountsModal() {
                                 <div className="flex w-full items-center justify-between">
                                   <div className="flex flex-col">
                                     <p className="mb-1 text-sm font-medium leading-none">
-                                      {account.account.name}
+                                      {account.account.displayName ??
+                                        account.account.name}
                                     </p>
                                     <span className="text-xs font-normal text-[#878787]">
-                                      {account.account.cashAccountType}
+                                      {account.account.product}
                                     </span>
                                   </div>
 

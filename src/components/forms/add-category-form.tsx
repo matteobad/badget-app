@@ -4,6 +4,7 @@ import type dynamicIconImports from "lucide-react/dynamicIconImports";
 import type z from "zod";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { capitalCase } from "change-case";
 import { startOfYear, subYears } from "date-fns";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
@@ -11,7 +12,7 @@ import { parseAsString, useQueryState } from "nuqs";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
+import { type Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
 import { cn } from "~/lib/utils";
 import { upsertCategorySchema } from "~/lib/validators";
 import { insertCategoryAction } from "~/server/actions/insert-category-action";
@@ -53,7 +54,7 @@ export function AddCategoryForm({ categories }: { categories: Category[] }) {
 
   const [_, setStep] = useQueryState("step", parseAsString);
 
-  const macros = categories.map((category) => category.macro);
+  const macros = [...new Set(categories.map((category) => category.macro))];
 
   const { execute, status } = useAction(insertCategoryAction, {
     onError: () => {
@@ -74,7 +75,7 @@ export function AddCategoryForm({ categories }: { categories: Category[] }) {
     mode: "onChange",
     defaultValues: {
       name: "",
-      macro: CategoryType.OUTCOME.toLowerCase(),
+      macro: macros[0] ?? CategoryType.OUTCOME,
       type: CategoryType.OUTCOME,
       icon: "circle-dashed",
       budgets: [
@@ -187,7 +188,7 @@ export function AddCategoryForm({ categories }: { categories: Category[] }) {
                           !field.value && "text-muted-foreground",
                         )}
                       >
-                        {field.value || "Seleziona gruppo"}
+                        {capitalCase(field.value) || "Seleziona gruppo"}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </FormControl>
@@ -225,7 +226,7 @@ export function AddCategoryForm({ categories }: { categories: Category[] }) {
                                     : "opacity-0",
                                 )}
                               />
-                              {macro}
+                              {capitalCase(macro)}
                             </CommandItem>
                           ))}
                         </CommandGroup>

@@ -36,7 +36,6 @@ export const category = createTable(
   },
   (t) => ({
     userId_name_unq: unique().on(t.userId, t.name),
-    userId_macro_unq: unique().on(t.userId, t.macro),
   }),
 );
 
@@ -63,6 +62,16 @@ export const categoryBudgets = createTable("category_budgets", {
   period: text("period").$type<BudgetPeriod>().notNull(),
   activeFrom: timestamp("active_from", { withTimezone: true }).notNull(),
 });
+
+export const categoryBudgetsRelations = relations(
+  categoryBudgets,
+  ({ one }) => ({
+    category: one(category, {
+      fields: [categoryBudgets.categoryId],
+      references: [category.id],
+    }),
+  }),
+);
 
 export const categoryRules = createTable("category_rules", {
   id: serial("id").primaryKey(),

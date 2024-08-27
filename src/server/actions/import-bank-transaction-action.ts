@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
+
 import { authActionClient } from "~/lib/safe-action";
 import { importBankTransactionSchema } from "~/lib/validators";
 import { upsertTransactions } from "../db/mutations";
@@ -26,5 +28,7 @@ export const importBankTransactionAction = authActionClient
           })),
         );
       }
+
+      revalidateTag(`bank_connections_${userId}`);
     },
   );

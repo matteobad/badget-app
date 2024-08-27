@@ -14,12 +14,6 @@ export const DEFAULT_CATEGORIES: Omit<
     icon: "hand-coins",
   },
   {
-    name: "Savings & Investments",
-    macro: "Savings & Investments",
-    type: CategoryType.SAVINGS_AND_INVESTMENTS,
-    icon: "leaf",
-  },
-  {
     name: "Uncategorized",
     macro: "Outcome",
     type: CategoryType.OUTCOME,

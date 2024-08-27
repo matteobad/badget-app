@@ -11,7 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { createTable } from "./_table";
-import { category } from "./categorization";
+import { category } from "./categories";
 import {
   type BankAccountType,
   type ConnectionStatus,

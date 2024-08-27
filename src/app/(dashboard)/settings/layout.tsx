@@ -1,9 +1,7 @@
 import { type Metadata } from "next";
 
-import { SettingsTopbarNav } from "./_components/topbar-nav";
-
 export const metadata: Metadata = {
-  title: "Forms",
+  title: "Settings",
   description: "Advanced form example using react-hook-form and Zod.",
 };
 
@@ -33,8 +31,7 @@ interface SettingsLayoutProps {
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
   return (
     <div className="p-6">
-      <SettingsTopbarNav items={sidebarNavItems} />
-      <div className="hidden min-h-[calc(100vh-134px)] flex-col space-y-6 py-6 md:flex">
+      <div className="hidden min-h-[calc(100vh-134px)] flex-col space-y-6 md:flex">
         {children}
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-import { category, categoryBudgets } from "~/server/db/schema/categorization";
+import { category, categoryBudgets } from "~/server/db/schema/categories";
 import {
   BankAccountType,
   ConnectionStatus,
@@ -195,7 +195,7 @@ export const dashboardSearchParamsSchema = z.object({
 export const transactionsSearchParamsSchema = z.object({
   page: z.coerce.number().default(1),
   per_page: z.coerce.number().default(10),
-  query: z.string().optional(),
+  description: z.string().optional(),
   sort: z.string().optional(),
   from: z.string().optional(),
   to: z.string().optional(),

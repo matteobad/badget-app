@@ -1,4 +1,4 @@
-import { type Transaction as GocardlessTransaction } from "~/server/providers/gocardless/types";
+import { type GocardlessTransaction } from "~/server/providers/gocardless/types";
 
 type Rule = {
   keywords: string[];

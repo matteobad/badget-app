@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 import { env } from "~/env";
-import * as categorization from "./schema/categorization";
+import * as categorization from "./schema/categories";
 import * as openBanking from "./schema/open-banking";
 import * as pensionFund from "./schema/pension-funds";
 import * as workingRecord from "./schema/working-records";

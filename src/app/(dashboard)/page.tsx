@@ -49,7 +49,7 @@ export default async function DashboardPage({
           <CategoryTypeSpendingServer
             from={from}
             to={to}
-            type={CategoryType.SAVINGS_AND_INVESTMENTS}
+            type={CategoryType.TRANSFERS}
           />
         </Suspense>
         <div className="col-span-4">

@@ -6,7 +6,7 @@ import type {
   GetTransactionsRequest,
   ProviderParams,
 } from "./types";
-import { logger, withRetry } from "~/lib/utils";
+import { withRetry } from "~/lib/utils";
 import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 
 export class Provider {
@@ -18,7 +18,7 @@ export class Provider {
     this.#name = params?.provider;
 
     switch (params?.provider) {
-      case "gocardless":
+      case "GOCARDLESS":
         this.#provider = new GoCardLessProvider(params);
         break;
       default:
@@ -26,63 +26,40 @@ export class Provider {
   }
 
   async getTransactions(params: GetTransactionsRequest) {
-    logger(
+    console.log(
       "getTransactions:",
       `provider: ${this.#name} id: ${params.accountId}`,
     );
 
     const data = await withRetry(() => this.#provider?.getTransactions(params));
-
-    if (data) {
-      return data;
-    }
-
-    return [];
+    return data ?? [];
   }
 
   async getAccounts(params: GetAccountsRequest) {
-    logger("getAccounts:", `provider: ${this.#name}`);
+    console.log("getAccounts:", `provider: ${this.#name}`);
 
     const data = await withRetry(() => this.#provider?.getAccounts(params));
-
-    if (data) {
-      return data;
-    }
-
-    return [];
+    return data ?? [];
   }
 
   async getAccountBalance(params: GetAccountBalanceRequest) {
-    logger(
+    console.log(
       "getAccountBalance:",
       `provider: ${this.#name} id: ${params.accountId}`,
     );
 
-    const data = await withRetry(() =>
-      this.#provider?.getAccountBalance(params),
-    );
-
-    if (data) {
-      return data;
-    }
-
-    return null;
+    return await withRetry(() => this.#provider?.getAccountBalance(params));
   }
 
   async getInstitutions(params: GetInstitutionsRequest) {
-    logger("getInstitutions:", `provider: ${this.#name}`);
+    console.log("getInstitutions:", `provider: ${this.#name}`);
 
     const data = await withRetry(() => this.#provider?.getInstitutions(params));
-
-    if (data) {
-      return data;
-    }
-
-    return [];
+    return data ?? [];
   }
 
   async deleteAccounts(params: DeleteAccountsRequest) {
-    logger("delete:", `provider: ${this.#name}`);
+    console.log("delete:", `provider: ${this.#name}`);
 
     return withRetry(() => this.#provider?.deleteAccounts(params));
   }

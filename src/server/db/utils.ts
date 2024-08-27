@@ -3,7 +3,7 @@ import type { PgSelect, PgTable } from "drizzle-orm/pg-core";
 import { eq, getTableColumns, sql } from "drizzle-orm";
 import { type SQLiteTable } from "drizzle-orm/sqlite-core";
 
-import { category } from "./schema/categorization";
+import { category } from "./schema/categories";
 import { bankAccounts, bankTransactions } from "./schema/open-banking";
 
 export const buildConflictUpdateColumns = <

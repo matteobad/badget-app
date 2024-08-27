@@ -18,7 +18,7 @@ import { type z } from "zod";
 import { filterColumn } from "~/lib/utils";
 import { type transactionsSearchParamsSchema } from "~/lib/validators";
 import { db, schema } from "..";
-import { category, categoryBudgets } from "../schema/categorization";
+import { category, categoryBudgets } from "../schema/categories";
 import { CategoryType } from "../schema/enum";
 import { bankAccounts, bankTransactions } from "../schema/open-banking";
 import { type DrizzleWhere } from "../utils";
@@ -114,8 +114,17 @@ export async function getFilteredTransactionsQuery({
   params: z.infer<typeof transactionsSearchParamsSchema>;
   userId: string;
 }) {
-  const { page, per_page, sort, query, operator, from, to, category, account } =
-    params;
+  const {
+    page,
+    per_page,
+    sort,
+    description,
+    operator,
+    from,
+    to,
+    category,
+    account,
+  } = params;
 
   // Offset to paginate the results
   const offset = (page - 1) * per_page;
@@ -142,10 +151,10 @@ export async function getFilteredTransactionsQuery({
           isSelectable: true,
         })
       : undefined,
-    query
+    description
       ? filterColumn({
-          column: bankTransactions.name,
-          value: query,
+          column: bankTransactions.description,
+          value: description,
         })
       : undefined,
     !!category

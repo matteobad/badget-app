@@ -1,6 +1,5 @@
 "use server";
 
-import { logger } from "~/lib/utils";
 import { db, schema } from "~/server/db";
 
 type GetAccountParams = {
@@ -19,7 +18,7 @@ export async function getInstitutions({
       item.name?.toLowerCase().includes(query?.toLowerCase() ?? ""),
     );
   } catch (error) {
-    logger(error instanceof Error ? error.message : String(error));
+    console.error(error instanceof Error ? error.message : String(error));
     return [];
   }
 }

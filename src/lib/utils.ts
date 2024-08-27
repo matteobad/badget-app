@@ -28,10 +28,6 @@ export const euroFormat = (
     ...options,
   }).format(typeof value === "string" ? Number(value) : value);
 
-export const logger = (message: string, ...rest: string[]) => {
-  console.log(message, ...rest);
-};
-
 export async function withRetry<TResult>(
   fn: (attempt: number) => TResult | Promise<TResult>,
   {
@@ -91,11 +87,11 @@ export class ProviderError extends Error {
       case "AccessExpiredError":
       case "AccountInactiveError":
       case "Account suspended":
-        logger("disconnected", this.message);
+        console.log("disconnected", this.message);
 
         return "disconnected";
       default:
-        logger("unknown", this.message);
+        console.log("unknown", this.message);
 
         return "unknown";
     }
