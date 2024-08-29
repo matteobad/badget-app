@@ -409,7 +409,7 @@ export async function getSpendingByCategoryQuery({
     const budgets = await tx.query.category.findMany({
       where: and(
         eq(category.userId, userId),
-        ne(category.type, CategoryType.TRANSFERS),
+        ne(category.type, CategoryType.TRANSFER),
       ),
       with: {
         budgets: {

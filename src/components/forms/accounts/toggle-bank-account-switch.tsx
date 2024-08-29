@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
+import { type z } from "zod";
 
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
@@ -18,7 +18,7 @@ type ToggleBankAccountSwitchProps = {
   enabled: boolean;
 };
 
-export function ToggleBankAccountSwitchProps({
+export function ToggleBankAccountSwitch({
   id,
   enabled,
 }: ToggleBankAccountSwitchProps) {

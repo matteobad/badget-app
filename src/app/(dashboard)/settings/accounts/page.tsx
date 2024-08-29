@@ -1,9 +1,7 @@
 import { Suspense } from "react";
 
-import {
-  BankAccountList,
-  BankAccountListLoading,
-} from "./_components/bank-account-list.server";
+import { BankConnectionTableLoading } from "./_components/bank-connection-table.loading";
+import { BankConnectionTableServer } from "./_components/bank-connection-table.server";
 
 export default function AccountsPage() {
   return (
@@ -13,8 +11,8 @@ export default function AccountsPage() {
           Conti, Carte e Account collegati
         </h1>
       </header>
-      <Suspense fallback={<BankAccountListLoading />}>
-        <BankAccountList />
+      <Suspense fallback={<BankConnectionTableLoading />}>
+        <BankConnectionTableServer />
       </Suspense>
     </>
   );

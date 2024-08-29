@@ -26,7 +26,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     id: getUUID(`transfers_${userId}`),
     name: "Transfer",
     macro: "Transfer",
-    type: CategoryType.TRANSFERS,
+    type: CategoryType.TRANSFER,
     icon: "arrow-left-right",
     userId,
   },
