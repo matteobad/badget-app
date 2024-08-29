@@ -8,6 +8,7 @@ import { db, schema } from "~/server/db";
 import {
   getCategoriesQuery,
   getCategoryBudgetsQuery,
+  getCategoryRulesQuery,
   getFilteredTransactionsQuery,
   getSpendingByCategoryQuery,
   getSpendingByCategoryTypeQuery,
@@ -154,6 +155,27 @@ export const getUserCategoryBudgets = async (
     {
       revalidate: 180,
       tags: [`transactions_${session.userId}`],
+    },
+  )();
+};
+
+export const getUserCategoryRules = async (
+  params: Omit<GetTransactionsParams, "userId">,
+) => {
+  const session = auth();
+
+  if (!session.userId) {
+    return [];
+  }
+
+  return unstable_cache(
+    async () => {
+      return getCategoryRulesQuery({ ...params, userId: session.userId });
+    },
+    ["category_rules_", session.userId],
+    {
+      revalidate: 180,
+      tags: [`category_rules_${session.userId}`],
     },
   )();
 };

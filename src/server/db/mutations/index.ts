@@ -14,11 +14,13 @@ import type {
   insertBankTransactionSchema,
   toggleBankAccountSchema,
   updateBankAccountSchema,
+  updateBankTransactionCategorySchema,
   updateCategorySchema,
   upsertBankConnectionsSchema,
   upsertCategoryBudgetSchema,
   upsertCategorySchema,
 } from "~/lib/validators";
+import { tokenize } from "~/lib/jobs/tokenize";
 import { type editBankTransactionSchema } from "~/lib/validators";
 import { buildConflictUpdateColumns } from "~/server/db/utils";
 import { getAccessValidForDays } from "~/server/providers/gocardless/utils";
@@ -267,15 +269,12 @@ export async function toggleBankAccount({
     );
 }
 
-type EditTransactionPayload = z.infer<typeof editBankTransactionSchema>;
-
 export async function editBankTransaction({
   id,
   categoryId,
   userId,
-}: EditTransactionPayload) {
-  console.log(id, categoryId);
-  await db
+}: z.infer<typeof editBankTransactionSchema>) {
+  const edited = await db
     .update(schema.bankTransactions)
     .set({
       categoryId,
@@ -287,9 +286,62 @@ export async function editBankTransaction({
         eq(schema.bankTransactions.id, id!),
         eq(schema.bankTransactions.userId, userId),
       ),
-    );
+    )
+    .returning({ description: schema.bankTransactions.description });
 
   revalidateTag(`bank_transactions_${userId}`);
+  return edited[0];
+}
+
+export async function updateBankTransactionCategory({
+  id,
+  categoryId,
+  userId,
+}: z.infer<typeof updateBankTransactionCategorySchema>) {
+  const transaction = await editBankTransaction({ id, categoryId, userId });
+
+  if (!transaction?.description) {
+    console.warn("unable to update category rules", id);
+    return;
+  }
+
+  await db.transaction(async (tx) => {
+    // get category rules
+    const categoryRule = await tx
+      .select({ id: schema.categoryRules.id })
+      .from(schema.categoryRules);
+
+    if (!categoryRule[0]?.id) {
+      console.error("unable to create or retrieve category rules", id);
+      return tx.rollback();
+    }
+
+    // create tokens from description
+    const tokens = tokenize(transaction.description);
+
+    // update category rule tokens
+    await tx
+      .insert(schema.categoryRulesTokens)
+      .values(
+        tokens.map((token) => ({
+          categoryRuleId: categoryRule[0]!.id,
+          token,
+          relevance: 1,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: [
+          schema.categoryRulesTokens.categoryRuleId,
+          schema.categoryRulesTokens.token,
+        ],
+        set: {
+          relevance: sql`${schema.categoryRulesTokens.relevance} + 1`,
+        },
+      });
+  });
+
+  revalidateTag(`bank_transactions_${userId}`);
+  revalidateTag(`category_rules_${userId}`);
 }
 
 // Bank Transactions
@@ -355,6 +407,14 @@ export async function insertCategory({
       .returning({ insertedId: schema.category.id });
 
     if (!inserted[0]?.insertedId) return tx.rollback();
+
+    await tx
+      .insert(schema.categoryRules)
+      .values({
+        categoryId: inserted[0]?.insertedId,
+        userId,
+      })
+      .onConflictDoNothing();
 
     await tx.insert(schema.categoryBudgets).values({
       budget: budgets[0]?.budget,

@@ -27,7 +27,7 @@ export type ConnectionStatus =
 export const CategoryType = {
   INCOME: "INCOME",
   OUTCOME: "OUTCOME",
-  TRANSFERS: "TRANSFERS",
+  TRANSFER: "TRANSFER",
 } as const;
 export type CategoryType = (typeof CategoryType)[keyof typeof CategoryType];
 

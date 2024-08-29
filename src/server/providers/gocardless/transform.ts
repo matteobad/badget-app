@@ -36,35 +36,32 @@ export const transformTransactionName = (
   let remittanceInformation = "";
 
   if (transaction?.remittanceInformationStructured) {
-    remittanceInformation = capitalCase(
-      transaction.remittanceInformationStructured,
-    );
+    remittanceInformation = transaction.remittanceInformationStructured;
   }
 
   if (
     !remittanceInformation &&
     transaction?.remittanceInformationUnstructured
   ) {
-    remittanceInformation = capitalCase(
-      transaction.remittanceInformationUnstructured,
-    );
+    remittanceInformation = transaction.remittanceInformationUnstructured;
   }
 
   if (
     !remittanceInformation &&
     transaction?.remittanceInformationUnstructuredArray?.at(0)
   ) {
-    remittanceInformation = capitalCase(remittanceInformation);
+    remittanceInformation =
+      transaction?.remittanceInformationUnstructuredArray?.at(0) ?? "";
   }
 
   if (transaction?.creditorName) {
-    return [capitalCase(transaction.creditorName), remittanceInformation]
+    return [transaction.creditorName, remittanceInformation]
       .filter(Boolean)
       .join(" - ");
   }
 
   if (transaction?.debtorName) {
-    return [capitalCase(transaction?.debtorName), remittanceInformation]
+    return [transaction?.debtorName, remittanceInformation]
       .filter(Boolean)
       .join(" - ");
   }
@@ -72,7 +69,7 @@ export const transformTransactionName = (
   if (remittanceInformation) return remittanceInformation;
 
   if (transaction?.additionalInformation) {
-    return capitalCase(transaction.additionalInformation);
+    return transaction.additionalInformation;
   }
 
   console.log("No transaction name", transaction);
@@ -150,8 +147,8 @@ export const transformAccount = ({
     accountId: id,
     type: BankAccountType.DEPOSITORY,
     name: transformAccountName({
-      name: account.name,
-      product: account.product,
+      name: account.name ?? "",
+      product: account.product ?? "",
     }),
     currency: account.currency,
     balance: transformAccountBalance(balance).amount.toString(),

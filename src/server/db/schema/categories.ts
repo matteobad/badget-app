@@ -18,11 +18,16 @@ import { bankTransactions } from "./open-banking";
 export const category = createTable(
   "category",
   {
-    id: serial("id").primaryKey(),
+    id: text("id")
+      .$defaultFn(() => crypto.randomUUID())
+      .primaryKey()
+      .notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+      () => new Date(),
+    ),
 
     // FK
     userId: varchar("user_id", { length: 128 }).notNull(),
@@ -50,13 +55,13 @@ export const categoryBudgets = createTable("category_budgets", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+    () => new Date(),
+  ),
 
   // FK
   userId: varchar("user_id", { length: 128 }).notNull(),
-  categoryId: integer("category_id")
-    .references(() => category.id, { onDelete: "cascade" })
-    .notNull(),
+  categoryId: text("category_id").notNull(),
 
   budget: decimal("budget").default("0").notNull(),
   period: text("period").$type<BudgetPeriod>().notNull(),
@@ -82,10 +87,12 @@ export const categoryRules = createTable("category_rules", {
 
   // FK
   userId: varchar("user_id", { length: 128 }).notNull(),
-  categoryId: integer("category_id")
-    .references(() => category.id, { onDelete: "cascade" })
-    .notNull(),
+  categoryId: text("category_id").notNull(),
 });
+
+export const categoryRulesRelations = relations(categoryRules, ({ many }) => ({
+  tokens: many(categoryRulesTokens),
+}));
 
 export const categoryRulesTokens = createTable(
   "category_rules_token",
@@ -97,9 +104,7 @@ export const categoryRulesTokens = createTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }),
 
     // FK
-    categoryRuleId: integer("category_rule_id")
-      .references(() => categoryRules.id, { onDelete: "cascade" })
-      .notNull(),
+    categoryRuleId: integer("category_rule_id").notNull(),
 
     token: text("token").notNull(),
     relevance: integer("relevance").default(1).notNull(),
@@ -112,4 +117,14 @@ export const categoryRulesTokens = createTable(
       ),
     };
   },
+);
+
+export const categoryRulesTokensRelations = relations(
+  categoryRulesTokens,
+  ({ one }) => ({
+    rule: one(categoryRules, {
+      fields: [categoryRulesTokens.categoryRuleId],
+      references: [categoryRules.id],
+    }),
+  }),
 );

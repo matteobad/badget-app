@@ -289,6 +289,37 @@ export async function getCategoryBudgetsQuery(params: GetCategoriesParams) {
   return data;
 }
 
+export async function getCategoryRulesQuery(params: GetCategoriesParams) {
+  const { userId } = params;
+
+  const data = await db.query.category.findMany({
+    columns: {
+      id: true,
+      name: true,
+    },
+    with: {
+      rules: {
+        columns: {},
+        with: { tokens: true },
+      },
+    },
+    where: eq(schema.category.userId, userId),
+  });
+
+  const result = data.map(({ id, name, rules }) => ({
+    id: id,
+    name: name,
+    keywords: rules.reduce((acc, rule) => {
+      for (const { token, relevance } of rule.tokens) {
+        acc.set(token, relevance);
+      }
+      return acc;
+    }, new Map<string, number>()),
+  }));
+
+  return result;
+}
+
 export async function getSpendingByCategoryTypeQuery({
   from,
   to,

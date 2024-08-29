@@ -273,7 +273,8 @@ export function SelectBankAccountsModal() {
                                   <div className="flex flex-col">
                                     <p className="mb-1 text-sm font-medium leading-none">
                                       {account.account.displayName ??
-                                        account.account.name}
+                                        account.account.name ??
+                                        account.institution.name}
                                     </p>
                                     <span className="text-xs font-normal text-[#878787]">
                                       {account.account.product}

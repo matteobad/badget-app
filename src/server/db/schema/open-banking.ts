@@ -119,15 +119,14 @@ export const bankTransactions = createTable("bank_transactions", {
 
   // FK
   accountId: varchar("account_id"),
-  categoryId: integer("category_id"),
+  categoryId: text("category_id"),
   userId: varchar("user_id", { length: 128 }).notNull(),
 
   transactionId: varchar("transaction_id").unique(),
-  amount: decimal("amount"),
-  currency: varchar("currency", { length: 64 }),
+  amount: decimal("amount").notNull(),
+  currency: varchar("currency", { length: 64 }).notNull(),
+  description: varchar("description", { length: 512 }).notNull(),
   date: timestamp("date", { withTimezone: true }),
-  name: varchar("name", { length: 256 }),
-  description: varchar("description", { length: 256 }),
   method: varchar("method", { length: 64 }),
   currencyRate: decimal("currency_rate"),
   currencySource: varchar("currency_source", { length: 64 }),

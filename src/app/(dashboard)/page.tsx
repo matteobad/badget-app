@@ -25,7 +25,7 @@ export default async function DashboardPage({
     : endOfMonth(new Date());
 
   return (
-    <div className="flex flex-col items-end gap-6 p-8">
+    <div className="flex w-full flex-col items-end gap-6 p-8">
       <DateRangePicker />
       <div className="grid grid-cols-4 gap-6">
         <Suspense fallback={<Skeleton className="" />}>
