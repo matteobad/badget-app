@@ -15,7 +15,7 @@ export async function GET(_req: Request) {
       amount: bankTransactions.amount,
       currency: bankTransactions.currency,
       date: sql<string>`TO_CHAR(${bankTransactions.date}, 'YYYY-MM-DD')`,
-      description: sql<string>`CONCAT(${bankTransactions.name}, ' - ', ${bankTransactions.description})`,
+      description: sql<string>`CONCAT(${bankTransactions.description}, ' - ', ${bankTransactions.description})`,
     })
     .from(bankTransactions)
     .where(isNull(bankTransactions.categoryId))
