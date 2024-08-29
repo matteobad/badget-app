@@ -41,5 +41,7 @@ export const tokenize = (description: string) => {
       // 3. Convertire in minuscolo e filtrare parole comuni e numeri
       .map((token) => token.toLowerCase())
       .filter((token) => token.length > 0 && !commonWords.has(token))
+      // 5. remove duplicates from array
+      .filter((item, index, self) => self.indexOf(item) === index)
   );
 };

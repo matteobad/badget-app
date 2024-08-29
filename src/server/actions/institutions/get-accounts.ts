@@ -22,8 +22,6 @@ export async function getAccounts({ id }: GetAccountParams) {
     id,
   });
 
-  console.log(data);
-
   return (
     data
       ?.filter((account) => account.account.status !== "deleted")

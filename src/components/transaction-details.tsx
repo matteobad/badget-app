@@ -28,8 +28,7 @@ export function TransactionDetails({
         <span className="text-sm text-slate-500">{data.bankAccount.name}</span>
       </div>
       <div className="flex flex-col">
-        <h2 className="text-lg">{data.name}</h2>
-        <span className="text-sm text-slate-500">{data.description}</span>
+        <h2 className="text-lg">{data.description}</h2>
         <span className="mt-4 text-4xl font-semibold">
           {euroFormat(data.amount ?? 0)}
         </span>

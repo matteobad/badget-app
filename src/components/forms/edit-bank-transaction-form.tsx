@@ -14,8 +14,8 @@ import {
   type Transaction,
 } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
 import { cn } from "~/lib/utils";
-import { editBankTransactionSchema } from "~/lib/validators";
-import { editBankTransactionAction } from "~/server/actions/bank-transaction-action";
+import { updateBankTransactionSchema } from "~/lib/validators";
+import { updateBankTransactionAction } from "~/server/actions/bank-transaction-action";
 import Icon from "../icons";
 import { Button } from "../ui/button";
 import {
@@ -48,14 +48,14 @@ export function EditTransactionCategoryForm({
 }: EditTransactionCategoryFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
 
-  const form = useForm<z.infer<typeof editBankTransactionSchema>>({
-    resolver: zodResolver(editBankTransactionSchema),
+  const form = useForm<z.infer<typeof updateBankTransactionSchema>>({
+    resolver: zodResolver(updateBankTransactionSchema),
     defaultValues: {
       ...transaction,
     },
   });
 
-  const { execute, isExecuting } = useAction(editBankTransactionAction, {
+  const { execute, isExecuting } = useAction(updateBankTransactionAction, {
     onError: () => {
       toast.error("Something went wrong please try again.", {
         duration: 3500,
@@ -137,7 +137,9 @@ export function EditTransactionCategoryForm({
                             key={category.id}
                             onSelect={() => {
                               form.setValue("categoryId", category.id);
-                              formRef.current?.requestSubmit();
+                              if (transaction.categoryId !== category.id) {
+                                formRef.current?.requestSubmit();
+                              }
                             }}
                           >
                             <div className="flex items-center gap-2">

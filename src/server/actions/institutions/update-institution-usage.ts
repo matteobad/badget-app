@@ -8,6 +8,7 @@ import { db, schema } from "~/server/db";
 
 export const updateInstitutionUsageAction = authActionClient
   .schema(updateInstitutionUsageSchema)
+  .metadata({ actionName: "updateInstitutionUsageAction" })
   .action(async ({ parsedInput: { institutionId } }) => {
     return await db
       .update(schema.institutions)

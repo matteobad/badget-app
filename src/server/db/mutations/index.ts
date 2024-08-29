@@ -1,6 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { addDays, startOfYear, subYears } from "date-fns";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, isNull, or, sql } from "drizzle-orm";
+import getUUID from "uuid-by-string";
 import { type z } from "zod";
 
 import type {
@@ -14,14 +15,13 @@ import type {
   insertBankTransactionSchema,
   toggleBankAccountSchema,
   updateBankAccountSchema,
-  updateBankTransactionCategorySchema,
   updateCategorySchema,
   upsertBankConnectionsSchema,
   upsertCategoryBudgetSchema,
   upsertCategorySchema,
 } from "~/lib/validators";
 import { tokenize } from "~/lib/jobs/tokenize";
-import { type editBankTransactionSchema } from "~/lib/validators";
+import { type updateBankTransactionSchema } from "~/lib/validators";
 import { buildConflictUpdateColumns } from "~/server/db/utils";
 import { getAccessValidForDays } from "~/server/providers/gocardless/utils";
 import { db, schema } from "..";
@@ -269,58 +269,84 @@ export async function toggleBankAccount({
     );
 }
 
-export async function editBankTransaction({
+export async function updateBankTransaction({
   id,
   categoryId,
   userId,
-}: z.infer<typeof editBankTransactionSchema>) {
+}: z.infer<typeof updateBankTransactionSchema>) {
   const edited = await db
     .update(schema.bankTransactions)
     .set({
       categoryId,
-      // amount,
-      // description,
     })
     .where(
       and(
-        eq(schema.bankTransactions.id, id!),
+        eq(schema.bankTransactions.id, id),
         eq(schema.bankTransactions.userId, userId),
       ),
     )
-    .returning({ description: schema.bankTransactions.description });
+    .returning({
+      description: schema.bankTransactions.description,
+      categoryId: schema.bankTransactions.categoryId,
+    });
 
-  revalidateTag(`bank_transactions_${userId}`);
-  return edited[0];
+  return edited;
 }
 
-export async function updateBankTransactionCategory({
-  id,
+export async function updateUncategorizedTransactions({
   categoryId,
+  description,
   userId,
-}: z.infer<typeof updateBankTransactionCategorySchema>) {
-  const transaction = await editBankTransaction({ id, categoryId, userId });
+}: {
+  categoryId: string;
+  description: string;
+  userId: string;
+}) {
+  return await db
+    .update(schema.bankTransactions)
+    .set({
+      categoryId,
+    })
+    .where(
+      and(
+        eq(schema.bankTransactions.description, description),
+        eq(schema.bankTransactions.userId, userId),
+        or(
+          isNull(schema.bankTransactions.categoryId),
+          eq(
+            schema.bankTransactions.categoryId,
+            getUUID(`uncategorized_${userId}`),
+          ),
+        ),
+      ),
+    )
+    .returning({ id: schema.bankTransactions.id });
+}
 
-  if (!transaction?.description) {
-    console.warn("unable to update category rules", id);
-    return;
-  }
-
-  await db.transaction(async (tx) => {
+export async function updateCategoryRules({
+  categoryId,
+  description,
+}: {
+  categoryId: string;
+  description: string;
+}) {
+  return await db.transaction(async (tx) => {
     // get category rules
     const categoryRule = await tx
       .select({ id: schema.categoryRules.id })
-      .from(schema.categoryRules);
+      .from(schema.categoryRules)
+      .where(eq(schema.categoryRules.categoryId, categoryId));
 
     if (!categoryRule[0]?.id) {
-      console.error("unable to create or retrieve category rules", id);
+      console.error("unable to retrieve category rules", categoryId);
       return tx.rollback();
     }
 
     // create tokens from description
-    const tokens = tokenize(transaction.description);
+    const tokens = tokenize(description);
 
     // update category rule tokens
-    await tx
+    return await tx
       .insert(schema.categoryRulesTokens)
       .values(
         tokens.map((token) => ({
@@ -335,13 +361,15 @@ export async function updateBankTransactionCategory({
           schema.categoryRulesTokens.token,
         ],
         set: {
-          relevance: sql`${schema.categoryRulesTokens.relevance} + 1`,
+          relevance: sql<number>`${schema.categoryRulesTokens.relevance} + 1`,
         },
+      })
+      .returning({
+        categoryRuleId: schema.categoryRulesTokens.categoryRuleId,
+        token: schema.categoryRulesTokens.token,
+        relevance: schema.categoryRulesTokens.relevance,
       });
   });
-
-  revalidateTag(`bank_transactions_${userId}`);
-  revalidateTag(`category_rules_${userId}`);
 }
 
 // Bank Transactions
@@ -460,41 +488,45 @@ type DeleteCategoryPayload = z.infer<typeof deleteCategorySchema> & {
 
 export async function deleteCategory({
   categoryId,
-  name,
   userId,
 }: DeleteCategoryPayload) {
   return await db.transaction(async (tx) => {
+    // delete category budget
     await tx
       .delete(schema.categoryBudgets)
       .where(eq(schema.categoryBudgets.categoryId, categoryId));
 
-    const defaultCategory = await tx
-      .select({
-        id: schema.category.id,
-      })
-      .from(schema.category)
-      .where(
-        and(
-          eq(schema.category.userId, userId),
-          eq(schema.category.name, "uncategorized"),
-        ),
-      );
+    // delete category rule
+    const deletedRule = await tx
+      .delete(schema.categoryRules)
+      .where(eq(schema.categoryRules.categoryId, categoryId))
+      .returning({ id: schema.categoryRules.id });
 
-    if (!defaultCategory[0]?.id) return tx.rollback();
+    // delete tokens associated with the rule
+    if (deletedRule[0]?.id) {
+      await tx
+        .delete(schema.categoryRulesTokens)
+        .where(
+          eq(schema.categoryRulesTokens.categoryRuleId, deletedRule[0].id),
+        );
+    }
 
+    // uncategorized all associated transactions
     await tx
       .update(schema.bankTransactions)
-      .set({
-        categoryId: defaultCategory[0].id,
-      })
+      .set({ categoryId: getUUID(`uncategorized_${userId}`) })
       .where(eq(schema.bankTransactions.categoryId, categoryId));
 
-    console.log(name);
-
+    // delete actual category
+    // TODO: maybe reprocess transactions agaist engine?
+    // TODO: log more info about deleted stuff
     await tx
       .delete(schema.category)
       .where(
-        and(eq(schema.category.id, categoryId), eq(schema.category.name, name)),
+        and(
+          eq(schema.category.id, categoryId),
+          eq(schema.category.userId, userId),
+        ),
       );
   });
 }

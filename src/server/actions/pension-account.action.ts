@@ -13,6 +13,7 @@ export const createPensionAccountFormAction = authActionClient
     handleValidationErrorsShape: (ve) =>
       flattenValidationErrors(ve).fieldErrors,
   })
+  .metadata({ actionName: "createPensionAccountFormAction" })
   .action(async ({ parsedInput, ctx }) => {
     try {
       // Mutate data

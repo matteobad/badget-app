@@ -27,7 +27,7 @@ export default async function DashboardPage({
   return (
     <div className="flex w-full flex-col items-end gap-6 p-8">
       <DateRangePicker />
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid w-full grid-cols-4 gap-6">
         <Suspense fallback={<Skeleton className="" />}>
           <BankBalanceServer />
         </Suspense>

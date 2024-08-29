@@ -10,6 +10,7 @@ import { getTransactions } from "./institutions/get-transactions";
 
 export const importBankTransactionAction = authActionClient
   .schema(importBankTransactionSchema)
+  .metadata({ actionName: "importBankTransactionSchema" })
   .action(
     async ({ parsedInput: { bankAccountIds, latest }, ctx: { userId } }) => {
       for (const bankAccountId of bankAccountIds) {

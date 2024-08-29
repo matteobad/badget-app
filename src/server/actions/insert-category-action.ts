@@ -19,6 +19,7 @@ import {
 
 export const insertCategoryAction = authActionClient
   .schema(upsertCategorySchema)
+  .metadata({ actionName: "insertCategoryAction" })
   .action(
     async ({
       parsedInput: { name, macro, type, budgets, icon, color },
@@ -40,6 +41,7 @@ export const insertCategoryAction = authActionClient
 
 export const editCategoryAction = authActionClient
   .schema(updateCategorySchema)
+  .metadata({ actionName: "editCategoryAction" })
   .action(
     async ({
       parsedInput: { id, name, macro, type, icon, color },
@@ -61,6 +63,7 @@ export const editCategoryAction = authActionClient
 
 export const upsertCategoryBudgetAction = authActionClient
   .schema(upsertCategoryBudgetSchema)
+  .metadata({ actionName: "upsertCategoryBudgetAction" })
   .action(async ({ parsedInput: { budgets }, ctx: { userId } }) => {
     await upsertCategoryBudget({
       budgets,
@@ -72,13 +75,17 @@ export const upsertCategoryBudgetAction = authActionClient
 
 export const deleteCategoryAction = authActionClient
   .schema(deleteCategorySchema)
-  .action(async ({ parsedInput: { categoryId, name }, ctx: { userId } }) => {
+  .metadata({ actionName: "deleteCategoryAction" })
+  .action(async ({ parsedInput: { categoryId }, ctx: { userId } }) => {
     await deleteCategory({
-      categoryId: Number(categoryId),
-      name,
+      categoryId,
       userId,
     });
 
-    revalidateTag(`bank_categories_${userId}`);
+    revalidateTag(`category_${userId}`);
+    revalidateTag(`category_rules_${userId}`);
+
+    // TODO: move redirect to client success
+    // to enable return and log of data
     redirect("/settings/categories");
   });

@@ -20,6 +20,7 @@ const provider = new GoCardLessApi({
 
 export const createGoCardLessLinkAction = authActionClient
   .schema(createGoCardLessLinkSchema)
+  .metadata({ actionName: "createGoCardLessLinkAction" })
   .action(
     async ({
       parsedInput: {

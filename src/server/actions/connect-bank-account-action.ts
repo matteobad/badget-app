@@ -6,6 +6,7 @@ import { upsertBankConnections } from "../db/mutations";
 
 export const connectBankAccountAction = authActionClient
   .schema(upsertBankConnectionsSchema)
+  .metadata({ actionName: "upsertBankConnectionsSchema" })
   .action(
     async ({ parsedInput: { accounts, ...connection }, ctx: { userId } }) => {
       // await createBankAccounts({

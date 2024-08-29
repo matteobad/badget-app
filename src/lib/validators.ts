@@ -1,4 +1,4 @@
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 import { category, categoryBudgets } from "~/server/db/schema/categories";
@@ -125,24 +125,11 @@ export const toggleBankAccountSchema = createInsertSchema(bankAccounts).pick({
 // Transaction
 export const insertBankTransactionSchema = createInsertSchema(bankTransactions);
 
-export const editBankTransactionSchema = createInsertSchema(bankTransactions, {
-  categoryId: z.string(),
-  amount: z.string().optional(),
+export const updateBankTransactionSchema = z.object({
+  id: z.number(),
   description: z.string().optional(),
-}).pick({
-  id: true,
-  categoryId: true,
-  description: true,
-  amount: true,
-  userId: true,
-});
-
-export const updateBankTransactionCategorySchema = createSelectSchema(
-  bankTransactions,
-).pick({
-  id: true,
-  categoryId: true,
-  userId: true,
+  categoryId: z.string().nullable(),
+  userId: z.string().min(1),
 });
 
 // Category
@@ -193,7 +180,6 @@ export const upsertCategoryBudgetSchema = z.object({
 });
 
 export const deleteCategorySchema = z.object({
-  name: z.string(),
   categoryId: z.string(),
 });
 

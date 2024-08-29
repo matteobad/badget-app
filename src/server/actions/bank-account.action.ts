@@ -17,6 +17,7 @@ import {
 
 export const createBankAccountAction = authActionClient
   .schema(createBankAccountSchema)
+  .metadata({ actionName: "createBankAccountAction" })
   .action(
     async ({ parsedInput: { name, balance, currency }, ctx: { userId } }) => {
       await createBankAccount({
@@ -32,6 +33,7 @@ export const createBankAccountAction = authActionClient
 
 export const updateBankAccountAction = authActionClient
   .schema(updateBankAccountSchema)
+  .metadata({ actionName: "updateBankAccountAction" })
   .action(
     async ({
       parsedInput: { id, name, type, balance, currency },
@@ -54,6 +56,7 @@ export const updateBankAccountAction = authActionClient
 
 export const toggleBankAccountAction = authActionClient
   .schema(toggleBankAccountSchema)
+  .metadata({ actionName: "toggleBankAccountSchema" })
   .action(async ({ parsedInput: { id, enabled }, ctx: { userId } }) => {
     await toggleBankAccount({
       id,
