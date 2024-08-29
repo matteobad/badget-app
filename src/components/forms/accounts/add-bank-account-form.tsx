@@ -26,7 +26,7 @@ export function AddBankAccountForm() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const { execute, status } = useAction(createBankAccountAction, {
+  const { execute, isExecuting } = useAction(createBankAccountAction, {
     onError: () => {
       toast.error("Something went wrong please try again.", {
         duration: 3500,
@@ -98,7 +98,7 @@ export function AddBankAccountForm() {
           >
             Torna indietro
           </Button>
-          <Button>Crea Conto</Button>
+          <Button disabled={isExecuting}>Crea Conto</Button>
         </div>
       </form>
     </Form>
