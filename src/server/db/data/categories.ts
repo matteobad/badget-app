@@ -1,5 +1,3 @@
-import getUUID from "uuid-by-string";
-
 import { type Category } from "..";
 import { CategoryType } from "../schema/enum";
 
@@ -7,7 +5,7 @@ const userId = "user_2jnV56cv1CJrRNLFsUdm6XAf7GD";
 
 export const DEFAULT_CATEGORIES: Category[] = [
   {
-    id: getUUID(`income_${userId}`),
+    id: 1,
     name: "Income",
     macro: "Income",
     type: CategoryType.INCOME,
@@ -15,7 +13,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     userId,
   },
   {
-    id: getUUID(`outcome_${userId}`),
+    id: 2,
     name: "Outcome",
     macro: "Outcome",
     type: CategoryType.OUTCOME,
@@ -23,7 +21,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     userId,
   },
   {
-    id: getUUID(`transfers_${userId}`),
+    id: 3,
     name: "Transfer",
     macro: "Transfer",
     type: CategoryType.TRANSFER,

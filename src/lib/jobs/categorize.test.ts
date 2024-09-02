@@ -1,20 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import getUUID from "uuid-by-string";
 
 import type { UserRule } from "./categorize";
 import { categorize } from "./categorize";
 
-// beforeAll(() => {
-//   // setup tests
-// });
-
-const userId = "userId";
-const incomeUUID = getUUID(`income_${userId}`);
-const outcomeUUID = getUUID(`outcome_${userId}`);
-
 const rules: UserRule[] = [
   {
-    id: "shoppingId",
+    id: 1,
     name: "shopping",
     keywords: new Map<string, number>([
       ["shopping", 1],
@@ -23,7 +14,7 @@ const rules: UserRule[] = [
     ]),
   },
   {
-    id: "transportationId",
+    id: 2,
     name: "transportation",
     keywords: new Map<string, number>([
       ["benzina", 1],
@@ -34,40 +25,15 @@ const rules: UserRule[] = [
 ];
 
 describe("categorize", () => {
-  test("should be income when no rules and positive amount", () => {
+  test("should be null when no rules match", () => {
     const actual = categorize(
       {
         amount: "-10,00",
         description: "description",
       },
       [],
-      userId,
     );
-    expect(actual).toBe(outcomeUUID);
-  });
-
-  test("should be outcome when no rules and negative amount", () => {
-    const actual = categorize(
-      {
-        amount: "10,00",
-        description: "description",
-      },
-      [],
-      userId,
-    );
-    expect(actual).toBe(incomeUUID);
-  });
-
-  test("should be incobe when no keyword match a rule", () => {
-    const actual = categorize(
-      {
-        amount: "10,00",
-        description: "no match",
-      },
-      rules,
-      userId,
-    );
-    expect(actual).toBe(incomeUUID);
+    expect(actual).toBeNull();
   });
 
   test("should categorize when one keyword match a rule", () => {
@@ -77,9 +43,8 @@ describe("categorize", () => {
         description: "shopping",
       },
       rules,
-      userId,
     );
-    expect(actual).toBe("shoppingId");
+    expect(actual).toBe(1);
   });
 
   test("should categorize with highest relavance when more rules match", () => {
@@ -89,8 +54,7 @@ describe("categorize", () => {
         description: "common auto",
       },
       rules,
-      userId,
     );
-    expect(actual).toBe("transportationId");
+    expect(actual).toBe(2);
   });
 });

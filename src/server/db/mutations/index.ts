@@ -1,7 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { addDays, startOfYear, subYears } from "date-fns";
-import { and, eq, isNull, or, sql } from "drizzle-orm";
-import getUUID from "uuid-by-string";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { type z } from "zod";
 
 import type {
@@ -298,7 +297,7 @@ export async function updateUncategorizedTransactions({
   description,
   userId,
 }: {
-  categoryId: string;
+  categoryId: number;
   description: string;
   userId: string;
 }) {
@@ -311,13 +310,7 @@ export async function updateUncategorizedTransactions({
       and(
         eq(schema.bankTransactions.description, description),
         eq(schema.bankTransactions.userId, userId),
-        or(
-          isNull(schema.bankTransactions.categoryId),
-          eq(
-            schema.bankTransactions.categoryId,
-            getUUID(`uncategorized_${userId}`),
-          ),
-        ),
+        isNull(schema.bankTransactions.categoryId),
       ),
     )
     .returning({ id: schema.bankTransactions.id });
@@ -327,7 +320,7 @@ export async function updateCategoryRules({
   categoryId,
   description,
 }: {
-  categoryId: string;
+  categoryId: number;
   description: string;
 }) {
   return await db.transaction(async (tx) => {
@@ -514,7 +507,7 @@ export async function deleteCategory({
     // uncategorized all associated transactions
     await tx
       .update(schema.bankTransactions)
-      .set({ categoryId: getUUID(`uncategorized_${userId}`) })
+      .set({ categoryId: null })
       .where(eq(schema.bankTransactions.categoryId, categoryId));
 
     // delete actual category

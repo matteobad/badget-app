@@ -119,7 +119,7 @@ export const bankTransactions = createTable("bank_transactions", {
 
   // FK
   accountId: varchar("account_id"),
-  categoryId: text("category_id"),
+  categoryId: integer("category_id"),
   userId: varchar("user_id", { length: 128 }).notNull(),
 
   transactionId: varchar("transaction_id").unique(),

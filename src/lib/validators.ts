@@ -128,7 +128,7 @@ export const insertBankTransactionSchema = createInsertSchema(bankTransactions);
 export const updateBankTransactionSchema = z.object({
   id: z.number(),
   description: z.string().optional(),
-  categoryId: z.string().nullable(),
+  categoryId: z.number().nullable(),
   userId: z.string().min(1),
 });
 
@@ -180,7 +180,7 @@ export const upsertCategoryBudgetSchema = z.object({
 });
 
 export const deleteCategorySchema = z.object({
-  categoryId: z.string(),
+  categoryId: z.number(),
 });
 
 export const dashboardSearchParamsSchema = z.object({
@@ -198,4 +198,12 @@ export const transactionsSearchParamsSchema = z.object({
   operator: z.enum(["and", "or"]).optional(),
   category: z.string().optional(),
   account: z.string().optional(),
+});
+
+export const accountsSearchParamsSchema = z.object({
+  q: z.string().optional(),
+});
+
+export const institutionsSearchParamsSchema = z.object({
+  q: z.string().optional(),
 });

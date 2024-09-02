@@ -18,10 +18,7 @@ import { bankTransactions } from "./open-banking";
 export const category = createTable(
   "category",
   {
-    id: text("id")
-      .$defaultFn(() => crypto.randomUUID())
-      .primaryKey()
-      .notNull(),
+    id: serial("id").primaryKey().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -51,7 +48,7 @@ export const categoriesRelations = relations(category, ({ many }) => ({
 }));
 
 export const categoryBudgets = createTable("category_budgets", {
-  id: serial("id").primaryKey(),
+  id: serial("id").primaryKey().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -61,7 +58,7 @@ export const categoryBudgets = createTable("category_budgets", {
 
   // FK
   userId: varchar("user_id", { length: 128 }).notNull(),
-  categoryId: text("category_id").notNull(),
+  categoryId: integer("category_id").notNull(),
 
   budget: decimal("budget").default("0").notNull(),
   period: text("period").$type<BudgetPeriod>().notNull(),
@@ -87,7 +84,7 @@ export const categoryRules = createTable("category_rules", {
 
   // FK
   userId: varchar("user_id", { length: 128 }).notNull(),
-  categoryId: text("category_id").notNull(),
+  categoryId: integer("category_id").notNull(),
 });
 
 export const categoryRulesRelations = relations(categoryRules, ({ many }) => ({

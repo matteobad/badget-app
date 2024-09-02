@@ -7,6 +7,7 @@ import {
   eq,
   gt,
   gte,
+  like,
   lt,
   lte,
   ne,
@@ -16,12 +17,35 @@ import {
 import { type z } from "zod";
 
 import { filterColumn } from "~/lib/utils";
-import { type transactionsSearchParamsSchema } from "~/lib/validators";
+import {
+  type institutionsSearchParamsSchema,
+  type transactionsSearchParamsSchema,
+} from "~/lib/validators";
 import { db, schema } from "..";
 import { category, categoryBudgets } from "../schema/categories";
 import { CategoryType } from "../schema/enum";
 import { bankAccounts, bankTransactions } from "../schema/open-banking";
 import { type DrizzleWhere } from "../utils";
+
+export async function getFilteredInstitutionsQuery({
+  params,
+}: {
+  params: z.infer<typeof institutionsSearchParamsSchema>;
+}) {
+  try {
+    let query = db.select().from(schema.institutions).$dynamic();
+    console.log(params.q);
+
+    if (params.q) {
+      query = query.where(like(schema.institutions.name, "%" + params.q + "%"));
+    }
+
+    return await query;
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    return [];
+  }
+}
 
 export type GetUserBankAccountsParams = {
   userId: string;

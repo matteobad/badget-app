@@ -16,16 +16,10 @@ export function AddBankAccountModal() {
   const isOpen = step === "manual";
 
   const handleOnClose = () => {
-    void setParams(
-      {
-        step: null,
-        countryCode: null,
-      },
-      {
-        // NOTE: Rerender so the overview modal is visible
-        shallow: false,
-      },
-    );
+    void setParams({
+      step: null,
+      countryCode: null,
+    });
   };
 
   return (

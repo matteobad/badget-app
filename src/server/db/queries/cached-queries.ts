@@ -3,12 +3,16 @@ import { auth } from "@clerk/nextjs/server";
 import { type z } from "zod";
 
 import type { GetTransactionsParams, GetUserBankAccountsParams } from ".";
-import { type transactionsSearchParamsSchema } from "~/lib/validators";
+import {
+  type institutionsSearchParamsSchema,
+  type transactionsSearchParamsSchema,
+} from "~/lib/validators";
 import { db, schema } from "~/server/db";
 import {
   getCategoriesQuery,
   getCategoryBudgetsQuery,
   getCategoryRulesQuery,
+  getFilteredInstitutionsQuery,
   getFilteredTransactionsQuery,
   getSpendingByCategoryQuery,
   getSpendingByCategoryTypeQuery,
@@ -17,6 +21,14 @@ import {
   getUserBankConnectionsQuery,
 } from ".";
 import { type CategoryType } from "../schema/enum";
+
+export async function getFilteredInstitutions(
+  params: z.infer<typeof institutionsSearchParamsSchema>,
+) {
+  unstable_noStore();
+
+  return await getFilteredInstitutionsQuery({ params });
+}
 
 export async function findAllInstitutions() {
   return unstable_cache(
