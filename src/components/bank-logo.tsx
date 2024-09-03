@@ -1,3 +1,5 @@
+"use client";
+
 import { Avatar, AvatarImage } from "./ui/avatar";
 
 type Props = {
@@ -6,7 +8,7 @@ type Props = {
   size?: number;
 };
 
-export function BankLogo({ src, alt, size = 34 }: Props) {
+export default function BankLogo({ src, alt, size = 34 }: Props) {
   return (
     <Avatar style={{ width: size, height: size }}>
       {src && <AvatarImage src={src} alt={alt} />}

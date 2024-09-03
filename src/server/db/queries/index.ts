@@ -7,7 +7,7 @@ import {
   eq,
   gt,
   gte,
-  like,
+  ilike,
   lt,
   lte,
   ne,
@@ -37,7 +37,9 @@ export async function getFilteredInstitutionsQuery({
     console.log(params.q);
 
     if (params.q) {
-      query = query.where(like(schema.institutions.name, "%" + params.q + "%"));
+      query = query.where(
+        ilike(schema.institutions.name, "%" + params.q + "%"),
+      );
     }
 
     return await query;

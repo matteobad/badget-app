@@ -1,3 +1,5 @@
+"use client";
+
 import { useAction } from "next-safe-action/hooks";
 
 import { updateInstitutionUsageAction } from "~/server/actions/institutions/update-institution-usage";

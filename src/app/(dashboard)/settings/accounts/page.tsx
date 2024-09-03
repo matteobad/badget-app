@@ -1,17 +1,20 @@
 import { Suspense } from "react";
-import { type z } from "zod";
 
-import { type accountsSearchParamsSchema } from "~/lib/validators";
-import { getFilteredInstitutions } from "~/server/db/queries/cached-queries";
 import { AddBankAccountModal } from "./_components/add-account-dialog";
 import { BankConnectionTableLoading } from "./_components/bank-connection-table.loading";
 import { BankConnectionTableServer } from "./_components/bank-connection-table.server";
+import { ConnectStep } from "./_components/steps/connect/connect-step";
+import { ManualStep } from "./_components/steps/manual/manual-step";
+import { MultiStepFormWrapper } from "./_components/steps/multi-step-form-wrapper";
+import { SelectStep } from "./_components/steps/select/select-step";
 
 export default async function AccountsPage({
   searchParams,
 }: {
-  searchParams: z.infer<typeof accountsSearchParamsSchema>;
+  searchParams: { step: string; q: string };
 }) {
+  const { step, q } = searchParams;
+
   return (
     <>
       <header className="">
@@ -22,7 +25,15 @@ export default async function AccountsPage({
       <Suspense fallback={<BankConnectionTableLoading />}>
         <BankConnectionTableServer />
       </Suspense>
-      <AddBankAccountModal />
+      <AddBankAccountModal>
+        <MultiStepFormWrapper>
+          {step === "connect" && <ConnectStep query={q} key={step} />}
+          {step === "select" && <SelectStep key={step} />}
+          {step === "manual" && <ManualStep key={step} />}
+          {/* {step === "tag" && <TagTransactionsStep key={step} />}
+        {step === "done" && <DoneStep />} */}
+        </MultiStepFormWrapper>
+      </AddBankAccountModal>
     </>
   );
 }

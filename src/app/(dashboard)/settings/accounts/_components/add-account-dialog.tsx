@@ -1,8 +1,5 @@
 "use client";
 
-import { AnimatePresence } from "framer-motion";
-import { z } from "zod";
-
 import {
   Dialog,
   DialogContent,
@@ -10,25 +7,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { useConnectParams } from "~/hooks/use-connect-params";
-import { CreateAccountForm } from "./steps/create-account-form";
-import { SelectConnectionForm } from "./steps/select-connection-form";
+import { AddAccountMultiStep } from "./steps/add-account-multi-step";
 
-export function AddBankAccountModal() {
-  const { step, setParams } = useConnectParams();
-
-  const isOpen = !!step;
+export function AddBankAccountModal({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const isOpen = true;
 
   const handleOnClose = () => {
-    void setParams(
-      {
-        step: null,
-        countryCode: null,
-      },
-      {
-        shallow: true,
-      },
-    );
+    // void setParams(
+    //   {
+    //     step: null,
+    //     countryCode: null,
+    //   },
+    //   {
+    //     shallow: true,
+    //   },
+    // );
   };
 
   return (
@@ -41,13 +38,7 @@ export function AddBankAccountModal() {
             qui puoi tracciare comunque il tuo conto manualmente.
           </DialogDescription>
         </DialogHeader>
-        <AnimatePresence mode="wait">
-          {step === "select-connection" && <SelectConnectionForm />}
-          {step === "create-account" && <CreateAccountForm />}
-          {/* {step === "select-accounts" && <SelectAccountsForm />}
-          {step === "tag-transactions" && <TagTransactionsForm />}
-          {step === "done" && <Done />} */}
-        </AnimatePresence>
+        {children}
       </DialogContent>
     </Dialog>
   );

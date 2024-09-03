@@ -6,35 +6,35 @@ import { getUserCategories } from "~/server/db/queries/cached-queries";
 export default async function Layout(props: { children: React.ReactNode }) {
   const userCategories = await getUserCategories({});
 
-  const ConnectBankModal = dynamic(
-    () =>
-      import("~/components/dialogs/connect-bank-modal").then(
-        (mod) => mod.ConnectBankModal,
-      ),
-    {
-      ssr: false,
-    },
-  );
+  // const ConnectBankModal = dynamic(
+  //   () =>
+  //     import("~/components/dialogs/connect-bank-modal").then(
+  //       (mod) => mod.ConnectBankModal,
+  //     ),
+  //   {
+  //     ssr: false,
+  //   },
+  // );
 
-  const AddBankAccountModal = dynamic(
-    () =>
-      import("~/components/dialogs/add-bank-account-modal").then(
-        (mod) => mod.AddBankAccountModal,
-      ),
-    {
-      ssr: false,
-    },
-  );
+  // const AddBankAccountModal = dynamic(
+  //   () =>
+  //     import("~/components/dialogs/add-bank-account-modal").then(
+  //       (mod) => mod.AddBankAccountModal,
+  //     ),
+  //   {
+  //     ssr: false,
+  //   },
+  // );
 
-  const SelectBankAccountsModal = dynamic(
-    () =>
-      import("~/components/dialogs/select-bank-accounts-modal").then(
-        (mod) => mod.SelectBankAccountsModal,
-      ),
-    {
-      ssr: false,
-    },
-  );
+  // const SelectBankAccountsModal = dynamic(
+  //   () =>
+  //     import("~/components/dialogs/select-bank-accounts-modal").then(
+  //       (mod) => mod.SelectBankAccountsModal,
+  //     ),
+  //   {
+  //     ssr: false,
+  //   },
+  // );
 
   const AddCategoryModal = dynamic(
     () =>
@@ -51,9 +51,9 @@ export default async function Layout(props: { children: React.ReactNode }) {
       <DashboardLayout>{props.children}</DashboardLayout>
 
       {/* Modals triggered by url search params */}
-      <ConnectBankModal countryCode={"IT"} />
+      {/* <ConnectBankModal countryCode={"IT"} />
       <SelectBankAccountsModal />
-      <AddBankAccountModal />
+      <AddBankAccountModal /> */}
       <AddCategoryModal categories={userCategories} />
     </>
   );
