@@ -1,8 +1,9 @@
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
 import { createGoCardLessLinkAction } from "../server/actions/institutions/create-gocardless-link";
-import { BankConnectButton } from "./bank-connect-button";
+import { Button } from "./ui/button";
 
 type Props = {
   id: string;
@@ -11,7 +12,7 @@ type Props = {
 };
 
 export function GoCardLessConnect({ onSelect, id, availableHistory }: Props) {
-  const createGoCardLessLink = useAction(createGoCardLessLinkAction, {
+  const { execute, isExecuting } = useAction(createGoCardLessLinkAction, {
     onError: () => {
       toast.error("Something went wrong please try again.", {
         duration: 3500,
@@ -22,12 +23,21 @@ export function GoCardLessConnect({ onSelect, id, availableHistory }: Props) {
   const handleOnSelect = () => {
     onSelect();
 
-    createGoCardLessLink.execute({
+    execute({
       institutionId: id,
       availableHistory: availableHistory,
       redirectBase: window.location.origin + window.location.pathname,
     });
   };
 
-  return <BankConnectButton onClick={handleOnSelect} />;
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={isExecuting}
+      onClick={handleOnSelect}
+    >
+      {isExecuting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Connect"}
+    </Button>
+  );
 }

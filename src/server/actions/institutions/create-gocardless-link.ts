@@ -8,6 +8,7 @@ import { env } from "~/env";
 import { authActionClient } from "~/lib/safe-action";
 import { createGoCardLessLinkSchema } from "~/lib/validators";
 import { db, schema } from "~/server/db";
+import { Provider } from "~/server/db/schema/enum";
 import { GoCardLessApi } from "~/server/providers/gocardless/gocardless-api";
 
 const provider = new GoCardLessApi({
@@ -40,7 +41,10 @@ export const createGoCardLessLinkAction = authActionClient
       const redirectTo = new URL(redirectBase);
 
       redirectTo.searchParams.append("step", step);
-      redirectTo.searchParams.append("provider", "gocardless");
+      redirectTo.searchParams.append(
+        "provider",
+        Provider.GOCARDLESS.toLowerCase(),
+      );
 
       const agreement = await provider.createEndUserAgreement({
         institutionId,

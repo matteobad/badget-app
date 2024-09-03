@@ -10,13 +10,10 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
+import type { BankAccountType, Provider } from "./enum";
 import { createTable } from "./_table";
 import { category } from "./categories";
-import {
-  type BankAccountType,
-  type ConnectionStatus,
-  type Provider,
-} from "./enum";
+import { ConnectionStatus } from "./enum";
 
 export const institutions = createTable("instituions", {
   id: varchar("id").primaryKey(),
@@ -56,7 +53,9 @@ export const bankConnections = createTable(
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     lastAccessed: timestamp("last_accessed", { withTimezone: true }),
     error: varchar("error", { length: 128 }),
-    status: text("status").$type<ConnectionStatus>().notNull(),
+    status: text("status")
+      .$type<ConnectionStatus>()
+      .default(ConnectionStatus.UNKNOWN),
   },
   (t) => ({
     user_institution_unq: unique().on(t.institutionId, t.userId),

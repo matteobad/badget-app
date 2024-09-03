@@ -15,7 +15,7 @@ import type {
   toggleBankAccountSchema,
   updateBankAccountSchema,
   updateCategorySchema,
-  upsertBankConnectionsSchema,
+  upsertBankConnectionSchema,
   upsertCategoryBudgetSchema,
   upsertCategorySchema,
 } from "~/lib/validators";
@@ -28,15 +28,11 @@ import { ConnectionStatus, Provider } from "../schema/enum";
 import { bankAccounts, bankConnections } from "../schema/open-banking";
 
 // Bank Connection
-type UpsertBankConnectionsAndAccountsPayload = z.infer<
-  typeof upsertBankConnectionsSchema
->;
-
 export async function upsertBankConnections(
-  payload: UpsertBankConnectionsAndAccountsPayload,
+  payload: z.infer<typeof upsertBankConnectionSchema>,
 ) {
   await db.transaction(async (tx) => {
-    const { accounts, ...connection } = payload;
+    const { accounts, connection } = payload;
     const updatedAt = new Date();
 
     // upsert connection

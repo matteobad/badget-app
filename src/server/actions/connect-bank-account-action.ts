@@ -1,25 +1,20 @@
 "use server";
 
 import { authActionClient } from "~/lib/safe-action";
-import { upsertBankConnectionsSchema } from "~/lib/validators";
+import { upsertBankConnectionSchema } from "~/lib/validators";
 import { upsertBankConnections } from "../db/mutations";
 
 export const connectBankAccountAction = authActionClient
-  .schema(upsertBankConnectionsSchema)
-  .metadata({ actionName: "upsertBankConnectionsSchema" })
+  .schema(upsertBankConnectionSchema)
+  .metadata({ actionName: "upsertBankConnectionSchema" })
   .action(
-    async ({ parsedInput: { accounts, ...connection }, ctx: { userId } }) => {
-      // await createBankAccounts({
-      //   referenceId,
-      //   userId: userId,
-      //   accounts,
-      //   provider,
-      // });
-
+    async ({ parsedInput: { accounts, connection }, ctx: { userId } }) => {
       await upsertBankConnections({
-        ...connection,
-        accounts: accounts.map((a) => ({ ...a, userId })),
-        userId,
+        connection: { ...connection, userId },
+        accounts: accounts.map((account) => ({
+          ...account,
+          userId,
+        })),
       });
     },
   );

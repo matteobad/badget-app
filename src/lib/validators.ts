@@ -1,7 +1,11 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-import { category, categoryBudgets } from "~/server/db/schema/categories";
+import {
+  category,
+  categoryBudgets,
+  categoryRules,
+} from "~/server/db/schema/categories";
 import {
   BankAccountType,
   ConnectionStatus,
@@ -91,10 +95,11 @@ export const importBankTransactionSchema = z.object({
 });
 
 // Bank Connections
-export const upsertBankConnectionsSchema = createInsertSchema(bankConnections, {
-  provider: z.nativeEnum(Provider),
-  status: z.nativeEnum(ConnectionStatus),
-}).extend({
+export const upsertBankConnectionSchema = z.object({
+  connection: createInsertSchema(bankConnections, {
+    status: z.nativeEnum(ConnectionStatus),
+    provider: z.nativeEnum(Provider),
+  }),
   accounts: z.array(
     createInsertSchema(bankAccounts, {
       type: z.nativeEnum(BankAccountType),
@@ -120,6 +125,15 @@ export const updateBankAccountSchema = createInsertSchema(bankAccounts).pick({
 export const toggleBankAccountSchema = createInsertSchema(bankAccounts).pick({
   id: true,
   enabled: true,
+});
+
+export const selectBankAccountsSchema = z.object({
+  accounts: z.array(
+    createInsertSchema(bankAccounts).pick({
+      accountId: true,
+      enabled: true,
+    }),
+  ),
 });
 
 // Transaction
@@ -186,6 +200,11 @@ export const deleteCategorySchema = z.object({
 export const dashboardSearchParamsSchema = z.object({
   from: z.string().optional(),
   to: z.string().optional(),
+});
+
+export const updateCategoryRuleSchema = z.object({
+  categoryId: z.number(),
+  description: z.string().min(1),
 });
 
 export const transactionsSearchParamsSchema = z.object({

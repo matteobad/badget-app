@@ -7,7 +7,7 @@ export async function InstitutionListServer({ query }: { query: string }) {
   const institutions = await getFilteredInstitutions({ q: query });
 
   return (
-    <ul className="flex-1 space-y-1 overflow-auto">
+    <ul className="flex-1 space-y-2 overflow-auto">
       {institutions.map((institution) => {
         return (
           <li key={institution.id}>
@@ -18,7 +18,7 @@ export async function InstitutionListServer({ query }: { query: string }) {
                   alt={institution.name + " logo"}
                 />
 
-                <div className="flex flex-col justify-center space-y-1">
+                <div className="flex flex-col justify-between gap-1">
                   <p className="text-sm font-medium leading-none">
                     {institution.name}
                   </p>

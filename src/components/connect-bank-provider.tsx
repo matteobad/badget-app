@@ -17,10 +17,6 @@ export function ConnectBankProvider({
 }) {
   const updateInstitutionUsage = useAction(updateInstitutionUsageAction);
 
-  const updateUsage = () => {
-    updateInstitutionUsage.execute({ institutionId: id });
-  };
-
   switch (provider) {
     case Provider.GOCARDLESS: {
       return (
@@ -28,7 +24,7 @@ export function ConnectBankProvider({
           id={id}
           availableHistory={availableHistory}
           onSelect={() => {
-            updateUsage();
+            updateInstitutionUsage.execute({ institutionId: id });
           }}
         />
       );
