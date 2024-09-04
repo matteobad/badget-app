@@ -4,6 +4,7 @@ import { type z } from "zod";
 
 import type { GetTransactionsParams, GetUserBankAccountsParams } from ".";
 import {
+  type accountsSearchParamsSchema,
   type institutionsSearchParamsSchema,
   type transactionsSearchParamsSchema,
 } from "~/lib/validators";
@@ -12,6 +13,7 @@ import {
   getCategoriesQuery,
   getCategoryBudgetsQuery,
   getCategoryRulesQuery,
+  getFilteredAccoountsQuery,
   getFilteredInstitutionsQuery,
   getFilteredTransactionsQuery,
   getSpendingByCategoryQuery,
@@ -90,6 +92,19 @@ export const getUserBankAccounts = async (
       revalidate: 180,
     },
   )();
+};
+
+export const getFilteredAccounts = async (
+  params: z.infer<typeof accountsSearchParamsSchema>,
+) => {
+  const session = auth();
+
+  if (!session.userId) {
+    return [];
+  }
+
+  unstable_noStore();
+  return getFilteredAccoountsQuery({ params, userId: session.userId });
 };
 
 export const getUserTransactions = async (

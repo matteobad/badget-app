@@ -1,30 +1,27 @@
-import { getTransactions } from "~/server/actions/institutions/get-transactions";
-import { getUserCategories } from "~/server/db/queries/cached-queries";
-import { type Provider } from "~/server/db/schema/enum";
+import {
+  getFilteredAccounts,
+  getFilteredTransactions,
+  getUserCategories,
+} from "~/server/db/queries/cached-queries";
+import { TransactionToCategoryForm } from "./transaction-to-category-form";
 
 export async function TransactionToCategoryServer({
-  accounts,
+  reference,
 }: {
   reference: string;
-  provider: Provider;
-  accounts: string[];
 }) {
   const categories = await getUserCategories({});
-  let transactions: Awaited<ReturnType<typeof getTransactions>> = [];
-
-  for (const accountId of accounts) {
-    const data = await getTransactions({
-      bankAccountId: accountId,
-      latest: false,
-    });
-
-    transactions = [...transactions, ...data];
-  }
+  const accounts = await getFilteredAccounts({ ref: reference });
+  const transactions = await getFilteredTransactions({
+    page: 1,
+    per_page: 5,
+    account: accounts.map((a) => a?.id).join("."),
+  });
 
   return (
     <TransactionToCategoryForm
       categories={categories}
-      transactions={transactions}
+      transactions={transactions.data}
     />
   );
 }

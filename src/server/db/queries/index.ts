@@ -18,13 +18,18 @@ import { type z } from "zod";
 
 import { filterColumn } from "~/lib/utils";
 import {
+  type accountsSearchParamsSchema,
   type institutionsSearchParamsSchema,
   type transactionsSearchParamsSchema,
 } from "~/lib/validators";
 import { db, schema } from "..";
 import { category, categoryBudgets } from "../schema/categories";
 import { CategoryType } from "../schema/enum";
-import { bankAccounts, bankTransactions } from "../schema/open-banking";
+import {
+  bankAccounts,
+  bankConnections,
+  bankTransactions,
+} from "../schema/open-banking";
 import { type DrizzleWhere } from "../utils";
 
 export async function getFilteredInstitutionsQuery({
@@ -81,6 +86,48 @@ export async function getUserBankAccountsQuery(
   });
 
   return data;
+}
+
+export async function getFilteredAccoountsQuery({
+  params,
+  userId,
+}: {
+  params: z.infer<typeof accountsSearchParamsSchema>;
+  userId: string;
+}) {
+  const { ref } = params;
+
+  const expressions: (SQL<unknown> | undefined)[] = [
+    userId
+      ? filterColumn({
+          column: bankConnections.userId,
+          value: userId,
+          isSelectable: true,
+        })
+      : undefined,
+    ref
+      ? filterColumn({
+          column: bankConnections.referenceId,
+          value: ref,
+        })
+      : undefined,
+  ];
+
+  const where: DrizzleWhere<typeof bankConnections.$inferSelect> = and(
+    ...expressions,
+  );
+
+  // Transaction is used to ensure both queries are executed in a single transaction
+  const data = await db
+    .select()
+    .from(bankConnections)
+    .where(where)
+    .leftJoin(
+      bankAccounts,
+      eq(bankAccounts.bankConnectionId, bankConnections.id),
+    );
+
+  return data.map((item) => item.bank_accounts) ?? [];
 }
 
 export type GetTransactionsParams = {
@@ -223,10 +270,7 @@ export async function getFilteredTransactionsQuery({
       .limit(per_page)
       .offset(offset)
       .where(where)
-      .leftJoin(
-        bankAccounts,
-        eq(bankAccounts.accountId, bankTransactions.accountId),
-      )
+      .leftJoin(bankAccounts, eq(bankAccounts.id, bankTransactions.accountId))
       .leftJoin(
         schema.category,
         eq(schema.category.id, bankTransactions.categoryId),
@@ -245,6 +289,8 @@ export async function getFilteredTransactionsQuery({
       .where(where)
       .execute()
       .then((res) => res[0]?.count ?? 0);
+
+    console.log(data);
 
     return {
       data: data.map((item) => {

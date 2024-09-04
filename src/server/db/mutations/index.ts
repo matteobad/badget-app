@@ -1,4 +1,3 @@
-import { revalidateTag } from "next/cache";
 import { addDays, startOfYear, subYears } from "date-fns";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { type z } from "zod";
@@ -31,7 +30,7 @@ import { bankAccounts, bankConnections } from "../schema/open-banking";
 export async function upsertBankConnections(
   payload: z.infer<typeof upsertBankConnectionSchema>,
 ) {
-  await db.transaction(async (tx) => {
+  return await db.transaction(async (tx) => {
     const { accounts, connection } = payload;
     const updatedAt = new Date();
 
@@ -48,7 +47,7 @@ export async function upsertBankConnections(
     if (!upserted[0]?.id) tx.rollback();
 
     // upsert accounts
-    await tx
+    return await tx
       .insert(bankAccounts)
       .values(
         accounts.map((account) => ({
@@ -65,6 +64,10 @@ export async function upsertBankConnections(
           "type",
           "updatedAt", // TODO: update this value
         ]),
+      })
+      .returning({
+        id: bankAccounts.id,
+        accountId: bankAccounts.accountId,
       });
   });
 }
@@ -381,10 +384,6 @@ export async function upsertTransactions(
         "description",
       ]),
     });
-
-  // invalidate cache key for given user
-  // NOTE: works only if payload is from same user!
-  revalidateTag(`bank_transactions_${payload[0]?.userId}`);
 }
 
 // Categories

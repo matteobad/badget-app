@@ -18,7 +18,7 @@ export function AddBankAccountButton({
     <Button
       variant={variant}
       size={size}
-      onClick={() => setStep("connect")}
+      onClick={() => setStep("connect", { shallow: false })}
       className={cn({ "rounded-full": !label })}
     >
       {!!label ? label : <PlusIcon className="h-4 w-4" />}

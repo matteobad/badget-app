@@ -1,5 +1,7 @@
 "use client";
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
 import {
   Dialog,
   DialogContent,
@@ -7,25 +9,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { AddAccountMultiStep } from "./steps/add-account-multi-step";
 
 export function AddBankAccountModal({
+  isOpen,
   children,
 }: {
+  isOpen: boolean;
   children: React.ReactNode;
 }) {
-  const isOpen = true;
+  const pathname = usePathname();
+  const router = useRouter();
 
   const handleOnClose = () => {
-    // void setParams(
-    //   {
-    //     step: null,
-    //     countryCode: null,
-    //   },
-    //   {
-    //     shallow: true,
-    //   },
-    // );
+    router.replace(`${pathname}`);
   };
 
   return (

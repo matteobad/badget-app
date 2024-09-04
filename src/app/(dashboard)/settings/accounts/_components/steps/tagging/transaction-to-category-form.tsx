@@ -2,131 +2,204 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowRight, Check, ChevronsUpDown } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { type z } from "zod";
 
-import type { selectBankAccountsSchema } from "~/lib/validators";
-import type { Provider } from "~/server/db/schema/enum";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "~/components/ui/form";
-import { Switch } from "~/components/ui/switch";
-import { euroFormat, getInitials } from "~/lib/utils";
-import { updateCategoryRuleSchema } from "~/lib/validators";
-import { type getAccounts } from "~/server/actions/institutions/get-accounts";
+import { Input } from "~/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { cn } from "~/lib/utils";
+import { updateTransactionCategoryBulkSchema } from "~/lib/validators";
+import { updateTransactionCategoryBulkAction } from "~/server/actions/bank-transaction-action";
+import {
+  type getFilteredTransactions,
+  type getUserCategories,
+  type getUserTransactions,
+} from "~/server/db/queries/cached-queries";
 import { ChangeStepButton } from "../change-step-button";
 
 export function TransactionToCategoryForm({
-  accounts,
+  categories,
+  transactions,
 }: {
-  accounts: Awaited<ReturnType<typeof getAccounts>>;
-  provider: Provider;
-  reference: string;
+  categories: Awaited<ReturnType<typeof getUserCategories>>;
+  transactions: Awaited<ReturnType<typeof getFilteredTransactions>>["data"];
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
 
-  // const connectBankAction = useAction(connectBankAccountAction, {
-  //   onError: () => {
-  //     toast.error("Something went wrong please try again.", {
-  //       duration: 3500,
-  //     });
-  //   },
-  //   onSuccess: () => {
-  //     // setActiveTab("loading");
-  //   },
-  // });
-
-  const form = useForm<z.infer<typeof updateCategoryRuleSchema>>({
-    resolver: zodResolver(updateCategoryRuleSchema),
-    mode: "onChange",
-    defaultValues: {},
+  const action = useAction(updateTransactionCategoryBulkAction, {
+    onError: () => {
+      toast.error("Something went wrong please try again.", {
+        duration: 3500,
+      });
+    },
+    onSuccess: () => {
+      const params = new URLSearchParams(searchParams);
+      params.delete("ref");
+      params.delete("provider");
+      params.set("step", "success");
+      router.replace(`${pathname}?${params.toString()}`);
+    },
   });
 
-  const onSubmit = (data: z.infer<typeof selectBankAccountsSchema>) => {
-    const enabledAccounts = data.accounts
-      .filter((account) => account.enabled)
-      .map((account) => account.accountId)
-      .join(",");
-
-    const params = new URLSearchParams(searchParams);
-    params.set("step", "tagging");
-    params.set("accounts", enabledAccounts);
-    router.replace(`${pathname}?${params.toString()}`);
-  };
+  const form = useForm<z.infer<typeof updateTransactionCategoryBulkSchema>>({
+    resolver: zodResolver(updateTransactionCategoryBulkSchema),
+    mode: "onChange",
+    defaultValues: {
+      transactions,
+    },
+  });
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(action.execute)}
         className="scrollbar-hide relative flex h-full flex-col space-y-6 overflow-auto"
       >
         <div className="flex-1">
-          {accounts.map((account) => (
+          {transactions.slice(0, 5).map((transation, index) => (
             <FormField
-              key={account.id}
+              key={transation.id}
               control={form.control}
-              name="accounts"
+              name="transactions"
               render={({ field }) => {
                 return (
-                  <FormItem key={account.id} className="flex items-center">
-                    <FormLabel className="mr-8 flex w-full items-center space-x-4">
-                      <Avatar className="size-[34px]">
-                        <AvatarImage src={account.institution.logo} />
-                        <AvatarFallback className="text-[11px]">
-                          {getInitials(account.account.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex w-full items-center justify-between">
-                        <div className="flex flex-col">
-                          <p className="mb-1 text-sm font-medium leading-none">
-                            {account.account.displayName ??
-                              account.account.name ??
-                              account.institution.name}
-                          </p>
-                          <span className="text-xs font-normal text-[#878787]">
-                            {account.account.product}
-                          </span>
-                        </div>
+                  <div className="flex items-end justify-between gap-4">
+                    <FormItem
+                      key={transation.id}
+                      className="flex w-full grow flex-col"
+                    >
+                      <FormLabel className={cn({ "sr-only": index !== 0 })}>
+                        Transazione
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="shadcn"
+                          {...field}
+                          value={
+                            field.value.find(
+                              (value) => value.id === transation.id,
+                            )?.description ?? ""
+                          }
+                          onChange={(event) => {
+                            return field.onChange(
+                              field.value.map((value) => {
+                                if (value.id === transation.id) {
+                                  return {
+                                    ...value,
+                                    description: event.target.value,
+                                  };
+                                }
 
-                        <span className="text-sm text-[#878787]">
-                          {euroFormat(account.balance?.amount ?? 0)}
-                        </span>
-                      </div>
-                    </FormLabel>
+                                return value;
+                              }),
+                            );
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                    <ArrowRight className="mb-3 size-4 shrink-0" />
+                    <FormItem className="flex w-full grow flex-col">
+                      <FormLabel className={cn({ "sr-only": index !== 0 })}>
+                        Categoria
+                      </FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                "justify-between",
+                                !field.value && "text-muted-foreground",
+                              )}
+                            >
+                              {field.value
+                                ? categories.find(
+                                    (category) =>
+                                      category.id ===
+                                      field.value[index]?.categoryId,
+                                  )?.name
+                                : "Seleziona categoria"}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cerca categoria..." />
+                            <CommandList>
+                              <CommandEmpty>
+                                Categoria non trovata.
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {categories.map((category) => (
+                                  <CommandItem
+                                    value={category.id.toString()}
+                                    key={category.id}
+                                    onSelect={() => {
+                                      const newValue = field.value.map(
+                                        (value) => {
+                                          if (value.id === transation.id) {
+                                            return {
+                                              ...value,
+                                              categoryId: category.id,
+                                            };
+                                          }
 
-                    <FormControl>
-                      <Switch
-                        className="!mt-0"
-                        checked={
-                          field.value.find(
-                            (value) => value.accountId === account.id,
-                          )?.enabled ?? false
-                        }
-                        onCheckedChange={(checked) => {
-                          return field.onChange(
-                            field.value.map((value) => {
-                              if (value.accountId === account.id) {
-                                return {
-                                  ...value,
-                                  enabled: checked,
-                                };
-                              }
+                                          return value;
+                                        },
+                                      );
 
-                              return value;
-                            }),
-                          );
-                        }}
-                      />
-                    </FormControl>
-                  </FormItem>
+                                      form.setValue("transactions", newValue);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        category.id ===
+                                          field.value[index]?.categoryId
+                                          ? "opacity-100"
+                                          : "opacity-0",
+                                      )}
+                                    />
+                                    {category.name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  </div>
                 );
               }}
             />
@@ -134,6 +207,7 @@ export function TransactionToCategoryForm({
         </div>
 
         <div className="flex w-full justify-end gap-4">
+          <ChangeStepButton step="success" label="skip" />
           <ChangeStepButton step="connect" label="annulla" />
           <Button type="submit" disabled={!form.formState.isValid}>
             Salva

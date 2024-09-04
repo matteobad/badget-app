@@ -29,18 +29,15 @@ export default async function AccountsPage({
       <Suspense fallback={<BankConnectionTableLoading />}>
         <BankConnectionTableServer />
       </Suspense>
-      <AddBankAccountModal>
+      <AddBankAccountModal isOpen={!!step}>
         <MultiStepFormWrapper>
           {step === "manual" && <ManualStep key={step} />}
-          {step === "connect" && <ConnectStep query={q} key={step} />}
+          {step === "connect" && <ConnectStep query={q} />}
           {step === "account" && (
             <AccountStep provider={provider} reference={ref} />
           )}
           {step === "tagging" && (
             <TaggingStep provider={provider} reference={ref} />
-          )}
-          {step === "loading" && (
-            <LoadingStep provider={provider} reference={ref} />
           )}
           {step === "success" && (
             <SuccessStep provider={provider} reference={ref} />

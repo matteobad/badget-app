@@ -1,11 +1,7 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-import {
-  category,
-  categoryBudgets,
-  categoryRules,
-} from "~/server/db/schema/categories";
+import { category, categoryBudgets } from "~/server/db/schema/categories";
 import {
   BankAccountType,
   ConnectionStatus,
@@ -95,6 +91,12 @@ export const importBankTransactionSchema = z.object({
 });
 
 // Bank Connections
+export const connectAccountSchema = z.object({
+  reference: z.string().min(1),
+  provider: z.nativeEnum(Provider),
+  accountIds: z.array(z.string().min(1)),
+});
+
 export const upsertBankConnectionSchema = z.object({
   connection: createInsertSchema(bankConnections, {
     status: z.nativeEnum(ConnectionStatus),
@@ -144,6 +146,10 @@ export const updateBankTransactionSchema = z.object({
   description: z.string().optional(),
   categoryId: z.number().nullable(),
   userId: z.string().min(1),
+});
+
+export const updateTransactionCategoryBulkSchema = z.object({
+  transactions: z.array(updateBankTransactionSchema),
 });
 
 // Category
@@ -221,6 +227,7 @@ export const transactionsSearchParamsSchema = z.object({
 
 export const accountsSearchParamsSchema = z.object({
   q: z.string().optional(),
+  ref: z.string().optional(),
 });
 
 export const institutionsSearchParamsSchema = z.object({
