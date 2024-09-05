@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import {
   Dialog,
@@ -26,7 +26,7 @@ export function AddBankAccountModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOnClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="flex h-full w-full max-w-screen-sm sm:max-h-[600px]">
         <DialogHeader className="sr-only">
           <DialogTitle>Aggiungi Conto</DialogTitle>
           <DialogDescription>

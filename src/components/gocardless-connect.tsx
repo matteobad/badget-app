@@ -9,9 +9,15 @@ type Props = {
   id: string;
   availableHistory: number;
   onSelect: () => void;
+  children: React.ReactNode;
 };
 
-export function GoCardLessConnect({ onSelect, id, availableHistory }: Props) {
+export function GoCardLessConnect({
+  onSelect,
+  id,
+  availableHistory,
+  children,
+}: Props) {
   const { execute, isExecuting } = useAction(createGoCardLessLinkAction, {
     onError: () => {
       toast.error("Something went wrong please try again.", {
@@ -31,13 +37,12 @@ export function GoCardLessConnect({ onSelect, id, availableHistory }: Props) {
   };
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
+    <button
+      className="h-full w-full"
       disabled={isExecuting}
       onClick={handleOnSelect}
     >
-      {isExecuting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Connect"}
-    </Button>
+      {children}
+    </button>
   );
 }

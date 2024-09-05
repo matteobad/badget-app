@@ -10,10 +10,12 @@ export function ConnectBankProvider({
   id,
   provider,
   availableHistory,
+  children,
 }: {
   id: string;
   provider: Provider;
   availableHistory: number;
+  children: React.ReactNode;
 }) {
   const updateInstitutionUsage = useAction(updateInstitutionUsageAction);
 
@@ -26,7 +28,9 @@ export function ConnectBankProvider({
           onSelect={() => {
             updateInstitutionUsage.execute({ institutionId: id });
           }}
-        />
+        >
+          {children}
+        </GoCardLessConnect>
       );
     }
     default:

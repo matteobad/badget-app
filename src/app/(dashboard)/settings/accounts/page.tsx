@@ -15,9 +15,15 @@ import { TaggingStep } from "./_components/steps/tagging/tagging-step";
 export default async function AccountsPage({
   searchParams,
 }: {
-  searchParams: { step: string; q: string; provider: Provider; ref: string };
+  searchParams: {
+    step: string;
+    country: string;
+    q: string;
+    provider: Provider;
+    ref: string;
+  };
 }) {
-  const { step, q, provider, ref } = searchParams;
+  const { step, country, q, provider, ref } = searchParams;
 
   return (
     <>
@@ -32,7 +38,7 @@ export default async function AccountsPage({
       <AddBankAccountModal isOpen={!!step}>
         <MultiStepFormWrapper>
           {step === "manual" && <ManualStep key={step} />}
-          {step === "connect" && <ConnectStep query={q} />}
+          {step === "connect" && <ConnectStep country={country} query={q} />}
           {step === "account" && (
             <AccountStep provider={provider} reference={ref} />
           )}

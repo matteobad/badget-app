@@ -32,7 +32,7 @@ export function InstitutionInfo({
     <TooltipProvider delayDuration={100}>
       <Tooltip>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
-        <TooltipContent className="w-[300px] text-xs" side="bottom">
+        <TooltipContent className="w-[300px] text-left text-xs" side="right">
           {getDescription()}
         </TooltipContent>
       </Tooltip>

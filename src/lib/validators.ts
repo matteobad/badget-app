@@ -231,5 +231,6 @@ export const accountsSearchParamsSchema = z.object({
 });
 
 export const institutionsSearchParamsSchema = z.object({
+  country: z.string().optional(),
   q: z.string().optional(),
 });

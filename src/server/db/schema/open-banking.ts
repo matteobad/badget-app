@@ -27,6 +27,9 @@ export const institutions = createTable("instituions", {
   provider: text("provider").$type<Provider>().notNull(),
   availableHistory: integer("available_history"),
   popularity: integer("popularity").default(0),
+  countries: text("countries")
+    .array()
+    .default(sql`ARRAY[]::text[]`),
 });
 
 export const institutionsRelations = relations(institutions, ({ many }) => ({

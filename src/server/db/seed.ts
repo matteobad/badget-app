@@ -81,6 +81,7 @@ try {
           provider: doc.provider,
           popularity: doc.popularity,
           availableHistory: doc.available_history,
+          countries: doc.countries,
         } satisfies typeof schema.institutions.$inferInsert;
       }),
     )
@@ -90,6 +91,7 @@ try {
         "name",
         "logo",
         "availableHistory",
+        "countries",
       ]),
     });
 } catch (error) {

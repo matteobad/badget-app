@@ -39,12 +39,20 @@ export async function getFilteredInstitutionsQuery({
 }) {
   try {
     let query = db.select().from(schema.institutions).$dynamic();
-    console.log(params.q);
+    console.log(params.country);
+
+    if (params.country) {
+      query = query.where(
+        sql`${schema.institutions.countries} @> ARRAY[${params.country}]`,
+      );
+    }
 
     if (params.q) {
       query = query.where(
         ilike(schema.institutions.name, "%" + params.q + "%"),
       );
+    } else {
+      query = query.orderBy(desc(schema.institutions.popularity)).limit(10);
     }
 
     return await query;
