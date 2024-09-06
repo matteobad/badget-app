@@ -21,7 +21,7 @@ export function AccountStep({
           time.
         </p>
       </header>
-      <div className="flex h-[320px] flex-col gap-6">
+      <div className="flex h-full flex-col gap-6">
         <Suspense key={reference} fallback={<AccountListLoading />}>
           <AccountListServer reference={reference} provider={provider} />
         </Suspense>

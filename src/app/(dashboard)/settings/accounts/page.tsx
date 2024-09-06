@@ -27,9 +27,9 @@ export default async function AccountsPage({
 
   return (
     <>
-      <div className="">
-        <header className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Your Bank Accounts</h1>
+      <div className="flex flex-1 flex-col gap-6">
+        <header className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Le Tue Connessioni</h1>
           <AddBankAccountButton />
         </header>
         <Suspense fallback={<BankConnectionListLoading />}>

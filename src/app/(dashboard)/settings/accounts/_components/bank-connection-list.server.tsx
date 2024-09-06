@@ -3,7 +3,6 @@ import { AddBankAccountButton } from "./add-bank-account-button";
 import { BankConnectionList } from "./bank-connection-list";
 
 export async function BankConnectionListServer() {
-  await new Promise((resolve) => setTimeout(resolve, 10000));
   const connections = await getUserBankConnections();
 
   if (connections.length === 0) {

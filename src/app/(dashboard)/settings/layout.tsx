@@ -11,7 +11,7 @@ interface SettingsLayoutProps {
 
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
   return (
-    <div className="container mx-auto flex min-h-[calc(100vh-134px)] flex-col space-y-6 py-6">
+    <div className="container mx-auto flex min-h-[calc(100vh-70px)] flex-col space-y-6 py-6">
       {children}
     </div>
   );
