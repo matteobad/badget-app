@@ -2,11 +2,11 @@ import { Suspense } from "react";
 
 import { type Provider } from "~/server/db/schema/enum";
 import { AddBankAccountModal } from "./_components/add-account-dialog";
-import { BankConnectionTableLoading } from "./_components/bank-connection-table.loading";
-import { BankConnectionTableServer } from "./_components/bank-connection-table.server";
+import { AddBankAccountButton } from "./_components/add-bank-account-button";
+import { BankConnectionListLoading } from "./_components/bank-connection-list.loading";
+import { BankConnectionListServer } from "./_components/bank-connection-list.server";
 import { AccountStep } from "./_components/steps/account/account-step";
 import { ConnectStep } from "./_components/steps/connect/connect-step";
-import { LoadingStep } from "./_components/steps/loading/loading-step";
 import { ManualStep } from "./_components/steps/manual/manual-step";
 import { MultiStepFormWrapper } from "./_components/steps/multi-step-form-wrapper";
 import { SuccessStep } from "./_components/steps/success/success-step";
@@ -27,14 +27,16 @@ export default async function AccountsPage({
 
   return (
     <>
-      <header className="">
-        <h1 className="text-2xl font-semibold">
-          Conti, Carte e Account collegati
-        </h1>
-      </header>
-      <Suspense fallback={<BankConnectionTableLoading />}>
-        <BankConnectionTableServer />
-      </Suspense>
+      <div className="">
+        <header className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Your Bank Accounts</h1>
+          <AddBankAccountButton />
+        </header>
+        <Suspense fallback={<BankConnectionListLoading />}>
+          <BankConnectionListServer />
+        </Suspense>
+      </div>
+
       <AddBankAccountModal isOpen={!!step}>
         <MultiStepFormWrapper>
           {step === "manual" && <ManualStep key={step} />}

@@ -1,11 +1,12 @@
-import { AddBankAccountButton } from "~/app/(dashboard)/_components/add-bank-account-button";
 import { getUserBankConnections } from "~/server/db/queries/cached-queries";
-import { BankConnectionTable } from "./bank-connection-table";
+import { AddBankAccountButton } from "./add-bank-account-button";
+import { BankConnectionList } from "./bank-connection-list";
 
-export async function BankConnectionTableServer() {
-  const data = await getUserBankConnections();
+export async function BankConnectionListServer() {
+  await new Promise((resolve) => setTimeout(resolve, 10000));
+  const connections = await getUserBankConnections();
 
-  if (data.length === 0) {
+  if (connections.length === 0) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-6 rounded-lg border border-dashed shadow-sm">
         <div className="flex flex-col items-center gap-2">
@@ -19,14 +20,5 @@ export async function BankConnectionTableServer() {
     );
   }
 
-  return (
-    <div className="flex w-full flex-col gap-4">
-      <div className="flex w-full rounded border">
-        <BankConnectionTable data={data} />
-      </div>
-      <div className="flex justify-end">
-        <AddBankAccountButton label="Aggiungi Conto" />
-      </div>
-    </div>
-  );
+  return <BankConnectionList connections={connections} />;
 }
