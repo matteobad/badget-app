@@ -20,7 +20,7 @@ export const createBankAccountAction = authActionClient
   .metadata({ actionName: "createBankAccountAction" })
   .action(
     async ({ parsedInput: { name, balance, currency }, ctx: { userId } }) => {
-      await createBankAccount({
+      const account = await createBankAccount({
         name,
         balance,
         currency,
@@ -28,6 +28,7 @@ export const createBankAccountAction = authActionClient
       });
 
       revalidateTag(`bank_accounts_${userId}`);
+      return account;
     },
   );
 

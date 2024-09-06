@@ -213,7 +213,8 @@ export async function createBankAccount({
         balance,
         currency,
       },
-    });
+    })
+    .returning({ id: schema.bankAccounts.id });
 }
 
 type UpdateBankAccountPayload = z.infer<typeof updateBankAccountSchema> & {

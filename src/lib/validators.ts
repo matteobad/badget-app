@@ -56,6 +56,11 @@ export const CreateWorkSchema = z.object({
   toDate: z.date().optional(),
 });
 
+export const createLinkSchema = z.object({
+  institutionId: z.string(),
+  provider: z.string(),
+});
+
 export const createGoCardLessLinkSchema = z.object({
   institutionId: z.string(),
   step: z.string().optional(),
@@ -223,6 +228,10 @@ export const transactionsSearchParamsSchema = z.object({
   operator: z.enum(["and", "or"]).optional(),
   category: z.string().optional(),
   account: z.string().optional(),
+});
+
+export const readAccountsByIdsSchema = z.object({
+  ids: z.array(z.string()),
 });
 
 export const accountsSearchParamsSchema = z.object({

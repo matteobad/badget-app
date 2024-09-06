@@ -8,6 +8,7 @@ import {
   gt,
   gte,
   ilike,
+  inArray,
   lt,
   lte,
   ne,
@@ -65,17 +66,25 @@ export async function getFilteredInstitutionsQuery({
 export type GetUserBankAccountsParams = {
   userId: string;
   enabled?: boolean;
+  ids?: string[];
 };
 
 export async function getUserBankConnectionsQuery(
   params: GetUserBankAccountsParams,
 ) {
-  const { userId } = params;
+  const { userId, ids } = params;
+
+  const whereConditions = [eq(schema.bankAccounts.userId, userId)];
+
+  if (ids && ids.length > 0) {
+    whereConditions.push(inArray(schema.bankAccounts.id, ids.map(Number)));
+  }
 
   const data = await db.query.bankConnections.findMany({
     where: eq(schema.bankConnections.userId, userId),
     with: {
       bankAccount: {
+        where: and(...whereConditions),
         orderBy: desc(schema.bankAccounts.balance),
       },
     },
@@ -87,10 +96,16 @@ export async function getUserBankConnectionsQuery(
 export async function getUserBankAccountsQuery(
   params: GetUserBankAccountsParams,
 ) {
-  const { userId } = params;
+  const { userId, ids } = params;
+
+  const whereConditions = [eq(schema.bankAccounts.userId, userId)];
+
+  if (ids && ids.length > 0) {
+    whereConditions.push(inArray(schema.bankAccounts.id, ids.map(Number)));
+  }
 
   const data = await db.query.bankAccounts.findMany({
-    where: eq(schema.bankAccounts.userId, userId),
+    where: and(...whereConditions),
   });
 
   return data;
