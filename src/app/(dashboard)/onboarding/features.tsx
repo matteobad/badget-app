@@ -75,7 +75,7 @@ export default function Features() {
             <Button
               variant="default"
               size="lg"
-              onClick={() => router.push("/onboarding?step=banking")}
+              onClick={() => router.push("/onboarding?step=banking-accounts")}
             >
               <Layers className="mr-2 h-4 w-4" />
               Banking

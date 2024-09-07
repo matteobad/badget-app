@@ -36,9 +36,9 @@ export const authActionClient = actionClient
 
     const endTime = performance.now();
 
+    console.log("Metadata ->", metadata);
     console.log("Client input ->", clientInput);
     console.log("Result ->", result);
-    console.log("Metadata ->", metadata);
     console.log("Action execution took", endTime - startTime, "ms");
 
     // And then return the result of the awaited action.

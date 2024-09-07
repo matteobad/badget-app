@@ -20,12 +20,14 @@ import { type z } from "zod";
 import { filterColumn } from "~/lib/utils";
 import {
   type accountsSearchParamsSchema,
+  type bankConnectionsFilteredParamsSchema,
   type institutionsSearchParamsSchema,
   type transactionsSearchParamsSchema,
 } from "~/lib/validators";
+import { getAccounts } from "~/server/actions/institutions/get-accounts";
 import { db, schema } from "..";
 import { category, categoryBudgets } from "../schema/categories";
-import { CategoryType } from "../schema/enum";
+import { CategoryType, Provider } from "../schema/enum";
 import {
   bankAccounts,
   bankConnections,
@@ -91,6 +93,54 @@ export async function getUserBankConnectionsQuery(
   });
 
   return data;
+}
+
+export async function getFilteredBankConnectionsQuery(
+  params: z.infer<typeof bankConnectionsFilteredParamsSchema>,
+  userId: string,
+) {
+  const { provider, ref, accounts } = params;
+
+  const providerAccounts: Awaited<ReturnType<typeof getAccounts>> = [];
+
+  for (const id of ref ?? []) {
+    const data = await getAccounts({ id });
+    providerAccounts.push(...data);
+  }
+
+  const data = await db.query.bankConnections.findMany({
+    where: and(
+      eq(schema.bankConnections.userId, userId),
+      eq(schema.bankConnections.provider, Provider.NONE),
+    ),
+    with: {
+      bankAccount: {
+        where: and(
+          eq(schema.bankAccounts.userId, userId),
+          inArray(schema.bankAccounts.id, accounts?.map(Number) ?? []),
+        ),
+        orderBy: desc(schema.bankAccounts.balance),
+      },
+    },
+  });
+
+  // Merge data with providerAccounts
+  const mergedData = [
+    ...data.map((connection) => ({
+      ...connection,
+      source: "db",
+    })),
+    ...providerAccounts.map((account) => ({
+      id: account.id,
+      name: account.institution.name,
+      userId,
+      provider: provider,
+      bankAccount: [account],
+      source: "provider",
+    })),
+  ];
+
+  return mergedData;
 }
 
 export async function getUserBankAccountsQuery(

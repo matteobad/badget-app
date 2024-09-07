@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { CalendarIcon, Receipt } from "lucide-react";
+import { CalendarIcon, Clock, Receipt } from "lucide-react";
 import { useDebounce } from "use-debounce";
 import { date } from "zod";
 
@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { cn } from "~/lib/utils";
+import { cn, euroFormat } from "~/lib/utils";
 import { type Transaction } from "~/server/db";
 
 export default function Transactions() {
@@ -105,14 +105,31 @@ export default function Transactions() {
                   size="lg"
                 >
                   <span className="w-full text-center font-bold">
-                    Ultime transazioni
+                    Aggiungi transazione
                   </span>
                   <ul className="w-[240px] text-left font-light">
-                    <li className="flex items-baseline">
-                      <span className="mr-2 text-xs text-slate-700">12/08</span>{" "}
-                      Cena fuori
-                      <span className="ml-auto">-100,00 €</span>
-                    </li>
+                    {transactions.length > 0 ? (
+                      transactions.map((transaction) => (
+                        <li
+                          className="flex items-baseline"
+                          key={transaction.id}
+                        >
+                          <span className="mr-2 text-xs text-slate-700">
+                            {format(transaction.date ?? new Date(), "dd/MM")}
+                          </span>{" "}
+                          {transaction.description}
+                          <span className="ml-auto">
+                            {euroFormat(transaction.amount)}
+                          </span>
+                        </li>
+                      ))
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Clock className="size-3 text-slate-700" /> Nessuna
+                        transazione
+                        <span className="flex-1"></span>-
+                      </div>
+                    )}
                   </ul>
                 </Button>
               </PopoverTrigger>
@@ -134,7 +151,7 @@ export default function Transactions() {
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
-                        selected={transaction?.date}
+                        selected={transaction?.date ?? new Date()}
                         onSelect={(date) =>
                           setTransaction({ ...transaction, date })
                         }
@@ -204,15 +221,7 @@ export default function Transactions() {
               },
             }}
           >
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => {
-                const params = new URLSearchParams(searchParams);
-                params.set("step", "banking-accounts");
-                router.replace(`${pathname}?${params.toString()}`);
-              }}
-            >
+            <Button variant="outline" size="lg" onClick={() => router.back()}>
               <span className="w-full text-center font-bold">Indietro</span>
             </Button>
             <span className="flex-1"></span>
@@ -222,7 +231,7 @@ export default function Transactions() {
               onClick={() => {
                 const params = new URLSearchParams(searchParams);
                 params.set("step", "banking-categories");
-                router.replace(`${pathname}?${params.toString()}`);
+                router.push(`${pathname}?${params.toString()}`);
               }}
             >
               <span className="w-full text-center font-bold">Salta</span>
@@ -234,7 +243,7 @@ export default function Transactions() {
               onClick={() => {
                 const params = new URLSearchParams(searchParams);
                 params.set("step", "banking-categories");
-                router.replace(`${pathname}?${params.toString()}`);
+                router.push(`${pathname}?${params.toString()}`);
               }}
             >
               <span className="w-full text-center font-bold">Avanti</span>

@@ -341,13 +341,7 @@ export default function Categories() {
               },
             }}
           >
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() =>
-                router.push("/onboarding?step=banking-transactions")
-              }
-            >
+            <Button variant="outline" size="lg" onClick={() => router.back()}>
               <span className="w-full text-center font-bold">Indietro</span>
             </Button>
             <span className="flex-1"></span>

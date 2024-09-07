@@ -1,11 +1,12 @@
 "use client";
 
-import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Building2, Layers, Link, PlusCircle } from "lucide-react";
+import { Layers, Link, PlusCircle } from "lucide-react";
 import { useDebounce } from "use-debounce";
 
+import { ConnectBankProvider } from "~/components/connect-bank-provider";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -14,28 +15,21 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import { euroFormat } from "~/lib/utils";
-import { type getUserBankConnections } from "~/server/db/queries/cached-queries";
-import { Provider } from "~/server/db/schema/enum";
+import {
+  type getBankConnections,
+  type getFilteredInstitutions,
+} from "~/server/db/queries/cached-queries";
 import { CreateAccountForm } from "./create-account-form";
 
-export default function Banking(props: {
-  children: React.ReactNode;
-  connections: Awaited<ReturnType<typeof getUserBankConnections>>;
+export default function AccountsStep(props: {
+  institutions: Awaited<ReturnType<typeof getFilteredInstitutions>>;
+  connections: Awaited<ReturnType<typeof getBankConnections>>;
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const showText = useDebounce(true, 800);
-
-  const linkedAccounts = props.connections.filter(
-    (connection) => connection.provider !== Provider.NONE,
-  );
-
-  const manualAccounts = props.connections.filter(
-    (connection) => connection.provider === Provider.NONE,
-  );
 
   return (
     <motion.div
@@ -108,11 +102,11 @@ export default function Banking(props: {
                     <Link className="mr-2 h-4 w-4" />
                     Collega un conto
                   </div>
-                  {linkedAccounts.map((connection) => {
-                    return connection.bankAccount.map((account) => {
-                      return <div key={account.id}>{account.name}</div>;
-                    });
-                  })}
+                  {props.connections
+                    .filter((connection) => connection.source === "provider")
+                    .map((connection) => (
+                      <div key={connection.id}>{connection.name}</div>
+                    ))}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-72" align="center">
@@ -126,9 +120,31 @@ export default function Banking(props: {
                     }}
                   />
                   <ScrollArea className="-ml-4 h-[200px]">
-                    <Suspense fallback={<div>Caricamento...</div>}>
-                      {props.children}
-                    </Suspense>
+                    <ul className="-mr-4 grid grid-cols-1 gap-1">
+                      {props.institutions.map((institution) => (
+                        <li key={institution.id} className="flex items-center">
+                          <ConnectBankProvider
+                            provider={institution.provider}
+                            id={institution.id}
+                            availableHistory={
+                              institution.availableHistory ?? 90
+                            }
+                          >
+                            <div className="flex h-12 w-full items-center justify-start gap-2 rounded-none pl-4 text-left text-sm font-normal hover:bg-muted">
+                              <Avatar className="h-8 w-8 rounded-none">
+                                <AvatarImage src={institution.logo ?? ""} />
+                                <AvatarFallback>
+                                  {institution.name}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="w-[80%] truncate">
+                                {institution.name}
+                              </span>
+                            </div>
+                          </ConnectBankProvider>
+                        </li>
+                      ))}
+                    </ul>
                   </ScrollArea>
                 </div>
               </PopoverContent>
@@ -144,22 +160,11 @@ export default function Banking(props: {
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Traccia a mano
                   </div>
-                  {manualAccounts.map((connection) => {
-                    return connection.bankAccount.map((account) => {
-                      return (
-                        <div
-                          key={account.id}
-                          className="flex w-full items-center font-light"
-                        >
-                          <Building2 className="mr-2 size-3" />
-                          {account.name}
-                          <span className="flex-1 text-right">
-                            {euroFormat(account.balance ?? "0")}
-                          </span>
-                        </div>
-                      );
-                    });
-                  })}
+                  {props.connections
+                    .filter((connection) => connection.source === "db")
+                    .map((connection) => (
+                      <div key={connection.id}>{connection.name}</div>
+                    ))}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-72">
@@ -178,11 +183,7 @@ export default function Banking(props: {
               },
             }}
           >
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => router.push("/onboarding?step=features")}
-            >
+            <Button variant="outline" size="lg" onClick={() => router.back()}>
               <span className="w-full text-center font-bold">Indietro</span>
             </Button>
             <span className="flex-1"></span>
@@ -200,7 +201,7 @@ export default function Banking(props: {
               onClick={() => {
                 const params = new URLSearchParams(searchParams);
                 params.set("step", "banking-transactions");
-                router.replace(`${pathname}?${params.toString()}`);
+                router.push(`${pathname}?${params.toString()}`);
               }}
             >
               <span className="w-full text-center font-bold">Avanti</span>

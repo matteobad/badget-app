@@ -259,3 +259,9 @@ export const institutionsSearchParamsSchema = z.object({
   country: z.string().optional(),
   q: z.string().optional(),
 });
+
+export const bankConnectionsFilteredParamsSchema = z.object({
+  provider: z.nativeEnum(Provider).nullable(),
+  ref: z.array(z.string()).nullable(),
+  accounts: z.array(z.string()).nullable(),
+});

@@ -24,7 +24,10 @@ export async function getAccounts({ id }: GetAccountParams) {
 
   return (
     data
-      ?.filter((account) => account.account.status !== "deleted")
+      ?.filter(
+        (account) =>
+          !account.account.status || account.account.status !== "deleted",
+      )
       .sort((a, b) => Number(b.balance?.amount) - Number(a.balance?.amount)) ??
     []
   );

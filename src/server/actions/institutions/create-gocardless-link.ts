@@ -21,14 +21,14 @@ const provider = new GoCardLessApi({
 
 export const createGoCardLessLinkAction = authActionClient
   .schema(createGoCardLessLinkSchema)
-  .metadata({ actionName: "createGoCardLessLinkAction" })
+  .metadata({ actionName: "create-gocardless-link" })
   .action(
     async ({
       parsedInput: {
         institutionId,
         availableHistory,
         redirectBase,
-        step = "account",
+        step = "banking-accounts",
       },
     }) => {
       await db
