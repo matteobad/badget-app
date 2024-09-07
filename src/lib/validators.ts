@@ -4,6 +4,8 @@ import { z } from "zod";
 import { category, categoryBudgets } from "~/server/db/schema/categories";
 import {
   BankAccountType,
+  BudgetPeriod,
+  CategoryType,
   ConnectionStatus,
   Provider,
 } from "~/server/db/schema/enum";
@@ -158,6 +160,20 @@ export const updateTransactionCategoryBulkSchema = z.object({
 });
 
 // Category
+export const upsertCategoryBulkSchema = z.object({
+  categories: z.array(
+    createInsertSchema(category, {
+      type: z.nativeEnum(CategoryType),
+    }).extend({
+      budgets: z.array(
+        createInsertSchema(categoryBudgets, {
+          period: z.nativeEnum(BudgetPeriod),
+        }),
+      ),
+    }),
+  ),
+});
+
 export const upsertCategorySchema = createInsertSchema(category, {
   name: (schema) => schema.name.toLowerCase(),
   macro: (schema) => schema.macro.toLowerCase(),

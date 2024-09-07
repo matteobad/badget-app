@@ -49,6 +49,27 @@ export type GetPensionAccountsReturnType = ReturnType<
   typeof findAllInstitutions
 >;
 
+export const getUserBankConnectionsByAccountIds = async (
+  params?: Omit<GetUserBankAccountsParams, "userId">,
+) => {
+  const session = auth();
+
+  if (!session.userId || !params?.ids) {
+    return [];
+  }
+
+  return unstable_cache(
+    async () => {
+      return getUserBankConnectionsQuery({ ...params, userId: session.userId });
+    },
+    ["bank_connections", session.userId],
+    {
+      tags: [`bank_connections_${session.userId}`],
+      revalidate: 180,
+    },
+  )();
+};
+
 export const getUserBankConnections = async (
   params?: Omit<GetUserBankAccountsParams, "userId">,
 ) => {

@@ -8,6 +8,7 @@ import {
   deleteCategorySchema,
   updateCategorySchema,
   upsertCategoryBudgetSchema,
+  upsertCategoryBulkSchema,
   upsertCategorySchema,
 } from "~/lib/validators";
 import {
@@ -15,6 +16,7 @@ import {
   editCategory,
   insertCategory,
   upsertCategoryBudget,
+  upsertCategoryBulk,
 } from "../db/mutations";
 
 export const insertCategoryAction = authActionClient
@@ -38,6 +40,21 @@ export const insertCategoryAction = authActionClient
       revalidateTag(`bank_categories_${userId}`);
     },
   );
+
+export const upsertCategoryBulkAction = authActionClient
+  .schema(upsertCategoryBulkSchema)
+  .metadata({ actionName: "upsert-category-bulk" })
+  .action(async ({ parsedInput: { categories }, ctx: { userId } }) => {
+    const result = await upsertCategoryBulk({
+      categories: categories.map((c) => ({
+        ...c,
+        userId,
+      })),
+    });
+
+    revalidateTag(`bank_categories_${userId}`);
+    return result;
+  });
 
 export const editCategoryAction = authActionClient
   .schema(updateCategorySchema)

@@ -54,7 +54,7 @@ export default function Banking(props: {
           }}
           initial="hidden"
           animate="show"
-          className="mx-5 flex flex-col items-center space-y-8 text-center sm:mx-auto"
+          className="mx-5 flex max-w-[-webkit-fill-available] flex-col items-center space-y-8 text-center sm:mx-auto"
         >
           <motion.h1
             className="font-cal flex items-center text-4xl font-bold transition-colors sm:text-5xl"
@@ -87,7 +87,7 @@ export default function Banking(props: {
             transazioni in automatico.
           </motion.p>
           <motion.div
-            className="grid grid-cols-2 gap-4 pb-4"
+            className="grid grid-cols-2 gap-4 pb-4 sm:grid-cols-2"
             variants={{
               hidden: { opacity: 0, y: 50 },
               show: {
@@ -142,7 +142,7 @@ export default function Banking(props: {
                 >
                   <div className="flex items-center">
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Traccia manualmente
+                    Traccia a mano
                   </div>
                   {manualAccounts.map((connection) => {
                     return connection.bankAccount.map((account) => {
@@ -168,7 +168,7 @@ export default function Banking(props: {
             </Popover>
           </motion.div>
           <motion.div
-            className="flex w-full justify-end gap-4"
+            className="flex w-full justify-end pt-6"
             variants={{
               hidden: { opacity: 0, y: 50 },
               show: {
@@ -179,32 +179,31 @@ export default function Banking(props: {
             }}
           >
             <Button
+              variant="outline"
+              size="lg"
+              onClick={() => router.push("/onboarding?step=features")}
+            >
+              <span className="w-full text-center font-bold">Indietro</span>
+            </Button>
+            <span className="flex-1"></span>
+
+            <Button
               variant="ghost"
               size="lg"
               onClick={() => router.push("/onboarding?step=categories")}
             >
               <span className="w-full text-center font-bold">Salta</span>
             </Button>
-            <span className="flex-1"></span>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => router.push("/onboarding?step=features")}
-            >
-              <span className="w-full text-center font-bold">
-                Torna indietro
-              </span>
-            </Button>
             <Button
               variant="default"
               size="lg"
               onClick={() => {
                 const params = new URLSearchParams(searchParams);
-                params.set("step", "banking-categories");
+                params.set("step", "banking-transactions");
                 router.replace(`${pathname}?${params.toString()}`);
               }}
             >
-              <span className="w-full text-center font-bold">Conferma</span>
+              <span className="w-full text-center font-bold">Avanti</span>
             </Button>
           </motion.div>
         </motion.div>

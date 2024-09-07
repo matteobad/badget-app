@@ -16,6 +16,7 @@ import type {
   updateCategorySchema,
   upsertBankConnectionSchema,
   upsertCategoryBudgetSchema,
+  upsertCategoryBulkSchema,
   upsertCategorySchema,
 } from "~/lib/validators";
 import { tokenize } from "~/lib/jobs/tokenize";
@@ -440,6 +441,57 @@ export async function insertCategory({
       categoryId: inserted[0].insertedId,
       userId: userId,
     });
+  });
+}
+
+export async function upsertCategoryBulk({
+  categories,
+}: z.infer<typeof upsertCategoryBulkSchema>) {
+  return await db.transaction(async (tx) => {
+    const results = [];
+
+    for (const { budgets, ...category } of categories) {
+      const inserted = await tx
+        .insert(schema.category)
+        .values(category)
+        .onConflictDoUpdate({
+          target: [schema.category.userId, schema.category.name],
+          set: {
+            name: category.name,
+            macro: category.macro,
+            type: category.type as CategoryType,
+            icon: category.icon,
+            color: category.color,
+          },
+        })
+        .returning({ id: schema.category.id });
+
+      if (!inserted[0]?.id) return tx.rollback();
+
+      await tx
+        .insert(schema.categoryRules)
+        .values({
+          categoryId: inserted[0]?.id,
+          userId: category.userId,
+        })
+        .onConflictDoNothing();
+
+      if (budgets.length !== 0) {
+        await tx.insert(schema.categoryBudgets).values(
+          budgets.map((b) => ({
+            budget: b.budget,
+            period: b.period,
+            activeFrom: startOfYear(subYears(new Date(), 2)), // first budget should compreend everything
+            categoryId: inserted[0]?.id!,
+            userId: category.userId,
+          })),
+        );
+      }
+
+      results.push(...inserted);
+    }
+
+    return results;
   });
 }
 

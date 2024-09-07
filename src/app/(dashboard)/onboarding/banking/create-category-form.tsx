@@ -18,7 +18,7 @@ import { Input } from "~/components/ui/input";
 import { createBankAccountSchema } from "~/lib/validators";
 import { createBankAccountAction } from "~/server/actions/bank-account.action";
 
-export function CreateAccountForm() {
+export function CreateCategoryForm() {
   const router = useRouter();
 
   const { execute, isExecuting } = useAction(createBankAccountAction, {
@@ -28,9 +28,7 @@ export function CreateAccountForm() {
     onSuccess: ({ data }) => {
       const bankAccountId = data![0]?.id;
       toast.success("Conto creato!");
-      router.push(
-        `/onboarding?step=banking-accounts&account_ids=${bankAccountId}`,
-      );
+      router.push(`/onboarding?step=banking&account_ids=${bankAccountId}`);
     },
   });
 
