@@ -81,7 +81,7 @@ export default function AccountsStep(props: {
             transazioni in automatico.
           </motion.p>
           <motion.div
-            className="grid grid-cols-2 gap-4 pb-4 sm:grid-cols-2"
+            className="grid w-full grid-cols-2 gap-4 pb-4 sm:grid-cols-2"
             variants={{
               hidden: { opacity: 0, y: 50 },
               show: {
@@ -156,7 +156,7 @@ export default function AccountsStep(props: {
                   variant={"outline"}
                   size="lg"
                 >
-                  <div className="flex items-center">
+                  <div className="flex w-full items-center justify-center">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Traccia a mano
                   </div>

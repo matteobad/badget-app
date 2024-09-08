@@ -5,6 +5,7 @@ import {
 } from "~/server/db/queries/cached-queries";
 import AccountsStep from "./accounts-step";
 import Categories from "./categories";
+import Done from "./done";
 import Rules from "./rules";
 import { searchParamsCache } from "./search-params";
 import Transactions from "./transactions";
@@ -30,6 +31,7 @@ export async function BankingOnboarding() {
       {step === "banking-transactions" && <Transactions />}
       {step === "banking-categories" && <Categories />}
       {step === "banking-rules" && <Rules />}
+      {step === "banking-done" && <Done />}
     </>
   );
 }

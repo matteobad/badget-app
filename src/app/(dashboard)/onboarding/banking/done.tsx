@@ -2,12 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { PencilRuler, Shapes } from "lucide-react";
+import { PartyPopper, PencilRuler } from "lucide-react";
 import { useDebounce } from "use-debounce";
 
 import { Button } from "~/components/ui/button";
 
-export default function Rules() {
+export default function Done() {
   const router = useRouter();
 
   const showText = useDebounce(true, 800);
@@ -42,8 +42,8 @@ export default function Rules() {
               },
             }}
           >
-            <PencilRuler className="mr-4 size-10" />
-            Regole
+            <PartyPopper className="mr-4 size-10" />
+            Ci siamo!
           </motion.h1>
           <motion.p
             className="max-w-md text-muted-foreground transition-colors sm:text-lg"
@@ -56,23 +56,10 @@ export default function Rules() {
               },
             }}
           >
-            Il primo passo è prendere consapevolezza delle proprie spese. Per
-            farlo possiamo creare delle categorie. Ogni persona ha esigenze
-            diverse perciò offriamo completa personalizzazione.
+            Sappiamo che il tempo è denaro e non vogliamo rubartene altro.
+            Abbiamo visto insieme come collegare un conto e creato delle
+            categorie. Potrai sempre aggiungerne altri dalle impostazioni.
           </motion.p>
-          <motion.div
-            className="grid grid-cols-3 gap-4 pb-4"
-            variants={{
-              hidden: { opacity: 0, y: 50 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.4, type: "spring" },
-              },
-            }}
-          >
-            TODO
-          </motion.div>
           <motion.div
             className="flex w-full justify-end pt-6"
             variants={{
@@ -85,27 +72,25 @@ export default function Rules() {
             }}
           >
             <Button
-              variant="outline"
-              size="lg"
-              onClick={() => router.push("/onboarding?step=banking-categories")}
-            >
-              <span className="w-full text-center font-bold">Indietro</span>
-            </Button>
-            <span className="flex-1"></span>
-
-            <Button
               variant="ghost"
               size="lg"
-              onClick={() => router.push("/onboarding?step=banking-done")}
+              onClick={() => router.push("/onboarding?step=features")}
             >
-              <span className="w-full text-center font-bold">Salta</span>
+              <span className="w-full text-center font-bold">
+                Fammi vedere altro
+              </span>
             </Button>
             <Button
               variant="default"
               size="lg"
-              onClick={() => router.push("/onboarding?step=banking-done")}
+              // onClick={() => {
+              //   execute({ categories });
+              // }}
+              // disabled={isExecuting}
             >
-              <span className="w-full text-center font-bold">Avanti</span>
+              <span className="w-full text-center font-bold">
+                Vai alla Dashboard
+              </span>
             </Button>
           </motion.div>
         </motion.div>
