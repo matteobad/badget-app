@@ -1,4 +1,5 @@
 import { capitalCase } from "change-case";
+import { addDays } from "date-fns";
 
 import type { Balance as BaseAccountBalance } from "../types";
 import type {
@@ -10,7 +11,12 @@ import type {
   TransformInstitution,
 } from "./types";
 import { type schema } from "~/server/db";
-import { BankAccountType, Provider } from "~/server/db/schema/enum";
+import {
+  BankAccountType,
+  ConnectionStatus,
+  Provider,
+} from "~/server/db/schema/enum";
+import { getAccessValidForDays } from "./utils";
 
 export const mapTransactionMethod = (type?: string) => {
   switch (type) {
@@ -136,6 +142,26 @@ const transformAccountName = (account: TransformAccountName) => {
   return "No name";
 };
 
+export const transformConnection = ({ id, institution }: TransformAccount) => {
+  const expiresAt = addDays(
+    new Date(),
+    getAccessValidForDays({
+      institutionId: institution.id,
+    }),
+  );
+
+  return {
+    userId: "",
+    name: institution.name,
+    provider: Provider.GOCARDLESS,
+    institutionId: institution.id,
+    logoUrl: institution.logo,
+    status: ConnectionStatus.CONNECTED,
+    referenceId: id,
+    expiresAt,
+  } satisfies typeof schema.bankConnections.$inferInsert;
+};
+
 export const transformAccount = ({
   id,
   account,
@@ -153,6 +179,7 @@ export const transformAccount = ({
     currency: account.currency,
     balance: transformAccountBalance(balance).amount.toString(),
     institutionId: transformInstitution(institution).id,
+    enabled: true,
   } satisfies typeof schema.bankAccounts.$inferInsert;
 };
 

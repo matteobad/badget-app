@@ -4,9 +4,18 @@ import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
+import { type z } from "zod";
 
+import type {
+  DateRange,
+  getPendingBankConnectionsParamsSchema,
+} from "./validators";
+import { getAccounts } from "~/server/actions/institutions/get-accounts";
 import { db, schema } from "~/server/db";
-import { type DateRange } from "./validators";
+import {
+  transformAccount,
+  transformConnection,
+} from "~/server/providers/gocardless/transform";
 
 // fetch data here with cache
 export async function getPensionAccountsByUserId() {
@@ -95,3 +104,42 @@ export const getRecentContributions = unstable_cache(async () => {
 
   return result;
 });
+
+export const getPendingBankConnections = async (
+  params: z.infer<typeof getPendingBankConnectionsParamsSchema>,
+) => {
+  const session = auth();
+
+  if (!session?.userId) {
+    throw new Error("UNAUTHORIZED");
+  }
+
+  return unstable_cache(
+    async () => {
+      const data: {
+        connection: typeof schema.bankConnections.$inferInsert;
+        accounts: (typeof schema.bankAccounts.$inferInsert)[];
+      }[] = [];
+
+      for (const id of params.ref ?? []) {
+        const accounts = await getAccounts({ id });
+        if (!accounts[0]?.account || !accounts[0]?.institution) continue;
+
+        data.push({
+          connection: {
+            ...transformConnection({ ...accounts[0], id }),
+            userId: session.userId,
+          },
+          accounts: accounts.map(transformAccount).map((account) => ({
+            ...account,
+            userId: session.userId,
+          })),
+        });
+      }
+
+      return data;
+    },
+    [`ref_${params.ref?.join(".")}`],
+    { tags: [`ref_${params.ref?.join(".")}`], revalidate: 60 * 60 * 24 * 7 },
+  )();
+};

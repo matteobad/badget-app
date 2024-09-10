@@ -116,6 +116,10 @@ export const upsertBankConnectionSchema = z.object({
   ),
 });
 
+export const upsertBankConnectionBulkSchema = z.array(
+  upsertBankConnectionSchema,
+);
+
 // Schema for inserting a category - can be used to validate API requests
 export const createBankAccountSchema = createInsertSchema(bankAccounts).pick({
   name: true,
@@ -260,8 +264,7 @@ export const institutionsSearchParamsSchema = z.object({
   q: z.string().optional(),
 });
 
-export const bankConnectionsFilteredParamsSchema = z.object({
+export const getPendingBankConnectionsParamsSchema = z.object({
   provider: z.nativeEnum(Provider).nullable(),
   ref: z.array(z.string()).nullable(),
-  accounts: z.array(z.string()).nullable(),
 });

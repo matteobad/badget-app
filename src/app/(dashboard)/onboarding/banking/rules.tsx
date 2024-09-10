@@ -1,16 +1,68 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { PencilRuler, Shapes } from "lucide-react";
+import { ArrowRight, PencilRuler } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
+import { type z } from "zod";
 
 import { Button } from "~/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import { cn } from "~/lib/utils";
+import { updateTransactionCategoryBulkSchema } from "~/lib/validators";
+import { updateTransactionCategoryBulkAction } from "~/server/actions/bank-transaction-action";
+import {
+  type getUserCategories,
+  type getUserTransactions,
+} from "~/server/db/queries/cached-queries";
+import { useSearchParams } from "./_hooks/use-search-params";
 
-export default function Rules() {
-  const router = useRouter();
-
+export default function Rules({
+  categories,
+  transactions,
+}: {
+  categories: Awaited<ReturnType<typeof getUserCategories>>;
+  transactions: Awaited<ReturnType<typeof getUserTransactions>>;
+}) {
   const showText = useDebounce(true, 800);
+
+  const [, setParams] = useSearchParams();
+
+  const form = useForm<z.infer<typeof updateTransactionCategoryBulkSchema>>({
+    resolver: zodResolver(updateTransactionCategoryBulkSchema),
+    defaultValues: {
+      transactions: transactions.map((transaction) => ({
+        id: transaction.id,
+        description: transaction.description,
+        categoryId: transaction.categoryId,
+        userId: transaction.userId,
+      })),
+    },
+  });
+
+  const { execute, isExecuting } = useAction(
+    updateTransactionCategoryBulkAction,
+    {
+      onError: ({ error }) => {
+        toast.error(error.serverError);
+      },
+      onSuccess: () => {
+        toast.success("Regole aggiornate con successo");
+        void setParams({ step: "banking-done" });
+      },
+    },
+  );
 
   return (
     <motion.div
@@ -56,12 +108,12 @@ export default function Rules() {
               },
             }}
           >
-            Il primo passo è prendere consapevolezza delle proprie spese. Per
-            farlo possiamo creare delle categorie. Ogni persona ha esigenze
-            diverse perciò offriamo completa personalizzazione.
+            Raccogliere le info non è sufficiente per darti una visione sensata.
+            Per questo uniamo AI e sofisticati algoritmi per aprendere dalle tue
+            scelte e automatizzare le operazioni noiose
           </motion.p>
           <motion.div
-            className="grid grid-cols-3 gap-4 pb-4"
+            className="flex gap-4 pb-4"
             variants={{
               hidden: { opacity: 0, y: 50 },
               show: {
@@ -71,7 +123,59 @@ export default function Rules() {
               },
             }}
           >
-            TODO
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(execute)}
+                className="flex flex-col gap-2"
+              >
+                {transactions.slice(0, 5).map((transaction, index) => (
+                  <div
+                    key={transaction.id}
+                    className="flex items-end justify-between gap-2"
+                  >
+                    <FormField
+                      control={form.control}
+                      name={`transactions.${transaction.id}.description`}
+                      render={({ field }) => (
+                        <FormItem className="text-left">
+                          <FormLabel
+                            className={cn("text-slate-500", {
+                              "sr-only": index !== 0,
+                            })}
+                          >
+                            Descrizione
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="Satispay" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <ArrowRight className="mb-3 size-4" />
+                    <FormField
+                      control={form.control}
+                      name={`transactions.${transaction.id}.categoryId`}
+                      render={({ field }) => (
+                        <FormItem className="text-left">
+                          <FormLabel
+                            className={cn("text-slate-500", {
+                              "sr-only": index !== 0,
+                            })}
+                          >
+                            Categoria
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="Satispay" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                ))}
+              </form>
+            </Form>
           </motion.div>
           <motion.div
             className="flex w-full justify-end pt-6"
@@ -87,7 +191,7 @@ export default function Rules() {
             <Button
               variant="outline"
               size="lg"
-              onClick={() => router.push("/onboarding?step=banking-categories")}
+              onClick={() => void setParams({ step: "banking-categories" })}
             >
               <span className="w-full text-center font-bold">Indietro</span>
             </Button>
@@ -96,14 +200,15 @@ export default function Rules() {
             <Button
               variant="ghost"
               size="lg"
-              onClick={() => router.push("/onboarding?step=banking-done")}
+              onClick={() => void setParams({ step: "banking-done" })}
             >
               <span className="w-full text-center font-bold">Salta</span>
             </Button>
             <Button
               variant="default"
               size="lg"
-              onClick={() => router.push("/onboarding?step=banking-done")}
+              disabled={isExecuting || !form.formState.isValid}
+              onClick={() => console.log("submit form")}
             >
               <span className="w-full text-center font-bold">Avanti</span>
             </Button>

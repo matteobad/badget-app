@@ -5,7 +5,7 @@ import { type z } from "zod";
 import type { GetTransactionsParams, GetUserBankAccountsParams } from ".";
 import {
   type accountsSearchParamsSchema,
-  type bankConnectionsFilteredParamsSchema,
+  type getPendingBankConnectionsParamsSchema,
   type institutionsSearchParamsSchema,
   type transactionsSearchParamsSchema,
 } from "~/lib/validators";
@@ -15,9 +15,9 @@ import {
   getCategoryBudgetsQuery,
   getCategoryRulesQuery,
   getFilteredAccoountsQuery,
-  getFilteredBankConnectionsQuery,
   getFilteredInstitutionsQuery,
   getFilteredTransactionsQuery,
+  getPendingBankConnectionsQuery,
   getSpendingByCategoryQuery,
   getSpendingByCategoryTypeQuery,
   getTransactionsQuery,
@@ -51,8 +51,8 @@ export type GetPensionAccountsReturnType = ReturnType<
   typeof findAllInstitutions
 >;
 
-export const getBankConnections = async (
-  params: z.infer<typeof bankConnectionsFilteredParamsSchema>,
+export const getPendingBankConnections = async (
+  params: z.infer<typeof getPendingBankConnectionsParamsSchema>,
 ) => {
   const session = auth();
 
@@ -61,7 +61,7 @@ export const getBankConnections = async (
   }
 
   unstable_noStore();
-  return await getFilteredBankConnectionsQuery(params, session.userId);
+  return await getPendingBankConnectionsQuery(params, session.userId);
 };
 
 export const getUserBankConnections = async (

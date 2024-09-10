@@ -1,5 +1,5 @@
+import { searchParamsCache } from "./banking/_utils/search-params";
 import { BankingOnboarding } from "./banking/banking-onboarding";
-import { searchParamsCache } from "./banking/search-params";
 import Features from "./features";
 import Intro from "./intro";
 import { Onboarding } from "./multi-step-form";

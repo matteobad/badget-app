@@ -1,14 +1,14 @@
+import { getPendingBankConnections } from "~/lib/data";
 import {
-  getBankConnections,
   getFilteredInstitutions,
-  getUserBankConnections,
+  getUserCategories,
+  getUserTransactions,
 } from "~/server/db/queries/cached-queries";
+import { searchParamsCache } from "./_utils/search-params";
 import AccountsStep from "./accounts-step";
 import Categories from "./categories";
 import Done from "./done";
 import Rules from "./rules";
-import { searchParamsCache } from "./search-params";
-import Transactions from "./transactions";
 
 export async function BankingOnboarding() {
   const step = searchParamsCache.get("step");
@@ -16,21 +16,21 @@ export async function BankingOnboarding() {
   const country = searchParamsCache.get("country");
   const provider = searchParamsCache.get("provider");
   const ref = searchParamsCache.get("ref");
-  const accounts = searchParamsCache.get("accounts");
 
   const institutions = await getFilteredInstitutions({ country, q });
-  const connections = await getBankConnections({ provider, ref, accounts });
-
-  console.log(connections);
+  const connections = await getPendingBankConnections({ provider, ref });
+  const categories = await getUserCategories({});
+  const transactions = [];
 
   return (
     <>
       {step === "banking-accounts" && (
         <AccountsStep connections={connections} institutions={institutions} />
       )}
-      {step === "banking-transactions" && <Transactions />}
       {step === "banking-categories" && <Categories />}
-      {step === "banking-rules" && <Rules />}
+      {step === "banking-rules" && (
+        <Rules categories={categories} transactions={transactions} />
+      )}
       {step === "banking-done" && <Done />}
     </>
   );
