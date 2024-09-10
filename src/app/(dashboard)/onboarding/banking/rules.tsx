@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { ArrowRight, PencilRuler } from "lucide-react";
@@ -9,6 +10,7 @@ import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
 import { type z } from "zod";
 
+import Icon from "~/components/icons";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -19,12 +21,19 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 import { updateTransactionCategoryBulkSchema } from "~/lib/validators";
 import { updateTransactionCategoryBulkAction } from "~/server/actions/bank-transaction-action";
 import {
+  type getUncategorizedTransactions,
   type getUserCategories,
-  type getUserTransactions,
 } from "~/server/db/queries/cached-queries";
 import { useSearchParams } from "./_hooks/use-search-params";
 
@@ -33,8 +42,10 @@ export default function Rules({
   transactions,
 }: {
   categories: Awaited<ReturnType<typeof getUserCategories>>;
-  transactions: Awaited<ReturnType<typeof getUserTransactions>>;
+  transactions: Awaited<ReturnType<typeof getUncategorizedTransactions>>;
 }) {
+  const formRef = useRef<HTMLFormElement>(null);
+
   const showText = useDebounce(true, 800);
 
   const [, setParams] = useSearchParams();
@@ -113,7 +124,7 @@ export default function Rules({
             scelte e automatizzare le operazioni noiose
           </motion.p>
           <motion.div
-            className="flex gap-4 pb-4"
+            className="flex w-full gap-4 pb-4"
             variants={{
               hidden: { opacity: 0, y: 50 },
               show: {
@@ -125,8 +136,9 @@ export default function Rules({
           >
             <Form {...form}>
               <form
+                ref={formRef}
                 onSubmit={form.handleSubmit(execute)}
-                className="flex flex-col gap-2"
+                className="flex w-[500px] max-w-full flex-col gap-2"
               >
                 {transactions.slice(0, 5).map((transaction, index) => (
                   <div
@@ -135,9 +147,9 @@ export default function Rules({
                   >
                     <FormField
                       control={form.control}
-                      name={`transactions.${transaction.id}.description`}
+                      name={`transactions.${index}.description`}
                       render={({ field }) => (
-                        <FormItem className="text-left">
+                        <FormItem className="w-full text-left">
                           <FormLabel
                             className={cn("text-slate-500", {
                               "sr-only": index !== 0,
@@ -146,18 +158,18 @@ export default function Rules({
                             Descrizione
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="Satispay" {...field} />
+                            <Input {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <ArrowRight className="mb-3 size-4" />
+                    <ArrowRight className="mb-3 size-4 shrink-0" />
                     <FormField
                       control={form.control}
-                      name={`transactions.${transaction.id}.categoryId`}
+                      name={`transactions.${index}.categoryId`}
                       render={({ field }) => (
-                        <FormItem className="text-left">
+                        <FormItem className="w-full text-left">
                           <FormLabel
                             className={cn("text-slate-500", {
                               "sr-only": index !== 0,
@@ -165,9 +177,32 @@ export default function Rules({
                           >
                             Categoria
                           </FormLabel>
-                          <FormControl>
-                            <Input placeholder="Satispay" {...field} />
-                          </FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value?.toString() ?? ""}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Categorizza" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {categories.map((category) => (
+                                <SelectItem
+                                  key={category.id}
+                                  value={category.id.toString()}
+                                >
+                                  <div className="flex flex-row items-center">
+                                    <Icon
+                                      name={category.icon ?? "circle-dashed"}
+                                      className="mr-2 size-4"
+                                    />
+                                    <span>{category.name}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -207,8 +242,8 @@ export default function Rules({
             <Button
               variant="default"
               size="lg"
-              disabled={isExecuting || !form.formState.isValid}
-              onClick={() => console.log("submit form")}
+              disabled={isExecuting}
+              onClick={() => formRef.current?.requestSubmit()}
             >
               <span className="w-full text-center font-bold">Avanti</span>
             </Button>

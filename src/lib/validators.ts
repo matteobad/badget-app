@@ -155,7 +155,7 @@ export const insertBankTransactionSchema = createInsertSchema(bankTransactions);
 export const updateBankTransactionSchema = z.object({
   id: z.number(),
   description: z.string().optional(),
-  categoryId: z.number().nullable(),
+  categoryId: z.coerce.number().nullable(),
   userId: z.string().min(1),
 });
 

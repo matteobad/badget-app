@@ -68,7 +68,7 @@ export const updateBankTransactionAction = authActionClient
 
 export const updateTransactionCategoryBulkAction = authActionClient
   .schema(updateTransactionCategoryBulkSchema)
-  .metadata({ actionName: "updateTransactionCategoryBulkSchema" })
+  .metadata({ actionName: "update-transaction-category-bulk" })
   .action(async ({ parsedInput: { transactions }, ctx: { userId } }) => {
     const meta = {
       updatedRules: 0,

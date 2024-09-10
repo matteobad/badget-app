@@ -9,6 +9,7 @@ import {
   gte,
   ilike,
   inArray,
+  isNull,
   lt,
   lte,
   ne,
@@ -359,6 +360,26 @@ export async function getFilteredTransactionsQuery({
 
   const pageCount = Math.ceil(total / per_page);
   return { data, pageCount };
+}
+
+export async function getUncategorizedTransactionsQuery(
+  params: GetTransactionsParams,
+) {
+  const { userId } = params;
+
+  const data = await db
+    .select()
+    .from(schema.bankTransactions)
+    .where(
+      and(
+        eq(schema.bankTransactions.userId, userId),
+        isNull(schema.bankTransactions.categoryId),
+      ),
+    )
+    .limit(10)
+    .orderBy(desc(schema.bankTransactions.date));
+
+  return data;
 }
 
 export type GetCategoriesParams = {

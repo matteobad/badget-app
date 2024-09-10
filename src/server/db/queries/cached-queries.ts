@@ -21,6 +21,7 @@ import {
   getSpendingByCategoryQuery,
   getSpendingByCategoryTypeQuery,
   getTransactionsQuery,
+  getUncategorizedTransactionsQuery,
   getUserBankAccountsQuery,
   getUserBankConnectionsQuery,
 } from ".";
@@ -141,6 +142,22 @@ export const getUserTransactions = async (
       tags: [`transactions_${session.userId}`],
     },
   )();
+};
+
+export const getUncategorizedTransactions = async (
+  params: Omit<GetTransactionsParams, "userId">,
+) => {
+  const session = auth();
+
+  if (!session.userId) {
+    return [];
+  }
+
+  unstable_noStore();
+  return getUncategorizedTransactionsQuery({
+    ...params,
+    userId: session.userId,
+  });
 };
 
 export const getFilteredTransactions = async (

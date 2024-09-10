@@ -1,6 +1,7 @@
 import { getPendingBankConnections } from "~/lib/data";
 import {
   getFilteredInstitutions,
+  getUncategorizedTransactions,
   getUserCategories,
   getUserTransactions,
 } from "~/server/db/queries/cached-queries";
@@ -20,7 +21,7 @@ export async function BankingOnboarding() {
   const institutions = await getFilteredInstitutions({ country, q });
   const connections = await getPendingBankConnections({ provider, ref });
   const categories = await getUserCategories({});
-  const transactions = [];
+  const transactions = await getUncategorizedTransactions({});
 
   return (
     <>
