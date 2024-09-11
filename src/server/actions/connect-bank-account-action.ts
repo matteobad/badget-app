@@ -87,7 +87,7 @@ export const connectAccountAction = authActionClient
 export const upsertBankConnectionBulkAction = authActionClient
   .schema(upsertBankConnectionBulkSchema)
   .metadata({ actionName: "upsert-bank-connection-bulk" })
-  .action(async ({ parsedInput: connections, ctx: { userId } }) => {
+  .action(async ({ parsedInput: { connections }, ctx: { userId } }) => {
     for (const { connection, accounts } of connections) {
       const inserted = await upsertBankConnections({
         connection,

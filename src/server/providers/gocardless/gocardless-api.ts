@@ -1,7 +1,5 @@
-import type { XiorInstance, XiorRequestConfig } from "xior";
-import { type VercelKV } from "@vercel/kv";
+import type { VercelKV } from "@vercel/kv";
 import { formatISO, subMonths } from "date-fns";
-import xior from "xior";
 
 import type { GetInstitutionsRequest, ProviderParams } from "../types";
 import type {
@@ -24,6 +22,7 @@ import type {
   PostEndUserAgreementRequest,
   PostRequisitionsRequest,
   PostRequisitionsResponse,
+  TokenData,
 } from "./types";
 import { ProviderError } from "~/lib/utils";
 import { getAccessValidForDays, getMaxHistoricalDays, isError } from "./utils";
@@ -31,11 +30,8 @@ import { getAccessValidForDays, getMaxHistoricalDays, isError } from "./utils";
 export class GoCardLessApi {
   #baseUrl = "https://bankaccountdata.gocardless.com";
 
-  #api: XiorInstance | null = null;
-
   // Cache keys
-  #accessTokenCacheKey = "gocardless_access_token";
-  #refreshTokenCacheKey = "gocardless_refresh_token";
+  #tokenCacheKey = "gocardless_tokens";
   #institutionsCacheKey = "gocardless_institutions";
   #accountCacheKey = "gocardless_account";
 
@@ -52,55 +48,55 @@ export class GoCardLessApi {
     this.#secretKey = params.envs.GOCARDLESS_SECRET_KEY;
   }
 
-  async #getRefreshToken(refresh: string): Promise<string> {
-    const response = await this.#post<GetRefreshTokenResponse>(
-      "/api/v2/token/refresh/",
-      undefined,
-      {
-        refresh,
-      },
-    );
+  async #getAccessToken() {
+    const tokenData = await this.#kv?.get<TokenData>(this.#tokenCacheKey);
+    const now = Date.now();
 
-    await this.#kv?.set(this.#accessTokenCacheKey, response.access, {
-      ex: response.access_expires - this.#oneHour,
-    });
+    // If access token exists and is valid, use it
+    if (tokenData?.accessToken && now < tokenData.accessExpires) {
+      return tokenData.accessToken;
+    }
 
-    return response.refresh;
+    // If refresh token exists and is valid, use it to get a new access token
+    if (tokenData?.refreshToken && now < tokenData.refreshExpires) {
+      const response = await this.#refreshToken(tokenData.refreshToken);
+      await this.#updateTokens(response);
+      return response.access;
+    }
+
+    // If both tokens are expired or don't exist, request new ones
+    const response = await this.#getNewToken();
+    await this.#updateTokens(response);
+    return response.access;
   }
 
-  async #getAccessToken(): Promise<string> {
-    const [accessToken, refreshToken] = await Promise.all([
-      this.#kv?.get(this.#accessTokenCacheKey),
-      this.#kv?.get(this.#refreshTokenCacheKey),
-    ]);
-
-    if (typeof accessToken === "string") {
-      return accessToken;
-    }
-
-    if (typeof refreshToken === "string") {
-      return this.#getRefreshToken(refreshToken);
-    }
-
-    const response = await this.#post<GetAccessTokenResponse>(
-      "/api/v2/token/new/",
+  async #refreshToken(refreshToken: string) {
+    return this.#post<GetRefreshTokenResponse>(
+      "/api/v2/token/refresh/",
       undefined,
-      {
-        secret_id: this.#secretId,
-        secret_key: this.#secretKey,
-      },
+      { refresh: refreshToken },
     );
+  }
 
-    await Promise.all([
-      this.#kv?.set(this.#accessTokenCacheKey, response.access, {
-        ex: response.access_expires - this.#oneHour,
-      }),
-      this.#kv?.set(this.#refreshTokenCacheKey, response.refresh, {
-        ex: response.refresh_expires - this.#oneHour,
-      }),
-    ]);
+  async #getNewToken() {
+    return this.#post<GetAccessTokenResponse>("/api/v2/token/new/", undefined, {
+      secret_id: this.#secretId,
+      secret_key: this.#secretKey,
+    });
+  }
 
-    return response.access;
+  async #updateTokens(
+    response: GetAccessTokenResponse | GetRefreshTokenResponse,
+  ) {
+    const now = Date.now();
+    const tokenData: TokenData = {
+      accessToken: response.access,
+      refreshToken: response.refresh,
+      accessExpires: now + response.access_expires * 1000,
+      refreshExpires: now + response.refresh_expires * 1000,
+    };
+
+    await this.#kv?.set(this.#tokenCacheKey, tokenData);
   }
 
   async getAccountBalance(
@@ -165,12 +161,7 @@ export class GoCardLessApi {
     const response = await this.#get<GetInstitutionsResponse>(
       "/api/v2/institutions/",
       token,
-      undefined,
-      {
-        params: {
-          country: countryCode,
-        },
-      },
+      countryCode ? { country: countryCode } : undefined,
     );
 
     void this.#kv?.set(cacheKey, JSON.stringify(response), {
@@ -384,54 +375,84 @@ export class GoCardLessApi {
     );
   }
 
-  async #getApi(accessToken?: string): Promise<XiorInstance> {
-    if (!this.#api) {
-      this.#api = xior.create({
-        baseURL: this.#baseUrl,
-        timeout: 30_000,
-        headers: {
-          Accept: "application/json",
-          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-        },
-      });
-    }
-
-    return this.#api;
+  async #getFetchOptions(accessToken?: string): Promise<RequestInit> {
+    return {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+      },
+    };
   }
 
   async #get<TResponse>(
     path: string,
     token?: string,
     params?: Record<string, string>,
-    config?: XiorRequestConfig,
   ): Promise<TResponse> {
-    const api = await this.#getApi(token);
+    const options = await this.#getFetchOptions(token);
+    const url = new URL(path, this.#baseUrl);
+    if (params) {
+      Object.entries(params).forEach(([key, value]) =>
+        url.searchParams.append(key, value),
+      );
+    }
 
-    return api
-      .get<TResponse>(path, { params, ...config })
-      .then(({ data }) => data);
+    const response = await fetch(url.toString(), {
+      ...options,
+      method: "GET",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json() as Promise<TResponse>;
   }
 
   async #post<TResponse>(
     path: string,
     token?: string,
     body?: unknown,
-    config?: XiorRequestConfig,
   ): Promise<TResponse> {
-    const api = await this.#getApi(token);
-    return api.post<TResponse>(path, body, config).then(({ data }) => data);
+    const options = await this.#getFetchOptions(token);
+    const url = new URL(path, this.#baseUrl);
+
+    const response = await fetch(url.toString(), {
+      ...options,
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json() as Promise<TResponse>;
   }
 
   async #_delete<TResponse>(
     path: string,
     token: string,
     params?: Record<string, string>,
-    config?: XiorRequestConfig,
   ): Promise<TResponse> {
-    const api = await this.#getApi(token);
+    const options = await this.#getFetchOptions(token);
+    const url = new URL(path, this.#baseUrl);
+    if (params) {
+      Object.entries(params).forEach(([key, value]) =>
+        url.searchParams.append(key, value),
+      );
+    }
 
-    return api
-      .delete<TResponse>(path, { params, ...config })
-      .then(({ data }) => data);
+    const response = await fetch(url.toString(), {
+      ...options,
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json() as Promise<TResponse>;
   }
 }

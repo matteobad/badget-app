@@ -27,6 +27,7 @@ export const actionClient = createSafeActionClient({
     });
   },
 });
+
 export const authActionClient = actionClient
   .use(async ({ next, clientInput, metadata }) => {
     const startTime = performance.now();
@@ -59,25 +60,3 @@ export const authActionClient = actionClient
       },
     });
   });
-// .use(async ({ next, metadata }) => {
-//   const user = await getUser();
-
-//   if (metadata) {
-//     const analytics = await setupAnalytics({
-//       userId: user.data.id,
-//       fullName: user.data.full_name,
-//     });
-
-//     if (metadata.track) {
-//       analytics.track(metadata.track);
-//     }
-//   }
-
-//   return Sentry.withServerActionInstrumentation(metadata.name, async () => {
-//     return next({
-//       ctx: {
-//         user: user.data,
-//       },
-//     });
-//   });
-// });

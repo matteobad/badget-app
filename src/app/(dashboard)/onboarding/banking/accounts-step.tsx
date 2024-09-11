@@ -1,16 +1,20 @@
 "use client";
 
+import { useRef } from "react";
 import Image from "next/image";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { CreditCard, Layers, Plus, Search } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
+import { type z } from "zod";
 
 import { ConnectBankProvider } from "~/components/connect-bank-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { Form, FormField } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import {
   Popover,
@@ -30,30 +34,42 @@ import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { type getPendingBankConnections } from "~/lib/data";
 import { euroFormat } from "~/lib/utils";
+import { upsertBankConnectionBulkSchema } from "~/lib/validators";
 import { upsertBankConnectionBulkAction } from "~/server/actions/connect-bank-account-action";
 import { type getFilteredInstitutions } from "~/server/db/queries/cached-queries";
 import { CreateAccountForm } from "./_components/create-account-form";
+import { useSearchParams } from "./_hooks/use-search-params";
 
 export default function AccountsStep(props: {
   institutions: Awaited<ReturnType<typeof getFilteredInstitutions>>;
   connections: Awaited<ReturnType<typeof getPendingBankConnections>>;
 }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const [, setParams] = useSearchParams();
 
   const showText = useDebounce(true, 800);
 
+  const form = useForm<z.infer<typeof upsertBankConnectionBulkSchema>>({
+    resolver: zodResolver(upsertBankConnectionBulkSchema),
+    defaultValues: {
+      connections: props.connections.map(({ connection, accounts }) => ({
+        connection,
+        accounts: accounts.map((account) => ({
+          ...account,
+          enabled: true,
+        })),
+      })),
+    },
+  });
+
   const { execute, isExecuting } = useAction(upsertBankConnectionBulkAction, {
     onError: ({ error }) => {
-      toast.error(error.serverError);
+      toast.error(error.serverError ?? error.validationErrors?._errors);
     },
     onSuccess: () => {
       toast.success("Account aggiunti!");
-
-      const params = new URLSearchParams(searchParams);
-      params.set("step", "banking-categories");
-      router.push(`/onboarding?${params.toString()}`);
+      void setParams({ step: "banking-categories" }, { shallow: false });
     },
   });
 
@@ -131,41 +147,61 @@ export default function AccountsStep(props: {
                     </div>
                   </Button>
                 </PopoverTrigger>
-                {props.connections.map(({ connection, accounts }, index) => (
-                  <div key={index} className="flex w-full flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <Image
-                        src={connection.logoUrl ?? ""}
-                        alt={connection.name}
-                        width={24}
-                        height={24}
-                      />
-                      <span className="font-semibold">{connection.name}</span>
-                      <span className="text-sm font-normal text-muted-foreground">
-                        {accounts.length + " conto"}
-                      </span>
-                    </div>
-                    <ul className="w-full">
-                      {accounts.map((account) => (
-                        <li
-                          key={account.accountId}
-                          className="flex items-center justify-between gap-3 px-1 font-normal"
-                        >
-                          <CreditCard className="size-4" />
-                          {account.name}
-                          <span className="flex-1"></span>
-                          {euroFormat(account.balance ?? "0")}
-                          <Switch
-                            checked={!!account.enabled}
-                            onCheckedChange={() => {
-                              console.log("switch");
-                            }}
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+                <Form {...form}>
+                  <form
+                    ref={formRef}
+                    onSubmit={form.handleSubmit(execute)}
+                    className="flex w-[500px] max-w-full flex-col gap-2"
+                  >
+                    {props.connections.map(
+                      ({ connection, accounts }, index) => (
+                        <div key={index} className="flex w-full flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <Image
+                              src={connection.logoUrl ?? ""}
+                              alt={connection.name}
+                              width={24}
+                              height={24}
+                            />
+                            <span className="font-semibold">
+                              {connection.name}
+                            </span>
+                            <span className="text-sm font-normal text-muted-foreground">
+                              {accounts.length + " conto"}
+                            </span>
+                          </div>
+                          <ul className="w-full">
+                            {accounts.map((account, accountIndex) => (
+                              <li
+                                key={account.accountId}
+                                className="flex items-center justify-between gap-3 px-1 font-normal"
+                              >
+                                <CreditCard className="size-5 shrink-0" />
+                                <FormField
+                                  control={form.control}
+                                  name={`connections.${index}.accounts.${accountIndex}.name`}
+                                  render={({ field }) => <Input {...field} />}
+                                />
+                                <span className="flex-1"></span>
+                                {euroFormat(account.balance ?? "0")}
+                                <FormField
+                                  control={form.control}
+                                  name={`connections.${index}.accounts.${accountIndex}.enabled`}
+                                  render={({ field }) => (
+                                    <Switch
+                                      checked={!!field.value}
+                                      onCheckedChange={field.onChange}
+                                    />
+                                  )}
+                                />
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ),
+                    )}
+                  </form>
+                </Form>
               </div>
               <PopoverContent className="w-80" align="center">
                 <Tabs defaultValue="account">
@@ -182,9 +218,10 @@ export default function AccountsStep(props: {
                           placeholder="Cerca istituzione"
                           type="search"
                           onChange={(e) => {
-                            const params = new URLSearchParams(searchParams);
-                            params.set("q", e.target.value);
-                            router.replace(`${pathname}?${params.toString()}`);
+                            void setParams(
+                              { q: e.target.value },
+                              { shallow: true },
+                            );
                           }}
                         />
                         <Select value="IT">
@@ -249,7 +286,13 @@ export default function AccountsStep(props: {
               },
             }}
           >
-            <Button variant="outline" size="lg" onClick={() => router.back()}>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() =>
+                setParams({ step: "features" }, { shallow: false })
+              }
+            >
               <span className="w-full text-center font-bold">Indietro</span>
             </Button>
             <span className="flex-1"></span>
@@ -257,7 +300,12 @@ export default function AccountsStep(props: {
             <Button
               variant="ghost"
               size="lg"
-              onClick={() => router.push("/onboarding?step=categories")}
+              onClick={() =>
+                void setParams(
+                  { step: "banking-categories" },
+                  { shallow: false },
+                )
+              }
             >
               <span className="w-full text-center font-bold">Salta</span>
             </Button>
@@ -266,7 +314,7 @@ export default function AccountsStep(props: {
               size="lg"
               disabled={isExecuting}
               onClick={() => {
-                execute(props.connections);
+                formRef.current?.requestSubmit();
               }}
             >
               <span className="w-full text-center font-bold">

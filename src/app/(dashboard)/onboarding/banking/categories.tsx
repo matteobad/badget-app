@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
 import { type z } from "zod";
 
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -113,18 +114,6 @@ export default function Categories() {
 
   const searchParams = useSearchParams();
   const router = useRouter();
-
-  const [value, setValue] = useReducer((_: unknown, next: string) => {
-    const digits = next.replace(/\D/g, "");
-    return euroFormat(Number(digits) / 100);
-  }, income.toString());
-
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  function handleChange(realChangeFn: Function, formattedValue: string) {
-    const digits = formattedValue.replace(/\D/g, "");
-    const realValue = Number(digits) / 100;
-    realChangeFn(realValue.toPrecision(2));
-  }
 
   const { execute, isExecuting } = useAction(upsertCategoryBulkAction, {
     onError: ({ error }) => {
@@ -313,6 +302,7 @@ export default function Categories() {
               className="flex h-full flex-col items-start justify-start gap-4 border p-4"
               variant={selected === "custom" ? "secondary" : "outline"}
               size="lg"
+              disabled
               onClick={() => {
                 setSelected("custom");
                 setCategories([]);
@@ -328,6 +318,7 @@ export default function Categories() {
                   </li>
                 </ul>
               </div>
+              <Badge className="mx-auto mt-4 flex">Coming soon</Badge>
             </Button>
           </motion.div>
           <motion.div

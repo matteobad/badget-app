@@ -53,6 +53,13 @@ export type GetAccessTokenResponse = {
   refresh_expires: number;
 };
 
+export type TokenData = {
+  accessToken: string;
+  refreshToken: string;
+  accessExpires: number;
+  refreshExpires: number;
+};
+
 export type GetInstitutionsResponse = Institution[];
 export type GetInstitutionResponse = Institution;
 

@@ -70,7 +70,7 @@ export default function Rules({
       },
       onSuccess: () => {
         toast.success("Regole aggiornate con successo");
-        void setParams({ step: "banking-done" });
+        void setParams({ step: "banking-done" }, { shallow: false });
       },
     },
   );
@@ -226,7 +226,12 @@ export default function Rules({
             <Button
               variant="outline"
               size="lg"
-              onClick={() => void setParams({ step: "banking-categories" })}
+              onClick={() =>
+                void setParams(
+                  { step: "banking-categories" },
+                  { shallow: false },
+                )
+              }
             >
               <span className="w-full text-center font-bold">Indietro</span>
             </Button>
@@ -235,7 +240,9 @@ export default function Rules({
             <Button
               variant="ghost"
               size="lg"
-              onClick={() => void setParams({ step: "banking-done" })}
+              onClick={() =>
+                void setParams({ step: "banking-done" }, { shallow: false })
+              }
             >
               <span className="w-full text-center font-bold">Salta</span>
             </Button>
