@@ -3,13 +3,12 @@ import {
   getFilteredInstitutions,
   getUncategorizedTransactions,
   getUserCategories,
-  getUserTransactions,
 } from "~/server/db/queries/cached-queries";
 import { searchParamsCache } from "./_utils/search-params";
 import AccountsStep from "./accounts-step";
-import Categories from "./categories";
-import Done from "./done";
-import Rules from "./rules";
+import Categories from "./categories-step";
+import Done from "./done-step";
+import Rules from "./rules-step";
 
 export async function BankingOnboarding() {
   const step = searchParamsCache.get("step");

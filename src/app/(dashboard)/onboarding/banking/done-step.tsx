@@ -83,10 +83,7 @@ export default function Done() {
             <Button
               variant="default"
               size="lg"
-              // onClick={() => {
-              //   execute({ categories });
-              // }}
-              // disabled={isExecuting}
+              onClick={() => router.push("/")}
             >
               <span className="w-full text-center font-bold">
                 Vai alla Dashboard
