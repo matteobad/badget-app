@@ -61,8 +61,8 @@ export function NavMain({
               )}
               {!item.enabled && <Badge>soon</Badge>}
             </div>
-            <CollapsibleContent className="px-4 py-0.5">
-              <ul className="grid border-l px-2">
+            <CollapsibleContent className="px-4 py-0.5 pl-[13px]">
+              <ul className="grid border-l px-4">
                 {item.items?.map((subItem) => (
                   <li key={subItem.title}>
                     <Link

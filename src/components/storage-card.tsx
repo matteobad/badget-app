@@ -1,25 +1,29 @@
-import { Database } from "lucide-react"
+"use client";
 
-import { Card, CardContent } from "~/components/ui/card"
-import { Progress } from "~/components/ui/progress"
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 
-export function StorageCard() {
+export function UpgradeCard() {
   return (
-    <Card className="rounded-md text-xs shadow-sm">
-      <CardContent className="flex items-start gap-2.5 p-2.5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
-          <Database className="h-5 w-5 text-muted-foreground" />
-        </div>
-        <div className="grid flex-1 gap-1">
-          <p className="font-medium">Running out of space?</p>
-          <p className="text-muted-foreground">79.2 GB / 100 GB used</p>
-          <Progress
-            value={79.2}
-            className="mt-1"
-            aria-label="79.2 GB / 100 GB used"
-          />
-        </div>
+    <Card>
+      <CardHeader className="p-2 pt-0 md:p-4">
+        <CardTitle className="text-base">Upgrade to Pro</CardTitle>
+        <CardDescription className="text-xs">
+          Sblocca tutte le funzionalità e ottieni accesso illimitato al nostro
+          team di supporto.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
+        <Button size="sm" className="w-full">
+          Upgrade
+        </Button>
       </CardContent>
     </Card>
-  )
+  );
 }

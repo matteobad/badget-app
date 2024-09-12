@@ -23,7 +23,7 @@ import { NavMain } from "~/components/nav-main";
 import { NavProjects } from "~/components/nav-projects";
 import { NavSecondary } from "~/components/nav-secondary";
 import { NavUser } from "~/components/nav-user";
-import { StorageCard } from "~/components/storage-card";
+import { UpgradeCard } from "~/components/storage-card";
 import { TeamSwitcher } from "~/components/team-switcher";
 import {
   Sidebar,
@@ -52,11 +52,6 @@ const data = {
       plan: "Free",
     },
   ],
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Banking",
@@ -180,18 +175,18 @@ export function AppSidebar() {
         </SidebarItem>
         <SidebarItem>
           <SidebarLabel>Impostazioni</SidebarLabel>
-          <NavProjects projects={data.settings} />
+          <NavProjects settings={data.settings} />
         </SidebarItem>
         <SidebarItem className="mt-auto">
           <SidebarLabel>Help</SidebarLabel>
           <NavSecondary items={data.navSecondary} />
         </SidebarItem>
         <SidebarItem>
-          <StorageCard />
+          <UpgradeCard />
         </SidebarItem>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

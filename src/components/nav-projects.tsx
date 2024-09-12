@@ -1,22 +1,13 @@
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { MoreHorizontal, PlusSquare } from "lucide-react";
 
-import { Button } from "~/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
 
 export function NavProjects({
-  projects,
+  settings,
   className,
 }: {
-  projects: {
+  settings: {
     name: string;
     url: string;
     icon: LucideIcon;
@@ -24,7 +15,7 @@ export function NavProjects({
 } & React.ComponentProps<"ul">) {
   return (
     <ul className={cn("grid gap-0.5", className)}>
-      {projects.map((item) => (
+      {settings.map((item) => (
         <li
           key={item.name}
           className="group relative rounded-md hover:bg-accent hover:text-accent-foreground has-[[data-state=open]]:bg-accent has-[[data-state=open]]:text-accent-foreground"
@@ -38,7 +29,7 @@ export function NavProjects({
               {item.name}
             </div>
           </Link>
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
@@ -54,17 +45,9 @@ export function NavProjects({
               <DropdownMenuSeparator />
               <DropdownMenuItem>Archive</DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </li>
       ))}
-      <li>
-        <button className="flex h-7 w-full items-center gap-2.5 overflow-hidden rounded-md px-1.5 text-left text-xs ring-ring transition-all hover:bg-muted focus-visible:outline-none focus-visible:ring-2">
-          <PlusSquare className="h-4 w-4 shrink-0 translate-x-0.5 text-muted-foreground" />
-          <div className="line-clamp-1 overflow-hidden font-medium text-muted-foreground">
-            Add Project
-          </div>
-        </button>
-      </li>
     </ul>
   );
 }
