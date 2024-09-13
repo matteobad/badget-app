@@ -8,14 +8,14 @@ import {
   Cross,
   Eclipse,
   Layers,
-  Leaf,
-  LifeBuoy,
+  LayoutDashboard,
   Link,
   PiggyBank,
   Rabbit,
   Receipt,
   Send,
   Shapes,
+  Sprout,
   User,
 } from "lucide-react";
 
@@ -23,7 +23,6 @@ import { NavMain } from "~/components/nav-main";
 import { NavProjects } from "~/components/nav-projects";
 import { NavSecondary } from "~/components/nav-secondary";
 import { NavUser } from "~/components/nav-user";
-import { UpgradeCard } from "~/components/storage-card";
 import { TeamSwitcher } from "~/components/team-switcher";
 import {
   Sidebar,
@@ -33,6 +32,7 @@ import {
   SidebarItem,
   SidebarLabel,
 } from "~/components/ui/sidebar";
+import { OnboardingCard } from "./onboarding-card";
 
 const data = {
   teams: [
@@ -50,6 +50,15 @@ const data = {
       name: "Evil Corp.",
       logo: Rabbit,
       plan: "Free",
+    },
+  ],
+  navLead: [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
+      isActive: true,
+      enabled: true,
     },
   ],
   navMain: [
@@ -71,7 +80,7 @@ const data = {
     {
       title: "Risparmi",
       url: "#",
-      icon: Leaf,
+      icon: PiggyBank,
       enabled: true,
       items: [
         {
@@ -86,13 +95,13 @@ const data = {
           icon: Cross,
           description: "Performance and speed for efficiency.",
         },
-        {
-          title: "Pensione",
-          url: "#",
-          icon: Leaf,
-          description: "The most powerful model for complex computations.",
-        },
       ],
+    },
+    {
+      title: "Pensione",
+      url: "#",
+      icon: Sprout,
+      enabled: true,
     },
     {
       title: "Investimenti",
@@ -133,11 +142,6 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
       title: "Feedback",
       url: "#",
       icon: Send,
@@ -146,29 +150,36 @@ const data = {
   settings: [
     {
       name: "Profilo",
-      url: "#",
+      url: "/settings/profile",
       icon: User,
     },
     {
       name: "Collegamenti",
-      url: "#",
+      url: "/settings/accounts",
       icon: Link,
     },
     {
       name: "Categorie",
-      url: "#",
+      url: "/settings/categories",
       icon: Shapes,
     },
   ],
 };
 
-export function AppSidebar() {
+export async function AppSidebar({
+  notificationCard,
+}: {
+  notificationCard: React.ReactNode;
+}) {
   return (
     <Sidebar>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
+        <SidebarItem>
+          <NavMain items={data.navLead} />
+        </SidebarItem>
         <SidebarItem>
           <SidebarLabel>Platform</SidebarLabel>
           <NavMain items={data.navMain} />
@@ -181,9 +192,7 @@ export function AppSidebar() {
           <SidebarLabel>Help</SidebarLabel>
           <NavSecondary items={data.navSecondary} />
         </SidebarItem>
-        <SidebarItem>
-          <UpgradeCard />
-        </SidebarItem>
+        <SidebarItem>{notificationCard}</SidebarItem>
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

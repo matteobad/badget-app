@@ -1,6 +1,9 @@
 import dynamic from "next/dynamic";
+import { cookies } from "next/headers";
 
-import DashboardLayout from "~/components/dashboard-layout";
+import { AppSidebar } from "~/components/app-sidebar";
+import { NotificationCard } from "~/components/onboarding-card";
+import { SidebarLayout, SidebarTrigger } from "~/components/ui/sidebar";
 import { getUserCategories } from "~/server/db/queries/cached-queries";
 
 export default async function Layout(props: { children: React.ReactNode }) {
@@ -47,14 +50,19 @@ export default async function Layout(props: { children: React.ReactNode }) {
   );
 
   return (
-    <>
-      <DashboardLayout>{props.children}</DashboardLayout>
+    <SidebarLayout
+      defaultOpen={cookies().get("sidebar:state")?.value === "true"}
+    >
+      <AppSidebar notificationCard={<NotificationCard />} />
+      <main className="flex flex-1 flex-col p-2 transition-all duration-300 ease-in-out">
+        <div className="h-full rounded-md border-2 border-dashed p-2">
+          <SidebarTrigger />
 
-      {/* Modals triggered by url search params */}
-      {/* <ConnectBankModal countryCode={"IT"} />
-      <SelectBankAccountsModal />
-      <AddBankAccountModal /> */}
+          {props.children}
+        </div>
+      </main>
+
       <AddCategoryModal categories={userCategories} />
-    </>
+    </SidebarLayout>
   );
 }
