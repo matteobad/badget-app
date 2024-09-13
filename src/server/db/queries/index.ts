@@ -45,7 +45,6 @@ export async function getFilteredInstitutionsQuery({
 }) {
   try {
     let query = db.select().from(schema.institutions).$dynamic();
-    console.log(params.country);
 
     if (params.country) {
       query = query.where(
@@ -333,8 +332,6 @@ export async function getFilteredTransactionsQuery({
       .where(where)
       .execute()
       .then((res) => res[0]?.count ?? 0);
-
-    console.log(data);
 
     return {
       data: data.map((item) => {

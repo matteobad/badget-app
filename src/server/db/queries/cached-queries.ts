@@ -3,9 +3,9 @@ import { auth } from "@clerk/nextjs/server";
 import { type z } from "zod";
 
 import type { GetTransactionsParams, GetUserBankAccountsParams } from ".";
-import { type dashboardSearchParamsSchema } from "~/app/(dashboard)/_validations/dashboard-schemas";
 import {
   type accountsSearchParamsSchema,
+  type dashboardSearchParamsSchema,
   type getPendingBankConnectionsParamsSchema,
   type institutionsSearchParamsSchema,
   type transactionsSearchParamsSchema,
