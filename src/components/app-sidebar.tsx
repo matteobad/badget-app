@@ -2,9 +2,8 @@
 
 import {
   Atom,
-  Building2,
+  Banknote,
   CandlestickChart,
-  CreditCard,
   Cross,
   Eclipse,
   Layers,
@@ -32,7 +31,6 @@ import {
   SidebarItem,
   SidebarLabel,
 } from "~/components/ui/sidebar";
-import { OnboardingCard } from "./onboarding-card";
 
 const data = {
   teams: [
@@ -63,15 +61,15 @@ const data = {
   ],
   navMain: [
     {
-      title: "Banking",
+      title: "Liquidità",
       url: "#",
-      icon: Layers,
+      icon: Banknote,
       isActive: true,
       enabled: true,
       items: [
         {
           title: "Transazioni",
-          url: "/transactions",
+          url: "/banking/transactions",
           icon: Receipt,
           description: "Vedi le tue transazioni",
         },
@@ -81,7 +79,7 @@ const data = {
       title: "Risparmi",
       url: "#",
       icon: PiggyBank,
-      enabled: true,
+      enabled: false,
       items: [
         {
           title: "Obiettivi",
@@ -101,7 +99,7 @@ const data = {
       title: "Pensione",
       url: "#",
       icon: Sprout,
-      enabled: true,
+      enabled: false,
     },
     {
       title: "Investimenti",
@@ -127,18 +125,18 @@ const data = {
         },
       ],
     },
-    {
-      title: "Assets",
-      url: "#",
-      icon: Building2,
-      enabled: false,
-    },
-    {
-      title: "Liabilities",
-      url: "#",
-      icon: CreditCard,
-      enabled: false,
-    },
+    // {
+    //   title: "Assets",
+    //   url: "#",
+    //   icon: Building2,
+    //   enabled: false,
+    // },
+    // {
+    //   title: "Liabilities",
+    //   url: "#",
+    //   icon: CreditCard,
+    //   enabled: false,
+    // },
   ],
   navSecondary: [
     {
@@ -181,7 +179,7 @@ export async function AppSidebar({
           <NavMain items={data.navLead} />
         </SidebarItem>
         <SidebarItem>
-          <SidebarLabel>Platform</SidebarLabel>
+          <SidebarLabel>Pilastri</SidebarLabel>
           <NavMain items={data.navMain} />
         </SidebarItem>
         <SidebarItem>
