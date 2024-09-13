@@ -64,8 +64,6 @@ export function DateRangePicker({
   dayCount,
   placeholder = "Pick a date",
   triggerVariant = "outline",
-  triggerSize = "default",
-  triggerClassName,
   className,
   ...props
 }: DateRangePickerProps) {
@@ -122,11 +120,10 @@ export function DateRangePicker({
         <PopoverTrigger asChild>
           <Button
             variant={triggerVariant}
-            size={triggerSize}
+            size="sm"
             className={cn(
               "w-full justify-start truncate text-left font-normal",
               !date && "text-muted-foreground",
-              triggerClassName,
             )}
           >
             <CalendarIcon className="mr-2 size-4" />

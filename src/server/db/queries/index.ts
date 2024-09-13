@@ -1,4 +1,5 @@
 import type { SQL } from "drizzle-orm";
+import { eachDayOfInterval } from "date-fns";
 import {
   and,
   asc,
@@ -21,6 +22,7 @@ import { type z } from "zod";
 import { filterColumn } from "~/lib/utils";
 import {
   type accountsSearchParamsSchema,
+  type getFilteredExpensesSchema,
   type getPendingBankConnectionsParamsSchema,
   type institutionsSearchParamsSchema,
   type transactionsSearchParamsSchema,
@@ -577,4 +579,44 @@ export async function getSpendingByCategoryQuery({
   });
 
   return data;
+}
+
+export async function getFilteredExpensesQuery({
+  from,
+  to,
+  userId,
+}: z.infer<typeof getFilteredExpensesSchema>) {
+  const data = await db
+    .select({
+      date: sql<string>`DATE(${schema.bankTransactions.date})`,
+      amount: sql<string>`SUM(ABS(${schema.bankTransactions.amount}))`,
+    })
+    .from(schema.bankTransactions)
+    .where(
+      and(
+        eq(schema.bankTransactions.userId, userId),
+        gt(schema.bankTransactions.date, from),
+        lt(schema.bankTransactions.date, to),
+      ),
+    )
+    .groupBy(sql`DATE(${schema.bankTransactions.date})`)
+    .orderBy(desc(sql`DATE(${schema.bankTransactions.date})`));
+
+  // Create an array of all dates in the range
+  const dateRange = eachDayOfInterval({ start: from, end: to });
+
+  // Fill in missing dates with zero amount
+  const filledData = dateRange.map((date) => {
+    const existingEntry = data.find(
+      (entry) =>
+        new Date(entry.date).toISOString().split("T")[0] ===
+        date.toISOString().split("T")[0],
+    );
+    return existingEntry ?? { date: date.toISOString(), amount: 0 };
+  });
+
+  return filledData.map((entry) => ({
+    date: entry.date,
+    amount: Number(entry.amount),
+  }));
 }

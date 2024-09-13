@@ -1,63 +1,32 @@
 import { Suspense } from "react";
-import { endOfMonth, startOfMonth } from "date-fns";
-import { type z } from "zod";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 
 import { DateRangePicker } from "~/components/data-range-picker";
-import { Skeleton } from "~/components/ui/skeleton";
-import BankBalanceServer from "~/components/widgets/banking/bank-balance.server";
-import CategorySpendingServer from "~/components/widgets/banking/category-spending.server";
-import CategoryTypeSpendingServer from "~/components/widgets/banking/category-type-spending.server";
-import { type dashboardSearchParamsSchema } from "~/lib/validators";
-import { CategoryType } from "~/server/db/schema/enum";
+import { ErrorFallback } from "~/components/error-fallback";
+import { ExpensesChartServer } from "./_components/expenses-chart.server";
+import { dashboardSearchParamsCache } from "./_utils/dashboard-search-params";
 
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: z.infer<typeof dashboardSearchParamsSchema>;
+  searchParams: {
+    from?: string;
+    to?: string;
+  };
 }) {
-  const from = searchParams.from
-    ? startOfMonth(new Date(searchParams.from))
-    : startOfMonth(new Date());
-
-  // TODO: can we allow range filtering?
-  const to = searchParams.from
-    ? endOfMonth(new Date(searchParams.from))
-    : endOfMonth(new Date());
+  // ⚠️ Don't forget to call `parse` here.
+  // You can access type-safe values from the returned object:
+  const params = dashboardSearchParamsCache.parse(searchParams);
+  const { from, to } = params;
 
   return (
-    <div className="flex w-full flex-col items-end gap-6 p-8">
-      <DateRangePicker />
-      <div className="grid w-full grid-cols-4 gap-6">
-        <Suspense fallback={<Skeleton className="" />}>
-          <BankBalanceServer />
+    <div className="flex w-full flex-col gap-2">
+      <DateRangePicker dateRange={{ from, to }} />
+      <ErrorBoundary errorComponent={ErrorFallback}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <ExpensesChartServer {...params} />
         </Suspense>
-        <Suspense fallback={<Skeleton className="" />}>
-          <CategoryTypeSpendingServer
-            from={from}
-            to={to}
-            type={CategoryType.INCOME}
-          />
-        </Suspense>
-        <Suspense fallback={<Skeleton className="" />}>
-          <CategoryTypeSpendingServer
-            from={from}
-            to={to}
-            type={CategoryType.OUTCOME}
-          />
-        </Suspense>
-        <Suspense fallback={<Skeleton className="" />}>
-          <CategoryTypeSpendingServer
-            from={from}
-            to={to}
-            type={CategoryType.TRANSFER}
-          />
-        </Suspense>
-        <div className="col-span-4">
-          <Suspense fallback={<Skeleton className="" />}>
-            <CategorySpendingServer from={from} to={to} />
-          </Suspense>
-        </div>
-      </div>
+      </ErrorBoundary>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { endOfMonth, startOfMonth } from "date-fns";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -228,11 +229,6 @@ export const deleteCategorySchema = z.object({
   categoryId: z.number(),
 });
 
-export const dashboardSearchParamsSchema = z.object({
-  from: z.string().optional(),
-  to: z.string().optional(),
-});
-
 export const updateCategoryRuleSchema = z.object({
   categoryId: z.number(),
   description: z.string().min(1),
@@ -267,4 +263,14 @@ export const institutionsSearchParamsSchema = z.object({
 export const getPendingBankConnectionsParamsSchema = z.object({
   provider: z.nativeEnum(Provider).nullable(),
   ref: z.array(z.string()).nullable(),
+});
+
+// Dashboard
+export const dashboardSearchParamsSchema = z.object({
+  from: z.coerce.date().default(startOfMonth(new Date())),
+  to: z.coerce.date().default(endOfMonth(new Date())),
+});
+
+export const getFilteredExpensesSchema = dashboardSearchParamsSchema.extend({
+  userId: z.string(),
 });

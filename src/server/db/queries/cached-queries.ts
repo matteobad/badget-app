@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { type z } from "zod";
 
 import type { GetTransactionsParams, GetUserBankAccountsParams } from ".";
+import { type dashboardSearchParamsSchema } from "~/app/(dashboard)/_validations/dashboard-schemas";
 import {
   type accountsSearchParamsSchema,
   type getPendingBankConnectionsParamsSchema,
@@ -15,6 +16,7 @@ import {
   getCategoryBudgetsQuery,
   getCategoryRulesQuery,
   getFilteredAccoountsQuery,
+  getFilteredExpensesQuery,
   getFilteredInstitutionsQuery,
   getFilteredTransactionsQuery,
   getPendingBankConnectionsQuery,
@@ -282,3 +284,22 @@ export const getSpendingByCategory = async (params: {
     userId: session.userId,
   });
 };
+
+export const getFilteredExpenses = async (
+  params: z.infer<typeof dashboardSearchParamsSchema>,
+) => {
+  const session = auth();
+
+  if (!session.userId) {
+    return [];
+  }
+
+  unstable_noStore();
+  return getFilteredExpensesQuery({
+    ...params,
+    userId: session.userId,
+  });
+};
+export type GetFilteredExpensesReturnType = Awaited<
+  ReturnType<typeof getFilteredExpenses>
+>;
