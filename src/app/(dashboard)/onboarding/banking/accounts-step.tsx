@@ -2,20 +2,14 @@
 
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Layers, Plus } from "lucide-react";
+import { ChevronLeft, Layers } from "lucide-react";
 import { useDebounce } from "use-debounce";
 
 import { Button } from "~/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { type getPendingBankConnections } from "~/lib/data";
 import { type getFilteredInstitutions } from "~/server/db/queries/cached-queries";
-import { CreateAccountForm } from "./_components/create-account-form";
-import SearchInstitution from "./_components/search-institution";
+import { CreateAccountDialog } from "./_components/create-account-dialog";
 import { SelectAccountForm } from "./_components/select-account-form";
 import { useSearchParams } from "./_hooks/use-search-params";
 
@@ -62,7 +56,7 @@ export default function AccountsStep(props: {
             }}
           >
             <Layers className="mr-4 size-10" />
-            Banking
+            Conti bancari
           </motion.h1>
           <motion.p
             className="max-w-md text-muted-foreground transition-colors sm:text-lg"
@@ -91,41 +85,21 @@ export default function AccountsStep(props: {
               },
             }}
           >
-            <Popover>
-              <div className="flex h-full flex-col items-center justify-start gap-4 rounded-md border p-4">
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    disabled={props.connections.length !== 0}
-                  >
-                    <div className="flex w-full items-center justify-center">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Aggiungi un conto
-                    </div>
-                  </Button>
-                </PopoverTrigger>
+            <Card>
+              <CardHeader>
+                <CreateAccountDialog
+                  connections={props.connections}
+                  institutions={props.institutions}
+                />
+              </CardHeader>
+              <CardContent>
                 <SelectAccountForm
                   formRef={formRef}
-                  connections={props.connections}
                   setIsExecuting={setIsExecuting}
+                  connections={props.connections}
                 />
-              </div>
-              <PopoverContent className="w-80" align="center">
-                <Tabs defaultValue="account">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="linked">Collega un conto</TabsTrigger>
-                    <TabsTrigger value="manual">Traccia a mano</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="linked" className="pt-2">
-                    <SearchInstitution institutions={props.institutions} />
-                  </TabsContent>
-                  <TabsContent value="manual" className="pt-2">
-                    <CreateAccountForm />
-                  </TabsContent>
-                </Tabs>
-              </PopoverContent>
-            </Popover>
+              </CardContent>
+            </Card>
           </motion.div>
           <motion.div
             className="flex w-full justify-end pt-6"
@@ -141,26 +115,13 @@ export default function AccountsStep(props: {
             <Button
               variant="outline"
               size="lg"
-              onClick={() =>
-                setParams({ step: "features" }, { shallow: false })
-              }
+              onClick={() => setParams({ step: "banking" }, { shallow: false })}
             >
-              <span className="w-full text-center font-bold">Indietro</span>
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              <span className="text-center font-bold">Indietro</span>
             </Button>
             <span className="flex-1"></span>
 
-            <Button
-              variant="ghost"
-              size="lg"
-              onClick={() =>
-                void setParams(
-                  { step: "banking-categories" },
-                  { shallow: false },
-                )
-              }
-            >
-              <span className="w-full text-center font-bold">Salta</span>
-            </Button>
             <Button
               variant="default"
               size="lg"
@@ -170,7 +131,7 @@ export default function AccountsStep(props: {
               }}
             >
               <span className="w-full text-center font-bold">
-                {isExecuting ? "Caricamento..." : "Avanti"}
+                {isExecuting ? "Caricamento..." : "Crea conti"}
               </span>
             </Button>
           </motion.div>

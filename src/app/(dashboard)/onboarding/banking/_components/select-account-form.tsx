@@ -54,6 +54,15 @@ export function SelectAccountForm({
     setIsExecuting(isExecuting);
   }, [isExecuting, setIsExecuting]);
 
+  if (connections.length === 0) {
+    return (
+      <div className="whitespace-wrap text-center text-sm text-slate-500">
+        Non hai collegato nessun istituto finanziario. <br />
+        Potrai farlo in seguito, ma perchè aspettare?
+      </div>
+    );
+  }
+
   return (
     <Form {...form}>
       <form

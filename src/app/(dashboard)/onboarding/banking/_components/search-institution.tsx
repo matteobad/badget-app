@@ -28,7 +28,7 @@ export default function SearchInstitution({
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           className="col-span-2 pl-10"
-          placeholder="Cerca istituzione"
+          placeholder="Cerca istituto finanziario"
           type="search"
           onChange={(e) => {
             void setParams({ q: e.target.value }, { shallow: true });
