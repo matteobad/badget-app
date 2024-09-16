@@ -6,7 +6,6 @@ import {
   CandlestickChart,
   Cross,
   Eclipse,
-  Layers,
   LayoutDashboard,
   Link,
   PiggyBank,

@@ -4,8 +4,10 @@ import {
   getUncategorizedTransactions,
   getUserCategories,
 } from "~/server/db/queries/cached-queries";
+import { Onboarding } from "../_components/multi-step-form";
 import { searchParamsCache } from "./_utils/search-params";
 import AccountsStep from "./accounts-step";
+import BankingIntro from "./banking-intro";
 import Categories from "./categories-step";
 import Done from "./done-step";
 import Rules from "./rules-step";
@@ -23,7 +25,8 @@ export async function BankingOnboarding() {
   const transactions = await getUncategorizedTransactions({});
 
   return (
-    <>
+    <Onboarding>
+      {step === "banking" && <BankingIntro />}
       {step === "banking-accounts" && (
         <AccountsStep connections={connections} institutions={institutions} />
       )}
@@ -32,6 +35,6 @@ export async function BankingOnboarding() {
         <Rules categories={categories} transactions={transactions} />
       )}
       {step === "banking-done" && <Done />}
-    </>
+    </Onboarding>
   );
 }

@@ -2,7 +2,6 @@ import { BankingOnboarding } from "./banking";
 import { searchParamsCache } from "./banking/_utils/search-params";
 import Features from "./features";
 import Intro from "./intro";
-import { Onboarding } from "./multi-step-form";
 
 export default async function OnboardingPage({
   searchParams,
@@ -15,14 +14,12 @@ export default async function OnboardingPage({
 
   return (
     <>
-      <Onboarding>
-        {!step && <Intro key="intro" />}
-        {step === "features" && <Features />}
-        {step.includes("banking") && <BankingOnboarding />}
-        {/* {step.includes("savings") && <BankingOnboarding />}
+      {!step && <Intro key="intro" />}
+      {step === "features" && <Features />}
+      {step.includes("banking") && <BankingOnboarding />}
+      {/* {step.includes("savings") && <BankingOnboarding />}
         {step.includes("pension") && <BankingOnboarding />}
         {step.includes("investments") && <BankingOnboarding />} */}
-      </Onboarding>
       <div className="absolute inset-0 top-12 -z-10 bg-cover bg-center" />
     </>
   );

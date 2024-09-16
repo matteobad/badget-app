@@ -12,34 +12,36 @@ export default clerkMiddleware(async (auth, request) => {
     auth().protect();
   }
 
-  // get user private metadata
-  const user = await clerkClient().users.getUser(auth().userId!);
-  const privateMetadata = user?.privateMetadata as {
-    bankingCompleted: boolean;
-    savingsCompleted: boolean;
-    pensionCompleted: boolean;
-  };
+  if (auth().userId) {
+    // get user private metadata
+    const user = await clerkClient().users.getUser(auth().userId!);
+    const privateMetadata = user?.privateMetadata as {
+      bankingCompleted: boolean;
+      savingsCompleted: boolean;
+      pensionCompleted: boolean;
+    };
 
-  // Use default false values if metadata is not yet set
-  const bankingCompleted = privateMetadata.bankingCompleted || false;
-  const savingsCompleted = privateMetadata.savingsCompleted || false;
-  const pensionCompleted = privateMetadata.pensionCompleted || false;
+    // Use default false values if metadata is not yet set
+    const bankingCompleted = privateMetadata.bankingCompleted || false;
+    const savingsCompleted = privateMetadata.savingsCompleted || false;
+    const pensionCompleted = privateMetadata.pensionCompleted || false;
 
-  // redirect to onboarding if not completed
-  if (request.nextUrl.pathname.startsWith("/banking") && !bankingCompleted) {
-    return NextResponse.redirect(
-      new URL("/onboarding?step=banking", request.url),
-    );
-  }
-  if (request.nextUrl.pathname.startsWith("/savings") && !savingsCompleted) {
-    return NextResponse.redirect(
-      new URL("/onboarding?step=savings", request.url),
-    );
-  }
-  if (request.nextUrl.pathname.startsWith("/pension") && !pensionCompleted) {
-    return NextResponse.redirect(
-      new URL("/onboarding?step=pension", request.url),
-    );
+    // redirect to onboarding if not completed
+    if (request.nextUrl.pathname.startsWith("/banking") && !bankingCompleted) {
+      return NextResponse.redirect(
+        new URL("/onboarding?step=banking", request.url),
+      );
+    }
+    if (request.nextUrl.pathname.startsWith("/savings") && !savingsCompleted) {
+      return NextResponse.redirect(
+        new URL("/onboarding?step=savings", request.url),
+      );
+    }
+    if (request.nextUrl.pathname.startsWith("/pension") && !pensionCompleted) {
+      return NextResponse.redirect(
+        new URL("/onboarding?step=pension", request.url),
+      );
+    }
   }
 });
 
