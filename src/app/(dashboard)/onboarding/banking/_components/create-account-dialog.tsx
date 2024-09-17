@@ -33,7 +33,7 @@ export function CreateAccountDialog({
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[90%]">
-        <DialogHeader>
+        <DialogHeader className="text-left">
           <DialogTitle>Aggiungi un conto</DialogTitle>
           <DialogDescription>
             Puoi aggiungere un conto bancario collegandolo direttamente al tuo

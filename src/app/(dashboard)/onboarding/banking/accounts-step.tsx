@@ -2,8 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, Layers } from "lucide-react";
-import { useDebounce } from "use-debounce";
+import { ArrowLeft, Layers } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
@@ -23,120 +22,125 @@ export default function AccountsStep(props: {
 
   const [, setParams] = useSearchParams();
 
-  const showText = useDebounce(true, 800);
-
   return (
     <motion.div
-      className="flex h-full w-full flex-col items-center justify-center"
+      className="flex w-full flex-1 flex-col items-center justify-center gap-10 px-3"
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3, type: "spring" }}
     >
-      {showText && (
-        <motion.div
-          variants={{
-            show: {
-              transition: {
-                staggerChildren: 0.2,
-              },
+      <motion.div
+        className="flex max-w-[-webkit-fill-available] flex-1 flex-col items-center justify-center space-y-8 text-center sm:flex-grow-0"
+        variants={{
+          hidden: { opacity: 0, y: 50 },
+          visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+              duration: 0.4,
+              type: "spring",
+              staggerChildren: 0.2,
             },
+          },
+        }}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.h1
+          className="font-cal flex items-center text-4xl font-bold transition-colors sm:text-5xl"
+          variants={{
+            hidden: { opacity: 0, y: 50 },
+            visible: { opacity: 1, y: 0 },
+          }}
+        >
+          <Layers className="mr-4 size-10" />
+          Conti bancari
+        </motion.h1>
+        <motion.p
+          className="max-w-md text-muted-foreground transition-colors sm:text-lg"
+          variants={{
+            hidden: { opacity: 0, y: 50 },
+            visible: { opacity: 1, y: 0 },
+          }}
+        >
+          Ogni movimento, entrata o uscita, parte dai nostri conti bancari. Con
+          Badget potrai collegarli e lasciare il resto a noi. Aggiorneremo ogni
+          giorno saldi e transazioni in automatico.
+        </motion.p>
+        <motion.div
+          className="min-w-full"
+          variants={{
+            hidden: { opacity: 0, y: 50 },
+            visible: { opacity: 1, y: 0 },
           }}
           initial="hidden"
-          animate="show"
-          className="mx-5 flex max-w-[-webkit-fill-available] flex-col items-center space-y-8 text-center sm:mx-auto"
+          animate="visible"
         >
-          <motion.h1
-            className="font-cal flex items-center text-4xl font-bold transition-colors sm:text-5xl"
-            variants={{
-              hidden: { opacity: 0, y: 50 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.4, type: "spring" },
-              },
-            }}
-          >
-            <Layers className="mr-4 size-10" />
-            Conti bancari
-          </motion.h1>
-          <motion.p
-            className="max-w-md text-muted-foreground transition-colors sm:text-lg"
-            variants={{
-              hidden: { opacity: 0, y: 50 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.4, type: "spring" },
-              },
-            }}
-          >
-            Ogni movimento, entrata o uscita, parte dai nostri conti bancari.
-            Tutti ne abbiamo almeno uno e con Badget potrai collegarli e
-            lasciare il resto a noi. Aggiorneremo ogni giorno saldi e
-            transazioni in automatico.
-          </motion.p>
-          <motion.div
-            className="grid w-full grid-cols-1 gap-4 pb-4"
-            variants={{
-              hidden: { opacity: 0, y: 50 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.4, type: "spring" },
-              },
-            }}
-          >
-            <Card>
-              <CardHeader>
-                <CreateAccountDialog
-                  connections={props.connections}
-                  institutions={props.institutions}
-                />
-              </CardHeader>
-              <CardContent>
-                <SelectAccountForm
-                  formRef={formRef}
-                  setIsExecuting={setIsExecuting}
-                  connections={props.connections}
-                />
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div
-            className="flex w-full justify-end pt-6"
-            variants={{
-              hidden: { opacity: 0, y: 50 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.4, type: "spring" },
-              },
-            }}
-          >
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setParams({ step: "banking" }, { shallow: false })}
-            >
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              <span className="text-center font-bold">Indietro</span>
-            </Button>
-            <span className="flex-1"></span>
-
-            <Button
-              variant="default"
-              size="lg"
-              disabled={isExecuting}
-              onClick={() => {
-                formRef.current?.requestSubmit();
-              }}
-            >
-              <span className="w-full text-center font-bold">
-                {isExecuting ? "Caricamento..." : "Crea conti"}
-              </span>
-            </Button>
-          </motion.div>
+          <Card>
+            <CardHeader className="items-center">
+              <CreateAccountDialog
+                connections={props.connections}
+                institutions={props.institutions}
+              />
+            </CardHeader>
+            <CardContent>
+              <SelectAccountForm
+                formRef={formRef}
+                setIsExecuting={setIsExecuting}
+                connections={props.connections}
+              />
+            </CardContent>
+          </Card>
         </motion.div>
-      )}
+      </motion.div>
+      <motion.div
+        className="flex w-full justify-center gap-4"
+        variants={{
+          hidden: { opacity: 0, y: 50 },
+          visible: { opacity: 1, y: 0 },
+        }}
+        initial="hidden"
+        animate="visible"
+      >
+        <Button
+          className="w-full sm:w-auto"
+          variant="ghost"
+          size="lg"
+          onClick={() => setParams({ step: "banking" }, { shallow: false })}
+        >
+          <motion.div
+            initial={{ opacity: 0, x: +10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
+          >
+            <ArrowLeft className="mr-2 size-4" />
+          </motion.div>
+          <motion.span
+            initial={{ opacity: 0, x: +10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+          >
+            Indietro
+          </motion.span>
+        </Button>
+
+        <Button
+          className="w-full sm:w-auto"
+          variant="default"
+          size="lg"
+          disabled={isExecuting}
+          onClick={() => {
+            formRef.current?.requestSubmit();
+          }}
+        >
+          <motion.span
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+          >
+            {isExecuting ? "Caricamento..." : "Crea conti"}
+          </motion.span>
+        </Button>
+      </motion.div>
     </motion.div>
   );
 }
