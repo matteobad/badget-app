@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreditCard } from "lucide-react";
+import { Landmark } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ import { type getPendingBankConnections } from "~/lib/data";
 import { euroFormat } from "~/lib/utils";
 import { upsertBankConnectionBulkSchema } from "~/lib/validators";
 import { upsertBankConnectionBulkAction } from "~/server/actions/connect-bank-account-action";
+import { Provider } from "~/server/db/schema/enum";
 import { useSearchParams } from "../_hooks/use-search-params";
 
 export function SelectAccountForm({
@@ -68,36 +69,43 @@ export function SelectAccountForm({
       <form
         ref={formRef}
         onSubmit={form.handleSubmit(execute)}
-        className="flex w-[500px] max-w-full flex-col gap-2"
+        className="flex max-w-full flex-col gap-4"
       >
         {connections.map(({ connection, accounts }, index) => (
           <div key={index} className="flex w-full flex-col gap-2">
             <div className="flex items-center gap-2">
-              <Image
-                src={connection.logoUrl ?? ""}
-                alt={connection.name}
-                width={24}
-                height={24}
-              />
+              {connection.provider === Provider.NONE ? (
+                <Landmark className="size-6" />
+              ) : (
+                <Image
+                  src={connection.logoUrl ?? ""}
+                  alt={connection.name}
+                  width={24}
+                  height={24}
+                />
+              )}
               <span className="font-semibold">{connection.name}</span>
               <span className="text-sm font-normal text-muted-foreground">
                 {accounts.length + " conto"}
               </span>
             </div>
-            <ul className="w-full">
+            <ul className="w-full space-y-1">
               {accounts.map((account, accountIndex) => (
                 <li
                   key={account.accountId}
-                  className="flex items-center justify-between gap-3 px-1 font-normal"
+                  className="flex items-center justify-between gap-3 font-normal"
                 >
-                  <CreditCard className="size-5 shrink-0" />
                   <FormField
                     control={form.control}
                     name={`connections.${index}.accounts.${accountIndex}.name`}
-                    render={({ field }) => <Input {...field} />}
+                    render={({ field }) => (
+                      <Input {...field} className="w-36" />
+                    )}
                   />
                   <span className="flex-1"></span>
-                  {euroFormat(account.balance ?? "0")}
+                  <span className="text-sm font-normal">
+                    {euroFormat(account.balance ?? "0")}
+                  </span>
                   <FormField
                     control={form.control}
                     name={`connections.${index}.accounts.${accountIndex}.enabled`}

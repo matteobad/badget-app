@@ -96,23 +96,25 @@ export const upsertBankConnectionBulkAction = authActionClient
 
       const transactions: (typeof bankTransactions.$inferInsert)[] = [];
 
-      for (const { id, accountId } of inserted) {
-        if (!accountId) continue;
+      for (const { id, accountId, manual } of inserted) {
+        if (!accountId || manual) continue;
 
         const data = await getTransactions({
           bankAccountId: accountId,
           latest: false,
         });
         transactions.push(
-          ...data.map((t) => ({
+          ...(data?.map((t) => ({
             ...transformTransaction(t),
             accountId: id,
             userId,
-          })),
+          })) ?? []),
         );
       }
 
-      await upsertTransactions(transactions);
+      if (transactions.length > 0) {
+        await upsertTransactions(transactions);
+      }
     }
 
     // NOTE: GoCardLess connection expires after 90-180 days

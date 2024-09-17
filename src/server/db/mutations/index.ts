@@ -69,6 +69,7 @@ export async function upsertBankConnections(
       .returning({
         id: bankAccounts.id,
         accountId: bankAccounts.accountId,
+        manual: bankAccounts.manual,
       });
   });
 }

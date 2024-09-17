@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -15,22 +14,24 @@ import {
 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
-import { useDebounce } from "use-debounce";
 import { type z } from "zod";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
+import { Card, CardContent } from "~/components/ui/card";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "~/components/ui/carousel";
 import { Separator } from "~/components/ui/separator";
 import { euroFormat } from "~/lib/utils";
 import { type upsertCategoryBulkSchema } from "~/lib/validators";
 import { upsertCategoryBulkAction } from "~/server/actions/insert-category-action";
 import { BudgetPeriod, CategoryType } from "~/server/db/schema/enum";
+import { useSearchParams } from "./_hooks/use-search-params";
 
 const BASIC_CATEGORIES = [
   {
@@ -112,250 +113,265 @@ export default function Categories() {
       DEFAULT_CATEGORIES,
     );
 
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  const [, setParams] = useSearchParams();
 
   const { execute, isExecuting } = useAction(upsertCategoryBulkAction, {
     onError: ({ error }) => {
       toast.error(error.serverError);
     },
     onSuccess: () => {
-      const params = new URLSearchParams(searchParams);
-      params.set("step", "banking-rules");
       toast.success("Categorie create!");
-      router.push(`/onboarding?${params.toString()}`);
+      void setParams({ step: "banking-rules" }, { shallow: false });
     },
   });
 
-  const showText = useDebounce(true, 800);
-
   return (
     <motion.div
-      className="flex h-full w-full flex-col items-center justify-center"
+      className="flex w-full flex-1 flex-col items-center justify-center gap-10 px-3"
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3, type: "spring" }}
     >
-      {showText && (
-        <motion.div
-          variants={{
-            show: {
-              transition: {
-                staggerChildren: 0.2,
-              },
+      <motion.div
+        className="flex max-w-[-webkit-fill-available] flex-1 flex-col items-center justify-center space-y-8 text-center sm:flex-grow-0"
+        variants={{
+          hidden: { opacity: 0, y: 50 },
+          visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+              duration: 0.4,
+              type: "spring",
+              staggerChildren: 0.2,
             },
+          },
+        }}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.h1
+          className="font-cal flex items-center text-4xl font-bold transition-colors sm:text-5xl"
+          variants={{
+            hidden: { opacity: 0, y: 50 },
+            visible: { opacity: 1, y: 0 },
+          }}
+        >
+          <Shapes className="mr-4 size-10" />
+          Categorie
+        </motion.h1>
+        <motion.p
+          className="max-w-md text-muted-foreground transition-colors sm:text-lg"
+          variants={{
+            hidden: { opacity: 0, y: 50 },
+            visible: { opacity: 1, y: 0 },
+          }}
+        >
+          Il primo passo è prendere consapevolezza delle proprie spese. Per
+          farlo possiamo creare delle categorie. Ogni persona ha esigenze
+          diverse perciò offriamo completa personalizzazione.
+        </motion.p>
+        <motion.div
+          className="flex w-full justify-center"
+          variants={{
+            hidden: { opacity: 0, y: 50 },
+            visible: { opacity: 1, y: 0 },
           }}
           initial="hidden"
-          animate="show"
-          className="mx-5 flex max-w-[-webkit-fill-available] flex-col items-center space-y-8 text-center sm:mx-auto"
+          animate="visible"
         >
-          <motion.h1
-            className="font-cal flex items-center text-4xl font-bold transition-colors sm:text-5xl"
-            variants={{
-              hidden: { opacity: 0, y: 50 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.4, type: "spring" },
-              },
-            }}
-          >
-            <Shapes className="mr-4 size-10" />
-            Categorie
-          </motion.h1>
-          <motion.p
-            className="max-w-md text-muted-foreground transition-colors sm:text-lg"
-            variants={{
-              hidden: { opacity: 0, y: 50 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.4, type: "spring" },
-              },
-            }}
-          >
-            Il primo passo è prendere consapevolezza delle proprie spese. Per
-            farlo possiamo creare delle categorie. Ogni persona ha esigenze
-            diverse perciò offriamo completa personalizzazione.
-          </motion.p>
-          <motion.div
-            className="grid grid-cols-2 gap-4 sm:grid-cols-3"
-            variants={{
-              hidden: { opacity: 0, y: 50 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.4, type: "spring" },
-              },
-            }}
-          >
-            <Button
-              className="flex h-full flex-col items-start justify-start gap-4 border p-4"
-              variant={selected === "basic" ? "secondary" : "outline"}
-              size="lg"
-              onClick={() => {
-                setSelected("basic");
-                setCategories(BASIC_CATEGORIES);
-              }}
-            >
-              <span className="w-full text-center font-bold">
-                Voglia farla semplice
-              </span>
-              <ul className="w-full text-left font-light">
-                <li className="flex items-center">
-                  <ArrowLeft className="mr-2 size-3" /> Entrate
-                </li>
-                <Separator className="my-2" />
-                <li className="flex items-center">
-                  <ArrowRight className="mr-2 size-3" /> Uscite
-                  <span className="ml-auto">
-                    {euroFormat(1000, { maximumFractionDigits: 0 })}
-                  </span>
-                </li>
-                <Separator className="my-2" />
-                <li className="flex items-center">
-                  <ArrowLeftRight className="mr-2 size-3" /> Trasferimenti
-                </li>
-              </ul>
-            </Button>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  className="flex h-full flex-col items-start justify-start gap-4 border p-4"
-                  variant={selected === "default" ? "secondary" : "outline"}
-                  size="lg"
-                  onClick={() => {
-                    setSelected("default");
-                    setCategories(DEFAULT_CATEGORIES);
-                  }}
-                >
-                  <span className="w-full text-center font-bold">50/30/20</span>
-                  <ul className="w-full text-left font-light">
-                    <li className="flex items-center">
-                      <Banknote className="mr-2 size-3" /> Stipendio
-                      <span className="ml-auto">
-                        {euroFormat(income, { maximumFractionDigits: 0 })}
+          <Carousel className="w-[calc(100vw-3rem)] max-w-sm flex-1 pt-6">
+            <CarouselPrevious className="absolute left-auto right-10 top-0" />
+            <CarouselNext className="absolute right-0 top-0" />
+            <CarouselContent>
+              <CarouselItem>
+                <div className="p-1">
+                  <Card>
+                    <CardContent className="flex aspect-square flex-col items-center justify-start gap-6 p-6">
+                      <span className="w-full text-center font-bold">
+                        Voglia farla semplice
                       </span>
-                    </li>
-                    <Separator className="my-2" />
-                    <li className="flex items-center">
-                      <ArrowRight className="mr-2 size-3" /> Necessità
-                      <span className="ml-auto">50%</span>
-                    </li>
-                    <li className="flex items-center">
-                      <PartyPopper className="mr-2 size-3" /> Svago
-                      <span className="ml-auto">30%</span>
-                    </li>
-                    <li className="flex items-center">
-                      <PiggyBank className="mr-2 size-3" /> Risparmio
-                      <span className="ml-auto">20%</span>
-                    </li>
-                    <Separator className="my-2" />
-                    <li className="flex items-center">
-                      <ArrowLeftRight className="mr-2 size-3" /> Trasferimenti
-                    </li>
-                  </ul>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48" align="center">
-                <Input
-                  className="text-rigth"
-                  placeholder="1.000"
-                  type="text"
-                  onChange={(ev) => {
-                    setIncome(ev.target.value);
-                  }}
-                  onBlur={() => {
-                    setCategories(
-                      DEFAULT_CATEGORIES.map((category) => ({
-                        ...category,
-                        budgets: [
-                          {
-                            budget:
-                              category.type === CategoryType.INCOME
-                                ? income
-                                : category.type === CategoryType.OUTCOME
-                                  ? (
-                                      parseFloat(income) *
-                                      (category.name === "Necessità"
-                                        ? 0.5
-                                        : category.name === "Svago"
-                                          ? 0.3
-                                          : category.name === "Risparmio"
-                                            ? 0.2
-                                            : 0)
-                                    ).toString()
-                                  : "0",
-                            period: BudgetPeriod.MONTH,
-                            activeFrom: new Date(), // placeholder
-                            categoryId: 0, // placeholder
-                            userId: "user_id_placeholder", // placeholder
-                          },
-                        ].filter(() => category.type !== CategoryType.TRANSFER),
-                      })),
-                    );
-                  }}
-                  value={income}
-                />
-              </PopoverContent>
-            </Popover>
-            <Button
-              className="flex h-full flex-col items-start justify-start gap-4 border p-4"
-              variant={selected === "custom" ? "secondary" : "outline"}
-              size="lg"
-              disabled
-              onClick={() => {
-                setSelected("custom");
-                setCategories([]);
-              }}
-            >
-              <span className="w-full text-center font-bold">
-                So quello che faccio
-              </span>
-              <div className="font-light">
-                <ul className="text-left">
-                  <li className="flex items-center">
-                    <Plus className="mr-2 size-3" /> Crea categorie
-                  </li>
-                </ul>
-              </div>
-              <Badge className="mx-auto mt-4 flex">Coming soon</Badge>
-            </Button>
-          </motion.div>
-          <motion.div
-            className="flex w-full justify-end pt-6"
-            variants={{
-              hidden: { opacity: 0, y: 50 },
-              show: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.4, type: "spring" },
-              },
-            }}
-          >
-            <Button variant="outline" size="lg" onClick={() => router.back()}>
-              <span className="w-full text-center font-bold">Indietro</span>
-            </Button>
-            <span className="flex-1"></span>
-            <Button
-              variant="ghost"
-              size="lg"
-              onClick={() => router.push("/onboarding?step=banking-rules")}
-            >
-              <span className="w-full text-center font-bold">Salta</span>
-            </Button>
-            <Button
-              variant="default"
-              size="lg"
-              onClick={() => {
-                execute({ categories });
-              }}
-              disabled={isExecuting}
-            >
-              <span className="w-full text-center font-bold">Avanti</span>
-            </Button>
-          </motion.div>
+                      <ul className="w-full text-left font-light">
+                        <li className="flex items-center">
+                          <ArrowLeft className="mr-2 size-3" /> Entrate
+                        </li>
+                        <Separator className="my-2" />
+                        <li className="flex items-center">
+                          <ArrowRight className="mr-2 size-3" /> Uscite
+                          <span className="ml-auto">
+                            {euroFormat(1000, { maximumFractionDigits: 0 })}
+                          </span>
+                        </li>
+                        <Separator className="my-2" />
+                        <li className="flex items-center">
+                          <ArrowLeftRight className="mr-2 size-3" />{" "}
+                          Trasferimenti
+                        </li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CarouselItem>
+              <CarouselItem>
+                <div className="p-1">
+                  <Card>
+                    <CardContent className="flex aspect-square flex-col items-center justify-start gap-6 p-6">
+                      <span className="w-full text-center font-bold">
+                        50/30/20
+                      </span>
+                      <ul className="w-full text-left font-light">
+                        <li className="flex items-center">
+                          <Banknote className="mr-2 size-3" /> Stipendio
+                          <span className="ml-auto">
+                            {euroFormat(income, {
+                              maximumFractionDigits: 0,
+                            })}
+                          </span>
+                        </li>
+                        <Separator className="my-2" />
+                        <li className="flex items-center">
+                          <ArrowRight className="mr-2 size-3" /> Necessità
+                          <span className="ml-auto">50%</span>
+                        </li>
+                        <li className="flex items-center">
+                          <PartyPopper className="mr-2 size-3" /> Svago
+                          <span className="ml-auto">30%</span>
+                        </li>
+                        <li className="flex items-center">
+                          <PiggyBank className="mr-2 size-3" /> Risparmio
+                          <span className="ml-auto">20%</span>
+                        </li>
+                        <Separator className="my-2" />
+                        <li className="flex items-center">
+                          <ArrowLeftRight className="mr-2 size-3" />{" "}
+                          Trasferimenti
+                        </li>
+                      </ul>
+                      {/* </PopoverTrigger>
+                        <PopoverContent className="w-48" align="center">
+                          <Input
+                            className="text-rigth"
+                            placeholder="1.000"
+                            type="text"
+                            onChange={(ev) => {
+                              setIncome(ev.target.value);
+                            }}
+                            onBlur={() => {
+                              setCategories(
+                                DEFAULT_CATEGORIES.map((category) => ({
+                                  ...category,
+                                  budgets: [
+                                    {
+                                      budget:
+                                        category.type === CategoryType.INCOME
+                                          ? income
+                                          : category.type ===
+                                              CategoryType.OUTCOME
+                                            ? (
+                                                parseFloat(income) *
+                                                (category.name === "Necessità"
+                                                  ? 0.5
+                                                  : category.name === "Svago"
+                                                    ? 0.3
+                                                    : category.name ===
+                                                        "Risparmio"
+                                                      ? 0.2
+                                                      : 0)
+                                              ).toString()
+                                            : "0",
+                                      period: BudgetPeriod.MONTH,
+                                      activeFrom: new Date(), // placeholder
+                                      categoryId: 0, // placeholder
+                                      userId: "user_id_placeholder", // placeholder
+                                    },
+                                  ].filter(
+                                    () =>
+                                      category.type !== CategoryType.TRANSFER,
+                                  ),
+                                })),
+                              );
+                            }}
+                            value={income}
+                          />
+                        </PopoverContent>
+                      </Popover> */}
+                    </CardContent>
+                  </Card>
+                </div>
+              </CarouselItem>
+              <CarouselItem>
+                <div className="p-1">
+                  <Card>
+                    <CardContent className="flex aspect-square items-center justify-center p-6">
+                      <div className="flex h-full flex-col gap-4 p-4">
+                        <span className="w-full text-center font-bold">
+                          So quello che faccio
+                        </span>
+                        <div className="font-light">
+                          <ul className="text-left">
+                            <li className="flex items-center">
+                              <Plus className="mr-2 size-3" /> Crea categorie
+                            </li>
+                          </ul>
+                        </div>
+                        <Badge className="mx-auto mt-4 flex">Coming soon</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CarouselItem>
+            </CarouselContent>
+          </Carousel>
         </motion.div>
-      )}
+      </motion.div>
+      <motion.div
+        className="flex w-full justify-center gap-4"
+        variants={{
+          hidden: { opacity: 0, y: 50 },
+          visible: { opacity: 1, y: 0 },
+        }}
+        initial="hidden"
+        animate="visible"
+      >
+        <Button
+          className="w-full sm:w-auto"
+          variant="ghost"
+          size="lg"
+          onClick={() =>
+            setParams({ step: "banking-accounts" }, { shallow: false })
+          }
+        >
+          <motion.div
+            initial={{ opacity: 0, x: +10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
+          >
+            <ArrowLeft className="mr-2 size-4" />
+          </motion.div>
+          <motion.span
+            initial={{ opacity: 0, x: +10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+          >
+            Indietro
+          </motion.span>
+        </Button>
+        <Button
+          className="w-full sm:w-auto"
+          variant="default"
+          size="lg"
+          disabled={isExecuting}
+          onClick={() => {
+            execute({ categories });
+          }}
+        >
+          <motion.span
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+          >
+            {isExecuting ? "Caricamento..." : "Crea categorie"}
+          </motion.span>
+        </Button>
+      </motion.div>
     </motion.div>
   );
 }

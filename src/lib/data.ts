@@ -12,6 +12,7 @@ import type {
 } from "./validators";
 import { getAccounts } from "~/server/actions/institutions/get-accounts";
 import { db, schema } from "~/server/db";
+import { Provider } from "~/server/db/schema/enum";
 import {
   transformAccount,
   transformConnection,
@@ -132,6 +133,28 @@ export const getPendingBankConnections = async (
           },
           accounts: accounts.map(transformAccount).map((account) => ({
             ...account,
+            userId: session.userId,
+          })),
+        });
+      }
+
+      const manualConnection = await db.query.bankConnections.findMany({
+        where: (bankConnections, { eq }) =>
+          eq(bankConnections.userId, session.userId) &&
+          eq(bankConnections.provider, Provider.NONE),
+        with: {
+          bankAccount: true,
+        },
+      });
+
+      if (manualConnection.length > 0) {
+        data.push({
+          connection: {
+            ...manualConnection[0]!,
+          },
+          accounts: manualConnection[0]!.bankAccount.map((account) => ({
+            ...account,
+            balance: account.balance?.toString() ?? "0",
             userId: session.userId,
           })),
         });
