@@ -1,22 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import type dynamicIconImports from "lucide-react/dynamicIconImports";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import {
-  ArrowLeft,
-  ArrowLeftRight,
-  ArrowRight,
-  Banknote,
-  PartyPopper,
-  PiggyBank,
-  Plus,
-  Shapes,
-} from "lucide-react";
+import { ArrowLeft, Shapes } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 import { type z } from "zod";
 
-import { Badge } from "~/components/ui/badge";
+import type { CarouselApi } from "~/components/ui/carousel";
+import Icon from "~/components/icons";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {
@@ -26,25 +19,39 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "~/components/ui/carousel";
+import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
-import { euroFormat } from "~/lib/utils";
 import { type upsertCategoryBulkSchema } from "~/lib/validators";
 import { upsertCategoryBulkAction } from "~/server/actions/insert-category-action";
 import { BudgetPeriod, CategoryType } from "~/server/db/schema/enum";
 import { useSearchParams } from "./_hooks/use-search-params";
+
+type UpsertCategoryBulkType = z.infer<
+  typeof upsertCategoryBulkSchema
+>["categories"];
 
 const BASIC_CATEGORIES = [
   {
     name: "Entrate",
     macro: "Entrate",
     type: CategoryType.INCOME,
+    icon: "arrow-left",
     userId: "user_id_placeholder",
-    budgets: [],
+    budgets: [
+      {
+        budget: "1500",
+        period: BudgetPeriod.MONTH,
+        activeFrom: new Date(), // placeholder
+        categoryId: 0, // placeholder
+        userId: "user_id_placeholder", // placeholder
+      },
+    ],
   },
   {
     name: "Uscite",
     macro: "Uscite",
     type: CategoryType.OUTCOME,
+    icon: "arrow-right",
     userId: "user_id_placeholder",
     budgets: [
       {
@@ -60,70 +67,144 @@ const BASIC_CATEGORIES = [
     name: "Trasferimenti",
     macro: "Trasferimenti",
     type: CategoryType.TRANSFER,
+    icon: "arrow-left-right",
     userId: "user_id_placeholder",
     budgets: [],
   },
-] as const satisfies z.infer<typeof upsertCategoryBulkSchema>["categories"];
+] as const satisfies UpsertCategoryBulkType;
 
 const DEFAULT_CATEGORIES = [
   {
-    name: "Stipendio",
+    name: "Entrate",
     macro: "Entrate",
     type: CategoryType.INCOME,
+    icon: "arrow-left",
     userId: "user_id_placeholder",
-    budgets: [],
+    budgets: [
+      {
+        budget: "1500",
+        period: BudgetPeriod.MONTH,
+        activeFrom: new Date(), // placeholder
+        categoryId: 0, // placeholder
+        userId: "user_id_placeholder", // placeholder
+      },
+    ],
   },
   {
     name: "Necessità",
     macro: "Necessità",
     type: CategoryType.OUTCOME,
+    icon: "arrow-right",
     userId: "user_id_placeholder",
-    budgets: [],
+    budgets: [
+      {
+        budget: "750",
+        period: BudgetPeriod.MONTH,
+        activeFrom: new Date(), // placeholder
+        categoryId: 0, // placeholder
+        userId: "user_id_placeholder", // placeholder
+      },
+    ],
   },
   {
     name: "Svago",
     macro: "Svago",
     type: CategoryType.OUTCOME,
+    icon: "party-popper",
     userId: "user_id_placeholder",
-    budgets: [],
+    budgets: [
+      {
+        budget: "450",
+        period: BudgetPeriod.MONTH,
+        activeFrom: new Date(), // placeholder
+        categoryId: 0, // placeholder
+        userId: "user_id_placeholder", // placeholder
+      },
+    ],
   },
   {
     name: "Risparmio",
     macro: "Risparmio",
     type: CategoryType.OUTCOME,
+    icon: "piggy-bank",
     userId: "user_id_placeholder",
-    budgets: [],
+    budgets: [
+      {
+        budget: "300",
+        period: BudgetPeriod.MONTH,
+        activeFrom: new Date(), // placeholder
+        categoryId: 0, // placeholder
+        userId: "user_id_placeholder", // placeholder
+      },
+    ],
   },
   {
     name: "Trasferimenti",
     macro: "Trasferimenti",
     type: CategoryType.TRANSFER,
+    icon: "arrow-left-right",
     userId: "user_id_placeholder",
     budgets: [],
   },
-] as const satisfies z.infer<typeof upsertCategoryBulkSchema>["categories"];
+] as const satisfies UpsertCategoryBulkType;
 
 export default function Categories() {
-  const [income, setIncome] = useState<string>("1500");
-  const [selected, setSelected] = useState<"basic" | "default" | "custom">(
-    "default",
-  );
-  const [categories, setCategories] =
-    useState<z.infer<typeof upsertCategoryBulkSchema>["categories"]>(
-      DEFAULT_CATEGORIES,
-    );
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [categoryOptions, setCategoryOptions] = useState<
+    UpsertCategoryBulkType[]
+  >([BASIC_CATEGORIES, DEFAULT_CATEGORIES]);
 
   const [, setParams] = useSearchParams();
 
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
+
   const { execute, isExecuting } = useAction(upsertCategoryBulkAction, {
     onError: ({ error }) => {
-      toast.error(error.serverError);
+      toast.error(
+        error.serverError ?? error.validationErrors?.categories?._errors,
+      );
     },
     onSuccess: () => {
       toast.success("Categorie create!");
       void setParams({ step: "banking-rules" }, { shallow: false });
     },
   });
+
+  const updateCategoryBudget = (
+    category: number,
+    budget: number,
+    value: string,
+  ) => {
+    const newCategories = categoryOptions.map((c, cIdx) => {
+      if (cIdx !== current) return c;
+      return c.map((item, idx) => {
+        if (idx !== category) return item;
+        return {
+          ...item,
+          budgets: item.budgets.map((b, bIdx) => {
+            if (bIdx !== budget) return b;
+            return {
+              ...b,
+              budget: value,
+            };
+          }),
+        };
+      });
+    });
+
+    setCategoryOptions(newCategories);
+  };
 
   return (
     <motion.div
@@ -178,146 +259,70 @@ export default function Categories() {
           initial="hidden"
           animate="visible"
         >
-          <Carousel className="w-[calc(100vw-3rem)] max-w-sm flex-1 pt-6">
+          <Carousel
+            setApi={setApi}
+            className="w-[calc(100vw-3rem)] max-w-sm flex-1 pt-6"
+          >
             <CarouselPrevious className="absolute left-auto right-10 top-0" />
             <CarouselNext className="absolute right-0 top-0" />
             <CarouselContent>
-              <CarouselItem>
-                <div className="p-1">
-                  <Card>
-                    <CardContent className="flex aspect-square flex-col items-center justify-start gap-6 p-6">
-                      <span className="w-full text-center font-bold">
-                        Voglia farla semplice
-                      </span>
-                      <ul className="w-full text-left font-light">
-                        <li className="flex items-center">
-                          <ArrowLeft className="mr-2 size-3" /> Entrate
-                        </li>
-                        <Separator className="my-2" />
-                        <li className="flex items-center">
-                          <ArrowRight className="mr-2 size-3" /> Uscite
-                          <span className="ml-auto">
-                            {euroFormat(1000, { maximumFractionDigits: 0 })}
+              {categoryOptions.map((option, optionIndex) => {
+                return (
+                  <CarouselItem key={optionIndex}>
+                    <div className="p-1">
+                      <Card>
+                        <CardContent className="flex aspect-square flex-col items-center justify-start gap-6 p-6">
+                          <span className="w-full text-center font-bold">
+                            {optionIndex === 0
+                              ? "Voglia farla semplice"
+                              : "50/30/20"}
                           </span>
-                        </li>
-                        <Separator className="my-2" />
-                        <li className="flex items-center">
-                          <ArrowLeftRight className="mr-2 size-3" />{" "}
-                          Trasferimenti
-                        </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
-              <CarouselItem>
-                <div className="p-1">
-                  <Card>
-                    <CardContent className="flex aspect-square flex-col items-center justify-start gap-6 p-6">
-                      <span className="w-full text-center font-bold">
-                        50/30/20
-                      </span>
-                      <ul className="w-full text-left font-light">
-                        <li className="flex items-center">
-                          <Banknote className="mr-2 size-3" /> Stipendio
-                          <span className="ml-auto">
-                            {euroFormat(income, {
-                              maximumFractionDigits: 0,
-                            })}
-                          </span>
-                        </li>
-                        <Separator className="my-2" />
-                        <li className="flex items-center">
-                          <ArrowRight className="mr-2 size-3" /> Necessità
-                          <span className="ml-auto">50%</span>
-                        </li>
-                        <li className="flex items-center">
-                          <PartyPopper className="mr-2 size-3" /> Svago
-                          <span className="ml-auto">30%</span>
-                        </li>
-                        <li className="flex items-center">
-                          <PiggyBank className="mr-2 size-3" /> Risparmio
-                          <span className="ml-auto">20%</span>
-                        </li>
-                        <Separator className="my-2" />
-                        <li className="flex items-center">
-                          <ArrowLeftRight className="mr-2 size-3" />{" "}
-                          Trasferimenti
-                        </li>
-                      </ul>
-                      {/* </PopoverTrigger>
-                        <PopoverContent className="w-48" align="center">
-                          <Input
-                            className="text-rigth"
-                            placeholder="1.000"
-                            type="text"
-                            onChange={(ev) => {
-                              setIncome(ev.target.value);
-                            }}
-                            onBlur={() => {
-                              setCategories(
-                                DEFAULT_CATEGORIES.map((category) => ({
-                                  ...category,
-                                  budgets: [
-                                    {
-                                      budget:
-                                        category.type === CategoryType.INCOME
-                                          ? income
-                                          : category.type ===
-                                              CategoryType.OUTCOME
-                                            ? (
-                                                parseFloat(income) *
-                                                (category.name === "Necessità"
-                                                  ? 0.5
-                                                  : category.name === "Svago"
-                                                    ? 0.3
-                                                    : category.name ===
-                                                        "Risparmio"
-                                                      ? 0.2
-                                                      : 0)
-                                              ).toString()
-                                            : "0",
-                                      period: BudgetPeriod.MONTH,
-                                      activeFrom: new Date(), // placeholder
-                                      categoryId: 0, // placeholder
-                                      userId: "user_id_placeholder", // placeholder
-                                    },
-                                  ].filter(
-                                    () =>
-                                      category.type !== CategoryType.TRANSFER,
-                                  ),
-                                })),
+                          <ul className="w-full space-y-2 text-left font-light">
+                            {option.map((category, categoryIndex) => {
+                              return (
+                                <>
+                                  <li className="flex items-center">
+                                    <Icon
+                                      name={
+                                        category.icon as keyof typeof dynamicIconImports
+                                      }
+                                      className="mr-2 size-4"
+                                    />
+                                    {category.name}
+                                    <div className="ml-auto h-8 text-right">
+                                      {category.type === "TRANSFER" ? (
+                                        "-"
+                                      ) : (
+                                        <Input
+                                          placeholder="1.500,00 €"
+                                          value={category?.budgets[0]?.budget}
+                                          onChange={(e) =>
+                                            updateCategoryBudget(
+                                              categoryIndex,
+                                              0,
+                                              e.target.value,
+                                            )
+                                          }
+                                          className="ml-auto h-8 w-28 text-right"
+                                        />
+                                      )}
+                                    </div>
+                                  </li>
+                                  {categoryIndex < option.length - 1 &&
+                                    category.type !==
+                                      option[categoryIndex + 1]?.type && (
+                                      <Separator className="my-2" />
+                                    )}
+                                </>
                               );
-                            }}
-                            value={income}
-                          />
-                        </PopoverContent>
-                      </Popover> */}
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
-              <CarouselItem>
-                <div className="p-1">
-                  <Card>
-                    <CardContent className="flex aspect-square items-center justify-center p-6">
-                      <div className="flex h-full flex-col gap-4 p-4">
-                        <span className="w-full text-center font-bold">
-                          So quello che faccio
-                        </span>
-                        <div className="font-light">
-                          <ul className="text-left">
-                            <li className="flex items-center">
-                              <Plus className="mr-2 size-3" /> Crea categorie
-                            </li>
+                            })}
                           </ul>
-                        </div>
-                        <Badge className="mx-auto mt-4 flex">Coming soon</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                );
+              })}
             </CarouselContent>
           </Carousel>
         </motion.div>
@@ -360,7 +365,7 @@ export default function Categories() {
           size="lg"
           disabled={isExecuting}
           onClick={() => {
-            execute({ categories });
+            execute({ categories: categoryOptions[current]! });
           }}
         >
           <motion.span

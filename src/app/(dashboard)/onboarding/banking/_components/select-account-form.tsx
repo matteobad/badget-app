@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Landmark } from "lucide-react";
+import { CircleX, Landmark, Trash } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
 
+import { Button } from "~/components/ui/button";
 import { Form, FormField } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
@@ -93,19 +94,25 @@ export function SelectAccountForm({
               {accounts.map((account, accountIndex) => (
                 <li
                   key={account.accountId}
-                  className="flex items-center justify-between gap-3 font-normal"
+                  className="relative flex items-center justify-between gap-3 font-normal"
                 >
                   <FormField
                     control={form.control}
                     name={`connections.${index}.accounts.${accountIndex}.name`}
                     render={({ field }) => (
-                      <Input {...field} className="w-36" />
+                      <Input {...field} className="w-full" />
                     )}
                   />
-                  <span className="flex-1"></span>
-                  <span className="text-sm font-normal">
+                  <span className="text- absolute right-28 font-normal text-muted-foreground">
                     {euroFormat(account.balance ?? "0")}
                   </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-[57px] h-[38px] rounded-sm text-muted-foreground"
+                  >
+                    <CircleX className="size-4" />
+                  </Button>
                   <FormField
                     control={form.control}
                     name={`connections.${index}.accounts.${accountIndex}.enabled`}
