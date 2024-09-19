@@ -27,23 +27,19 @@ import {
 import { cn } from "~/lib/utils";
 import { updateTransactionCategoryBulkSchema } from "~/lib/validators";
 import { updateTransactionCategoryBulkAction } from "~/server/actions/bank-transaction-action";
-import {
-  type getUncategorizedTransactions,
-  type getUserCategories,
-} from "~/server/db/queries/cached-queries";
+import { useCategories, useTransactions } from "../_hooks/use-banking";
 import { useSearchParams } from "../_hooks/use-search-params";
 
 export function CategorizeTransactionForm({
   formRef,
-  categories,
-  transactions,
   setIsExecuting,
 }: {
   formRef: React.RefObject<HTMLFormElement>;
-  categories: Awaited<ReturnType<typeof getUserCategories>>;
-  transactions: Awaited<ReturnType<typeof getUncategorizedTransactions>>;
   setIsExecuting: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const transactions = useTransactions();
+  const categories = useCategories();
+
   const [, setParams] = useSearchParams();
 
   const form = useForm<z.infer<typeof updateTransactionCategoryBulkSchema>>({

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleX, Landmark, Trash } from "lucide-react";
+import { CircleX, Landmark } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -10,33 +10,32 @@ import { type z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Form, FormField } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
-import { type getPendingBankConnections } from "~/lib/data";
 import { euroFormat } from "~/lib/utils";
 import { upsertBankConnectionBulkSchema } from "~/lib/validators";
 import { upsertBankConnectionBulkAction } from "~/server/actions/connect-bank-account-action";
 import { Provider } from "~/server/db/schema/enum";
+import { useConnections } from "../_hooks/use-banking";
 import { useSearchParams } from "../_hooks/use-search-params";
 
 export function SelectAccountForm({
   formRef,
-  connections,
   setIsExecuting,
 }: {
   formRef: React.RefObject<HTMLFormElement>;
-  connections: Awaited<ReturnType<typeof getPendingBankConnections>>;
   setIsExecuting: (isExecuting: boolean) => void;
 }) {
+  const connections = useConnections();
   const [, setParams] = useSearchParams();
 
   const form = useForm<z.infer<typeof upsertBankConnectionBulkSchema>>({
     resolver: zodResolver(upsertBankConnectionBulkSchema),
     defaultValues: {
-      connections: connections.map(({ connection, accounts }) => ({
+      connections: connections.map(({ bankAccount, ...connection }) => ({
         connection,
-        accounts: accounts.map((account) => ({
+        accounts: bankAccount.map((account) => ({
           ...account,
-          enabled: true,
         })),
       })),
     },
@@ -72,7 +71,8 @@ export function SelectAccountForm({
         onSubmit={form.handleSubmit(execute)}
         className="flex max-w-full flex-col gap-4"
       >
-        {connections.map(({ connection, accounts }, index) => (
+        {JSON.stringify(form.formState.errors, null, 2)}
+        {connections.map(({ bankAccount: accounts, ...connection }, index) => (
           <div key={index} className="flex w-full flex-col gap-2">
             <div className="flex items-center gap-2">
               {connection.provider === Provider.NONE ? (
@@ -90,29 +90,16 @@ export function SelectAccountForm({
                 {accounts.length + " conto"}
               </span>
             </div>
-            <ul className="w-full space-y-1">
+            <ul className="mb-2 w-full space-y-2">
               {accounts.map((account, accountIndex) => (
                 <li
                   key={account.accountId}
-                  className="relative flex items-center justify-between gap-3 font-normal"
+                  className="relative flex items-center justify-between gap-4 font-normal"
                 >
-                  <FormField
-                    control={form.control}
-                    name={`connections.${index}.accounts.${accountIndex}.name`}
-                    render={({ field }) => (
-                      <Input {...field} className="w-full" />
-                    )}
-                  />
-                  <span className="text- absolute right-28 font-normal text-muted-foreground">
+                  <span className="flex-1 text-left">{account.name}</span>
+                  <span className="text-sm font-normal text-muted-foreground">
                     {euroFormat(account.balance ?? "0")}
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-[57px] h-[38px] rounded-sm text-muted-foreground"
-                  >
-                    <CircleX className="size-4" />
-                  </Button>
                   <FormField
                     control={form.control}
                     name={`connections.${index}.accounts.${accountIndex}.enabled`}
@@ -126,6 +113,7 @@ export function SelectAccountForm({
                 </li>
               ))}
             </ul>
+            {index !== connections.length - 1 && <Separator />}
           </div>
         ))}
       </form>

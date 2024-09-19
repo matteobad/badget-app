@@ -6,20 +6,10 @@ import { PencilRuler } from "lucide-react";
 import { useDebounce } from "use-debounce";
 
 import { Button } from "~/components/ui/button";
-import {
-  type getUncategorizedTransactions,
-  type getUserCategories,
-} from "~/server/db/queries/cached-queries";
 import { CategorizeTransactionForm } from "./_components/categorize-transaction-form";
 import { useSearchParams } from "./_hooks/use-search-params";
 
-export default function Rules({
-  categories,
-  transactions,
-}: {
-  categories: Awaited<ReturnType<typeof getUserCategories>>;
-  transactions: Awaited<ReturnType<typeof getUncategorizedTransactions>>;
-}) {
+export default function Rules() {
   const [isExecuting, setIsExecuting] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -88,8 +78,6 @@ export default function Rules({
           >
             <CategorizeTransactionForm
               formRef={formRef}
-              categories={categories}
-              transactions={transactions}
               setIsExecuting={setIsExecuting}
             />
           </motion.div>

@@ -92,6 +92,7 @@ export async function getUserBankConnectionsQuery(
         orderBy: desc(schema.bankAccounts.balance),
       },
     },
+    orderBy: asc(schema.bankConnections.provider),
   });
 
   return data;

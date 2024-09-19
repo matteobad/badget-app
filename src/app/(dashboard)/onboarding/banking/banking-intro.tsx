@@ -15,12 +15,12 @@ export default function BankingIntro() {
 
   return (
     <motion.div
-      className="flex w-full flex-1 flex-col items-center justify-center gap-10 px-3"
+      className="flex w-full max-w-md flex-1 flex-col items-center justify-center gap-10 px-3"
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3, type: "spring" }}
     >
       <motion.div
-        className="flex max-w-[-webkit-fill-available] flex-1 flex-col items-center justify-center space-y-8 text-center sm:flex-grow-0"
+        className="flex w-full flex-1 flex-col items-center justify-center space-y-8 text-center sm:flex-grow-0"
         variants={{
           hidden: { opacity: 0, y: 50 },
           visible: {
@@ -59,7 +59,7 @@ export default function BankingIntro() {
         </motion.p>
       </motion.div>
       <motion.div
-        className="flex w-full justify-center gap-4"
+        className="flex w-full items-center justify-between gap-4"
         variants={{
           hidden: { opacity: 0, y: 50 },
           visible: { opacity: 1, y: 0 },

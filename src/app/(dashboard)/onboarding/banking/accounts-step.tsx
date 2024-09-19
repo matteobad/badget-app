@@ -6,16 +6,12 @@ import { ArrowLeft, Layers } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import { type getPendingBankConnections } from "~/lib/data";
-import { type getFilteredInstitutions } from "~/server/db/queries/cached-queries";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import { CreateAccountDialog } from "./_components/create-account-dialog";
 import { SelectAccountForm } from "./_components/select-account-form";
 import { useSearchParams } from "./_hooks/use-search-params";
 
-export default function AccountsStep(props: {
-  institutions: Awaited<ReturnType<typeof getFilteredInstitutions>>;
-  connections: Awaited<ReturnType<typeof getPendingBankConnections>>;
-}) {
+export default function AccountsStep() {
   const [isExecuting, setIsExecuting] = useState(false);
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -24,12 +20,12 @@ export default function AccountsStep(props: {
 
   return (
     <motion.div
-      className="flex w-full flex-1 flex-col items-center justify-center gap-10 px-3"
+      className="flex w-full max-w-md flex-1 flex-col items-center justify-center gap-10 px-3"
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3, type: "spring" }}
     >
       <motion.div
-        className="flex max-w-[-webkit-fill-available] flex-1 flex-col items-center justify-center space-y-8 text-center sm:flex-grow-0"
+        className="flex flex-1 flex-col items-center justify-center space-y-8 text-center sm:flex-grow-0"
         variants={{
           hidden: { opacity: 0, y: 50 },
           visible: {
@@ -77,23 +73,19 @@ export default function AccountsStep(props: {
         >
           <Card>
             <CardHeader className="items-center">
-              <CreateAccountDialog
-                connections={props.connections}
-                institutions={props.institutions}
-              />
+              <CreateAccountDialog />
             </CardHeader>
             <CardContent>
               <SelectAccountForm
                 formRef={formRef}
                 setIsExecuting={setIsExecuting}
-                connections={props.connections}
               />
             </CardContent>
           </Card>
         </motion.div>
       </motion.div>
       <motion.div
-        className="flex w-full justify-center gap-4"
+        className="flex w-full items-center justify-between gap-4"
         variants={{
           hidden: { opacity: 0, y: 50 },
           visible: { opacity: 1, y: 0 },

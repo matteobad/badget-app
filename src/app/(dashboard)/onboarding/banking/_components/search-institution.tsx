@@ -12,14 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { type getFilteredInstitutions } from "~/server/db/queries/cached-queries";
+import { useInstitutions } from "../_hooks/use-banking";
 import { useSearchParams } from "../_hooks/use-search-params";
 
-export default function SearchInstitution({
-  institutions,
-}: {
-  institutions: Awaited<ReturnType<typeof getFilteredInstitutions>>;
-}) {
+export default function SearchInstitution() {
+  const institutions = useInstitutions();
   const [, setParams] = useSearchParams();
 
   return (

@@ -173,7 +173,7 @@ export const transformAccount = ({
     accountId: id,
     type: BankAccountType.DEPOSITORY,
     name: transformAccountName({
-      name: account.name ?? "",
+      name: account.name ?? account.displayName ?? account.ownerName ?? "",
       product: account.product ?? "",
     }),
     currency: account.currency,

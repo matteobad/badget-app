@@ -2,13 +2,15 @@ import { getPendingBankConnections } from "~/lib/data";
 import {
   getFilteredInstitutions,
   getUncategorizedTransactions,
+  getUserBankConnections,
   getUserCategories,
 } from "~/server/db/queries/cached-queries";
 import { Onboarding } from "../_components/multi-step-form";
+import { BankingProvider } from "./_hooks/use-banking";
 import { searchParamsCache } from "./_utils/search-params";
 import AccountsStep from "./accounts-step";
 import BankingIntro from "./banking-intro";
-import Categories from "./categories-step";
+import CategoriesStep from "./categories-step";
 import Done from "./done-step";
 import Rules from "./rules-step";
 
@@ -19,22 +21,27 @@ export async function BankingOnboarding() {
   const provider = searchParamsCache.get("provider");
   const ref = searchParamsCache.get("ref");
 
-  const institutions = await getFilteredInstitutions({ country, q });
-  const connections = await getPendingBankConnections({ provider, ref });
-  const categories = await getUserCategories({});
-  const transactions = await getUncategorizedTransactions({});
+  const institutionsPromise = getFilteredInstitutions({ country, q });
+  const connectionsPromise = getUserBankConnections();
+  const pendingConnectionPromise = getPendingBankConnections({ provider, ref });
+  const transactionsPromise = getUncategorizedTransactions({});
+  const categoriesPromise = getUserCategories({});
 
   return (
-    <Onboarding>
-      {step === "banking" && <BankingIntro />}
-      {step === "banking-accounts" && (
-        <AccountsStep connections={connections} institutions={institutions} />
-      )}
-      {step === "banking-categories" && <Categories />}
-      {step === "banking-rules" && (
-        <Rules categories={categories} transactions={transactions} />
-      )}
-      {step === "banking-done" && <Done />}
-    </Onboarding>
+    <BankingProvider
+      institutionsPromise={institutionsPromise}
+      connectionsPromise={connectionsPromise}
+      pendingConnectionsPromise={pendingConnectionPromise}
+      transactionsPromise={transactionsPromise}
+      categoriesPromise={categoriesPromise}
+    >
+      <Onboarding>
+        {step === "banking" && <BankingIntro />}
+        {step === "banking-accounts" && <AccountsStep />}
+        {step === "banking-categories" && <CategoriesStep />}
+        {step === "banking-rules" && <Rules />}
+        {step === "banking-done" && <Done />}
+      </Onboarding>
+    </BankingProvider>
   );
 }

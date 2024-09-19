@@ -148,7 +148,7 @@ const DEFAULT_CATEGORIES = [
   },
 ] as const satisfies UpsertCategoryBulkType;
 
-export default function Categories() {
+export default function CategoriesStep() {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [categoryOptions, setCategoryOptions] = useState<
