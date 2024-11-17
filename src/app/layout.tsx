@@ -24,7 +24,11 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider afterSignOutUrl={"/sign-in"}>
-      <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <html
+        lang="en"
+        className={`${GeistSans.variable} ${GeistMono.variable}`}
+        suppressHydrationWarning
+      >
         <body>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <NuqsAdapter>{children}</NuqsAdapter>

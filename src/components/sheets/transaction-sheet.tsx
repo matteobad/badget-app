@@ -1,7 +1,7 @@
 "use client";
 
-import type { Transaction } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
-import { type Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
+import type { Transaction } from "~/app/old/banking/transactions/_components/transactions-table";
+import { type Category } from "~/app/old/banking/transactions/_components/transactions-table";
 import { useMediaQuery } from "~/hooks/use-media-query";
 import { TransactionDetails } from "../transaction-details";
 import { Drawer, DrawerContent } from "../ui/drawer";

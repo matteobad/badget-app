@@ -3,7 +3,7 @@
 import {
   type Category,
   type Transaction,
-} from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
+} from "~/app/old/banking/transactions/_components/transactions-table";
 import { euroFormat } from "~/lib/utils";
 import { EditTransactionCategoryForm } from "./forms/edit-bank-transaction-form";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";

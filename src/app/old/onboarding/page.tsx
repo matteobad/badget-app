@@ -3,11 +3,9 @@ import { searchParamsCache } from "./banking/_utils/search-params";
 import Features from "./features";
 import Intro from "./intro";
 
-export default async function OnboardingPage(
-  props: {
-    searchParams: Promise<Record<string, string | string[] | undefined>>;
-  }
-) {
+export default async function OnboardingPage(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const searchParams = await props.searchParams;
   // ⚠️ Don't forget to call `parse` here.
   // You can access type-safe values from the returned object:

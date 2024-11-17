@@ -12,7 +12,7 @@ import { parseAsString, useQueryState } from "nuqs";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { type Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
+import { type Category } from "~/app/old/banking/transactions/_components/transactions-table";
 import { cn } from "~/lib/utils";
 import { upsertCategorySchema } from "~/lib/validators";
 import { insertCategoryAction } from "~/server/actions/insert-category-action";

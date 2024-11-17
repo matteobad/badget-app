@@ -5,48 +5,35 @@ import {
   createRouteMatcher,
 } from "@clerk/nextjs/server";
 
+const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
 const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
   const client = await clerkClient();
+  const { userId, sessionClaims, redirectToSignIn } = await auth();
+
+  // For users visiting /onboarding, don't try to redirect
+  if (userId && isOnboardingRoute(request)) {
+    return NextResponse.next();
+  }
+
+  // If the user isn't signed in and the route is private, redirect to sign-in
+  if (!userId && !isPublicRoute(request))
+    return redirectToSignIn({ returnBackUrl: request.url });
+
+  // Catch users who do not have `onboardingComplete: true` in their publicMetadata
+  // Redirect them to the /onboading route to complete onboarding
+  if (userId && !sessionClaims?.metadata?.onboardingComplete) {
+    const onboardingUrl = new URL("/onboarding", request.url);
+    return NextResponse.redirect(onboardingUrl);
+  }
 
   if (!isPublicRoute(request)) {
     await auth.protect();
   }
 
-  const { userId } = await auth();
-
-  if (userId) {
-    // get user private metadata
-    const user = await client.users.getUser(userId);
-    const privateMetadata = user.privateMetadata as {
-      bankingCompleted: boolean;
-      savingsCompleted: boolean;
-      pensionCompleted: boolean;
-    };
-
-    // Use default false values if metadata is not yet set
-    const bankingCompleted = privateMetadata.bankingCompleted || false;
-    const savingsCompleted = privateMetadata.savingsCompleted || false;
-    const pensionCompleted = privateMetadata.pensionCompleted || false;
-
-    // redirect to onboarding if not completed
-    if (request.nextUrl.pathname.startsWith("/banking") && !bankingCompleted) {
-      return NextResponse.redirect(
-        new URL("/onboarding?step=banking", request.url),
-      );
-    }
-    if (request.nextUrl.pathname.startsWith("/savings") && !savingsCompleted) {
-      return NextResponse.redirect(
-        new URL("/onboarding?step=savings", request.url),
-      );
-    }
-    if (request.nextUrl.pathname.startsWith("/pension") && !pensionCompleted) {
-      return NextResponse.redirect(
-        new URL("/onboarding?step=pension", request.url),
-      );
-    }
-  }
+  // If the user is logged in and the route is protected, let them view.
+  if (userId && !isPublicRoute(request)) return NextResponse.next();
 });
 
 export const config = {

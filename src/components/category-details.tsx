@@ -2,7 +2,7 @@
 
 import dynamicIconImports from "lucide-react/dynamicIconImports";
 
-import { Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
+import { Category } from "~/app/old/banking/transactions/_components/transactions-table";
 import { euroFormat } from "~/lib/utils";
 import { DeleteCategoryForm } from "./forms/delete-category-form";
 import { EditCategoryBudgetForm } from "./forms/edit-category-budget-form";

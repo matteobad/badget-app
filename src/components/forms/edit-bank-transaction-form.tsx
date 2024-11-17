@@ -12,7 +12,7 @@ import { type z } from "zod";
 import {
   type Category,
   type Transaction,
-} from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
+} from "~/app/old/banking/transactions/_components/transactions-table";
 import { cn } from "~/lib/utils";
 import { updateBankTransactionSchema } from "~/lib/validators";
 import { updateBankTransactionAction } from "~/server/actions/bank-transaction-action";

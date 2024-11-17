@@ -18,11 +18,9 @@ async function findAllWorkRecord() {
     .where(eq(schema.works.userId, session.userId));
 }
 
-export default async function WorkAccountPage(
-  props: {
-    searchParams: Promise<Record<string, string | string[]>>;
-  }
-) {
+export default async function WorkAccountPage(props: {
+  searchParams: Promise<Record<string, string | string[]>>;
+}) {
   const searchParams = await props.searchParams;
   const workRecords = await findAllWorkRecord();
   const { action } = searchParams;

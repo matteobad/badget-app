@@ -1,6 +1,6 @@
 "use client";
 
-import { Account } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
+import { Account } from "~/app/old/banking/transactions/_components/transactions-table";
 import {
   Carousel,
   CarouselContent,

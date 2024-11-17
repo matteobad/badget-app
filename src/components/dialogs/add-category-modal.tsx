@@ -2,7 +2,7 @@
 
 import { parseAsString, useQueryState } from "nuqs";
 
-import { Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
+import { Category } from "~/app/old/banking/transactions/_components/transactions-table";
 import { AddCategoryForm } from "../forms/add-category-form";
 import {
   Dialog,

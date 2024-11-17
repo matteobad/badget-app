@@ -9,7 +9,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { Category } from "~/app/(dashboard)/banking/transactions/_components/transactions-table";
+import { Category } from "~/app/old/banking/transactions/_components/transactions-table";
 import { cn } from "~/lib/utils";
 import { updateCategorySchema } from "~/lib/validators";
 import { editCategoryAction } from "~/server/actions/insert-category-action";

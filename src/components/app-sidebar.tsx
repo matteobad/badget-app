@@ -1,143 +1,142 @@
 "use client";
 
+import * as React from "react";
+import { useOrganization, useOrganizationList, useUser } from "@clerk/nextjs";
 import {
-  Atom,
+  AudioWaveform,
   Banknote,
   CandlestickChart,
-  Cross,
-  Eclipse,
-  LayoutDashboard,
-  Link,
+  Command,
+  GalleryVerticalEnd,
+  LifeBuoy,
+  Link2,
+  ListTodo,
   PiggyBank,
-  Rabbit,
-  Receipt,
   Send,
+  Settings,
   Shapes,
   Sprout,
-  User,
 } from "lucide-react";
 
 import { NavMain } from "~/components/nav-main";
-import { NavProjects } from "~/components/nav-projects";
 import { NavSecondary } from "~/components/nav-secondary";
 import { NavUser } from "~/components/nav-user";
-import { TeamSwitcher } from "~/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarItem,
-  SidebarLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "~/components/ui/sidebar";
+import { NavSettings } from "./nav-settings";
+import { TeamSwitcher } from "./team-switcher";
 
 const data = {
+  user: {
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
+  },
   teams: [
     {
       name: "Acme Inc",
-      logo: Atom,
+      logo: GalleryVerticalEnd,
       plan: "Enterprise",
     },
     {
       name: "Acme Corp.",
-      logo: Eclipse,
+      logo: AudioWaveform,
       plan: "Startup",
     },
     {
       name: "Evil Corp.",
-      logo: Rabbit,
+      logo: Command,
       plan: "Free",
-    },
-  ],
-  navLead: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboard,
-      isActive: true,
-      enabled: true,
     },
   ],
   navMain: [
     {
       title: "Liquidità",
-      url: "#",
+      url: "/banking",
       icon: Banknote,
       isActive: true,
-      enabled: true,
       items: [
         {
           title: "Transazioni",
           url: "/banking/transactions",
-          icon: Receipt,
-          description: "Vedi le tue transazioni",
+        },
+        {
+          title: "Passività",
+          url: "/banking/liabilities",
         },
       ],
     },
     {
       title: "Risparmi",
-      url: "#",
+      url: "/saving",
       icon: PiggyBank,
-      enabled: false,
       items: [
         {
           title: "Obiettivi",
-          url: "#",
-          icon: PiggyBank,
-          description: "Obiettivi di risparmio",
+          url: "/saving/goals",
         },
         {
-          title: "Fondo di emergenza",
-          url: "#",
-          icon: Cross,
-          description: "Performance and speed for efficiency.",
+          title: "Fondo emergenza",
+          url: "/saving/emergency",
         },
       ],
     },
     {
       title: "Pensione",
-      url: "#",
+      url: "/pension",
       icon: Sprout,
-      enabled: false,
-    },
-    {
-      title: "Investimenti",
-      url: "#",
-      icon: CandlestickChart,
-      enabled: false,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "Sociale (INPS)",
+          url: "/pension/inps",
         },
         {
-          title: "Get Started",
-          url: "#",
+          title: "Complementare (fondi)",
+          url: "/pension/simulations",
         },
         {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
+          title: "Simulatore",
+          url: "/pension/simulations",
         },
       ],
     },
-    // {
-    //   title: "Assets",
-    //   url: "#",
-    //   icon: Building2,
-    //   enabled: false,
-    // },
-    // {
-    //   title: "Liabilities",
-    //   url: "#",
-    //   icon: CreditCard,
-    //   enabled: false,
-    // },
+    {
+      title: "Investimenti",
+      url: "/investments",
+      icon: CandlestickChart,
+      items: [
+        {
+          title: "Azioni",
+          url: "/investments/stocks",
+        },
+        {
+          title: "Obbligazioni",
+          url: "/investments/bonds",
+        },
+        {
+          title: "Fondi",
+          url: "/investments/funds",
+        },
+        {
+          title: "Crypto",
+          url: "/investments/cryptos",
+        },
+      ],
+    },
   ],
   navSecondary: [
+    {
+      title: "Support",
+      url: "#",
+      icon: LifeBuoy,
+    },
     {
       title: "Feedback",
       url: "#",
@@ -146,50 +145,38 @@ const data = {
   ],
   settings: [
     {
-      name: "Profilo",
-      url: "/settings/profile",
-      icon: User,
-    },
-    {
-      name: "Collegamenti",
+      name: "Conti collegati",
       url: "/settings/accounts",
-      icon: Link,
+      icon: Link2,
     },
     {
       name: "Categorie",
       url: "/settings/categories",
       icon: Shapes,
     },
+    {
+      name: "Budgets",
+      url: "/settings/budgets",
+      icon: ListTodo,
+    },
+    {
+      name: "Preferenze",
+      url: "/settings",
+      icon: Settings,
+    },
   ],
 };
 
-export async function AppSidebar({
-  notificationCard,
-}: {
-  notificationCard: React.ReactNode;
-}) {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar>
+    <Sidebar variant="inset" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarItem>
-          <NavMain items={data.navLead} />
-        </SidebarItem>
-        <SidebarItem>
-          <SidebarLabel>Pilastri</SidebarLabel>
-          <NavMain items={data.navMain} />
-        </SidebarItem>
-        <SidebarItem>
-          <SidebarLabel>Impostazioni</SidebarLabel>
-          <NavProjects settings={data.settings} />
-        </SidebarItem>
-        <SidebarItem className="mt-auto">
-          <SidebarLabel>Help</SidebarLabel>
-          <NavSecondary items={data.navSecondary} />
-        </SidebarItem>
-        <SidebarItem>{notificationCard}</SidebarItem>
+        <NavMain items={data.navMain} />
+        <NavSettings settings={data.settings} />
+        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
