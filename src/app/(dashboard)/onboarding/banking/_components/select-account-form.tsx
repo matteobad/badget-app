@@ -23,7 +23,7 @@ export function SelectAccountForm({
   formRef,
   setIsExecuting,
 }: {
-  formRef: React.RefObject<HTMLFormElement>;
+  formRef: React.RefObject<HTMLFormElement | null>;
   setIsExecuting: (isExecuting: boolean) => void;
 }) {
   const connections = useConnections();

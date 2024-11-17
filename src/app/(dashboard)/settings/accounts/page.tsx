@@ -12,17 +12,18 @@ import { MultiStepFormWrapper } from "./_components/steps/multi-step-form-wrappe
 import { SuccessStep } from "./_components/steps/success/success-step";
 import { TaggingStep } from "./_components/steps/tagging/tagging-step";
 
-export default async function AccountsPage({
-  searchParams,
-}: {
-  searchParams: {
-    step: string;
-    country: string;
-    q: string;
-    provider: Provider;
-    ref: string;
-  };
-}) {
+export default async function AccountsPage(
+  props: {
+    searchParams: Promise<{
+      step: string;
+      country: string;
+      q: string;
+      provider: Provider;
+      ref: string;
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const { step, country, q, provider, ref } = searchParams;
 
   return (

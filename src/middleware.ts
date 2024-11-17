@@ -8,14 +8,18 @@ import {
 const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
+  const client = await clerkClient();
+
   if (!isPublicRoute(request)) {
-    auth().protect();
+    await auth.protect();
   }
 
-  if (auth().userId) {
+  const { userId } = await auth();
+
+  if (userId) {
     // get user private metadata
-    const user = await clerkClient().users.getUser(auth().userId!);
-    const privateMetadata = user?.privateMetadata as {
+    const user = await client.users.getUser(userId);
+    const privateMetadata = user.privateMetadata as {
       bankingCompleted: boolean;
       savingsCompleted: boolean;
       pensionCompleted: boolean;

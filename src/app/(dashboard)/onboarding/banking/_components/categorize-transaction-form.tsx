@@ -34,7 +34,7 @@ export function CategorizeTransactionForm({
   formRef,
   setIsExecuting,
 }: {
-  formRef: React.RefObject<HTMLFormElement>;
+  formRef: React.RefObject<HTMLFormElement | null>;
   setIsExecuting: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const transactions = useTransactions();

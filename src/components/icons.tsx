@@ -5,6 +5,8 @@ import dynamicIconImports from "lucide-react/dynamicIconImports";
 import { cn } from "~/lib/utils";
 import { Skeleton } from "./ui/skeleton";
 
+import type { JSX } from "react";
+
 export type Icon = (props: LucideProps) => JSX.Element;
 
 export const System: Icon = (props) => (

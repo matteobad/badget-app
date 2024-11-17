@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { Toaster } from "~/components/ui/sonner";
 import { TailwindIndicator } from "../components/tailwind-indicator";
@@ -26,7 +27,7 @@ export default function RootLayout({
       <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <body>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
+            <NuqsAdapter>{children}</NuqsAdapter>
             <TailwindIndicator />
           </ThemeProvider>
           <Toaster />

@@ -18,7 +18,7 @@ import {
 } from "~/server/providers/gocardless/transform";
 
 export async function GET(_req: Request) {
-  const headersList = headers();
+  const headersList = await headers();
   const authorization = headersList.get("Authorization");
 
   // if (authorization !== `Bearer ${env.CRON_SECRET}`) {

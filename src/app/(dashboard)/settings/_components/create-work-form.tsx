@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useActionState } from "react";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useFormState } from "react-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
@@ -36,7 +35,7 @@ import { ContractType } from "~/server/db/schema/working-records";
 export function CreateWorkForm() {
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [state, formAction] = useFormState(createWorkAction, {
+  const [state, formAction] = useActionState(createWorkAction, {
     message: "",
   });
 

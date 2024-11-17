@@ -7,11 +7,12 @@ import { transactionsSearchParamsSchema } from "~/lib/validators";
 import { TransactionsTableLoading } from "./_components/transactions-table.loading";
 import { TransactionsTableServer } from "./_components/transactions-table.server";
 
-export default async function TransactionsPage({
-  searchParams,
-}: {
-  searchParams: z.infer<typeof transactionsSearchParamsSchema>;
-}) {
+export default async function TransactionsPage(
+  props: {
+    searchParams: Promise<z.infer<typeof transactionsSearchParamsSchema>>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const search = transactionsSearchParamsSchema.parse(searchParams);
 
   return (

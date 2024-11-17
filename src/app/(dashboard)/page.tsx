@@ -6,14 +6,13 @@ import { ErrorFallback } from "~/components/error-fallback";
 import { ExpensesChartServer } from "./_components/expenses-chart.server";
 import { dashboardSearchParamsCache } from "./_utils/dashboard-search-params";
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: {
+export default async function DashboardPage(props: {
+  searchParams: Promise<{
     from?: string;
     to?: string;
-  };
+  }>;
 }) {
+  const searchParams = await props.searchParams;
   // ⚠️ Don't forget to call `parse` here.
   // You can access type-safe values from the returned object:
   const params = dashboardSearchParamsCache.parse(searchParams);

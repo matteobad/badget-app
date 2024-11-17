@@ -39,19 +39,15 @@ export default async function Layout(props: { children: React.ReactNode }) {
   //   },
   // );
 
-  const AddCategoryModal = dynamic(
-    () =>
-      import("~/components/dialogs/add-category-modal").then(
-        (mod) => mod.AddCategoryModal,
-      ),
-    {
-      ssr: false,
-    },
+  const AddCategoryModal = dynamic(() =>
+    import("~/components/dialogs/add-category-modal").then(
+      (mod) => mod.AddCategoryModal,
+    ),
   );
 
   return (
     <SidebarLayout
-      defaultOpen={cookies().get("sidebar:state")?.value === "true"}
+      defaultOpen={(await cookies()).get("sidebar:state")?.value === "true"}
     >
       <AppSidebar notificationCard={<NotificationCard />} />
       <main className="flex flex-1 flex-col p-2 transition-all duration-300 ease-in-out">
@@ -60,7 +56,6 @@ export default async function Layout(props: { children: React.ReactNode }) {
           <SidebarTrigger />
         </div>
       </main>
-
       <AddCategoryModal categories={userCategories} />
     </SidebarLayout>
   );

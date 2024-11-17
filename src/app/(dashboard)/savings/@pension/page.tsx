@@ -14,10 +14,10 @@ import { CardContributions } from "./_components/contribution-list";
 import { CreateAccountServer } from "./_components/create-account.server";
 
 export default async function PensionPage(props: {
-  searchParams: Record<string, string | string[]>;
+  searchParams: Promise<Record<string, string | string[]>>;
 }) {
   const pensionAccounts = await getPensionAccountsByUserId();
-  const step = props.searchParams.step;
+  const step = (await props.searchParams).step;
 
   if (pensionAccounts.length === 0) {
     return (

@@ -1,4 +1,4 @@
-import { parseAsArrayOf, parseAsString, parseAsStringEnum } from "nuqs";
+import { parseAsArrayOf, parseAsString, parseAsStringEnum } from "nuqs/server";
 
 import { Provider } from "~/server/db/schema/enum";
 
