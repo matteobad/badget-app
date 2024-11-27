@@ -11,21 +11,21 @@ export function SyncActiveOrganization() {
   const { orgId } = useAuth();
 
   // Get the organization ID from the URL
-  const { orgId: urlOrgId } = useParams<{ orgId: string }>();
+  const { workspaceId: urlId } = useParams<{ workspaceId: string }>();
 
   useEffect(() => {
     if (!isLoaded) return;
 
     // If the org ID in the URL is not valid, redirect to the homepage
-    if (!urlOrgId?.startsWith("org_")) {
+    if (!urlId?.startsWith("org_")) {
       redirect("/");
     }
 
     // If the org ID in the URL is not the same as the org ID in the session (the active organization), set the active organization to be the org ID from the URL
-    if (urlOrgId && urlOrgId !== orgId) {
-      void setActive({ organization: urlOrgId });
+    if (urlId && urlId !== orgId) {
+      void setActive({ organization: urlId });
     }
-  }, [orgId, isLoaded, setActive, urlOrgId]);
+  }, [orgId, isLoaded, setActive, urlId]);
 
   return null;
 }

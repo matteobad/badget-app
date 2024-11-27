@@ -24,8 +24,8 @@ import { type updateBankTransactionSchema } from "~/lib/validators";
 import { buildConflictUpdateColumns } from "~/server/db/utils";
 import { getAccessValidForDays } from "~/server/providers/gocardless/utils";
 import { db, schema } from "..";
+import { bankAccounts, bankConnections } from "../schema/connections";
 import { ConnectionStatus, Provider } from "../schema/enum";
-import { bankAccounts, bankConnections } from "../schema/open-banking";
 
 // Bank Connection
 export async function upsertBankConnections(

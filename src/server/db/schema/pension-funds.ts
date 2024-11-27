@@ -1,4 +1,4 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
   date,
   decimal,
@@ -10,7 +10,8 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { createTable } from "./_table";
+import { timestamps } from "../utils";
+import { pgTable } from "./_table";
 
 export const PensionFundType = {
   FPN: "Fondo negoziale",
@@ -24,12 +25,8 @@ export const PensionFundType = {
 export type PensionFundType =
   (typeof PensionFundType)[keyof typeof PensionFundType];
 
-export const pensionFunds = createTable("pension_funds", {
+export const pensionFunds = pgTable("pension_funds", {
   id: serial("id").primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }),
 
   name: varchar("name", { length: 512 }).notNull(),
   type: text("type").$type<PensionFundType>().notNull(),
@@ -39,6 +36,8 @@ export const pensionFunds = createTable("pension_funds", {
   legalForm: varchar("legal_form", { length: 128 }),
   suvervisionedSince: date("suvervisioned_since", { mode: "string" }),
   iscLink: varchar("isc_link", { length: 2048 }),
+
+  ...timestamps,
 });
 
 export const pensionFundsRelations = relations(pensionFunds, ({ many }) => ({
@@ -55,12 +54,8 @@ export const BranchCategory = {
 export type BranchCategory =
   (typeof BranchCategory)[keyof typeof BranchCategory];
 
-export const investmentBranches = createTable("investment_branches", {
+export const investmentBranches = pgTable("investment_branches", {
   id: serial("id").primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }),
 
   // FK
   pensionFundId: integer("pension_fund_id"),
@@ -72,6 +67,8 @@ export const investmentBranches = createTable("investment_branches", {
   isc10: real("isc_10"),
   isc35: real("isc_35"),
   averageReturns: real("average_returns"),
+
+  ...timestamps,
 });
 
 export const investmentBranchesRelations = relations(
@@ -85,12 +82,8 @@ export const investmentBranchesRelations = relations(
   }),
 );
 
-export const investmentBranchesPerf = createTable("investment_branches_perf", {
+export const investmentBranchesPerf = pgTable("investment_branches_perf", {
   id: serial("id").primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }),
 
   // FK
   branchId: integer("investment_branch_id").notNull(),
@@ -101,6 +94,8 @@ export const investmentBranchesPerf = createTable("investment_branches_perf", {
   yield5: real("yield_5"),
   yield10: real("yield_10"),
   yield20: real("yield_20"),
+
+  ...timestamps,
 });
 
 export const investmentBranchesPerfRelations = relations(
@@ -114,12 +109,8 @@ export const investmentBranchesPerfRelations = relations(
 );
 
 // Domain data
-export const pensionAccounts = createTable("pension_accounts", {
+export const pensionAccounts = pgTable("pension_accounts", {
   id: serial("id").primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }),
 
   // FK
   pensionFundId: integer("pension_fund_id").notNull(),
@@ -130,6 +121,8 @@ export const pensionAccounts = createTable("pension_accounts", {
   baseTFRPercentage: real("base_tfr_percentage").default(0),
   baseEmployeePercentage: real("base_employee_percentage").default(0),
   baseEmployerPercentage: real("base_employer_percentage").default(0),
+
+  ...timestamps,
 });
 
 export const pensionAccountsRelations = relations(
@@ -152,12 +145,8 @@ export const ContributionContributor = {
 export type ContributionContributor =
   (typeof ContributionContributor)[keyof typeof ContributionContributor];
 
-export const pensionContributions = createTable("pension_contributions", {
+export const pensionContributions = pgTable("pension_contributions", {
   id: serial("id").primaryKey(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }),
 
   // FK
   pensionAccountId: integer("pension_account_id").notNull(),
@@ -166,6 +155,8 @@ export const pensionContributions = createTable("pension_contributions", {
   contributor: text("contributor").$type<ContributionContributor>(),
   date: timestamp("date", { withTimezone: true }),
   consolidatedAt: timestamp("consolidated_at", { withTimezone: true }),
+
+  ...timestamps,
 });
 
 export const pensionContributionsRelations = relations(

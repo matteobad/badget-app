@@ -30,12 +30,12 @@ import {
 import { getAccounts } from "~/server/actions/institutions/get-accounts";
 import { db, schema } from "..";
 import { category, categoryBudgets } from "../schema/categories";
-import { CategoryType } from "../schema/enum";
 import {
   bankAccounts,
   bankConnections,
   bankTransactions,
-} from "../schema/open-banking";
+} from "../schema/connections";
+import { CategoryType } from "../schema/enum";
 import { type DrizzleWhere } from "../utils";
 
 export async function getFilteredInstitutionsQuery({

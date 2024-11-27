@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { useOrganization, useOrganizationList, useUser } from "@clerk/nextjs";
+import Link from "next/link";
 import {
   AudioWaveform,
-  Banknote,
   CandlestickChart,
   Command,
   GalleryVerticalEnd,
+  Layers,
+  LayoutDashboard,
   LifeBuoy,
   Link2,
   ListTodo,
@@ -25,6 +26,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -60,7 +62,7 @@ const data = {
     {
       title: "Liquidità",
       url: "/banking",
-      icon: Banknote,
+      icon: Layers,
       isActive: true,
       items: [
         {

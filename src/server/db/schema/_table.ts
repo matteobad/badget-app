@@ -6,4 +6,4 @@ import { pgTableCreator } from "drizzle-orm/pg-core";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = pgTableCreator((name) => `badget-app_${name}`);
+export const pgTable = pgTableCreator((name) => `badget_${name}`);

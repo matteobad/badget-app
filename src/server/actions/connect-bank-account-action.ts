@@ -9,8 +9,8 @@ import {
   upsertBankConnectionBulkSchema,
 } from "~/lib/validators";
 import { upsertBankConnections, upsertTransactions } from "../db/mutations";
+import { type bankTransactions } from "../db/schema/connections";
 import { ConnectionStatus, Provider } from "../db/schema/enum";
-import { type bankTransactions } from "../db/schema/open-banking";
 import {
   transformAccount,
   transformTransaction,

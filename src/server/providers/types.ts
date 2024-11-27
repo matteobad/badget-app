@@ -1,10 +1,10 @@
 import { type VercelKV } from "@vercel/kv";
 
-import { type Provider } from "../db/schema/enum";
 import {
   type bankAccounts,
   type bankTransactions,
-} from "../db/schema/open-banking";
+} from "../db/schema/connections";
+import { type Provider } from "../db/schema/enum";
 
 export type ProviderParams = {
   provider: Provider;
