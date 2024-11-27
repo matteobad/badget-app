@@ -9,12 +9,16 @@ const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
 const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
+  // Add a new header x-current-path which passes the path to downstream components
+  const headers = new Headers(request.headers);
+  headers.set("x-current-path", request.nextUrl.pathname);
+
   const client = await clerkClient();
   const { userId, sessionClaims, redirectToSignIn } = await auth();
 
   // For users visiting /onboarding, don't try to redirect
   if (userId && isOnboardingRoute(request)) {
-    return NextResponse.next();
+    return NextResponse.next({ headers });
   }
 
   // If the user isn't signed in and the route is private, redirect to sign-in
@@ -23,17 +27,17 @@ export default clerkMiddleware(async (auth, request) => {
 
   // Catch users who do not have `onboardingComplete: true` in their publicMetadata
   // Redirect them to the /onboading route to complete onboarding
-  if (userId && !sessionClaims?.metadata?.onboardingComplete) {
-    const onboardingUrl = new URL("/onboarding", request.url);
-    return NextResponse.redirect(onboardingUrl);
-  }
+  // if (userId && !sessionClaims?.metadata?.onboardingComplete) {
+  //   const onboardingUrl = new URL("/onboarding", request.url);
+  //   return NextResponse.redirect(onboardingUrl);
+  // }
 
   if (!isPublicRoute(request)) {
     await auth.protect();
   }
 
   // If the user is logged in and the route is protected, let them view.
-  if (userId && !isPublicRoute(request)) return NextResponse.next();
+  if (userId && !isPublicRoute(request)) return NextResponse.next({ headers });
 });
 
 export const config = {

@@ -4,16 +4,16 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": "20.16.0"
+    "node": "20.18.0"
   },
-  "packageManager": "pnpm@9.7.1",
+  "packageManager": "pnpm@9.12.2",
   "scripts": {
     "build": "next build",
     "clean": "git clean -xdf node_modules .next",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "dotenv -e ./.env -- tsx src/server/db/seed.ts",
-    "ui-add": "pnpm dlx shadcn-ui add && prettier src --write --list-different",
+    "ui-add": "pnpm dlx shadcn add && prettier src --write --list-different",
     "dev": "next dev --turbopack",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
@@ -62,7 +62,7 @@
     "drizzle-orm": "^0.36.3",
     "drizzle-zod": "^0.5.1",
     "embla-carousel-react": "^8.3.1",
-    "framer-motion": "^11.11.17",
+    "framer-motion": "12.0.0-alpha.1",
     "geist": "^1.3.1",
     "lucide-react": "^0.460.0",
     "next": "15.0.3",
@@ -113,7 +113,8 @@
   "pnpm": {
     "overrides": {
       "@types/react": "npm:types-react@19.0.0-rc.1",
-      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
+      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+      "react-is": "^19.0.0-rc-69d4b800-20241021"
     }
   }
 }
