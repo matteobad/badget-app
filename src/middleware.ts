@@ -1,24 +1,26 @@
 import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { createI18nMiddleware } from "next-international/middleware";
+
+const I18nMiddleware = createI18nMiddleware({
+  locales: ["en", "it"],
+  defaultLocale: "it",
+  urlMappingStrategy: "rewriteDefault",
+});
 
 const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
 const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
-  const url = new URL(request.nextUrl.origin);
-  const pathname = request.nextUrl.pathname;
-
-  const { orgId, userId } = await auth();
-
   // If the user isn't signed in and the route is private, redirect to sign-in
   if (!isPublicRoute(request)) {
-    console.log("protect");
     await auth.protect();
   }
 
+  const { userId } = await auth();
+
   // For users visiting /onboarding, don't try to redirect
   if (userId && isOnboardingRoute(request)) {
-    console.log("logged and onboarding");
     return NextResponse.next();
   }
 
@@ -29,14 +31,9 @@ export default clerkMiddleware(async (auth, request) => {
   //   return NextResponse.redirect(onboardingUrl);
   // }
 
-  return NextResponse.next();
+  return I18nMiddleware(request);
 });
 
 export const config = {
-  matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
-    "/(api|trpc)(.*)",
-  ],
+  matcher: ["/((?!api|static|.*\\..*|_next|favicon.ico|robots.txt).*)"],
 };
