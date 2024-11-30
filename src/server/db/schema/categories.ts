@@ -10,10 +10,10 @@ import {
 
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
-import { budgets } from "./budgets";
+import { budgetsToCategories } from "./budgets-to-categories";
 import { type CategoryType } from "./enum";
 import { rules } from "./rules";
-import { transactions } from "./transactions";
+import { transactionsToCategories } from "./transactions-to-categories";
 
 export const categories = pgTable(
   "categories",
@@ -40,7 +40,10 @@ export const categories = pgTable(
 );
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
-  transactions: many(transactions),
-  budgets: many(budgets),
+  transactions: many(transactionsToCategories),
+  budgets: many(budgetsToCategories),
   rules: many(rules),
 }));
+
+export type SelectCategory = typeof categories.$inferSelect;
+export type InsertCategory = typeof categories.$inferInsert;

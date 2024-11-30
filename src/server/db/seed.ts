@@ -1,7 +1,8 @@
-import { seed } from "drizzle-seed";
+import "dotenv/config";
 
-import { db } from ".";
-import { accounts } from "./schema/accounts";
+import { reset, seed } from "drizzle-seed";
+
+import { db, schema } from ".";
 
 // import { DEFAULT_CATEGORIES } from "./data/categories";
 
@@ -59,8 +60,11 @@ import { accounts } from "./schema/accounts";
 // }
 
 async function main() {
-  //await reset(db, schema);
-  await seed(db, { accounts });
+  await reset(db, schema);
+  await seed(db, schema).refine((f) => ({
+    institutions: { count: 1000 },
+    connections: { count: 10 },
+  }));
 }
 
 await main();

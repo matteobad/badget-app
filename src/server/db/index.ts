@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { neon, neonConfig } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import ws from "ws";
@@ -5,6 +7,7 @@ import ws from "ws";
 import { env } from "~/env";
 import * as accounts from "./schema/accounts";
 import * as budgets from "./schema/budgets";
+import * as budgetsToCategories from "./schema/budgets-to-categories";
 import * as categories from "./schema/categories";
 import * as connections from "./schema/connections";
 import * as institutions from "./schema/institutions";
@@ -34,6 +37,7 @@ if (env.NODE_ENV === "development") {
 export const schema = {
   ...accounts,
   ...budgets,
+  ...budgetsToCategories,
   ...categories,
   ...connections,
   ...institutions,
@@ -44,4 +48,9 @@ export const schema = {
 };
 
 export const sql = neon(connectionString);
-export const db = drizzle({ client: sql, schema, casing: "snake_case" });
+export const db = drizzle({
+  client: sql,
+  schema,
+  logger: env.NODE_ENV !== "production",
+  casing: "snake_case",
+});

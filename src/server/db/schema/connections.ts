@@ -14,10 +14,10 @@ export const connections = pgTable(
     id: serial().primaryKey(),
 
     // FK
+    userId: varchar({ length: 32 }).notNull(),
     institutionId: varchar()
       .notNull()
       .references(() => institutions.id),
-    userId: varchar({ length: 32 }).notNull(),
 
     referenceId: varchar(),
     name: varchar({ length: 128 }).notNull(),
@@ -34,12 +34,12 @@ export const connections = pgTable(
 );
 
 export const connectionsRelations = relations(connections, ({ many, one }) => ({
-  bankAccount: many(accounts),
+  account: many(accounts),
   institution: one(institutions, {
     fields: [connections.institutionId],
     references: [institutions.id],
   }),
 }));
 
-type SelectConnection = typeof connections.$inferSelect;
-type InsertConnection = typeof connections.$inferInsert;
+export type SelectConnection = typeof connections.$inferSelect;
+export type InsertConnection = typeof connections.$inferInsert;

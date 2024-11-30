@@ -1,14 +1,9 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import {
-  AudioWaveform,
   CandlestickChart,
-  Command,
-  GalleryVerticalEnd,
   Layers,
-  LayoutDashboard,
   LifeBuoy,
   Link2,
   ListTodo,
@@ -26,38 +21,12 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from "~/components/ui/sidebar";
 import { NavSettings } from "./nav-settings";
 import { TeamSwitcher } from "./team-switcher";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
   navMain: [
     {
       title: "Liquidità",
@@ -65,6 +34,10 @@ const data = {
       icon: Layers,
       isActive: true,
       items: [
+        {
+          title: "Conti",
+          url: "/banking/accounts",
+        },
         {
           title: "Transazioni",
           url: "/banking/transactions",

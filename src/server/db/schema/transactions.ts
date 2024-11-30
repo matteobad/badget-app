@@ -6,7 +6,6 @@ import {
   serial,
   text,
   timestamp,
-  varchar,
 } from "drizzle-orm/pg-core";
 
 import { timestamps } from "../utils";
@@ -20,7 +19,6 @@ export const transactions = pgTable("transactions", {
   accountId: integer()
     .notNull()
     .references(() => accounts.id),
-  userId: varchar({ length: 32 }).notNull(),
 
   amount: numeric({ precision: 10, scale: 2 }).notNull(),
   currency: char({ length: 3 }).notNull(),
@@ -40,3 +38,6 @@ export const transactionsRelations = relations(
     transactionCategories: many(transactionsToCategories),
   }),
 );
+
+export type SelectTransaction = typeof transactions.$inferSelect;
+export type InsertTransaction = typeof transactions.$inferInsert;
