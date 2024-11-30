@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { createI18nMiddleware } from "next-international/middleware";
 
+import { defaultLocale, locales } from "./locales/config";
+
 const I18nMiddleware = createI18nMiddleware({
-  locales: ["en", "it"],
-  defaultLocale: "it",
+  locales: locales,
+  defaultLocale: defaultLocale,
   urlMappingStrategy: "rewriteDefault",
 });
 
