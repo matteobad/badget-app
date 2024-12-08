@@ -1,17 +1,6 @@
 import { Landmark } from "lucide-react";
 
-import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+import { ImportModal } from "../_components/import-modal";
 
 export function AccountsEmptyPlaceholder() {
   return (
@@ -23,28 +12,7 @@ export function AccountsEmptyPlaceholder() {
         <p className="mb-4 mt-2 text-sm text-muted-foreground">
           Non hai ancora creato e collegato alcun conto corrente.
         </p>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="relative">Aggiungi conto</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Podcast</DialogTitle>
-              <DialogDescription>
-                Copy and paste the podcast feed URL to import.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="url">Podcast URL</Label>
-                <Input id="url" placeholder="https://example.com/feed.xml" />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button>Import Podcast</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <ImportModal />
       </div>
     </div>
   );

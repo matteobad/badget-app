@@ -10,11 +10,15 @@ import * as budgets from "./schema/budgets";
 import * as budgetsToCategories from "./schema/budgets-to-categories";
 import * as categories from "./schema/categories";
 import * as connections from "./schema/connections";
+import * as groups from "./schema/groups";
 import * as institutions from "./schema/institutions";
 import * as rules from "./schema/rules";
 import * as tokens from "./schema/tokens";
 import * as transactions from "./schema/transactions";
 import * as transactionsToCategories from "./schema/transactions-to-categories";
+import * as users from "./schema/users";
+import * as usersToGroups from "./schema/users-to-groups";
+import * as workspaceToAccounts from "./schema/workspace-to-accounts";
 
 let connectionString = env.DATABASE_URL;
 
@@ -40,11 +44,15 @@ export const schema = {
   ...budgetsToCategories,
   ...categories,
   ...connections,
+  ...groups,
   ...institutions,
   ...rules,
   ...tokens,
   ...transactionsToCategories,
   ...transactions,
+  ...users,
+  ...usersToGroups,
+  ...workspaceToAccounts,
 };
 
 export const sql = neon(connectionString);

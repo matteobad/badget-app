@@ -21,6 +21,7 @@ import {
 } from "~/components/ui/sidebar";
 import { CreateTeamModal } from "./create-team-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Skeleton } from "./ui/skeleton";
 
 export function TeamSwitcher() {
   const { isMobile } = useSidebar();
@@ -37,7 +38,16 @@ export function TeamSwitcher() {
   const [isCreatingOrg, setIsCreatingOrg] = React.useState(false);
 
   if (!isLoaded) {
-    return <>Loading</>;
+    return (
+      <div className="flex h-12 w-full items-center gap-2 p-2">
+        <Skeleton className="rouded size-8" />
+        <div className="flex flex-grow flex-col gap-1">
+          <Skeleton className="rouded h-4 w-[80px]" />
+          <Skeleton className="rouded h-3 w-[50px]" />
+        </div>
+        <Skeleton className="rouded size-4" />
+      </div>
+    );
   }
 
   return (

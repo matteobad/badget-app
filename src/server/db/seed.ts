@@ -61,10 +61,9 @@ import { db, schema } from ".";
 
 async function main() {
   await reset(db, schema);
-  await seed(db, schema).refine((f) => ({
-    institutions: { count: 1000 },
-    connections: { count: 10 },
-  }));
+  await seed(db, schema, {
+    count: 10,
+  });
 }
 
 await main();

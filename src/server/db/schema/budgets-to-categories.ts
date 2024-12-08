@@ -9,7 +9,7 @@ import { categories } from "./categories";
 export const budgetsToCategories = pgTable(
   "budgets_to_categories",
   {
-    budgetsId: integer()
+    budgetId: integer()
       .notNull()
       .references(() => budgets.id),
     categoryId: integer()
@@ -18,14 +18,14 @@ export const budgetsToCategories = pgTable(
 
     ...timestamps,
   },
-  (t) => [primaryKey({ columns: [t.budgetsId, t.categoryId] })],
+  (t) => [primaryKey({ columns: [t.budgetId, t.categoryId] })],
 );
 
 export const budgetsToCategoriesRelations = relations(
   budgetsToCategories,
   ({ one }) => ({
     budget: one(budgets, {
-      fields: [budgetsToCategories.budgetsId],
+      fields: [budgetsToCategories.budgetId],
       references: [budgets.id],
     }),
     category: one(categories, {

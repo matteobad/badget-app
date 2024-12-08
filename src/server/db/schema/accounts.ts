@@ -6,6 +6,7 @@ import { pgTable } from "./_table";
 import { connections } from "./connections";
 import { institutions } from "./institutions";
 import { transactions } from "./transactions";
+import { workspaceToAccounts } from "./workspace-to-accounts";
 
 export const accounts = pgTable("accounts", {
   id: serial().primaryKey().notNull(),
@@ -27,6 +28,7 @@ export const accounts = pgTable("accounts", {
 
 export const accountsRelations = relations(accounts, ({ one, many }) => ({
   transactions: many(transactions),
+  workspaceToAccounts: many(workspaceToAccounts),
   institution: one(institutions, {
     fields: [accounts.institutionId],
     references: [institutions.id],

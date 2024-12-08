@@ -2,7 +2,7 @@ import { DynamicBreadcrumb } from "~/components/layouts/dynamic-breadcrumb";
 import { Separator } from "~/components/ui/separator";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { getAccountsForActiveWorkspace } from "~/server/db/queries/accounts-queries-cached";
-import { AccountsEmptyPlaceholder } from "./accounts-empty-placeholder";
+import { AccountsEmptyPlaceholder } from "./transactions-empty-placeholder";
 
 export default async function BankingAccountsPage() {
   const accounts = await getAccountsForActiveWorkspace();

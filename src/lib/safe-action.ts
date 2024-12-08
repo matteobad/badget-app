@@ -8,7 +8,7 @@ import { z } from "zod";
 // This is our base client.
 // Here we define a middleware that logs the result of the action execution.
 export const actionClient = createSafeActionClient({
-  handleReturnedServerError(e) {
+  handleServerError(e) {
     if (e instanceof Error) {
       return e.message;
     }
@@ -46,7 +46,7 @@ export const authActionClient = actionClient
     return result;
   })
   .use(async ({ next }) => {
-    const session = auth();
+    const session = await auth();
 
     // If the session is not valid, we throw an error and stop execution here.
     if (!session.userId) {

@@ -26,12 +26,24 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "~/components/ui/sidebar";
+import { Skeleton } from "./ui/skeleton";
 
 export function NavUser() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const { isMobile } = useSidebar();
 
-  if (!user) return;
+  if (!user || !isLoaded) {
+    return (
+      <div className="flex h-12 w-full items-center gap-2 p-2">
+        <Skeleton className="rouded size-8" />
+        <div className="flex flex-grow flex-col gap-1">
+          <Skeleton className="rouded h-4 w-[80px]" />
+          <Skeleton className="rouded h-3 w-[120px]" />
+        </div>
+        <Skeleton className="rouded size-4" />
+      </div>
+    );
+  }
 
   return (
     <SidebarMenu>
