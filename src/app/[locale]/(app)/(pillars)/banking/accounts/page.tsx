@@ -1,10 +1,24 @@
+import { type SearchParams } from "nuqs/server";
+
 import { DynamicBreadcrumb } from "~/components/layouts/dynamic-breadcrumb";
 import { Separator } from "~/components/ui/separator";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { getAccountsForActiveWorkspace } from "~/server/db/queries/accounts-queries-cached";
-import { AccountsEmptyPlaceholder } from "./accounts-empty-placeholder";
+import { AccountsEmptyPlaceholder } from "./_components/accounts-empty-placeholder";
+import { AddSelectorDialog } from "./_components/add-selector-dialog";
+import { accountsSearchParamsCache } from "./account-search-params";
 
-export default async function BankingAccountsPage() {
+type BankingAccountsPageProps = {
+  searchParams: Promise<SearchParams>; // Next.js 15+: async searchParams prop
+};
+
+export default async function BankingAccountsPage({
+  searchParams,
+}: BankingAccountsPageProps) {
+  // ⚠️ Don't forget to call `parse` here.
+  // You can access type-safe values from the returned object:
+  const { action } = await accountsSearchParamsCache.parse(searchParams);
+
   const accounts = await getAccountsForActiveWorkspace();
 
   return (
@@ -26,6 +40,9 @@ export default async function BankingAccountsPage() {
           })
         )}
       </div>
+
+      <AddSelectorDialog open={action === "add"} />
+      {/* <ImportModal /> */}
     </>
   );
 }

@@ -1,8 +1,14 @@
-import { Landmark } from "lucide-react";
+"use client";
 
-import { ImportModal } from "../_components/import-modal";
+import { Landmark } from "lucide-react";
+import { useQueryStates } from "nuqs";
+
+import { Button } from "~/components/ui/button";
+import { accountsParsers } from "../account-search-params";
 
 export function AccountsEmptyPlaceholder() {
+  const [, setState] = useQueryStates(accountsParsers);
+
   return (
     <div className="flex h-full shrink-0 items-center justify-center rounded-md border border-dashed">
       <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
@@ -12,7 +18,14 @@ export function AccountsEmptyPlaceholder() {
         <p className="mb-4 mt-2 text-sm text-muted-foreground">
           Non hai ancora creato e collegato alcun conto corrente.
         </p>
-        <ImportModal />
+        <Button
+          className="relative"
+          onClick={() => {
+            void setState({ action: "add" }, { shallow: false });
+          }}
+        >
+          Aggiungi conto
+        </Button>
       </div>
     </div>
   );
