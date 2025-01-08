@@ -88,7 +88,7 @@ export function AddInvestment() {
     },
   });
 
-  async function onSubmit(data: InvestmentFormValues) {
+  async function onSubmit(_data: InvestmentFormValues) {
     try {
       setIsLoading(true);
       // Here you would typically call your server action
@@ -99,7 +99,7 @@ export function AddInvestment() {
       form.reset();
       setStep(1);
     } catch (error) {
-      toast.error("Failed to add investment");
+      toast.error("Failed to add investment", error);
     } finally {
       setIsLoading(false);
     }

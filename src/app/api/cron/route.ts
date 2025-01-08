@@ -1,9 +1,8 @@
 import { revalidateTag } from "next/cache";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { and, eq, gt, isNotNull, lt } from "drizzle-orm";
+import { and, eq, gt, isNotNull } from "drizzle-orm";
 
-import { env } from "~/env";
 import { getAccounts } from "~/server/actions/institutions/get-accounts";
 import { getTransactions } from "~/server/actions/institutions/get-transactions";
 import { db } from "~/server/db";
@@ -11,7 +10,7 @@ import {
   upsertBankConnections,
   upsertTransactions,
 } from "~/server/db/mutations";
-import { bankAccounts, bankConnections } from "~/server/db/schema/open-banking";
+import { accounts } from "~/server/db/schema/accounts";
 import {
   transformAccount,
   transformTransaction,
@@ -28,15 +27,15 @@ export async function GET(_req: Request) {
   // }
 
   // get all connections
-  const connections = await db.query.bankConnections.findMany({
+  const connections = await db.query.connections.findMany({
     where: and(
-      isNotNull(bankConnections.referenceId),
-      gt(bankConnections.expiresAt, new Date()),
+      isNotNull(connections.referenceId),
+      gt(connections.expiresAt, new Date()),
     ),
     with: {
-      bankAccount: {
+      accounts: {
         columns: { accountId: true },
-        where: eq(bankAccounts.enabled, true),
+        where: eq(accounts.enabled, true),
       },
     },
   });

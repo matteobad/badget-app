@@ -1,4 +1,4 @@
-import { type UserJSON } from "@clerk/nextjs/server";
+import { type DeletedObjectJSON, type UserJSON } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 
 import { db, schema } from "..";
@@ -20,11 +20,11 @@ export async function upsertUser(payload: UserJSON) {
     });
 }
 
-export async function deleteUser(payload: UserJSON) {
+export async function deleteUser(payload: DeletedObjectJSON) {
   return await db
     .update(schema.users)
     .set({
       deletedAt: new Date(),
     })
-    .where(eq(schema.users.userId, payload.id));
+    .where(eq(schema.users.userId, payload.id!));
 }

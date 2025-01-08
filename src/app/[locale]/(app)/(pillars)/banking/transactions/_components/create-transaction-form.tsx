@@ -49,7 +49,7 @@ const languages = [
 ] as const;
 
 export function CreateTransactionForm() {
-  const { execute, isExecuting } = useAction(createTransactionAction, {
+  const { execute } = useAction(createTransactionAction, {
     onError: ({ error }) => {
       toast.error(error.serverError, {
         duration: 3500,

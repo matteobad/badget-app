@@ -42,7 +42,7 @@ export function ImportModal() {
       reader.onload = (e) => {
         const content = e.target?.result as string;
         const lines = content.split("\n");
-        const headers = lines[0].split(",");
+        const headers = lines[0]?.split(",");
         setPreview(lines.slice(0, 6).map((line) => line.split(",")));
         setColumnMapping(
           Object.fromEntries(headers.map((header) => [header, ""])),
@@ -100,7 +100,7 @@ export function ImportModal() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      {preview[0].map((header, index) => (
+                      {preview[0]?.map((header, index) => (
                         <th
                           key={index}
                           className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
