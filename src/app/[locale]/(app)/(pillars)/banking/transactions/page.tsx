@@ -12,7 +12,9 @@ type PageProps = {
 export default async function BankingTransactionsPage({
   searchParams,
 }: PageProps) {
-  const { action } = await transactionsSearchParamsCache.parse(searchParams);
+  // ⚠️ Don't forget to call `parse` here.
+  // You can access type-safe values from the returned object:
+  const {} = await transactionsSearchParamsCache.parse(searchParams);
   const transactions = await getAccountsForActiveWorkspace();
 
   return (
@@ -27,7 +29,7 @@ export default async function BankingTransactionsPage({
         )}
       </div>
 
-      <CreateTransactionSheet open={action === "add"} />
+      <CreateTransactionSheet />
     </>
   );
 }

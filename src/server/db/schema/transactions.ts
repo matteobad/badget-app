@@ -23,7 +23,7 @@ export const transactions = pgTable("transactions", {
   amount: numeric({ precision: 10, scale: 2 }).notNull(),
   currency: char({ length: 3 }).notNull(),
   date: timestamp({ withTimezone: true }).notNull(),
-  description: text(),
+  description: text().notNull(),
 
   ...timestamps,
 });
