@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Edit, MoreVertical, PlusCircle, Trash2 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -138,7 +139,7 @@ export function BankAccountsPage() {
         {institutions.map((institution) => (
           <Card key={institution.id}>
             <CardHeader className="flex flex-row items-center space-x-4 pb-2">
-              <img
+              <Image
                 src={institution.logoUrl}
                 alt={`${institution.name} logo`}
                 className="h-10 w-10"

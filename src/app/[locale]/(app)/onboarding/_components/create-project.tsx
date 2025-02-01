@@ -1,11 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 export function CreateProject() {
-  const router = useRouter();
-
   return (
     <motion.div
       className="my-auto flex h-full w-full flex-col items-center justify-center"

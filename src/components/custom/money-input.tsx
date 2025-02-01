@@ -34,7 +34,8 @@ export default function MoneyInput(props: TextInputProps) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const initialValue = props.initialValue
     ? props.initialValue
-    : props.form.getValues()[props.name]
+    : // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      props.form.getValues()[props.name]
       ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
         moneyFormatter.format(props.form.getValues()[props.name])
       : "";
@@ -44,10 +45,11 @@ export default function MoneyInput(props: TextInputProps) {
     return moneyFormatter.format(Number(digits) / 100);
   }, initialValue);
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   function handleChange(realChangeFn: Function, formattedValue: string) {
     const digits = formattedValue.replace(/\D/g, "");
     const realValue = Number(digits) / 100;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     realChangeFn(realValue.toPrecision(2));
   }
 

@@ -1,6 +1,5 @@
 import { type SearchParams } from "nuqs/server";
 
-import { getAccountsForActiveWorkspace } from "~/server/db/queries/accounts-queries-cached";
 import { CreateTransactionSheet } from "./_components/create-transaction-sheet";
 import { TransactionsEmptyPlaceholder } from "./_components/transactions-empty-placeholder";
 import { transactionsSearchParamsCache } from "./transaction-search-params";
@@ -15,7 +14,7 @@ export default async function BankingTransactionsPage({
   // ⚠️ Don't forget to call `parse` here.
   // You can access type-safe values from the returned object:
   const {} = await transactionsSearchParamsCache.parse(searchParams);
-  const transactions = await getAccountsForActiveWorkspace();
+  const transactions = [];
 
   return (
     <>
@@ -23,9 +22,10 @@ export default async function BankingTransactionsPage({
         {transactions.length === 0 ? (
           <TransactionsEmptyPlaceholder />
         ) : (
-          transactions.map((transaction) => {
-            return <span key={transaction.id}>{transaction.name}</span>;
-          })
+          <></>
+          // transactions.map((transaction) => {
+          //   return <span key={transaction.id}>{transaction.name}</span>;
+          // })
         )}
       </div>
 

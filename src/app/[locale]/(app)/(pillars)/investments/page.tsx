@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { AddInvestment } from "./_components/add-investment";
-import { BalanceChart } from "./_components/balance-chart";
 import { PortfolioAllocation } from "./_components/portfolio-allocation";
 import { PositionsTable } from "./_components/positions-table";
 
@@ -39,9 +38,7 @@ export default async function InvestmentsPage() {
                     last month
                   </p>
                 </div>
-                <div className="h-[180px]">
-                  <BalanceChart />
-                </div>
+                <div className="h-[180px]">{/* <BalanceChart /> */}</div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <TrendingUp className="h-3.5 w-3.5 text-green-500" />
                   <span>Portfolio is up 2.5% from last month</span>
@@ -68,7 +65,7 @@ export default async function InvestmentsPage() {
                   </p>
                 </div>
                 <div className="h-[180px]">
-                  <BalanceChart variant="secondary" />
+                  {/* <BalanceChart variant="secondary" /> */}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <TrendingUp className="h-3.5 w-3.5 text-green-500" />
@@ -94,9 +91,7 @@ export default async function InvestmentsPage() {
                     <span className="text-green-500">+$1.01 (+1.2%)</span> today
                   </p>
                 </div>
-                <div className="h-[180px]">
-                  <BalanceChart />
-                </div>
+                <div className="h-[180px]">{/* <BalanceChart /> */}</div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <TrendingUp className="h-3.5 w-3.5 text-green-500" />
                   <span>Market is up 1.2% today</span>

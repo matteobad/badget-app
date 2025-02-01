@@ -11,7 +11,7 @@ export function Done() {
 
   const router = useRouter();
 
-  const [_, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
     if (step === "done") {

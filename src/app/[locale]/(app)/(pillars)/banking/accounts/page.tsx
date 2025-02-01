@@ -1,6 +1,5 @@
 import { type SearchParams } from "nuqs/server";
 
-import { getAccountsForActiveWorkspace } from "~/server/db/queries/accounts-queries-cached";
 import { AccountsEmptyPlaceholder } from "./_components/accounts-empty-placeholder";
 import { AddSelectorDialog } from "./_components/add-selector-dialog";
 import { accountsSearchParamsCache } from "./account-search-params";
@@ -16,7 +15,7 @@ export default async function BankingAccountsPage({
   // You can access type-safe values from the returned object:
   const { action } = await accountsSearchParamsCache.parse(searchParams);
 
-  const accounts = await getAccountsForActiveWorkspace();
+  const accounts = [];
 
   return (
     <>
@@ -24,9 +23,10 @@ export default async function BankingAccountsPage({
         {accounts.length === 0 ? (
           <AccountsEmptyPlaceholder />
         ) : (
-          accounts.map((account) => {
-            return <span key={account.id}>{account.name}</span>;
-          })
+          <></>
+          // accounts.map((account) => {
+          //   return <span key={account.id}>{account.name}</span>;
+          // })
         )}
       </div>
 

@@ -64,6 +64,7 @@ export function BalanceChart({ variant = "primary" }: BalanceChartProps) {
             tickLine={false}
             axisLine={false}
             tickMargin={8}
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
             tickFormatter={(value) => value.split("-")[2]}
             className="text-xs text-muted-foreground"
           />
@@ -87,7 +88,7 @@ export function BalanceChart({ variant = "primary" }: BalanceChartProps) {
                           Date
                         </span>
                         <span className="font-bold text-foreground">
-                          {payload[0]?.payload?.date?.split("-")[2]}
+                          {/* {payload[0]?.payload?.date?.split("-")[2]} */}
                         </span>
                       </div>
                     </div>

@@ -98,8 +98,9 @@ export function AddInvestment() {
       setOpen(false);
       form.reset();
       setStep(1);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      toast.error("Failed to add investment", error);
+      toast.error("Failed to add investment");
     } finally {
       setIsLoading(false);
     }

@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAction } from "next-safe-action/hooks";
 import { Label } from "recharts";
 
 import { Button } from "~/components/ui/button";
@@ -22,56 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { importTransactions } from "~/server/actions/import-transaction";
 
 type ColumnMapping = Record<string, string>;
 
 export function ImportModal() {
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string[][]>([]);
-  const [columnMapping, setColumnMapping] = useState<ColumnMapping>({});
-  const router = useRouter();
-
-  const { execute, status } = useAction(importTransactions);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        const lines = content.split("\n");
-        const headers = lines[0]?.split(",");
-        setPreview(lines.slice(0, 6).map((line) => line.split(",")));
-        setColumnMapping(
-          Object.fromEntries(headers.map((header) => [header, ""])),
-        );
-      };
-      reader.readAsText(selectedFile);
-    }
-  };
-
-  const handleColumnMappingChange = (csvColumn: string, dbColumn: string) => {
-    setColumnMapping((prev) => ({ ...prev, [csvColumn]: dbColumn }));
-  };
-
-  const handleImport = async () => {
-    if (file && Object.values(columnMapping).every(Boolean)) {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("columnMapping", JSON.stringify(columnMapping));
-
-      const result = await execute(formData);
-
-      if (result.data) {
-        router.refresh();
-      } else if (result.serverError) {
-        console.error("Import failed:", result.serverError);
-        // Handle error (e.g., show error message to user)
-      }
-    }
-  };
+  const [file] = useState<File | null>(null);
+  const [preview] = useState<string[][]>([]);
+  const [columnMapping] = useState<ColumnMapping>({});
 
   return (
     <Dialog>
@@ -89,7 +44,7 @@ export function ImportModal() {
               id="csv-file"
               type="file"
               accept=".csv"
-              onChange={handleFileChange}
+              // onChange={handleFileChange}
               className="col-span-3"
             />
           </div>
@@ -140,9 +95,9 @@ export function ImportModal() {
                     <Label className="text-right">{csvColumn}</Label>
                     <Select
                       value={dbColumn}
-                      onValueChange={(value) =>
-                        handleColumnMappingChange(csvColumn, value)
-                      }
+                      // onValueChange={(value) =>
+                      //   handleColumnMappingChange(csvColumn, value)
+                      // }
                     >
                       <SelectTrigger className="col-span-3">
                         <SelectValue placeholder="Select a column" />
@@ -163,7 +118,7 @@ export function ImportModal() {
         </div>
         <DialogFooter>
           <Button
-            onClick={handleImport}
+            // onClick={handleImport}
             disabled={
               status === "executing" ||
               !file ||
