@@ -1,7 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ChevronsUpDown, Plus } from "lucide-react"
+import * as React from "react";
+import { useOrganization, useOrganizationList, useUser } from "@clerk/nextjs";
+import { ChevronsUpDown, Plus } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -11,69 +12,140 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu"
+} from "~/components/ui/dropdown-menu";
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "~/components/ui/sidebar";
+import { CreateTeamModal } from "./create-team-modal";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Skeleton } from "./ui/skeleton";
 
-export function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string
-    logo: React.ElementType
-    plan: string
-  }[]
-}) {
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+export function TeamSwitcher() {
+  const { isMobile } = useSidebar();
+
+  const { user } = useUser();
+  const { organization } = useOrganization();
+  const { userMemberships, isLoaded, setActive } = useOrganizationList({
+    userMemberships: {
+      infinite: true,
+      limit: 5,
+    },
+  });
+
+  const [isCreatingOrg, setIsCreatingOrg] = React.useState(false);
+
+  if (!isLoaded) {
+    return (
+      <div className="flex h-12 w-full items-center gap-2 p-2">
+        <Skeleton className="rouded size-8" />
+        <div className="flex flex-grow flex-col gap-1">
+          <Skeleton className="rouded h-4 w-[80px]" />
+          <Skeleton className="rouded h-3 w-[50px]" />
+        </div>
+        <Skeleton className="rouded size-4" />
+      </div>
+    );
+  }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="w-full rounded-md ring-ring hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 data-[state=open]:bg-accent">
-        <div className="flex items-center gap-1.5 overflow-hidden px-2 py-1.5 text-left text-sm transition-all">
-          <div className="flex h-5 w-5 items-center justify-center rounded-sm bg-primary text-primary-foreground">
-            <activeTeam.logo className="h-3.5 w-3.5 shrink-0" />
-          </div>
-          <div className="line-clamp-1 flex-1 pr-2 font-medium">
-            {activeTeam.name}
-          </div>
-          <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-64"
-        align="start"
-        side="right"
-        sideOffset={4}
-      >
-        <DropdownMenuLabel className="text-xs text-muted-foreground">
-          Teams
-        </DropdownMenuLabel>
-        {teams.map((team, index) => (
-          <DropdownMenuItem
-            key={team.name}
-            onClick={() => setActiveTeam(team)}
-            className="items-start gap-2 px-1.5"
-          >
-            <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary text-primary-foreground">
-              <team.logo className="h-5 w-5 shrink-0" />
-            </div>
-            <div className="grid flex-1 leading-tight">
-              <div className="line-clamp-1 font-medium">{team.name}</div>
-              <div className="overflow-hidden text-xs text-muted-foreground">
-                <div className="line-clamp-1">{team.plan}</div>
-              </div>
-            </div>
-            <DropdownMenuShortcut className="self-center">
-              ⌘{index + 1}
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2 px-1.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md border bg-background">
-            <Plus className="h-5 w-5" />
-          </div>
-          <div className="font-medium text-muted-foreground">Add workspace</div>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
+    <>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              >
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <Avatar className="size-8 rounded-lg">
+                    <AvatarImage
+                      src={organization?.imageUrl ?? user?.imageUrl}
+                      alt={`avatar of ${organization?.name ?? user?.imageUrl}`}
+                    />
+                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  </Avatar>
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">
+                    {organization?.name ?? user?.firstName}
+                  </span>
+                  <span className="truncate text-xs">{"Free plan"}</span>
+                </div>
+                <ChevronsUpDown className="ml-auto" />
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+              align="start"
+              side={isMobile ? "bottom" : "right"}
+              sideOffset={4}
+            >
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                Spazio Personale
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => setActive({ organization: null })}
+                className="gap-2 p-2"
+              >
+                <div className="flex size-6 items-center justify-center rounded-sm border">
+                  <Avatar className="size-6 shrink-0 rounded-sm">
+                    <AvatarImage
+                      src={user?.imageUrl}
+                      alt={`avatar of ${user?.fullName}`}
+                    />
+                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  </Avatar>
+                </div>
+                {user?.fullName}
+                <DropdownMenuShortcut>⌘{0}</DropdownMenuShortcut>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                Gruppi
+              </DropdownMenuLabel>
+              {userMemberships.data?.map(({ organization }, index) => (
+                <DropdownMenuItem
+                  key={organization.id}
+                  onClick={() => setActive({ organization: organization.id })}
+                  className="gap-2 p-2"
+                >
+                  <div className="flex size-6 items-center justify-center rounded-sm">
+                    <Avatar className="size-6 shrink-0 rounded-sm">
+                      <AvatarImage
+                        src={organization?.imageUrl}
+                        alt={`avatar of ${organization?.name}`}
+                      />
+                      <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                    </Avatar>
+                  </div>
+                  {organization.name}
+                  <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              ))}
+
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="gap-2 p-2"
+                onClick={() => setIsCreatingOrg(true)}
+              >
+                <div className="flex size-6 items-center justify-center rounded-md border bg-background">
+                  <Plus className="size-4" />
+                </div>
+                <div className="font-medium text-muted-foreground">
+                  Crea gruppo
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarMenuItem>
+      </SidebarMenu>
+
+      <CreateTeamModal open={isCreatingOrg} onOpenChange={setIsCreatingOrg} />
+    </>
+  );
 }

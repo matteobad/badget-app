@@ -1,43 +1,40 @@
-"use client";
-
-import Link from "next/link";
+import * as React from "react";
 import { type LucideIcon } from "lucide-react";
 
-import { cn } from "~/lib/utils";
+import {
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "~/components/ui/sidebar";
 
 export function NavSecondary({
-  className,
   items,
+  ...props
 }: {
   items: {
     title: string;
     url: string;
     icon: LucideIcon;
-    items?: {
-      title: string;
-      url: string;
-    }[];
   }[];
-} & React.ComponentProps<"ul">) {
-  if (!items?.length) {
-    return null;
-  }
-
+} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
-    <ul className={cn("grid gap-0.5", className)}>
-      {items.map((item) => (
-        <li key={item.title}>
-          <Link
-            href={item.url}
-            className="flex h-7 items-center gap-2.5 overflow-hidden rounded-md px-1.5 text-xs ring-ring transition-all hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2"
-          >
-            <item.icon className="h-4 w-4 shrink-0 translate-x-0.5 text-muted-foreground" />
-            <div className="line-clamp-1 grow overflow-hidden pr-6 font-medium text-muted-foreground">
-              {item.title}
-            </div>
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <SidebarGroup {...props}>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton asChild size="sm">
+                <a href={item.url}>
+                  <item.icon />
+                  <span>{item.title}</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
   );
 }

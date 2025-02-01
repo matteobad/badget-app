@@ -1,18 +1,6 @@
 import type { ClassValue } from "clsx";
-import type { Column, ColumnBaseConfig, ColumnDataType } from "drizzle-orm";
 import { clsx } from "clsx";
-import {
-  eq,
-  ilike,
-  inArray,
-  isNotNull,
-  isNull,
-  not,
-  notLike,
-} from "drizzle-orm";
 import { twMerge } from "tailwind-merge";
-
-import { type DataTableConfig } from "~/configs/data-table";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -27,92 +15,6 @@ export const euroFormat = (
     currency: "EUR",
     ...options,
   }).format(typeof value === "string" ? Number(value) : value);
-
-export async function withRetry<TResult>(
-  fn: (attempt: number) => TResult | Promise<TResult>,
-  {
-    maxRetries = 3,
-    onError,
-    delay,
-  }: {
-    maxRetries?: number;
-    onError?(error: unknown, attempt: number): boolean | undefined;
-    delay?: number;
-  } = {},
-) {
-  let retries = 0;
-  let lastError: unknown;
-
-  while (retries <= maxRetries) {
-    if (delay && retries > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-
-    try {
-      const res = await fn(retries);
-      return res;
-    } catch (err) {
-      lastError = err;
-
-      if (onError) {
-        const shouldRetry = onError(err, retries);
-        if (!shouldRetry) {
-          break;
-        }
-      }
-
-      retries++;
-    }
-  }
-
-  throw lastError;
-}
-
-export class ProviderError extends Error {
-  code: string;
-
-  constructor({ message, code }: { message: string; code: string }) {
-    super(message);
-    this.code = this.setCode(code);
-  }
-
-  setCode(code: string) {
-    // GoCardLess
-    if (this.message.startsWith("EUA was valid for")) {
-      return "disconnected";
-    }
-
-    switch (code) {
-      // GoCardLess
-      case "AccessExpiredError":
-      case "AccountInactiveError":
-      case "Account suspended":
-        console.log("disconnected", this.message);
-
-        return "disconnected";
-      default:
-        console.log("unknown", this.message);
-
-        return "unknown";
-    }
-  }
-}
-
-export function createErrorResponse(error: unknown, requestId: string) {
-  if (error instanceof ProviderError) {
-    return {
-      requestId,
-      message: error.message,
-      code: error.code,
-    };
-  }
-
-  return {
-    requestId,
-    message: String(error),
-    code: "unknown",
-  };
-}
 
 export function getInitials(value?: string) {
   if (!value) return "CC";
@@ -230,60 +132,4 @@ export function getColorFromName(value: string) {
 export function getRandomColor() {
   const randomIndex = Math.floor(Math.random() * colors.length);
   return colors[randomIndex]!;
-}
-
-export function filterColumn({
-  column,
-  value,
-  isSelectable,
-}: {
-  column: Column<ColumnBaseConfig<ColumnDataType, string>, object, object>;
-  value: string;
-  isSelectable?: boolean;
-}) {
-  const [filterValue, filterOperator] = (value?.split("~").filter(Boolean) ??
-    []) as [
-    string,
-    DataTableConfig["comparisonOperators"][number]["value"] | undefined,
-  ];
-
-  if (!filterValue) return;
-
-  if (isSelectable) {
-    switch (filterOperator) {
-      case "eq":
-        return inArray(column, filterValue?.split(".").filter(Boolean) ?? []);
-      case "notEq":
-        return not(
-          inArray(column, filterValue?.split(".").filter(Boolean) ?? []),
-        );
-      case "isNull":
-        return isNull(column);
-      case "isNotNull":
-        return isNotNull(column);
-      default:
-        return inArray(column, filterValue?.split(".") ?? []);
-    }
-  }
-
-  switch (filterOperator) {
-    case "ilike":
-      return ilike(column, `%${filterValue}%`);
-    case "notIlike":
-      return notLike(column, `%${filterValue}%`);
-    case "startsWith":
-      return ilike(column, `${filterValue}%`);
-    case "endsWith":
-      return ilike(column, `%${filterValue}`);
-    case "eq":
-      return eq(column, filterValue);
-    case "notEq":
-      return not(eq(column, filterValue));
-    case "isNull":
-      return isNull(column);
-    case "isNotNull":
-      return isNotNull(column);
-    default:
-      return ilike(column, `%${filterValue}%`);
-  }
 }

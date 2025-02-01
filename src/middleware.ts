@@ -1,55 +1,46 @@
 import { NextResponse } from "next/server";
-import {
-  clerkClient,
-  clerkMiddleware,
-  createRouteMatcher,
-} from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { createI18nMiddleware } from "next-international/middleware";
 
-const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+import { defaultLocale, locales } from "./locales/config";
+
+const I18nMiddleware = createI18nMiddleware({
+  locales: locales,
+  defaultLocale: defaultLocale,
+  urlMappingStrategy: "rewriteDefault",
+});
+
+const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/api/webhooks(.*)",
+]);
 
 export default clerkMiddleware(async (auth, request) => {
+  // If the user isn't signed in and the route is private, redirect to sign-in
   if (!isPublicRoute(request)) {
-    auth().protect();
+    await auth.protect();
   }
 
-  if (auth().userId) {
-    // get user private metadata
-    const user = await clerkClient().users.getUser(auth().userId!);
-    const privateMetadata = user?.privateMetadata as {
-      bankingCompleted: boolean;
-      savingsCompleted: boolean;
-      pensionCompleted: boolean;
-    };
+  const { userId } = await auth();
 
-    // Use default false values if metadata is not yet set
-    const bankingCompleted = privateMetadata.bankingCompleted || false;
-    const savingsCompleted = privateMetadata.savingsCompleted || false;
-    const pensionCompleted = privateMetadata.pensionCompleted || false;
-
-    // redirect to onboarding if not completed
-    if (request.nextUrl.pathname.startsWith("/banking") && !bankingCompleted) {
-      return NextResponse.redirect(
-        new URL("/onboarding?step=banking", request.url),
-      );
-    }
-    if (request.nextUrl.pathname.startsWith("/savings") && !savingsCompleted) {
-      return NextResponse.redirect(
-        new URL("/onboarding?step=savings", request.url),
-      );
-    }
-    if (request.nextUrl.pathname.startsWith("/pension") && !pensionCompleted) {
-      return NextResponse.redirect(
-        new URL("/onboarding?step=pension", request.url),
-      );
-    }
+  // For users visiting /onboarding, don't try to redirect
+  if (userId && isOnboardingRoute(request)) {
+    return NextResponse.next();
   }
+
+  // Catch users who do not have `onboardingComplete: true` in their publicMetadata
+  // Redirect them to the /onboading route to complete onboarding
+  // if (userId && !sessionClaims?.metadata?.onboardingComplete) {
+  //   const onboardingUrl = new URL("/onboarding", request.url);
+  //   return NextResponse.redirect(onboardingUrl);
+  // }
+
+  return I18nMiddleware(request);
 });
 
 export const config = {
-  matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
-    "/(api|trpc)(.*)",
-  ],
+  matcher: ["/((?!api|static|.*\\..*|_next|favicon.ico|robots.txt).*)"],
 };

@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import dynamic from "next/dynamic";
 import { type LucideProps } from "lucide-react";
 import dynamicIconImports from "lucide-react/dynamicIconImports";

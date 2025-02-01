@@ -6,7 +6,7 @@ await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
 const config = {
-  transpilePackages: ["geist", 'lucide-react'],
+  transpilePackages: ["geist", "lucide-react"],
 
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },
@@ -15,19 +15,19 @@ const config = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'cdn-logos.gocardless.com',
-        port: '',
-        pathname: '/ais/**',
+        protocol: "https",
+        hostname: "cdn-logos.gocardless.com",
+        port: "",
+        pathname: "/ais/**",
       },
       {
-        protocol: 'https',
-        hostname: 'storage.googleapis.com',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "storage.googleapis.com",
+        port: "",
+        pathname: "/**",
       },
     ],
-  }
+  },
 };
 
 export default config;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
-import { Circle, CircleCheck, ExternalLink } from "lucide-react";
+import { Circle, CircleCheck } from "lucide-react";
 
 import {
   Card,

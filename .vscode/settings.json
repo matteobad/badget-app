@@ -1,6 +1,7 @@
 {
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
@@ -13,7 +14,9 @@
   "typescript.preferences.autoImportFileExcludePatterns": [
     "next/router.d.ts",
     "next/dist/client/router.d.ts",
-    "@radix-ui/*"
+    "@radix-ui/**", // exclude auto imports from radix-ui
+    "cmdk", // exclude auto imports from radix-ui
+    "react-day-picker" // exclude auto imports from react-day-picker
   ],
   "typescript.tsdk": "node_modules/typescript/lib"
 }

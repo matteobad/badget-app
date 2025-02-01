@@ -1,0 +1,22 @@
+[
+  { "id": "badget_accounts", "position": { "x": 50, "y": 2180 } },
+  { "id": "badget_budgets", "position": { "x": 1620, "y": 2200 } },
+  { "id": "badget_categories", "position": { "x": 1180, "y": 3760 } },
+  { "id": "badget_connections", "position": { "x": 930, "y": 1750 } },
+  { "id": "badget_instituions", "position": { "x": 490, "y": 1890 } },
+  { "id": "badget_investment_branches", "position": { "x": 50, "y": 1190 } },
+  {
+    "id": "badget_investment_branches_perf",
+    "position": { "x": 490, "y": 1250 }
+  },
+  { "id": "badget_pension_accounts", "position": { "x": 930, "y": 550 } },
+  { "id": "badget_pension_contributions", "position": { "x": 1370, "y": 610 } },
+  { "id": "badget_pension_funds", "position": { "x": 490, "y": 530 } },
+  { "id": "badget_rules", "position": { "x": 2120, "y": 3680 } },
+  { "id": "badget_tokens", "position": { "x": 2500, "y": 3460 } },
+  {
+    "id": "badget_transactions_to_categories",
+    "position": { "x": 1600, "y": 3340 }
+  },
+  { "id": "badget_transactions", "position": { "x": 560, "y": 3480 } }
+]

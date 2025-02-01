@@ -1,17 +1,10 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import "dotenv/config";
 
-import { env } from "~/env";
-import { schema } from ".";
-import { getInstitutions } from "../tasks/get-institutions";
-import { buildConflictUpdateColumns } from "./utils";
+import { reset, seed } from "drizzle-seed";
+
+import { db, schema } from ".";
 
 // import { DEFAULT_CATEGORIES } from "./data/categories";
-
-const queryClient = postgres(env.POSTGRES_URL);
-const db = drizzle(queryClient);
-
-console.log("Seed start");
 
 // eslint-disable-next-line drizzle/enforce-delete-with-where
 // await db.delete(schema.category);
@@ -66,40 +59,11 @@ console.log("Seed start");
 //   }
 // }
 
-const documents = await getInstitutions();
-
-try {
-  // eslint-disable-next-line drizzle/enforce-delete-with-where
-  await db
-    .insert(schema.institutions)
-    .values(
-      documents.map((doc) => {
-        return {
-          id: doc.id,
-          name: doc.name,
-          logo: doc.logo,
-          provider: doc.provider,
-          popularity: doc.popularity,
-          availableHistory: doc.available_history,
-          countries: doc.countries,
-        } satisfies typeof schema.institutions.$inferInsert;
-      }),
-    )
-    .onConflictDoUpdate({
-      target: schema.institutions.id,
-      set: buildConflictUpdateColumns(schema.institutions, [
-        "name",
-        "logo",
-        "availableHistory",
-        "countries",
-      ]),
-    });
-} catch (error) {
-  // @ts-expect-error no typings
-  console.log(error.importResults);
+async function main() {
+  await reset(db, schema);
+  await seed(db, schema, {
+    count: 10,
+  });
 }
 
-console.log("Seed done");
-
-// closing connection
-await queryClient.end();
+await main();
