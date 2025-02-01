@@ -32,10 +32,9 @@ const moneyFormatter = Intl.NumberFormat("it-IT", {
 
 export default function MoneyInput(props: TextInputProps) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const initialValue = props.initialValue
-    ? props.initialValue
-    : // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      props.form.getValues()[props.name]
+  const initialValue =
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    (props.initialValue ?? props.form.getValues()[props.name])
       ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
         moneyFormatter.format(props.form.getValues()[props.name])
       : "";
