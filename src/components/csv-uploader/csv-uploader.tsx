@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from "react";
 import { useDropzone } from "@uploadthing/react";
-import { Terminal } from "lucide-react";
 import { toast } from "sonner";
 import {
   generateClientDropzoneAccept,
@@ -21,6 +20,7 @@ import { useRealtimeCSVValidator } from "~/hooks/use-realtime-csv-validator";
 import { type ProcessingStatus } from "~/lib/types";
 import { useUploadThing } from "~/utils/uploadthing";
 import { CompletedSection } from "./completed-section";
+import DataMapping from "./data-mapping";
 import { Dropzone } from "./dropzone";
 import { ProgressSection } from "./progress-section";
 import { StatusBadge } from "./status-badge";
@@ -102,59 +102,60 @@ export default function CSVUploader() {
 
   return (
     <div className="min-h-screen bg-background p-6 text-foreground">
-      <div className="mx-auto max-w-4xl space-y-6">
-        <div className="mb-8 flex items-center gap-2">
-          <Terminal className="h-5 w-5 text-primary" />
-          <h1 className="text-xl font-semibold">CSV Email Validation</h1>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle>{file ? file.name : "Upload CSV"}</CardTitle>
-                <CardDescription>
-                  {getStatusDescription(currentStatus, totalEmails)}
-                </CardDescription>
-              </div>
-              <StatusBadge status={currentStatus} />
+      <Card>
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col gap-1">
+              <CardTitle>{file ? file.name : "Select a file"}</CardTitle>
+              <CardDescription>
+                {getStatusDescription(currentStatus, totalEmails)}
+              </CardDescription>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {currentStatus === "idle" && (
-              <Dropzone
-                getRootProps={getRootProps}
-                getInputProps={getInputProps}
-                isDragActive={isDragActive}
-                file={file}
-                onUpload={handleUpload}
-              />
-            )}
+            <StatusBadge status={currentStatus} />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {currentStatus === "idle" && !file && (
+            <Dropzone
+              getRootProps={getRootProps}
+              getInputProps={getInputProps}
+              isDragActive={isDragActive}
+              file={file}
+              // onUpload={handleUpload}
+            />
+          )}
 
-            {(currentStatus === "uploading" ||
-              currentStatus === "processing") && (
-              <ProgressSection
-                status={currentStatus}
-                progress={progress}
-                uploadProgress={uploadProgress}
-                emailsProcessed={emailsProcessed}
-                emailsRemaining={emailsRemaining}
-                batches={batches}
-              />
-            )}
+          {currentStatus === "idle" && file && (
+            <DataMapping
+              file={file}
+              setFile={setFile}
+              onUpload={handleUpload}
+            />
+          )}
 
-            {currentStatus === "complete" && (
-              <CompletedSection
-                totalValid={totalValid}
-                totalInvalid={totalInvalid}
-                totalEmails={totalEmails}
-                totalApiCalls={totalApiCalls}
-                durationInSeconds={csvValidation.durationInSeconds}
-              />
-            )}
-          </CardContent>
-        </Card>
-      </div>
+          {(currentStatus === "uploading" ||
+            currentStatus === "processing") && (
+            <ProgressSection
+              status={currentStatus}
+              progress={progress}
+              uploadProgress={uploadProgress}
+              emailsProcessed={emailsProcessed}
+              emailsRemaining={emailsRemaining}
+              batches={batches}
+            />
+          )}
+
+          {currentStatus === "complete" && (
+            <CompletedSection
+              totalValid={totalValid}
+              totalInvalid={totalInvalid}
+              totalEmails={totalEmails}
+              totalApiCalls={totalApiCalls}
+              durationInSeconds={csvValidation.durationInSeconds}
+            />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -162,13 +163,13 @@ export default function CSVUploader() {
 function getStatusDescription(status: ProcessingStatus, totalEmails: number) {
   switch (status) {
     case "idle":
-      return "Drop your CSV file here or click to select";
+      return "Upload a CSV file of your transactions.";
     case "uploading":
       return "Uploading CSV file...";
     case "processing":
-      return `Processing ${totalEmails} email addresses`;
+      return `Processing ${totalEmails} transactions`;
     case "complete":
-      return `Processed ${totalEmails} email addresses`;
+      return `Processed ${totalEmails} transactions`;
     default:
       return "";
   }

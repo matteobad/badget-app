@@ -13,7 +13,7 @@ import { pgTable } from "./_table";
 import { accounts } from "./accounts";
 import { transactionsToCategories } from "./transactions-to-categories";
 
-export const transactions = pgTable("transactions", {
+export const transaction_table = pgTable("transaction_table", {
   id: serial().primaryKey(),
 
   accountId: integer()
@@ -29,15 +29,15 @@ export const transactions = pgTable("transactions", {
 });
 
 export const transactionsRelations = relations(
-  transactions,
+  transaction_table,
   ({ one, many }) => ({
     account: one(accounts, {
-      fields: [transactions.accountId],
+      fields: [transaction_table.accountId],
       references: [accounts.id],
     }),
     transactionCategories: many(transactionsToCategories),
   }),
 );
 
-export type SelectTransaction = typeof transactions.$inferSelect;
-export type InsertTransaction = typeof transactions.$inferInsert;
+export type SelectTransaction = typeof transaction_table.$inferSelect;
+export type InsertTransaction = typeof transaction_table.$inferInsert;

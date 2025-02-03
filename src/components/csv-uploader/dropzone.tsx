@@ -1,8 +1,6 @@
 // components/csv-uploader/dropzone.tsx
 import { AlertCircle, File, Upload } from "lucide-react";
 
-import { Button } from "~/components/ui/button";
-
 interface DropzoneProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getRootProps: any;
@@ -10,7 +8,7 @@ interface DropzoneProps {
   getInputProps: any;
   isDragActive: boolean;
   file?: File;
-  onUpload: () => void;
+  // onUpload: () => void;
 }
 
 export const Dropzone = ({
@@ -18,7 +16,7 @@ export const Dropzone = ({
   getInputProps,
   isDragActive,
   file,
-  onUpload,
+  // onUpload,
 }: DropzoneProps) => (
   <>
     <div
@@ -59,9 +57,9 @@ export const Dropzone = ({
         <p className="text-sm text-yellow-500">No file selected</p>
       </div>
     )}
-
+    {/* 
     <Button className="mt-6 w-full" onClick={onUpload} disabled={!file}>
       Upload and Process CSV
-    </Button>
+    </Button> */}
   </>
 );

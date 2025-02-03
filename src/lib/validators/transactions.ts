@@ -1,9 +1,10 @@
 import { createInsertSchema } from "drizzle-zod";
+import { type z } from "zod";
 
-import { transactions } from "~/server/db/schema/transactions";
+import { transaction_table } from "~/server/db/schema/transactions";
 
-export const CreateTransactionFormSchema = createInsertSchema(
-  transactions,
+export const TransactionInsertSchema = createInsertSchema(
+  transaction_table,
   {},
 ).omit({
   id: true,
@@ -11,3 +12,5 @@ export const CreateTransactionFormSchema = createInsertSchema(
   updatedAt: true,
   deletedAt: true,
 });
+
+export type TransactionInsertSchema = z.infer<typeof TransactionInsertSchema>;

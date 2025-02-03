@@ -13,10 +13,6 @@ export const UploadedFileData = z.object({
 
 export type UploadedFileData = z.infer<typeof UploadedFileData>;
 
-export const CSVRow = z.record(z.any());
-
-export type CSVRow = z.infer<typeof CSVRow>;
-
 // Status schema for progress updates
 export const CSVStatus = z.enum([
   "fetching",

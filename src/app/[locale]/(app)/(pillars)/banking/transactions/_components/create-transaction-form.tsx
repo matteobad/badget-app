@@ -33,7 +33,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
-import { CreateTransactionFormSchema } from "~/lib/validators/transactions";
+import { TransactionInsertSchema } from "~/lib/validators/transactions";
 import { createTransactionAction } from "../create-transaction-action";
 
 const languages = [
@@ -62,8 +62,8 @@ export function CreateTransactionForm() {
     },
   });
 
-  const form = useForm<z.infer<typeof CreateTransactionFormSchema>>({
-    resolver: zodResolver(CreateTransactionFormSchema),
+  const form = useForm<z.infer<typeof TransactionInsertSchema>>({
+    resolver: zodResolver(TransactionInsertSchema),
     defaultValues: {
       date: new Date(),
       currency: "EUR",

@@ -4,7 +4,7 @@ import { check, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { categories } from "./categories";
-import { transactions } from "./transactions";
+import { transaction_table } from "./transactions";
 
 export const transactionsToCategories = pgTable(
   "transactions_to_categories",
@@ -13,7 +13,7 @@ export const transactionsToCategories = pgTable(
     userId: varchar({ length: 32 }),
     transactionId: integer()
       .notNull()
-      .references(() => transactions.id),
+      .references(() => transaction_table.id),
     categoryId: integer()
       .notNull()
       .references(() => categories.id),
@@ -29,9 +29,9 @@ export const transactionsToCategories = pgTable(
 export const transactionsToCategoriesRelations = relations(
   transactionsToCategories,
   ({ one }) => ({
-    transaction: one(transactions, {
+    transaction: one(transaction_table, {
       fields: [transactionsToCategories.transactionId],
-      references: [transactions.id],
+      references: [transaction_table.id],
     }),
     category: one(categories, {
       fields: [transactionsToCategories.categoryId],
