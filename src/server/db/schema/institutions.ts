@@ -4,7 +4,7 @@ import { integer, text, varchar } from "drizzle-orm/pg-core";
 import type { Provider } from "./enum";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
-import { accounts } from "./accounts";
+import { account_table } from "./accounts";
 import { connections } from "./connections";
 
 export const institutions = pgTable("instituions", {
@@ -23,7 +23,7 @@ export const institutions = pgTable("instituions", {
 });
 
 export const institutionsRelations = relations(institutions, ({ many }) => ({
-  accounts: many(accounts),
+  accounts: many(account_table),
   connections: many(connections),
 }));
 
