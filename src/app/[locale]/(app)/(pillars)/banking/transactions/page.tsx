@@ -1,6 +1,5 @@
 import { type SearchParams } from "nuqs/server";
 
-import { CreateTransactionSheet } from "./_components/create-transaction-sheet";
 import { TransactionsEmptyPlaceholder } from "./_components/transactions-empty-placeholder";
 import { transactionsSearchParamsCache } from "./transaction-search-params";
 
@@ -28,8 +27,6 @@ export default async function BankingTransactionsPage({
           // })
         )}
       </div>
-
-      <CreateTransactionSheet />
     </>
   );
 }

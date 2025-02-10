@@ -60,7 +60,7 @@ type CSVUploadOptions = {
   accounts: DB_AccountType[];
 };
 
-type CSVUploaderContext = {
+type BackfillTransactionContext = {
   file: File | undefined;
   setFile: (file: File | undefined) => void;
   options: CSVUploadOptions;
@@ -72,10 +72,11 @@ type CSVUploaderContext = {
   setRunHandle: (handle: { id: string; publicAccessToken: string }) => void;
 };
 
-const CSVUploaderContext = createContext<CSVUploaderContext | null>(null);
+const BackfillTransactionContext =
+  createContext<BackfillTransactionContext | null>(null);
 
 function useCSVUploader() {
-  const context = useContext(CSVUploaderContext);
+  const context = useContext(BackfillTransactionContext);
   if (!context) {
     throw new Error("useCSVUploader must be used within CSVUploaderProvider");
   }
@@ -188,7 +189,7 @@ function useRealtimeCSVValidator(runId?: string, accessToken?: string) {
   }
 }
 
-const CSVImporterProvider = React.forwardRef<
+const BackfillTransactionProvider = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
     accounts: DB_AccountType[];
@@ -205,6 +206,10 @@ const CSVImporterProvider = React.forwardRef<
     },
     ref,
   ) => {
+    // This is the internal state of the backfiller.
+    // We use openProp and setOpenProp for control from outside the component.
+    const [_step, _setOpen] = React.useState(defaultOpen);
+
     const [file, setFile] = useState<File>();
 
     // This is the state for the CSV parsing options.
@@ -221,7 +226,7 @@ const CSVImporterProvider = React.forwardRef<
       publicAccessToken: string;
     } | null>(null);
 
-    const contextValue = React.useMemo<CSVUploaderContext>(
+    const contextValue = React.useMemo<BackfillTransactionContext>(
       () => ({
         file,
         setFile,
@@ -257,7 +262,7 @@ const CSVImporterProvider = React.forwardRef<
     );
 
     return (
-      <CSVUploaderContext.Provider value={contextValue}>
+      <BackfillTransactionContext.Provider value={contextValue}>
         <div
           className={cn("group/csv-uploader-wrapper flex w-full", className)}
           ref={ref}
@@ -265,11 +270,11 @@ const CSVImporterProvider = React.forwardRef<
         >
           {children}
         </div>
-      </CSVUploaderContext.Provider>
+      </BackfillTransactionContext.Provider>
     );
   },
 );
-CSVImporterProvider.displayName = "CSVUploaderProvider";
+BackfillTransactionProvider.displayName = "BackfillTransactionProvider";
 
 const CSVUploaderDropzone = React.forwardRef<
   HTMLDivElement,
@@ -551,7 +556,7 @@ const CSVUploaderProgress = React.forwardRef<
 });
 CSVUploaderProgress.displayName = "CSVUploaderProgress";
 
-export { CSVImporterProvider };
+export { BackfillTransactionProvider as CSVImporterProvider };
 
 function getStatusDescription(status: ProcessingStatus, totalEmails: number) {
   switch (status) {

@@ -1,4 +1,5 @@
 import { type PropsWithChildren } from "react";
+import dynamic from "next/dynamic";
 
 import { AppSidebar } from "~/components/app-sidebar";
 import { DynamicBreadcrumb } from "~/components/layouts/dynamic-breadcrumb";
@@ -10,6 +11,10 @@ import {
 } from "~/components/ui/sidebar";
 
 export default function AppLayout(props: PropsWithChildren) {
+  const BackfillPanel = dynamic(
+    () => import("~/components/layouts/backfill-panel"),
+  );
+
   return (
     <>
       <SidebarProvider>
@@ -25,6 +30,8 @@ export default function AppLayout(props: PropsWithChildren) {
           {props.children}
         </SidebarInset>
       </SidebarProvider>
+
+      <BackfillPanel />
     </>
   );
 }
