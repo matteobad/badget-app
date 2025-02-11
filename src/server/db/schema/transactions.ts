@@ -24,6 +24,9 @@ export const transaction_table = pgTable("transaction_table", {
   currency: char({ length: 3 }).notNull(),
   date: timestamp({ withTimezone: true }).notNull(),
   description: text().notNull(),
+  category_slug: varchar({ length: 128 }).notNull().default("uncategorized"), // TODO: relation to category_table
+  attachment: text(),
+  note: text(),
 
   ...timestamps,
 });

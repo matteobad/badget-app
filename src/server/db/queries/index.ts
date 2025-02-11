@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { type TransactionInsertSchema } from "~/lib/validators/transactions";
 import { db } from "..";
 import { account_table as accountSchema } from "../schema/accounts";
+import { category_table as categorySchema } from "../schema/categories";
 import { transaction_table } from "../schema/transactions";
 
 export const QUERIES = {
@@ -14,6 +15,14 @@ export const QUERIES = {
       .from(accountSchema)
       .where(eq(accountSchema.userId, userId))
       .orderBy(accountSchema.name);
+  },
+
+  getCategoriesForUser: function (userId: string) {
+    return db
+      .select()
+      .from(categorySchema)
+      .where(eq(categorySchema.userId, userId))
+      .orderBy(categorySchema.name);
   },
 };
 

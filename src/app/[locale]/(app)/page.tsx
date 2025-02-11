@@ -1,9 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 
-import CSVUploader from "~/components/csv-uploader/csv-uploader";
-import { CACHED_QUERIES } from "~/server/db/queries/cached-queries";
-
 export default async function Page() {
   const session = await auth();
 
@@ -13,7 +10,7 @@ export default async function Page() {
     redirect("/sign-in");
   }
 
-  const accounts = await CACHED_QUERIES.getAccountsForUser(session.userId);
+  // const accounts = await CACHED_QUERIES.getAccountsForUser(session.userId);
 
-  return <CSVUploader accounts={accounts} />;
+  // return <CSVUploader accounts={accounts} />;
 }
