@@ -1,6 +1,6 @@
 "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, getTableColumns } from "drizzle-orm";
 
 import type {
   DB_AttachmentInsertType,
@@ -37,6 +37,25 @@ export const QUERIES = {
   },
 
   // transactions
+  getTransactionForUser: function (userId: string, client: DBClient = db) {
+    return client
+      .select({
+        ...getTableColumns(transactionSchema),
+        account: accountSchema,
+        category: categorySchema,
+      })
+      .from(transactionSchema)
+      .innerJoin(
+        accountSchema,
+        eq(transactionSchema.accountId, accountSchema.id),
+      )
+      .innerJoin(
+        categorySchema,
+        eq(transactionSchema.categoryId, categorySchema.id),
+      )
+      .where(eq(transactionSchema.userId, userId));
+  },
+
   getTransactionById: function (transactionId: string, client: DBClient = db) {
     return client
       .select()

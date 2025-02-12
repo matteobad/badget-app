@@ -12,6 +12,7 @@ import {
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { account_table } from "./accounts";
+import { category_table } from "./categories";
 import { transactionsToCategories } from "./transactions-to-categories";
 
 export const transaction_table = pgTable("transaction_table", {
@@ -24,12 +25,14 @@ export const transaction_table = pgTable("transaction_table", {
   accountId: varchar({ length: 128 })
     .notNull()
     .references(() => account_table.id),
+  categoryId: varchar({ length: 128 })
+    .notNull()
+    .references(() => category_table.id),
 
   amount: numeric({ precision: 10, scale: 2 }).notNull(),
   currency: char({ length: 3 }).notNull(),
   date: timestamp({ withTimezone: true }).notNull(),
   description: text().notNull(),
-  category_slug: varchar({ length: 128 }).default("uncategorized"), // TODO: relation to category_table
   note: text(),
 
   ...timestamps,

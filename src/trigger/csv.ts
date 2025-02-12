@@ -37,6 +37,7 @@ function transformCSV(row: CSVRow, mapping: CSVMapping) {
     amount,
     currency: "EUR",
     accountId: "1",
+    categoryId: "1",
     attachment_ids: [],
   };
 

@@ -68,7 +68,7 @@ import { UploadDropzone } from "~/utils/uploadthing";
 import {
   createTransactionAction,
   deleteAttachmentAction,
-} from "./transactions/create-transaction-action";
+} from "./create-transaction-action";
 
 function AddTransactionForm({
   accounts,
@@ -102,6 +102,9 @@ function AddTransactionForm({
     },
   });
 
+  const notcatId = categories.find((c) => c.slug === "uncategorized")!.id;
+  const incomeId = categories.find((c) => c.slug === "income")!.id;
+
   const form = useForm<z.infer<typeof TransactionInsertSchema>>({
     resolver: zodResolver(TransactionInsertSchema),
     defaultValues: {
@@ -109,12 +112,12 @@ function AddTransactionForm({
       description: "",
       amount: "0",
       currency: "EUR",
-      category_slug: "uncategorized",
+      categoryId: notcatId,
       attachment_ids: [],
     },
   });
 
-  const category = form.watch("category_slug");
+  const category = form.watch("categoryId");
 
   return (
     <Form {...form}>
@@ -192,15 +195,15 @@ function AddTransactionForm({
                       field.onChange(values.floatValue);
 
                       if (values.floatValue && values.floatValue > 0) {
-                        form.setValue("category_slug", "income");
+                        form.setValue("categoryId", incomeId);
                       }
 
                       if (
-                        category === "income" &&
+                        category === incomeId &&
                         values.floatValue !== undefined &&
                         values.floatValue < 0
                       ) {
-                        form.setValue("category_slug", undefined);
+                        form.setValue("categoryId", notcatId);
                       }
                     }}
                   />
@@ -261,13 +264,13 @@ function AddTransactionForm({
           />
           <FormField
             control={form.control}
-            name="category_slug"
+            name="categoryId"
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Categoria</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value ?? "uncategorized"}
+                  defaultValue={field.value}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Categoria..." />

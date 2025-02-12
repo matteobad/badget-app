@@ -21,6 +21,24 @@ function getAccountsForUser(userId: string) {
   )();
 }
 
+function getTransactionForUser(userId: string) {
+  const cacheKeys = ["transaction", `transaction_${userId}`];
+  return unstable_cache(
+    async () => {
+      return await QUERIES.getTransactionForUser(userId);
+
+      // NOTE: do whatever you want here, map, aggregate filter...
+      // result will be cached and typesafety preserved
+    },
+    cacheKeys,
+    {
+      tags: cacheKeys,
+      revalidate: 3600,
+    },
+  )();
+}
+
 export const CACHED_QUERIES = {
   getAccountsForUser,
+  getTransactionForUser,
 };

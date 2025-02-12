@@ -2,10 +2,11 @@ import { auth } from "@clerk/nextjs/server";
 import { type SearchParams } from "nuqs/server";
 
 import { QUERIES } from "~/server/db/queries";
-import AddPanel from "../add-panel";
 import BackfillPanel from "../backfill-panel";
 import { TransactionsEmptyPlaceholder } from "./_components/transactions-empty-placeholder";
+import AddPanel from "./add-panel";
 import { transactionsSearchParamsCache } from "./transaction-search-params";
+import TransactionDataTable from "./transaction-table";
 
 type PageProps = {
   searchParams: Promise<SearchParams>; // Next.js 15+: async searchParams prop
@@ -17,26 +18,24 @@ export default async function BankingTransactionsPage({
   // ⚠️ Don't forget to call `parse` here.
   // You can access type-safe values from the returned object:
   const {} = await transactionsSearchParamsCache.parse(searchParams);
-  const transactions = [];
 
   const session = await auth();
   if (!session.userId) throw new Error("User not found");
 
-  const [accountsData, categoriesData] = await Promise.all([
+  // TODO: improve performance with Suspence bounderies
+  const [accountsData, categoriesData, transactionsData] = await Promise.all([
     QUERIES.getAccountsForUser(session.userId),
     QUERIES.getCategoriesForUser(session.userId),
+    QUERIES.getTransactionForUser(session.userId),
   ]);
 
   return (
     <>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        {transactions.length === 0 ? (
+        {transactionsData.length === 0 ? (
           <TransactionsEmptyPlaceholder />
         ) : (
-          <></>
-          // transactions.map((transaction) => {
-          //   return <span key={transaction.id}>{transaction.name}</span>;
-          // })
+          <TransactionDataTable data={transactionsData} />
         )}
       </div>
 

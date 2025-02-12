@@ -11,3 +11,27 @@ export function formatSize(bytes: number): string {
     unit: units[unitIndex],
   }).format(+Math.round(bytes / 1024 ** unitIndex));
 }
+
+type FormatAmountParams = Intl.NumberFormatOptions & {
+  amount: number;
+  locale?: Intl.LocalesArgument;
+};
+
+export function formatAmount({
+  amount,
+  currency = "EUR",
+  locale = "it-IT",
+  minimumFractionDigits,
+  maximumFractionDigits,
+}: FormatAmountParams) {
+  if (!currency) {
+    return;
+  }
+
+  return Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits,
+    maximumFractionDigits,
+  }).format(amount);
+}

@@ -3,8 +3,10 @@ import "dotenv/config";
 import { reset } from "drizzle-seed";
 
 import type { DB_AccountInsertType } from "./schema/accounts";
+import type { DB_CategoryInsertType } from "./schema/categories";
 import { db, schema } from ".";
 import { account_table as accountSchema } from "./schema/accounts";
+import { category_table as categorySchema } from "./schema/categories";
 
 // import { DEFAULT_CATEGORIES } from "./data/categories";
 
@@ -82,13 +84,37 @@ const ACCOUNTS_DATA: DB_AccountInsertType[] = [
   },
 ];
 
+const CATEGORY_DATA: DB_CategoryInsertType[] = [
+  {
+    name: "Uncategorized",
+    slug: "uncategorized",
+    type: "OUTCOME",
+    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
+  },
+  {
+    name: "Income",
+    slug: "income",
+    type: "INCOME",
+    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
+  },
+  {
+    name: "Transfer",
+    slug: "transfer",
+    type: "TRANSFER",
+    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
+  },
+];
+
 async function main() {
   await reset(db, schema);
 
   await db.insert(accountSchema).values(ACCOUNTS_DATA);
+  await db.insert(categorySchema).values(CATEGORY_DATA);
   // await seed(db, schema, {
   //   count: 10,
   // });
+
+  await db.$client.end();
 }
 
 await main();
