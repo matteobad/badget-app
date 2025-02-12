@@ -7,6 +7,7 @@ import { authActionClient } from "~/lib/safe-action";
 import {
   AttachmentDeleteSchema,
   TransactionDeleteSchema,
+  TransactionImportSchema,
   TransactionInsertSchema,
 } from "~/lib/validators/transactions";
 import { db } from "~/server/db";
@@ -46,6 +47,19 @@ export const createTransactionAction = authActionClient
     // Invalidate cache
     revalidateTag(`transaction_${ctx.userId}`);
     revalidateTag(`attachment_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Transaction created" };
+  });
+
+export const importTransactionAction = authActionClient
+  .schema(TransactionImportSchema)
+  .metadata({ actionName: "import-transaction" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+
+    // Invalidate cache
+    revalidateTag(`transaction_${ctx.userId}`);
 
     // Return success message
     return { message: "Transaction created" };

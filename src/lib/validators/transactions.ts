@@ -20,6 +20,21 @@ export const TransactionInsertSchema = createInsertSchema(transaction_table, {
 
 export type TransactionInsertSchema = z.infer<typeof TransactionInsertSchema>;
 
+export const TransactionImportSchema = z.object({
+  file: z.instanceof(File).refine((file) => ["text/csv"].includes(file.type), {
+    message: "Invalid document file type",
+  }),
+  fieldMapping: z.object({
+    date: z.string({ message: "Missing date mapping" }),
+    description: z.string({ message: "Missing description mapping" }),
+    amount: z.string({ message: "Missing amount mapping" }),
+    currency: z.string().default("EUR"),
+  }),
+  extraFields: z.object({ accountId: z.string() }),
+  options: z.object({ inverted: z.boolean() }),
+});
+export type TransactionImportSchema = z.infer<typeof TransactionImportSchema>;
+
 export const TransactionDeleteSchema = z.object({
   ids: z.array(z.string()),
 });

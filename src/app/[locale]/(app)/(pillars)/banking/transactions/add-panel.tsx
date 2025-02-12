@@ -68,7 +68,7 @@ import { UploadDropzone } from "~/utils/uploadthing";
 import {
   createTransactionAction,
   deleteAttachmentAction,
-} from "./create-transaction-action";
+} from "./transaction-actions";
 
 function AddTransactionForm({
   accounts,

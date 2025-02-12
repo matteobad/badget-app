@@ -32,7 +32,7 @@ export function AddTransaction({ label }: AddTransactionProps) {
           <Landmark />
           Collega
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => void setState({ action: "backfill" })}>
+        <DropdownMenuItem onClick={() => void setState({ action: "import" })}>
           <FileSpreadsheet />
           Importa
         </DropdownMenuItem>

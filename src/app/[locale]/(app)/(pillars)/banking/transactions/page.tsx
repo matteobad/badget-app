@@ -2,9 +2,9 @@ import { auth } from "@clerk/nextjs/server";
 import { type SearchParams } from "nuqs/server";
 
 import { QUERIES } from "~/server/db/queries";
-import BackfillPanel from "../backfill-panel";
 import { TransactionsEmptyPlaceholder } from "./_components/transactions-empty-placeholder";
 import AddPanel from "./add-panel";
+import ImportPanel from "./import-panel";
 import { transactionsSearchParamsCache } from "./transaction-search-params";
 import TransactionDataTable from "./transaction-table";
 
@@ -40,7 +40,7 @@ export default async function BankingTransactionsPage({
       </div>
 
       <AddPanel accounts={accountsData} categories={categoriesData} />
-      <BackfillPanel />
+      <ImportPanel accounts={accountsData} categories={categoriesData} />
     </>
   );
 }

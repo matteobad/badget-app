@@ -40,3 +40,10 @@ export const CSVMappingSchema = z.object({
 });
 
 export type CSVMapping = z.infer<typeof CSVMappingSchema>;
+
+// Document Schema
+export const CSV_SCHEMA = z
+  .instanceof(File)
+  .refine((file) => ["text/csv"].includes(file.type), {
+    message: "Invalid document file type",
+  });

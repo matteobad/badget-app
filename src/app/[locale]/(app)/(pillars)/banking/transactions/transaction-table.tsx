@@ -52,7 +52,7 @@ import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
 import { formatAmount } from "~/utils/format";
 import { AddTransaction } from "./_components/add-transaction";
-import { deleteTransactionAction } from "./create-transaction-action";
+import { deleteTransactionAction } from "./transaction-actions";
 
 export type TransactionType = Awaited<
   ReturnType<typeof QUERIES.getTransactionForUser>
