@@ -56,7 +56,7 @@ export function useRealtimeCSVValidator(
       status: "queued",
       progress: 0.05,
       message: "Queued...",
-      filename: instance.run.payload.name,
+      filename: instance.run.payload.file.name,
     };
   }
 
@@ -69,7 +69,7 @@ export function useRealtimeCSVValidator(
       status: "error",
       progress: 0,
       message: "Failed to parse metadata",
-      filename: instance.run.payload.name,
+      filename: instance.run.payload.file.name,
     };
   }
 
@@ -79,7 +79,7 @@ export function useRealtimeCSVValidator(
         status: "fetching",
         progress: 0.1,
         message: "Fetching CSV file...",
-        filename: instance.run.payload.name,
+        filename: instance.run.payload.file.name,
       };
     }
     case "parsing": {
@@ -87,7 +87,7 @@ export function useRealtimeCSVValidator(
         status: "parsing",
         progress: 0.2,
         message: "Parsing CSV file...",
-        filename: instance.run.payload.name,
+        filename: instance.run.payload.file.name,
       };
     }
     case "processing": {
@@ -109,7 +109,7 @@ export function useRealtimeCSVValidator(
         message: "Processing CSV file...",
         totalRows: parsedMetadata.data.totalRows,
         totalProcessed: parsedMetadata.data.totalProcessed,
-        filename: instance.run.payload.name,
+        filename: instance.run.payload.file.name,
         batches: parsedMetadata.data.batches,
         totalValid: parsedMetadata.data.totalValid,
         totalInvalid: parsedMetadata.data.totalInvalid,
@@ -124,7 +124,7 @@ export function useRealtimeCSVValidator(
         message: "CSV processing complete",
         totalRows: parsedMetadata.data.totalRows,
         totalProcessed: parsedMetadata.data.totalProcessed,
-        filename: instance.run.payload.name,
+        filename: instance.run.payload.file.name,
         batches: parsedMetadata.data.batches,
         totalValid: parsedMetadata.data.totalValid,
         totalInvalid: parsedMetadata.data.totalInvalid,

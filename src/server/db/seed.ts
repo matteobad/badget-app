@@ -1,8 +1,10 @@
 import "dotenv/config";
 
-import { reset, seed } from "drizzle-seed";
+import { reset } from "drizzle-seed";
 
+import type { DB_AccountInsertType } from "./schema/accounts";
 import { db, schema } from ".";
+import { account_table as accountSchema } from "./schema/accounts";
 
 // import { DEFAULT_CATEGORIES } from "./data/categories";
 
@@ -59,11 +61,34 @@ import { db, schema } from ".";
 //   }
 // }
 
+const ACCOUNTS_DATA: DB_AccountInsertType[] = [
+  {
+    name: "Revolut",
+    balance: "0",
+    currency: "EUR",
+    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
+  },
+  {
+    name: "N26",
+    balance: "0",
+    currency: "EUR",
+    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
+  },
+  {
+    name: "Hype",
+    balance: "0",
+    currency: "EUR",
+    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
+  },
+];
+
 async function main() {
   await reset(db, schema);
-  await seed(db, schema, {
-    count: 10,
-  });
+
+  await db.insert(accountSchema).values(ACCOUNTS_DATA);
+  // await seed(db, schema, {
+  //   count: 10,
+  // });
 }
 
 await main();

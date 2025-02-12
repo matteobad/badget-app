@@ -1,18 +1,5 @@
 import { z } from "zod";
 
-export const UploadedFileData = z.object({
-  name: z.string(),
-  size: z.number(),
-  type: z.string(),
-  key: z.string(),
-  url: z.string(),
-  appUrl: z.string(),
-  fileHash: z.string(),
-  customId: z.string().nullable(),
-});
-
-export type UploadedFileData = z.infer<typeof UploadedFileData>;
-
 // Status schema for progress updates
 export const CSVStatus = z.enum([
   "fetching",
@@ -45,3 +32,11 @@ export const CSVUploadMetadataSchema = z.object({
 });
 
 export type CSVUploadMetadata = z.infer<typeof CSVUploadMetadataSchema>;
+
+export const CSVMappingSchema = z.object({
+  date: z.string(),
+  description: z.string(),
+  amount: z.string(),
+});
+
+export type CSVMapping = z.infer<typeof CSVMappingSchema>;

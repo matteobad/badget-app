@@ -4,7 +4,7 @@ import { serial, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
 import type { Provider } from "./enum";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
-import { accounts } from "./accounts";
+import { account_table } from "./accounts";
 import { ConnectionStatus } from "./enum";
 import { institutions } from "./institutions";
 
@@ -34,7 +34,7 @@ export const connections = pgTable(
 );
 
 export const connectionsRelations = relations(connections, ({ many, one }) => ({
-  account: many(accounts),
+  account: many(account_table),
   institution: one(institutions, {
     fields: [connections.institutionId],
     references: [institutions.id],

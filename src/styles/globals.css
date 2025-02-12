@@ -39,6 +39,15 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --panel-background: 0 0% 98%;
+    --panel-foreground: 240 5.3% 26.1%;
+    --panel-primary: 240 5.9% 10%;
+    --panel-primary-foreground: 0 0% 98%;
+    --panel-accent: 240 4.8% 95.9%;
+    --panel-accent-foreground: 240 5.9% 10%;
+    --panel-border: 220 13% 91%;
+    --panel-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {

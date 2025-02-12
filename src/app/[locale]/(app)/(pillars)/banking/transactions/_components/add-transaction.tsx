@@ -21,7 +21,7 @@ export function AddTransaction({ label }: AddTransactionProps) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
         <Button>
           <Plus className="size-4" />
           {label}
@@ -32,7 +32,7 @@ export function AddTransaction({ label }: AddTransactionProps) {
           <Landmark />
           Collega
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => void setState({ action: "backfill" })}>
           <FileSpreadsheet />
           Importa
         </DropdownMenuItem>

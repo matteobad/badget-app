@@ -10,6 +10,10 @@ import {
 } from "~/components/ui/sidebar";
 
 export default function AppLayout(props: PropsWithChildren) {
+  // const BackfillPanel = dynamic(
+  //   () => import("~/app/[locale]/(app)/(pillars)/banking/backfill-panel"),
+  // );
+
   return (
     <>
       <SidebarProvider>
@@ -25,6 +29,8 @@ export default function AppLayout(props: PropsWithChildren) {
           {props.children}
         </SidebarInset>
       </SidebarProvider>
+
+      {/* <BackfillPanel /> */}
     </>
   );
 }

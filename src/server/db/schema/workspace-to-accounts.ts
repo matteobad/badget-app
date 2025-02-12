@@ -1,9 +1,9 @@
 import { isNotNull, or, relations } from "drizzle-orm";
-import { check, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
+import { check, primaryKey, varchar } from "drizzle-orm/pg-core";
 
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
-import { accounts } from "./accounts";
+import { account_table } from "./accounts";
 import { groups } from "./groups";
 import { users } from "./users";
 
@@ -16,9 +16,9 @@ export const workspaceToAccounts = pgTable(
     groupId: varchar({ length: 32 })
       .notNull()
       .references(() => groups.groupId),
-    accountId: integer()
+    accountId: varchar({ length: 128 })
       .notNull()
-      .references(() => accounts.id),
+      .references(() => account_table.id),
 
     ...timestamps,
   },
@@ -39,9 +39,9 @@ export const workspaceToAccountsRelations = relations(
       fields: [workspaceToAccounts.groupId],
       references: [groups.groupId],
     }),
-    account: one(accounts, {
+    account: one(account_table, {
       fields: [workspaceToAccounts.accountId],
-      references: [accounts.id],
+      references: [account_table.id],
     }),
   }),
 );

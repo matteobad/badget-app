@@ -1,19 +1,70 @@
 import { parse } from "@fast-csv/parse";
 import { batch, logger, metadata, schemaTask } from "@trigger.dev/sdk/v3";
+import { type UploadedFileData } from "uploadthing/types";
 import { z } from "zod";
 
+import type { CSVMapping } from "~/utils/schemas";
 import { TransactionInsertSchema } from "~/lib/validators/transactions";
-import { createTransactionMutation } from "~/server/db/queries";
-import { UploadedFileData } from "~/utils/schemas";
+import { MUTATIONS } from "~/server/db/queries";
+import { CSVMappingSchema } from "~/utils/schemas";
+
+type CSVRow = Record<string, string | null>;
+type ParsedCSVRow = z.input<typeof TransactionInsertSchema>;
 
 // Trigger.dev supports up to 500 runs per batch, but we've set it to 50 for this example
 const BATCH_SIZE = 50;
 
+function transformCSV(row: CSVRow, mapping: CSVMapping) {
+  logger.info("Raw row", { row });
+
+  let date: Date;
+  if (mapping.date in row) date = new Date(row[mapping.date]!);
+  else throw new Error(`Col ${mapping.date} is not present in the CSV`);
+
+  let description: string;
+  if (mapping.description in row) description = row[mapping.description]!;
+  else throw new Error(`Col ${mapping.description} is not present in the CSV`);
+
+  let amount: string;
+  if (mapping.amount in row) amount = row[mapping.amount]!;
+  else throw new Error(`Col ${mapping.amount} is not present in the CSV`);
+
+  // add other columns mapping here
+
+  const mappedRow: ParsedCSVRow = {
+    date,
+    description,
+    amount,
+    currency: "EUR",
+    accountId: "1",
+    attachment_ids: [],
+  };
+
+  logger.info("Mapped row", { mappedRow });
+
+  const parsedRow = TransactionInsertSchema.safeParse(mappedRow);
+
+  if (!parsedRow.success) {
+    logger.warn("Failed to parse mapped row", {
+      originalRow: row,
+      mappedRow,
+      errors: parsedRow.error,
+    });
+  }
+
+  logger.info("Parsed row", { parsedRow: parsedRow.data });
+
+  return parsedRow.data;
+}
+
 export const csvValidator = schemaTask({
   id: "csv-validator",
-  schema: UploadedFileData,
-  run: async (file) => {
-    logger.info("Handling uploaded file", { file });
+  schema: z.object({
+    file: z.custom<UploadedFileData>(),
+    mapping: CSVMappingSchema,
+  }),
+  run: async ({ file, mapping }) => {
+    logger.info("Handling uploaded file with mapping", { file, mapping });
 
     metadata.set("status", "fetching");
 
@@ -27,40 +78,18 @@ export const csvValidator = schemaTask({
 
     metadata.set("status", "parsing");
 
-    const rows = await new Promise<Array<TransactionInsertSchema>>(
+    const rows = await new Promise<TransactionInsertSchema[]>(
       (resolve, reject) => {
-        const rows: Array<TransactionInsertSchema> = [];
+        const rows: TransactionInsertSchema[] = [];
 
-        const parser = parse({
-          headers: true,
-          delimiter: ",",
-          quote: '"',
-          trim: true,
-        });
-
-        parser.on("data", (row) => {
-          logger.info("Row", { row });
-
-          // accountId in parsing
-          const parsedRow = TransactionInsertSchema.safeParse(row);
-
-          if (parsedRow.success) {
-            rows.push(parsedRow.data);
-          } else {
-            logger.warn("Failed to parse row", {
-              row,
-              errors: parsedRow.error,
-            });
-          }
-        });
-
-        parser.on("end", () => {
-          logger.info("CSV parsing complete");
-
-          resolve(rows);
-        });
-
-        parser.on("error", reject);
+        const parser = parse<CSVRow, ParsedCSVRow>({ headers: true })
+          .transform((data: CSVRow) => transformCSV(data, mapping))
+          .on("error", reject)
+          .on("data", (data: TransactionInsertSchema) => rows.push(data))
+          .on("end", (rowCount: number) => {
+            console.log(`Parsed ${rowCount} rows`);
+            resolve(rows.filter(Boolean));
+          });
 
         parser.write(body);
         parser.end();
@@ -134,7 +163,8 @@ export const handleCSVRow = schemaTask({
     let valid = false;
 
     try {
-      await createTransactionMutation(row);
+      // TODO: pass real userId
+      await MUTATIONS.createTransaction({ ...row, userId: "userId" });
       valid = true;
     } catch {
       logger.error("Error inserting transaction");

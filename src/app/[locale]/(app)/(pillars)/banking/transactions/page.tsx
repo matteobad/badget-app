@@ -1,6 +1,9 @@
+import { auth } from "@clerk/nextjs/server";
 import { type SearchParams } from "nuqs/server";
 
-import { CreateTransactionSheet } from "./_components/create-transaction-sheet";
+import { QUERIES } from "~/server/db/queries";
+import AddPanel from "../add-panel";
+import BackfillPanel from "../backfill-panel";
 import { TransactionsEmptyPlaceholder } from "./_components/transactions-empty-placeholder";
 import { transactionsSearchParamsCache } from "./transaction-search-params";
 
@@ -16,6 +19,14 @@ export default async function BankingTransactionsPage({
   const {} = await transactionsSearchParamsCache.parse(searchParams);
   const transactions = [];
 
+  const session = await auth();
+  if (!session.userId) throw new Error("User not found");
+
+  const [accountsData, categoriesData] = await Promise.all([
+    QUERIES.getAccountsForUser(session.userId),
+    QUERIES.getCategoriesForUser(session.userId),
+  ]);
+
   return (
     <>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
@@ -29,7 +40,8 @@ export default async function BankingTransactionsPage({
         )}
       </div>
 
-      <CreateTransactionSheet />
+      <AddPanel accounts={accountsData} categories={categoriesData} />
+      <BackfillPanel />
     </>
   );
 }

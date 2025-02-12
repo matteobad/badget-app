@@ -1,9 +1,99 @@
 "server-only";
 
-import { type TransactionInsertSchema } from "~/lib/validators/transactions";
-import { db } from "..";
-import { transaction_table } from "../schema/transactions";
+import { and, eq } from "drizzle-orm";
 
-export function createTransactionMutation(data: TransactionInsertSchema) {
-  return db.insert(transaction_table).values(data);
+import type {
+  DB_AttachmentInsertType,
+  DB_TransactionInsertType,
+} from "../schema/transactions";
+import { db } from "..";
+import { account_table as accountSchema } from "../schema/accounts";
+import { category_table as categorySchema } from "../schema/categories";
+import {
+  transaction_attachment_table as attachmentSchema,
+  transaction_table as transactionSchema,
+} from "../schema/transactions";
+
+// Helper type for database client
+type DBType = typeof db;
+type TXType = Parameters<Parameters<DBType["transaction"]>[0]>[0];
+type DBClient = DBType | TXType;
+
+export const QUERIES = {
+  getAccountsForUser: function (userId: string, client: DBClient = db) {
+    return client
+      .select()
+      .from(accountSchema)
+      .where(eq(accountSchema.userId, userId))
+      .orderBy(accountSchema.name);
+  },
+
+  getCategoriesForUser: function (userId: string, client: DBClient = db) {
+    return client
+      .select()
+      .from(categorySchema)
+      .where(eq(categorySchema.userId, userId))
+      .orderBy(categorySchema.name);
+  },
+
+  // transactions
+  getTransactionById: function (transactionId: string, client: DBClient = db) {
+    return client
+      .select()
+      .from(transactionSchema)
+      .where(eq(transactionSchema.id, transactionId));
+  },
+};
+
+export const MUTATIONS = {
+  createTransaction: function (
+    data: DB_TransactionInsertType,
+    client: DBClient = db,
+  ) {
+    return client
+      .insert(transactionSchema)
+      .values(data)
+      .returning({ insertedId: transactionSchema.id });
+  },
+
+  createAttachment: function (
+    attachment: DB_AttachmentInsertType,
+    client: DBClient = db,
+  ) {
+    return client.insert(attachmentSchema).values(attachment).returning();
+  },
+
+  updateAttachment: function (
+    attachment: Partial<DB_AttachmentInsertType>,
+    client: DBClient = db,
+  ) {
+    return client
+      .update(attachmentSchema)
+      .set(attachment)
+      .where(
+        and(
+          eq(attachmentSchema.id, attachment.id!),
+          eq(attachmentSchema.userId, attachment.userId!),
+        ),
+      );
+  },
+
+  deleteAttachment: function (id: string, userId: string, client: DBType = db) {
+    return client
+      .delete(attachmentSchema)
+      .where(
+        and(eq(attachmentSchema.id, id), eq(attachmentSchema.userId, userId)),
+      );
+  },
+};
+
+// Helper function to run transactions
+export async function withTransaction<T>(
+  callback: (tx: TXType) => Promise<T>,
+): Promise<T> {
+  return db.transaction(callback);
+}
+
+export function createTransactionMutation(data: DB_TransactionInsertType) {
+  return db.insert(transactionSchema).values(data);
 }

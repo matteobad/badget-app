@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": "22.11.0"
+    "node": "22.x"
   },
-  "packageManager": "pnpm@9.14.2",
+  "packageManager": "pnpm@9.15.0",
   "scripts": {
     "build": "next build",
     "clean": "git clean -xdf node_modules .next",
@@ -16,6 +16,7 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/server/db/seed.ts",
     "db:visualize": "dotenv -e ./.env -- npx drizzle-lab@latest visualizer",
+    "trigger:dev": "pnpm dlx trigger.dev@latest dev",
     "trigger:deploy": "pnpm dlx trigger.dev@latest deploy",
     "ui-add": "pnpm dlx shadcn add && prettier src --write --list-different",
     "webhook": "ngrok http --url=suitable-malamute-logical.ngrok-free.app 3000",
@@ -34,6 +35,7 @@
     "@fast-csv/parse": "^5.0.2",
     "@hookform/resolvers": "^3.10.0",
     "@neondatabase/serverless": "^0.10.4",
+    "@paralleldrive/cuid2": "^2.2.2",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-avatar": "^1.1.2",
     "@radix-ui/react-checkbox": "^1.1.3",
@@ -54,8 +56,8 @@
     "@radix-ui/react-tooltip": "^1.1.5",
     "@t3-oss/env-nextjs": "^0.11.1",
     "@tanstack/react-table": "^8.20.6",
-    "@trigger.dev/react-hooks": "^3.3.12",
-    "@trigger.dev/sdk": "^3.3.12",
+    "@trigger.dev/react-hooks": "3.3.13",
+    "@trigger.dev/sdk": "3.3.13",
     "@uploadthing/react": "^7.1.5",
     "@vercel/analytics": "^1.4.1",
     "@vercel/speed-insights": "^1.1.0",
@@ -83,6 +85,7 @@
     "react-day-picker": "8.10.1",
     "react-dom": "19.0.0",
     "react-hook-form": "^7.54.2",
+    "react-number-format": "^5.4.3",
     "recharts": "^2.15.1",
     "server-only": "^0.0.1",
     "sonner": "^1.7.4",
@@ -98,7 +101,7 @@
   "devDependencies": {
     "@clerk/types": "^4.45.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
-    "@trigger.dev/build": "^3.3.12",
+    "@trigger.dev/build": "3.3.13",
     "@types/bun": "^1.2.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/eslint": "^8.56.2",
@@ -113,6 +116,7 @@
     "eslint-config-next": "15.1.6",
     "eslint-plugin-drizzle": "^0.2.3",
     "postcss": "^8.5.1",
+    "postgres": "^3.4.5",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^3.4.17",
