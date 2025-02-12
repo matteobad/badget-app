@@ -6,7 +6,7 @@ import type {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -24,6 +24,8 @@ import {
   MoreHorizontal,
   Trash2Icon,
 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
 
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -50,157 +52,11 @@ import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
 import { formatAmount } from "~/utils/format";
 import { AddTransaction } from "./_components/add-transaction";
+import { deleteTransactionAction } from "./create-transaction-action";
 
 export type TransactionType = Awaited<
   ReturnType<typeof QUERIES.getTransactionForUser>
 >[number];
-
-export const columns: ColumnDef<TransactionType>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        className="mt-1"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "date",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="link"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
-        >
-          Data
-          <ChevronsUpDownIcon className="size-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const date: Date = row.getValue("date");
-      return <div>{format(date, "LLL")}</div>;
-    },
-  },
-  {
-    accessorKey: "description",
-    header: () => {
-      return <div className="text-neutral-900">Descrizione</div>;
-    },
-    cell: ({ row }) => <div>{row.getValue("description")}</div>,
-  },
-  {
-    accessorKey: "amount",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="link"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Importo
-          <ChevronsUpDownIcon className="size-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const amount = Number(row.getValue("amount"));
-      const currency = row.original.currency;
-      if (isNaN(amount)) return null;
-      return <div>{formatAmount({ amount, currency })}</div>;
-    },
-  },
-  {
-    accessorKey: "category",
-    header: () => {
-      return <div className="text-neutral-900">Categoria</div>;
-    },
-    cell: ({ row }) => {
-      const category: DB_CategoryType = row.getValue("category");
-      return <div>{category.name}</div>;
-    },
-  },
-  {
-    accessorKey: "account",
-    header: () => {
-      return <div className="text-neutral-900">Conto</div>;
-    },
-    cell: ({ row }) => {
-      const account: DB_AccountType = row.getValue("account");
-      return <div>{account.name}</div>;
-    },
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    header: () => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <DownloadIcon />
-              Esporta come CSV
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              <Trash2Icon /> Elimina movimenti
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-    cell: ({ row }) => {
-      const id = row.original.id;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>Download file</DropdownMenuItem>
-            <DropdownMenuItem>Copy link</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={() => {
-                console.log("TODO delete", id);
-              }}
-            >
-              Delete file
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
 
 export default function TransactionDataTable({
   data,
@@ -212,7 +68,192 @@ export default function TransactionDataTable({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  console.log(data);
+  const deleteTransaction = useAction(deleteTransactionAction, {
+    onError: ({ error }) => {
+      console.error(error);
+      toast.error(error.serverError);
+    },
+    onSuccess: ({ data }) => {
+      console.log(data?.message);
+      toast.success("Transazione eliminata!");
+    },
+  });
+
+  const columns: ColumnDef<TransactionType>[] = useMemo(
+    () => [
+      {
+        id: "select",
+        size: 40,
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+            className="mt-1"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+            className="mt-1"
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      },
+      {
+        accessorKey: "date",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="link"
+              className="px-0"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "desc")
+              }
+            >
+              Data
+              <ChevronsUpDownIcon className="size-4" />
+            </Button>
+          );
+        },
+        cell: ({ row }) => {
+          const date: Date = row.getValue("date");
+          return <div>{format(date, "LLL dd")}</div>;
+        },
+      },
+      {
+        accessorKey: "description",
+        header: () => {
+          return <div className="text-neutral-900">Descrizione</div>;
+        },
+        cell: ({ row }) => <div>{row.getValue("description")}</div>,
+      },
+      {
+        accessorKey: "amount",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="link"
+              className="px-0"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Importo
+              <ChevronsUpDownIcon className="size-4" />
+            </Button>
+          );
+        },
+        cell: ({ row }) => {
+          const amount = Number(row.getValue("amount"));
+          const currency = row.original.currency;
+          if (isNaN(amount)) return null;
+          return <div>{formatAmount({ amount, currency })}</div>;
+        },
+      },
+      {
+        accessorKey: "category",
+        header: () => {
+          return <div className="text-neutral-900">Categoria</div>;
+        },
+        cell: ({ row }) => {
+          const category: DB_CategoryType = row.getValue("category");
+          return <div>{category.name}</div>;
+        },
+      },
+      {
+        accessorKey: "account",
+        header: () => {
+          return <div className="text-neutral-900">Conto</div>;
+        },
+        cell: ({ row }) => {
+          const account: DB_AccountType = row.getValue("account");
+          return <div>{account.name}</div>;
+        },
+      },
+      {
+        id: "actions",
+        enableHiding: false,
+        enableResizing: false,
+        size: 44,
+        header: () => {
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="relative h-8 w-8 p-0"
+                  disabled={Object.keys(rowSelection).length === 0}
+                >
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                  {Object.keys(rowSelection).length > 0 && (
+                    <span className="absolute -right-1 -top-1 size-4 rounded-full bg-primary text-xs font-light text-primary-foreground">
+                      {Object.keys(rowSelection).length}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <DownloadIcon />
+                  Esporta come CSV
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive"
+                  disabled={deleteTransaction.isExecuting}
+                  onClick={() => {
+                    deleteTransaction.execute({
+                      ids: Object.keys(rowSelection),
+                    });
+                    table.resetRowSelection(true);
+                  }}
+                >
+                  <Trash2Icon /> Elimina selezionati
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+        cell: ({ row }) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem>Download file</DropdownMenuItem>
+              <DropdownMenuItem>Copy link</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive"
+                disabled={deleteTransaction.isExecuting}
+                onClick={() => {
+                  deleteTransaction.execute({ ids: [row.original.id] });
+                }}
+              >
+                Elimina movimento
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [deleteTransaction, rowSelection],
+  );
 
   const table = useReactTable({
     data,
@@ -225,6 +266,7 @@ export default function TransactionDataTable({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    getRowId: (row) => row.id, //use the row's uuid from your database as the row id
     state: {
       sorting,
       columnFilters,
@@ -288,7 +330,13 @@ export default function TransactionDataTable({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="h-11">
+                    <TableHead
+                      key={header.id}
+                      className="h-11"
+                      style={{
+                        width: header.getSize(),
+                      }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(

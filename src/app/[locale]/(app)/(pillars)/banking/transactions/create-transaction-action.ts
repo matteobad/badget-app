@@ -6,6 +6,7 @@ import { and, eq } from "drizzle-orm";
 import { authActionClient } from "~/lib/safe-action";
 import {
   AttachmentDeleteSchema,
+  TransactionDeleteSchema,
   TransactionInsertSchema,
 } from "~/lib/validators/transactions";
 import { db } from "~/server/db";
@@ -48,6 +49,24 @@ export const createTransactionAction = authActionClient
 
     // Return success message
     return { message: "Transaction created" };
+  });
+
+export const deleteTransactionAction = authActionClient
+  .schema(TransactionDeleteSchema)
+  .metadata({ actionName: "delete-transaction" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    await db.transaction(async (tx) => {
+      for (const id of parsedInput.ids) {
+        await tx.delete(transactionSchema).where(eq(transactionSchema.id, id));
+      }
+    });
+
+    // Invalidate cache
+    revalidateTag(`transaction_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Transaction deleted" };
   });
 
 export const deleteAttachmentAction = authActionClient

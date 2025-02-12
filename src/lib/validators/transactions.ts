@@ -20,6 +20,11 @@ export const TransactionInsertSchema = createInsertSchema(transaction_table, {
 
 export type TransactionInsertSchema = z.infer<typeof TransactionInsertSchema>;
 
+export const TransactionDeleteSchema = z.object({
+  ids: z.array(z.string()),
+});
+export type TransactionDeleteSchema = z.infer<typeof TransactionDeleteSchema>;
+
 export const AttachmentDeleteSchema = z.object({
   id: z.string(),
   fileKey: z.string(),

@@ -75,6 +75,10 @@ export const MUTATIONS = {
       .returning({ insertedId: transactionSchema.id });
   },
 
+  deleteTransaction: function (id: string, client: DBClient = db) {
+    return client.delete(transactionSchema).where(eq(transactionSchema.id, id));
+  },
+
   createAttachment: function (
     attachment: DB_AttachmentInsertType,
     client: DBClient = db,

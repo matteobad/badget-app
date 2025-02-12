@@ -2,8 +2,7 @@
 
 ## Notes 2025-02-12
 
-- [ ] transactions page, tables and filters
+- [ ] transaction table filters
 - [ ] edit transaction
-- [ ] delete transaction/s
 - [ ] CSV import
 - [ ] gocardless integration
