@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, Search } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useForm } from "react-hook-form";
@@ -18,7 +19,6 @@ import {
 } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
-import { Card, CardContent } from "~/components/ui/card";
 import {
   Drawer,
   DrawerClose,
@@ -62,7 +62,13 @@ import { cn } from "~/lib/utils";
 import { TransactionInsertSchema } from "~/lib/validators/transactions";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
-import { createTransactionAction } from "./transactions/create-transaction-action";
+import { type DB_AttachmentType } from "~/server/db/schema/transactions";
+import { formatSize } from "~/utils/format";
+import { UploadDropzone } from "~/utils/uploadthing";
+import {
+  createTransactionAction,
+  deleteAttachmentAction,
+} from "./transactions/create-transaction-action";
 
 function AddTransactionForm({
   accounts,
@@ -72,16 +78,27 @@ function AddTransactionForm({
   accounts: DB_AccountType[];
   categories: DB_CategoryType[];
 } & React.ComponentProps<"form">) {
+  const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
+
   const { execute, isExecuting } = useAction(createTransactionAction, {
     onError: ({ error }) => {
-      toast.error(error.serverError, {
-        duration: 3500,
-      });
+      console.error(error);
+      toast.error(error.serverError);
     },
-    onSuccess: () => {
-      toast.success("Transazione creata!", {
-        duration: 3500,
-      });
+    onSuccess: ({ data }) => {
+      console.log(data?.message);
+      toast.success("Transazione creata!");
+    },
+  });
+
+  const deleteAttachment = useAction(deleteAttachmentAction, {
+    onError: ({ error }) => {
+      console.error(error);
+      toast.error(error.serverError);
+    },
+    onSuccess: ({ data, input }) => {
+      console.log(data?.message);
+      setAttachments((prev) => prev.filter((_) => _.id !== input.id));
     },
   });
 
@@ -93,12 +110,11 @@ function AddTransactionForm({
       amount: "0",
       currency: "EUR",
       category_slug: "uncategorized",
-      attachment: "",
+      attachment_ids: [],
     },
   });
 
   const category = form.watch("category_slug");
-  const attachments = form.watch("attachment");
 
   return (
     <Form {...form}>
@@ -106,6 +122,10 @@ function AddTransactionForm({
         onSubmit={form.handleSubmit(execute)}
         className={cn("flex h-full flex-col gap-6", className)}
       >
+        {/* <pre>
+          <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
+        </pre> */}
+
         <div className="grid w-full grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -247,7 +267,7 @@ function AddTransactionForm({
                 <FormLabel>Categoria</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  defaultValue={field.value ?? "uncategorized"}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Categoria..." />
@@ -271,23 +291,64 @@ function AddTransactionForm({
         <Accordion type="single" collapsible>
           <AccordionItem value="attchament">
             <AccordionTrigger>Allegati</AccordionTrigger>
-            <AccordionContent className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Cerca allegati" className="pl-9" />
+            <AccordionContent className="space-y-2">
+              <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden">
+                <UploadDropzone
+                  content={{
+                    uploadIcon: <></>,
+                  }}
+                  className="mt-0 h-[200px]"
+                  endpoint="attachmentUploader"
+                  onClientUploadComplete={(res) => {
+                    // Do something with the response
+                    console.log("Files: ", res);
+                    const serverData = res[0]?.serverData.attachments ?? "[]";
+                    const uploaded = JSON.parse(
+                      serverData,
+                    ) as DB_AttachmentType[];
+                    const attachmentIds = uploaded.map((_) => _.id);
+                    setAttachments(uploaded);
+                    form.setValue("attachment_ids", attachmentIds);
+                    toast.info("Attachment caricati");
+                  }}
+                  onUploadError={(error: Error) => {
+                    // Do something with the error.
+                    console.error(error.message);
+                    toast.error(error.message);
+                  }}
+                />
               </div>
-              <Card>
-                <CardContent className="p-4 text-center text-sm text-muted-foreground">
-                  <p>
-                    Drop your files here, or{" "}
-                    <Button variant="link" className="h-auto p-0 font-normal">
-                      click to browse
+              <ul className="mt-4 space-y-4">
+                {attachments.map((file) => (
+                  <div
+                    className="flex items-center justify-between"
+                    key={file.fileKey}
+                  >
+                    <div className="flex w-80 flex-col space-y-0.5">
+                      <span className="truncate">{file.fileName}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {file.fileSize && formatSize(file.fileSize)}
+                      </span>
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      type="button"
+                      className="flex w-auto hover:bg-transparent"
+                      disabled={deleteAttachment.isExecuting}
+                      onClick={() =>
+                        deleteAttachment.execute({
+                          id: file.id,
+                          fileKey: file.fileKey,
+                        })
+                      }
+                    >
+                      <X size={14} />
                     </Button>
-                    .
-                  </p>
-                  <p>3MB file limit.</p>
-                </CardContent>
-              </Card>
+                  </div>
+                ))}
+              </ul>
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="note">
@@ -295,7 +356,7 @@ function AddTransactionForm({
             <AccordionContent>
               <FormField
                 control={form.control}
-                name="description"
+                name="note"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormControl>

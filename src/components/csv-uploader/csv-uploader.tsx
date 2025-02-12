@@ -110,7 +110,7 @@ function useRealtimeCSVValidator(runId?: string, accessToken?: string) {
       status: "queued",
       progress: 0.05,
       message: "Queued...",
-      filename: instance.run.payload.name,
+      filename: instance.run.payload.file.name,
     };
   }
 
@@ -123,7 +123,7 @@ function useRealtimeCSVValidator(runId?: string, accessToken?: string) {
       status: "error",
       progress: 0,
       message: "Failed to parse metadata",
-      filename: instance.run.payload.name,
+      filename: instance.run.payload.file.name,
     };
   }
 
@@ -133,7 +133,7 @@ function useRealtimeCSVValidator(runId?: string, accessToken?: string) {
         status: "fetching",
         progress: 0.1,
         message: "Fetching CSV file...",
-        filename: instance.run.payload.name,
+        filename: instance.run.payload.file.name,
       };
     }
     case "parsing": {
@@ -141,7 +141,7 @@ function useRealtimeCSVValidator(runId?: string, accessToken?: string) {
         status: "parsing",
         progress: 0.2,
         message: "Parsing CSV file...",
-        filename: instance.run.payload.name,
+        filename: instance.run.payload.file.name,
       };
     }
     case "processing": {
@@ -163,7 +163,7 @@ function useRealtimeCSVValidator(runId?: string, accessToken?: string) {
         message: "Processing CSV file...",
         totalRows: parsedMetadata.data.totalRows,
         totalProcessed: parsedMetadata.data.totalProcessed,
-        filename: instance.run.payload.name,
+        filename: instance.run.payload.file.name,
         batches: parsedMetadata.data.batches,
         totalValid: parsedMetadata.data.totalValid,
         totalInvalid: parsedMetadata.data.totalInvalid,
@@ -178,7 +178,7 @@ function useRealtimeCSVValidator(runId?: string, accessToken?: string) {
         message: "CSV processing complete",
         totalRows: parsedMetadata.data.totalRows,
         totalProcessed: parsedMetadata.data.totalProcessed,
-        filename: instance.run.payload.name,
+        filename: instance.run.payload.file.name,
         batches: parsedMetadata.data.batches,
         totalValid: parsedMetadata.data.totalValid,
         totalInvalid: parsedMetadata.data.totalInvalid,
@@ -208,8 +208,6 @@ const BackfillTransactionProvider = React.forwardRef<
   ) => {
     // This is the internal state of the backfiller.
     // We use openProp and setOpenProp for control from outside the component.
-    const [_step, _setOpen] = React.useState(defaultOpen);
-
     const [file, setFile] = useState<File>();
 
     // This is the state for the CSV parsing options.
@@ -282,8 +280,6 @@ const CSVUploaderDropzone = React.forwardRef<
     onFileUpload: (file: File) => void;
   }
 >(({ onFileUpload, className, ...props }, ref) => {
-  const { file, setFile } = useCSVUploader();
-
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
@@ -456,9 +452,9 @@ const CSVUploaderProgress = React.forwardRef<
   const {
     totalProcessed: emailsProcessed = 0,
     totalRows: totalEmails = 0,
-    totalValid = 0,
-    totalInvalid = 0,
-    totalApiCalls = 0,
+    // totalValid = 0,
+    // totalInvalid = 0,
+    // totalApiCalls = 0,
     batches = [],
   } = csvValidation;
 
@@ -558,17 +554,17 @@ CSVUploaderProgress.displayName = "CSVUploaderProgress";
 
 export { BackfillTransactionProvider as CSVImporterProvider };
 
-function getStatusDescription(status: ProcessingStatus, totalEmails: number) {
-  switch (status) {
-    case "idle":
-      return "Upload a CSV file of your transactions.";
-    case "uploading":
-      return "Uploading CSV file...";
-    case "processing":
-      return `Processing ${totalEmails} transactions`;
-    case "complete":
-      return `Processed ${totalEmails} transactions`;
-    default:
-      return "";
-  }
-}
+// function getStatusDescription(status: ProcessingStatus, totalEmails: number) {
+//   switch (status) {
+//     case "idle":
+//       return "Upload a CSV file of your transactions.";
+//     case "uploading":
+//       return "Uploading CSV file...";
+//     case "processing":
+//       return `Processing ${totalEmails} transactions`;
+//     case "complete":
+//       return `Processed ${totalEmails} transactions`;
+//     default:
+//       return "";
+//   }
+// }

@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { createI18nMiddleware } from "next-international/middleware";
 
@@ -10,7 +9,7 @@ const I18nMiddleware = createI18nMiddleware({
   urlMappingStrategy: "rewriteDefault",
 });
 
-const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
+const isUploadthingRoute = createRouteMatcher(["/api/uploadthing(.*)"]);
 const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
@@ -19,28 +18,23 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
+  // uploadthing needs to pass through clerkMiddleware
+  // but if passing on i18nMiddleware we get a 404
+  if (isUploadthingRoute(request)) return;
+
   // If the user isn't signed in and the route is private, redirect to sign-in
   if (!isPublicRoute(request)) {
     await auth.protect();
   }
 
-  const { userId } = await auth();
-
-  // For users visiting /onboarding, don't try to redirect
-  if (userId && isOnboardingRoute(request)) {
-    return NextResponse.next();
-  }
-
-  // Catch users who do not have `onboardingComplete: true` in their publicMetadata
-  // Redirect them to the /onboading route to complete onboarding
-  // if (userId && !sessionClaims?.metadata?.onboardingComplete) {
-  //   const onboardingUrl = new URL("/onboarding", request.url);
-  //   return NextResponse.redirect(onboardingUrl);
-  // }
-
   return I18nMiddleware(request);
 });
 
 export const config = {
-  matcher: ["/((?!api|static|.*\\..*|_next|favicon.ico|robots.txt).*)"],
+  matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Always run for API routes
+    "/(api|trpc)(.*)",
+  ],
 };

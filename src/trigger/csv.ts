@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import type { CSVMapping } from "~/utils/schemas";
 import { TransactionInsertSchema } from "~/lib/validators/transactions";
-import { createTransactionMutation } from "~/server/db/queries";
+import { MUTATIONS } from "~/server/db/queries";
 import { CSVMappingSchema } from "~/utils/schemas";
 
 type CSVRow = Record<string, string | null>;
@@ -36,7 +36,8 @@ function transformCSV(row: CSVRow, mapping: CSVMapping) {
     description,
     amount,
     currency: "EUR",
-    accountId: 1,
+    accountId: "1",
+    attachment_ids: [],
   };
 
   logger.info("Mapped row", { mappedRow });
@@ -162,7 +163,8 @@ export const handleCSVRow = schemaTask({
     let valid = false;
 
     try {
-      await createTransactionMutation(row);
+      // TODO: pass real userId
+      await MUTATIONS.createTransaction({ ...row, userId: "userId" });
       valid = true;
     } catch {
       logger.error("Error inserting transaction");

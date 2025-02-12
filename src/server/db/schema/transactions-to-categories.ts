@@ -1,5 +1,5 @@
 import { isNotNull, or, relations } from "drizzle-orm";
-import { check, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
+import { check, primaryKey, varchar } from "drizzle-orm/pg-core";
 
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
@@ -11,7 +11,7 @@ export const transactionsToCategories = pgTable(
   {
     orgId: varchar({ length: 32 }),
     userId: varchar({ length: 32 }),
-    transactionId: integer()
+    transactionId: varchar({ length: 128 })
       .notNull()
       .references(() => transaction_table.id),
     categoryId: varchar({ length: 128 })
