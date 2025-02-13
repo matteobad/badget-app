@@ -59,6 +59,7 @@
     "@trigger.dev/react-hooks": "3.3.13",
     "@trigger.dev/sdk": "3.3.13",
     "@uploadthing/react": "^7.1.5",
+    "@upstash/redis": "^1.34.4",
     "@vercel/analytics": "^1.4.1",
     "@vercel/speed-insights": "^1.1.0",
     "canvas-confetti": "^1.9.3",
