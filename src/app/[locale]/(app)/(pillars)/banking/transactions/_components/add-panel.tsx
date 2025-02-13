@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, CheckCircle2Icon, Loader2Icon, X } from "lucide-react";
+import { CalendarIcon, Loader2Icon, X } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useForm } from "react-hook-form";
@@ -73,27 +73,27 @@ import { UploadDropzone } from "~/utils/uploadthing";
 function AddTransactionForm({
   accounts,
   categories,
+  onComplete,
   className,
 }: {
   accounts: DB_AccountType[];
   categories: DB_CategoryType[];
+  onComplete: () => void;
 } & React.ComponentProps<"form">) {
   const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
 
-  const { execute, isExecuting, hasSucceeded, reset } = useAction(
-    createTransactionAction,
-    {
-      onError: ({ error }) => {
-        console.error(error);
-        toast.error(error.serverError);
-      },
-      onSuccess: ({ data }) => {
-        console.log(data?.message);
-        toast.success("Transazione creata!");
-        reset();
-      },
+  const { execute, isExecuting, reset } = useAction(createTransactionAction, {
+    onError: ({ error }) => {
+      console.error(error);
+      toast.error(error.serverError);
     },
-  );
+    onSuccess: ({ data }) => {
+      console.log(data?.message);
+      toast.success("Transazione creata!");
+      reset();
+      onComplete();
+    },
+  });
 
   const deleteAttachment = useAction(deleteAttachmentAction, {
     onError: ({ error }) => {
@@ -123,21 +123,6 @@ function AddTransactionForm({
 
   const category = form.watch("categoryId");
 
-  if (hasSucceeded) {
-    return (
-      <div className="mx-auto max-w-2xl p-4 text-center">
-        <div className="mb-4 flex justify-center">
-          <CheckCircle2Icon className="h-12 w-12 text-green-500" />
-        </div>
-        <h1 className="mb-2 text-2xl font-semibold">Transazione Creata!</h1>
-        <p className="mb-6 text-muted-foreground">
-          La tua transazione è stata registrata correttamente.
-        </p>
-        <Button onClick={reset}>{"Creane un'altra"}</Button>
-      </div>
-    );
-  }
-
   return (
     <Form {...form}>
       <form
@@ -164,7 +149,7 @@ function AddTransactionForm({
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {format(new Date(2025, 1, 11), "MMMM dd'th', yyyy")}
+                      {format(field.value, "MMMM dd'th', yyyy")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -425,9 +410,13 @@ export default function AddPanel({
   const [params, setParams] = useQueryStates({ action: parseAsString });
   const open = params.action === "add";
 
+  const handleClose = () => {
+    void setParams({ action: null });
+  };
+
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={() => setParams({ action: null })}>
+      <Drawer open={open} onOpenChange={handleClose}>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Nuova spesa o entrata</DrawerTitle>
@@ -439,6 +428,7 @@ export default function AddPanel({
             className="px-4"
             accounts={accounts}
             categories={categories}
+            onComplete={handleClose}
           />
           <DrawerFooter>
             <DrawerClose>
@@ -462,7 +452,11 @@ export default function AddPanel({
               Registra un movimento per tenere tutto sotto controllo.
             </SheetDescription>
           </SheetHeader>
-          <AddTransactionForm accounts={accounts} categories={categories} />
+          <AddTransactionForm
+            accounts={accounts}
+            categories={categories}
+            onComplete={handleClose}
+          />
         </div>
       </SheetContent>
     </Sheet>

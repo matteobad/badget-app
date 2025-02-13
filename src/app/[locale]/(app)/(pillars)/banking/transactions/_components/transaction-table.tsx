@@ -111,14 +111,13 @@ export default function TransactionDataTable({
       {
         accessorKey: "date",
         size: 90,
+        sortingFn: "datetime",
         header: ({ column }) => {
           return (
             <Button
               variant="link"
               className="px-0"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "desc")
-              }
+              onClick={() => column.toggleSorting()}
             >
               Data
               <ChevronsUpDownIcon className="size-4" />
@@ -141,14 +140,13 @@ export default function TransactionDataTable({
       },
       {
         accessorKey: "amount",
+        // sortingFn: "", TODO: add custom sorting fn
         header: ({ column }) => {
           return (
             <Button
               variant="link"
               className="px-0"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
+              onClick={() => column.toggleSorting()}
             >
               Importo
               <ChevronsUpDownIcon className="size-4" />
