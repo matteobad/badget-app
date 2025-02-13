@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, X } from "lucide-react";
+import { CalendarIcon, CheckCircle2Icon, Loader2Icon, X } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useForm } from "react-hook-form";
@@ -80,16 +80,20 @@ function AddTransactionForm({
 } & React.ComponentProps<"form">) {
   const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
 
-  const { execute, isExecuting } = useAction(createTransactionAction, {
-    onError: ({ error }) => {
-      console.error(error);
-      toast.error(error.serverError);
+  const { execute, isExecuting, hasSucceeded, reset } = useAction(
+    createTransactionAction,
+    {
+      onError: ({ error }) => {
+        console.error(error);
+        toast.error(error.serverError);
+      },
+      onSuccess: ({ data }) => {
+        console.log(data?.message);
+        toast.success("Transazione creata!");
+        reset();
+      },
     },
-    onSuccess: ({ data }) => {
-      console.log(data?.message);
-      toast.success("Transazione creata!");
-    },
-  });
+  );
 
   const deleteAttachment = useAction(deleteAttachmentAction, {
     onError: ({ error }) => {
@@ -118,6 +122,21 @@ function AddTransactionForm({
   });
 
   const category = form.watch("categoryId");
+
+  if (hasSucceeded) {
+    return (
+      <div className="mx-auto max-w-2xl p-4 text-center">
+        <div className="mb-4 flex justify-center">
+          <CheckCircle2Icon className="h-12 w-12 text-green-500" />
+        </div>
+        <h1 className="mb-2 text-2xl font-semibold">Transazione Creata!</h1>
+        <p className="mb-6 text-muted-foreground">
+          La tua transazione è stata registrata correttamente.
+        </p>
+        <Button onClick={reset}>{"Creane un'altra"}</Button>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -378,13 +397,18 @@ function AddTransactionForm({
         </Accordion>
 
         <div className="flex-grow"></div>
-        <Button
-          className="col-span-2 mt-4"
-          type="submit"
-          disabled={isExecuting}
-        >
-          Crea Transazione
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button className="w-full" type="submit" disabled={isExecuting}>
+            {isExecuting ? (
+              <>
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                Creo transazione...
+              </>
+            ) : (
+              "Aggiungi transazione"
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );

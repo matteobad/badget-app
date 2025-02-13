@@ -110,6 +110,7 @@ export default function TransactionDataTable({
       },
       {
         accessorKey: "date",
+        size: 90,
         header: ({ column }) => {
           return (
             <Button
@@ -134,7 +135,9 @@ export default function TransactionDataTable({
         header: () => {
           return <div className="text-neutral-900">Descrizione</div>;
         },
-        cell: ({ row }) => <div>{row.getValue("description")}</div>,
+        cell: ({ row }) => (
+          <div className="line-clamp-1">{row.getValue("description")}</div>
+        ),
       },
       {
         accessorKey: "amount",
@@ -166,7 +169,7 @@ export default function TransactionDataTable({
         },
         cell: ({ row }) => {
           const category: DB_CategoryType = row.getValue("category");
-          return <div>{category.name}</div>;
+          return <div>{category?.name}</div>;
         },
       },
       {
