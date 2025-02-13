@@ -49,7 +49,7 @@ export const QUERIES = {
         accountSchema,
         eq(transactionSchema.accountId, accountSchema.id),
       )
-      .innerJoin(
+      .leftJoin(
         categorySchema,
         eq(transactionSchema.categoryId, categorySchema.id),
       )
