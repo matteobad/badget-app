@@ -31,7 +31,7 @@ export const TransactionImportSchema = z.object({
     currency: z.string().default("EUR"),
   }),
   extraFields: z.object({ accountId: z.string() }),
-  options: z.object({ inverted: z.boolean() }),
+  settings: z.object({ inverted: z.boolean().default(false) }),
 });
 export type TransactionImportSchema = z.infer<typeof TransactionImportSchema>;
 

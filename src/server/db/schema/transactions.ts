@@ -25,9 +25,7 @@ export const transaction_table = pgTable("transaction_table", {
   accountId: varchar({ length: 128 })
     .notNull()
     .references(() => account_table.id),
-  categoryId: varchar({ length: 128 })
-    .notNull()
-    .references(() => category_table.id),
+  categoryId: varchar({ length: 128 }).references(() => category_table.id),
 
   amount: numeric({ precision: 10, scale: 2 }).notNull(),
   currency: char({ length: 3 }).notNull(),

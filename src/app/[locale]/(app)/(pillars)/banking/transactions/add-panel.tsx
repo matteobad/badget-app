@@ -270,7 +270,7 @@ function AddTransactionForm({
                 <FormLabel>Categoria</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  defaultValue={field.value ?? undefined}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Categoria..." />

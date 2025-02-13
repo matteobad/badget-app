@@ -46,6 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Switch } from "~/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
@@ -88,7 +89,9 @@ function ImportTransactionForm({
 
   const form = useForm<z.infer<typeof TransactionImportSchema>>({
     resolver: zodResolver(TransactionImportSchema),
-    defaultValues: {},
+    defaultValues: {
+      settings: { inverted: false },
+    },
   });
 
   const file = form.watch("file");
@@ -191,8 +194,8 @@ function ImportTransactionForm({
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p>
-                                  Transaction {parsedCSV[field.value]}{" "}
-                                  information
+                                  {parsedCSV[field.value] ??
+                                    "Mappa la colonna per avere una preview"}
                                 </p>
                               </TooltipContent>
                             </Tooltip>
@@ -210,7 +213,22 @@ function ImportTransactionForm({
         <Accordion type="single" collapsible>
           <AccordionItem value="attchament">
             <AccordionTrigger>Impostazioni</AccordionTrigger>
-            <AccordionContent className="space-y-2">Invert</AccordionContent>
+            <AccordionContent className="space-y-2">
+              <FormField
+                control={form.control}
+                name="settings.inverted"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between space-y-0">
+                    <FormLabel className="mt-0">Inverti importi</FormLabel>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      aria-readonly
+                    />
+                  </FormItem>
+                )}
+              />
+            </AccordionContent>
           </AccordionItem>
           <AccordionItem value="note">
             <AccordionTrigger>Conto</AccordionTrigger>
@@ -219,14 +237,14 @@ function ImportTransactionForm({
                 control={form.control}
                 name="extraFields.accountId"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
+                  <FormItem className="flex items-center justify-between gap-4 space-y-0">
                     <FormLabel>Conto</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Conto..." />
+                        <SelectValue placeholder="Seleziona Conto..." />
                       </SelectTrigger>
                       <SelectContent>
                         {accounts.map((account) => {
@@ -261,7 +279,6 @@ function ImportTransactionForm({
 
 export default function ImportPanel({
   accounts,
-  categories,
 }: {
   accounts: DB_AccountType[];
   categories: DB_CategoryType[];
