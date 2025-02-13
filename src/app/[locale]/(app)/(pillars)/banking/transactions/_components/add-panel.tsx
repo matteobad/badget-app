@@ -59,16 +59,16 @@ import {
 import { Textarea } from "~/components/ui/textarea";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
-import { TransactionInsertSchema } from "~/lib/validators/transactions";
+import { TransactionInsertSchema } from "~/lib/validators";
+import {
+  createTransactionAction,
+  deleteAttachmentAction,
+} from "~/server/actions";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
 import { type DB_AttachmentType } from "~/server/db/schema/transactions";
 import { formatSize } from "~/utils/format";
 import { UploadDropzone } from "~/utils/uploadthing";
-import {
-  createTransactionAction,
-  deleteAttachmentAction,
-} from "./transaction-actions";
 
 function AddTransactionForm({
   accounts,

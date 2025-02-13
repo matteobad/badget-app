@@ -47,12 +47,12 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { deleteTransactionAction } from "~/server/actions";
 import { type QUERIES } from "~/server/db/queries";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
 import { formatAmount } from "~/utils/format";
-import { AddTransaction } from "./_components/add-transaction";
-import { deleteTransactionAction } from "./transaction-actions";
+import { AddTransaction } from "./add-transaction";
 
 export type TransactionType = Awaited<
   ReturnType<typeof QUERIES.getTransactionForUser>

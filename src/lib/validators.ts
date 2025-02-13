@@ -1,20 +1,7 @@
+import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export type FormState = {
-  message: string;
-  fields?: Record<string, string>;
-  errors?: Record<string, string[]>;
-};
-
-export type DateRange = {
-  from: Date;
-  to: Date;
-};
-
-export const CreatePostSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
-  content: z.string().min(1, { message: "Content is required" }),
-});
+import { transaction_table } from "~/server/db/schema/transactions";
 
 // savings
 export const addSavingsAccountFormSchema = z.object({
@@ -29,3 +16,46 @@ export const CreatePensionAccountSchema = z.object({
   joinedAt: z.date().default(new Date()),
   baseContribution: z.number().default(0),
 });
+
+export const TransactionInsertSchema = createInsertSchema(transaction_table, {
+  amount: z.coerce.string(),
+  note: z.string().optional(),
+})
+  .omit({
+    id: true,
+    userId: true,
+    createdAt: true,
+    updatedAt: true,
+    deletedAt: true,
+  })
+  .extend({
+    attachment_ids: z.array(z.string()),
+  });
+
+export type TransactionInsertSchema = z.infer<typeof TransactionInsertSchema>;
+
+export const TransactionImportSchema = z.object({
+  file: z.instanceof(File).refine((file) => ["text/csv"].includes(file.type), {
+    message: "Invalid document file type",
+  }),
+  fieldMapping: z.object({
+    date: z.string({ message: "Missing date mapping" }),
+    description: z.string({ message: "Missing description mapping" }),
+    amount: z.string({ message: "Missing amount mapping" }),
+    currency: z.string().default("EUR"),
+  }),
+  extraFields: z.object({ accountId: z.string() }),
+  settings: z.object({ inverted: z.boolean().default(false) }),
+});
+export type TransactionImportSchema = z.infer<typeof TransactionImportSchema>;
+
+export const TransactionDeleteSchema = z.object({
+  ids: z.array(z.string()),
+});
+export type TransactionDeleteSchema = z.infer<typeof TransactionDeleteSchema>;
+
+export const AttachmentDeleteSchema = z.object({
+  id: z.string(),
+  fileKey: z.string(),
+});
+export type AttachmentDeleteSchema = z.infer<typeof AttachmentDeleteSchema>;

@@ -2,11 +2,11 @@ import { auth } from "@clerk/nextjs/server";
 import { type SearchParams } from "nuqs/server";
 
 import { QUERIES } from "~/server/db/queries";
+import AddPanel from "./_components/add-panel";
+import ImportPanel from "./_components/import-panel";
+import TransactionDataTable from "./_components/transaction-table";
 import { TransactionsEmptyPlaceholder } from "./_components/transactions-empty-placeholder";
-import AddPanel from "./add-panel";
-import ImportPanel from "./import-panel";
 import { transactionsSearchParamsCache } from "./transaction-search-params";
-import TransactionDataTable from "./transaction-table";
 
 type PageProps = {
   searchParams: Promise<SearchParams>; // Next.js 15+: async searchParams prop
