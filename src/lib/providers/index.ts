@@ -1,3 +1,5 @@
+import { GoCardlessProvider } from "./gocardless";
+
 export type Providers = "gocardless" | "teller" | "plaid";
 
 export interface BankAccountProvider {
@@ -65,4 +67,19 @@ export type GetInstitutionsResponse = {
 
 export type GetInstitutionsRequest = {
   countryCode?: string;
+};
+
+const providers: Record<string, BankAccountProvider> = {
+  gocardless: GoCardlessProvider,
+  // Future providers can be added here
+};
+
+export const getBankAccountProvider = (
+  providerName: string,
+): BankAccountProvider => {
+  const provider = providers[providerName];
+  if (!provider) {
+    throw new Error(`Unknown provider: ${providerName}`);
+  }
+  return provider;
 };

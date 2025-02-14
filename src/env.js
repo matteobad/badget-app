@@ -7,13 +7,15 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
-    DATABASE_URL: z.string(),
+    DATABASE_URL: z.string().min(1),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
     CLERK_SECRET_KEY: z.string().min(1),
     SIGNING_SECRET: z.string().min(1),
     UPLOADTHING_TOKEN: z.string().min(1),
+    UPSTASH_REDIS_REST_URL: z.string().url(),
+    UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
     TRIGGER_SECRET_KEY: z.string().min(1),
     GOCARDLESS_SECRET_ID: z.string().min(1),
     GOCARDLESS_SECRET_KEY: z.string().min(1),
@@ -42,6 +44,8 @@ export const env = createEnv({
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     SIGNING_SECRET: process.env.SIGNING_SECRET,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     TRIGGER_SECRET_KEY: process.env.TRIGGER_SECRET_KEY,
     GOCARDLESS_SECRET_ID: process.env.GOCARDLESS_SECRET_ID,
     GOCARDLESS_SECRET_KEY: process.env.GOCARDLESS_SECRET_KEY,

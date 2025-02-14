@@ -9,7 +9,7 @@ const I18nMiddleware = createI18nMiddleware({
   urlMappingStrategy: "rewriteDefault",
 });
 
-const isUploadthingRoute = createRouteMatcher(["/api/uploadthing(.*)"]);
+const isAPIRoute = createRouteMatcher(["/api/(.*)"]);
 const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
@@ -18,9 +18,9 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
-  // uploadthing needs to pass through clerkMiddleware
+  // api routes need to pass through clerkMiddleware
   // but if passing on i18nMiddleware we get a 404
-  if (isUploadthingRoute(request)) return;
+  if (isAPIRoute(request)) return;
 
   // If the user isn't signed in and the route is private, redirect to sign-in
   if (!isPublicRoute(request)) {

@@ -1,17 +1,11 @@
-import { Redis } from "@upstash/redis";
-
 import { env } from "~/env";
+import { redis } from "~/server/redis";
 import {
   type GC_AccessTokenResponse,
   type GC_GetInstitutionsRequest,
   type GC_GetInstitutionsResponse,
   type GC_RefreshTokenResponse,
 } from "./gocardless-types";
-
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
 
 export interface ErrorResponse {
   detail: string;
@@ -64,11 +58,13 @@ async function fetchWithAuth<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
+  const url = `${BASE_URL}${path}`;
   const headers = new Headers(options.headers);
   const token = await getValidAccessToken();
   headers.set("Authorization", `Bearer ${token}`);
 
-  const response = await fetch(`${BASE_URL}${path}`, {
+  console.log(`[gocardless] fetching ${url}`);
+  const response = await fetch(url, {
     ...options,
     headers,
   });
@@ -83,7 +79,7 @@ async function fetchWithAuth<T>(
 }
 
 async function getAccessToken() {
-  const response = await fetch(`${BASE_URL}/token/new/`, {
+  const response = await fetch(`${BASE_URL}/api/v2/token/new/`, {
     method: "POST",
     body: JSON.stringify({
       secret_id: env.GOCARDLESS_SECRET_ID,
@@ -137,7 +133,7 @@ export const gocardlessClient = {
 
     const queryParams = new URLSearchParams();
     queryParams.set("country", params.country);
-    const url = `/api/v2/institutions/${queryParams.toString()}`;
+    const url = `/api/v2/institutions/?${queryParams.toString()}`;
 
     const data = await fetchWithAuth<GC_GetInstitutionsResponse>(url);
     await redis.set(cacheKey, data, { ex: ONE_DAY });
