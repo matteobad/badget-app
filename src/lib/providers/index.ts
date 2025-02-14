@@ -1,3 +1,4 @@
+import { type DB_InstitutionInsertType } from "~/server/db/schema/institutions";
 import { GoCardlessProvider } from "./gocardless";
 
 export type Providers = "gocardless" | "teller" | "plaid";
@@ -18,7 +19,7 @@ export interface BankAccountProvider {
 
   getInstitutions: (
     params: GetInstitutionsRequest,
-  ) => Promise<GetInstitutionsResponse>;
+  ) => Promise<DB_InstitutionInsertType[]>;
   // getConnectionStatus: (
   //   params: GetConnectionStatusRequest,
   // ) => Promise<GetConnectionStatusResponse>;

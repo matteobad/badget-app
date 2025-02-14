@@ -6,7 +6,7 @@ import { timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { account_table } from "./accounts";
 import { ConnectionStatus } from "./enum";
-import { institutions } from "./institutions";
+import { institution_table } from "./institutions";
 
 export const connections = pgTable(
   "connections",
@@ -17,7 +17,7 @@ export const connections = pgTable(
     userId: varchar({ length: 32 }).notNull(),
     institutionId: varchar()
       .notNull()
-      .references(() => institutions.id),
+      .references(() => institution_table.id),
 
     referenceId: varchar(),
     name: varchar({ length: 128 }).notNull(),
@@ -35,9 +35,9 @@ export const connections = pgTable(
 
 export const connectionsRelations = relations(connections, ({ many, one }) => ({
   account: many(account_table),
-  institution: one(institutions, {
+  institution: one(institution_table, {
     fields: [connections.institutionId],
-    references: [institutions.id],
+    references: [institution_table.id],
   }),
 }));
 

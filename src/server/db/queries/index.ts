@@ -1,6 +1,6 @@
 "server-only";
 
-import { and, eq, getTableColumns } from "drizzle-orm";
+import { and, arrayContains, eq, getTableColumns } from "drizzle-orm";
 
 import type {
   DB_AttachmentInsertType,
@@ -9,6 +9,7 @@ import type {
 import { db } from "..";
 import { account_table as accountSchema } from "../schema/accounts";
 import { category_table as categorySchema } from "../schema/categories";
+import { institution_table as institutionSchema } from "../schema/institutions";
 import {
   transaction_attachment_table as attachmentSchema,
   transaction_table as transactionSchema,
@@ -20,6 +21,17 @@ type TXType = Parameters<Parameters<DBType["transaction"]>[0]>[0];
 type DBClient = DBType | TXType;
 
 export const QUERIES = {
+  // institutions
+  getInstitutionsForCountry: function (
+    countryCode: string,
+    client: DBClient = db,
+  ) {
+    return client
+      .select()
+      .from(institutionSchema)
+      .where(arrayContains(institutionSchema.countries, [countryCode]));
+  },
+
   getAccountsForUser: function (userId: string, client: DBClient = db) {
     return client
       .select()

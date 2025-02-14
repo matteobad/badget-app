@@ -1,4 +1,6 @@
-import { type GetInstitutionsRequest, type GetInstitutionsResponse } from "..";
+import { Provider } from "~/server/db/schema/enum";
+import { type DB_InstitutionInsertType } from "~/server/db/schema/institutions";
+import { type GetInstitutionsRequest } from "..";
 import {
   type GC_GetInstitutionsRequest,
   type GC_GetInstitutionsResponse,
@@ -14,9 +16,10 @@ export const mapInstitutionsResponse = (
   data: GC_GetInstitutionsResponse[number],
 ) => {
   return {
-    id: data.id,
+    originalId: data.id,
     logo: data.logo,
     name: data.name,
-    provider: "gocardless",
-  } satisfies GetInstitutionsResponse[number];
+    provider: Provider.GOCARDLESS,
+    countries: data.countries,
+  } satisfies DB_InstitutionInsertType;
 };

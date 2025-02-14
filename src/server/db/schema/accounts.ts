@@ -5,7 +5,7 @@ import { char, integer, numeric, varchar } from "drizzle-orm/pg-core";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { connections } from "./connections";
-import { institutions } from "./institutions";
+import { institution_table } from "./institutions";
 import { transaction_table } from "./transactions";
 import { workspaceToAccounts } from "./workspace-to-accounts";
 
@@ -16,7 +16,7 @@ export const account_table = pgTable("account_table", {
     .notNull(),
 
   userId: varchar({ length: 32 }).notNull(),
-  institutionId: varchar().references(() => institutions.id),
+  institutionId: varchar().references(() => institution_table.id),
   connectionId: integer().references(() => connections.id),
 
   name: varchar({ length: 64 }).notNull(),
@@ -29,9 +29,9 @@ export const account_table = pgTable("account_table", {
 export const accountsRelations = relations(account_table, ({ one, many }) => ({
   transactions: many(transaction_table),
   workspaceToAccounts: many(workspaceToAccounts),
-  institution: one(institutions, {
+  institution: one(institution_table, {
     fields: [account_table.institutionId],
-    references: [institutions.id],
+    references: [institution_table.id],
   }),
   connection: one(connections, {
     fields: [account_table.connectionId],

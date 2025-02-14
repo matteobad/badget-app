@@ -28,7 +28,7 @@ export function AddTransaction({ label }: AddTransactionProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => void setState({ action: "connect" })}>
           <Landmark />
           Collega
         </DropdownMenuItem>

@@ -21,23 +21,6 @@ import * as users from "./schema/users";
 import * as usersToGroups from "./schema/users-to-groups";
 import * as workspaceToAccounts from "./schema/workspace-to-accounts";
 
-export const schema = {
-  ...accounts,
-  ...budgets,
-  ...budgetsToCategories,
-  ...categories,
-  ...connections,
-  ...groups,
-  ...institutions,
-  ...rules,
-  ...tokens,
-  ...transactionsToCategories,
-  ...transactions,
-  ...users,
-  ...usersToGroups,
-  ...workspaceToAccounts,
-};
-
 let connectionString = env.DATABASE_URL;
 
 // Configuring Neon for local development
@@ -60,6 +43,23 @@ if (env.NODE_ENV === "development") {
 
 const sql = neon(connectionString);
 const pool = new Pool({ connectionString });
+
+export const schema = {
+  ...accounts,
+  ...budgets,
+  ...budgetsToCategories,
+  ...categories,
+  ...connections,
+  ...groups,
+  ...institutions,
+  ...rules,
+  ...tokens,
+  ...transactionsToCategories,
+  ...transactions,
+  ...users,
+  ...usersToGroups,
+  ...workspaceToAccounts,
+};
 
 // Drizzle supports both HTTP and WebSocket clients. Choose the one that fits your needs:
 // HTTP Client:
