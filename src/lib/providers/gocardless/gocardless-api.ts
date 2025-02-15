@@ -2,6 +2,11 @@ import { env } from "~/env";
 import { redis } from "~/server/redis";
 import {
   type GC_AccessTokenResponse,
+  type GC_CreateAgreementRequest,
+  type GC_CreateAgreementResponse,
+  type GC_CreateRequisitionRequest,
+  type GC_CreateRequisitionResponse,
+  type GC_GetInstitutionByIdResponse,
   type GC_GetInstitutionsRequest,
   type GC_GetInstitutionsResponse,
   type GC_RefreshTokenResponse,
@@ -138,5 +143,26 @@ export const gocardlessClient = {
     const data = await fetchWithAuth<GC_GetInstitutionsResponse>(url);
     await redis.set(cacheKey, data, { ex: ONE_DAY });
     return data;
+  },
+
+  getInstitutionById: async (params: { id: string }) => {
+    const url = `/api/v2/institutions/${params.id}`;
+    return await fetchWithAuth<GC_GetInstitutionByIdResponse>(url);
+  },
+
+  createAgreement: async (params: GC_CreateAgreementRequest) => {
+    const url = `/api/v2/agreements/enduser/`;
+    return await fetchWithAuth<GC_CreateAgreementResponse>(url, {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
+  },
+
+  createRequisition: async (params: GC_CreateRequisitionRequest) => {
+    const url = `/api/v2/requisitions/`;
+    return await fetchWithAuth<GC_CreateRequisitionResponse>(url, {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
   },
 };

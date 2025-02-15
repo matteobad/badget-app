@@ -1,8 +1,9 @@
 # Badget
 
-## Notes 2025-02-13
+## Notes 2025-02-14
 
-- [ ] Import transaction success message (import another one, empty form, add and close)
+- [ ] gocardless integration
+- [ ] add redis integration to vercel
+- [ ] protect institutions api route
 - [ ] transaction table filters
 - [ ] edit transaction
-- [ ] gocardless integration

@@ -1,12 +1,15 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
 import { parse } from "@fast-csv/parse";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
+import { gocardlessClient } from "~/lib/providers/gocardless/gocardless-api";
 import { authActionClient } from "~/lib/safe-action";
 import {
   AttachmentDeleteSchema,
+  ConnectGocardlessSchema,
   TransactionDeleteSchema,
   TransactionImportSchema,
   TransactionInsertSchema,
@@ -20,6 +23,7 @@ import {
 import { utapi } from "~/server/uploadthing";
 import { type CSVRow, type CSVRowParsed } from "~/utils/schemas";
 import { transformCSV } from "~/utils/transform";
+import { institution_table as institutionSchema } from "./db/schema/institutions";
 
 // Server Action
 export async function parseCsv(file: File, maxRows = 9999) {
@@ -161,4 +165,42 @@ export const deleteAttachmentAction = authActionClient
 
     // Return success message
     return { message: "Attachment deleted" };
+  });
+
+export const connectGocardlessAction = authActionClient
+  .schema(ConnectGocardlessSchema)
+  .metadata({ actionName: "connect-gocardless" })
+  .action(async ({ parsedInput }) => {
+    const { institutionId, provider, redirectBase } = parsedInput;
+    const redirectTo = new URL("/settings/accounts", redirectBase);
+    redirectTo.searchParams.append("provider", provider.toLowerCase());
+
+    await db
+      .update(institutionSchema)
+      .set({
+        popularity: sql`${institutionSchema.popularity} + 1`,
+      })
+      .where(eq(institutionSchema.originalId, institutionId));
+
+    const institution = await gocardlessClient.getInstitutionById({
+      id: institutionId,
+    });
+
+    const agreement = await gocardlessClient.createAgreement({
+      institution_id: institutionId,
+      access_valid_for_days: institution.max_access_valid_for_days,
+      max_historical_days: institution.transaction_total_days,
+      access_scope: ["details", "balances", "transactions"],
+    });
+
+    const requisition = await gocardlessClient.createRequisition({
+      institution_id: institutionId,
+      redirect: redirectTo.toString(),
+      agreement: agreement.id,
+      user_language: "IT",
+      // reference: TODO: investigate custom reference
+      // account_selection: TODO: integrate account selcetion in the UI before
+    });
+
+    return redirect(requisition.link);
   });

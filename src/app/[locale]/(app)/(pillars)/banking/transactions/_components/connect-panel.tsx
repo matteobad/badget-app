@@ -1,14 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SearchIcon } from "lucide-react";
+import { Landmark, Loader2Icon, SearchIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
 
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -41,49 +42,14 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
-import { TransactionImportSchema } from "~/lib/validators";
-import { importTransactionAction } from "~/server/actions";
+import { ConnectGocardlessSchema } from "~/lib/validators";
+import { connectGocardlessAction } from "~/server/actions";
 import { type DB_InstitutionType } from "~/server/db/schema/institutions";
 
 const countries = [
   {
-    continent: "America",
-    items: [
-      { value: "1", label: "United States", flag: "🇺🇸" },
-      { value: "2", label: "Canada", flag: "🇨🇦" },
-      { value: "3", label: "Mexico", flag: "🇲🇽" },
-    ],
-  },
-  {
-    continent: "Africa",
-    items: [
-      { value: "4", label: "South Africa", flag: "🇿🇦" },
-      { value: "5", label: "Nigeria", flag: "🇳🇬" },
-      { value: "6", label: "Morocco", flag: "🇲🇦" },
-    ],
-  },
-  {
-    continent: "Asia",
-    items: [
-      { value: "7", label: "China", flag: "🇨🇳" },
-      { value: "8", label: "Japan", flag: "🇯🇵" },
-      { value: "9", label: "India", flag: "🇮🇳" },
-    ],
-  },
-  {
     continent: "Europe",
-    items: [
-      { value: "10", label: "United Kingdom", flag: "🇬🇧" },
-      { value: "11", label: "France", flag: "🇫🇷" },
-      { value: "12", label: "Germany", flag: "🇩🇪" },
-    ],
-  },
-  {
-    continent: "Oceania",
-    items: [
-      { value: "13", label: "Australia", flag: "🇦🇺" },
-      { value: "14", label: "New Zealand", flag: "🇳🇿" },
-    ],
+    items: [{ value: "IT", label: "Italy", flag: "🇮🇹" }],
   },
 ];
 
@@ -91,27 +57,31 @@ function ConnectAccountForm({
   className,
   institutions,
 }: { institutions: DB_InstitutionType[] } & React.ComponentProps<"form">) {
-  const { execute, isExecuting } = useAction(importTransactionAction, {
+  const { execute, isExecuting } = useAction(connectGocardlessAction, {
     onError: ({ error }) => {
       console.error(error);
       toast.error(error.serverError);
     },
-    onSuccess: ({ data }) => {
-      console.log(data?.message);
-      toast.success("Transazione creata!");
+    onSuccess: () => {
+      console.log("Connessione iniziata!");
+      toast.success("Connessione iniziata!");
     },
   });
 
-  const form = useForm<z.infer<typeof TransactionImportSchema>>({
-    resolver: zodResolver(TransactionImportSchema),
+  const form = useForm<z.infer<typeof ConnectGocardlessSchema>>({
+    resolver: zodResolver(ConnectGocardlessSchema),
     defaultValues: {
-      settings: { inverted: false },
+      provider: "GOCARDLESS",
+      redirectBase: window.location.origin,
     },
   });
+
+  const formRef = useRef<HTMLFormElement>(null);
 
   return (
     <Form {...form}>
       <form
+        ref={formRef}
         onSubmit={form.handleSubmit(execute)}
         className={cn("flex h-full flex-col gap-2", className)}
       >
@@ -119,34 +89,24 @@ function ConnectAccountForm({
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
         </pre> */}
 
-        <div className="flex w-full items-center gap-4">
-          <FormField
-            control={form.control}
-            name="file"
-            render={({ field }) => (
-              <FormItem
-                className={cn("relative flex flex-1 space-y-0", {
-                  hidden: !!field.value,
-                })}
-              >
-                <Input
-                  placeholder="Cerca la tua banca"
-                  className="max-w-sm pe-9 ps-9"
-                />
-                <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
-                  <SearchIcon size={16} strokeWidth={2} />
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="flex w-full items-center gap-2">
+          <div className={cn("relative flex flex-1 space-y-0")}>
+            <Input
+              placeholder="Cerca la tua banca"
+              className="max-w-sm pe-9 ps-9"
+            />
+            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
+              <SearchIcon size={16} strokeWidth={2} />
+            </div>
+            <FormMessage />
+          </div>
 
           <FormField
             control={form.control}
-            name="file"
+            name="countryCode"
             render={({}) => (
               <FormItem className="w-[180px]">
-                <Select defaultValue="2">
+                <Select defaultValue="IT">
                   <SelectTrigger className="[&>span]:flex [&>span]:items-center [&>span]:gap-2 [&>span_svg]:shrink-0 [&>span_svg]:text-muted-foreground/80">
                     <SelectValue placeholder="Select framework" />
                   </SelectTrigger>
@@ -174,25 +134,61 @@ function ConnectAccountForm({
           />
         </div>
 
-        <ScrollArea className="h-72 w-full rounded-md border">
-          <div className="p-4">
-            {institutions.map((institution) => (
+        <ScrollArea className="h-72 w-full rounded-md border p-4">
+          {institutions.length === 0 ? (
+            <div className="mx-auto flex h-60 flex-col items-center justify-center text-center">
+              <Landmark />
+
+              <h3 className="mt-4 text-lg font-semibold">
+                Nessun conto collegabile
+              </h3>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Prova a selezionare un altro paese dalla lista
+              </p>
+            </div>
+          ) : (
+            institutions.map((institution) => (
               <React.Fragment key={institution.id}>
-                <div className="text-sm">{institution.name}</div>
+                <div className="flex items-center gap-2">
+                  <Avatar className="rounded-none border">
+                    <AvatarImage
+                      src={institution.logo!}
+                      alt={`${institution.name} logo`}
+                    />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <div className="text-sm">{institution.name}</div>
+                    <div className="text-xs lowercase text-muted-foreground">
+                      Via {institution.provider}
+                    </div>
+                  </div>
+                  <div className="flex-1"></div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={isExecuting}
+                    onClick={() => {
+                      form.setValue("institutionId", institution.id);
+                      formRef.current?.requestSubmit();
+                    }}
+                  >
+                    {isExecuting ? (
+                      <>
+                        <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                        Connetto...
+                      </>
+                    ) : (
+                      "Connetti"
+                    )}
+                  </Button>
+                </div>
                 <Separator className="my-2" />
               </React.Fragment>
-            ))}
-          </div>
+            ))
+          )}
         </ScrollArea>
-
-        <div className="flex-grow"></div>
-        <Button
-          className="col-span-2 mt-4"
-          type="submit"
-          disabled={isExecuting}
-        >
-          Importa Transazioni
-        </Button>
       </form>
     </Form>
   );
@@ -219,9 +215,10 @@ export default function ConnectPanel({
       <Drawer open={open} onOpenChange={() => setParams({ action: null })}>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Importazione rapida da CSV</DrawerTitle>
+            <DrawerTitle>Collega il tuo conto bancario</DrawerTitle>
             <DrawerDescription>
-              Semplifica la gestione, carica il file e verifica i dati.
+              Connetti in sicurezza e sincronizza le tue transazioni in pochi
+              secondi.
             </DrawerDescription>
           </DrawerHeader>
           <PanelContent />
@@ -242,9 +239,10 @@ export default function ConnectPanel({
       <DialogContent className="p-4">
         <div className="flex h-full flex-col">
           <DialogHeader className="mb-6">
-            <DialogTitle>Importazione rapida da CSV</DialogTitle>
+            <DialogTitle>Collega il tuo conto bancario</DialogTitle>
             <DialogDescription>
-              Semplifica la gestione, carica il file e verifica i dati.
+              Connetti in sicurezza e sincronizza le tue transazioni in pochi
+              secondi.
             </DialogDescription>
           </DialogHeader>
           <PanelContent />

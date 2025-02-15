@@ -1,6 +1,7 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+import { Provider } from "~/server/db/schema/enum";
 import { transaction_table } from "~/server/db/schema/transactions";
 
 // savings
@@ -59,3 +60,10 @@ export const AttachmentDeleteSchema = z.object({
   fileKey: z.string(),
 });
 export type AttachmentDeleteSchema = z.infer<typeof AttachmentDeleteSchema>;
+
+export const ConnectGocardlessSchema = z.object({
+  institutionId: z.string(),
+  countryCode: z.string().default("IT"),
+  provider: z.nativeEnum(Provider),
+  redirectBase: z.string().url(),
+});
