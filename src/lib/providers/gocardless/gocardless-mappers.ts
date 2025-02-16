@@ -1,9 +1,11 @@
 import { capitalCase } from "change-case";
+import { parseISO } from "date-fns";
 
 import type {
   GetAccountsRequest,
   GetAccountsResponse,
   GetInstitutionsRequest,
+  GetInstitutionsResponse,
 } from "..";
 import type {
   GC_CreateRequisitionResponse,
@@ -16,7 +18,6 @@ import type {
   GC_GetInstitutionsResponse,
 } from "./gocardless-types";
 import { ConnectionStatus, Provider } from "~/server/db/schema/enum";
-import { type DB_InstitutionInsertType } from "~/server/db/schema/open-banking";
 import { type GetTransactionsRequest, type GetTransactionsResponse } from "..";
 import {
   type GC_GetTransactionsRequest,
@@ -39,7 +40,7 @@ export const mapInstitutionsResponse = (
     provider: Provider.GOCARDLESS,
     countries: data.countries,
     availableHistory: data.transaction_total_days,
-  } satisfies DB_InstitutionInsertType;
+  } satisfies GetInstitutionsResponse[number];
 };
 
 export const mapRequisitionStatus = (
@@ -81,26 +82,17 @@ export const mapAccountsResponse = (
   institutionData: GC_GetInstitutionByIdResponse,
 ) => {
   return {
-    id: accountId,
+    rawId: accountId,
     name:
       detailsData.account.name ??
       detailsData.account.product ??
       institutionData.name ??
       "No name",
-    balance: {
-      amount: parseFloat(balancesData.balances[0].balanceAmount.amount),
-      currency: balancesData.balances[0].balanceAmount.currency,
-    },
+    balance: balancesData.balances[0].balanceAmount.amount,
     currency: detailsData.account.currency,
-    resource_id: detailsData.account.resourceId,
-    enrollment_id: null,
-    institution: {
-      id: institutionData.id,
-      logo: institutionData.logo,
-      name: institutionData.name,
-      provider: "gocardless",
-    },
-    type: "depository",
+    // resource_id: detailsData.account.resourceId,
+    // enrollment_id: null,
+    logoUrl: institutionData.logo,
   } satisfies GetAccountsResponse[number];
 };
 
@@ -108,36 +100,6 @@ export const mapTransactionsRequest = (params: GetTransactionsRequest) => {
   return {
     id: params.accountId,
   } satisfies GC_GetTransactionsRequest;
-};
-
-const mapTransactionCategory = (transaction: GC_Transaction) => {
-  if (+transaction.transactionAmount.amount > 0) {
-    return "income";
-  }
-
-  if (transaction?.proprietaryBankTransactionCode === "Transfer") {
-    return "transfer";
-  }
-
-  return null;
-};
-
-const mapTransactionMethod = (type?: string) => {
-  switch (type) {
-    case "Payment":
-    case "Bankgiro payment":
-    case "Incoming foreign payment":
-      return "payment";
-    case "Card purchase":
-    case "Card foreign purchase":
-      return "card_purchase";
-    case "Card ATM":
-      return "card_atm";
-    case "Transfer":
-      return "transfer";
-    default:
-      return "other";
-  }
 };
 
 const transformDescription = ({
@@ -208,47 +170,47 @@ const transformTransactionName = (transaction: GC_Transaction) => {
 };
 
 export const mapTransactionsResponse = (transaction: GC_Transaction) => {
-  const method = mapTransactionMethod(
-    transaction?.proprietaryBankTransactionCode,
-  );
+  // const method = mapTransactionMethod(
+  //   transaction?.proprietaryBankTransactionCode,
+  // );
 
-  let currencyExchange: { rate: number; currency: string } | undefined;
+  // let currencyExchange: { rate: number; currency: string } | undefined;
 
-  if (Array.isArray(transaction.currencyExchange)) {
-    const rate = Number.parseFloat(
-      transaction.currencyExchange.at(0)?.exchangeRate ?? "",
-    );
+  // if (Array.isArray(transaction.currencyExchange)) {
+  //   const rate = Number.parseFloat(
+  //     transaction.currencyExchange.at(0)?.exchangeRate ?? "",
+  //   );
 
-    if (rate) {
-      const currency = transaction?.currencyExchange?.at(0)?.sourceCurrency;
+  //   if (rate) {
+  //     const currency = transaction?.currencyExchange?.at(0)?.sourceCurrency;
 
-      if (currency) {
-        currencyExchange = {
-          rate,
-          currency: currency.toUpperCase(),
-        };
-      }
-    }
-  }
+  //     if (currency) {
+  //       currencyExchange = {
+  //         rate,
+  //         currency: currency.toUpperCase(),
+  //       };
+  //     }
+  //   }
+  // }
 
   const name = transformTransactionName(transaction);
-  const description = transformDescription({ transaction, name }) ?? null;
-  const balance = transaction?.balanceAfterTransaction?.balanceAmount?.amount
-    ? +transaction.balanceAfterTransaction.balanceAmount.amount
-    : null;
+  const description = transformDescription({ transaction, name });
+  // const balance = transaction?.balanceAfterTransaction?.balanceAmount?.amount
+  //   ? +transaction.balanceAfterTransaction.balanceAmount.amount
+  //   : null;
 
   return {
-    id: transaction.internalTransactionId,
-    date: transaction.bookingDate,
-    name,
-    method,
-    amount: +transaction.transactionAmount.amount,
+    rawId: transaction.internalTransactionId ?? transaction.transactionId,
+    date: parseISO(transaction.bookingDate),
+    // method,
+    amount: transaction.transactionAmount.amount,
     currency: transaction.transactionAmount.currency,
-    category: mapTransactionCategory(transaction),
-    currency_rate: currencyExchange?.rate ?? null,
-    currency_source: currencyExchange?.currency?.toUpperCase() ?? null,
-    balance,
-    description,
-    status: "posted",
+    // category: mapTransactionCategory(transaction),
+    // currency_rate: currencyExchange?.rate ?? null,
+    // currency_source: currencyExchange?.currency?.toUpperCase() ?? null,
+    // balance,
+    description: name,
+    note: description,
+    // status: "posted",
   } satisfies GetTransactionsResponse[number];
 };

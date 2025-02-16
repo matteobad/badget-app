@@ -7,7 +7,9 @@ export default async function SettingsAccountsPage() {
   const session = await auth();
   if (!session.userId) throw new Error("User not found");
 
-  const connections = await QUERIES.getConnectionsForUser(session.userId);
+  const connections = await QUERIES.getAccountsWithConnectionsForUser(
+    session.userId,
+  );
 
   return (
     <>

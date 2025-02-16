@@ -42,7 +42,30 @@ export const QUERIES = {
       .where(eq(institutionSchema.id, institutionId));
   },
 
-  getConnectionsForUser: function (userId: string, client: DBClient = db) {
+  getConnectionsforUser: function (userId: string, client: DBClient = db) {
+    return client
+      .select()
+      .from(connectionSchema)
+      .where(eq(connectionSchema.userId, userId));
+  },
+  getConnectionByKey: function (key: string, client: DBClient = db) {
+    return client
+      .select()
+      .from(connectionSchema)
+      .where(eq(connectionSchema.referenceId, key));
+  },
+
+  getAccountsForUser: function (userId: string, client: DBClient = db) {
+    return client
+      .select()
+      .from(accountSchema)
+      .where(eq(accountSchema.userId, userId))
+      .orderBy(accountSchema.name);
+  },
+  getAccountsWithConnectionsForUser: function (
+    userId: string,
+    client: DBClient = db,
+  ) {
     return client
       .select({
         ...getTableColumns(accountSchema),
@@ -59,20 +82,6 @@ export const QUERIES = {
         eq(accountSchema.connectionId, connectionSchema.id),
       )
       .where(eq(accountSchema.userId, userId));
-  },
-  getConnectionByKey: function (key: string, client: DBClient = db) {
-    return client
-      .select()
-      .from(connectionSchema)
-      .where(eq(connectionSchema.referenceId, key));
-  },
-
-  getAccountsForUser: function (userId: string, client: DBClient = db) {
-    return client
-      .select()
-      .from(accountSchema)
-      .where(eq(accountSchema.userId, userId))
-      .orderBy(accountSchema.name);
   },
 
   getCategoriesForUser: function (userId: string, client: DBClient = db) {
@@ -102,7 +111,6 @@ export const QUERIES = {
       )
       .where(eq(transactionSchema.userId, userId));
   },
-
   getTransactionById: function (transactionId: string, client: DBClient = db) {
     return client
       .select()

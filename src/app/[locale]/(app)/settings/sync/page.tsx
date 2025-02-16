@@ -1,8 +1,11 @@
+import { Suspense } from "react";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { auth } from "@clerk/nextjs/server";
 
+import { ErrorFallback } from "~/components/error-fallback";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { QUERIES } from "~/server/db/queries";
-import ImportData from "./import-data";
+import ImportData, { SyncDataLoading } from "./sync-data.server";
 
 export default async function SyncPage({
   searchParams,
@@ -13,14 +16,14 @@ export default async function SyncPage({
   if (!session.userId) throw new Error("User not found");
 
   const params = await searchParams;
-
   const conn = await QUERIES.getConnectionByKey(params.ref);
-  const institution = await QUERIES.getInstitutionById(conn[0]!.institutionId);
+  if (!conn[0]) throw new Error("Connection not found");
+  if (conn[0].userId !== session.userId) throw new Error("User not authorized");
 
-  console.log(conn, institution);
+  const institution = await QUERIES.getInstitutionById(conn[0].institutionId);
 
   return (
-    <div className="mx-auto max-w-2xl p-4 text-center">
+    <div className="mx-auto flex max-w-2xl flex-1 flex-col justify-center p-4 text-center">
       <div className="mb-4 flex justify-center">
         <Avatar className="h-12 w-12 text-green-500">
           <AvatarImage
@@ -31,17 +34,20 @@ export default async function SyncPage({
           <AvatarFallback>BK</AvatarFallback>
         </Avatar>
       </div>
-      <h1 className="mb-2 text-2xl font-semibold">Banca Collegata!</h1>
+      <h1 className="mb-2 text-2xl font-semibold">Collegamento riuscito!</h1>
       <p className="mb-6 text-muted-foreground">
-        I tuoi conti sono stati collegati con successo
+        {institution[0]!.name} è stato collegati con successo
       </p>
-      <ImportData
-        id={params.ref}
-        provider={params.provider}
-        connectionId={conn[0]!.id}
-        institutionId={institution[0]!.id}
-        institutionLogo={institution[0]!.logo!}
-      />
+      <ErrorBoundary errorComponent={ErrorFallback}>
+        <Suspense fallback={<SyncDataLoading />}>
+          <ImportData
+            id={params.ref}
+            provider={params.provider}
+            connectionId={conn[0].id}
+            institutionId={institution[0]!.id}
+          />
+        </Suspense>
+      </ErrorBoundary>
     </div>
   );
 }

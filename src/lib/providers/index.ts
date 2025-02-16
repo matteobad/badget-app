@@ -1,4 +1,6 @@
+import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_InstitutionInsertType } from "~/server/db/schema/open-banking";
+import { type DB_TransactionInsertType } from "~/server/db/schema/transactions";
 import { GoCardlessProvider } from "./gocardless";
 
 export type Providers = "gocardless" | "teller" | "plaid";
@@ -33,43 +35,32 @@ export interface BankAccountProvider {
 //   // accountType: AccountType;
 // };
 
-export type Institution = {
-  id: string;
-  name: string;
-  logo: string | null;
-  provider: Providers;
-};
+type Institution = Omit<
+  DB_InstitutionInsertType,
+  "id" | "createdAt" | "updatedAt" | "deletedAt"
+>;
 
-export type Balance = {
-  amount: number;
-  currency: string;
-};
+type Account = Omit<
+  DB_AccountType,
+  | "id"
+  | "userId"
+  | "institutionId"
+  | "connectionId"
+  | "createdAt"
+  | "updatedAt"
+  | "deletedAt"
+>;
 
-export type Account = {
-  id: string;
-  name: string;
-  currency: string;
-  type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
-  institution: Institution;
-  balance: Balance;
-  enrollment_id: string | null; // Teller
-  resource_id: string | null; // GoCardLess
-};
-
-export type Transaction = {
-  id: string;
-  amount: number;
-  currency: string;
-  date: string;
-  status: "posted" | "pending";
-  balance: number | null;
-  category: string | null;
-  method: string;
-  name: string;
-  description: string | null;
-  currency_rate: number | null;
-  currency_source: string | null;
-};
+type Transaction = Omit<
+  DB_TransactionInsertType,
+  | "id"
+  | "userId"
+  | "accountId"
+  | "categoryId"
+  | "createdAt"
+  | "updatedAt"
+  | "deletedAt"
+>;
 
 export type GetAccountsRequest = {
   id?: string; // GoCardLess
@@ -78,21 +69,6 @@ export type GetAccountsRequest = {
 };
 
 export type GetAccountsResponse = Account[];
-
-export type GetAccountBalanceRequest = {
-  accountId: string;
-  accessToken?: string; // Teller & Plaid
-};
-
-export type GetAccountBalanceResponse = {
-  currency: string;
-  amount: number;
-};
-
-export type DeleteAccountsRequest = {
-  accountId?: string; // GoCardLess
-  accessToken?: string; // Teller & Plaid
-};
 
 export type GetTransactionsRequest = {
   accountId: string;
@@ -108,16 +84,11 @@ export type GetConnectionStatusRequest = {
   accessToken?: string; // Teller & Plaid
 };
 
-export type GetInstitutionsResponse = {
-  id: string;
-  name: string;
-  logo: string | null;
-  provider: Providers;
-}[];
-
 export type GetInstitutionsRequest = {
   countryCode?: string;
 };
+
+export type GetInstitutionsResponse = Institution[];
 
 const providers: Record<string, BankAccountProvider> = {
   gocardless: GoCardlessProvider,

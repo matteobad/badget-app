@@ -3,24 +3,20 @@
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { parse } from "@fast-csv/parse";
-import { parseISO } from "date-fns";
 import { and, eq, sql } from "drizzle-orm";
 
-import { getBankAccountProvider } from "~/lib/providers";
 import { gocardlessClient } from "~/lib/providers/gocardless/gocardless-api";
 import { mapRequisitionStatus } from "~/lib/providers/gocardless/gocardless-mappers";
 import { authActionClient } from "~/lib/safe-action";
 import {
   AttachmentDeleteSchema,
   ConnectGocardlessSchema,
-  ImportDataSchema,
   TransactionDeleteSchema,
   TransactionImportSchema,
   TransactionInsertSchema,
 } from "~/lib/validators";
 import { db } from "~/server/db";
 import { MUTATIONS } from "~/server/db/queries";
-import { account_table as accountSchema } from "~/server/db/schema/accounts";
 import {
   transaction_attachment_table as attachmentSchema,
   transaction_table as transactionSchema,
@@ -220,45 +216,4 @@ export const connectGocardlessAction = authActionClient
     });
 
     return redirect(requisition.link);
-  });
-
-export const importDataAction = authActionClient
-  .schema(ImportDataSchema)
-  .metadata({ actionName: "import-data" })
-  .action(async ({ parsedInput, ctx }) => {
-    const { id, connectionId, institutionId, institutionLogo } = parsedInput;
-    const provider = getBankAccountProvider(parsedInput.provider);
-    const accounts = await provider.getAccounts({ id });
-
-    for (const account of accounts) {
-      const transactions = await provider.getTransactions({
-        accountId: account.id,
-      });
-
-      const inserted = await db
-        .insert(accountSchema)
-        .values({
-          balance: account.balance.amount.toFixed(2),
-          currency: account.currency,
-          name: account.name,
-          connectionId: connectionId,
-          institutionId: institutionId,
-          logoUrl: institutionLogo,
-          userId: ctx.userId,
-        })
-        .returning({ insertedId: accountSchema.id });
-
-      await db.insert(transactionSchema).values(
-        transactions.map((transaction) => ({
-          date: parseISO(transaction.date),
-          amount: transaction.amount.toFixed(2),
-          currency: transaction.currency,
-          description: transaction.description ?? "",
-          accountId: inserted[0]!.insertedId,
-          userId: ctx.userId,
-        })),
-      );
-    }
-
-    redirect("/banking/transactions");
   });

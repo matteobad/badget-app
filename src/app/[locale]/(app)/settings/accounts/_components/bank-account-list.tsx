@@ -27,7 +27,9 @@ function getInitials(name: string): string {
 export default function BankAccountList({
   connections,
 }: {
-  connections: Awaited<ReturnType<typeof QUERIES.getConnectionsForUser>>;
+  connections: Awaited<
+    ReturnType<typeof QUERIES.getAccountsWithConnectionsForUser>
+  >;
 }) {
   return (
     <Card className="w-full">

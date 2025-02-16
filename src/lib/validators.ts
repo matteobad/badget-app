@@ -73,5 +73,4 @@ export const ImportDataSchema = z.object({
   provider: z.string(),
   connectionId: z.string(),
   institutionId: z.string(),
-  institutionLogo: z.string(),
 });

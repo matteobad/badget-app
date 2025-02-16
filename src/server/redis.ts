@@ -10,12 +10,7 @@ const globalForRedis = globalThis as unknown as {
   conn: Redis | undefined;
 };
 
-const conn =
-  globalForRedis.conn ??
-  new Redis({
-    url: env.KV_REST_API_URL,
-    token: env.KV_REST_API_TOKEN,
-  });
+const conn = globalForRedis.conn ?? Redis.fromEnv();
 if (env.NODE_ENV !== "production") globalForRedis.conn = conn;
 
 export const redis = conn;

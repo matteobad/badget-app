@@ -52,7 +52,7 @@ import { type DB_InstitutionType } from "~/server/db/schema/open-banking";
 import { formatAmount } from "~/utils/format";
 
 export type AccountType = Awaited<
-  ReturnType<typeof QUERIES.getConnectionsForUser>
+  ReturnType<typeof QUERIES.getAccountsWithConnectionsForUser>
 >[number];
 
 export default function AccountDataTable({ data }: { data: AccountType[] }) {
