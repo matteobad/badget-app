@@ -10,9 +10,8 @@ import * as accounts from "./schema/accounts";
 import * as budgets from "./schema/budgets";
 import * as budgetsToCategories from "./schema/budgets-to-categories";
 import * as categories from "./schema/categories";
-import * as connections from "./schema/connections";
 import * as groups from "./schema/groups";
-import * as institutions from "./schema/institutions";
+import * as openBanking from "./schema/open-banking";
 import * as rules from "./schema/rules";
 import * as tokens from "./schema/tokens";
 import * as transactions from "./schema/transactions";
@@ -49,9 +48,8 @@ export const schema = {
   ...budgets,
   ...budgetsToCategories,
   ...categories,
-  ...connections,
+  ...openBanking,
   ...groups,
-  ...institutions,
   ...rules,
   ...tokens,
   ...transactionsToCategories,

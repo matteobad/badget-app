@@ -1,11 +1,10 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
-import { char, integer, numeric, varchar } from "drizzle-orm/pg-core";
+import { char, numeric, varchar } from "drizzle-orm/pg-core";
 
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
-import { connections } from "./connections";
-import { institution_table } from "./institutions";
+import { connection_table, institution_table } from "./open-banking";
 import { transaction_table } from "./transactions";
 import { workspaceToAccounts } from "./workspace-to-accounts";
 
@@ -16,10 +15,13 @@ export const account_table = pgTable("account_table", {
     .notNull(),
 
   userId: varchar({ length: 32 }).notNull(),
-  institutionId: varchar().references(() => institution_table.id),
-  connectionId: integer().references(() => connections.id),
+  institutionId: varchar({ length: 128 }).references(
+    () => institution_table.id,
+  ),
+  connectionId: varchar({ length: 128 }).references(() => connection_table.id),
 
   name: varchar({ length: 64 }).notNull(),
+  logoUrl: varchar({ length: 2048 }),
   balance: numeric({ precision: 10, scale: 2 }).notNull(),
   currency: char({ length: 3 }).notNull(),
 
@@ -33,9 +35,9 @@ export const accountsRelations = relations(account_table, ({ one, many }) => ({
     fields: [account_table.institutionId],
     references: [institution_table.id],
   }),
-  connection: one(connections, {
+  connection: one(connection_table, {
     fields: [account_table.connectionId],
-    references: [connections.id],
+    references: [connection_table.id],
   }),
 }));
 

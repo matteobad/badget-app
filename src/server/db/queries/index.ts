@@ -1,6 +1,6 @@
 "server-only";
 
-import { and, arrayContains, eq, getTableColumns } from "drizzle-orm";
+import { and, arrayContains, desc, eq, getTableColumns } from "drizzle-orm";
 
 import type {
   DB_AttachmentInsertType,
@@ -9,7 +9,10 @@ import type {
 import { db } from "..";
 import { account_table as accountSchema } from "../schema/accounts";
 import { category_table as categorySchema } from "../schema/categories";
-import { institution_table as institutionSchema } from "../schema/institutions";
+import {
+  connection_table as connectionSchema,
+  institution_table as institutionSchema,
+} from "../schema/open-banking";
 import {
   transaction_attachment_table as attachmentSchema,
   transaction_table as transactionSchema,
@@ -29,7 +32,39 @@ export const QUERIES = {
     return client
       .select()
       .from(institutionSchema)
-      .where(arrayContains(institutionSchema.countries, [countryCode]));
+      .where(arrayContains(institutionSchema.countries, [countryCode]))
+      .orderBy(desc(institutionSchema.popularity));
+  },
+  getInstitutionById: function (institutionId: string, client: DBClient = db) {
+    return client
+      .select()
+      .from(institutionSchema)
+      .where(eq(institutionSchema.id, institutionId));
+  },
+
+  getConnectionsForUser: function (userId: string, client: DBClient = db) {
+    return client
+      .select({
+        ...getTableColumns(accountSchema),
+        connection: connectionSchema,
+        institution: institutionSchema,
+      })
+      .from(accountSchema)
+      .leftJoin(
+        institutionSchema,
+        eq(accountSchema.institutionId, institutionSchema.id),
+      )
+      .leftJoin(
+        connectionSchema,
+        eq(accountSchema.connectionId, connectionSchema.id),
+      )
+      .where(eq(accountSchema.userId, userId));
+  },
+  getConnectionByKey: function (key: string, client: DBClient = db) {
+    return client
+      .select()
+      .from(connectionSchema)
+      .where(eq(connectionSchema.referenceId, key));
   },
 
   getAccountsForUser: function (userId: string, client: DBClient = db) {

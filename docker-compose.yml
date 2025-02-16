@@ -30,6 +30,9 @@ services:
     image: redis
     ports:
       - "6379:6379"
+    volumes:
+      - kv_data:/data
+
   serverless-redis-http:
     ports:
       - "8079:80"
@@ -41,3 +44,4 @@ services:
 
 volumes:
   db_data:
+  kv_data:

@@ -64,18 +64,7 @@ export type GC_CreateAgreementResponse = {
 };
 
 // requisitions
-export type GC_CreateRequisitionRequest = {
-  redirect: string;
-  institution_id: string;
-  agreement?: string;
-  reference?: string;
-  user_language?: string;
-  ssn?: string;
-  account_selection?: boolean;
-  redirect_immediate?: boolean;
-};
-
-export type GC_CreateRequisitionResponse = {
+type GC_Requisition = {
   id: string;
   created: string;
   redirect: string;
@@ -100,4 +89,115 @@ export type GC_CreateRequisitionResponse = {
   ssn: string | null;
   account_selection: boolean;
   redirect_immediate: boolean;
+};
+
+export type GC_CreateRequisitionRequest = {
+  redirect: string;
+  institution_id: string;
+  agreement?: string;
+  reference?: string;
+  user_language?: string;
+  ssn?: string;
+  account_selection?: boolean;
+  redirect_immediate?: boolean;
+};
+
+export type GC_CreateRequisitionResponse = GC_Requisition;
+
+export type GC_GetRequisitionByIdRequest = {
+  id: string;
+};
+
+export type GC_GetRequisitionByIdResponse = GC_Requisition;
+
+export type GC_DeleteRequisitionByIdRequest = {
+  id: string;
+};
+
+export type GC_DeleteRequisitionByIdResponse = {
+  summary: string;
+  detail: string;
+};
+
+// accounts
+export type GC_Transaction = {
+  transactionAmount: { amount: string; currency: string };
+  currencyExchange?: {
+    exchangeRate: string;
+    targetCurrency: string;
+    sourceCurrency: string;
+  }[];
+  remittanceInformationStructured?: string;
+  remittanceInformationStructuredArray?: string[];
+  remittanceInformationUnstructured?: string;
+  remittanceInformationUnstructuredArray?: string[];
+  proprietaryBankTransactionCode?: string;
+  entryReference?: string;
+  transactionId?: string;
+  internalTransactionId: string;
+  bookingDate: string;
+  valueDate?: string;
+  additionalInformation?: string;
+  creditorName?: string;
+  creditorAccount?: { iban?: string };
+  debtorName?: string;
+  debtorAccount?: { iban?: string };
+  balanceAfterTransaction?: {
+    balanceAmount?: {
+      amount: string;
+    };
+  };
+};
+
+export type GC_GetAccountRequest = {
+  id: string;
+};
+
+export type GC_GetAccountMetadataResponse = {
+  id: string;
+  created: string;
+  last_accessed: string;
+  iban: string;
+  bban: string;
+  status: string;
+  institution_id: string;
+  owner_name: string;
+};
+
+export type GC_GetAccountDetailsResponse = {
+  account: {
+    resourceId: string;
+    iban: string;
+    currency: string;
+    ownerName: string;
+    name: string;
+    product: string;
+    cashAccountType: string;
+    // TODO: map remaining fields https://developer.gocardless.com/bank-account-data/endpoints
+  };
+};
+
+export type GC_GetAccountBalancesResponse = {
+  balances: [
+    {
+      balanceAmount: {
+        amount: string;
+        currency: string;
+      };
+      balanceType: string;
+      referenceDate: string;
+    },
+  ];
+};
+
+export type GC_GetTransactionsRequest = GC_GetAccountRequest & {
+  date_from?: string;
+  date_to?: string;
+};
+
+export type GC_GetTransactionsResponse = {
+  transactions: {
+    booked: GC_Transaction[];
+    posted: GC_Transaction[];
+  };
 };

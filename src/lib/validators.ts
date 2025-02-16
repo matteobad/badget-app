@@ -67,3 +67,11 @@ export const ConnectGocardlessSchema = z.object({
   provider: z.nativeEnum(Provider),
   redirectBase: z.string().url(),
 });
+
+export const ImportDataSchema = z.object({
+  id: z.string(),
+  provider: z.string(),
+  connectionId: z.string(),
+  institutionId: z.string(),
+  institutionLogo: z.string(),
+});

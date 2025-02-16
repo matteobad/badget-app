@@ -17,8 +17,11 @@ export type BankAccountType =
   (typeof BankAccountType)[keyof typeof BankAccountType];
 
 export const ConnectionStatus = {
-  CONNECTED: "CONNECTED",
-  DISCONNECTED: "DISCONNECTED",
+  CREATED: "CREATED",
+  PENDING: "PENDING",
+  LINKED: "LINKED",
+  EXPIRED: "EXPIRED",
+  ERROR: "ERROR",
   UNKNOWN: "UNKNOWN",
 } as const;
 export type ConnectionStatus =

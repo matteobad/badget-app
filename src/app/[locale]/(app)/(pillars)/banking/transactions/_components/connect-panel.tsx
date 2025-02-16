@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Landmark, Loader2Icon, SearchIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
@@ -44,7 +44,7 @@ import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { ConnectGocardlessSchema } from "~/lib/validators";
 import { connectGocardlessAction } from "~/server/actions";
-import { type DB_InstitutionType } from "~/server/db/schema/institutions";
+import { type DB_InstitutionType } from "~/server/db/schema/open-banking";
 
 const countries = [
   {
@@ -57,6 +57,8 @@ function ConnectAccountForm({
   className,
   institutions,
 }: { institutions: DB_InstitutionType[] } & React.ComponentProps<"form">) {
+  const [query, setQuery] = useState<string>();
+
   const { execute, isExecuting } = useAction(connectGocardlessAction, {
     onError: ({ error }) => {
       console.error(error);
@@ -78,6 +80,8 @@ function ConnectAccountForm({
 
   const formRef = useRef<HTMLFormElement>(null);
 
+  const institutioId = form.watch("institutionId");
+
   return (
     <Form {...form}>
       <form
@@ -94,6 +98,7 @@ function ConnectAccountForm({
             <Input
               placeholder="Cerca la tua banca"
               className="max-w-sm pe-9 ps-9"
+              onChange={(event) => setQuery(event.target.value)}
             />
             <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
               <SearchIcon size={16} strokeWidth={2} />
@@ -147,46 +152,51 @@ function ConnectAccountForm({
               </p>
             </div>
           ) : (
-            institutions.map((institution) => (
-              <React.Fragment key={institution.id}>
-                <div className="flex items-center gap-2">
-                  <Avatar className="rounded-none border">
-                    <AvatarImage
-                      src={institution.logo!}
-                      alt={`${institution.name} logo`}
-                    />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <div className="text-sm">{institution.name}</div>
-                    <div className="text-xs lowercase text-muted-foreground">
-                      Via {institution.provider}
+            institutions
+              .filter((institution) =>
+                query ? institution.name.includes(query) : true,
+              )
+              .map((institution) => (
+                <React.Fragment key={institution.id}>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="rounded-none border">
+                      <AvatarImage
+                        src={institution.logo!}
+                        alt={`${institution.name} logo`}
+                      />
+                      <AvatarFallback>CN</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <div className="text-sm">{institution.name}</div>
+                      <div className="text-xs lowercase text-muted-foreground">
+                        Via {institution.provider}
+                      </div>
                     </div>
+                    <div className="flex-1"></div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={isExecuting}
+                      onClick={() => {
+                        form.setValue("institutionId", institution.originalId);
+                        formRef.current?.requestSubmit();
+                      }}
+                    >
+                      {isExecuting &&
+                      institution.originalId === institutioId ? (
+                        <>
+                          <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                          Connetto...
+                        </>
+                      ) : (
+                        "Connetti"
+                      )}
+                    </Button>
                   </div>
-                  <div className="flex-1"></div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={isExecuting}
-                    onClick={() => {
-                      form.setValue("institutionId", institution.id);
-                      formRef.current?.requestSubmit();
-                    }}
-                  >
-                    {isExecuting ? (
-                      <>
-                        <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                        Connetto...
-                      </>
-                    ) : (
-                      "Connetti"
-                    )}
-                  </Button>
-                </div>
-                <Separator className="my-2" />
-              </React.Fragment>
-            ))
+                  <Separator className="my-2" />
+                </React.Fragment>
+              ))
           )}
         </ScrollArea>
       </form>

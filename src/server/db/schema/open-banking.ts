@@ -1,10 +1,12 @@
 import { createId } from "@paralleldrive/cuid2";
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { integer, text, varchar } from "drizzle-orm/pg-core";
 
 import type { Provider } from "./enum";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
+import { account_table } from "./accounts";
+import { ConnectionStatus } from "./enum";
 
 export const institution_table = pgTable("institution_table", {
   id: varchar({ length: 128 })
@@ -35,3 +37,33 @@ export const institution_table = pgTable("institution_table", {
 
 export type DB_InstitutionType = typeof institution_table.$inferSelect;
 export type DB_InstitutionInsertType = typeof institution_table.$inferInsert;
+
+export const connection_table = pgTable("connection_table", {
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId())
+    .notNull(),
+
+  // FK
+  userId: varchar({ length: 32 }).notNull(),
+  institutionId: varchar({ length: 128 })
+    .notNull()
+    .references(() => institution_table.id),
+
+  referenceId: varchar().unique(),
+  provider: text().$type<Provider>().notNull(),
+  status: text().$type<ConnectionStatus>().default(ConnectionStatus.UNKNOWN),
+
+  ...timestamps,
+});
+
+export const connection_relations = relations(connection_table, ({ many }) => ({
+  accounts: many(account_table),
+  // institution: one(institution_table, {
+  //   fields: [connection_table.institutionId],
+  //   references: [institution_table.id],
+  // }),
+}));
+
+export type DB_ConnectionType = typeof connection_table.$inferSelect;
+export type DB_ConnectionInsertType = typeof connection_table.$inferInsert;

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import { getBankAccountProvider } from "~/lib/providers";
 import { db } from "~/server/db";
-import { institution_table as institutionSchema } from "~/server/db/schema/institutions";
+import { institution_table as institutionSchema } from "~/server/db/schema/open-banking";
 
 export async function GET(req: NextRequest) {
   try {
