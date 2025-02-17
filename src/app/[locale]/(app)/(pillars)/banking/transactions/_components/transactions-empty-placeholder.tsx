@@ -9,7 +9,7 @@ export function TransactionsEmptyPlaceholder() {
         <Landmark />
 
         <h3 className="mt-4 text-lg font-semibold">Nessuna transazione</h3>
-        <p className="mb-4 mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 mb-4 text-sm text-muted-foreground">
           Non ci sono ancora transazioni in nessuno dei tuoi conti.
         </p>
         <AddTransaction label="Aggiungi transazione" />

@@ -120,7 +120,7 @@ export function AddInvestment() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] md:max-w-[700px]">
         {isLoading && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-xs">
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
               <p className="text-sm text-muted-foreground">
@@ -143,7 +143,7 @@ export function AddInvestment() {
                 className={`cursor-pointer transition-all ${
                   form.watch("type") === type.id
                     ? "border-primary shadow-md"
-                    : "hover:border-primary hover:shadow-sm"
+                    : "hover:border-primary hover:shadow-xs"
                 }`}
                 onClick={() =>
                   handleInvestmentTypeSelect(

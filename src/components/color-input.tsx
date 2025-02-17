@@ -16,7 +16,7 @@ export function ColorPicker({ value, onSelect }: ColorPickerProps) {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="absolute left-3.5 top-3.5 size-3 rounded-[2px] transition-colors"
+          className="absolute top-3.5 left-3.5 size-3 rounded-[2px] transition-colors"
           style={{
             backgroundColor: value,
           }}

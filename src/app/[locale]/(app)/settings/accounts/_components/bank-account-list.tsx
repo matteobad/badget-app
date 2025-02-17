@@ -56,7 +56,7 @@ export default function BankAccountList({
               <div className="flex-1 space-y-1">
                 <Link
                   href={`/banking/${account.id}`}
-                  className="block text-sm font-medium leading-none hover:underline"
+                  className="block text-sm leading-none font-medium hover:underline"
                 >
                   {account.name}
                 </Link>

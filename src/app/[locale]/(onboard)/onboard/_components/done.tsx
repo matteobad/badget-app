@@ -26,7 +26,7 @@ export function Done() {
 
   return (
     <motion.div
-      className="shadox-xl flex h-full w-full flex-col items-center justify-center bg-opacity-60 p-8"
+      className="shadox-xl bg-opacity-60 flex h-full w-full flex-col items-center justify-center p-8"
       exit={{ opacity: 0, scale: 0.95 }}
       initial={{ background: "transparent" }}
       animate={{ background: "var(--background)" }}

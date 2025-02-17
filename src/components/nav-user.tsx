@@ -36,7 +36,7 @@ export function NavUser() {
     return (
       <div className="flex h-12 w-full items-center gap-2 p-2">
         <Skeleton className="rouded size-8" />
-        <div className="flex flex-grow flex-col gap-1">
+        <div className="flex grow flex-col gap-1">
           <Skeleton className="rouded h-4 w-[80px]" />
           <Skeleton className="rouded h-3 w-[120px]" />
         </div>
@@ -71,7 +71,7 @@ export function NavUser() {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}

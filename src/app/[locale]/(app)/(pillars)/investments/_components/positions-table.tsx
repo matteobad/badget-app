@@ -66,7 +66,7 @@ export function PositionsTable() {
                   <position.icon className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-medium leading-none">
+                  <p className="text-sm leading-none font-medium">
                     {position.name}
                   </p>
                   <p className="text-xs text-muted-foreground">

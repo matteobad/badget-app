@@ -97,7 +97,7 @@ function ConnectAccountForm({
           <div className={cn("relative flex flex-1 space-y-0")}>
             <Input
               placeholder="Cerca la tua banca"
-              className="max-w-sm pe-9 ps-9"
+              className="max-w-sm ps-9 pe-9"
               onChange={(event) => setQuery(event.target.value)}
             />
             <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
@@ -110,12 +110,12 @@ function ConnectAccountForm({
             control={form.control}
             name="countryCode"
             render={({}) => (
-              <FormItem className="w-[180px]">
+              <FormItem className="w-[180px] space-y-0">
                 <Select defaultValue="IT">
                   <SelectTrigger className="[&>span]:flex [&>span]:items-center [&>span]:gap-2 [&>span_svg]:shrink-0 [&>span_svg]:text-muted-foreground/80">
                     <SelectValue placeholder="Select framework" />
                   </SelectTrigger>
-                  <SelectContent className="[&_*[role=option]>span>svg]:shrink-0 [&_*[role=option]>span>svg]:text-muted-foreground/80 [&_*[role=option]>span]:end-2 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:flex [&_*[role=option]>span]:items-center [&_*[role=option]>span]:gap-2 [&_*[role=option]]:pe-8 [&_*[role=option]]:ps-2">
+                  <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2 [&_*[role=option]>span]:flex [&_*[role=option]>span]:items-center [&_*[role=option]>span]:gap-2 [&_*[role=option]>span>svg]:shrink-0 [&_*[role=option]>span>svg]:text-muted-foreground/80">
                     {countries.map((continent) => (
                       <SelectGroup key={continent.continent}>
                         <SelectLabel className="ps-2">
@@ -168,7 +168,7 @@ function ConnectAccountForm({
                     </Avatar>
                     <div className="flex flex-col">
                       <div className="text-sm">{institution.name}</div>
-                      <div className="text-xs lowercase text-muted-foreground">
+                      <div className="text-xs text-muted-foreground lowercase">
                         Via {institution.provider}
                       </div>
                     </div>
