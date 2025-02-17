@@ -1,6 +1,6 @@
 "server-only";
 
-import { and, eq, getTableColumns } from "drizzle-orm";
+import { and, arrayContains, desc, eq, getTableColumns } from "drizzle-orm";
 
 import type {
   DB_AttachmentInsertType,
@@ -9,6 +9,10 @@ import type {
 import { db } from "..";
 import { account_table as accountSchema } from "../schema/accounts";
 import { category_table as categorySchema } from "../schema/categories";
+import {
+  connection_table as connectionSchema,
+  institution_table as institutionSchema,
+} from "../schema/open-banking";
 import {
   transaction_attachment_table as attachmentSchema,
   transaction_table as transactionSchema,
@@ -20,12 +24,64 @@ type TXType = Parameters<Parameters<DBType["transaction"]>[0]>[0];
 type DBClient = DBType | TXType;
 
 export const QUERIES = {
+  // institutions
+  getInstitutionsForCountry: function (
+    countryCode: string,
+    client: DBClient = db,
+  ) {
+    return client
+      .select()
+      .from(institutionSchema)
+      .where(arrayContains(institutionSchema.countries, [countryCode]))
+      .orderBy(desc(institutionSchema.popularity));
+  },
+  getInstitutionById: function (institutionId: string, client: DBClient = db) {
+    return client
+      .select()
+      .from(institutionSchema)
+      .where(eq(institutionSchema.id, institutionId));
+  },
+
+  getConnectionsforUser: function (userId: string, client: DBClient = db) {
+    return client
+      .select()
+      .from(connectionSchema)
+      .where(eq(connectionSchema.userId, userId));
+  },
+  getConnectionByKey: function (key: string, client: DBClient = db) {
+    return client
+      .select()
+      .from(connectionSchema)
+      .where(eq(connectionSchema.referenceId, key));
+  },
+
   getAccountsForUser: function (userId: string, client: DBClient = db) {
     return client
       .select()
       .from(accountSchema)
       .where(eq(accountSchema.userId, userId))
       .orderBy(accountSchema.name);
+  },
+  getAccountsWithConnectionsForUser: function (
+    userId: string,
+    client: DBClient = db,
+  ) {
+    return client
+      .select({
+        ...getTableColumns(accountSchema),
+        connection: connectionSchema,
+        institution: institutionSchema,
+      })
+      .from(accountSchema)
+      .leftJoin(
+        institutionSchema,
+        eq(accountSchema.institutionId, institutionSchema.id),
+      )
+      .leftJoin(
+        connectionSchema,
+        eq(accountSchema.connectionId, connectionSchema.id),
+      )
+      .where(eq(accountSchema.userId, userId));
   },
 
   getCategoriesForUser: function (userId: string, client: DBClient = db) {
@@ -55,7 +111,6 @@ export const QUERIES = {
       )
       .where(eq(transactionSchema.userId, userId));
   },
-
   getTransactionById: function (transactionId: string, client: DBClient = db) {
     return client
       .select()

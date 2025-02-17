@@ -4,7 +4,7 @@ set -a
 set +a
 
 # setup
-docker-compose up -d --wait db neon-proxy
+docker-compose up -d --wait
 
 # db
 pnpm db:push

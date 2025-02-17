@@ -1,56 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { Check, CreditCard, DollarSign } from "lucide-react";
+import { DollarSign } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
-import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
-
-const bankAccounts = [
-  {
-    id: 1,
-    name: "Main Checking",
-    type: "Checking",
-    balance: 5420.5,
-    logo: "/placeholder.svg?height=40&width=40",
-    lastUpdated: new Date(2023, 10, 15, 9, 30), // November 15, 2023, 09:30 AM
-  },
-  {
-    id: 2,
-    name: "Savings",
-    type: "Savings",
-    balance: 15780.25,
-    logo: "/placeholder.svg?height=40&width=40",
-    lastUpdated: new Date(2023, 10, 14, 18, 45), // November 14, 2023, 06:45 PM
-  },
-  {
-    id: 3,
-    name: "Investment Account",
-    type: "Investment",
-    balance: 32150.75,
-    logo: "/placeholder.svg?height=40&width=40",
-    lastUpdated: new Date(2023, 10, 13, 12, 0), // November 13, 2023, 12:00 PM
-  },
-  {
-    id: 4,
-    name: "Credit Card",
-    type: "Credit",
-    balance: -1250.0,
-    logo: "/placeholder.svg?height=40&width=40",
-    lastUpdated: new Date(2023, 10, 15, 7, 15), // November 15, 2023, 07:15 AM
-  },
-];
+import { type QUERIES } from "~/server/db/queries";
 
 function getInitials(name: string): string {
   return name
@@ -61,21 +24,13 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-export default function BankAccountList() {
-  const [selectedAccounts, setSelectedAccounts] = useState<number[]>([]);
-
-  const toggleAccount = (accountId: number) => {
-    setSelectedAccounts((prev) =>
-      prev.includes(accountId)
-        ? prev.filter((id) => id !== accountId)
-        : [...prev, accountId],
-    );
-  };
-
-  const totalBalance = bankAccounts
-    .filter((account) => selectedAccounts.includes(account.id))
-    .reduce((sum, account) => sum + account.balance, 0);
-
+export default function BankAccountList({
+  connections,
+}: {
+  connections: Awaited<
+    ReturnType<typeof QUERIES.getAccountsWithConnectionsForUser>
+  >;
+}) {
   return (
     <Card className="w-full">
       <CardHeader>
@@ -86,12 +41,11 @@ export default function BankAccountList() {
       </CardHeader>
       <CardContent>
         <div className="grid gap-4">
-          {bankAccounts.map((account) => (
+          {connections.map((account) => (
             <div
               key={account.id}
               className={cn(
-                "flex items-center space-x-4 rounded-md border p-4",
-                selectedAccounts.includes(account.id) && "border-primary",
+                "flex items-center space-x-4 rounded-md border border-primary p-4",
               )}
             >
               <Avatar className="h-10 w-10 rounded-lg">
@@ -106,10 +60,12 @@ export default function BankAccountList() {
                 >
                   {account.name}
                 </Link>
-                <p className="text-sm text-muted-foreground">{account.type}</p>
+                <p className="text-sm text-muted-foreground">
+                  {account.currency}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   Last updated:{" "}
-                  {formatDistanceToNow(account.lastUpdated, {
+                  {formatDistanceToNow(account.updatedAt!, {
                     addSuffix: true,
                   })}
                 </p>
@@ -120,67 +76,20 @@ export default function BankAccountList() {
                   <span
                     className={cn(
                       "text-sm font-medium",
-                      account.balance < 0 && "text-destructive",
+                      parseFloat(account.balance) < 0 && "text-destructive",
                     )}
                   >
-                    {account.balance.toLocaleString("en-US", {
+                    {parseFloat(account.balance).toLocaleString("it-IT", {
                       style: "currency",
-                      currency: "USD",
+                      currency: "EUR",
                     })}
                   </span>
                 </div>
-                <Button
-                  variant={
-                    selectedAccounts.includes(account.id)
-                      ? "secondary"
-                      : "ghost"
-                  }
-                  size="icon"
-                  onClick={() => toggleAccount(account.id)}
-                >
-                  <Check
-                    className={cn(
-                      "h-4 w-4",
-                      selectedAccounts.includes(account.id)
-                        ? "opacity-100"
-                        : "opacity-0",
-                    )}
-                  />
-                  <span className="sr-only">
-                    {selectedAccounts.includes(account.id)
-                      ? "Deselect"
-                      : "Select"}{" "}
-                    {account.name}
-                  </span>
-                </Button>
               </div>
             </div>
           ))}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <div className="flex items-center space-x-2">
-          <CreditCard className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">
-            {selectedAccounts.length}{" "}
-            {selectedAccounts.length === 1 ? "account" : "accounts"} selected
-          </span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium">Total Balance:</span>
-          <span
-            className={cn(
-              "text-sm font-medium",
-              totalBalance < 0 && "text-destructive",
-            )}
-          >
-            {totalBalance.toLocaleString("en-US", {
-              style: "currency",
-              currency: "USD",
-            })}
-          </span>
-        </div>
-      </CardFooter>
     </Card>
   );
 }

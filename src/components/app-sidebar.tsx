@@ -35,7 +35,7 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "Conti",
+          title: "Conti corrente",
           url: "/banking/accounts",
         },
         {
@@ -120,7 +120,7 @@ const data = {
   ],
   settings: [
     {
-      name: "Conti collegati",
+      name: "Collegamenti",
       url: "/settings/accounts",
       icon: Link2,
     },

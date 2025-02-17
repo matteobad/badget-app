@@ -1,8 +1,9 @@
 # Badget
 
-## Notes 2025-02-13
+## Notes 2025-02-14
 
-- [ ] Import transaction success message (import another one, empty form, add and close)
+- [ ] settings accounts page with simple table
 - [ ] transaction table filters
 - [ ] edit transaction
-- [ ] gocardless integration
+- [ ] RLS with neon + Clerk
+- [ ] upgrade Tailwind v4

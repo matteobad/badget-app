@@ -3,6 +3,7 @@ import { type SearchParams } from "nuqs/server";
 
 import { QUERIES } from "~/server/db/queries";
 import AddPanel from "./_components/add-panel";
+import ConnectPanel from "./_components/connect-panel";
 import ImportPanel from "./_components/import-panel";
 import TransactionDataTable from "./_components/transaction-table";
 import { TransactionsEmptyPlaceholder } from "./_components/transactions-empty-placeholder";
@@ -23,11 +24,13 @@ export default async function BankingTransactionsPage({
   if (!session.userId) throw new Error("User not found");
 
   // TODO: improve performance with Suspence bounderies
-  const [accountsData, categoriesData, transactionsData] = await Promise.all([
-    QUERIES.getAccountsForUser(session.userId),
-    QUERIES.getCategoriesForUser(session.userId),
-    QUERIES.getTransactionForUser(session.userId),
-  ]);
+  const [institutionsData, accountsData, categoriesData, transactionsData] =
+    await Promise.all([
+      QUERIES.getInstitutionsForCountry("IT"),
+      QUERIES.getAccountsForUser(session.userId),
+      QUERIES.getCategoriesForUser(session.userId),
+      QUERIES.getTransactionForUser(session.userId),
+    ]);
 
   return (
     <>
@@ -41,6 +44,7 @@ export default async function BankingTransactionsPage({
 
       <AddPanel accounts={accountsData} categories={categoriesData} />
       <ImportPanel accounts={accountsData} categories={categoriesData} />
+      <ConnectPanel institutions={institutionsData} />
     </>
   );
 }

@@ -10,9 +10,8 @@ import * as accounts from "./schema/accounts";
 import * as budgets from "./schema/budgets";
 import * as budgetsToCategories from "./schema/budgets-to-categories";
 import * as categories from "./schema/categories";
-import * as connections from "./schema/connections";
 import * as groups from "./schema/groups";
-import * as institutions from "./schema/institutions";
+import * as openBanking from "./schema/open-banking";
 import * as rules from "./schema/rules";
 import * as tokens from "./schema/tokens";
 import * as transactions from "./schema/transactions";
@@ -20,23 +19,6 @@ import * as transactionsToCategories from "./schema/transactions-to-categories";
 import * as users from "./schema/users";
 import * as usersToGroups from "./schema/users-to-groups";
 import * as workspaceToAccounts from "./schema/workspace-to-accounts";
-
-export const schema = {
-  ...accounts,
-  ...budgets,
-  ...budgetsToCategories,
-  ...categories,
-  ...connections,
-  ...groups,
-  ...institutions,
-  ...rules,
-  ...tokens,
-  ...transactionsToCategories,
-  ...transactions,
-  ...users,
-  ...usersToGroups,
-  ...workspaceToAccounts,
-};
 
 let connectionString = env.DATABASE_URL;
 
@@ -60,6 +42,22 @@ if (env.NODE_ENV === "development") {
 
 const sql = neon(connectionString);
 const pool = new Pool({ connectionString });
+
+export const schema = {
+  ...accounts,
+  ...budgets,
+  ...budgetsToCategories,
+  ...categories,
+  ...openBanking,
+  ...groups,
+  ...rules,
+  ...tokens,
+  ...transactionsToCategories,
+  ...transactions,
+  ...users,
+  ...usersToGroups,
+  ...workspaceToAccounts,
+};
 
 // Drizzle supports both HTTP and WebSocket clients. Choose the one that fits your needs:
 // HTTP Client:
