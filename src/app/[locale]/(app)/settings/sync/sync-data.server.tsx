@@ -26,7 +26,7 @@ export default async function SyncDataServer(props: {
       accountId: account.rawId!,
     });
 
-    const inserted = await db
+    const upserted = await db
       .insert(account_table)
       .values({
         ...account,
@@ -34,15 +34,32 @@ export default async function SyncDataServer(props: {
         institutionId: institutionId,
         userId: session.userId!,
       })
+      .onConflictDoUpdate({
+        target: [account_table.userId, account_table.rawId],
+        set: {
+          ...account,
+          connectionId: connectionId,
+          institutionId: institutionId,
+        },
+      })
       .returning({ insertedId: account_table.id });
 
-    await db.insert(transaction_table).values(
-      transactions.map((transaction) => ({
-        ...transaction,
-        accountId: inserted[0]!.insertedId,
-        userId: session.userId!,
-      })),
-    );
+    await db
+      .insert(transaction_table)
+      .values(
+        transactions.map((transaction) => ({
+          ...transaction,
+          accountId: upserted[0]!.insertedId,
+          userId: session.userId!,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: [transaction_table.userId, transaction_table.rawId],
+        set: {
+          ...transaction_table,
+          accountId: upserted[0]!.insertedId,
+        },
+      });
   }
 
   return (
