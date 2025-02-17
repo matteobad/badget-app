@@ -2,8 +2,9 @@
 
 ## Notes 2025-02-14
 
-- [ ] gocardless integration
-- [ ] add redis integration to vercel
-- [ ] protect institutions api route
+- [ ] cron to update accounts daily
+- [ ] settings accounts page with simple table
 - [ ] transaction table filters
 - [ ] edit transaction
+- [ ] RLS with neon + Clerk
+- [ ] upgrade Tailwind v4

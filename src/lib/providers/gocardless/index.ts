@@ -55,9 +55,9 @@ export const GoCardlessProvider: BankAccountProvider = {
     return response;
   },
 
-  async getTransactions(params: GetTransactionsRequest) {
-    const { id } = mapTransactionsRequest(params);
-    const response = await gocardlessClient.getAccountTransactions({ id });
+  async getTransactions(request: GetTransactionsRequest) {
+    const params = mapTransactionsRequest(request);
+    const response = await gocardlessClient.getAccountTransactions(params);
     return response.transactions.booked.map(mapTransactionsResponse);
   },
 };

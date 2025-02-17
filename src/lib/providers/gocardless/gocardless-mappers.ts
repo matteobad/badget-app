@@ -1,5 +1,5 @@
 import { capitalCase } from "change-case";
-import { parseISO } from "date-fns";
+import { formatISO, parseISO, subDays } from "date-fns";
 
 import type {
   GetAccountsRequest,
@@ -99,6 +99,11 @@ export const mapAccountsResponse = (
 export const mapTransactionsRequest = (params: GetTransactionsRequest) => {
   return {
     id: params.accountId,
+    date_from: params.latest
+      ? formatISO(subDays(new Date(), 7), {
+          representation: "date",
+        })
+      : undefined,
   } satisfies GC_GetTransactionsRequest;
 };
 

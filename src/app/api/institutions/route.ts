@@ -1,14 +1,22 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { env } from "~/env";
 import { getBankAccountProvider } from "~/lib/providers";
 import { db } from "~/server/db";
 import { institution_table as institutionSchema } from "~/server/db/schema/open-banking";
 
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
+    return new Response("Unauthorized", {
+      status: 401,
+    });
+  }
+
   try {
     const providerName =
-      req.nextUrl.searchParams.get("provider") ?? "gocardless";
+      request.nextUrl.searchParams.get("provider") ?? "gocardless";
 
     const provider = getBankAccountProvider(providerName);
     const institutions = await provider.getInstitutions({ countryCode: "IT" });

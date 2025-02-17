@@ -98,7 +98,7 @@ const providers: Record<string, BankAccountProvider> = {
 export const getBankAccountProvider = (
   providerName: string,
 ): BankAccountProvider => {
-  const provider = providers[providerName];
+  const provider = providers[providerName.toLowerCase()];
   if (!provider) {
     throw new Error(`Unknown provider: ${providerName}`);
   }

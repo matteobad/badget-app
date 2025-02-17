@@ -30,41 +30,6 @@ export interface ErrorResponse {
   status_code: number;
 }
 
-export interface AccountBalance {
-  balances: Array<{
-    balanceAmount: {
-      amount: string;
-      currency: string;
-    };
-  }>;
-}
-
-export interface Transaction {
-  transactionId?: string;
-  debtorName?: string;
-  debtorAccount?: {
-    iban: string;
-  };
-  transactionAmount: {
-    currency: string;
-    amount: string;
-  };
-  bankTransactionCode?: string;
-  bookingDate?: string;
-  valueDate?: string;
-  remittanceInformationUnstructured?: string;
-  remittanceInformationStructured?: string;
-  additionalInformation?: string;
-  purposeCode?: string;
-}
-
-export interface AccountTransactions {
-  transactions: {
-    booked: Transaction[];
-    pending?: Transaction[];
-  };
-}
-
 const BASE_URL = "https://bankaccountdata.gocardless.com";
 
 const ONE_DAY = 3600 * 24;
@@ -74,7 +39,17 @@ const REFRESH_KEY = "gocardless:refresh_token";
 async function fetchWithAuth<T>(
   path: string,
   options: RequestInit = {},
+  cacheKey?: string,
 ): Promise<T> {
+  if (cacheKey) {
+    console.log(`[gocardless] reading from cache ${cacheKey}`);
+    const cachedData = await redis.get<T>(cacheKey);
+    if (cachedData) {
+      console.log(`[gocardless] found cached data`);
+      return cachedData;
+    }
+  }
+
   const url = `${BASE_URL}${path}`;
   const headers = new Headers(options.headers);
   const token = await getValidAccessToken();
@@ -89,6 +64,11 @@ async function fetchWithAuth<T>(
   });
 
   const data = (await response.json()) as T;
+
+  if (cacheKey) {
+    await redis.set(cacheKey, data, { ex: ONE_DAY });
+    console.log(`[gocardless] writing to cache ${cacheKey}`);
+  }
 
   if (!response.ok) {
     throw new Error((data as ErrorResponse).detail || "Unknown error occurred");
@@ -148,18 +128,16 @@ export const gocardlessClient = {
   // institutions
   getInstitutions: async (params: GC_GetInstitutionsRequest) => {
     const cacheKey = `gocardless:institutions:${params.country}`;
-    const cachedData = await redis.get<GC_GetInstitutionsResponse>(cacheKey);
-    if (cachedData) return cachedData;
-
     const queryParams = new URLSearchParams();
     queryParams.set("country", params.country);
     const url = `/api/v2/institutions/?${queryParams.toString()}`;
-
-    const data = await fetchWithAuth<GC_GetInstitutionsResponse>(url);
-    await redis.set(cacheKey, data, { ex: ONE_DAY });
+    const data = await fetchWithAuth<GC_GetInstitutionsResponse>(
+      url,
+      {},
+      cacheKey,
+    );
     return data;
   },
-
   getInstitutionById: async (params: { id: string }) => {
     const url = `/api/v2/institutions/${params.id}`;
     return await fetchWithAuth<GC_GetInstitutionByIdResponse>(url);
@@ -198,43 +176,43 @@ export const gocardlessClient = {
   // accounts
   getAccountMetadata: async (params: GC_GetAccountRequest) => {
     const cacheKey = `gocardless:account_metadata:${params.id}`;
-    const cachedData = await redis.get<GC_GetAccountMetadataResponse>(cacheKey);
-    if (cachedData) return cachedData;
-
     const url = `/api/v2/accounts/${params.id}/`;
-    const data = await fetchWithAuth<GC_GetAccountMetadataResponse>(url);
-    await redis.set(cacheKey, data, { ex: ONE_DAY });
+    const data = await fetchWithAuth<GC_GetAccountMetadataResponse>(
+      url,
+      {},
+      cacheKey,
+    );
     return data;
   },
   getAccountDetails: async (params: GC_GetAccountRequest) => {
     const cacheKey = `gocardless:account_details:${params.id}`;
-    const cachedData = await redis.get<GC_GetAccountDetailsResponse>(cacheKey);
-    if (cachedData) return cachedData;
-
     const url = `/api/v2/accounts/${params.id}/details/`;
-    const data = await fetchWithAuth<GC_GetAccountDetailsResponse>(url);
-    await redis.set(cacheKey, data, { ex: ONE_DAY });
+    const data = await fetchWithAuth<GC_GetAccountDetailsResponse>(
+      url,
+      {},
+      cacheKey,
+    );
     return data;
   },
   getAccountBalances: async (params: GC_GetAccountRequest) => {
     const cacheKey = `gocardless:account_balances:${params.id}`;
-    const cachedData = await redis.get<GC_GetAccountBalancesResponse>(cacheKey);
-    if (cachedData) return cachedData;
-
     const url = `/api/v2/accounts/${params.id}/balances/`;
-    const data = await fetchWithAuth<GC_GetAccountBalancesResponse>(url);
-    await redis.set(cacheKey, data, { ex: ONE_DAY });
+    const data = await fetchWithAuth<GC_GetAccountBalancesResponse>(
+      url,
+      {},
+      cacheKey,
+    );
     return data;
   },
   getAccountTransactions: async (params: GC_GetTransactionsRequest) => {
     const paramsKey = Object.values(params).join(":");
     const cacheKey = `gocardless:account_transactions:${paramsKey}`;
-    const cachedData = await redis.get<GC_GetTransactionsResponse>(cacheKey);
-    if (cachedData) return cachedData;
-
     const url = `/api/v2/accounts/${params.id}/transactions/`;
-    const data = await fetchWithAuth<GC_GetTransactionsResponse>(url);
-    await redis.set(cacheKey, data, { ex: ONE_DAY });
+    const data = await fetchWithAuth<GC_GetTransactionsResponse>(
+      url,
+      {},
+      cacheKey,
+    );
     return data;
   },
 };

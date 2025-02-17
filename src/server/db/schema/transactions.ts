@@ -6,6 +6,7 @@ import {
   numeric,
   text,
   timestamp,
+  unique,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -15,27 +16,31 @@ import { account_table } from "./accounts";
 import { category_table } from "./categories";
 import { transactionsToCategories } from "./transactions-to-categories";
 
-export const transaction_table = pgTable("transaction_table", {
-  id: varchar({ length: 128 })
-    .primaryKey()
-    .$defaultFn(() => createId())
-    .notNull(),
+export const transaction_table = pgTable(
+  "transaction_table",
+  {
+    id: varchar({ length: 128 })
+      .primaryKey()
+      .$defaultFn(() => createId())
+      .notNull(),
 
-  userId: varchar({ length: 32 }).notNull(),
-  accountId: varchar({ length: 128 })
-    .notNull()
-    .references(() => account_table.id),
-  categoryId: varchar({ length: 128 }).references(() => category_table.id),
+    userId: varchar({ length: 32 }).notNull(),
+    accountId: varchar({ length: 128 })
+      .notNull()
+      .references(() => account_table.id),
+    categoryId: varchar({ length: 128 }).references(() => category_table.id),
 
-  rawId: text(),
-  amount: numeric({ precision: 10, scale: 2 }).notNull(),
-  currency: char({ length: 3 }).notNull(),
-  date: timestamp({ withTimezone: true }).notNull(),
-  description: text().notNull(),
-  note: text(),
+    rawId: text().unique(),
+    amount: numeric({ precision: 10, scale: 2 }).notNull(),
+    currency: char({ length: 3 }).notNull(),
+    date: timestamp({ withTimezone: true }).notNull(),
+    description: text().notNull(),
+    note: text(),
 
-  ...timestamps,
-});
+    ...timestamps,
+  },
+  (t) => [unique().on(t.userId, t.rawId)],
+);
 
 export const transactionsRelations = relations(
   transaction_table,
