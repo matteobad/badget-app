@@ -5,6 +5,7 @@ import { env } from "~/env";
 import { getBankAccountProvider } from "~/lib/providers";
 import { db } from "~/server/db";
 import { institution_table as institutionSchema } from "~/server/db/schema/open-banking";
+import { buildConflictUpdateColumns } from "~/server/db/utils";
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -23,6 +24,13 @@ export async function GET(request: NextRequest) {
     const inserted = await db
       .insert(institutionSchema)
       .values(institutions)
+      .onConflictDoUpdate({
+        target: [institutionSchema.originalId],
+        set: buildConflictUpdateColumns(institutionSchema, [
+          "countries",
+          "logo",
+        ]),
+      })
       .returning();
 
     return NextResponse.json({ institutions: inserted });

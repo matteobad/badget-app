@@ -15,7 +15,7 @@ export const institution_table = pgTable("institution_table", {
     .$defaultFn(() => createId())
     .notNull(),
 
-  originalId: varchar({ length: 128 }).notNull(),
+  originalId: varchar({ length: 128 }).unique().notNull(),
   name: varchar({ length: 256 }).notNull(),
   logo: varchar({ length: 2048 }),
   provider: text().$type<Provider>().notNull(),

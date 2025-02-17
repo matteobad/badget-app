@@ -4,9 +4,6 @@ import type { DB_AccountInsertType } from "./schema/accounts";
 import type { DB_CategoryInsertType } from "./schema/categories";
 import type { DB_ConnectionInsertType } from "./schema/open-banking";
 import { db } from ".";
-import { account_table } from "./schema/accounts";
-import { category_table } from "./schema/categories";
-import { connection_table } from "./schema/open-banking";
 
 // import { DEFAULT_CATEGORIES } from "./data/categories";
 
@@ -63,15 +60,17 @@ import { connection_table } from "./schema/open-banking";
 //   }
 // }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CONNECTIONS_DATA: DB_ConnectionInsertType[] = [
   {
-    institutionId: "qpevotmf05kqknn4k630b28x",
+    institutionId: "n5doi0t2ubrvn7wtdjhrtf16",
     provider: "GOCARDLESS",
     userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
     referenceId: "d33ae4ee-6952-4e16-85c7-fa9c8bc0a2a5",
   },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ACCOUNTS_DATA: DB_AccountInsertType[] = [
   {
     name: "Revolut",
@@ -93,23 +92,21 @@ const ACCOUNTS_DATA: DB_AccountInsertType[] = [
   },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CATEGORY_DATA: DB_CategoryInsertType[] = [
   {
     name: "Uncategorized",
     slug: "uncategorized",
-    type: "OUTCOME",
     userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
   },
   {
     name: "Income",
     slug: "income",
-    type: "INCOME",
     userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
   },
   {
     name: "Transfer",
     slug: "transfer",
-    type: "TRANSFER",
     userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
   },
 ];
@@ -117,9 +114,9 @@ const CATEGORY_DATA: DB_CategoryInsertType[] = [
 async function main() {
   // await reset(db, schema);
 
-  await db.insert(connection_table).values(CONNECTIONS_DATA);
-  await db.insert(account_table).values(ACCOUNTS_DATA);
-  await db.insert(category_table).values(CATEGORY_DATA);
+  // await db.insert(connection_table).values(CONNECTIONS_DATA);
+  // await db.insert(account_table).values(ACCOUNTS_DATA);
+  // await db.insert(category_table).values(CATEGORY_DATA);
   // await seed(db, schema, {
   //   count: 10,
   // });

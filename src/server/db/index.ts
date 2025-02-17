@@ -15,7 +15,6 @@ import * as openBanking from "./schema/open-banking";
 import * as rules from "./schema/rules";
 import * as tokens from "./schema/tokens";
 import * as transactions from "./schema/transactions";
-import * as transactionsToCategories from "./schema/transactions-to-categories";
 import * as users from "./schema/users";
 import * as usersToGroups from "./schema/users-to-groups";
 import * as workspaceToAccounts from "./schema/workspace-to-accounts";
@@ -52,7 +51,6 @@ export const schema = {
   ...groups,
   ...rules,
   ...tokens,
-  ...transactionsToCategories,
   ...transactions,
   ...users,
   ...usersToGroups,

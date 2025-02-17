@@ -22,7 +22,7 @@ import {
   institution_table as institutionSchema,
 } from "../schema/open-banking";
 import {
-  transaction_attachment_table as attachmentSchema,
+  attachment_table as attachmentSchema,
   transaction_table as transactionSchema,
 } from "../schema/transactions";
 

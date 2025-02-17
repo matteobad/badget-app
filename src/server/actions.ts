@@ -22,7 +22,7 @@ import {
 import { db } from "~/server/db";
 import { MUTATIONS } from "~/server/db/queries";
 import {
-  transaction_attachment_table as attachmentSchema,
+  attachment_table as attachmentSchema,
   transaction_table as transactionSchema,
 } from "~/server/db/schema/transactions";
 import { utapi } from "~/server/uploadthing";
