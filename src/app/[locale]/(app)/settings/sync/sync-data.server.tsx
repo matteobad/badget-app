@@ -14,8 +14,6 @@ export default async function SyncDataServer(props: {
   connectionId: string;
   institutionId: string;
 }) {
-  // await new Promise((resolve) => setTimeout(resolve, 2000));
-
   const { id, connectionId, institutionId } = props;
   const provider = getBankAccountProvider(props.provider);
   const accounts = await provider.getAccounts({ id });

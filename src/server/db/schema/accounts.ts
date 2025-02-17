@@ -1,6 +1,13 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
-import { char, numeric, text, unique, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  char,
+  numeric,
+  text,
+  unique,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
@@ -29,6 +36,7 @@ export const account_table = pgTable(
     logoUrl: varchar({ length: 2048 }),
     balance: numeric({ precision: 10, scale: 2 }).notNull(),
     currency: char({ length: 3 }).notNull(),
+    enabled: boolean().notNull().default(true),
 
     ...timestamps,
   },

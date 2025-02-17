@@ -1,11 +1,19 @@
 "server-only";
 
-import { and, arrayContains, desc, eq, getTableColumns } from "drizzle-orm";
+import {
+  and,
+  arrayContains,
+  asc,
+  desc,
+  eq,
+  getTableColumns,
+} from "drizzle-orm";
 
 import type {
   DB_AttachmentInsertType,
   DB_TransactionInsertType,
 } from "../schema/transactions";
+import { type ToggleAccountType } from "~/lib/validators";
 import { db } from "..";
 import { account_table as accountSchema } from "../schema/accounts";
 import { category_table as categorySchema } from "../schema/categories";
@@ -62,26 +70,25 @@ export const QUERIES = {
       .where(eq(accountSchema.userId, userId))
       .orderBy(accountSchema.name);
   },
+  getDisabledAccountsForUser: function (userId: string, client: DBClient = db) {
+    return client
+      .select({ rawId: accountSchema.rawId })
+      .from(accountSchema)
+      .where(
+        and(eq(accountSchema.userId, userId), eq(accountSchema.enabled, false)),
+      );
+  },
   getAccountsWithConnectionsForUser: function (
     userId: string,
     client: DBClient = db,
   ) {
-    return client
-      .select({
-        ...getTableColumns(accountSchema),
-        connection: connectionSchema,
-        institution: institutionSchema,
-      })
-      .from(accountSchema)
-      .leftJoin(
-        institutionSchema,
-        eq(accountSchema.institutionId, institutionSchema.id),
-      )
-      .leftJoin(
-        connectionSchema,
-        eq(accountSchema.connectionId, connectionSchema.id),
-      )
-      .where(eq(accountSchema.userId, userId));
+    return client.query.connection_table.findMany({
+      with: {
+        accounts: { orderBy: asc(accountSchema.createdAt) },
+        institution: true,
+      },
+      where: eq(connectionSchema.userId, userId),
+    });
   },
 
   getCategoriesForUser: function (userId: string, client: DBClient = db) {
@@ -129,7 +136,6 @@ export const MUTATIONS = {
       .values(data)
       .returning({ insertedId: transactionSchema.id });
   },
-
   deleteTransaction: function (id: string, client: DBClient = db) {
     return client.delete(transactionSchema).where(eq(transactionSchema.id, id));
   },
@@ -140,7 +146,6 @@ export const MUTATIONS = {
   ) {
     return client.insert(attachmentSchema).values(attachment).returning();
   },
-
   updateAttachment: function (
     attachment: Partial<DB_AttachmentInsertType>,
     client: DBClient = db,
@@ -155,13 +160,19 @@ export const MUTATIONS = {
         ),
       );
   },
-
   deleteAttachment: function (id: string, userId: string, client: DBType = db) {
     return client
       .delete(attachmentSchema)
       .where(
         and(eq(attachmentSchema.id, id), eq(attachmentSchema.userId, userId)),
       );
+  },
+
+  toggleAccount: function (params: ToggleAccountType, client: DBClient = db) {
+    return client
+      .update(accountSchema)
+      .set({ enabled: params.enabled })
+      .where(eq(accountSchema.id, params.id));
   },
 };
 

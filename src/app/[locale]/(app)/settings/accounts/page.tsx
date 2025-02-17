@@ -14,7 +14,7 @@ export default async function SettingsAccountsPage() {
   return (
     <>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <AccountDataTable data={connections} />
+        <AccountDataTable connections={connections} />
       </div>
     </>
   );

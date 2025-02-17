@@ -1,43 +1,40 @@
 "use client";
 
-import type {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-} from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Fragment, useMemo, useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
+  getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { format } from "date-fns";
+import { differenceInDays } from "date-fns";
 import {
-  ChevronsUpDownIcon,
-  Columns3Icon,
+  ChevronDown,
+  ChevronUp,
   DownloadIcon,
-  FilterIcon,
+  FileSpreadsheetIcon,
   MoreHorizontal,
+  PencilIcon,
   Trash2Icon,
 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -46,37 +43,63 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { deleteTransactionAction } from "~/server/actions";
+import { cn } from "~/lib/utils";
+import { toggleAccountAction } from "~/server/actions";
 import { type QUERIES } from "~/server/db/queries";
-import { type DB_InstitutionType } from "~/server/db/schema/open-banking";
+import { ConnectionStatus } from "~/server/db/schema/enum";
 import { formatAmount } from "~/utils/format";
 
-export type AccountType = Awaited<
+type ConnectionWithAccounts = Awaited<
   ReturnType<typeof QUERIES.getAccountsWithConnectionsForUser>
 >[number];
 
-export default function AccountDataTable({ data }: { data: AccountType[] }) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+export default function AccountDataTable({
+  connections,
+}: {
+  connections: ConnectionWithAccounts[];
+}) {
   const [rowSelection, setRowSelection] = useState({});
 
-  const deleteTransaction = useAction(deleteTransactionAction, {
-    onError: ({ error }) => {
-      console.error(error);
-      toast.error(error.serverError);
-    },
-    onSuccess: ({ data }) => {
-      console.log(data?.message);
-      toast.success("Transazione eliminata!");
-    },
-  });
-
-  const columns: ColumnDef<AccountType>[] = useMemo(
+  const columns: ColumnDef<ConnectionWithAccounts>[] = useMemo(
     () => [
       {
+        id: "expander",
+        header: () => null,
+        cell: ({ row }) => {
+          return row.getCanExpand() ? (
+            <Button
+              {...{
+                className: "size-7 shadow-none text-muted-foreground",
+                onClick: row.getToggleExpandedHandler(),
+                "aria-expanded": row.getIsExpanded(),
+                "aria-label": row.getIsExpanded()
+                  ? `Collapse details for ${row.original.institution.name}`
+                  : `Expand details for ${row.original.institution.name}`,
+                size: "icon",
+                variant: "ghost",
+              }}
+            >
+              {row.getIsExpanded() ? (
+                <ChevronUp
+                  className="opacity-60"
+                  size={16}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+              ) : (
+                <ChevronDown
+                  className="opacity-60"
+                  size={16}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+              )}
+            </Button>
+          ) : undefined;
+        },
+      },
+      {
         id: "select",
-        size: 40,
         header: ({ table }) => (
           <Checkbox
             checked={
@@ -87,7 +110,6 @@ export default function AccountDataTable({ data }: { data: AccountType[] }) {
               table.toggleAllPageRowsSelected(!!value)
             }
             aria-label="Select all"
-            className="mt-1"
           />
         ),
         cell: ({ row }) => (
@@ -95,79 +117,75 @@ export default function AccountDataTable({ data }: { data: AccountType[] }) {
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(!!value)}
             aria-label="Select row"
-            className="mt-1"
           />
         ),
-        enableSorting: false,
-        enableHiding: false,
       },
       {
-        accessorKey: "name",
-        size: 90,
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="link"
-              className="px-0"
-              onClick={() => column.toggleSorting()}
-            >
-              Nome
-              <ChevronsUpDownIcon className="size-4" />
-            </Button>
-          );
-        },
-        cell: ({ row }) => {
-          return <div>{row.getValue("name")}</div>;
-        },
-      },
-      {
+        header: "Istituto Bancario",
         accessorKey: "institution",
-        header: () => {
-          return <div className="text-neutral-900">Banca</div>;
-        },
         cell: ({ row }) => {
-          const institution: DB_InstitutionType | null =
+          const institution: ConnectionWithAccounts["institution"] =
             row.getValue("institution");
-          <div className="line-clamp-1">{institution?.name ?? "Manual"}</div>;
-        },
-      },
-      {
-        accessorKey: "updatedAt",
-        header: ({ column }) => {
+
           return (
-            <Button
-              variant="link"
-              className="px-0"
-              onClick={() => column.toggleSorting()}
-            >
-              Aggiornato al
-              <ChevronsUpDownIcon className="size-4" />
-            </Button>
+            <div className="flex items-center gap-2 font-medium">
+              <Avatar className="size-5">
+                <AvatarImage
+                  src={institution.logo!}
+                  alt={`${institution.name} logo`}
+                ></AvatarImage>
+                <AvatarFallback>IB</AvatarFallback>
+              </Avatar>
+              {institution.name}
+            </div>
           );
         },
+      },
+      {
+        header: "Provider",
+        accessorKey: "provider",
+      },
+      {
+        header: "Validità",
+        accessorKey: "validUntil",
         cell: ({ row }) => {
-          const updatedAt: Date = row.getValue("updatedAt");
-          return <div>{format(updatedAt, "MM/dd hh:mm")}</div>;
+          return (
+            <div>
+              {differenceInDays(row.getValue("validUntil"), new Date())} giorni
+            </div>
+          );
         },
       },
-      // {
-      //   accessorKey: "expires_at",
-      //   header: () => {
-      //     return <div className="text-neutral-900">Categoria</div>;
-      //   },
-      //   cell: ({ row }) => {
-      //     const category: DB_CategoryType = row.getValue("category");
-      //     return <div>{category?.name}</div>;
-      //   },
-      // },
       {
-        accessorKey: "balance",
-        header: () => {
-          return <div className="text-neutral-900">Saldo</div>;
-        },
+        header: "Status",
+        accessorKey: "status",
+        cell: ({ row }) => (
+          <Badge
+            className={cn(
+              row.getValue("status") === ConnectionStatus.EXPIRED &&
+                "bg-muted-foreground/60 text-primary-foreground",
+            )}
+          >
+            {row.getValue("status")}
+          </Badge>
+        ),
+      },
+      {
+        header: () => <div className="text-right">Balance</div>,
+        accessorKey: "accounts",
         cell: ({ row }) => {
-          const balance = parseFloat(row.getValue("balance"));
-          return <div>{formatAmount({ amount: balance })}</div>;
+          const accounts: ConnectionWithAccounts["accounts"] =
+            row.getValue("accounts");
+          const totalBalance = accounts.reduce((acc, value) => {
+            acc += parseFloat(value.balance);
+            return acc;
+          }, 0);
+
+          return (
+            <div className="text-right">
+              {formatAmount({ amount: totalBalance })}
+            </div>
+          );
         },
       },
       {
@@ -199,23 +217,14 @@ export default function AccountDataTable({ data }: { data: AccountType[] }) {
                   Esporta come CSV
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive"
-                  disabled={deleteTransaction.isExecuting}
-                  onClick={() => {
-                    deleteTransaction.execute({
-                      ids: Object.keys(rowSelection),
-                    });
-                    table.resetRowSelection(true);
-                  }}
-                >
+                <DropdownMenuItem className="text-destructive">
                   <Trash2Icon /> Elimina selezionati
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           );
         },
-        cell: ({ row }) => (
+        cell: () => (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
@@ -228,13 +237,7 @@ export default function AccountDataTable({ data }: { data: AccountType[] }) {
               <DropdownMenuItem>Download file</DropdownMenuItem>
               <DropdownMenuItem>Copy link</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive"
-                disabled={deleteTransaction.isExecuting}
-                onClick={() => {
-                  deleteTransaction.execute({ ids: [row.original.id] });
-                }}
-              >
+              <DropdownMenuItem className="text-destructive">
                 Elimina movimento
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -242,110 +245,67 @@ export default function AccountDataTable({ data }: { data: AccountType[] }) {
         ),
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [deleteTransaction, rowSelection],
+    [rowSelection],
   );
 
   const table = useReactTable({
-    data,
+    data: connections,
     columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
+    getRowCanExpand: (row) => Boolean(row.original.accounts.length),
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
+    getExpandedRowModel: getExpandedRowModel(),
     onRowSelectionChange: setRowSelection,
     getRowId: (row) => row.id, //use the row's uuid from your database as the row id
     state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
       rowSelection,
     },
   });
 
-  return (
-    <div className="w-full">
-      <div className="flex items-center gap-4 py-4">
-        <div className="relative">
-          <Input
-            placeholder="Cerca movimenti..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("name")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm ps-9 pe-9"
-          />
-          <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
-            <FilterIcon size={16} strokeWidth={2} />
-          </div>
-        </div>
-        <span className="flex-1"></span>
+  const { execute, isExecuting } = useAction(toggleAccountAction, {
+    onError: ({ error }) => {
+      console.error(error);
+      toast.error(error.serverError);
+    },
+    onSuccess: ({ data }) => {
+      console.log(data?.message);
+      toast.success("Account toggled!");
+    },
+  });
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Columns3Icon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
+  return (
+    <div>
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id} className="hover:bg-transparent">
+              {headerGroup.headers.map((header) => {
                 return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
                 );
               })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {/* <AddTransaction label="Aggiungi" /> */}
-      </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className="h-11"
-                      style={{
-                        width: header.getSize(),
-                      }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <Fragment key={row.id}>
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className="whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -353,26 +313,93 @@ export default function AccountDataTable({ data }: { data: AccountType[] }) {
                     </TableCell>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-between space-x-2 py-4">
-        <div className="text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-      </div>
+                {row.getIsExpanded() && (
+                  <TableRow>
+                    <TableCell colSpan={row.getVisibleCells().length}>
+                      <div className="ml-[96px] flex items-start py-2 text-primary/80">
+                        <ul className="flex w-full flex-col gap-2">
+                          {row.original.accounts.map((account) => {
+                            return (
+                              <li
+                                className="flex w-full items-center justify-between"
+                                key={account.id}
+                              >
+                                <div>{account.name}</div>
+                                <div>
+                                  <div className="flex items-center gap-4">
+                                    <div>
+                                      {formatAmount({
+                                        amount: parseFloat(account.balance),
+                                      })}
+                                    </div>
+
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          className="relative h-8 w-8 p-0"
+                                        >
+                                          <span className="sr-only">
+                                            Open menu
+                                          </span>
+                                          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem>
+                                          <PencilIcon />
+                                          Modifica
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem>
+                                          <FileSpreadsheetIcon />
+                                          Importa
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className="text-destructive">
+                                          <Trash2Icon /> Rimuovi
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                    <div>
+                                      <Switch
+                                        id="airplane-mode"
+                                        disabled={isExecuting}
+                                        checked={account.enabled}
+                                        onCheckedChange={(checked) =>
+                                          execute({
+                                            id: account.id,
+                                            enabled: checked,
+                                          })
+                                        }
+                                      />
+                                      <Label
+                                        htmlFor="airplane-mode"
+                                        className="sr-only"
+                                      >
+                                        Status
+                                      </Label>
+                                    </div>
+                                  </div>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </Fragment>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No results.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }

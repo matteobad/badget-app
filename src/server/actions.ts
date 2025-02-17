@@ -6,11 +6,15 @@ import { parse } from "@fast-csv/parse";
 import { and, eq, sql } from "drizzle-orm";
 
 import { gocardlessClient } from "~/lib/providers/gocardless/gocardless-api";
-import { mapRequisitionStatus } from "~/lib/providers/gocardless/gocardless-mappers";
+import {
+  mapRequisitionStatus,
+  mapRequisitionValidity,
+} from "~/lib/providers/gocardless/gocardless-mappers";
 import { authActionClient } from "~/lib/safe-action";
 import {
   AttachmentDeleteSchema,
   ConnectGocardlessSchema,
+  ToggleAccountSchema,
   TransactionDeleteSchema,
   TransactionImportSchema,
   TransactionInsertSchema,
@@ -213,7 +217,26 @@ export const connectGocardlessAction = authActionClient
       userId: ctx.userId,
       referenceId: requisition.id,
       status: mapRequisitionStatus(requisition.status),
+      validUntil: mapRequisitionValidity(
+        requisition.created,
+        agreement.access_valid_for_days,
+      ),
     });
 
     return redirect(requisition.link);
+  });
+
+export const toggleAccountAction = authActionClient
+  .schema(ToggleAccountSchema)
+  .metadata({ actionName: "toggle-account" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    await MUTATIONS.toggleAccount({ ...parsedInput, userId: ctx.userId });
+
+    // Invalidate cache
+    revalidateTag(`connection_${ctx.userId}`);
+    revalidateTag(`account_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Account toggled" };
   });
