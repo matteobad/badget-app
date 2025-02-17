@@ -1,6 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
+import { addDays } from "date-fns";
 import { relations, sql } from "drizzle-orm";
-import { integer, text, varchar } from "drizzle-orm/pg-core";
+import { integer, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 import type { Provider } from "./enum";
 import { timestamps } from "../utils";
@@ -53,17 +54,23 @@ export const connection_table = pgTable("connection_table", {
   referenceId: varchar().unique(),
   provider: text().$type<Provider>().notNull(),
   status: text().$type<ConnectionStatus>().default(ConnectionStatus.UNKNOWN),
+  validUntil: timestamp({ withTimezone: true }).$defaultFn(() =>
+    addDays(new Date(), 90),
+  ),
 
   ...timestamps,
 });
 
-export const connection_relations = relations(connection_table, ({ many }) => ({
-  accounts: many(account_table),
-  // institution: one(institution_table, {
-  //   fields: [connection_table.institutionId],
-  //   references: [institution_table.id],
-  // }),
-}));
+export const connection_relations = relations(
+  connection_table,
+  ({ many, one }) => ({
+    accounts: many(account_table),
+    institution: one(institution_table, {
+      fields: [connection_table.institutionId],
+      references: [institution_table.id],
+    }),
+  }),
+);
 
 export type DB_ConnectionType = typeof connection_table.$inferSelect;
 export type DB_ConnectionInsertType = typeof connection_table.$inferInsert;

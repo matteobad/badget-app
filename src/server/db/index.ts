@@ -80,7 +80,7 @@ export const drizzleClientHttp = drizzleHttp({
 export const drizzleClientWs = drizzleWs({
   client: pool,
   schema,
-  logger: env.NODE_ENV !== "production",
+  logger: false, // env.NODE_ENV !== "production",
   casing: "snake_case",
 });
 

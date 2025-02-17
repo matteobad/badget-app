@@ -1,5 +1,5 @@
 import { capitalCase } from "change-case";
-import { formatISO, parseISO, subDays } from "date-fns";
+import { addDays, formatISO, parseISO, subDays } from "date-fns";
 
 import type {
   GetAccountsRequest,
@@ -8,6 +8,7 @@ import type {
   GetInstitutionsResponse,
 } from "..";
 import type {
+  GC_CreateAgreementResponse,
   GC_CreateRequisitionResponse,
   GC_GetAccountBalancesResponse,
   GC_GetAccountDetailsResponse,
@@ -66,6 +67,13 @@ export const mapRequisitionStatus = (
     default:
       return ConnectionStatus.UNKNOWN;
   }
+};
+
+export const mapRequisitionValidity = (
+  created: GC_CreateRequisitionResponse["created"],
+  days: GC_CreateAgreementResponse["access_valid_for_days"],
+) => {
+  return addDays(parseISO(created), days);
 };
 
 export const mapAccountsRequest = (params: GetAccountsRequest) => {

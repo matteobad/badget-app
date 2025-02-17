@@ -66,22 +66,10 @@ export const QUERIES = {
     userId: string,
     client: DBClient = db,
   ) {
-    return client
-      .select({
-        ...getTableColumns(accountSchema),
-        connection: connectionSchema,
-        institution: institutionSchema,
-      })
-      .from(accountSchema)
-      .leftJoin(
-        institutionSchema,
-        eq(accountSchema.institutionId, institutionSchema.id),
-      )
-      .leftJoin(
-        connectionSchema,
-        eq(accountSchema.connectionId, connectionSchema.id),
-      )
-      .where(eq(accountSchema.userId, userId));
+    return client.query.connection_table.findMany({
+      with: { accounts: true, institution: true },
+      where: eq(connectionSchema.userId, userId),
+    });
   },
 
   getCategoriesForUser: function (userId: string, client: DBClient = db) {
