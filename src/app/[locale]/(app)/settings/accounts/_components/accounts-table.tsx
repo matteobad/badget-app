@@ -13,10 +13,13 @@ import {
   ChevronDown,
   ChevronUp,
   DownloadIcon,
-  Info,
+  FileSpreadsheetIcon,
   MoreHorizontal,
+  PencilIcon,
   Trash2Icon,
 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
@@ -30,6 +33,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -39,6 +44,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
+import { toggleAccountAction } from "~/server/actions";
 import { type QUERIES } from "~/server/db/queries";
 import { ConnectionStatus } from "~/server/db/schema/enum";
 import { formatAmount } from "~/utils/format";
@@ -249,6 +255,21 @@ export default function AccountDataTable({
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     onRowSelectionChange: setRowSelection,
+    getRowId: (row) => row.id, //use the row's uuid from your database as the row id
+    state: {
+      rowSelection,
+    },
+  });
+
+  const { execute, isExecuting } = useAction(toggleAccountAction, {
+    onError: ({ error }) => {
+      console.error(error);
+      toast.error(error.serverError);
+    },
+    onSuccess: ({ data }) => {
+      console.log(data?.message);
+      toast.success("Account toggled!");
+    },
   });
 
   return (
@@ -295,20 +316,75 @@ export default function AccountDataTable({
                 {row.getIsExpanded() && (
                   <TableRow>
                     <TableCell colSpan={row.getVisibleCells().length}>
-                      <div className="flex items-start py-2 text-primary/80">
-                        <span
-                          className="me-3 mt-0.5 flex w-7 shrink-0 justify-center"
-                          aria-hidden="true"
-                        >
-                          <Info
-                            className="opacity-60"
-                            size={16}
-                            strokeWidth={2}
-                          />
-                        </span>
-                        <p className="text-sm">
-                          {row.original.accounts.length}
-                        </p>
+                      <div className="ml-[96px] flex items-start py-2 text-primary/80">
+                        <ul className="flex w-full flex-col gap-2">
+                          {row.original.accounts.map((account) => {
+                            return (
+                              <li
+                                className="flex w-full items-center justify-between"
+                                key={account.id}
+                              >
+                                <div>{account.name}</div>
+                                <div>
+                                  <div className="flex items-center gap-4">
+                                    <div>
+                                      {formatAmount({
+                                        amount: parseFloat(account.balance),
+                                      })}
+                                    </div>
+
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          className="relative h-8 w-8 p-0"
+                                        >
+                                          <span className="sr-only">
+                                            Open menu
+                                          </span>
+                                          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem>
+                                          <PencilIcon />
+                                          Modifica
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem>
+                                          <FileSpreadsheetIcon />
+                                          Importa
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className="text-destructive">
+                                          <Trash2Icon /> Rimuovi
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                    <div>
+                                      <Switch
+                                        id="airplane-mode"
+                                        disabled={isExecuting}
+                                        checked={account.enabled}
+                                        onCheckedChange={(checked) =>
+                                          execute({
+                                            id: account.id,
+                                            enabled: checked,
+                                          })
+                                        }
+                                      />
+                                      <Label
+                                        htmlFor="airplane-mode"
+                                        className="sr-only"
+                                      >
+                                        Status
+                                      </Label>
+                                    </div>
+                                  </div>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
                       </div>
                     </TableCell>
                   </TableRow>

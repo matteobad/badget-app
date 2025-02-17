@@ -74,3 +74,11 @@ export const ImportDataSchema = z.object({
   connectionId: z.string(),
   institutionId: z.string(),
 });
+
+export const ToggleAccountSchema = z.object({
+  id: z.string(),
+  enabled: z.boolean(),
+});
+export type ToggleAccountType = z.infer<typeof ToggleAccountSchema> & {
+  userId: string;
+};

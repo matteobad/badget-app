@@ -101,6 +101,7 @@ export const mapAccountsResponse = (
     // resource_id: detailsData.account.resourceId,
     // enrollment_id: null,
     logoUrl: institutionData.logo,
+    enabled: true,
   } satisfies GetAccountsResponse[number];
 };
 

@@ -23,10 +23,22 @@ export async function GET(request: NextRequest) {
 
     for (const user of userList.data) {
       const connections = await QUERIES.getConnectionsforUser(user.id);
+      const disabledAccounts = await QUERIES.getDisabledAccountsForUser(
+        user.id,
+      );
+      const disabledAccountIds = disabledAccounts.map((a) => a.rawId);
+
+      // TODO: check validity, update status and filter expired connections
+
       for (const connection of connections) {
         const provider = getBankAccountProvider(connection.provider);
-        const accounts = await provider.getAccounts({
+        const availableAccounts = await provider.getAccounts({
           id: connection.referenceId!,
+        });
+
+        const accounts = availableAccounts.filter((account) => {
+          if (disabledAccountIds.includes(account.rawId)) return false;
+          else return true;
         });
 
         await db.transaction(async (tx) => {

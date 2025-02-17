@@ -14,6 +14,7 @@ import { authActionClient } from "~/lib/safe-action";
 import {
   AttachmentDeleteSchema,
   ConnectGocardlessSchema,
+  ToggleAccountSchema,
   TransactionDeleteSchema,
   TransactionImportSchema,
   TransactionInsertSchema,
@@ -223,4 +224,19 @@ export const connectGocardlessAction = authActionClient
     });
 
     return redirect(requisition.link);
+  });
+
+export const toggleAccountAction = authActionClient
+  .schema(ToggleAccountSchema)
+  .metadata({ actionName: "toggle-account" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    await MUTATIONS.toggleAccount({ ...parsedInput, userId: ctx.userId });
+
+    // Invalidate cache
+    revalidateTag(`connection_${ctx.userId}`);
+    revalidateTag(`account_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Account toggled" };
   });
