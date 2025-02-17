@@ -163,7 +163,7 @@ function ImportTransactionForm({
                     control={form.control}
                     name={`fieldMapping.${item}`}
                     render={({ field }) => (
-                      <FormItem className="grid grid-cols-[1fr,auto,1fr] items-center gap-4 space-y-0">
+                      <FormItem className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 space-y-0">
                         <Select
                           value={field.value ?? ""}
                           onValueChange={(value) => field.onChange(value)}
@@ -263,7 +263,7 @@ function ImportTransactionForm({
           </AccordionItem>
         </Accordion>
 
-        <div className="flex-grow"></div>
+        <div className="grow"></div>
         <Button
           className="col-span-2 mt-4"
           type="submit"

@@ -109,7 +109,7 @@ export function CollapseMenuButton({
             asChild
           >
             <Link href={href}>
-              <span className="ml-2 mr-4">
+              <span className="mr-4 ml-2">
                 <Dot size={18} />
               </span>
               <p

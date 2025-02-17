@@ -1,4 +1,4 @@
-import "~/styles/globals.css";
+import "~/globals.css";
 
 import { type ReactElement } from "react";
 import { ClerkProvider } from "@clerk/nextjs";

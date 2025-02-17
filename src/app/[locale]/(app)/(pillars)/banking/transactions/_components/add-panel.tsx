@@ -381,7 +381,7 @@ function AddTransactionForm({
           </AccordionItem>
         </Accordion>
 
-        <div className="flex-grow"></div>
+        <div className="grow"></div>
         <div className="flex items-center gap-4">
           <Button className="w-full" type="submit" disabled={isExecuting}>
             {isExecuting ? (

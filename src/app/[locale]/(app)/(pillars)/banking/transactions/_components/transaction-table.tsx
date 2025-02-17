@@ -197,7 +197,7 @@ export default function TransactionDataTable({
                   <span className="sr-only">Open menu</span>
                   <MoreHorizontal className="h-4 w-4" />
                   {Object.keys(rowSelection).length > 0 && (
-                    <span className="absolute -right-1 -top-1 size-4 rounded-full bg-primary text-xs font-light text-primary-foreground">
+                    <span className="absolute -top-1 -right-1 size-4 rounded-full bg-primary text-xs font-light text-primary-foreground">
                       {Object.keys(rowSelection).length}
                     </span>
                   )}
@@ -288,7 +288,7 @@ export default function TransactionDataTable({
             onChange={(event) =>
               table.getColumn("description")?.setFilterValue(event.target.value)
             }
-            className="max-w-sm pe-9 ps-9"
+            className="max-w-sm ps-9 pe-9"
           />
           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
             <FilterIcon size={16} strokeWidth={2} />

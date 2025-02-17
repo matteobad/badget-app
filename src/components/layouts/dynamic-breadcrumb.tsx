@@ -31,7 +31,7 @@ export function DynamicBreadcrumb() {
   };
 
   return (
-    <Breadcrumb className="flex-grow">
+    <Breadcrumb className="grow">
       <BreadcrumbList>
         {segments
           .filter((segment) => !locales.includes(segment))

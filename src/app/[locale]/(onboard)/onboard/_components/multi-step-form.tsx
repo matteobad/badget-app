@@ -12,7 +12,7 @@ export function Onboarding() {
   const [{ step }] = useQueryStates(onboardingParsers);
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-14rem)] w-full max-w-screen-sm flex-col items-center">
+    <div className="mx-auto flex h-[calc(100vh-14rem)] w-full max-w-(--breakpoint-sm) flex-col items-center">
       <AnimatePresence mode="wait">
         {!step && <Intro key="intro" />}
         {step === "create-project" && <CreateProject />}

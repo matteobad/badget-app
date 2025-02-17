@@ -74,7 +74,7 @@ function LoadingIcon() {
   return pending ? (
     <div
       data-pending={pending ? "" : undefined}
-      className="absolute right-3 top-1/2 -translate-y-1/2"
+      className="absolute top-1/2 right-3 -translate-y-1/2"
     >
       <div
         className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent"

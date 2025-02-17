@@ -60,7 +60,7 @@ function OnboardingCard({
             )}
             <Link
               href={"/onboarding?step=banking"}
-              className="flex h-7 w-full items-center gap-1 overflow-hidden rounded-md px-1.5 text-xs ring-ring transition-all hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2"
+              className="flex h-7 w-full items-center gap-1 overflow-hidden rounded-md px-1.5 text-xs ring-ring transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:outline-hidden"
             >
               <div className="line-clamp-1 grow overflow-hidden pr-6 font-medium text-muted-foreground">
                 Banking
@@ -75,7 +75,7 @@ function OnboardingCard({
             )}
             <Link
               href={"/onboarding?step=savings"}
-              className="flex h-7 w-full items-center gap-1 overflow-hidden rounded-md px-1.5 text-xs ring-ring transition-all hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2"
+              className="flex h-7 w-full items-center gap-1 overflow-hidden rounded-md px-1.5 text-xs ring-ring transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:outline-hidden"
             >
               <div className="line-clamp-1 grow overflow-hidden pr-6 font-medium text-muted-foreground">
                 Risparmi
@@ -90,7 +90,7 @@ function OnboardingCard({
             )}
             <Link
               href={"/onboarding?step=pension"}
-              className="flex h-7 w-full items-center gap-1 overflow-hidden rounded-md px-1.5 text-xs ring-ring transition-all hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2"
+              className="flex h-7 w-full items-center gap-1 overflow-hidden rounded-md px-1.5 text-xs ring-ring transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:outline-hidden"
             >
               <div className="line-clamp-1 grow overflow-hidden pr-6 font-medium text-muted-foreground">
                 Pensione

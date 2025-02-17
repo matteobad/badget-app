@@ -26,7 +26,7 @@ export function Menu({ isOpen }: MenuProps) {
   const menuList = getMenuList(pathname);
 
   return (
-    <ScrollArea className="[&>div>div[style]]:!block">
+    <ScrollArea className="[&>div>div[style]]:block!">
       <nav className="mt-4 h-full w-full">
         <ul className="flex flex-col items-start space-y-1 px-2">
           {menuList.map(({ groupLabel, menus }, index) => (
