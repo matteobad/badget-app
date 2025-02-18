@@ -42,43 +42,39 @@ const data = {
           title: "Transazioni",
           url: "/banking/transactions",
         },
-        {
-          title: "Passività",
-          url: "/banking/liabilities",
-        },
       ],
     },
     {
-      title: "Risparmi",
-      url: "/saving",
+      title: "Fondo emergenza",
+      url: "#",
       icon: PiggyBank,
       items: [
         {
-          title: "Obiettivi",
-          url: "/saving/goals",
+          title: "Conti deposito",
+          url: "#",
         },
         {
-          title: "Fondo emergenza",
-          url: "/saving/emergency",
+          title: "Obbligazioni a breve",
+          url: "#",
+        },
+        {
+          title: "EFT monetari",
+          url: "#",
         },
       ],
     },
     {
-      title: "Pensione",
-      url: "/pension",
+      title: "Spese previste",
+      url: "#",
       icon: Sprout,
       items: [
         {
-          title: "Sociale (INPS)",
-          url: "/pension/inps",
+          title: "BTP Valore",
+          url: "#",
         },
         {
-          title: "Complementare (fondi)",
-          url: "/pension/simulations",
-        },
-        {
-          title: "Simulatore",
-          url: "/pension/simulations",
+          title: "Obbligazioni",
+          url: "#",
         },
       ],
     },
@@ -89,21 +85,38 @@ const data = {
       items: [
         {
           title: "Azioni",
-          url: "/investments/stocks",
+          url: "#",
         },
         {
           title: "Obbligazioni",
-          url: "/investments/bonds",
+          url: "#",
         },
         {
           title: "Fondi",
-          url: "/investments/funds",
+          url: "#",
         },
         {
           title: "Crypto",
-          url: "/investments/cryptos",
+          url: "#",
         },
       ],
+    },
+  ],
+  navPrimary: [
+    {
+      title: "Assets",
+      url: "/settings/accounts",
+      icon: Link2,
+    },
+    {
+      title: "Liabilities",
+      url: "/settings/categories",
+      icon: Shapes,
+    },
+    {
+      title: "Previdenza",
+      url: "/settings/budgets",
+      icon: ListTodo,
     },
   ],
   navSecondary: [
@@ -149,7 +162,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain header="Pilastri" items={data.navMain} />
+        <NavMain header="Patrimonio" items={data.navPrimary} />
         <NavSettings settings={data.settings} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
