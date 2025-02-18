@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -16,7 +16,6 @@ import {
   ChevronUp,
   ClockIcon,
   Columns3Icon,
-  DownloadIcon,
   FileSpreadsheetIcon,
   FilterIcon,
   LoaderIcon,
@@ -30,7 +29,6 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -65,12 +63,11 @@ export default function AccountDataTable({
 }: {
   connections: ConnectionWithAccounts[];
 }) {
-  const [rowSelection, setRowSelection] = useState({});
-
   const columns: ColumnDef<ConnectionWithAccounts>[] = useMemo(
     () => [
       {
         id: "expander",
+        size: 44,
         header: () => null,
         cell: ({ row }) => {
           return row.getCanExpand() ? (
@@ -104,28 +101,6 @@ export default function AccountDataTable({
             </Button>
           ) : undefined;
         },
-      },
-      {
-        id: "select",
-        header: ({ table }) => (
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
-            }
-            onCheckedChange={(value) =>
-              table.toggleAllPageRowsSelected(!!value)
-            }
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
-        ),
       },
       {
         header: "Istituto Bancario",
@@ -225,37 +200,7 @@ export default function AccountDataTable({
         enableHiding: false,
         enableResizing: false,
         size: 44,
-        header: () => {
-          return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-8 w-8 p-0"
-                  disabled={Object.keys(rowSelection).length === 0}
-                >
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                  {Object.keys(rowSelection).length > 0 && (
-                    <span className="absolute -top-1 -right-1 size-4 rounded-full bg-primary text-xs font-light text-primary-foreground">
-                      {Object.keys(rowSelection).length}
-                    </span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <DownloadIcon />
-                  Esporta come CSV
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">
-                  <Trash2Icon /> Elimina selezionati
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          );
-        },
+        header: "",
         cell: () => (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -270,14 +215,14 @@ export default function AccountDataTable({
               <DropdownMenuItem>Copy link</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive">
-                Elimina movimento
+                Elimina account
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ),
       },
     ],
-    [rowSelection],
+    [],
   );
 
   const table = useReactTable({
@@ -286,11 +231,7 @@ export default function AccountDataTable({
     getRowCanExpand: (row) => Boolean(row.original.accounts.length),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    onRowSelectionChange: setRowSelection,
     getRowId: (row) => row.id, //use the row's uuid from your database as the row id
-    state: {
-      rowSelection,
-    },
   });
 
   const { execute, isExecuting } = useAction(toggleAccountAction, {
@@ -358,7 +299,12 @@ export default function AccountDataTable({
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      style={{
+                        width: header.getSize(),
+                      }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
