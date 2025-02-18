@@ -1,7 +1,7 @@
 # Badget
 
-## Notes 2025-02-14
+## Notes 2025-02-18
 
-- [ ] transaction table filters
 - [ ] edit transaction
+- [ ] transaction table filters
 - [ ] RLS with neon + Clerk
