@@ -93,4 +93,7 @@ export const CategoryInsertSchema = createInsertSchema(category_table, {}).omit(
     deletedAt: true,
   },
 );
-export type CategoryInsertType = z.infer<typeof CategoryInsertSchema>;
+
+export const CategoryDeleteSchema = z.object({
+  ids: z.array(z.string()),
+});

@@ -14,25 +14,23 @@ import {
   ChevronDown,
   ChevronUp,
   Columns3Icon,
-  DownloadIcon,
   FilterIcon,
   MoreHorizontal,
   PlusIcon,
-  Trash2Icon,
 } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
+import { useAction } from "next-safe-action/hooks";
 import { useQueryState } from "nuqs";
+import { toast } from "sonner";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
@@ -44,6 +42,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { deleteCategoryAction } from "~/server/actions";
 import { type QUERIES } from "~/server/db/queries";
 
 type Category = Awaited<
@@ -57,6 +56,17 @@ export default function CategoryDataTable({
 }) {
   const [, setOpen] = useQueryState("add");
   const [rowSelection, setRowSelection] = useState({});
+
+  const deleteCategory = useAction(deleteCategoryAction, {
+    onError: ({ error }) => {
+      console.error(error);
+      toast.error(error.serverError);
+    },
+    onSuccess: ({ data }) => {
+      console.log(data?.message);
+      toast.success("Categoria eliminata!");
+    },
+  });
 
   const columns: ColumnDef<Category>[] = useMemo(
     () => [
@@ -96,30 +106,6 @@ export default function CategoryDataTable({
             </Button>
           ) : undefined;
         },
-      },
-      {
-        id: "select",
-        size: 44,
-        header: ({ table }) => (
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
-            }
-            onCheckedChange={(value) =>
-              table.toggleAllPageRowsSelected(!!value)
-            }
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            disabled={!row.original.parentId}
-            aria-label="Select row"
-          />
-        ),
       },
       {
         header: "Categoria",
@@ -177,40 +163,10 @@ export default function CategoryDataTable({
         enableHiding: false,
         enableResizing: false,
         size: 44,
-        header: () => {
-          return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-8 w-8 p-0"
-                  disabled={Object.keys(rowSelection).length === 0}
-                >
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                  {Object.keys(rowSelection).length > 0 && (
-                    <span className="absolute -top-1 -right-1 size-4 rounded-full bg-primary text-xs font-light text-primary-foreground">
-                      {Object.keys(rowSelection).length}
-                    </span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <DownloadIcon />
-                  Esporta come CSV
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">
-                  <Trash2Icon /> Elimina selezionati
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          );
-        },
-        cell: () => (
+        header: "",
+        cell: ({ row }) => (
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild disabled={!row.original.parentId}>
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
@@ -218,18 +174,22 @@ export default function CategoryDataTable({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem>Download file</DropdownMenuItem>
-              <DropdownMenuItem>Copy link</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
-                Elimina movimento
+              <DropdownMenuItem
+                className="text-destructive"
+                disabled={deleteCategory.isExecuting}
+                onClick={() => {
+                  deleteCategory.execute({ ids: [row.original.id] });
+                }}
+              >
+                Elimina categoria
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ),
       },
     ],
-    [categories, rowSelection],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [categories, deleteCategory, rowSelection],
   );
 
   const table = useReactTable({

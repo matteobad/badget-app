@@ -13,6 +13,7 @@ import {
 import { authActionClient } from "~/lib/safe-action";
 import {
   AttachmentDeleteSchema,
+  CategoryDeleteSchema,
   CategoryInsertSchema,
   ConnectGocardlessSchema,
   ToggleAccountSchema,
@@ -257,4 +258,22 @@ export const createCategoryAction = authActionClient
 
     // Return success message
     return { message: "Category created" };
+  });
+
+export const deleteCategoryAction = authActionClient
+  .schema(CategoryDeleteSchema)
+  .metadata({ actionName: "delete-category" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    await db.transaction(async (tx) => {
+      for (const id of parsedInput.ids) {
+        await tx.delete(categorySchema).where(eq(categorySchema.id, id));
+      }
+    });
+
+    // Invalidate cache
+    revalidateTag(`category_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Category deleted" };
   });
