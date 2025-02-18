@@ -16,6 +16,7 @@ export const BankAccountType = {
 export type BankAccountType =
   (typeof BankAccountType)[keyof typeof BankAccountType];
 
+// TODO: reduce possible status
 export const ConnectionStatus = {
   CREATED: "CREATED",
   PENDING: "PENDING",
