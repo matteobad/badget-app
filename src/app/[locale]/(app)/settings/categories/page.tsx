@@ -1,16 +1,18 @@
-import { Skeleton } from "~/components/ui/skeleton";
+import { auth } from "@clerk/nextjs/server";
 
-export default function CategoriesPage() {
+import { QUERIES } from "~/server/db/queries";
+import CategoryDataTable from "./category-table";
+
+export default async function CategoriesPage() {
+  const session = await auth();
+  if (!session.userId) throw new Error("User not found");
+
+  const categories = await QUERIES.getCategoriesForUser(session.userId);
+
   return (
     <>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="grid auto-rows-min gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Skeleton className="aspect-video rounded-xl bg-muted/50" />
-          <Skeleton className="aspect-video rounded-xl bg-muted/50" />
-          <Skeleton className="aspect-video rounded-xl bg-muted/50" />
-          <Skeleton className="aspect-video rounded-xl bg-muted/50" />
-        </div>
-        <Skeleton className="grid min-h-[100vh] flex-1 overflow-hidden rounded-xl bg-muted/50 md:min-h-min md:grid-cols-3" />
+        <CategoryDataTable categories={categories} />
       </div>
     </>
   );

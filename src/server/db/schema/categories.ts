@@ -1,6 +1,6 @@
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
-import { boolean, unique, varchar } from "drizzle-orm/pg-core";
+import { unique, varchar } from "drizzle-orm/pg-core";
 
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
@@ -24,11 +24,10 @@ export const category_table = pgTable(
       (): AnyPgColumn => category_table.id,
       { onDelete: "set null" },
     ),
-    manual: boolean().default(true),
 
     ...timestamps,
   },
-  (t) => [unique().on(t.userId, t.slug)],
+  (t) => [unique().on(t.userId, t.slug).nullsNotDistinct()],
 );
 
 export type DB_CategoryType = typeof category_table.$inferSelect;

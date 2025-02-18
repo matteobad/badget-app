@@ -7,6 +7,8 @@ import {
   desc,
   eq,
   getTableColumns,
+  isNull,
+  or,
 } from "drizzle-orm";
 
 import type {
@@ -95,7 +97,9 @@ export const QUERIES = {
     return client
       .select()
       .from(categorySchema)
-      .where(eq(categorySchema.userId, userId))
+      .where(
+        or(eq(categorySchema.userId, userId), isNull(categorySchema.userId)),
+      )
       .orderBy(categorySchema.name);
   },
 
