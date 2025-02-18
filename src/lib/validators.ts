@@ -1,6 +1,7 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+import { category_table } from "~/server/db/schema/categories";
 import { Provider } from "~/server/db/schema/enum";
 import { transaction_table } from "~/server/db/schema/transactions";
 
@@ -82,3 +83,14 @@ export const ToggleAccountSchema = z.object({
 export type ToggleAccountType = z.infer<typeof ToggleAccountSchema> & {
   userId: string;
 };
+
+export const CategoryInsertSchema = createInsertSchema(category_table, {}).omit(
+  {
+    id: true,
+    userId: true,
+    createdAt: true,
+    updatedAt: true,
+    deletedAt: true,
+  },
+);
+export type CategoryInsertType = z.infer<typeof CategoryInsertSchema>;

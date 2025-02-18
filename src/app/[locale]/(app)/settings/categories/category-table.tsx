@@ -17,10 +17,12 @@ import {
   DownloadIcon,
   FilterIcon,
   MoreHorizontal,
+  PlusIcon,
   Trash2Icon,
 } from "lucide-react";
+import { DynamicIcon } from "lucide-react/dynamic";
+import { useQueryState } from "nuqs";
 
-import Icon from "~/components/icons";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -53,6 +55,7 @@ export default function CategoryDataTable({
 }: {
   categories: Category[];
 }) {
+  const [, setOpen] = useQueryState("add");
   const [rowSelection, setRowSelection] = useState({});
 
   const columns: ColumnDef<Category>[] = useMemo(
@@ -113,6 +116,7 @@ export default function CategoryDataTable({
           <Checkbox
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(!!value)}
+            disabled={!row.original.parentId}
             aria-label="Select row"
           />
         ),
@@ -133,7 +137,7 @@ export default function CategoryDataTable({
                   color: `hsl(${color})`,
                 }}
               >
-                <Icon name={icon as keyof typeof dynamicIconImports} />
+                <DynamicIcon name={icon as keyof typeof dynamicIconImports} />
                 {row.getValue("name")}
               </Badge>
             </div>
@@ -285,6 +289,10 @@ export default function CategoryDataTable({
               })}
           </DropdownMenuContent>
         </DropdownMenu>
+        <Button onClick={() => setOpen("")}>
+          <PlusIcon />
+          Crea Categoria
+        </Button>
       </div>
       <div className="rounded-md border">
         <Table>

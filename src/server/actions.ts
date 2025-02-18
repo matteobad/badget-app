@@ -13,6 +13,7 @@ import {
 import { authActionClient } from "~/lib/safe-action";
 import {
   AttachmentDeleteSchema,
+  CategoryInsertSchema,
   ConnectGocardlessSchema,
   ToggleAccountSchema,
   TransactionDeleteSchema,
@@ -28,6 +29,7 @@ import {
 import { utapi } from "~/server/uploadthing";
 import { type CSVRow, type CSVRowParsed } from "~/utils/schemas";
 import { transformCSV } from "~/utils/transform";
+import { category_table as categorySchema } from "./db/schema/categories";
 import {
   connection_table as connectionSchema,
   institution_table as institutionSchema,
@@ -239,4 +241,20 @@ export const toggleAccountAction = authActionClient
 
     // Return success message
     return { message: "Account toggled" };
+  });
+
+export const createCategoryAction = authActionClient
+  .schema(CategoryInsertSchema)
+  .metadata({ actionName: "create-category" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    await db
+      .insert(categorySchema)
+      .values({ ...parsedInput, userId: ctx.userId });
+
+    // Invalidate cache
+    revalidateTag(`category_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Category created" };
   });
