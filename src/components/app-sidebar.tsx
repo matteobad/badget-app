@@ -2,7 +2,10 @@
 
 import * as React from "react";
 import {
+  CalendarClockIcon,
   CandlestickChart,
+  CreditCardIcon,
+  CuboidIcon,
   Layers,
   LifeBuoy,
   Link2,
@@ -11,7 +14,7 @@ import {
   Send,
   Settings,
   Shapes,
-  Sprout,
+  SproutIcon,
 } from "lucide-react";
 
 import { NavMain } from "~/components/nav-main";
@@ -66,7 +69,7 @@ const data = {
     {
       title: "Spese previste",
       url: "#",
-      icon: Sprout,
+      icon: CalendarClockIcon,
       items: [
         {
           title: "BTP Valore",
@@ -106,17 +109,17 @@ const data = {
     {
       title: "Assets",
       url: "/settings/accounts",
-      icon: Link2,
+      icon: CuboidIcon,
     },
     {
       title: "Liabilities",
       url: "/settings/categories",
-      icon: Shapes,
+      icon: CreditCardIcon,
     },
     {
       title: "Previdenza",
       url: "/settings/budgets",
-      icon: ListTodo,
+      icon: SproutIcon,
     },
   ],
   navSecondary: [
