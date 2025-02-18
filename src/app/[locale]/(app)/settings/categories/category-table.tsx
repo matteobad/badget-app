@@ -18,11 +18,11 @@ import {
   MoreHorizontal,
   PlusIcon,
 } from "lucide-react";
-import { DynamicIcon } from "lucide-react/dynamic";
 import { useAction } from "next-safe-action/hooks";
 import { useQueryState } from "nuqs";
 import { toast } from "sonner";
 
+import { CategoryBadge } from "~/components/category-badge";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -111,21 +111,13 @@ export default function CategoryDataTable({
         header: "Categoria",
         accessorKey: "name",
         cell: ({ row }) => {
-          const color = row.original.color;
-          const icon = row.original.icon;
+          const name = row.original.name ?? undefined;
+          const color = row.original.color ?? undefined;
+          const icon = row.original.icon as keyof typeof dynamicIconImports;
 
           return (
-            <div className="flex items-center gap-2 font-medium">
-              <Badge
-                variant="outline"
-                style={{
-                  border: `1px solid hsl(${color})`,
-                  color: `hsl(${color})`,
-                }}
-              >
-                <DynamicIcon name={icon as keyof typeof dynamicIconImports} />
-                {row.getValue("name")}
-              </Badge>
+            <div className="flex items-center gap-2">
+              <CategoryBadge name={name} color={color} icon={icon} />
             </div>
           );
         },
