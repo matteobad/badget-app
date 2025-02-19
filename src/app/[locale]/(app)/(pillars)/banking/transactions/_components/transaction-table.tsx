@@ -31,6 +31,7 @@ import { toast } from "sonner";
 
 import { CategoryBadge } from "~/components/category-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
@@ -52,14 +53,15 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { deleteTransactionAction } from "~/server/actions";
-import { type QUERIES } from "~/server/db/queries";
+import { type CACHED_QUERIES } from "~/server/db/queries/cached-queries";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
+import { type DB_TagType } from "~/server/db/schema/transactions";
 import { formatAmount } from "~/utils/format";
 import { transactionsParsers } from "../transaction-search-params";
 import { AddTransaction } from "./add-transaction";
 
 export type TransactionType = Awaited<
-  ReturnType<typeof QUERIES.getTransactionForUser>
+  ReturnType<typeof CACHED_QUERIES.getTransactionForUser>
 >[number];
 
 export default function TransactionDataTable({
@@ -183,6 +185,27 @@ export default function TransactionDataTable({
                 color={color}
                 icon={icon as keyof typeof dynamicIconImports}
               />
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "tags",
+        header: () => {
+          return <div className="text-neutral-900">Tags</div>;
+        },
+        cell: ({ row }) => {
+          const tags: DB_TagType[] = row.getValue("tags");
+
+          return (
+            <div className="flex items-center gap-2">
+              {tags.map((tag) => {
+                return (
+                  <Badge variant="secondary" key={tag.id}>
+                    {tag.name}
+                  </Badge>
+                );
+              })}
             </div>
           );
         },

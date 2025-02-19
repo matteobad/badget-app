@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
+import { type Tag } from "emblor";
 import { CalendarIcon, Loader2Icon, X } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
@@ -13,6 +14,7 @@ import { type z } from "zod";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { AccountPicker } from "~/components/forms/account-picker";
 import { CategoryPicker } from "~/components/forms/category-picker";
+import TagsPicker from "~/components/forms/tags-picker";
 import {
   Accordion,
   AccordionContent,
@@ -83,6 +85,8 @@ function AddTransactionForm({
   onComplete: () => void;
 } & React.ComponentProps<"form">) {
   const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
+  const [, setTags] = useState<Tag[]>([]);
+  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   const { execute, isExecuting, reset } = useAction(createTransactionAction, {
     onError: ({ error }) => {
@@ -117,8 +121,10 @@ function AddTransactionForm({
       description: "",
       amount: "0",
       currency: "EUR",
+      accountId: accounts[0]?.id ?? undefined,
       categoryId: null,
       attachment_ids: [],
+      tags: [],
     },
   });
 
@@ -265,6 +271,28 @@ function AddTransactionForm({
                   onValueChange={field.onChange}
                   defaultValue={field.value ?? undefined}
                   options={categories}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="tags"
+            render={({ field }) => (
+              <FormItem className="col-span-2 flex flex-col">
+                <FormLabel>Tags</FormLabel>
+                <TagsPicker
+                  {...field}
+                  placeholder="Enter a tag"
+                  tags={[]}
+                  className="sm:min-w-[450px]"
+                  setTags={(newTags) => {
+                    setTags(newTags);
+                    form.setValue("tags", newTags as [Tag, ...Tag[]]);
+                  }}
+                  activeTagIndex={activeTagIndex}
+                  setActiveTagIndex={setActiveTagIndex}
                 />
                 <FormMessage />
               </FormItem>

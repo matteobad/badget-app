@@ -25,7 +25,9 @@ import {
 } from "../schema/open-banking";
 import {
   attachment_table as attachmentSchema,
+  tag_table as tagSchema,
   transaction_table as transactionSchema,
+  transaction_to_tag_table as transactionToTagSchema,
 } from "../schema/transactions";
 
 // Helper type for database client
@@ -110,6 +112,7 @@ export const QUERIES = {
         ...getTableColumns(transactionSchema),
         account: accountSchema,
         category: categorySchema,
+        tags: tagSchema,
       })
       .from(transactionSchema)
       .innerJoin(
@@ -120,6 +123,11 @@ export const QUERIES = {
         categorySchema,
         eq(transactionSchema.categoryId, categorySchema.id),
       )
+      .leftJoin(
+        transactionToTagSchema,
+        eq(transactionSchema.id, transactionToTagSchema.transactionId),
+      ) // Join transaction_tags
+      .leftJoin(tagSchema, eq(transactionToTagSchema.tagId, tagSchema.id)) // Join with tags
       .where(eq(transactionSchema.userId, userId))
       .orderBy(desc(transactionSchema.date), desc(transactionSchema.createdAt));
   },

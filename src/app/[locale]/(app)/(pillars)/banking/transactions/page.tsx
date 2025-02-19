@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { type SearchParams } from "nuqs/server";
 
 import { QUERIES } from "~/server/db/queries";
+import { CACHED_QUERIES } from "~/server/db/queries/cached-queries";
 import AddPanel from "./_components/add-panel";
 import ConnectPanel from "./_components/connect-panel";
 import EditTransactionDrawerDialog from "./_components/edit-drawer-dialog";
@@ -30,7 +31,7 @@ export default async function BankingTransactionsPage({
       QUERIES.getInstitutionsForCountry("IT"),
       QUERIES.getAccountsForUser(session.userId),
       QUERIES.getCategoriesForUser(session.userId),
-      QUERIES.getTransactionForUser(session.userId),
+      CACHED_QUERIES.getTransactionForUser(session.userId),
     ]);
 
   return (

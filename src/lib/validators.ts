@@ -33,6 +33,12 @@ export const TransactionInsertSchema = createInsertSchema(transaction_table, {
   })
   .extend({
     attachment_ids: z.array(z.string()),
+    tags: z.array(
+      z.object({
+        id: z.string(),
+        text: z.string(),
+      }),
+    ),
   });
 
 export type TransactionInsertSchema = z.infer<typeof TransactionInsertSchema>;
