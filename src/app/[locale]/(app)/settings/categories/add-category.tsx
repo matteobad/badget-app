@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
 
+import { CategoryPicker } from "~/components/forms/category-picker";
 import {
   Accordion,
   AccordionContent,
@@ -49,13 +50,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -146,29 +140,11 @@ function AddCategoryForm({
             render={({ field }) => (
               <FormItem className="col-span-2 flex flex-col">
                 <FormLabel>Categoria padre (optional)</FormLabel>
-                <Select
+                <CategoryPicker
                   onValueChange={field.onChange}
                   defaultValue={field.value ?? undefined}
-                >
-                  <SelectTrigger className="[&>span]:flex [&>span]:items-center [&>span]:gap-2 [&>span_svg]:shrink-0 [&>span_svg]:text-muted-foreground/80">
-                    <SelectValue placeholder="Categoria..." />
-                  </SelectTrigger>
-                  <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2 [&_*[role=option]>span]:flex [&_*[role=option]>span]:items-center [&_*[role=option]>span]:gap-2 [&_*[role=option]>span>svg]:shrink-0 [&_*[role=option]>span>svg]:text-muted-foreground/80">
-                    {categories.map((category) => {
-                      return (
-                        <SelectItem value={category.id} key={category.id}>
-                          <DynamicIcon
-                            className="size-4"
-                            name={
-                              category.icon as keyof typeof dynamicIconImports
-                            }
-                          />
-                          {category.name}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
+                  options={categories}
+                />
                 <FormMessage />
               </FormItem>
             )}

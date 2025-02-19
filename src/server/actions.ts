@@ -20,6 +20,7 @@ import {
   TransactionDeleteSchema,
   TransactionImportSchema,
   TransactionInsertSchema,
+  TransactionUpdateSchema,
 } from "~/lib/validators";
 import { db } from "~/server/db";
 import { MUTATIONS } from "~/server/db/queries";
@@ -91,6 +92,43 @@ export const createTransactionAction = authActionClient
 
     // Return success message
     return { message: "Transaction created" };
+  });
+
+export const updateTransactionAction = authActionClient
+  .schema(TransactionUpdateSchema)
+  .metadata({ actionName: "update-transaction" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    await db.transaction(async (tx) => {
+      await tx
+        .update(transactionSchema)
+        .set({ ...parsedInput, userId: ctx.userId })
+        .where(
+          and(
+            eq(transactionSchema.userId, ctx.userId),
+            eq(transactionSchema.id, parsedInput.id),
+          ),
+        );
+
+      for (const id of parsedInput.attachment_ids) {
+        await tx
+          .update(attachmentSchema)
+          .set({ transactionId: parsedInput.id })
+          .where(
+            and(
+              eq(attachmentSchema.id, id),
+              eq(attachmentSchema.userId, ctx.userId),
+            ),
+          );
+      }
+    });
+
+    // Invalidate cache
+    revalidateTag(`transaction_${ctx.userId}`);
+    revalidateTag(`attachment_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Transaction updated" };
   });
 
 export const importTransactionAction = authActionClient

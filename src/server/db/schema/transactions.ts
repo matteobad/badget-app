@@ -1,5 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import {
+  boolean,
   char,
   integer,
   numeric,
@@ -33,6 +34,8 @@ export const transaction_table = pgTable(
     currency: char({ length: 3 }).notNull(),
     date: timestamp({ withTimezone: true }).notNull(),
     description: text().notNull(),
+    exclude: boolean().notNull().default(false),
+    recurring: boolean().notNull().default(false),
     note: text(),
 
     ...timestamps,

@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { type dynamicIconImports } from "lucide-react/dynamic";
 import { useAction } from "next-safe-action/hooks";
+import { useQueryStates } from "nuqs";
 import { toast } from "sonner";
 
 import { CategoryBadge } from "~/components/category-badge";
@@ -54,6 +55,7 @@ import { deleteTransactionAction } from "~/server/actions";
 import { type QUERIES } from "~/server/db/queries";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { formatAmount } from "~/utils/format";
+import { transactionsParsers } from "../transaction-search-params";
 import { AddTransaction } from "./add-transaction";
 
 export type TransactionType = Awaited<
@@ -69,6 +71,8 @@ export default function TransactionDataTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+
+  const [, setParams] = useQueryStates(transactionsParsers);
 
   const deleteTransaction = useAction(deleteTransactionAction, {
     onError: ({ error }) => {
@@ -381,6 +385,7 @@ export default function TransactionDataTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() => setParams({ id: row.id })}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

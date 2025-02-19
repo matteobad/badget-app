@@ -20,6 +20,7 @@ export const CreatePensionAccountSchema = z.object({
 });
 
 export const TransactionInsertSchema = createInsertSchema(transaction_table, {
+  date: z.coerce.date(),
   amount: z.coerce.string(),
   note: z.string().optional(),
 })
@@ -35,6 +36,22 @@ export const TransactionInsertSchema = createInsertSchema(transaction_table, {
   });
 
 export type TransactionInsertSchema = z.infer<typeof TransactionInsertSchema>;
+
+export const TransactionUpdateSchema = createInsertSchema(transaction_table, {
+  id: z.string(),
+  date: z.coerce.date().optional(),
+  amount: z.coerce.string().optional(),
+  note: z.string().optional(),
+})
+  .omit({
+    userId: true,
+    createdAt: true,
+    updatedAt: true,
+    deletedAt: true,
+  })
+  .extend({
+    attachment_ids: z.array(z.string()),
+  });
 
 export const TransactionImportSchema = z.object({
   file: z.instanceof(File).refine((file) => ["text/csv"].includes(file.type), {
