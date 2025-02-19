@@ -15,6 +15,7 @@ import {
   AttachmentDeleteSchema,
   CategoryDeleteSchema,
   CategoryInsertSchema,
+  CategoryUpdateSchema,
   ConnectGocardlessSchema,
   ToggleAccountSchema,
   TransactionDeleteSchema,
@@ -296,6 +297,28 @@ export const createCategoryAction = authActionClient
 
     // Return success message
     return { message: "Category created" };
+  });
+
+export const updateCategoryAction = authActionClient
+  .schema(CategoryUpdateSchema)
+  .metadata({ actionName: "update-category" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    await db
+      .update(categorySchema)
+      .set({ ...parsedInput })
+      .where(
+        and(
+          eq(categorySchema.userId, ctx.userId),
+          eq(categorySchema.id, parsedInput.id),
+        ),
+      );
+
+    // Invalidate cache
+    revalidateTag(`category_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Categoria aggiornata!" };
   });
 
 export const deleteCategoryAction = authActionClient

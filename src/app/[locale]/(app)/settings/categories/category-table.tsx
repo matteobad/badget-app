@@ -19,7 +19,7 @@ import {
   PlusIcon,
 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { useQueryState } from "nuqs";
+import { useQueryStates } from "nuqs";
 import { toast } from "sonner";
 
 import { CategoryBadge } from "~/components/category-badge";
@@ -44,6 +44,7 @@ import {
 } from "~/components/ui/table";
 import { deleteCategoryAction } from "~/server/actions";
 import { type QUERIES } from "~/server/db/queries";
+import { categoriesParsers } from "./search-params";
 
 type Category = Awaited<
   ReturnType<typeof QUERIES.getCategoriesForUser>
@@ -54,7 +55,7 @@ export default function CategoryDataTable({
 }: {
   categories: Category[];
 }) {
-  const [, setOpen] = useQueryState("add");
+  const [, setParams] = useQueryStates(categoriesParsers);
   const [rowSelection, setRowSelection] = useState({});
 
   const deleteCategory = useAction(deleteCategoryAction, {
@@ -123,16 +124,16 @@ export default function CategoryDataTable({
         },
       },
       {
-        header: "Slug",
-        accessorKey: "slug",
+        header: "Descrizione",
+        accessorKey: "description",
         cell: ({ row }) => (
-          <div className="font-mono text-muted-foreground">
-            {row.getValue("slug")}
+          <div className="line-clamp-1 text-muted-foreground">
+            {row.getValue("description") ?? "No description available"}
           </div>
         ),
       },
       {
-        header: "Parent",
+        header: "Gerarchia",
         accessorKey: "parentId",
         cell: ({ row }) => {
           const parent = categories.find(
@@ -241,7 +242,7 @@ export default function CategoryDataTable({
               })}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button onClick={() => setOpen("")}>
+        <Button onClick={() => setParams({ add: true })}>
           <PlusIcon />
           Crea Categoria
         </Button>
@@ -278,6 +279,11 @@ export default function CategoryDataTable({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    onClick={() => {
+                      if (row.original.userId) {
+                        void setParams({ id: row.id });
+                      }
+                    }}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell

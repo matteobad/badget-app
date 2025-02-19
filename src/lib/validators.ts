@@ -101,15 +101,25 @@ export type ToggleAccountType = z.infer<typeof ToggleAccountSchema> & {
   userId: string;
 };
 
-export const CategoryInsertSchema = createInsertSchema(category_table, {}).omit(
-  {
-    id: true,
-    userId: true,
-    createdAt: true,
-    updatedAt: true,
-    deletedAt: true,
-  },
-);
+export const CategoryInsertSchema = createInsertSchema(category_table, {
+  description: z.string().optional(),
+}).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+});
+
+export const CategoryUpdateSchema = createInsertSchema(category_table, {
+  id: z.string(),
+  description: z.string().optional(),
+}).omit({
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+});
 
 export const CategoryDeleteSchema = z.object({
   ids: z.array(z.string()),

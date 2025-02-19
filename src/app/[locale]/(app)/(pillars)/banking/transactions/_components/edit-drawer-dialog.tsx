@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Loader2Icon, X } from "lucide-react";
@@ -311,22 +311,31 @@ function EditTransactionForm({
   );
 }
 
-export default function EditDrawerDialog({
+export default function EditTransactionDrawerDialog({
   accounts,
   categories,
-  transaction,
+  transactions,
 }: {
   accounts: DB_AccountType[];
   categories: DB_CategoryType[];
-  transaction?: DB_TransactionType;
+  transactions: DB_TransactionType[];
 }) {
-  const isMobile = useIsMobile();
   const [{ id }, setParams] = useQueryStates(transactionsParsers);
+  const isMobile = useIsMobile();
+
   const open = !!id;
+
+  const transaction = useMemo(() => {
+    return transactions.find((t) => t.id === id);
+  }, [id, transactions]);
 
   const handleClose = () => {
     void setParams({ id: null });
   };
+
+  console.log(id, transaction);
+
+  if (!transaction) return;
 
   if (isMobile) {
     return (
@@ -342,7 +351,7 @@ export default function EditDrawerDialog({
             className="px-4"
             accounts={accounts}
             categories={categories}
-            transaction={transaction!}
+            transaction={transaction}
             onComplete={handleClose}
           />
           <DrawerFooter>
@@ -370,7 +379,7 @@ export default function EditDrawerDialog({
           <EditTransactionForm
             accounts={accounts}
             categories={categories}
-            transaction={transaction!}
+            transaction={transaction}
             onComplete={handleClose}
           />
         </div>

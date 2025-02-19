@@ -15,15 +15,16 @@ export const category_table = pgTable(
 
     // FK
     userId: varchar({ length: 32 }),
+    parentId: varchar({ length: 128 }).references(
+      (): AnyPgColumn => category_table.id,
+      { onDelete: "set null" },
+    ),
 
     name: varchar({ length: 64 }).notNull(),
     slug: varchar({ length: 64 }).notNull(),
     color: varchar({ length: 32 }),
     icon: varchar({ length: 32 }),
-    parentId: varchar({ length: 128 }).references(
-      (): AnyPgColumn => category_table.id,
-      { onDelete: "set null" },
-    ),
+    description: varchar({ length: 128 }),
 
     ...timestamps,
   },

@@ -1,6 +1,6 @@
 "use client";
 
-import type dynamicIconImports from "lucide-react/dynamicIconImports";
+import type { dynamicIconImports } from "lucide-react/dynamic";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronsUpDown, CircleDashedIcon, Loader2Icon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
@@ -59,39 +59,38 @@ import {
 } from "~/components/ui/sheet";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
-import { CategoryInsertSchema } from "~/lib/validators";
-import { createCategoryAction } from "~/server/actions";
+import { CategoryUpdateSchema } from "~/lib/validators";
+import { updateCategoryAction } from "~/server/actions";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
 import { categoriesParsers } from "./search-params";
 
-function AddCategoryForm({
+function EditCategoryForm({
   categories,
+  category,
   onComplete,
   className,
 }: {
   categories: DB_CategoryType[];
+  category: DB_CategoryType;
   onComplete: () => void;
 } & React.ComponentProps<"form">) {
-  const { execute, isExecuting, reset } = useAction(createCategoryAction, {
+  const { execute, isExecuting, reset } = useAction(updateCategoryAction, {
     onError: ({ error }) => {
       console.error(error);
       toast.error(error.serverError);
     },
     onSuccess: ({ data }) => {
-      console.log(data?.message);
-      toast.success("Transazione creata!");
+      toast.success(data?.message);
       reset();
       onComplete();
     },
   });
 
-  const form = useForm<z.infer<typeof CategoryInsertSchema>>({
-    resolver: zodResolver(CategoryInsertSchema),
+  const form = useForm<z.infer<typeof CategoryUpdateSchema>>({
+    resolver: zodResolver(CategoryUpdateSchema),
     defaultValues: {
-      name: "",
-      color: "",
-      slug: "",
-      description: "",
+      ...category,
+      description: category.description ?? undefined,
     },
   });
 
@@ -104,7 +103,7 @@ function AddCategoryForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(execute)}
-        className={cn("flex h-full flex-col gap-6", className)}
+        className={cn("mt-8 flex h-full flex-col", className)}
       >
         {/* <pre>
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
@@ -147,7 +146,7 @@ function AddCategoryForm({
                 <CategoryPicker
                   onValueChange={field.onChange}
                   defaultValue={field.value ?? undefined}
-                  options={categories}
+                  options={categories.filter((c) => c.id !== category.id)}
                 />
                 <FormMessage />
               </FormItem>
@@ -158,18 +157,15 @@ function AddCategoryForm({
             name="description"
             render={({ field }) => (
               <FormItem className="col-span-2 flex flex-col">
-                <FormLabel>Descrizione</FormLabel>
+                <FormLabel>Descrizione (opzionale)</FormLabel>
                 <FormControl>
                   <Input
-                    {...field}
                     placeholder=""
                     autoComplete="off"
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck="false"
-                    onChange={(event) => {
-                      field.onChange(event);
-                    }}
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage />
@@ -178,9 +174,9 @@ function AddCategoryForm({
           />
         </div>
 
-        <Accordion type="single" collapsible>
-          <AccordionItem value="attchament">
-            <AccordionTrigger>Personalizza</AccordionTrigger>
+        <Accordion type="multiple">
+          <AccordionItem value="icon">
+            <AccordionTrigger className="text-sm">Icona</AccordionTrigger>
             <AccordionContent className="space-y-2">
               <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden">
                 <FormField
@@ -188,7 +184,7 @@ function AddCategoryForm({
                   name="icon"
                   render={({ field }) => (
                     <FormItem className="flex w-full flex-col">
-                      <FormLabel>Icona</FormLabel>
+                      <FormLabel className="sr-only">Icona</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -251,12 +247,19 @@ function AddCategoryForm({
                     </FormItem>
                   )}
                 />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="color">
+            <AccordionTrigger className="text-sm">Colore</AccordionTrigger>
+            <AccordionContent className="space-y-2">
+              <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden">
                 <FormField
                   control={form.control}
                   name="color"
                   render={({ field }) => (
                     <FormItem className="col-span-2 flex w-full flex-col">
-                      <FormLabel>Colore</FormLabel>
+                      <FormLabel className="sr-only">Colore</FormLabel>
                       <FormControl>
                         <HslColorPicker
                           className="w-full!"
@@ -281,10 +284,10 @@ function AddCategoryForm({
             {isExecuting ? (
               <>
                 <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                Creo categoria...
+                Modifico categoria...
               </>
             ) : (
-              "Aggiungi categoria"
+              "Modifica categoria"
             )}
           </Button>
         </div>
@@ -293,34 +296,38 @@ function AddCategoryForm({
   );
 }
 
-export default function AddCategoryDrawerDialog({
+export default function EditCategoryDrawerDialog({
   categories,
 }: {
   categories: DB_CategoryType[];
 }) {
   const isMobile = useIsMobile();
-  const [{ add }, setParams] = useQueryStates(categoriesParsers);
+  const [{ id }, setParams] = useQueryStates(categoriesParsers);
 
-  const open = !!add;
+  const open = !!id;
+  const category = categories.find((c) => c.id === id)!;
 
   const handleClose = () => {
-    void setParams({ add: null });
+    void setParams({ id: null });
   };
+
+  if (!id) return;
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleClose}>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Crea una nuova categoria</DrawerTitle>
+            <DrawerTitle>Modifica categoria</DrawerTitle>
             <DrawerDescription>
               Ogni euro ha la sua storia: crea categorie e organizza le tue
               finanze.
             </DrawerDescription>
           </DrawerHeader>
-          <AddCategoryForm
+          <EditCategoryForm
             className="px-4"
             categories={categories}
+            category={category}
             onComplete={handleClose}
           />
           <DrawerFooter>
@@ -337,16 +344,20 @@ export default function AddCategoryDrawerDialog({
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="p-4">
+      <SheetContent className="p-4 [&>button]:hidden">
         <div className="flex h-full flex-col">
-          <SheetHeader className="mb-6">
-            <SheetTitle>Crea una nuova categoria</SheetTitle>
+          <SheetHeader>
+            <SheetTitle>Modifica categoria</SheetTitle>
             <SheetDescription>
               Ogni euro ha la sua storia: crea categorie e organizza le tue
               finanze.
             </SheetDescription>
           </SheetHeader>
-          <AddCategoryForm categories={categories} onComplete={handleClose} />
+          <EditCategoryForm
+            categories={categories}
+            category={category}
+            onComplete={handleClose}
+          />
         </div>
       </SheetContent>
     </Sheet>

@@ -121,7 +121,7 @@ export const QUERIES = {
         eq(transactionSchema.categoryId, categorySchema.id),
       )
       .where(eq(transactionSchema.userId, userId))
-      .orderBy(desc(transactionSchema.date));
+      .orderBy(desc(transactionSchema.date), desc(transactionSchema.createdAt));
   },
   getTransactionById: function (transactionId: string, client: DBClient = db) {
     return client
