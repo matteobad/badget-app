@@ -65,13 +65,13 @@ async function fetchWithAuth<T>(
 
   const data = (await response.json()) as T;
 
+  if (!response.ok) {
+    throw new Error((data as ErrorResponse).detail || "Unknown error occurred");
+  }
+
   if (cacheKey) {
     await redis.set(cacheKey, data, { ex: ONE_DAY });
     console.log(`[gocardless] writing to cache ${cacheKey}`);
-  }
-
-  if (!response.ok) {
-    throw new Error((data as ErrorResponse).detail || "Unknown error occurred");
   }
 
   return data;
@@ -212,8 +212,8 @@ export const gocardlessClient = {
 
     const { date_from, date_to } = params;
     const query = new URLSearchParams();
-    if (date_from) query.set("data_from", date_from);
-    if (date_to) query.set("data_to", date_to);
+    if (date_from) query.set("date_from", date_from);
+    if (date_to) query.set("date_to", date_to);
 
     const url = `/api/v2/accounts/${params.id}/transactions/?${query.toString()}`;
     const data = await fetchWithAuth<GC_GetTransactionsResponse>(

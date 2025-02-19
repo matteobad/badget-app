@@ -109,7 +109,7 @@ export const mapTransactionsRequest = (params: GetTransactionsRequest) => {
   return {
     id: params.accountId,
     date_from: params.latest
-      ? formatISO(subDays(new Date(), 7), {
+      ? formatISO(subDays(new Date(), 5), {
           representation: "date",
         })
       : undefined,
