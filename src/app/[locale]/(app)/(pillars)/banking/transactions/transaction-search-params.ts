@@ -1,4 +1,8 @@
-import { createSearchParamsCache, parseAsStringLiteral } from "nuqs/server";
+import {
+  createSearchParamsCache,
+  parseAsString,
+  parseAsStringLiteral,
+} from "nuqs/server";
 
 // Note: import from 'nuqs/server' to avoid the "use client" directive
 
@@ -7,6 +11,7 @@ const userActions = ["add", "connect", "import"] as const;
 
 export const transactionsParsers = {
   action: parseAsStringLiteral(userActions),
+  id: parseAsString,
 };
 
 export const transactionsSearchParamsCache =

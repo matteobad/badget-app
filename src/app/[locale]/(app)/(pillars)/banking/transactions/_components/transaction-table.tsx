@@ -24,9 +24,13 @@ import {
   MoreHorizontal,
   Trash2Icon,
 } from "lucide-react";
+import { type dynamicIconImports } from "lucide-react/dynamic";
 import { useAction } from "next-safe-action/hooks";
+import { useQueryStates } from "nuqs";
 import { toast } from "sonner";
 
+import { CategoryBadge } from "~/components/category-badge";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
@@ -50,8 +54,8 @@ import {
 import { deleteTransactionAction } from "~/server/actions";
 import { type QUERIES } from "~/server/db/queries";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
-import { type DB_CategoryType } from "~/server/db/schema/categories";
 import { formatAmount } from "~/utils/format";
+import { transactionsParsers } from "../transaction-search-params";
 import { AddTransaction } from "./add-transaction";
 
 export type TransactionType = Awaited<
@@ -67,6 +71,8 @@ export default function TransactionDataTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+
+  const [, setParams] = useQueryStates(transactionsParsers);
 
   const deleteTransaction = useAction(deleteTransactionAction, {
     onError: ({ error }) => {
@@ -166,8 +172,19 @@ export default function TransactionDataTable({
           return <div className="text-neutral-900">Categoria</div>;
         },
         cell: ({ row }) => {
-          const category: DB_CategoryType = row.getValue("category");
-          return <div>{category?.name}</div>;
+          const name = row.original.category?.name ?? undefined;
+          const color = row.original.category?.color ?? undefined;
+          const icon = row.original.category?.icon ?? undefined;
+
+          return (
+            <div className="flex items-center gap-2">
+              <CategoryBadge
+                name={name}
+                color={color}
+                icon={icon as keyof typeof dynamicIconImports}
+              />
+            </div>
+          );
         },
       },
       {
@@ -177,7 +194,19 @@ export default function TransactionDataTable({
         },
         cell: ({ row }) => {
           const account: DB_AccountType = row.getValue("account");
-          return <div>{account.name}</div>;
+
+          return (
+            <div className="flex items-center gap-2">
+              <Avatar className="size-5">
+                <AvatarImage
+                  src={account.logoUrl!}
+                  alt={`${account.name} logo`}
+                ></AvatarImage>
+                <AvatarFallback>AN</AvatarFallback>
+              </Avatar>
+              {account.name}
+            </div>
+          );
         },
       },
       {
@@ -356,6 +385,7 @@ export default function TransactionDataTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() => setParams({ id: row.id })}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

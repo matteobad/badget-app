@@ -7,6 +7,8 @@ import {
   desc,
   eq,
   getTableColumns,
+  isNull,
+  or,
 } from "drizzle-orm";
 
 import type {
@@ -22,7 +24,7 @@ import {
   institution_table as institutionSchema,
 } from "../schema/open-banking";
 import {
-  transaction_attachment_table as attachmentSchema,
+  attachment_table as attachmentSchema,
   transaction_table as transactionSchema,
 } from "../schema/transactions";
 
@@ -95,7 +97,9 @@ export const QUERIES = {
     return client
       .select()
       .from(categorySchema)
-      .where(eq(categorySchema.userId, userId))
+      .where(
+        or(eq(categorySchema.userId, userId), isNull(categorySchema.userId)),
+      )
       .orderBy(categorySchema.name);
   },
 
@@ -116,7 +120,8 @@ export const QUERIES = {
         categorySchema,
         eq(transactionSchema.categoryId, categorySchema.id),
       )
-      .where(eq(transactionSchema.userId, userId));
+      .where(eq(transactionSchema.userId, userId))
+      .orderBy(desc(transactionSchema.date), desc(transactionSchema.createdAt));
   },
   getTransactionById: function (transactionId: string, client: DBClient = db) {
     return client

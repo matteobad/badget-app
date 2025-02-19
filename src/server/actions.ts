@@ -13,21 +13,26 @@ import {
 import { authActionClient } from "~/lib/safe-action";
 import {
   AttachmentDeleteSchema,
+  CategoryDeleteSchema,
+  CategoryInsertSchema,
+  CategoryUpdateSchema,
   ConnectGocardlessSchema,
   ToggleAccountSchema,
   TransactionDeleteSchema,
   TransactionImportSchema,
   TransactionInsertSchema,
+  TransactionUpdateSchema,
 } from "~/lib/validators";
 import { db } from "~/server/db";
 import { MUTATIONS } from "~/server/db/queries";
 import {
-  transaction_attachment_table as attachmentSchema,
+  attachment_table as attachmentSchema,
   transaction_table as transactionSchema,
 } from "~/server/db/schema/transactions";
 import { utapi } from "~/server/uploadthing";
 import { type CSVRow, type CSVRowParsed } from "~/utils/schemas";
 import { transformCSV } from "~/utils/transform";
+import { category_table as categorySchema } from "./db/schema/categories";
 import {
   connection_table as connectionSchema,
   institution_table as institutionSchema,
@@ -88,6 +93,43 @@ export const createTransactionAction = authActionClient
 
     // Return success message
     return { message: "Transaction created" };
+  });
+
+export const updateTransactionAction = authActionClient
+  .schema(TransactionUpdateSchema)
+  .metadata({ actionName: "update-transaction" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    await db.transaction(async (tx) => {
+      await tx
+        .update(transactionSchema)
+        .set({ ...parsedInput, userId: ctx.userId })
+        .where(
+          and(
+            eq(transactionSchema.userId, ctx.userId),
+            eq(transactionSchema.id, parsedInput.id),
+          ),
+        );
+
+      for (const id of parsedInput.attachment_ids) {
+        await tx
+          .update(attachmentSchema)
+          .set({ transactionId: parsedInput.id })
+          .where(
+            and(
+              eq(attachmentSchema.id, id),
+              eq(attachmentSchema.userId, ctx.userId),
+            ),
+          );
+      }
+    });
+
+    // Invalidate cache
+    revalidateTag(`transaction_${ctx.userId}`);
+    revalidateTag(`attachment_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Transaction updated" };
   });
 
 export const importTransactionAction = authActionClient
@@ -239,4 +281,60 @@ export const toggleAccountAction = authActionClient
 
     // Return success message
     return { message: "Account toggled" };
+  });
+
+export const createCategoryAction = authActionClient
+  .schema(CategoryInsertSchema)
+  .metadata({ actionName: "create-category" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    await db
+      .insert(categorySchema)
+      .values({ ...parsedInput, userId: ctx.userId });
+
+    // Invalidate cache
+    revalidateTag(`category_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Category created" };
+  });
+
+export const updateCategoryAction = authActionClient
+  .schema(CategoryUpdateSchema)
+  .metadata({ actionName: "update-category" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    await db
+      .update(categorySchema)
+      .set({ ...parsedInput })
+      .where(
+        and(
+          eq(categorySchema.userId, ctx.userId),
+          eq(categorySchema.id, parsedInput.id),
+        ),
+      );
+
+    // Invalidate cache
+    revalidateTag(`category_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Categoria aggiornata!" };
+  });
+
+export const deleteCategoryAction = authActionClient
+  .schema(CategoryDeleteSchema)
+  .metadata({ actionName: "delete-category" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    await db.transaction(async (tx) => {
+      for (const id of parsedInput.ids) {
+        await tx.delete(categorySchema).where(eq(categorySchema.id, id));
+      }
+    });
+
+    // Invalidate cache
+    revalidateTag(`category_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Category deleted" };
   });

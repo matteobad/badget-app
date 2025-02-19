@@ -2,7 +2,10 @@
 
 import * as React from "react";
 import {
+  CalendarClockIcon,
   CandlestickChart,
+  CreditCardIcon,
+  CuboidIcon,
   Layers,
   LifeBuoy,
   Link2,
@@ -11,7 +14,7 @@ import {
   Send,
   Settings,
   Shapes,
-  Sprout,
+  SproutIcon,
 } from "lucide-react";
 
 import { NavMain } from "~/components/nav-main";
@@ -42,43 +45,39 @@ const data = {
           title: "Transazioni",
           url: "/banking/transactions",
         },
-        {
-          title: "Passività",
-          url: "/banking/liabilities",
-        },
       ],
     },
     {
-      title: "Risparmi",
-      url: "/saving",
+      title: "Fondo emergenza",
+      url: "#",
       icon: PiggyBank,
       items: [
         {
-          title: "Obiettivi",
-          url: "/saving/goals",
+          title: "Conti deposito",
+          url: "#",
         },
         {
-          title: "Fondo emergenza",
-          url: "/saving/emergency",
+          title: "Obbligazioni a breve",
+          url: "#",
+        },
+        {
+          title: "EFT monetari",
+          url: "#",
         },
       ],
     },
     {
-      title: "Pensione",
-      url: "/pension",
-      icon: Sprout,
+      title: "Spese previste",
+      url: "#",
+      icon: CalendarClockIcon,
       items: [
         {
-          title: "Sociale (INPS)",
-          url: "/pension/inps",
+          title: "BTP Valore",
+          url: "#",
         },
         {
-          title: "Complementare (fondi)",
-          url: "/pension/simulations",
-        },
-        {
-          title: "Simulatore",
-          url: "/pension/simulations",
+          title: "Obbligazioni",
+          url: "#",
         },
       ],
     },
@@ -89,21 +88,38 @@ const data = {
       items: [
         {
           title: "Azioni",
-          url: "/investments/stocks",
+          url: "#",
         },
         {
           title: "Obbligazioni",
-          url: "/investments/bonds",
+          url: "#",
         },
         {
           title: "Fondi",
-          url: "/investments/funds",
+          url: "#",
         },
         {
           title: "Crypto",
-          url: "/investments/cryptos",
+          url: "#",
         },
       ],
+    },
+  ],
+  navPrimary: [
+    {
+      title: "Assets",
+      url: "/settings/accounts",
+      icon: CuboidIcon,
+    },
+    {
+      title: "Liabilities",
+      url: "/settings/categories",
+      icon: CreditCardIcon,
+    },
+    {
+      title: "Previdenza",
+      url: "/settings/budgets",
+      icon: SproutIcon,
     },
   ],
   navSecondary: [
@@ -149,7 +165,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain header="Pilastri" items={data.navMain} />
+        <NavMain header="Patrimonio" items={data.navPrimary} />
         <NavSettings settings={data.settings} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

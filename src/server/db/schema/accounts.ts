@@ -12,8 +12,6 @@ import {
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { connection_table, institution_table } from "./open-banking";
-import { transaction_table } from "./transactions";
-import { workspaceToAccounts } from "./workspace-to-accounts";
 
 export const account_table = pgTable(
   "account_table",
@@ -43,9 +41,9 @@ export const account_table = pgTable(
   (t) => [unique().on(t.userId, t.rawId)],
 );
 
-export const accountsRelations = relations(account_table, ({ one, many }) => ({
-  transactions: many(transaction_table),
-  workspaceToAccounts: many(workspaceToAccounts),
+export const accountsRelations = relations(account_table, ({ one }) => ({
+  // transactions: many(transaction_table),
+  // workspaceToAccounts: many(workspaceToAccounts),
   institution: one(institution_table, {
     fields: [account_table.institutionId],
     references: [institution_table.id],

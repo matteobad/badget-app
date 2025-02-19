@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2Icon, X } from "lucide-react";
+import { Loader2Icon, X } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryStates } from "nuqs";
+import { useQueryStates } from "nuqs";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
 
-import { CurrencyInput } from "~/components/custom/currency-input";
-import { AccountPicker } from "~/components/forms/account-picker";
+import { AccountAvatar } from "~/components/account-avatar";
 import { CategoryPicker } from "~/components/forms/category-picker";
 import {
   Accordion,
@@ -20,7 +19,6 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
 import {
   Drawer,
   DrawerClose,
@@ -38,19 +36,6 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -58,40 +43,47 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
+import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
-import { TransactionInsertSchema } from "~/lib/validators";
+import { TransactionUpdateSchema } from "~/lib/validators";
 import {
-  createTransactionAction,
   deleteAttachmentAction,
+  updateTransactionAction,
 } from "~/server/actions";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
-import { type DB_AttachmentType } from "~/server/db/schema/transactions";
-import { formatSize } from "~/utils/format";
+import {
+  type DB_AttachmentType,
+  type DB_TransactionType,
+} from "~/server/db/schema/transactions";
+import { formatAmount, formatSize } from "~/utils/format";
 import { UploadDropzone } from "~/utils/uploadthing";
+import { transactionsParsers } from "../transaction-search-params";
 
-function AddTransactionForm({
+function EditTransactionForm({
   accounts,
   categories,
+  transaction,
   onComplete,
   className,
 }: {
   accounts: DB_AccountType[];
   categories: DB_CategoryType[];
+  transaction: DB_TransactionType;
   onComplete: () => void;
 } & React.ComponentProps<"form">) {
   const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
 
-  const { execute, isExecuting, reset } = useAction(createTransactionAction, {
+  const { execute, isExecuting, reset } = useAction(updateTransactionAction, {
     onError: ({ error }) => {
       console.error(error);
       toast.error(error.serverError);
     },
     onSuccess: ({ data }) => {
       console.log(data?.message);
-      toast.success("Transazione creata!");
+      toast.success("Transazione aggiornata!");
       reset();
       onComplete();
     },
@@ -108,158 +100,52 @@ function AddTransactionForm({
     },
   });
 
-  const incomeId = categories.find((c) => c.slug === "income")!.id;
+  const account = accounts.find((a) => a.id === transaction.accountId);
 
-  const form = useForm<z.infer<typeof TransactionInsertSchema>>({
-    resolver: zodResolver(TransactionInsertSchema),
+  const form = useForm<z.infer<typeof TransactionUpdateSchema>>({
+    resolver: zodResolver(TransactionUpdateSchema),
     defaultValues: {
-      date: new Date(),
-      description: "",
-      amount: "0",
-      currency: "EUR",
-      categoryId: null,
+      ...transaction,
+      note: transaction?.note ?? undefined,
       attachment_ids: [],
     },
   });
-
-  const category = form.watch("categoryId");
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(execute)}
-        className={cn("flex h-full flex-col gap-6", className)}
+        className={cn("flex h-full flex-col", className)}
       >
         {/* <pre>
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
         </pre> */}
 
+        <div className="mb-8 flex justify-between">
+          <AccountAvatar
+            account={{
+              name: account?.name ?? "",
+              logoUrl: account?.logoUrl ?? "",
+            }}
+          />
+          <div className="text-sm text-muted-foreground">
+            {format(transaction.date, "LLL dd, yyyy")}
+          </div>
+        </div>
+
+        <div className="mb-8 flex flex-col gap-2">
+          <h2>{transaction.description}</h2>
+          <span className="font-mono text-4xl">
+            {formatAmount({ amount: parseFloat(transaction.amount) })}
+          </span>
+        </div>
+
         <div className="grid w-full grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className="col-span-2 flex flex-col">
-                <FormLabel>Data</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {format(field.value, "MMMM dd'th', yyyy")}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                      toDate={new Date()}
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem className="col-span-2 flex flex-col">
-                <FormLabel>Descrizione</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder=""
-                    autoComplete="off"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck="false"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Importo</FormLabel>
-                <FormControl>
-                  <CurrencyInput
-                    value={field.value}
-                    onValueChange={(values) => {
-                      field.onChange(values.floatValue);
-
-                      if (values.floatValue && values.floatValue > 0) {
-                        form.setValue("categoryId", incomeId);
-                      }
-
-                      if (
-                        category === incomeId &&
-                        values.floatValue !== undefined &&
-                        values.floatValue < 0
-                      ) {
-                        form.setValue("categoryId", null);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="currency"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Valuta</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleziona valuta" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EUR">EUR</SelectItem>
-                    <SelectItem value="USD">USD</SelectItem>
-                    <SelectItem value="GBP">GBP</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="accountId"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Conto</FormLabel>
-                <AccountPicker
-                  onValueChange={field.onChange}
-                  defaultValue={field.value ?? undefined}
-                  options={accounts}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="categoryId"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="col-span-2 flex flex-col">
                 <FormLabel>Categoria</FormLabel>
                 <CategoryPicker
                   onValueChange={field.onChange}
@@ -272,9 +158,9 @@ function AddTransactionForm({
           />
         </div>
 
-        <Accordion type="single" collapsible>
+        <Accordion type="multiple">
           <AccordionItem value="attchament">
-            <AccordionTrigger>Allegati</AccordionTrigger>
+            <AccordionTrigger className="text-sm">Allegati</AccordionTrigger>
             <AccordionContent className="space-y-2">
               <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden">
                 <UploadDropzone
@@ -335,8 +221,57 @@ function AddTransactionForm({
               </ul>
             </AccordionContent>
           </AccordionItem>
+          <AccordionItem value="exclude">
+            <AccordionTrigger className="text-sm">
+              Escludi dalle analisi
+            </AccordionTrigger>
+            <AccordionContent>
+              <FormField
+                control={form.control}
+                name="exclude"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-4">
+                    <FormLabel className="mt-0 text-sm font-normal text-muted-foreground">
+                      Exclude this transaction from analytics like profit,
+                      expense and revenue. This is useful for internal transfers
+                      between accounts to avoid double-counting.
+                    </FormLabel>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      aria-readonly
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="recurring">
+            <AccordionTrigger className="text-sm">Ricorrente</AccordionTrigger>
+            <AccordionContent>
+              <FormField
+                control={form.control}
+                name="recurring"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-4">
+                    <FormLabel className="mt-0 text-sm font-normal text-muted-foreground">
+                      Mark as recurring. Similar future transactions will be
+                      automatically categorized and flagged as recurring.
+                    </FormLabel>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      aria-readonly
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </AccordionContent>
+          </AccordionItem>
           <AccordionItem value="note">
-            <AccordionTrigger>Note</AccordionTrigger>
+            <AccordionTrigger className="text-sm">Note</AccordionTrigger>
             <AccordionContent>
               <FormField
                 control={form.control}
@@ -364,10 +299,10 @@ function AddTransactionForm({
             {isExecuting ? (
               <>
                 <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                Creo transazione...
+                Modifico transazione...
               </>
             ) : (
-              "Aggiungi transazione"
+              "Modifica transazione"
             )}
           </Button>
         </div>
@@ -376,35 +311,47 @@ function AddTransactionForm({
   );
 }
 
-export default function AddPanel({
+export default function EditTransactionDrawerDialog({
   accounts,
   categories,
+  transactions,
 }: {
   accounts: DB_AccountType[];
   categories: DB_CategoryType[];
+  transactions: DB_TransactionType[];
 }) {
+  const [{ id }, setParams] = useQueryStates(transactionsParsers);
   const isMobile = useIsMobile();
-  const [params, setParams] = useQueryStates({ action: parseAsString });
-  const open = params.action === "add";
+
+  const open = !!id;
+
+  const transaction = useMemo(() => {
+    return transactions.find((t) => t.id === id);
+  }, [id, transactions]);
 
   const handleClose = () => {
-    void setParams({ action: null });
+    void setParams({ id: null });
   };
+
+  console.log(id, transaction);
+
+  if (!transaction) return;
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleClose}>
         <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Nuova spesa o entrata</DrawerTitle>
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>Modifica spesa o entrata</DrawerTitle>
             <DrawerDescription>
-              Registra un movimento per tenere tutto sotto controllo.
+              Modifica un movimento per tenere tutto sotto controllo.
             </DrawerDescription>
           </DrawerHeader>
-          <AddTransactionForm
+          <EditTransactionForm
             className="px-4"
             accounts={accounts}
             categories={categories}
+            transaction={transaction}
             onComplete={handleClose}
           />
           <DrawerFooter>
@@ -420,18 +367,19 @@ export default function AddPanel({
   }
 
   return (
-    <Sheet open={open} onOpenChange={() => setParams({ action: null })}>
-      <SheetContent className="p-4">
+    <Sheet open={open} onOpenChange={handleClose}>
+      <SheetContent className="p-4 [&>button]:hidden">
         <div className="flex h-full flex-col">
-          <SheetHeader className="mb-6">
-            <SheetTitle>Nuova spesa o entrata</SheetTitle>
+          <SheetHeader className="sr-only">
+            <SheetTitle>Modifica spesa o entrate</SheetTitle>
             <SheetDescription>
-              Registra un movimento per tenere tutto sotto controllo.
+              Modifica un movimento per tenere tutto sotto controllo.
             </SheetDescription>
           </SheetHeader>
-          <AddTransactionForm
+          <EditTransactionForm
             accounts={accounts}
             categories={categories}
+            transaction={transaction}
             onComplete={handleClose}
           />
         </div>

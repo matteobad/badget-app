@@ -1,17 +1,34 @@
-import { Skeleton } from "~/components/ui/skeleton";
+import type { SearchParams } from "nuqs/server";
+import { auth } from "@clerk/nextjs/server";
 
-export default function CategoriesPage() {
+import { QUERIES } from "~/server/db/queries";
+import AddCategoryDrawerDialog from "./add-category";
+import CategoryDataTable from "./category-table";
+import EditCategoryDrawerDialog from "./edit-category";
+import { categoriesSearchParamsCache } from "./search-params";
+
+export default async function CategoriesPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  // ⚠️ Don't forget to call `parse` here.
+  // You can access type-safe values from the returned object:
+  const {} = await categoriesSearchParamsCache.parse(searchParams);
+
+  const session = await auth();
+  if (!session.userId) throw new Error("User not found");
+
+  const categories = await QUERIES.getCategoriesForUser(session.userId);
+
   return (
     <>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="grid auto-rows-min gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Skeleton className="aspect-video rounded-xl bg-muted/50" />
-          <Skeleton className="aspect-video rounded-xl bg-muted/50" />
-          <Skeleton className="aspect-video rounded-xl bg-muted/50" />
-          <Skeleton className="aspect-video rounded-xl bg-muted/50" />
-        </div>
-        <Skeleton className="grid min-h-[100vh] flex-1 overflow-hidden rounded-xl bg-muted/50 md:min-h-min md:grid-cols-3" />
+        <CategoryDataTable categories={categories} />
       </div>
+
+      <AddCategoryDrawerDialog categories={categories} />
+      <EditCategoryDrawerDialog categories={categories} />
     </>
   );
 }

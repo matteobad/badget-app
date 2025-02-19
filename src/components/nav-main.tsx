@@ -21,8 +21,10 @@ import {
 } from "~/components/ui/sidebar";
 
 export function NavMain({
+  header,
   items,
 }: {
+  header: string;
   items: {
     title: string;
     url: string;
@@ -36,7 +38,7 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Pilastri</SidebarGroupLabel>
+      <SidebarGroupLabel>{header}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>

@@ -65,13 +65,13 @@ async function fetchWithAuth<T>(
 
   const data = (await response.json()) as T;
 
+  if (!response.ok) {
+    throw new Error((data as ErrorResponse).detail || "Unknown error occurred");
+  }
+
   if (cacheKey) {
     await redis.set(cacheKey, data, { ex: ONE_DAY });
     console.log(`[gocardless] writing to cache ${cacheKey}`);
-  }
-
-  if (!response.ok) {
-    throw new Error((data as ErrorResponse).detail || "Unknown error occurred");
   }
 
   return data;
@@ -98,6 +98,7 @@ async function getAccessToken() {
   return access;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getRefreshToken(refreshToken: string) {
   const response = await fetch(`${BASE_URL}/token/refresh/`, {
     method: "POST",
@@ -118,8 +119,9 @@ async function getValidAccessToken() {
   const accessToken = await redis.get<string>(ACCESS_KEY);
   if (accessToken) return accessToken;
 
-  const refreshToken = await redis.get<string>(REFRESH_KEY);
-  if (refreshToken) return getRefreshToken(refreshToken);
+  // TODO: fix refresh call return 404 and I don't know why
+  // const refreshToken = await redis.get<string>(REFRESH_KEY);
+  // if (refreshToken) return getRefreshToken(refreshToken);
 
   return getAccessToken();
 }
@@ -207,7 +209,13 @@ export const gocardlessClient = {
   getAccountTransactions: async (params: GC_GetTransactionsRequest) => {
     const paramsKey = Object.values(params).join(":");
     const cacheKey = `gocardless:account_transactions:${paramsKey}`;
-    const url = `/api/v2/accounts/${params.id}/transactions/`;
+
+    const { date_from, date_to } = params;
+    const query = new URLSearchParams();
+    if (date_from) query.set("date_from", date_from);
+    if (date_to) query.set("date_to", date_to);
+
+    const url = `/api/v2/accounts/${params.id}/transactions/?${query.toString()}`;
     const data = await fetchWithAuth<GC_GetTransactionsResponse>(
       url,
       {},

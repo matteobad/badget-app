@@ -4,9 +4,8 @@ import type { DB_AccountInsertType } from "./schema/accounts";
 import type { DB_CategoryInsertType } from "./schema/categories";
 import type { DB_ConnectionInsertType } from "./schema/open-banking";
 import { db } from ".";
-import { account_table } from "./schema/accounts";
 import { category_table } from "./schema/categories";
-import { connection_table } from "./schema/open-banking";
+import { buildConflictUpdateColumns } from "./utils";
 
 // import { DEFAULT_CATEGORIES } from "./data/categories";
 
@@ -63,15 +62,17 @@ import { connection_table } from "./schema/open-banking";
 //   }
 // }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CONNECTIONS_DATA: DB_ConnectionInsertType[] = [
   {
-    institutionId: "qpevotmf05kqknn4k630b28x",
+    institutionId: "n5doi0t2ubrvn7wtdjhrtf16",
     provider: "GOCARDLESS",
     userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
     referenceId: "d33ae4ee-6952-4e16-85c7-fa9c8bc0a2a5",
   },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ACCOUNTS_DATA: DB_AccountInsertType[] = [
   {
     name: "Revolut",
@@ -93,33 +94,57 @@ const ACCOUNTS_DATA: DB_AccountInsertType[] = [
   },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CATEGORY_DATA: DB_CategoryInsertType[] = [
-  {
-    name: "Uncategorized",
-    slug: "uncategorized",
-    type: "OUTCOME",
-    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
-  },
   {
     name: "Income",
     slug: "income",
-    type: "INCOME",
-    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
+    color: "142.8 64.2% 24.1%", // green-800
+    icon: "arrow-down-0-1",
+    userId: null,
+  },
+  {
+    name: "Outcome",
+    slug: "outcome",
+    color: "0 70% 35.3%", // red-800
+    icon: "arrow-up-1-0",
+    userId: null,
+  },
+  {
+    name: "Saving",
+    slug: "saving",
+    color: "225.9 70.7% 40.2%", // blue-800
+    icon: "piggy-bank",
+    userId: null,
+  },
+  {
+    name: "Investment",
+    slug: "investment",
+    color: "272.9 67.2% 39.4%", // purple-800
+    icon: "chart-candlestick",
+    userId: null,
   },
   {
     name: "Transfer",
     slug: "transfer",
-    type: "TRANSFER",
-    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
+    color: "0 0% 14.9%", // neutral-800
+    icon: "arrow-down-up", // neutral-800
+    userId: null,
   },
 ];
 
 async function main() {
   // await reset(db, schema);
 
-  await db.insert(connection_table).values(CONNECTIONS_DATA);
-  await db.insert(account_table).values(ACCOUNTS_DATA);
-  await db.insert(category_table).values(CATEGORY_DATA);
+  // await db.insert(connection_table).values(CONNECTIONS_DATA);
+  // await db.insert(account_table).values(ACCOUNTS_DATA);
+  await db
+    .insert(category_table)
+    .values(CATEGORY_DATA)
+    .onConflictDoUpdate({
+      target: [category_table.slug, category_table.userId],
+      set: buildConflictUpdateColumns(category_table, ["color", "icon"]),
+    });
   // await seed(db, schema, {
   //   count: 10,
   // });
