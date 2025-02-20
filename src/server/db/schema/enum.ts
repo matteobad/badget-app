@@ -36,9 +36,9 @@ export const CategoryType = {
 export type CategoryType = (typeof CategoryType)[keyof typeof CategoryType];
 
 export const BudgetPeriod = {
-  WEEK: "WEEK",
-  MONTH: "MONTH",
-  YEAR: "YEAR",
+  WEEKLY: "WEEKLY",
+  MONTHLY: "MONTHLY",
+  YEARLY: "YEARLY",
   UNKNOWN: "UNKNOWN",
 } as const;
 export type BudgetPeriod = (typeof BudgetPeriod)[keyof typeof BudgetPeriod];

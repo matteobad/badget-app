@@ -19,6 +19,11 @@ import type {
 import { type ToggleAccountType } from "~/lib/validators";
 import { db } from "..";
 import { account_table as accountSchema } from "../schema/accounts";
+import {
+  budget_table as budgetSchema,
+  budget_to_category_table as budgetToCategoryTable,
+  budget_to_tag_table as budgetToTagTable,
+} from "../schema/budgets";
 import { category_table as categorySchema } from "../schema/categories";
 import {
   connection_table as connectionSchema,
@@ -104,6 +109,43 @@ export const QUERIES = {
         or(eq(categorySchema.userId, userId), isNull(categorySchema.userId)),
       )
       .orderBy(categorySchema.name);
+  },
+
+  getBudgetWithCategoryForUser: function (
+    userId: string,
+    client: DBClient = db,
+  ) {
+    return client
+      .select({
+        ...getTableColumns(budgetSchema),
+        category: categorySchema,
+      })
+      .from(budgetSchema)
+      .leftJoin(
+        budgetToCategoryTable,
+        eq(budgetSchema.id, budgetToCategoryTable.categoryId),
+      )
+      .leftJoin(
+        categorySchema,
+        eq(budgetToCategoryTable.categoryId, categorySchema.id),
+      )
+      .where(eq(budgetSchema.userId, userId))
+      .orderBy(budgetSchema.name);
+  },
+  getBudgetWithTagForUser: function (userId: string, client: DBClient = db) {
+    return client
+      .select({
+        ...getTableColumns(budgetSchema),
+        tag: tagSchema,
+      })
+      .from(budgetSchema)
+      .leftJoin(
+        budgetToTagTable,
+        eq(budgetSchema.id, budgetToTagTable.budgetId),
+      )
+      .leftJoin(tagSchema, eq(budgetToTagTable.tagId, tagSchema.id))
+      .where(eq(budgetSchema.userId, userId))
+      .orderBy(budgetSchema.name);
   },
 
   // transactions

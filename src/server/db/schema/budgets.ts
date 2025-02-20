@@ -1,42 +1,63 @@
-import { isNotNull, or, relations } from "drizzle-orm";
-import {
-  check,
-  decimal,
-  serial,
-  text,
-  timestamp,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { createId } from "@paralleldrive/cuid2";
+import { date, decimal, text, varchar } from "drizzle-orm/pg-core";
 
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
-import { budgetsToCategories } from "./budgets-to-categories";
+import { category_table } from "./categories";
 import { type BudgetPeriod } from "./enum";
+import { tag_table } from "./transactions";
 
-export const budgets = pgTable(
-  "budgets",
-  {
-    id: serial().primaryKey(),
+export const budget_table = pgTable("budget_table", {
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId())
+    .notNull(),
 
-    // FK
-    userId: varchar({ length: 32 }),
-    orgId: varchar({ length: 32 }),
+  userId: varchar({ length: 32 }),
+  name: text().notNull(), // Example: "Groceries Budget"
+  amount: decimal({ precision: 10, scale: 2 }).notNull(), // Budgeted amount
+  period: text().$type<BudgetPeriod>().notNull(),
+  startDate: date().notNull(), // When budget starts
+  endDate: date().notNull(), // When budget ends
 
-    amount: decimal({ precision: 10, scale: 2 }).default("0"),
-    period: text().$type<BudgetPeriod>().notNull(),
-    activeFrom: timestamp({ withTimezone: true }).notNull(),
-    activeTo: timestamp({ withTimezone: true }).notNull(),
+  ...timestamps,
+});
 
-    ...timestamps,
-  },
-  (t) => [
-    check("org_id_or_user_id", or(isNotNull(t.orgId), isNotNull(t.userId))!),
-  ],
-);
+export type DB_BudgetType = typeof budget_table.$inferSelect;
+export type DB_BudgetInsertType = typeof budget_table.$inferInsert;
 
-export const budgetsRelations = relations(budgets, ({ many }) => ({
-  budgetCategories: many(budgetsToCategories),
-}));
+// Budget Categories (One-to-Many: Budgets → Categories)
+export const budget_to_category_table = pgTable("budget_to_category_table", {
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId())
+    .notNull(),
 
-export type SelectBudget = typeof budgets.$inferSelect;
-export type InsertBudget = typeof budgets.$inferInsert;
+  budgetId: varchar({ length: 128 })
+    .notNull()
+    .references(() => budget_table.id, { onDelete: "cascade" }),
+  categoryId: varchar({ length: 128 })
+    .notNull()
+    .references(() => category_table.id, { onDelete: "cascade" }),
+
+  ...timestamps,
+});
+
+// Budget Tags (One-to-Many: Budgets → Tags)
+export const budget_to_tag_table = pgTable("budget_to_tag_table", {
+  id: varchar({ length: 128 })
+    .primaryKey()
+    .$defaultFn(() => createId())
+    .notNull(),
+
+  budgetId: varchar({ length: 128 })
+    .notNull()
+    .references(() => budget_table.id, {
+      onDelete: "cascade",
+    }),
+  tagId: varchar({ length: 128 })
+    .notNull()
+    .references(() => tag_table.id, { onDelete: "cascade" }),
+
+  ...timestamps,
+});

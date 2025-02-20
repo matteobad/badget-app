@@ -8,7 +8,6 @@ import ws from "ws";
 import { env } from "~/env";
 import * as accounts from "./schema/accounts";
 import * as budgets from "./schema/budgets";
-import * as budgetsToCategories from "./schema/budgets-to-categories";
 import * as categories from "./schema/categories";
 import * as groups from "./schema/groups";
 import * as openBanking from "./schema/open-banking";
@@ -45,7 +44,6 @@ const pool = new Pool({ connectionString });
 export const schema = {
   ...accounts,
   ...budgets,
-  ...budgetsToCategories,
   ...categories,
   ...openBanking,
   ...groups,
