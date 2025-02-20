@@ -85,7 +85,7 @@ function AddTransactionForm({
   onComplete: () => void;
 } & React.ComponentProps<"form">) {
   const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
-  const [, setTags] = useState<Tag[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   const { execute, isExecuting, reset } = useAction(createTransactionAction, {
@@ -124,7 +124,6 @@ function AddTransactionForm({
       accountId: accounts[0]?.id ?? undefined,
       categoryId: null,
       attachment_ids: [],
-      tags: [],
     },
   });
 
@@ -285,11 +284,12 @@ function AddTransactionForm({
                 <TagsPicker
                   {...field}
                   placeholder="Enter a tag"
-                  tags={[]}
+                  tags={tags}
                   className="sm:min-w-[450px]"
                   setTags={(newTags) => {
                     setTags(newTags);
                     form.setValue("tags", newTags as [Tag, ...Tag[]]);
+                    console.log(newTags);
                   }}
                   activeTagIndex={activeTagIndex}
                   setActiveTagIndex={setActiveTagIndex}

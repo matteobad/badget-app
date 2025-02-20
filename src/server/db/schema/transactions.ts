@@ -80,11 +80,11 @@ export const tag_table = pgTable(
       .notNull(),
 
     userId: varchar({ length: 32 }).notNull(),
-    name: text().notNull(),
+    text: text().notNull(),
 
     ...timestamps,
   },
-  (t) => [unique().on(t.userId, t.name)],
+  (t) => [unique().on(t.userId, t.text)],
 );
 
 export type DB_TagType = typeof tag_table.$inferSelect;
@@ -99,13 +99,14 @@ export const transaction_to_tag_table = pgTable(
       .$defaultFn(() => createId())
       .notNull(),
 
-    transactionId: varchar({ length: 128 }).references(
-      () => transaction_table.id,
-      { onDelete: "cascade" },
-    ),
-    tagId: varchar({ length: 128 }).references(() => tag_table.id, {
-      onDelete: "cascade",
-    }),
+    transactionId: varchar({ length: 128 })
+      .notNull()
+      .references(() => transaction_table.id, { onDelete: "cascade" }),
+    tagId: varchar({ length: 128 })
+      .notNull()
+      .references(() => tag_table.id, {
+        onDelete: "cascade",
+      }),
 
     ...timestamps,
   },

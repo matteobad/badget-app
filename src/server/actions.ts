@@ -70,14 +70,14 @@ export const createTransactionAction = authActionClient
       const inserted = await tx
         .insert(transactionSchema)
         .values({ ...parsedInput, userId: ctx.userId })
-        .returning({ insertedId: transactionSchema.id });
+        .returning({ id: transactionSchema.id });
 
-      if (!inserted[0]?.insertedId) return tx.rollback();
+      if (!inserted[0]?.id) return tx.rollback();
 
       for (const id of parsedInput.attachment_ids) {
         await tx
           .update(attachmentSchema)
-          .set({ transactionId: inserted[0]?.insertedId })
+          .set({ transactionId: inserted[0].id })
           .where(
             and(
               eq(attachmentSchema.id, id),
@@ -85,10 +85,17 @@ export const createTransactionAction = authActionClient
             ),
           );
       }
+
+      // handle tags
+      const userId = ctx.userId;
+      const tags = parsedInput.tags.map((t) => t.text);
+      // TODO: do the same for attachment, centralize logic
+      await MUTATIONS.updateTagsOnTransaction(tags, inserted[0].id, userId, tx);
     });
 
     // Invalidate cache
     revalidateTag(`transaction_${ctx.userId}`);
+    revalidateTag(`tag_${ctx.userId}`);
     revalidateTag(`attachment_${ctx.userId}`);
 
     // Return success message
@@ -101,6 +108,7 @@ export const updateTransactionAction = authActionClient
   .action(async ({ parsedInput, ctx }) => {
     // Mutate data
     await db.transaction(async (tx) => {
+      // update transactions
       await tx
         .update(transactionSchema)
         .set({ ...parsedInput, userId: ctx.userId })
@@ -111,6 +119,7 @@ export const updateTransactionAction = authActionClient
           ),
         );
 
+      // handle attachements
       for (const id of parsedInput.attachment_ids) {
         await tx
           .update(attachmentSchema)
@@ -122,6 +131,11 @@ export const updateTransactionAction = authActionClient
             ),
           );
       }
+
+      // handle tags
+      const userId = ctx.userId;
+      const tags = parsedInput.tags.map((t) => t.text);
+      await MUTATIONS.updateTagsOnTransaction(tags, parsedInput.id, userId, tx);
     });
 
     // Invalidate cache

@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { category_table } from "~/server/db/schema/categories";
 import { Provider } from "~/server/db/schema/enum";
-import { transaction_table } from "~/server/db/schema/transactions";
+import { tag_table, transaction_table } from "~/server/db/schema/transactions";
 
 // savings
 export const addSavingsAccountFormSchema = z.object({
@@ -17,6 +17,16 @@ export const CreatePensionAccountSchema = z.object({
   investmentBranchId: z.number(),
   joinedAt: z.date().default(new Date()),
   baseContribution: z.number().default(0),
+});
+
+export const TagInsertSchema = createInsertSchema(tag_table, {
+  id: z.string(),
+  text: z.string(),
+}).omit({
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
 });
 
 export const TransactionInsertSchema = createInsertSchema(transaction_table, {
@@ -33,12 +43,7 @@ export const TransactionInsertSchema = createInsertSchema(transaction_table, {
   })
   .extend({
     attachment_ids: z.array(z.string()),
-    tags: z.array(
-      z.object({
-        id: z.string(),
-        text: z.string(),
-      }),
-    ),
+    tags: z.array(TagInsertSchema).default([]),
   });
 
 export type TransactionInsertSchema = z.infer<typeof TransactionInsertSchema>;
@@ -57,6 +62,7 @@ export const TransactionUpdateSchema = createInsertSchema(transaction_table, {
   })
   .extend({
     attachment_ids: z.array(z.string()),
+    tags: z.array(TagInsertSchema).default([]),
   });
 
 export const TransactionImportSchema = z.object({

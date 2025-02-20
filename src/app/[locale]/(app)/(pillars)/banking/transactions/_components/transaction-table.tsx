@@ -202,7 +202,7 @@ export default function TransactionDataTable({
               {tags.map((tag) => {
                 return (
                   <Badge variant="secondary" key={tag.id}>
-                    {tag.name}
+                    {tag.text}
                   </Badge>
                 );
               })}
