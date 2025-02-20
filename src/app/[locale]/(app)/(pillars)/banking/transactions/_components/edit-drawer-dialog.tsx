@@ -12,6 +12,7 @@ import { type z } from "zod";
 
 import { AccountAvatar } from "~/components/account-avatar";
 import { CategoryPicker } from "~/components/forms/category-picker";
+import TagsPicker from "~/components/forms/tags-picker";
 import {
   Accordion,
   AccordionContent,
@@ -52,15 +53,17 @@ import {
   deleteAttachmentAction,
   updateTransactionAction,
 } from "~/server/actions";
+import { type CACHED_QUERIES } from "~/server/db/queries/cached-queries";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
-import {
-  type DB_AttachmentType,
-  type DB_TransactionType,
-} from "~/server/db/schema/transactions";
+import { type DB_AttachmentType } from "~/server/db/schema/transactions";
 import { formatAmount, formatSize } from "~/utils/format";
 import { UploadDropzone } from "~/utils/uploadthing";
 import { transactionsParsers } from "../transaction-search-params";
+
+type Transaction = Awaited<
+  ReturnType<typeof CACHED_QUERIES.getTransactionForUser>
+>[number];
 
 function EditTransactionForm({
   accounts,
@@ -71,10 +74,11 @@ function EditTransactionForm({
 }: {
   accounts: DB_AccountType[];
   categories: DB_CategoryType[];
-  transaction: DB_TransactionType;
+  transaction: Transaction;
   onComplete: () => void;
 } & React.ComponentProps<"form">) {
   const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
+  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   const { execute, isExecuting, reset } = useAction(updateTransactionAction, {
     onError: ({ error }) => {
@@ -140,7 +144,7 @@ function EditTransactionForm({
           </span>
         </div>
 
-        <div className="grid w-full grid-cols-2 gap-4">
+        <div className="mb-2 grid w-full grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="categoryId"
@@ -151,6 +155,25 @@ function EditTransactionForm({
                   onValueChange={field.onChange}
                   defaultValue={field.value ?? undefined}
                   options={categories}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="tags"
+            render={({ field }) => (
+              <FormItem className="col-span-2 flex flex-col">
+                <FormLabel>Tags</FormLabel>
+                <TagsPicker
+                  {...field}
+                  placeholder="Enter a tag"
+                  tags={field.value}
+                  className="sm:min-w-[450px]"
+                  setTags={field.onChange}
+                  activeTagIndex={activeTagIndex}
+                  setActiveTagIndex={setActiveTagIndex}
                 />
                 <FormMessage />
               </FormItem>
@@ -318,7 +341,7 @@ export default function EditTransactionDrawerDialog({
 }: {
   accounts: DB_AccountType[];
   categories: DB_CategoryType[];
-  transactions: DB_TransactionType[];
+  transactions: Transaction[];
 }) {
   const [{ id }, setParams] = useQueryStates(transactionsParsers);
   const isMobile = useIsMobile();
@@ -332,8 +355,6 @@ export default function EditTransactionDrawerDialog({
   const handleClose = () => {
     void setParams({ id: null });
   };
-
-  console.log(id, transaction);
 
   if (!transaction) return;
 
