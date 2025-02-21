@@ -111,6 +111,67 @@ export const QUERIES = {
       .orderBy(categorySchema.name);
   },
 
+  getCategoriesWithBudgets: async function (
+    userId: string,
+    year: number,
+    client: DBClient = db,
+  ) {
+    // Recupera tutte le categorie dell'utente
+    const categories = await client
+      .select()
+      .from(categorySchema)
+      .where(
+        or(eq(categorySchema.userId, userId), isNull(categorySchema.userId)),
+      );
+
+    // Recupera tutti i budget per l'utente
+    const budgets = await client
+      .select({
+        id: budgetSchema.id,
+        categoryId: budgetToCategoryTable.categoryId,
+        amount: budgetSchema.amount,
+        period: budgetSchema.period,
+        startDate: budgetSchema.startDate,
+        endDate: budgetSchema.endDate,
+      })
+      .from(budgetSchema)
+      .leftJoin(
+        budgetToCategoryTable,
+        eq(budgetSchema.id, budgetToCategoryTable.budgetId),
+      )
+      .where(and(eq(budgetSchema.userId, userId)));
+
+    // Creiamo una mappa {categoryId: { mese: budget } }
+    const budgetMap = new Map<string, Record<number, number>>();
+
+    budgets.forEach((budget) => {
+      if (!budget.categoryId) return; // Caso raro in cui budget non è collegato a nessuna categoria
+      const categoryBudgets = budgetMap.get(budget.categoryId) ?? {};
+
+      for (let month = 1; month <= 12; month++) {
+        const inRange =
+          new Date(budget.startDate).getFullYear() <= year &&
+          new Date(budget.endDate).getFullYear() >= year &&
+          new Date(budget.startDate).getMonth() + 1 <= month &&
+          new Date(budget.endDate).getMonth() + 1 >= month;
+
+        categoryBudgets[month] = inRange
+          ? Number(budget.amount)
+          : (categoryBudgets[month] ?? 0);
+      }
+
+      budgetMap.set(budget.categoryId, categoryBudgets);
+    });
+
+    // Costruisci il risultato finale
+    return categories.map((category) => ({
+      ...category,
+      budgets: Array.from({ length: 12 }, (_, i) => ({
+        month: i + 1,
+        amount: budgetMap.get(category.id)?.[i + 1] ?? 0, // Default a 0 se non c'è budget
+      })),
+    }));
+  },
   getBudgetWithCategoryForUser: function (
     userId: string,
     client: DBClient = db,

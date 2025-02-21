@@ -97,40 +97,33 @@ const ACCOUNTS_DATA: DB_AccountInsertType[] = [
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CATEGORY_DATA: DB_CategoryInsertType[] = [
   {
-    name: "Income",
+    name: "Incomes",
     slug: "income",
     color: "142.8 64.2% 24.1%", // green-800
     icon: "arrow-down-0-1",
     userId: null,
   },
   {
-    name: "Outcome",
+    name: "Expenses",
     slug: "outcome",
     color: "0 70% 35.3%", // red-800
     icon: "arrow-up-1-0",
     userId: null,
   },
   {
-    name: "Saving",
-    slug: "saving",
-    color: "225.9 70.7% 40.2%", // blue-800
-    icon: "piggy-bank",
-    userId: null,
-  },
-  {
-    name: "Investment",
-    slug: "investment",
+    name: "Savings & Investments",
+    slug: "saving-investment",
     color: "272.9 67.2% 39.4%", // purple-800
     icon: "chart-candlestick",
     userId: null,
   },
-  {
-    name: "Transfer",
-    slug: "transfer",
-    color: "0 0% 14.9%", // neutral-800
-    icon: "arrow-down-up", // neutral-800
-    userId: null,
-  },
+  // {
+  //   name: "Transfer",
+  //   slug: "transfer",
+  //   color: "0 0% 14.9%", // neutral-800
+  //   icon: "arrow-down-up", // neutral-800
+  //   userId: null,
+  // },
 ];
 
 async function main() {
