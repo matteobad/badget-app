@@ -11,8 +11,6 @@ import * as budgets from "./schema/budgets";
 import * as categories from "./schema/categories";
 import * as groups from "./schema/groups";
 import * as openBanking from "./schema/open-banking";
-import * as rules from "./schema/rules";
-import * as tokens from "./schema/tokens";
 import * as transactions from "./schema/transactions";
 import * as users from "./schema/users";
 import * as usersToGroups from "./schema/users-to-groups";
@@ -47,8 +45,6 @@ export const schema = {
   ...categories,
   ...openBanking,
   ...groups,
-  ...rules,
-  ...tokens,
   ...transactions,
   ...users,
   ...usersToGroups,
