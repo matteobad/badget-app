@@ -5,12 +5,13 @@ import type { LucideIcon } from "lucide-react";
 import { Collapsible } from "~/components/ui/collapsible";
 import {
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
 
-export function NavMain({
+export function NavExtras({
   items,
 }: {
   items: {
@@ -26,6 +27,7 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
+      <SidebarGroupLabel>Extra</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>

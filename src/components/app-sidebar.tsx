@@ -7,14 +7,14 @@ import {
   CreditCardIcon,
   CuboidIcon,
   Layers,
+  LayoutDashboardIcon,
   LifeBuoy,
   Link2,
-  ListTodo,
+  ListTodoIcon,
   PiggyBank,
   Send,
   Settings,
   Shapes,
-  SproutIcon,
 } from "lucide-react";
 
 import { NavMain } from "~/components/nav-main";
@@ -26,11 +26,25 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "~/components/ui/sidebar";
+import { NavExtras } from "./nav-extras";
+import { NavPillars } from "./nav-pillars";
 import { NavSettings } from "./nav-settings";
 import { TeamSwitcher } from "./team-switcher";
 
 const data = {
   navMain: [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboardIcon,
+    },
+    {
+      title: "Budgets",
+      url: "/budgets",
+      icon: ListTodoIcon,
+    },
+  ],
+  navPillars: [
     {
       title: "Liquidità",
       url: "/banking",
@@ -105,22 +119,22 @@ const data = {
       ],
     },
   ],
-  navPrimary: [
+  navExtras: [
     {
-      title: "Assets",
-      url: "/settings/accounts",
+      title: "Attività",
+      url: "#",
       icon: CuboidIcon,
     },
     {
-      title: "Liabilities",
-      url: "/settings/categories",
+      title: "Passività",
+      url: "#",
       icon: CreditCardIcon,
     },
-    {
-      title: "Previdenza",
-      url: "/settings/budgets",
-      icon: SproutIcon,
-    },
+    // {
+    //   title: "Previdenza",
+    //   url: "#",
+    //   icon: SproutIcon,
+    // },
   ],
   navSecondary: [
     {
@@ -146,11 +160,6 @@ const data = {
       icon: Shapes,
     },
     {
-      name: "Budgets",
-      url: "/settings/budgets",
-      icon: ListTodo,
-    },
-    {
       name: "Preferenze",
       url: "/settings",
       icon: Settings,
@@ -165,8 +174,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain header="Pilastri" items={data.navMain} />
-        <NavMain header="Patrimonio" items={data.navPrimary} />
+        <NavMain items={data.navMain} />
+        <NavPillars items={data.navPillars} />
+        <NavExtras items={data.navExtras} />
         <NavSettings settings={data.settings} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
