@@ -26,7 +26,6 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "~/components/ui/sidebar";
-import { NavExtras } from "./nav-extras";
 import { NavPillars } from "./nav-pillars";
 import { NavSettings } from "./nav-settings";
 import { TeamSwitcher } from "./team-switcher";
@@ -176,7 +175,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavPillars items={data.navPillars} />
-        <NavExtras items={data.navExtras} />
+        {/* <NavExtras items={data.navExtras} /> */}
         <NavSettings settings={data.settings} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
