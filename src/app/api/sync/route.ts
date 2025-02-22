@@ -66,6 +66,8 @@ export async function GET(request: NextRequest) {
               })
               .returning({ insertedId: account_table.id });
 
+            if (transactions.length === 0) continue;
+
             await tx
               .insert(transaction_table)
               .values(
