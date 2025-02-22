@@ -85,6 +85,10 @@ export const TransactionDeleteSchema = z.object({
 });
 export type TransactionDeleteSchema = z.infer<typeof TransactionDeleteSchema>;
 
+export const CategorizeTransactionSchema = z.object({
+  description: z.string(),
+});
+
 export const AttachmentDeleteSchema = z.object({
   id: z.string(),
   fileKey: z.string(),

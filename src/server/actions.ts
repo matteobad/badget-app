@@ -5,6 +5,10 @@ import { redirect } from "next/navigation";
 import { parse } from "@fast-csv/parse";
 import { and, eq, sql } from "drizzle-orm";
 
+import {
+  categorizeTransaction,
+  updateOrCreateRule,
+} from "~/lib/categorization";
 import { gocardlessClient } from "~/lib/providers/gocardless/gocardless-api";
 import {
   mapRequisitionStatus,
@@ -13,6 +17,7 @@ import {
 import { authActionClient } from "~/lib/safe-action";
 import {
   AttachmentDeleteSchema,
+  CategorizeTransactionSchema,
   CategoryDeleteSchema,
   CategoryInsertSchema,
   CategoryUpdateSchema,
@@ -136,6 +141,13 @@ export const updateTransactionAction = authActionClient
       const userId = ctx.userId;
       const tags = parsedInput.tags.map((t) => t.text);
       await MUTATIONS.updateTagsOnTransaction(tags, parsedInput.id, userId, tx);
+
+      // handle category
+      await updateOrCreateRule(
+        userId,
+        parsedInput.description,
+        parsedInput.categoryId,
+      );
     });
 
     // Invalidate cache
@@ -196,6 +208,17 @@ export const importTransactionAction = authActionClient
 
     // Return success message
     return { message: "Transaction created" };
+  });
+
+export const categorizeTransactionAction = authActionClient
+  .schema(CategorizeTransactionSchema)
+  .metadata({ actionName: "categorize-transaction" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    const categoryId = await categorizeTransaction(ctx.userId, parsedInput);
+
+    // Return success message
+    return { categoryId };
   });
 
 export const deleteTransactionAction = authActionClient

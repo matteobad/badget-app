@@ -8,7 +8,7 @@ import { rule_table, token_table } from "~/server/db/schema/categories";
 import { type DB_TransactionType } from "~/server/db/schema/transactions";
 
 // Tipi per le transazioni e le categorie
-type Transaction = DB_TransactionType;
+type Transaction = Partial<DB_TransactionType> & { description: string };
 
 type RuleWithTokens = DB_RuleType & { tokens: DB_TokenType[] };
 

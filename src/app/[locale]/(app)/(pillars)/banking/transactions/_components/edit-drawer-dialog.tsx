@@ -152,9 +152,12 @@ function EditTransactionForm({
               <FormItem className="col-span-2 flex flex-col">
                 <FormLabel>Categoria</FormLabel>
                 <CategoryPicker
-                  onValueChange={field.onChange}
-                  defaultValue={field.value ?? undefined}
                   options={categories}
+                  value={field.value ?? undefined}
+                  onValueChange={field.onChange}
+                  onReset={() => {
+                    form.setValue("categoryId", null);
+                  }}
                 />
                 <FormMessage />
               </FormItem>

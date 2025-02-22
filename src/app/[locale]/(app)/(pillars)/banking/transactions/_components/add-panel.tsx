@@ -65,6 +65,7 @@ import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { TransactionInsertSchema } from "~/lib/validators";
 import {
+  categorizeTransactionAction,
   createTransactionAction,
   deleteAttachmentAction,
 } from "~/server/actions";
@@ -101,6 +102,17 @@ function AddTransactionForm({
     },
   });
 
+  const categorizeTransaction = useAction(categorizeTransactionAction, {
+    onError: ({ error }) => {
+      console.error(error);
+    },
+    onSuccess: ({ data }) => {
+      if (form.getFieldState("categoryId").isDirty) return;
+      console.log("updating category since field is not dirty");
+      form.setValue("categoryId", data?.categoryId);
+    },
+  });
+
   const deleteAttachment = useAction(deleteAttachmentAction, {
     onError: ({ error }) => {
       console.error(error);
@@ -122,7 +134,6 @@ function AddTransactionForm({
       amount: "0",
       currency: "EUR",
       accountId: accounts[0]?.id ?? undefined,
-      categoryId: null,
       attachment_ids: [],
     },
   });
@@ -186,6 +197,11 @@ function AddTransactionForm({
                     autoCorrect="off"
                     spellCheck="false"
                     {...field}
+                    onBlur={(event) => {
+                      categorizeTransaction.execute({
+                        description: event.target.value,
+                      });
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -203,6 +219,8 @@ function AddTransactionForm({
                     value={field.value}
                     onValueChange={(values) => {
                       field.onChange(values.floatValue);
+
+                      if (form.getFieldState("categoryId").isDirty) return;
 
                       if (values.floatValue && values.floatValue > 0) {
                         form.setValue("categoryId", incomeId);
@@ -267,9 +285,12 @@ function AddTransactionForm({
               <FormItem className="flex flex-col">
                 <FormLabel>Categoria</FormLabel>
                 <CategoryPicker
-                  onValueChange={field.onChange}
-                  defaultValue={field.value ?? undefined}
                   options={categories}
+                  value={field.value ?? undefined}
+                  onValueChange={field.onChange}
+                  onReset={() => {
+                    form.resetField("categoryId", { defaultValue: undefined });
+                  }}
                 />
                 <FormMessage />
               </FormItem>
