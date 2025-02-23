@@ -10,14 +10,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { transactionsParsers } from "../utils/search-params";
+import { actionsParsers } from "~/utils/search-params";
 
-type AddTransactionProps = {
-  label?: string;
-};
-
-export function AddTransaction({ label }: AddTransactionProps) {
-  const [, setState] = useQueryStates(transactionsParsers, { shallow: false });
+export function AddTransactionButton({ label }: { label?: string }) {
+  const [, setState] = useQueryStates(actionsParsers, { shallow: false });
 
   return (
     <DropdownMenu>
@@ -28,15 +24,21 @@ export function AddTransaction({ label }: AddTransactionProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => void setState({ action: "connect" })}>
+        <DropdownMenuItem
+          onClick={() => void setState({ action: "link-institution" })}
+        >
           <Landmark />
           Collega
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => void setState({ action: "import" })}>
+        <DropdownMenuItem
+          onClick={() => void setState({ action: "import-transaction" })}
+        >
           <FileSpreadsheet />
           Importa
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => void setState({ action: "add" })}>
+        <DropdownMenuItem
+          onClick={() => void setState({ action: "create-transaction" })}
+        >
           <FilePlus /> Crea transazione
         </DropdownMenuItem>
       </DropdownMenuContent>

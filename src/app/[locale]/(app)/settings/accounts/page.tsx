@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 
 import { QUERIES } from "~/server/db/queries";
-import AccountDataTable from "./_components/accounts-table";
+import AccountDataTable from "../../../../../features/open-banking/components/accounts-table";
 
 export default async function SettingsAccountsPage() {
   const session = await auth();

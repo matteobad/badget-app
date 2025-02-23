@@ -56,12 +56,12 @@ import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_TagType } from "~/server/db/schema/transactions";
 import { formatAmount } from "~/utils/format";
 import { deleteTransactionAction } from "../server/actions";
-import { type CACHED_QUERIES } from "../server/cached-queries";
+import { type getTransactionForUser_CACHED } from "../server/cached-queries";
 import { transactionsParsers } from "../utils/search-params";
-import { AddTransaction } from "./add-transaction";
+import { AddTransactionButton } from "./add-transaction-button";
 
 export type TransactionType = Awaited<
-  ReturnType<typeof CACHED_QUERIES.getTransactionForUser>
+  ReturnType<typeof getTransactionForUser_CACHED>
 >[number];
 
 export default function TransactionDataTable({
@@ -374,7 +374,7 @@ export default function TransactionDataTable({
               })}
           </DropdownMenuContent>
         </DropdownMenu>
-        <AddTransaction label="Aggiungi" />
+        <AddTransactionButton label="Aggiungi" />
       </div>
       <div className="rounded-md border">
         <Table>

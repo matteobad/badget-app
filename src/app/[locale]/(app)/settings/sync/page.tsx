@@ -4,8 +4,13 @@ import { auth } from "@clerk/nextjs/server";
 
 import { ErrorFallback } from "~/components/error-fallback";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { QUERIES } from "~/server/db/queries";
-import ImportData, { SyncDataLoading } from "./sync-data.server";
+import {
+  getConnectionByKey,
+  getInstitutionById,
+} from "~/features/open-banking/server/queries";
+import ImportData, {
+  SyncDataLoading,
+} from "../../../../../features/open-banking/components/sync-data.server";
 
 export default async function SyncPage({
   searchParams,
@@ -16,11 +21,11 @@ export default async function SyncPage({
   if (!session.userId) throw new Error("User not found");
 
   const params = await searchParams;
-  const conn = await QUERIES.getConnectionByKey(params.ref);
+  const conn = await getConnectionByKey(params.ref);
   if (!conn[0]) throw new Error("Connection not found");
   if (conn[0].userId !== session.userId) throw new Error("User not authorized");
 
-  const institution = await QUERIES.getInstitutionById(conn[0].institutionId);
+  const institution = await getInstitutionById(conn[0].institutionId);
 
   return (
     <div className="mx-auto flex max-w-2xl flex-1 flex-col justify-center p-4 text-center">

@@ -1,6 +1,6 @@
 import { Landmark } from "lucide-react";
 
-import { AddTransaction } from "./add-transaction";
+import { AddTransactionButton } from "./add-transaction-button";
 
 export function TransactionsEmptyPlaceholder() {
   return (
@@ -12,7 +12,7 @@ export function TransactionsEmptyPlaceholder() {
         <p className="mt-2 mb-4 text-sm text-muted-foreground">
           Non ci sono ancora transazioni in nessuno dei tuoi conti.
         </p>
-        <AddTransaction label="Aggiungi transazione" />
+        <AddTransactionButton label="Aggiungi transazione" />
       </div>
     </div>
   );

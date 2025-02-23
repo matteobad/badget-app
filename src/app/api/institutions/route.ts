@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { env } from "~/env";
-import { getBankAccountProvider } from "~/lib/providers";
+import { getBankAccountProvider } from "~/features/open-banking/server/providers";
 import { db } from "~/server/db";
 import { institution_table as institutionSchema } from "~/server/db/schema/open-banking";
 import { buildConflictUpdateColumns } from "~/server/db/utils";

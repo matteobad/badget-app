@@ -8,7 +8,7 @@ import {
   type DB_TagType,
   type DB_TransactionType,
 } from "~/server/db/schema/transactions";
-import { QUERIES } from "./queries";
+import { getTransactionForUser } from "./queries";
 
 type TransactionForUser = DB_TransactionType & {
   account: DB_AccountType;
@@ -16,11 +16,11 @@ type TransactionForUser = DB_TransactionType & {
   tags: DB_TagType[];
 };
 
-function getTransactionForUser(userId: string) {
+export const getTransactionForUser_CACHED = (userId: string) => {
   const cacheKeys = ["transaction", `transaction_${userId}`];
   return unstable_cache(
     async () => {
-      const result = await QUERIES.getTransactionForUser(userId);
+      const result = await getTransactionForUser(userId);
 
       // NOTE: do whatever you want here, map, aggregate filter...
       // result will be cached and typesafety preserved
@@ -49,8 +49,4 @@ function getTransactionForUser(userId: string) {
       revalidate: 3600,
     },
   )();
-}
-
-export const CACHED_QUERIES = {
-  getTransactionForUser,
 };

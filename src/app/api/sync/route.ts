@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import { clerkClient } from "@clerk/nextjs/server";
 
 import { env } from "~/env";
-import { getBankAccountProvider } from "~/lib/providers";
+import { getBankAccountProvider } from "~/features/open-banking/server/providers";
+import { getConnectionsforUser } from "~/features/open-banking/server/queries";
 import { db } from "~/server/db";
 import { QUERIES } from "~/server/db/queries";
 import { account_table } from "~/server/db/schema/accounts";
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
     const userList = await client.users.getUserList();
 
     for (const user of userList.data) {
-      const connections = await QUERIES.getConnectionsforUser(user.id);
+      const connections = await getConnectionsforUser(user.id);
       const disabledAccounts = await QUERIES.getDisabledAccountsForUser(
         user.id,
       );

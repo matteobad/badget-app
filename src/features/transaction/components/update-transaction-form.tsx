@@ -1,11 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Loader2Icon, X } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { useQueryStates } from "nuqs";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
@@ -21,15 +20,6 @@ import {
 } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "~/components/ui/drawer";
-import {
   Form,
   FormControl,
   FormField,
@@ -37,16 +27,8 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "~/components/ui/sheet";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
@@ -57,15 +39,14 @@ import {
   deleteAttachmentAction,
   updateTransactionAction,
 } from "../server/actions";
-import { type CACHED_QUERIES } from "../server/cached-queries";
+import { type getTransactionForUser_CACHED } from "../server/cached-queries";
 import { TransactionUpdateSchema } from "../utils/schemas";
-import { transactionsParsers } from "../utils/search-params";
 
 type Transaction = Awaited<
-  ReturnType<typeof CACHED_QUERIES.getTransactionForUser>
+  ReturnType<typeof getTransactionForUser_CACHED>
 >[number];
 
-function EditTransactionForm({
+export default function UpdateTransactionForm({
   accounts,
   categories,
   transaction,
@@ -334,80 +315,5 @@ function EditTransactionForm({
         </div>
       </form>
     </Form>
-  );
-}
-
-export default function EditTransactionDrawerDialog({
-  accounts,
-  categories,
-  transactions,
-}: {
-  accounts: DB_AccountType[];
-  categories: DB_CategoryType[];
-  transactions: Transaction[];
-}) {
-  const [{ id }, setParams] = useQueryStates(transactionsParsers);
-  const isMobile = useIsMobile();
-
-  const open = !!id;
-
-  const transaction = useMemo(() => {
-    return transactions.find((t) => t.id === id);
-  }, [id, transactions]);
-
-  const handleClose = () => {
-    void setParams({ id: null });
-  };
-
-  if (!transaction) return;
-
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={handleClose}>
-        <DrawerContent>
-          <DrawerHeader className="sr-only">
-            <DrawerTitle>Modifica spesa o entrata</DrawerTitle>
-            <DrawerDescription>
-              Modifica un movimento per tenere tutto sotto controllo.
-            </DrawerDescription>
-          </DrawerHeader>
-          <EditTransactionForm
-            className="px-4"
-            accounts={accounts}
-            categories={categories}
-            transaction={transaction}
-            onComplete={handleClose}
-          />
-          <DrawerFooter>
-            <DrawerClose>
-              <Button variant="outline" asChild>
-                Cancel
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="p-4 [&>button]:hidden">
-        <div className="flex h-full flex-col">
-          <SheetHeader className="sr-only">
-            <SheetTitle>Modifica spesa o entrate</SheetTitle>
-            <SheetDescription>
-              Modifica un movimento per tenere tutto sotto controllo.
-            </SheetDescription>
-          </SheetHeader>
-          <EditTransactionForm
-            accounts={accounts}
-            categories={categories}
-            transaction={transaction}
-            onComplete={handleClose}
-          />
-        </div>
-      </SheetContent>
-    </Sheet>
   );
 }

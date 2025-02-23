@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { Loader2Icon } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
-import { getBankAccountProvider } from "~/lib/providers";
+import { getBankAccountProvider } from "~/features/open-banking/server/providers";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { transaction_table } from "~/server/db/schema/transactions";

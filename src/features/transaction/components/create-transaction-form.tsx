@@ -6,7 +6,6 @@ import { format } from "date-fns";
 import { type Tag } from "emblor";
 import { CalendarIcon, Loader2Icon, X } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryStates } from "nuqs";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
@@ -23,15 +22,6 @@ import {
 } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "~/components/ui/drawer";
 import {
   Form,
   FormControl,
@@ -53,15 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "~/components/ui/sheet";
 import { Textarea } from "~/components/ui/textarea";
-import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
@@ -75,7 +57,7 @@ import {
 } from "../server/actions";
 import { TransactionInsertSchema } from "../utils/schemas";
 
-function AddTransactionForm({
+export default function CreateTransactionForm({
   accounts,
   categories,
   onComplete,
@@ -426,69 +408,5 @@ function AddTransactionForm({
         </div>
       </form>
     </Form>
-  );
-}
-
-export default function AddTransactionDrawerDialog({
-  accounts,
-  categories,
-}: {
-  accounts: DB_AccountType[];
-  categories: DB_CategoryType[];
-}) {
-  const isMobile = useIsMobile();
-  const [params, setParams] = useQueryStates({ action: parseAsString });
-  const open = params.action === "add";
-
-  const handleClose = () => {
-    void setParams({ action: null });
-  };
-
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={handleClose}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Nuova spesa o entrata</DrawerTitle>
-            <DrawerDescription>
-              Registra un movimento per tenere tutto sotto controllo.
-            </DrawerDescription>
-          </DrawerHeader>
-          <AddTransactionForm
-            className="px-4"
-            accounts={accounts}
-            categories={categories}
-            onComplete={handleClose}
-          />
-          <DrawerFooter>
-            <DrawerClose>
-              <Button variant="outline" asChild>
-                Cancel
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={() => setParams({ action: null })}>
-      <SheetContent className="p-4">
-        <div className="flex h-full flex-col">
-          <SheetHeader className="mb-6">
-            <SheetTitle>Nuova spesa o entrata</SheetTitle>
-            <SheetDescription>
-              Registra un movimento per tenere tutto sotto controllo.
-            </SheetDescription>
-          </SheetHeader>
-          <AddTransactionForm
-            accounts={accounts}
-            categories={categories}
-            onComplete={handleClose}
-          />
-        </div>
-      </SheetContent>
-    </Sheet>
   );
 }

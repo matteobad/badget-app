@@ -2,9 +2,7 @@
 
 import {
   and,
-  arrayContains,
   asc,
-  desc,
   eq,
   getTableColumns,
   inArray,
@@ -12,6 +10,7 @@ import {
   or,
 } from "drizzle-orm";
 
+import type { DBClient } from "..";
 import type {
   DB_AttachmentInsertType,
   DB_TransactionInsertType,
@@ -25,50 +24,15 @@ import {
   budget_to_tag_table as budgetToTagTable,
 } from "../schema/budgets";
 import { category_table as categorySchema } from "../schema/categories";
-import {
-  connection_table as connectionSchema,
-  institution_table as institutionSchema,
-} from "../schema/open-banking";
+import { connection_table as connectionSchema } from "../schema/open-banking";
 import {
   attachment_table as attachmentSchema,
   tag_table as tagSchema,
   transaction_table as transactionSchema,
   transaction_to_tag_table as transactionToTagSchema,
 } from "../schema/transactions";
-import { type DBClient } from "../utils";
 
 export const QUERIES = {
-  // institutions
-  getInstitutionsForCountry: function (
-    countryCode: string,
-    client: DBClient = db,
-  ) {
-    return client
-      .select()
-      .from(institutionSchema)
-      .where(arrayContains(institutionSchema.countries, [countryCode]))
-      .orderBy(desc(institutionSchema.popularity));
-  },
-  getInstitutionById: function (institutionId: string, client: DBClient = db) {
-    return client
-      .select()
-      .from(institutionSchema)
-      .where(eq(institutionSchema.id, institutionId));
-  },
-
-  getConnectionsforUser: function (userId: string, client: DBClient = db) {
-    return client
-      .select()
-      .from(connectionSchema)
-      .where(eq(connectionSchema.userId, userId));
-  },
-  getConnectionByKey: function (key: string, client: DBClient = db) {
-    return client
-      .select()
-      .from(connectionSchema)
-      .where(eq(connectionSchema.referenceId, key));
-  },
-
   getAccountsForUser: function (userId: string, client: DBClient = db) {
     return client
       .select()

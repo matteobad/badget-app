@@ -4,29 +4,12 @@ import React, { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Landmark, Loader2Icon, SearchIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryStates } from "nuqs";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "~/components/ui/drawer";
 import { Form, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -40,10 +23,9 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
-import { useIsMobile } from "~/hooks/use-mobile";
+import { connectGocardlessAction } from "~/features/open-banking/server/actions";
+import { ConnectGocardlessSchema } from "~/features/open-banking/utils/schemas";
 import { cn } from "~/lib/utils";
-import { ConnectGocardlessSchema } from "~/lib/validators";
-import { connectGocardlessAction } from "~/server/actions";
 import { type DB_InstitutionType } from "~/server/db/schema/open-banking";
 
 const countries = [
@@ -53,7 +35,7 @@ const countries = [
   },
 ];
 
-function ConnectAccountForm({
+export default function LinkInstitutionForm({
   className,
   institutions,
 }: { institutions: DB_InstitutionType[] } & React.ComponentProps<"form">) {
@@ -201,63 +183,5 @@ function ConnectAccountForm({
         </ScrollArea>
       </form>
     </Form>
-  );
-}
-
-export default function ConnectPanel({
-  institutions,
-}: {
-  institutions: DB_InstitutionType[];
-}) {
-  const isMobile = useIsMobile();
-  const [params, setParams] = useQueryStates({ action: parseAsString });
-  const open = params.action === "connect";
-
-  const PanelContent = () => (
-    <ConnectAccountForm
-      className={cn({ "px-4": isMobile })}
-      institutions={institutions}
-    />
-  );
-
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={() => setParams({ action: null })}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Collega il tuo conto bancario</DrawerTitle>
-            <DrawerDescription>
-              Connetti in sicurezza e sincronizza le tue transazioni in pochi
-              secondi.
-            </DrawerDescription>
-          </DrawerHeader>
-          <PanelContent />
-          <DrawerFooter>
-            <DrawerClose>
-              <Button variant="outline" asChild>
-                Cancel
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={() => setParams({ action: null })}>
-      <DialogContent className="p-4">
-        <div className="flex h-full flex-col">
-          <DialogHeader className="mb-6">
-            <DialogTitle>Collega il tuo conto bancario</DialogTitle>
-            <DialogDescription>
-              Connetti in sicurezza e sincronizza le tue transazioni in pochi
-              secondi.
-            </DialogDescription>
-          </DialogHeader>
-          <PanelContent />
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 }

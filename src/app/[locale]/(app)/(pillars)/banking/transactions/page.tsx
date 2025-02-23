@@ -1,15 +1,17 @@
 import { auth } from "@clerk/nextjs/server";
 import { type SearchParams } from "nuqs/server";
 
-import AddTransactionDrawerDialog from "~/features/transaction/components/add-transaction-drawer-dialog";
-import ConnectPanel from "~/features/transaction/components/connect-panel";
-import EditTransactionDrawerDialog from "~/features/transaction/components/edit-drawer-dialog";
-import ImportPanel from "~/features/transaction/components/import-panel";
+import LinkInstitutionDrawerDialog from "~/features/open-banking/components/link-institution-drawer-dialog";
+import { getInstitutionsForCountry } from "~/features/open-banking/server/queries";
+import CreateTransactionDrawerSheet from "~/features/transaction/components/create-transaction-drawer-sheet";
+import ImportTransactionDrawerDialog from "~/features/transaction/components/import-transaction-drawer-dialog";
 import TransactionDataTable from "~/features/transaction/components/transaction-table";
 import { TransactionsEmptyPlaceholder } from "~/features/transaction/components/transactions-empty-placeholder";
-import { CACHED_QUERIES } from "~/features/transaction/server/cached-queries";
+import UpdateTransactionDrawerSheet from "~/features/transaction/components/update-transaction-drawer-sheet";
+import { getTransactionForUser_CACHED } from "~/features/transaction/server/cached-queries";
 import { transactionsSearchParamsCache } from "~/features/transaction/utils/search-params";
 import { QUERIES } from "~/server/db/queries";
+import { actionsSearchParamsCache } from "~/utils/search-params";
 
 type PageProps = {
   searchParams: Promise<SearchParams>; // Next.js 15+: async searchParams prop
@@ -20,6 +22,7 @@ export default async function BankingTransactionsPage({
 }: PageProps) {
   // ⚠️ Don't forget to call `parse` here.
   // You can access type-safe values from the returned object:
+  const {} = await actionsSearchParamsCache.parse(searchParams);
   const {} = await transactionsSearchParamsCache.parse(searchParams);
 
   const session = await auth();
@@ -28,10 +31,10 @@ export default async function BankingTransactionsPage({
   // TODO: improve performance with Suspence bounderies
   const [institutionsData, accountsData, categoriesData, transactionsData] =
     await Promise.all([
-      QUERIES.getInstitutionsForCountry("IT"),
+      getInstitutionsForCountry("IT"),
       QUERIES.getAccountsForUser(session.userId),
       QUERIES.getCategoriesForUser(session.userId),
-      CACHED_QUERIES.getTransactionForUser(session.userId),
+      getTransactionForUser_CACHED(session.userId),
     ]);
 
   return (
@@ -44,14 +47,17 @@ export default async function BankingTransactionsPage({
         )}
       </div>
 
-      <AddTransactionDrawerDialog
+      <CreateTransactionDrawerSheet
         accounts={accountsData}
         categories={categoriesData}
       />
-      <ImportPanel accounts={accountsData} categories={categoriesData} />
-      <ConnectPanel institutions={institutionsData} />
+      <ImportTransactionDrawerDialog
+        accounts={accountsData}
+        categories={categoriesData}
+      />
+      <LinkInstitutionDrawerDialog institutions={institutionsData} />
 
-      <EditTransactionDrawerDialog
+      <UpdateTransactionDrawerSheet
         accounts={accountsData}
         categories={categoriesData}
         transactions={transactionsData}

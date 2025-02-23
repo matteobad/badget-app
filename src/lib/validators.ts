@@ -2,7 +2,6 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 import { category_table } from "~/server/db/schema/categories";
-import { Provider } from "~/server/db/schema/enum";
 import { tag_table } from "~/server/db/schema/transactions";
 
 // savings
@@ -27,13 +26,6 @@ export const TagInsertSchema = createInsertSchema(tag_table, {
   createdAt: true,
   updatedAt: true,
   deletedAt: true,
-});
-
-export const ConnectGocardlessSchema = z.object({
-  institutionId: z.string(),
-  countryCode: z.string().default("IT"),
-  provider: z.nativeEnum(Provider),
-  redirectBase: z.string().url(),
 });
 
 export const ImportDataSchema = z.object({
