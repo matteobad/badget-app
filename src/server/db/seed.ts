@@ -1,9 +1,9 @@
 import "dotenv/config";
 
 import type { DB_AccountInsertType } from "./schema/accounts";
-import type { DB_CategoryInsertType } from "./schema/categories";
 import type { DB_ConnectionInsertType } from "./schema/open-banking";
 import { db } from ".";
+import { DEFAULT_CATEGORIES } from "./data/categories";
 import { category_table } from "./schema/categories";
 import { buildConflictUpdateColumns } from "./utils";
 
@@ -94,38 +94,6 @@ const ACCOUNTS_DATA: DB_AccountInsertType[] = [
   },
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const CATEGORY_DATA: DB_CategoryInsertType[] = [
-  {
-    name: "Incomes",
-    slug: "income",
-    color: "142.8 64.2% 24.1%", // green-800
-    icon: "arrow-down-0-1",
-    userId: null,
-  },
-  {
-    name: "Expenses",
-    slug: "outcome",
-    color: "0 70% 35.3%", // red-800
-    icon: "arrow-up-1-0",
-    userId: null,
-  },
-  {
-    name: "Savings & Investments",
-    slug: "saving-investment",
-    color: "272.9 67.2% 39.4%", // purple-800
-    icon: "chart-candlestick",
-    userId: null,
-  },
-  // {
-  //   name: "Transfer",
-  //   slug: "transfer",
-  //   color: "0 0% 14.9%", // neutral-800
-  //   icon: "arrow-down-up", // neutral-800
-  //   userId: null,
-  // },
-];
-
 async function main() {
   // await reset(db, schema);
 
@@ -133,7 +101,7 @@ async function main() {
   // await db.insert(account_table).values(ACCOUNTS_DATA);
   await db
     .insert(category_table)
-    .values(CATEGORY_DATA)
+    .values(DEFAULT_CATEGORIES)
     .onConflictDoUpdate({
       target: [category_table.slug, category_table.userId],
       set: buildConflictUpdateColumns(category_table, ["color", "icon"]),

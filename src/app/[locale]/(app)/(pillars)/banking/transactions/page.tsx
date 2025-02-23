@@ -3,7 +3,7 @@ import { type SearchParams } from "nuqs/server";
 
 import { QUERIES } from "~/server/db/queries";
 import { CACHED_QUERIES } from "~/server/db/queries/cached-queries";
-import AddPanel from "./_components/add-panel";
+import AddTransactionDrawerDialog from "./_components/add-transaction-drawer-dialog";
 import ConnectPanel from "./_components/connect-panel";
 import EditTransactionDrawerDialog from "./_components/edit-drawer-dialog";
 import ImportPanel from "./_components/import-panel";
@@ -44,7 +44,10 @@ export default async function BankingTransactionsPage({
         )}
       </div>
 
-      <AddPanel accounts={accountsData} categories={categoriesData} />
+      <AddTransactionDrawerDialog
+        accounts={accountsData}
+        categories={categoriesData}
+      />
       <ImportPanel accounts={accountsData} categories={categoriesData} />
       <ConnectPanel institutions={institutionsData} />
 

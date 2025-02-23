@@ -89,15 +89,16 @@ function AddTransactionForm({
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
-  const { execute, isExecuting, reset } = useAction(createTransactionAction, {
+  const createTransaction = useAction(createTransactionAction, {
     onError: ({ error }) => {
       console.error(error);
       toast.error(error.serverError);
     },
     onSuccess: ({ data }) => {
       console.log(data?.message);
-      toast.success("Transazione creata!");
-      reset();
+      toast.success(data?.message);
+      createTransaction.reset();
+      form.reset();
       onComplete();
     },
   });
@@ -124,8 +125,6 @@ function AddTransactionForm({
     },
   });
 
-  const incomeId = categories.find((c) => c.slug === "income")!.id;
-
   const form = useForm<z.infer<typeof TransactionInsertSchema>>({
     resolver: zodResolver(TransactionInsertSchema),
     defaultValues: {
@@ -139,11 +138,12 @@ function AddTransactionForm({
   });
 
   const category = form.watch("categoryId");
+  const incomeId = categories.find((c) => c.slug === "income")!.id;
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(execute)}
+        onSubmit={form.handleSubmit(createTransaction.execute)}
         className={cn("flex h-full flex-col gap-6", className)}
       >
         {/* <pre>
@@ -270,9 +270,9 @@ function AddTransactionForm({
               <FormItem className="flex flex-col">
                 <FormLabel>Conto</FormLabel>
                 <AccountPicker
-                  onValueChange={field.onChange}
-                  defaultValue={field.value ?? undefined}
                   options={accounts}
+                  value={field.value ?? undefined}
+                  onValueChange={field.onChange}
                 />
                 <FormMessage />
               </FormItem>
@@ -409,8 +409,12 @@ function AddTransactionForm({
 
         <div className="grow"></div>
         <div className="flex items-center gap-4">
-          <Button className="w-full" type="submit" disabled={isExecuting}>
-            {isExecuting ? (
+          <Button
+            className="w-full"
+            type="submit"
+            disabled={createTransaction.isExecuting}
+          >
+            {createTransaction.isExecuting ? (
               <>
                 <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
                 Creo transazione...
@@ -425,7 +429,7 @@ function AddTransactionForm({
   );
 }
 
-export default function AddPanel({
+export default function AddTransactionDrawerDialog({
   accounts,
   categories,
 }: {
