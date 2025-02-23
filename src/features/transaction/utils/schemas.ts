@@ -4,16 +4,6 @@ import { z } from "zod";
 import { TagInsertSchema } from "~/lib/validators";
 import { transaction_table } from "~/server/db/schema/transactions";
 
-// Document Schema
-export const CSV_SCHEMA = z
-  .instanceof(File)
-  .refine((file) => ["text/csv"].includes(file.type), {
-    message: "Invalid document file type",
-  });
-
-export type CSVRow = Record<string, string | null>;
-export type CSVRowParsed = z.input<typeof TransactionInsertSchema>;
-
 export const TransactionInsertSchema = createInsertSchema(transaction_table, {
   date: z.coerce.date(),
   amount: z.coerce.string(),
@@ -49,21 +39,6 @@ export const TransactionUpdateSchema = createInsertSchema(transaction_table, {
     attachment_ids: z.array(z.string()),
     tags: z.array(TagInsertSchema).default([]),
   });
-
-export const TransactionImportSchema = z.object({
-  file: z.instanceof(File).refine((file) => ["text/csv"].includes(file.type), {
-    message: "Invalid document file type",
-  }),
-  fieldMapping: z.object({
-    date: z.string({ message: "Missing date mapping" }),
-    description: z.string({ message: "Missing description mapping" }),
-    amount: z.string({ message: "Missing amount mapping" }),
-    currency: z.string().default("EUR"),
-  }),
-  extraFields: z.object({ accountId: z.string() }),
-  settings: z.object({ inverted: z.boolean().default(false) }),
-});
-export type TransactionImportSchema = z.infer<typeof TransactionImportSchema>;
 
 export const TransactionDeleteSchema = z.object({
   ids: z.array(z.string()),

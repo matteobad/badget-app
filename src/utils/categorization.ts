@@ -156,8 +156,8 @@ export const categorizeTransactions = async (
 ) => {
   return Promise.all(
     transactions.map(async (tx) => ({
-      transaction: tx,
-      category: await categorizeTransaction(userId, tx),
+      ...tx,
+      categoryId: await categorizeTransaction(userId, tx),
     })),
   );
 };

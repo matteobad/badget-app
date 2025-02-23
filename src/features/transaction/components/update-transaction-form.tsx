@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -36,7 +34,7 @@ import { type DB_AttachmentType } from "~/server/db/schema/transactions";
 import { formatAmount, formatSize } from "~/utils/format";
 import { UploadDropzone } from "~/utils/uploadthing";
 import {
-  deleteAttachmentAction,
+  deleteTransactionAttachmentAction,
   updateTransactionAction,
 } from "../server/actions";
 import { type getTransactionForUser_CACHED } from "../server/cached-queries";
@@ -74,7 +72,7 @@ export default function UpdateTransactionForm({
     },
   });
 
-  const deleteAttachment = useAction(deleteAttachmentAction, {
+  const deleteAttachment = useAction(deleteTransactionAttachmentAction, {
     onError: ({ error }) => {
       console.error(error);
       toast.error(error.serverError);

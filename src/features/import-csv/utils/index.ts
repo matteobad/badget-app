@@ -40,8 +40,6 @@ export function transformCSV(
     description,
     amount,
     currency: "EUR",
-    attachment_ids: [], // TODO: add csv as attachment
-    tags: [],
     ...extraFields,
   };
 

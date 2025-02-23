@@ -33,9 +33,10 @@ export default function CreateTransactionDrawerSheet({
   accounts: DB_AccountType[];
   categories: DB_CategoryType[];
 }) {
-  const isMobile = useIsMobile();
   const [{ action }, setParams] = useQueryStates(actionsParsers);
   const open = action === "create-transaction";
+
+  const isMobile = useIsMobile();
 
   const handleClose = () => {
     void setParams({ action: null });
@@ -74,7 +75,7 @@ export default function CreateTransactionDrawerSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={() => setParams({ action: null })}>
+    <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent className="p-4">
         <div className="flex h-full flex-col">
           <SheetHeader className="mb-6">

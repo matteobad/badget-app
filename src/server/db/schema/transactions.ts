@@ -46,6 +46,7 @@ export const transaction_table = pgTable(
 export type DB_TransactionType = typeof transaction_table.$inferSelect;
 export type DB_TransactionInsertType = typeof transaction_table.$inferInsert;
 
+// TODO: attachment are a completly different feature
 export const attachment_table = pgTable("attachment_table", {
   id: varchar({ length: 128 })
     .primaryKey()

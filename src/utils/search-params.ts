@@ -4,6 +4,7 @@ import { createSearchParamsCache, parseAsStringLiteral } from "nuqs/server";
 
 // List accepted values
 const userActions = [
+  "create-account",
   "create-transaction",
   "import-transaction",
   "link-institution",

@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { Loader2Icon } from "lucide-react";
@@ -58,6 +59,8 @@ export default async function SyncDataServer(props: {
           accountId: upserted[0]!.insertedId,
         },
       });
+
+    revalidateTag(`transaction_${session.userId}`);
   }
 
   return (

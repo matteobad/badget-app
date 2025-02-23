@@ -3,7 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { createUploadthing } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 
-import { MUTATIONS } from "~/server/db/queries";
+import { db } from "~/server/db";
+import { attachment_table } from "~/server/db/schema/transactions";
 
 const f = createUploadthing();
 
@@ -25,14 +26,17 @@ export const ourFileRouter = {
       console.log("Upload complete for userId:", metadata.userId);
       console.log("file url", file.url);
 
-      const inserted = await MUTATIONS.createAttachment({
-        fileName: file.name,
-        fileKey: file.key,
-        fileUrl: file.url,
-        fileType: file.type,
-        fileSize: file.size,
-        userId: metadata.userId,
-      });
+      const inserted = await db
+        .insert(attachment_table)
+        .values({
+          fileName: file.name,
+          fileKey: file.key,
+          fileUrl: file.ufsUrl,
+          fileType: file.type,
+          fileSize: file.size,
+          userId: metadata.userId,
+        })
+        .returning();
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
       return { attachments: JSON.stringify(inserted) };
@@ -52,12 +56,12 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for userId:", metadata.userId);
-      console.log("file url", file.url);
+      console.log("file url", file.ufsUrl);
 
-      await MUTATIONS.createAttachment({
+      await db.insert(attachment_table).values({
         fileName: file.name,
         fileKey: file.key,
-        fileUrl: file.url,
+        fileUrl: file.ufsUrl,
         fileType: file.type,
         fileSize: file.size,
         userId: metadata.userId,

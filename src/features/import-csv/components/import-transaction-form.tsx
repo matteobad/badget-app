@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
 
+import { AccountPicker } from "~/components/forms/account-picker";
 import {
   Accordion,
   AccordionContent,
@@ -219,23 +220,11 @@ export default function ImportTransactionForm({
                 render={({ field }) => (
                   <FormItem className="flex items-center justify-between gap-4 space-y-0">
                     <FormLabel>Conto</FormLabel>
-                    <Select
+                    <AccountPicker
+                      options={accounts}
+                      value={field.value ?? undefined}
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleziona Conto..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {accounts.map((account) => {
-                          return (
-                            <SelectItem value={account.id} key={account.id}>
-                              {account.name}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
+                    />
                     <FormMessage />
                   </FormItem>
                 )}

@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -53,7 +51,7 @@ import { UploadDropzone } from "~/utils/uploadthing";
 import {
   categorizeTransactionAction,
   createTransactionAction,
-  deleteAttachmentAction,
+  deleteTransactionAttachmentAction,
 } from "../server/actions";
 import { TransactionInsertSchema } from "../utils/schemas";
 
@@ -91,12 +89,11 @@ export default function CreateTransactionForm({
     },
     onSuccess: ({ data }) => {
       if (form.getFieldState("categoryId").isDirty) return;
-      console.log("updating category since field is not dirty");
       form.setValue("categoryId", data?.categoryId);
     },
   });
 
-  const deleteAttachment = useAction(deleteAttachmentAction, {
+  const deleteAttachment = useAction(deleteTransactionAttachmentAction, {
     onError: ({ error }) => {
       console.error(error);
       toast.error(error.serverError);
