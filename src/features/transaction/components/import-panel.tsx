@@ -55,11 +55,11 @@ import {
 } from "~/components/ui/tooltip";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
-import { TransactionImportSchema } from "~/lib/validators";
-import { importTransactionAction, parseCsv } from "~/server/actions";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
 import { UploadDropzone } from "~/utils/uploadthing";
+import { importTransactionAction, parseCsv } from "../server/actions";
+import { TransactionImportSchema } from "../utils/schemas";
 
 const CSV_REQUIRED_FIELDS: (keyof TransactionImportSchema["fieldMapping"])[] = [
   "date",

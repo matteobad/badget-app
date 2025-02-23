@@ -4,6 +4,11 @@ import { getTableColumns, sql } from "drizzle-orm";
 import { timestamp } from "drizzle-orm/pg-core";
 import { type SQLiteTable } from "drizzle-orm/sqlite-core";
 
+export type DrizzleWhere<T> =
+  | SQL<unknown>
+  | ((aliases: T) => SQL<T> | undefined)
+  | undefined;
+
 export const timestamps = {
   createdAt: timestamp().defaultNow().notNull(),
   updatedAt: timestamp().$onUpdate(() => new Date()),
@@ -35,8 +40,3 @@ export function withPagination<T extends PgSelect>(
 ) {
   return qb.limit(pageSize).offset((page - 1) * pageSize);
 }
-
-export type DrizzleWhere<T> =
-  | SQL<unknown>
-  | ((aliases: T) => SQL<T> | undefined)
-  | undefined;

@@ -35,11 +35,7 @@ import {
   transaction_table as transactionSchema,
   transaction_to_tag_table as transactionToTagSchema,
 } from "../schema/transactions";
-
-// Helper type for database client
-type DBType = typeof db;
-type TXType = Parameters<Parameters<DBType["transaction"]>[0]>[0];
-type DBClient = DBType | TXType;
+import { type DBClient } from "../utils";
 
 export const QUERIES = {
   // institutions
@@ -208,39 +204,6 @@ export const QUERIES = {
       .where(eq(budgetSchema.userId, userId))
       .orderBy(budgetSchema.name);
   },
-
-  // transactions
-  getTransactionForUser: function (userId: string, client: DBClient = db) {
-    return client
-      .select({
-        ...getTableColumns(transactionSchema),
-        account: accountSchema,
-        category: categorySchema,
-        tags: tagSchema,
-      })
-      .from(transactionSchema)
-      .innerJoin(
-        accountSchema,
-        eq(transactionSchema.accountId, accountSchema.id),
-      )
-      .leftJoin(
-        categorySchema,
-        eq(transactionSchema.categoryId, categorySchema.id),
-      )
-      .leftJoin(
-        transactionToTagSchema,
-        eq(transactionSchema.id, transactionToTagSchema.transactionId),
-      ) // Join transaction_tags
-      .leftJoin(tagSchema, eq(transactionToTagSchema.tagId, tagSchema.id)) // Join with tags
-      .where(eq(transactionSchema.userId, userId))
-      .orderBy(desc(transactionSchema.date), desc(transactionSchema.createdAt));
-  },
-  getTransactionById: function (transactionId: string, client: DBClient = db) {
-    return client
-      .select()
-      .from(transactionSchema)
-      .where(eq(transactionSchema.id, transactionId));
-  },
 };
 
 export const MUTATIONS = {
@@ -368,7 +331,11 @@ export const MUTATIONS = {
         ),
       );
   },
-  deleteAttachment: function (id: string, userId: string, client: DBType = db) {
+  deleteAttachment: function (
+    id: string,
+    userId: string,
+    client: DBClient = db,
+  ) {
     return client
       .delete(attachmentSchema)
       .where(
@@ -383,13 +350,6 @@ export const MUTATIONS = {
       .where(eq(accountSchema.id, params.id));
   },
 };
-
-// Helper function to run transactions
-export async function withTransaction<T>(
-  callback: (tx: TXType) => Promise<T>,
-): Promise<T> {
-  return db.transaction(callback);
-}
 
 export function createTransactionMutation(data: DB_TransactionInsertType) {
   return db.insert(transactionSchema).values(data);

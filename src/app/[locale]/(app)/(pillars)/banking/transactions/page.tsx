@@ -1,15 +1,15 @@
 import { auth } from "@clerk/nextjs/server";
 import { type SearchParams } from "nuqs/server";
 
+import AddTransactionDrawerDialog from "~/features/transaction/components/add-transaction-drawer-dialog";
+import ConnectPanel from "~/features/transaction/components/connect-panel";
+import EditTransactionDrawerDialog from "~/features/transaction/components/edit-drawer-dialog";
+import ImportPanel from "~/features/transaction/components/import-panel";
+import TransactionDataTable from "~/features/transaction/components/transaction-table";
+import { TransactionsEmptyPlaceholder } from "~/features/transaction/components/transactions-empty-placeholder";
+import { CACHED_QUERIES } from "~/features/transaction/server/cached-queries";
+import { transactionsSearchParamsCache } from "~/features/transaction/utils/search-params";
 import { QUERIES } from "~/server/db/queries";
-import { CACHED_QUERIES } from "~/server/db/queries/cached-queries";
-import AddTransactionDrawerDialog from "./_components/add-transaction-drawer-dialog";
-import ConnectPanel from "./_components/connect-panel";
-import EditTransactionDrawerDialog from "./_components/edit-drawer-dialog";
-import ImportPanel from "./_components/import-panel";
-import TransactionDataTable from "./_components/transaction-table";
-import { TransactionsEmptyPlaceholder } from "./_components/transactions-empty-placeholder";
-import { transactionsSearchParamsCache } from "./transaction-search-params";
 
 type PageProps = {
   searchParams: Promise<SearchParams>; // Next.js 15+: async searchParams prop

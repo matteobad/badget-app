@@ -77,3 +77,15 @@ export const drizzleClientWs = drizzleWs({
 });
 
 export const db = drizzleClientWs;
+
+// Helper type for database client
+export type DBType = typeof db;
+export type TXType = Parameters<Parameters<DBType["transaction"]>[0]>[0];
+export type DBClient = DBType | TXType;
+
+// Helper function to run transactions
+export async function withTransaction<T>(
+  callback: (tx: TXType) => Promise<T>,
+): Promise<T> {
+  return db.transaction(callback);
+}

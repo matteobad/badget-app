@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { transactionsParsers } from "../transaction-search-params";
+import { transactionsParsers } from "../utils/search-params";
 
 type AddTransactionProps = {
   label?: string;
