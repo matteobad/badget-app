@@ -5,9 +5,11 @@ import { Loader2Icon } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { getBankAccountProvider } from "~/features/open-banking/server/providers";
-import { db } from "~/server/db";
+import { withTransaction } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { transaction_table } from "~/server/db/schema/transactions";
+import { buildConflictUpdateColumns } from "~/server/db/utils";
+import { categorizeTransactions } from "~/utils/categorization";
 
 export default async function SyncDataServer(props: {
   id: string;
@@ -20,48 +22,59 @@ export default async function SyncDataServer(props: {
   const accounts = await provider.getAccounts({ id });
   const session = await auth();
 
-  for (const account of accounts) {
-    const transactions = await provider.getTransactions({
-      accountId: account.rawId!,
-    });
+  await withTransaction(async (tx) => {
+    for (const account of accounts) {
+      const transactions = await provider.getTransactions({
+        accountId: account.rawId!,
+      });
+      const categorizedData = await categorizeTransactions(
+        session.userId!,
+        transactions,
+      );
 
-    const upserted = await db
-      .insert(account_table)
-      .values({
-        ...account,
-        connectionId: connectionId,
-        institutionId: institutionId,
-        userId: session.userId!,
-      })
-      .onConflictDoUpdate({
-        target: [account_table.userId, account_table.rawId],
-        set: {
+      const upserted = await tx
+        .insert(account_table)
+        .values({
           ...account,
           connectionId: connectionId,
           institutionId: institutionId,
-        },
-      })
-      .returning({ insertedId: account_table.id });
-
-    await db
-      .insert(transaction_table)
-      .values(
-        transactions.map((transaction) => ({
-          ...transaction,
-          accountId: upserted[0]!.insertedId,
           userId: session.userId!,
-        })),
-      )
-      .onConflictDoUpdate({
-        target: [transaction_table.userId, transaction_table.rawId],
-        set: {
-          ...transaction_table,
-          accountId: upserted[0]!.insertedId,
-        },
-      });
+        })
+        .onConflictDoUpdate({
+          target: [account_table.userId, account_table.rawId],
+          set: {
+            ...account,
+            connectionId: connectionId,
+            institutionId: institutionId,
+          },
+        })
+        .returning({ id: account_table.id });
 
-    revalidateTag(`transaction_${session.userId}`);
-  }
+      if (!upserted[0]?.id) return tx.rollback();
+
+      await tx
+        .insert(transaction_table)
+        .values(
+          // @ts-expect-error type is messeded up by categorizeTransactions
+          categorizedData.map((transaction) => ({
+            ...transaction,
+            accountId: upserted[0]!.id,
+            userId: session.userId!,
+          })),
+        )
+        .onConflictDoUpdate({
+          target: [transaction_table.userId, transaction_table.rawId],
+          set: buildConflictUpdateColumns(transaction_table, [
+            "amount",
+            "description",
+            "date",
+            "currency",
+          ]),
+        });
+
+      revalidateTag(`transaction_${session.userId}`);
+    }
+  });
 
   return (
     <Button asChild>
