@@ -21,8 +21,6 @@ export const TransactionInsertSchema = createInsertSchema(transaction_table, {
     tags: z.array(TagInsertSchema).default([]),
   });
 
-export type TransactionInsertSchema = z.infer<typeof TransactionInsertSchema>;
-
 export const TransactionUpdateSchema = createInsertSchema(transaction_table, {
   id: z.string(),
   date: z.coerce.date().optional(),
@@ -43,7 +41,6 @@ export const TransactionUpdateSchema = createInsertSchema(transaction_table, {
 export const TransactionDeleteSchema = z.object({
   ids: z.array(z.string()),
 });
-export type TransactionDeleteSchema = z.infer<typeof TransactionDeleteSchema>;
 
 export const CategorizeTransactionSchema = z.object({
   description: z.string(),
@@ -53,4 +50,3 @@ export const AttachmentDeleteSchema = z.object({
   id: z.string(),
   fileKey: z.string(),
 });
-export type AttachmentDeleteSchema = z.infer<typeof AttachmentDeleteSchema>;
