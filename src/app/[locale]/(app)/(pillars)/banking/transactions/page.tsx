@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { type SearchParams } from "nuqs/server";
 
+import { getCategoriesForUser_QUERY } from "~/features/category/server/queries";
 import LinkInstitutionDrawerDialog from "~/features/open-banking/components/link-institution-drawer-dialog";
 import { getInstitutionsForCountry } from "~/features/open-banking/server/queries";
 import CreateTransactionDrawerSheet from "~/features/transaction/components/create-transaction-drawer-sheet";
@@ -33,7 +34,7 @@ export default async function BankingTransactionsPage({
     await Promise.all([
       getInstitutionsForCountry("IT"),
       QUERIES.getAccountsForUser(session.userId),
-      QUERIES.getCategoriesForUser(session.userId),
+      getCategoriesForUser_QUERY(session.userId),
       getTransactionForUser_CACHED(session.userId),
     ]);
 

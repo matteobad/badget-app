@@ -1,11 +1,11 @@
 import type { SearchParams } from "nuqs/server";
 import { auth } from "@clerk/nextjs/server";
 
-import { QUERIES } from "~/server/db/queries";
-import AddCategoryDrawerDialog from "./add-category";
-import CategoryDataTable from "./category-table";
-import EditCategoryDrawerDialog from "./edit-category";
-import { categoriesSearchParamsCache } from "./search-params";
+import CategoryDataTable from "~/features/category/components/category-table";
+import CreateCategoryDrawerSheet from "~/features/category/components/create-category-drawer-sheet";
+import UpdateCategoryDrawerSheet from "~/features/category/components/update-category-drawer-sheet";
+import { getCategoriesForUser_QUERY } from "~/features/category/server/queries";
+import { categoriesSearchParamsCache } from "~/features/category/utils/search-params";
 
 export default async function BudgetsPage({
   searchParams,
@@ -20,7 +20,7 @@ export default async function BudgetsPage({
   if (!session.userId) throw new Error("User not found");
 
   const userId = session.userId;
-  const categories = await QUERIES.getCategoriesForUser(userId);
+  const categories = await getCategoriesForUser_QUERY(userId);
 
   return (
     <>
@@ -28,8 +28,8 @@ export default async function BudgetsPage({
         <CategoryDataTable categories={categories} />
       </div>
 
-      <AddCategoryDrawerDialog categories={categories} />
-      <EditCategoryDrawerDialog categories={categories} />
+      <CreateCategoryDrawerSheet categories={categories} />
+      <UpdateCategoryDrawerSheet categories={categories} />
     </>
   );
 }

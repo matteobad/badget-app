@@ -11,10 +11,7 @@ import {
 } from "drizzle-orm";
 
 import type { DBClient } from "..";
-import type {
-  DB_AttachmentInsertType,
-  DB_TransactionInsertType,
-} from "../schema/transactions";
+import type { DB_AttachmentInsertType } from "../schema/transactions";
 import { type ToggleAccountType } from "~/lib/validators";
 import { db } from "..";
 import { account_table as accountSchema } from "../schema/accounts";
@@ -28,7 +25,6 @@ import { connection_table as connectionSchema } from "../schema/open-banking";
 import {
   attachment_table as attachmentSchema,
   tag_table as tagSchema,
-  transaction_table as transactionSchema,
   transaction_to_tag_table as transactionToTagSchema,
 } from "../schema/transactions";
 
@@ -59,16 +55,6 @@ export const QUERIES = {
       },
       where: eq(connectionSchema.userId, userId),
     });
-  },
-
-  getCategoriesForUser: function (userId: string, client: DBClient = db) {
-    return client
-      .select()
-      .from(categorySchema)
-      .where(
-        or(eq(categorySchema.userId, userId), isNull(categorySchema.userId)),
-      )
-      .orderBy(categorySchema.name);
   },
 
   getCategoriesWithBudgets: async function (
@@ -171,19 +157,6 @@ export const QUERIES = {
 };
 
 export const MUTATIONS = {
-  createTransaction: function (
-    data: DB_TransactionInsertType,
-    client: DBClient = db,
-  ) {
-    return client
-      .insert(transactionSchema)
-      .values(data)
-      .returning({ insertedId: transactionSchema.id });
-  },
-  deleteTransaction: function (id: string, client: DBClient = db) {
-    return client.delete(transactionSchema).where(eq(transactionSchema.id, id));
-  },
-
   updateTagsOnTransaction: async function (
     tags: string[],
     transactionId: string,
@@ -314,7 +287,3 @@ export const MUTATIONS = {
       .where(eq(accountSchema.id, params.id));
   },
 };
-
-export function createTransactionMutation(data: DB_TransactionInsertType) {
-  return db.insert(transactionSchema).values(data);
-}

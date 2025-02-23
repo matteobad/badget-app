@@ -8,7 +8,7 @@ import type { CSVRow, CSVRowParsed } from "../utils/schemas";
 import {
   categorizeTransaction,
   updateOrCreateRule,
-} from "~/lib/categorization";
+} from "~/features/category/utils/categorization";
 import { authActionClient } from "~/lib/safe-action";
 import { db } from "~/server/db";
 import { MUTATIONS } from "~/server/db/queries";
@@ -202,7 +202,9 @@ export const importTransactionAction = authActionClient
     //   userId: ctx.userId,
     // });
     for (const item of data) {
-      await MUTATIONS.createTransaction({ ...item, userId: ctx.userId });
+      await db
+        .insert(transaction_table)
+        .values({ ...item, userId: ctx.userId });
     }
 
     // Invalidate cache

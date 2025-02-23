@@ -42,13 +42,11 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { deleteCategoryAction } from "~/server/actions";
-import { type QUERIES } from "~/server/db/queries";
-import { categoriesParsers } from "./search-params";
+import { deleteCategoryAction } from "../server/actions";
+import { type getCategoriesForUser_QUERY } from "../server/queries";
+import { categoriesParsers } from "../utils/search-params";
 
-type Category = Awaited<
-  ReturnType<typeof QUERIES.getCategoriesForUser>
->[number];
+type Category = Awaited<ReturnType<typeof getCategoriesForUser_QUERY>>[number];
 
 export default function CategoryDataTable({
   categories,
@@ -65,7 +63,7 @@ export default function CategoryDataTable({
     },
     onSuccess: ({ data }) => {
       console.log(data?.message);
-      toast.success("Categoria eliminata!");
+      toast.success(data?.message);
     },
   });
 

@@ -1,11 +1,8 @@
-"use client";
-
 import type dynamicIconImports from "lucide-react/dynamicIconImports";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronsUpDown, CircleDashedIcon, Loader2Icon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 import { useAction } from "next-safe-action/hooks";
-import { useQueryStates } from "nuqs";
 import { HslColorPicker } from "react-colorful";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -28,15 +25,6 @@ import {
   CommandList,
 } from "~/components/ui/command";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "~/components/ui/drawer";
-import {
   Form,
   FormControl,
   FormField,
@@ -50,21 +38,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "~/components/ui/sheet";
-import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
-import { CategoryInsertSchema } from "~/lib/validators";
-import { createCategoryAction } from "~/server/actions";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
-import { categoriesParsers } from "./search-params";
+import { createCategoryAction } from "../server/actions";
+import { CategoryInsertSchema } from "../utils/schemas";
 
-function AddCategoryForm({
+export default function CreateCategoryForm({
   categories,
   onComplete,
   className,
@@ -78,8 +57,7 @@ function AddCategoryForm({
       toast.error(error.serverError);
     },
     onSuccess: ({ data }) => {
-      console.log(data?.message);
-      toast.success("Transazione creata!");
+      toast.success(data?.message);
       reset();
       onComplete();
     },
@@ -290,65 +268,5 @@ function AddCategoryForm({
         </div>
       </form>
     </Form>
-  );
-}
-
-export default function AddCategoryDrawerDialog({
-  categories,
-}: {
-  categories: DB_CategoryType[];
-}) {
-  const isMobile = useIsMobile();
-  const [{ add }, setParams] = useQueryStates(categoriesParsers);
-
-  const open = !!add;
-
-  const handleClose = () => {
-    void setParams({ add: null });
-  };
-
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={handleClose}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Crea una nuova categoria</DrawerTitle>
-            <DrawerDescription>
-              Ogni euro ha la sua storia: crea categorie e organizza le tue
-              finanze.
-            </DrawerDescription>
-          </DrawerHeader>
-          <AddCategoryForm
-            className="px-4"
-            categories={categories}
-            onComplete={handleClose}
-          />
-          <DrawerFooter>
-            <DrawerClose>
-              <Button variant="outline" asChild>
-                Cancel
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="p-4">
-        <div className="flex h-full flex-col">
-          <SheetHeader className="mb-6">
-            <SheetTitle>Crea una nuova categoria</SheetTitle>
-            <SheetDescription>
-              Ogni euro ha la sua storia: crea categorie e organizza le tue
-              finanze.
-            </SheetDescription>
-          </SheetHeader>
-          <AddCategoryForm categories={categories} onComplete={handleClose} />
-        </div>
-      </SheetContent>
-    </Sheet>
   );
 }

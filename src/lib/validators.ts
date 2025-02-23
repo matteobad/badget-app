@@ -1,7 +1,6 @@
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-import { category_table } from "~/server/db/schema/categories";
 import { tag_table } from "~/server/db/schema/transactions";
 
 // savings
@@ -42,27 +41,3 @@ export const ToggleAccountSchema = z.object({
 export type ToggleAccountType = z.infer<typeof ToggleAccountSchema> & {
   userId: string;
 };
-
-export const CategoryInsertSchema = createInsertSchema(category_table, {
-  description: z.string().optional(),
-}).omit({
-  id: true,
-  userId: true,
-  createdAt: true,
-  updatedAt: true,
-  deletedAt: true,
-});
-
-export const CategoryUpdateSchema = createInsertSchema(category_table, {
-  id: z.string(),
-  description: z.string().optional(),
-}).omit({
-  userId: true,
-  createdAt: true,
-  updatedAt: true,
-  deletedAt: true,
-});
-
-export const CategoryDeleteSchema = z.object({
-  ids: z.array(z.string()),
-});

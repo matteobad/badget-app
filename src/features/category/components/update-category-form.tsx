@@ -1,11 +1,8 @@
-"use client";
-
 import type { dynamicIconImports } from "lucide-react/dynamic";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronsUpDown, CircleDashedIcon, Loader2Icon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 import { useAction } from "next-safe-action/hooks";
-import { useQueryStates } from "nuqs";
 import { HslColorPicker } from "react-colorful";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -28,15 +25,6 @@ import {
   CommandList,
 } from "~/components/ui/command";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "~/components/ui/drawer";
-import {
   Form,
   FormControl,
   FormField,
@@ -50,21 +38,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "~/components/ui/sheet";
-import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
-import { CategoryUpdateSchema } from "~/lib/validators";
-import { updateCategoryAction } from "~/server/actions";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
-import { categoriesParsers } from "./search-params";
+import { updateCategoryAction } from "../server/actions";
+import { CategoryUpdateSchema } from "../utils/schemas";
 
-function EditCategoryForm({
+export default function UpdateCategoryForm({
   categories,
   category,
   onComplete,
@@ -293,73 +272,5 @@ function EditCategoryForm({
         </div>
       </form>
     </Form>
-  );
-}
-
-export default function EditCategoryDrawerDialog({
-  categories,
-}: {
-  categories: DB_CategoryType[];
-}) {
-  const isMobile = useIsMobile();
-  const [{ id }, setParams] = useQueryStates(categoriesParsers);
-
-  const open = !!id;
-  const category = categories.find((c) => c.id === id)!;
-
-  const handleClose = () => {
-    void setParams({ id: null });
-  };
-
-  if (!id) return;
-
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={handleClose}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Modifica categoria</DrawerTitle>
-            <DrawerDescription>
-              Ogni euro ha la sua storia: crea categorie e organizza le tue
-              finanze.
-            </DrawerDescription>
-          </DrawerHeader>
-          <EditCategoryForm
-            className="px-4"
-            categories={categories}
-            category={category}
-            onComplete={handleClose}
-          />
-          <DrawerFooter>
-            <DrawerClose>
-              <Button variant="outline" asChild>
-                Cancel
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="p-4 [&>button]:hidden">
-        <div className="flex h-full flex-col">
-          <SheetHeader>
-            <SheetTitle>Modifica categoria</SheetTitle>
-            <SheetDescription>
-              Ogni euro ha la sua storia: crea categorie e organizza le tue
-              finanze.
-            </SheetDescription>
-          </SheetHeader>
-          <EditCategoryForm
-            categories={categories}
-            category={category}
-            onComplete={handleClose}
-          />
-        </div>
-      </SheetContent>
-    </Sheet>
   );
 }
