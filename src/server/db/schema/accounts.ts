@@ -11,6 +11,7 @@ import {
 
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
+import { type BankAccountType } from "./enum";
 import { connection_table, institution_table } from "./open-banking";
 
 export const account_table = pgTable(
@@ -31,6 +32,8 @@ export const account_table = pgTable(
 
     rawId: text().unique(),
     name: varchar({ length: 64 }).notNull(),
+    description: text(),
+    type: text().$type<BankAccountType>().notNull(),
     logoUrl: varchar({ length: 2048 }),
     balance: numeric({ precision: 10, scale: 2 }).notNull(),
     currency: char({ length: 3 }).notNull(),

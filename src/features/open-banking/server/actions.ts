@@ -9,7 +9,10 @@ import {
   connection_table,
   institution_table,
 } from "~/server/db/schema/open-banking";
-import { ConnectGocardlessSchema } from "../utils/schemas";
+import {
+  ConnectGocardlessSchema,
+  ConnectionUpdateSchema,
+} from "../utils/schemas";
 import { gocardlessClient } from "./providers/gocardless/gocardless-api";
 import {
   mapRequisitionStatus,
@@ -65,4 +68,11 @@ export const connectGocardlessAction = authActionClient
     });
 
     return redirect(requisition.link);
+  });
+
+export const updateConnectedAccountAction = authActionClient
+  .schema(ConnectionUpdateSchema)
+  .metadata({ actionName: "update-connected-account" })
+  .action(async () => {
+    return { message: "todo" };
   });

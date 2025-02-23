@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Fragment, useMemo } from "react";
+import { useMemo } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -12,19 +12,13 @@ import { differenceInDays } from "date-fns";
 import {
   AlertTriangleIcon,
   CheckIcon,
-  ChevronDown,
-  ChevronUp,
   ClockIcon,
   Columns3Icon,
-  FileSpreadsheetIcon,
   FilterIcon,
   LoaderIcon,
   MoreHorizontal,
-  PencilIcon,
-  Trash2Icon,
 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
+import { useQueryStates } from "nuqs";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
@@ -39,8 +33,6 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Switch } from "~/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -49,59 +41,25 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { toggleAccountAction } from "~/server/actions";
-import { type QUERIES } from "~/server/db/queries";
 import { ConnectionStatus } from "~/server/db/schema/enum";
 import { formatAmount } from "~/utils/format";
+import { type getConnectionsWithAccountsForUser } from "../server/queries";
+import { connectionsParsers } from "../utils/search-params";
+import { AddConnectionButton } from "./add-connection-button";
 
 type ConnectionWithAccounts = Awaited<
-  ReturnType<typeof QUERIES.getAccountsWithConnectionsForUser>
+  ReturnType<typeof getConnectionsWithAccountsForUser>
 >[number];
 
-export default function AccountDataTable({
+export default function ConnectionDataTable({
   connections,
 }: {
   connections: ConnectionWithAccounts[];
 }) {
+  const [, setParams] = useQueryStates(connectionsParsers);
+
   const columns: ColumnDef<ConnectionWithAccounts>[] = useMemo(
     () => [
-      {
-        id: "expander",
-        size: 44,
-        header: () => null,
-        cell: ({ row }) => {
-          return row.getCanExpand() ? (
-            <Button
-              {...{
-                className: "size-7 shadow-none text-muted-foreground",
-                onClick: row.getToggleExpandedHandler(),
-                "aria-expanded": row.getIsExpanded(),
-                "aria-label": row.getIsExpanded()
-                  ? `Collapse details for ${row.original.institution.name}`
-                  : `Expand details for ${row.original.institution.name}`,
-                size: "icon",
-                variant: "ghost",
-              }}
-            >
-              {row.getIsExpanded() ? (
-                <ChevronUp
-                  className="opacity-60"
-                  size={16}
-                  strokeWidth={2}
-                  aria-hidden="true"
-                />
-              ) : (
-                <ChevronDown
-                  className="opacity-60"
-                  size={16}
-                  strokeWidth={2}
-                  aria-hidden="true"
-                />
-              )}
-            </Button>
-          ) : undefined;
-        },
-      },
       {
         header: "Istituto Bancario",
         accessorKey: "institution",
@@ -234,23 +192,12 @@ export default function AccountDataTable({
     getRowId: (row) => row.id, //use the row's uuid from your database as the row id
   });
 
-  const { execute, isExecuting } = useAction(toggleAccountAction, {
-    onError: ({ error }) => {
-      console.error(error);
-      toast.error(error.serverError);
-    },
-    onSuccess: ({ data }) => {
-      console.log(data?.message);
-      toast.success("Account toggled!");
-    },
-  });
-
   return (
     <div className="w-full">
       <div className="flex items-center gap-4 py-4">
         <div className="relative">
           <Input
-            placeholder="Cerca conti..."
+            placeholder="Cerca connessione..."
             value={
               (table.getColumn("institution")?.getFilterValue() as string) ?? ""
             }
@@ -291,6 +238,8 @@ export default function AccountDataTable({
               })}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <AddConnectionButton label="Aggiungi conto" />
       </div>
       <div className="rounded-md border">
         <Table>
@@ -320,100 +269,23 @@ export default function AccountDataTable({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <Fragment key={row.id}>
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className="whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  {row.getIsExpanded() && (
-                    <TableRow>
-                      <TableCell colSpan={row.getVisibleCells().length}>
-                        <div className="ml-[96px] flex items-start py-2 text-primary/80">
-                          <ul className="flex w-full flex-col gap-2">
-                            {row.original.accounts.map((account) => {
-                              return (
-                                <li
-                                  className="flex w-full items-center justify-between"
-                                  key={account.id}
-                                >
-                                  <div>{account.name}</div>
-                                  <div>
-                                    <div className="flex items-center gap-4">
-                                      <div>
-                                        {formatAmount({
-                                          amount: parseFloat(account.balance),
-                                        })}
-                                      </div>
-
-                                      <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                          <Button
-                                            variant="ghost"
-                                            className="relative h-8 w-8 p-0"
-                                          >
-                                            <span className="sr-only">
-                                              Open menu
-                                            </span>
-                                            <MoreHorizontal className="h-4 w-4" />
-                                          </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                          <DropdownMenuItem>
-                                            <PencilIcon />
-                                            Modifica
-                                          </DropdownMenuItem>
-                                          <DropdownMenuItem>
-                                            <FileSpreadsheetIcon />
-                                            Importa
-                                          </DropdownMenuItem>
-                                          <DropdownMenuSeparator />
-                                          <DropdownMenuItem className="text-destructive">
-                                            <Trash2Icon /> Rimuovi
-                                          </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                      </DropdownMenu>
-                                      <div>
-                                        <Switch
-                                          id="airplane-mode"
-                                          disabled={isExecuting}
-                                          checked={account.enabled}
-                                          onCheckedChange={(checked) =>
-                                            execute({
-                                              id: account.id,
-                                              enabled: checked,
-                                            })
-                                          }
-                                        />
-                                        <Label
-                                          htmlFor="airplane-mode"
-                                          className="sr-only"
-                                        >
-                                          Status
-                                        </Label>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </Fragment>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  onClick={() => setParams({ id: row.id })}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className="whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
               ))
             ) : (
               <TableRow>

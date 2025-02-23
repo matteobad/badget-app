@@ -98,6 +98,8 @@ export const mapAccountsResponse = (
       "No name",
     balance: balancesData.balances[0].balanceAmount.amount,
     currency: detailsData.account.currency,
+    type: "checking",
+    description: "",
     // resource_id: detailsData.account.resourceId,
     // enrollment_id: null,
     logoUrl: institutionData.logo,

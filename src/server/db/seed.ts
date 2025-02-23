@@ -78,18 +78,21 @@ const ACCOUNTS_DATA: DB_AccountInsertType[] = [
     name: "Revolut",
     balance: "0",
     currency: "EUR",
+    type: "checking",
     userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
   },
   {
     name: "N26",
     balance: "0",
     currency: "EUR",
+    type: "checking",
     userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
   },
   {
     name: "Hype",
     balance: "0",
     currency: "EUR",
+    type: "checking",
     userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
   },
 ];

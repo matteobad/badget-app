@@ -7,10 +7,10 @@ export const Provider = {
 export type Provider = (typeof Provider)[keyof typeof Provider];
 
 export const BankAccountType = {
-  CREDIT: "CREDIT",
-  DEPOSITORY: "DEPOSITORY",
-  OTHER_ASSET: "OTHER_ASSET",
-  LOAN: "LOAN",
+  CHECKING: "checking",
+  SAVINGS: "savings",
+  INVESTMENTS: "investment",
+  LODEBTAN: "debt",
   OTHER_LIABILITY: "OTHER_LIABILITY",
 } as const;
 export type BankAccountType =

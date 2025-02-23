@@ -8,6 +8,7 @@ const userActions = [
   "create-transaction",
   "import-transaction",
   "link-institution",
+  "update-connection",
 ] as const;
 
 export const actionsParsers = {

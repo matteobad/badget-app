@@ -1,8 +1,9 @@
 "server-only";
 
-import { arrayContains, desc, eq } from "drizzle-orm";
+import { arrayContains, asc, desc, eq } from "drizzle-orm";
 
 import { db } from "~/server/db";
+import { account_table } from "~/server/db/schema/accounts";
 import {
   connection_table,
   institution_table,
@@ -35,4 +36,14 @@ export const getConnectionByKey = (key: string) => {
     .select()
     .from(connection_table)
     .where(eq(connection_table.referenceId, key));
+};
+
+export const getConnectionsWithAccountsForUser = (userId: string) => {
+  return db.query.connection_table.findMany({
+    with: {
+      accounts: { orderBy: asc(account_table.createdAt) },
+      institution: true,
+    },
+    where: eq(connection_table.userId, userId),
+  });
 };
