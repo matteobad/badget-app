@@ -9,6 +9,7 @@ import { db } from "~/server/db";
 import { QUERIES } from "~/server/db/queries";
 import { account_table } from "~/server/db/schema/accounts";
 import { transaction_table } from "~/server/db/schema/transactions";
+import { categorizeTransactions } from "~/utils/categorization";
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -48,6 +49,10 @@ export async function GET(request: NextRequest) {
               accountId: account.rawId!,
               latest: true,
             });
+            const categorizedData = await categorizeTransactions(
+              user.id,
+              transactions,
+            );
 
             const upserted = await tx
               .insert(account_table)
@@ -72,7 +77,8 @@ export async function GET(request: NextRequest) {
             await tx
               .insert(transaction_table)
               .values(
-                transactions.map((transaction) => ({
+                // @ts-expect-error type is messeded up by categorizeTransactions
+                categorizedData.map((transaction) => ({
                   ...transaction,
                   accountId: upserted[0]!.insertedId,
                   userId: user.id,
