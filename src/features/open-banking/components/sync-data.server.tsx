@@ -78,7 +78,7 @@ export default async function SyncDataServer(props: {
 
   return (
     <Button asChild>
-      <Link href="/banking/transactions">Vai alla dashboard</Link>
+      <Link href="/transactions">Vai alla dashboard</Link>
     </Button>
   );
 }
