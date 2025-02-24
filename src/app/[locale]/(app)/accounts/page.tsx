@@ -2,12 +2,12 @@ import { auth } from "@clerk/nextjs/server";
 import { type SearchParams } from "nuqs/server";
 
 import AccountCardGrid from "~/features/account/components/account-card-grid";
+import { AddAccountButton } from "~/features/account/components/add-account-button";
 import CreateAccountDrawerSheet from "~/features/account/components/create-account-drawer-sheet";
 import UpdateAccountDrawerSheet from "~/features/account/components/update-account-drawer-sheet";
 import { getAccountsForUser_CACHED } from "~/features/account/server/cached-queries";
-import { AccountsEmptyPlaceholder } from "./_components/accounts-empty-placeholder";
-import { AddSelectorDialog } from "./_components/add-selector-dialog";
-import { accountsSearchParamsCache } from "./account-search-params";
+import { accountsSearchParamsCache } from "~/features/account/utils/search-params";
+import { AccountsEmptyPlaceholder } from "../../../../features/account/components/accounts-empty-placeholder";
 
 type BankingAccountsPageProps = {
   searchParams: Promise<SearchParams>; // Next.js 15+: async searchParams prop
@@ -18,7 +18,7 @@ export default async function BankingAccountsPage({
 }: BankingAccountsPageProps) {
   // ⚠️ Don't forget to call `parse` here.
   // You can access type-safe values from the returned object:
-  const { action } = await accountsSearchParamsCache.parse(searchParams);
+  const {} = await accountsSearchParamsCache.parse(searchParams);
 
   const session = await auth();
   if (!session.userId) throw new Error("User not found");
@@ -31,11 +31,23 @@ export default async function BankingAccountsPage({
         {data.length === 0 ? (
           <AccountsEmptyPlaceholder />
         ) : (
-          <AccountCardGrid data={data} />
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <h2 className="text-xl font-medium">
+                  I tuoi conti, sotto controllo
+                </h2>
+                <p className="text-sm font-light text-muted-foreground">
+                  Dai risparmi agli investimenti, tutto in un unico sguardo.
+                </p>
+              </div>
+              <AddAccountButton label="Aggiungi un conto" />
+            </div>
+            <AccountCardGrid data={data} />
+          </div>
         )}
       </div>
 
-      <AddSelectorDialog open={action === "add"} />
       <CreateAccountDrawerSheet />
       <UpdateAccountDrawerSheet data={data} />
     </>
