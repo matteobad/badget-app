@@ -1,4 +1,5 @@
 import React from "react";
+import { Wallet2Icon } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -21,9 +22,13 @@ export function AccountAvatar({
           src={account.logoUrl}
           alt={`${account.name} logo`}
         ></AvatarImage>
-        <AvatarFallback>AN</AvatarFallback>
+        <AvatarFallback>
+          <Wallet2Icon className="size-3" />
+        </AvatarFallback>
       </Avatar>
-      <span className="text-sm text-muted-foreground">{account.name}</span>
+      <span className="text-sm text-muted-foreground">
+        {account.name || "Manuale"}
+      </span>
     </div>
   );
 }

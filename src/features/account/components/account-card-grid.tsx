@@ -1,6 +1,11 @@
 "use client";
 
-import { EllipsisVerticalIcon, RefreshCwIcon, UnlinkIcon } from "lucide-react";
+import {
+  EllipsisVerticalIcon,
+  ReceiptIcon,
+  RefreshCwIcon,
+  UnlinkIcon,
+} from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -143,35 +148,41 @@ export default function AccountCardGrid({ data }: { data: GroupedAccount[] }) {
                     {item.connection?.status ?? "valido"}
                   </Badge>
                 </div>
-                {item.connection && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <EllipsisVerticalIcon className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem disabled>
-                        <RefreshCwIcon className="size-3" />
-                        Rinnova connessione
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        disabled={isExecuting}
-                        onClick={() => {
-                          execute({
-                            id: item.connection!.id,
-                            provider: item.connection!.provider,
-                          });
-                        }}
-                      >
-                        <UnlinkIcon className="size-3" />
-                        Revoca connessione
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <EllipsisVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem disabled>
+                      <ReceiptIcon className="size-3" />
+                      Vedi transazioni
+                    </DropdownMenuItem>
+                    {item.connection && (
+                      <>
+                        <DropdownMenuItem disabled>
+                          <RefreshCwIcon className="size-3" />
+                          Rinnova connessione
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          disabled={isExecuting}
+                          onClick={() => {
+                            execute({
+                              id: item.connection!.id,
+                              provider: item.connection!.provider,
+                            });
+                          }}
+                        >
+                          <UnlinkIcon className="size-3" />
+                          Revoca connessione
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
 

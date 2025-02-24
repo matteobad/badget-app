@@ -38,9 +38,9 @@ export default function CreateAccountDrawerSheet() {
       <Drawer open={open} onOpenChange={handleClose}>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Crea un nuovo conto</DrawerTitle>
+            <DrawerTitle>Un nuovo conto, un nuovo inizio.</DrawerTitle>
             <DrawerDescription>
-              Ogni euro ha la sua storia: crea conti e organizza le tue finanze.
+              Scegli il tipo, aggiungi i dettagli e sei pronto!
             </DrawerDescription>
           </DrawerHeader>
           <CreateAccountForm className="px-4" onComplete={handleClose} />
@@ -61,10 +61,9 @@ export default function CreateAccountDrawerSheet() {
       <SheetContent className="p-4">
         <div className="flex h-full flex-col">
           <SheetHeader className="mb-6">
-            <SheetTitle>Crea un nuovo conto</SheetTitle>
+            <SheetTitle>Un nuovo conto, un nuovo inizio.</SheetTitle>
             <SheetDescription>
-              Ogni euro ha la sua storia: crea categorie e organizza le tue
-              finanze.
+              Scegli il tipo, aggiungi i dettagli e sei pronto!
             </SheetDescription>
           </SheetHeader>
           <CreateAccountForm onComplete={handleClose} />

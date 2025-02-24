@@ -5,7 +5,9 @@ import { account_table } from "~/server/db/schema/accounts";
 import { AccountType, Provider } from "~/server/db/schema/enum";
 
 export const AccountInsertSchema = createInsertSchema(account_table, {
+  balance: z.coerce.string(),
   type: z.nativeEnum(AccountType),
+  description: z.string().optional(),
 }).omit({
   id: true,
   userId: true,
@@ -16,6 +18,7 @@ export const AccountInsertSchema = createInsertSchema(account_table, {
 
 export const AccountUpdateSchema = createInsertSchema(account_table, {
   id: z.string(),
+  balance: z.coerce.string(),
   type: z.nativeEnum(AccountType),
   description: z.string().optional(),
 }).omit({
