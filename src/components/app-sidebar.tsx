@@ -6,12 +6,12 @@ import {
   CandlestickChart,
   CreditCardIcon,
   CuboidIcon,
+  LandmarkIcon,
   Layers,
   LayoutDashboardIcon,
   LifeBuoy,
-  Link2,
-  ListTodoIcon,
   PiggyBank,
+  ReceiptIcon,
   Send,
   Settings,
   Shapes,
@@ -28,6 +28,7 @@ import {
 } from "~/components/ui/sidebar";
 import { NavPillars } from "./nav-pillars";
 import { NavSettings } from "./nav-settings";
+import { NavWealth } from "./nav-wealth";
 import { TeamSwitcher } from "./team-switcher";
 
 const data = {
@@ -38,9 +39,14 @@ const data = {
       icon: LayoutDashboardIcon,
     },
     {
-      title: "Budgets",
-      url: "/budgets",
-      icon: ListTodoIcon,
+      title: "Conti",
+      url: "/accounts",
+      icon: LandmarkIcon,
+    },
+    {
+      title: "Transazioni",
+      url: "/transactions",
+      icon: ReceiptIcon,
     },
   ],
   navPillars: [
@@ -48,79 +54,26 @@ const data = {
       title: "Liquidità",
       url: "/banking",
       icon: Layers,
-      isActive: true,
-      items: [
-        {
-          title: "Conti corrente",
-          url: "/banking/accounts",
-        },
-        {
-          title: "Transazioni",
-          url: "/banking/transactions",
-        },
-      ],
     },
     {
       title: "Fondo emergenza",
       url: "#",
       icon: PiggyBank,
-      items: [
-        {
-          title: "Conti deposito",
-          url: "#",
-        },
-        {
-          title: "Obbligazioni a breve",
-          url: "#",
-        },
-        {
-          title: "EFT monetari",
-          url: "#",
-        },
-      ],
     },
     {
-      title: "Spese previste",
+      title: "Obiettivi a breve",
       url: "#",
       icon: CalendarClockIcon,
-      items: [
-        {
-          title: "BTP Valore",
-          url: "#",
-        },
-        {
-          title: "Obbligazioni",
-          url: "#",
-        },
-      ],
     },
     {
       title: "Investimenti",
       url: "/investments",
       icon: CandlestickChart,
-      items: [
-        {
-          title: "Azioni",
-          url: "#",
-        },
-        {
-          title: "Obbligazioni",
-          url: "#",
-        },
-        {
-          title: "Fondi",
-          url: "#",
-        },
-        {
-          title: "Crypto",
-          url: "#",
-        },
-      ],
     },
   ],
-  navExtras: [
+  navWealth: [
     {
-      title: "Attività",
+      title: "Beni patrimoniali",
       url: "#",
       icon: CuboidIcon,
     },
@@ -129,11 +82,6 @@ const data = {
       url: "#",
       icon: CreditCardIcon,
     },
-    // {
-    //   title: "Previdenza",
-    //   url: "#",
-    //   icon: SproutIcon,
-    // },
   ],
   navSecondary: [
     {
@@ -149,19 +97,14 @@ const data = {
   ],
   settings: [
     {
-      name: "Collegamenti",
-      url: "/settings/accounts",
-      icon: Link2,
+      name: "Preferenze",
+      url: "/settings",
+      icon: Settings,
     },
     {
       name: "Categorie",
       url: "/settings/categories",
       icon: Shapes,
-    },
-    {
-      name: "Preferenze",
-      url: "/settings",
-      icon: Settings,
     },
   ],
 };
@@ -175,7 +118,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavPillars items={data.navPillars} />
-        {/* <NavExtras items={data.navExtras} /> */}
+        <NavWealth items={data.navWealth} />
         <NavSettings settings={data.settings} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

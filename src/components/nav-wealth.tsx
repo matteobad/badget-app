@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
 
-export function NavExtras({
+export function NavWealth({
   items,
 }: {
   items: {
@@ -27,7 +27,7 @@ export function NavExtras({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Extra</SidebarGroupLabel>
+      <SidebarGroupLabel>Patrimonio</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>

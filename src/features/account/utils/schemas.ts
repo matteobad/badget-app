@@ -17,6 +17,7 @@ export const AccountInsertSchema = createInsertSchema(account_table, {
 export const AccountUpdateSchema = createInsertSchema(account_table, {
   id: z.string(),
   type: z.nativeEnum(BankAccountType),
+  description: z.string().optional(),
 }).omit({
   userId: true,
   createdAt: true,

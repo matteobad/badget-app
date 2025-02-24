@@ -23,58 +23,64 @@ import {
 } from "~/components/ui/sheet";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
-import { type getConnectionsWithAccountsForUser } from "../server/queries";
-import { connectionsParsers } from "../utils/search-params";
-import UpdateConnectionForm from "./update-connection-form";
+import { formatAmount } from "~/utils/format";
+import { type getAccountsForUser_CACHED } from "../server/cached-queries";
+import { accountsParsers } from "../utils/search-params";
+import UpdateAccountForm from "./update-account-form";
 
-type ConnectionWithAccounts = Awaited<
-  ReturnType<typeof getConnectionsWithAccountsForUser>
+type GroupedAccount = Awaited<
+  ReturnType<typeof getAccountsForUser_CACHED>
 >[number];
 
-export default function UpdateConnectionDrawerSheet({
-  connections,
+export default function UpdateAccountDrawerSheet({
+  data,
 }: {
-  connections: ConnectionWithAccounts[];
+  data: GroupedAccount[];
 }) {
-  const [{ id }, setParams] = useQueryStates(connectionsParsers);
+  const [{ id }, setParams] = useQueryStates(accountsParsers);
   const isMobile = useIsMobile();
 
   const open = !!id;
-
-  const connection = useMemo(() => {
-    return connections.find((t) => t.id === id);
-  }, [id, connections]);
 
   const handleClose = () => {
     void setParams({ id: null });
   };
 
-  if (!connection) return;
+  const { account, connection, institution } = useMemo(() => {
+    const item = data.find((_) => _.accounts.find((a) => a.id === id));
+    return {
+      account: item?.accounts.find((a) => a.id === id),
+      connection: item?.connection ?? null,
+      institution: item?.institution ?? null,
+    };
+  }, [id, data]);
+
+  if (!account) return;
 
   const DrawerSheetContent = () => (
     <>
       <div className="mb-8 flex justify-between">
         <AccountAvatar
           account={{
-            name: connection.institution?.name ?? "",
-            logoUrl: connection.institution?.logo ?? "",
+            name: institution?.name ?? "",
+            logoUrl: institution?.logo ?? "",
           }}
         />
         <div className="text-sm text-muted-foreground">
-          {connection.provider.toLowerCase()}
+          {connection?.provider.toLowerCase()}
         </div>
       </div>
 
       <div className="mb-8 flex flex-col gap-2">
-        <h2>{connection.institution.provider}</h2>
+        <h2>Saldo</h2>
         <span className="font-mono text-4xl">
-          {connection.institution.name}
+          {formatAmount({ amount: parseFloat(account.balance) })}
         </span>
       </div>
 
-      <UpdateConnectionForm
+      <UpdateAccountForm
         className={cn({ "px-4": isMobile })}
-        connection={connection}
+        account={account}
         onComplete={handleClose}
       />
     </>
