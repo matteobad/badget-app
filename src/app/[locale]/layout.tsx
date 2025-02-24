@@ -38,13 +38,6 @@ export default async function RootLayout({
         className={`${GeistSans.variable} ${GeistMono.variable}`}
         suppressHydrationWarning
       >
-        <head>
-          {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-          <script
-            crossOrigin="anonymous"
-            src="//unpkg.com/react-scan/dist/auto.global.js"
-          />
-        </head>
         <body>
           <I18nProviderClient locale={locale}>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
