@@ -11,4 +11,15 @@ export default {
     investments: "Investments",
     settings: "Settings",
   },
+
+  account: {
+    type: {
+      checking: "Conto corrente",
+      savings: "Conto deposito",
+      investment: "Conto titoli",
+      debt: "Conto di debito",
+      cash: "Liquidi",
+      other: "Altro",
+    },
+  },
 } as const;

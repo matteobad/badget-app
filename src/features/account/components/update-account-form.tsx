@@ -21,13 +21,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
@@ -35,6 +28,7 @@ import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { UploadDropzone } from "~/utils/uploadthing";
 import { updateAccountAction } from "../server/actions";
 import { AccountUpdateSchema } from "../utils/schemas";
+import { AccountTypePicker } from "./account-type-picker";
 
 export default function UpdateAccountForm({
   account,
@@ -60,6 +54,9 @@ export default function UpdateAccountForm({
   const form = useForm<z.infer<typeof AccountUpdateSchema>>({
     resolver: zodResolver(AccountUpdateSchema),
     defaultValues: {
+      id: account.id,
+      balance: account.balance,
+      currency: account.currency,
       description: account.description ?? undefined,
       name: account.name,
       type: account.type,
@@ -105,20 +102,10 @@ export default function UpdateAccountForm({
             render={({ field }) => (
               <FormItem className="col-span-2 flex flex-col">
                 <FormLabel>Tipologia</FormLabel>
-                <Select
+                <AccountTypePicker
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleziona il tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="checking">Conto corrente</SelectItem>
-                    <SelectItem value="savings">Conto deposito</SelectItem>
-                    <SelectItem value="investment">Conto titoli</SelectItem>
-                    <SelectItem value="debt">Conto di debito</SelectItem>
-                  </SelectContent>
-                </Select>
+                  value={field.value ?? undefined}
+                />
                 <FormMessage />
               </FormItem>
             )}

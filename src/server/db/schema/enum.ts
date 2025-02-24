@@ -6,15 +6,15 @@ export const Provider = {
 } as const;
 export type Provider = (typeof Provider)[keyof typeof Provider];
 
-export const BankAccountType = {
+export const AccountType = {
   CHECKING: "checking",
   SAVINGS: "savings",
   INVESTMENTS: "investment",
-  LODEBTAN: "debt",
-  OTHER_LIABILITY: "OTHER_LIABILITY",
+  DEBT: "debt",
+  CASH: "cash",
+  OTHER: "other",
 } as const;
-export type BankAccountType =
-  (typeof BankAccountType)[keyof typeof BankAccountType];
+export type AccountType = (typeof AccountType)[keyof typeof AccountType];
 
 // TODO: reduce possible status
 export const ConnectionStatus = {

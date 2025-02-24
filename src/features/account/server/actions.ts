@@ -6,11 +6,33 @@ import { and, eq } from "drizzle-orm";
 import { authActionClient } from "~/lib/safe-action";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
+import { connection_table } from "~/server/db/schema/open-banking";
 import {
   AccountDeleteSchema,
   AccountInsertSchema,
   AccountUpdateSchema,
+  ConnectionDeleteSchema,
 } from "../utils/schemas";
+
+export const deleteConnectionAction = authActionClient
+  .schema(ConnectionDeleteSchema)
+  .metadata({ actionName: "delete-connection" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    // TODO: delete connection on provider too
+    // const provider = getBankAccountProvider(parsedInput.provider);
+
+    await db
+      .delete(connection_table)
+      .where(eq(connection_table.id, parsedInput.id));
+
+    // Invalidate cache
+    revalidateTag(`account_${ctx.userId}`);
+    revalidateTag(`connection_${ctx.userId}`);
+
+    // Return success message
+    return { message: "connection-delete-success-message" };
+  });
 
 export const createAccountAction = authActionClient
   .schema(AccountInsertSchema)
