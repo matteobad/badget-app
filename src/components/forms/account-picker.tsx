@@ -1,4 +1,5 @@
 import React from "react";
+import { Wallet2Icon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
@@ -37,7 +38,9 @@ export function AccountPicker({
                     src={option.logoUrl!}
                     alt={`${option.name} logo`}
                   ></AvatarImage>
-                  <AvatarFallback>AN</AvatarFallback>
+                  <AvatarFallback>
+                    <Wallet2Icon className="size-3" />
+                  </AvatarFallback>
                 </Avatar>
                 {option.name}
               </SelectItem>

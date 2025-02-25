@@ -23,6 +23,7 @@ import {
   FilterIcon,
   MoreHorizontal,
   Trash2Icon,
+  Wallet2Icon,
 } from "lucide-react";
 import { type dynamicIconImports } from "lucide-react/dynamic";
 import { useAction } from "next-safe-action/hooks";
@@ -225,7 +226,9 @@ export default function TransactionDataTable({
                   src={account.logoUrl!}
                   alt={`${account.name} logo`}
                 ></AvatarImage>
-                <AvatarFallback>AN</AvatarFallback>
+                <AvatarFallback>
+                  <Wallet2Icon className="size-3" />
+                </AvatarFallback>
               </Avatar>
               {account.name}
             </div>
@@ -374,7 +377,7 @@ export default function TransactionDataTable({
               })}
           </DropdownMenuContent>
         </DropdownMenu>
-        <AddTransactionButton label="Aggiungi" />
+        <AddTransactionButton label="Crea transazione" />
       </div>
       <div className="rounded-md border">
         <Table>

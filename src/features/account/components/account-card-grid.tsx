@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   EllipsisVerticalIcon,
   ReceiptIcon,
@@ -22,6 +23,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { type getAccountsForUser_CACHED } from "~/features/account/server/cached-queries";
@@ -37,6 +39,8 @@ type GroupedAccount = Awaited<
 >[number];
 
 export default function AccountCardGrid({ data }: { data: GroupedAccount[] }) {
+  const router = useRouter();
+
   const { execute, isExecuting } = useAction(deleteConnectionAction, {
     onError: ({ error }) => {
       toast.error(error.serverError);
@@ -159,10 +163,17 @@ export default function AccountCardGrid({ data }: { data: GroupedAccount[] }) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem disabled>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push(
+                          `/transactions?institution=${item.institution?.id}`,
+                        );
+                      }}
+                    >
                       <ReceiptIcon className="size-3" />
                       Vedi transazioni
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     {item.connection && (
                       <>
                         <DropdownMenuItem disabled>
