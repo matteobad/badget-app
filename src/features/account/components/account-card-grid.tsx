@@ -16,7 +16,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
@@ -26,10 +25,12 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { type getAccountsForUser_CACHED } from "~/features/account/server/cached-queries";
+import { CONNECTION_STATUS } from "~/server/db/schema/enum";
 import { formatAmount } from "~/utils/format";
 import { deleteConnectionAction } from "../server/actions";
 import AccountIcon from "./account-icon";
 import AccountList from "./account-list";
+import ConnectionStatusBadge from "./connection-status-badge";
 
 type GroupedAccount = Awaited<
   ReturnType<typeof getAccountsForUser_CACHED>
@@ -144,9 +145,11 @@ export default function AccountCardGrid({ data }: { data: GroupedAccount[] }) {
               />
               <div className="flex items-center gap-4">
                 <div className="text-sm text-muted-foreground">
-                  <Badge variant="secondary">
-                    {item.connection?.status ?? "valido"}
-                  </Badge>
+                  <ConnectionStatusBadge
+                    status={
+                      item.connection?.status ?? CONNECTION_STATUS.UNKNOWN
+                    }
+                  />
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -187,7 +190,7 @@ export default function AccountCardGrid({ data }: { data: GroupedAccount[] }) {
             </div>
 
             {/* Total Balance Section */}
-            <div className="flex items-center justify-between border-b border-zinc-100 p-4 dark:border-zinc-800">
+            <div className="flex items-center justify-between border-b border-zinc-100 p-4 pt-2 dark:border-zinc-800">
               <div className="">
                 <p className="text-xs text-muted-foreground">Saldo totale</p>
                 <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">

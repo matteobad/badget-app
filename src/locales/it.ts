@@ -22,4 +22,13 @@ export default {
       other: "Altro",
     },
   },
+
+  connection: {
+    status: {
+      linked: "Connesso",
+      pending: "In corso",
+      expired: "Scaduto",
+      unknown: "Non connesso",
+    },
+  },
 } as const;

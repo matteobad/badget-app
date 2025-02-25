@@ -17,23 +17,14 @@ export const AccountType = {
 export type AccountType = (typeof AccountType)[keyof typeof AccountType];
 
 // TODO: reduce possible status
-export const ConnectionStatus = {
-  CREATED: "CREATED",
-  PENDING: "PENDING",
-  LINKED: "LINKED",
-  EXPIRED: "EXPIRED",
-  ERROR: "ERROR",
-  UNKNOWN: "UNKNOWN",
+export const CONNECTION_STATUS = {
+  PENDING: "pending",
+  LINKED: "linked",
+  EXPIRED: "expired",
+  UNKNOWN: "unknown",
 } as const;
-export type ConnectionStatus =
-  (typeof ConnectionStatus)[keyof typeof ConnectionStatus];
-
-export const CategoryType = {
-  INCOME: "INCOME",
-  OUTCOME: "OUTCOME",
-  TRANSFER: "TRANSFER",
-} as const;
-export type CategoryType = (typeof CategoryType)[keyof typeof CategoryType];
+export type ConnectionStatusType =
+  (typeof CONNECTION_STATUS)[keyof typeof CONNECTION_STATUS];
 
 export const BudgetPeriod = {
   WEEKLY: "WEEKLY",

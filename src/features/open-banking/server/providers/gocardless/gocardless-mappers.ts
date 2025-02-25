@@ -18,7 +18,7 @@ import type {
   GC_GetInstitutionsRequest,
   GC_GetInstitutionsResponse,
 } from "./gocardless-types";
-import { ConnectionStatus, Provider } from "~/server/db/schema/enum";
+import { CONNECTION_STATUS, Provider } from "~/server/db/schema/enum";
 import { type GetTransactionsRequest, type GetTransactionsResponse } from "..";
 import {
   type GC_GetTransactionsRequest,
@@ -44,28 +44,23 @@ export const mapInstitutionsResponse = (
   } satisfies GetInstitutionsResponse[number];
 };
 
+// ref: https://developer.gocardless.com/bank-account-data/statuses
 export const mapRequisitionStatus = (
   status: GC_CreateRequisitionResponse["status"],
 ) => {
   switch (status) {
-    case "CR":
-      return ConnectionStatus.CREATED;
-    case "ID":
-    case "GC":
-    case "UA":
-    case "GA":
-    case "SA":
-    case "SU":
-      return ConnectionStatus.PENDING;
+    case "CR": // CREATED
+    case "GC": // GIVING_CONSENT
+    case "UA": // UNDERGOING_AUTHENTICATION
+    case "SA": // SELECTING_ACCOUNTS
+    case "GA": // GRANTING_ACCESS
+      return CONNECTION_STATUS.PENDING;
     case "LN":
-      return ConnectionStatus.LINKED;
-    case "RJ":
-    case "ER":
-      return ConnectionStatus.ERROR;
+      return CONNECTION_STATUS.LINKED;
     case "EX":
-      return ConnectionStatus.EXPIRED;
+      return CONNECTION_STATUS.EXPIRED;
     default:
-      return ConnectionStatus.UNKNOWN;
+      return CONNECTION_STATUS.UNKNOWN;
   }
 };
 

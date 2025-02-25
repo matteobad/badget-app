@@ -3,11 +3,11 @@ import { addDays } from "date-fns";
 import { relations, sql } from "drizzle-orm";
 import { integer, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
-import type { Provider } from "./enum";
+import type { ConnectionStatusType, Provider } from "./enum";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { account_table } from "./accounts";
-import { ConnectionStatus } from "./enum";
+import { CONNECTION_STATUS } from "./enum";
 
 export const institution_table = pgTable("institution_table", {
   id: varchar({ length: 128 })
@@ -28,14 +28,6 @@ export const institution_table = pgTable("institution_table", {
   ...timestamps,
 });
 
-// export const institutionsRelations = relations(
-//   institution_table,
-//   ({ many }) => ({
-//     accounts: many(account_table),
-//     connections: many(connections),
-//   }),
-// );
-
 export type DB_InstitutionType = typeof institution_table.$inferSelect;
 export type DB_InstitutionInsertType = typeof institution_table.$inferInsert;
 
@@ -53,7 +45,9 @@ export const connection_table = pgTable("connection_table", {
 
   referenceId: varchar().unique(),
   provider: text().$type<Provider>().notNull(),
-  status: text().$type<ConnectionStatus>().default(ConnectionStatus.UNKNOWN),
+  status: text()
+    .$type<ConnectionStatusType>()
+    .default(CONNECTION_STATUS.UNKNOWN),
   validUntil: timestamp({ withTimezone: true }).$defaultFn(() =>
     addDays(new Date(), 90),
   ),
