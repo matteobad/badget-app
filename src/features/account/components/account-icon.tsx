@@ -32,7 +32,6 @@ export default function AccountIcon({
   className,
 }: React.ComponentProps<"div"> &
   VariantProps<typeof iconVariants> & { type: AccountType }) {
-  console.log(size);
   return (
     <div
       className={cn(iconVariants({ size }), className, {

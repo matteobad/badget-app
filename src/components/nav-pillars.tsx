@@ -1,6 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 
 import {
@@ -34,6 +35,8 @@ export function NavPillars({
     }[];
   }[];
 }) {
+  const pathname = usePathname();
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Pilastri</SidebarGroupLabel>
@@ -41,7 +44,11 @@ export function NavPillars({
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={item.title}>
+              <SidebarMenuButton
+                asChild
+                tooltip={item.title}
+                isActive={item.url === pathname}
+              >
                 <a href={item.url}>
                   <item.icon />
                   <span>{item.title}</span>
@@ -59,7 +66,10 @@ export function NavPillars({
                     <SidebarMenuSub>
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={item.url === pathname}
+                          >
                             <a href={subItem.url}>
                               <span>{subItem.title}</span>
                             </a>
