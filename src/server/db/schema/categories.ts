@@ -34,7 +34,8 @@ export const category_table = pgTable(
 
     ...timestamps,
   },
-  (t) => [unique().on(t.userId, t.slug).nullsNotDistinct()],
+  // REF: https://github.com/drizzle-team/drizzle-orm/issues/3764
+  (t) => [unique().on(t.slug, t.userId).nullsNotDistinct()],
 );
 
 export type DB_CategoryType = typeof category_table.$inferSelect;
