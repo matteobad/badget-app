@@ -1,6 +1,6 @@
 "use client";
 
-import { FilePlus, FileSpreadsheet, Landmark, Plus } from "lucide-react";
+import { FilePlus, Landmark, Plus } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
 import { Button } from "~/components/ui/button";
@@ -18,28 +18,22 @@ export function AddAccountButton({ label }: { label?: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button>
+        <Button className="w-[180px]">
           <Plus className="size-4" />
           {label}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent className="w-[180px]">
         <DropdownMenuItem
           onClick={() => void setState({ action: "link-institution" })}
         >
           <Landmark />
-          Collega
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => void setState({ action: "import-transaction" })}
-        >
-          <FileSpreadsheet />
-          Importa
+          Collega un conto
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => void setState({ action: "create-account" })}
         >
-          <FilePlus /> Crea account
+          <FilePlus /> Crea manualmente
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

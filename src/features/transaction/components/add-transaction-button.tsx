@@ -18,23 +18,23 @@ export function AddTransactionButton({ label }: { label?: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button>
+        <Button className="w-[180px]">
           <Plus className="size-4" />
           {label}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent className="w-[180px]">
         <DropdownMenuItem
           onClick={() => void setState({ action: "link-institution" })}
         >
           <Landmark />
-          Collega
+          Collega un conto
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => void setState({ action: "import-transaction" })}
         >
           <FileSpreadsheet />
-          Importa
+          Importa da CSV
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => void setState({ action: "create-transaction" })}
