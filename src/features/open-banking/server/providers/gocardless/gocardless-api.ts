@@ -215,7 +215,8 @@ export const gocardlessClient = {
     if (date_from) query.set("date_from", date_from);
     if (date_to) query.set("date_to", date_to);
 
-    const url = `/api/v2/accounts/${params.id}/transactions/?${query.toString()}`;
+    let url = `/api/v2/accounts/${params.id}/transactions/?${query.toString()}`;
+    url = url.endsWith("?") ? url.replace("?", "") : url;
     const data = await fetchWithAuth<GC_GetTransactionsResponse>(
       url,
       {},
