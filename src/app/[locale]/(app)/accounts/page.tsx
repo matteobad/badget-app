@@ -4,10 +4,10 @@ import { type SearchParams } from "nuqs/server";
 import AccountCardGrid from "~/features/account/components/account-card-grid";
 import { AddAccountButton } from "~/features/account/components/add-account-button";
 import CreateAccountDrawerSheet from "~/features/account/components/create-account-drawer-sheet";
+import LinkInstitutionDrawerDialog from "~/features/account/components/link-institution-drawer-dialog";
 import UpdateAccountDrawerSheet from "~/features/account/components/update-account-drawer-sheet";
 import { getAccountsForUser_CACHED } from "~/features/account/server/cached-queries";
 import { accountsSearchParamsCache } from "~/features/account/utils/search-params";
-import LinkInstitutionDrawerDialog from "~/features/open-banking/components/link-institution-drawer-dialog";
 import { getInstitutionsForCountry } from "~/features/open-banking/server/queries";
 import { AccountsEmptyPlaceholder } from "../../../../features/account/components/accounts-empty-placeholder";
 

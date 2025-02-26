@@ -1,9 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { type SearchParams } from "nuqs/server";
 
+import LinkInstitutionDrawerDialog from "~/features/account/components/link-institution-drawer-dialog";
 import { getCategoriesForUser_QUERY } from "~/features/category/server/queries";
 import ImportTransactionDrawerDialog from "~/features/import-csv/components/import-transaction-drawer-dialog";
-import LinkInstitutionDrawerDialog from "~/features/open-banking/components/link-institution-drawer-dialog";
 import { getInstitutionsForCountry } from "~/features/open-banking/server/queries";
 import CreateTransactionDrawerSheet from "~/features/transaction/components/create-transaction-drawer-sheet";
 import TransactionDataTable from "~/features/transaction/components/transaction-table";
