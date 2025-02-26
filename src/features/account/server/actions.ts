@@ -12,7 +12,29 @@ import {
   AccountInsertSchema,
   AccountUpdateSchema,
   ConnectionDeleteSchema,
+  SyncConnectionSchema,
 } from "../utils/schemas";
+import { syncUserConnection_MUTATION } from "./queries";
+
+export const syncConnectionAction = authActionClient
+  .schema(SyncConnectionSchema)
+  .metadata({ actionName: "sync-connection" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Mutate data
+    try {
+      await syncUserConnection_MUTATION(ctx.userId, parsedInput.ref);
+    } catch (err) {
+      console.error(err);
+      return { message: "Sincronizzazione fallita" };
+    }
+
+    // Invalidate cache
+    revalidateTag(`account_${ctx.userId}`);
+    revalidateTag(`transaction_${ctx.userId}`);
+
+    // Return success message
+    return { message: "Sincronizzazione completata" };
+  });
 
 export const deleteConnectionAction = authActionClient
   .schema(ConnectionDeleteSchema)

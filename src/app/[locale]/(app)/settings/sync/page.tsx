@@ -1,16 +1,11 @@
-import { Suspense } from "react";
-import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { auth } from "@clerk/nextjs/server";
 
-import { ErrorFallback } from "~/components/error-fallback";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import SyncConnection from "~/features/account/components/sync-connection";
 import {
   getConnectionByKey,
   getInstitutionById,
 } from "~/features/open-banking/server/queries";
-import ImportData, {
-  SyncDataLoading,
-} from "../../../../../features/open-banking/components/sync-data.server";
 
 export default async function SyncPage({
   searchParams,
@@ -41,18 +36,9 @@ export default async function SyncPage({
       </div>
       <h1 className="mb-2 text-2xl font-semibold">Collegamento riuscito!</h1>
       <p className="mb-6 text-muted-foreground">
-        {institution[0]!.name} è stato collegati con successo
+        {institution[0]!.name} è stato collegato con successo
       </p>
-      <ErrorBoundary errorComponent={ErrorFallback}>
-        <Suspense fallback={<SyncDataLoading />}>
-          <ImportData
-            id={params.ref}
-            provider={params.provider}
-            connectionId={conn[0].id}
-            institutionId={institution[0]!.id}
-          />
-        </Suspense>
-      </ErrorBoundary>
+      <SyncConnection id={params.ref} />
     </div>
   );
 }

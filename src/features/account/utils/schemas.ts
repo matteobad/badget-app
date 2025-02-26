@@ -4,6 +4,10 @@ import { z } from "zod";
 import { account_table } from "~/server/db/schema/accounts";
 import { AccountType, Provider } from "~/server/db/schema/enum";
 
+export const SyncConnectionSchema = z.object({
+  ref: z.string(),
+});
+
 export const AccountInsertSchema = createInsertSchema(account_table, {
   balance: z.coerce.string(),
   type: z.nativeEnum(AccountType),
