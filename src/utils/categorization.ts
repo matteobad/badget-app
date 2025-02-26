@@ -1,5 +1,5 @@
 import { LRUCache } from "next/dist/server/lib/lru-cache";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { eng, ita, removeStopwords } from "stopword";
 
 import type { DB_RuleType, DB_TokenType } from "~/server/db/schema/categories";
@@ -12,8 +12,9 @@ type Transaction = Partial<DB_TransactionType> & { description: string };
 
 type RuleWithTokens = DB_RuleType & { tokens: DB_TokenType[] };
 
-// Cache LRU per le tokenizzazioni (evita di ripetere l'elaborazione per descrizioni già analizzate)
+// Caches
 const tokenCache = new LRUCache<string[]>(500);
+const ruleCache = new LRUCache<RuleWithTokens[]>(100);
 
 // Funzione per estrarre, normalizzare e tokenizzare i dati da una descrizione
 const extractTokens = (description: string): string[] => {
@@ -35,10 +36,9 @@ const extractTokens = (description: string): string[] => {
   // tokens = tokens.map((token) => PorterStemmer.stem(token));
 
   // Genera bigrammi per catturare contesti di due parole
-  const bigrams: string[] = [];
-  for (let i = 0; i < tokens.length - 1; i++) {
-    bigrams.push(`${tokens[i]}_${tokens[i + 1]}`);
-  }
+  const bigrams = tokens
+    .slice(0, -1)
+    .map((_, i) => `${tokens[i]}_${tokens[i + 1]}`);
 
   // Unisci token e bigrammi, rimuovendo eventuali duplicati
   const allTokens = Array.from(new Set([...tokens, ...bigrams]));
@@ -49,24 +49,30 @@ const extractTokens = (description: string): string[] => {
   return allTokens;
 };
 
-// Funzione per ottenere le regole dinamiche dal database
+// Fetch rules with caching
 const fetchRulesFromDB = async (userId: string): Promise<RuleWithTokens[]> => {
+  if (ruleCache.has(userId)) return ruleCache.get(userId)!;
+
   const rules = await db
     .select()
     .from(rule_table)
     .where(eq(rule_table.userId, userId));
+  if (!rules.length) return [];
 
-  const rulesWithTokens = await Promise.all(
-    rules.map(async (rule) => {
-      const tokens = await db
-        .select()
-        .from(token_table)
-        .where(eq(token_table.ruleId, rule.id))
-        .orderBy(desc(token_table.relevance));
-      return { ...rule, tokens };
-    }),
-  );
+  const ruleIds = rules.map((r) => r.id);
+  const tokens = await db
+    .select()
+    .from(token_table)
+    .where(inArray(token_table.ruleId, ruleIds))
+    .orderBy(desc(token_table.relevance));
 
+  // Map tokens to rules
+  const rulesWithTokens = rules.map((rule) => ({
+    ...rule,
+    tokens: tokens.filter((t) => t.ruleId === rule.id),
+  }));
+
+  ruleCache.set(userId, rulesWithTokens);
   return rulesWithTokens;
 };
 
@@ -123,25 +129,23 @@ export const updateOrCreateRule = async (
   }
 };
 
-// Funzione per categorizzare una transazione
+// Categorize transaction
 export const categorizeTransaction = async (
   userId: string,
   transaction: Transaction,
 ): Promise<string | null> => {
   const rules = await fetchRulesFromDB(userId);
-  const tokens = extractTokens(transaction.description);
+  const tokens = new Set(extractTokens(transaction.description));
 
   let bestMatch: { categoryId: string; relevance: number } | null = null;
 
   for (const rule of rules) {
     for (const token of rule.tokens) {
-      if (tokens.includes(token.token)) {
-        if (!bestMatch || token.relevance > bestMatch.relevance) {
-          bestMatch = {
-            categoryId: rule.categoryId,
-            relevance: token.relevance,
-          };
-        }
+      if (
+        tokens.has(token.token) &&
+        (!bestMatch || token.relevance > bestMatch.relevance)
+      ) {
+        bestMatch = { categoryId: rule.categoryId, relevance: token.relevance };
       }
     }
   }
@@ -149,7 +153,7 @@ export const categorizeTransaction = async (
   return bestMatch?.categoryId ?? null;
 };
 
-// Funzione per processare un batch di transazioni
+// Batch categorize transactions
 export const categorizeTransactions = async (
   userId: string,
   transactions: Transaction[],

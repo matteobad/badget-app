@@ -1,6 +1,7 @@
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
 import {
+  index,
   integer,
   text,
   unique,
@@ -41,20 +42,24 @@ export const category_table = pgTable(
 export type DB_CategoryType = typeof category_table.$inferSelect;
 export type DB_CategoryInsertType = typeof category_table.$inferInsert;
 
-export const rule_table = pgTable("rule_table", {
-  id: varchar({ length: 128 })
-    .primaryKey()
-    .$defaultFn(() => createId())
-    .notNull(),
+export const rule_table = pgTable(
+  "rule_table",
+  {
+    id: varchar({ length: 128 })
+      .primaryKey()
+      .$defaultFn(() => createId())
+      .notNull(),
 
-  // FK
-  userId: varchar({ length: 32 }).notNull(),
-  categoryId: varchar({ length: 128 })
-    .notNull()
-    .references(() => category_table.id),
+    // FK
+    userId: varchar({ length: 32 }).notNull(),
+    categoryId: varchar({ length: 128 })
+      .notNull()
+      .references(() => category_table.id),
 
-  ...timestamps,
-});
+    ...timestamps,
+  },
+  (t) => [index().on(t.userId)],
+);
 
 export type DB_RuleType = typeof rule_table.$inferSelect;
 export type DB_RuleInsertType = typeof rule_table.$inferInsert;
