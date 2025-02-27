@@ -18,7 +18,7 @@ export function AddTransactionButton({ label }: { label?: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="w-[180px]">
+        <Button className="w-[180px]" size="sm">
           <Plus className="size-4" />
           {label}
         </Button>

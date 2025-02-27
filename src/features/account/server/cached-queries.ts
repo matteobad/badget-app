@@ -7,7 +7,7 @@ import {
   type DB_ConnectionType,
   type DB_InstitutionType,
 } from "~/server/db/schema/open-banking";
-import { getAccountsForUser } from "./queries";
+import { getAccounts_QUERY, getAccountsForUser } from "./queries";
 
 type GroupedAccounts = {
   id: string; // institutionId || accountId
@@ -44,6 +44,22 @@ export const getAccountsForUser_CACHED = (userId: string) => {
       }
 
       return groupedAccounts;
+    },
+    cacheKeys,
+    {
+      tags: cacheKeys,
+      revalidate: 3600,
+    },
+  )();
+};
+
+export const getAccounts_CACHED = (userId: string) => {
+  const cacheKeys = ["account", `account_${userId}`];
+  return unstable_cache(
+    async () => {
+      const result = await getAccounts_QUERY(userId);
+
+      return result;
     },
     cacheKeys,
     {

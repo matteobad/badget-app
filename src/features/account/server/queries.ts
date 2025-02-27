@@ -33,6 +33,20 @@ export const getAccountsForUser = (userId: string) => {
     .where(eq(account_table.userId, userId));
 };
 
+export const getAccounts_QUERY = (userId: string) => {
+  return db
+    .select({
+      ...getTableColumns(account_table),
+      institution: institution_table,
+    })
+    .from(account_table)
+    .leftJoin(
+      institution_table,
+      eq(institution_table.id, account_table.institutionId),
+    )
+    .where(eq(account_table.userId, userId));
+};
+
 export const getCategoriesForUser_QUERY = (userId: string) => {
   return db
     .select()

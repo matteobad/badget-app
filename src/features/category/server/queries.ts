@@ -5,7 +5,7 @@ import { eq, isNull, or } from "drizzle-orm";
 import { db } from "~/server/db";
 import { category_table } from "~/server/db/schema/categories";
 
-export const getCategoriesForUser_QUERY = (userId: string) => {
+export const getCategories_QUERY = (userId: string) => {
   return db
     .select()
     .from(category_table)
