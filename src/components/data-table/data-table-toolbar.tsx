@@ -2,14 +2,14 @@
 
 import type { Table } from "@tanstack/react-table";
 import * as React from "react";
-import { X } from "lucide-react";
+import { SearchIcon, X } from "lucide-react";
 
-import { DataTableFacetedFilter } from "~/components/data-table/data-table-faceted-filter";
 import { DataTableViewOptions } from "~/components/data-table/data-table-view-options";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import { type DataTableFilterField } from "~/utils/data-table";
+import { type DataTableAdvancedFilterField } from "~/utils/data-table";
+import { DataTableFilters } from "./data-table-filters";
 
 interface DataTableToolbarProps<TData>
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -36,7 +36,7 @@ interface DataTableToolbarProps<TData>
    *   }
    * ]
    */
-  filterFields?: DataTableFilterField<TData>[];
+  filterFields?: DataTableAdvancedFilterField<TData>[];
 }
 
 export function DataTableToolbar<TData>({
@@ -51,8 +51,8 @@ export function DataTableToolbar<TData>({
   // Memoize computation of searchableColumns and filterableColumns
   const { searchableColumns, filterableColumns } = React.useMemo(() => {
     return {
-      searchableColumns: filterFields.filter((field) => !field.options),
-      filterableColumns: filterFields.filter((field) => field.options),
+      searchableColumns: filterFields.filter((f) => f.type === "text"),
+      filterableColumns: filterFields.filter((f) => f.type !== "text"),
     };
   }, [filterFields]);
 
@@ -64,40 +64,49 @@ export function DataTableToolbar<TData>({
       )}
       {...props}
     >
-      <div className="flex flex-1 items-center gap-2">
+      <div className="relative flex flex-1 items-center gap-2">
         {searchableColumns.length > 0 &&
           searchableColumns.map(
             (column) =>
               table.getColumn(column.id ? String(column.id) : "") && (
-                <Input
-                  key={String(column.id)}
-                  placeholder={column.placeholder}
-                  value={
-                    (table
-                      .getColumn(String(column.id))
-                      ?.getFilterValue() as string) ?? ""
-                  }
-                  onChange={(event) =>
-                    table
-                      .getColumn(String(column.id))
-                      ?.setFilterValue(event.target.value)
-                  }
-                  className="h-8 w-40 lg:w-64"
-                />
+                <div className="relative" key={String(column.id)}>
+                  <SearchIcon className="absolute top-2.5 left-4 size-4 text-muted-foreground" />
+                  <Input
+                    placeholder={column.placeholder}
+                    value={
+                      (table
+                        .getColumn(String(column.id))
+                        ?.getFilterValue() as string) ?? ""
+                    }
+                    onChange={(event) =>
+                      table
+                        .getColumn(String(column.id))
+                        ?.setFilterValue(event.target.value)
+                    }
+                    className="h-9 w-40 pl-12 lg:w-64"
+                  />
+                </div>
               ),
           )}
-        {filterableColumns.length > 0 &&
-          filterableColumns.map(
-            (column) =>
-              table.getColumn(column.id ? String(column.id) : "") && (
-                <DataTableFacetedFilter
-                  key={String(column.id)}
-                  column={table.getColumn(column.id ? String(column.id) : "")}
-                  title={column.label}
-                  options={column.options ?? []}
-                />
-              ),
-          )}
+        {filterableColumns.length > 0 && (
+          <>
+            <DataTableFilters
+              table={table}
+              filterableColumns={filterableColumns}
+            />
+            {/* {filterableColumns.map(
+              (column) =>
+                table.getColumn(column.id ? String(column.id) : "") && (
+                  <DataTableFacetedFilter
+                    key={String(column.id)}
+                    column={table.getColumn(column.id ? String(column.id) : "")}
+                    title={column.label}
+                    options={column.options ?? []}
+                  />
+                ),
+            )} */}
+          </>
+        )}
         {isFiltered && (
           <Button
             aria-label="Reset filters"

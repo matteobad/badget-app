@@ -13,7 +13,7 @@ import ImportTransactionDrawerDialog from "~/features/import-csv/components/impo
 import { useDataTable } from "~/hooks/use-data-table";
 import {
   type DataTableAction,
-  type DataTableFilterField,
+  type DataTableAdvancedFilterField,
   type DataTableRowAction,
 } from "~/utils/data-table";
 import {
@@ -70,15 +70,27 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
    * @prop {React.ReactNode} [icon] - An optional icon to display next to the label.
    * @prop {boolean} [withCount] - An optional boolean to display the count of the filter option.
    */
-  const filterFields: DataTableFilterField<TransactionType>[] = [
+  const filterFields: DataTableAdvancedFilterField<TransactionType>[] = [
     {
       id: "description",
       label: "Descrizione",
+      type: "text",
       placeholder: "Cerca transazione...",
+    },
+    {
+      id: "date",
+      label: "Data",
+      type: "date",
+    },
+    {
+      id: "amount",
+      label: "Importo",
+      type: "number",
     },
     {
       id: "category",
       label: "Categoria",
+      type: "multi-select",
       options: categories.map((category) => ({
         label: category.name,
         value: category.id,
@@ -91,9 +103,20 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
         count: categoryCounts[category.id],
       })),
     },
+    // {
+    //   id: "tags",
+    //   label: "Tags",
+    //   options: accounts.map((account) => ({
+    //     label: account.name,
+    //     value: account.id,
+    //     icon: () => <AccountIcon type={account.type} />,
+    //     count: accountCounts[account.id],
+    //   })),
+    // },
     {
       id: "account",
       label: "Conto",
+      type: "multi-select",
       options: accounts.map((account) => ({
         label: account.name,
         value: account.id,
