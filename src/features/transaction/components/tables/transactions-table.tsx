@@ -1,7 +1,7 @@
 "use client";
 
 import type { dynamicIconImports } from "lucide-react/dynamic";
-import * as React from "react";
+import { use, useMemo, useState } from "react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import { DataTable } from "~/components/data-table/data-table";
@@ -9,8 +9,10 @@ import { DataTableToolbar } from "~/components/data-table/data-table-toolbar";
 import AccountIcon from "~/features/account/components/account-icon";
 import { type getAccounts_CACHED } from "~/features/account/server/cached-queries";
 import { type getCategories_QUERY } from "~/features/category/server/queries";
+import ImportTransactionDrawerDialog from "~/features/import-csv/components/import-transaction-drawer-dialog";
 import { useDataTable } from "~/hooks/use-data-table";
 import {
+  type DataTableAction,
   type DataTableFilterField,
   type DataTableRowAction,
 } from "~/utils/data-table";
@@ -19,11 +21,12 @@ import {
   type getTransactionCategoryCounts_CACHED,
   type getTransactions_CACHED,
 } from "../../server/cached-queries";
-import { AddTransactionButton } from "../add-transaction-button";
+import CreateTransactionDrawerSheet from "../create-transaction-drawer-sheet";
 import { DeleteTransactionsDialog } from "../delete-transactions-dialog";
 import UpdateTransactionDrawerSheet from "../update-transaction-drawer-sheet";
 import { getColumns } from "./transactions-table-columns";
 import { TransactionsTableFloatingBar } from "./transactions-table-floating-bar";
+import { TransactionsTableToolbarActions } from "./transactions-table-toolbar-action";
 
 export type TransactionType = Awaited<
   ReturnType<typeof getTransactions_CACHED>
@@ -37,7 +40,6 @@ interface TransactionsTableProps {
       Awaited<ReturnType<typeof getTransactionAccountCounts_CACHED>>,
       Awaited<ReturnType<typeof getCategories_QUERY>>,
       Awaited<ReturnType<typeof getAccounts_CACHED>>,
-      // Awaited<ReturnType<typeof getTaskPriorityCounts>>,
     ]
   >;
 }
@@ -49,12 +51,13 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
     accountCounts,
     categories,
     accounts,
-  ] = React.use(promises);
+  ] = use(promises);
 
   const [rowAction, setRowAction] =
-    React.useState<DataTableRowAction<TransactionType> | null>(null);
+    useState<DataTableRowAction<TransactionType> | null>(null);
+  const [tableAction, setTableAction] = useState<DataTableAction | null>(null);
 
-  const columns = React.useMemo(() => getColumns({ setRowAction }), []);
+  const columns = useMemo(() => getColumns({ setRowAction }), []);
 
   /**
    * This component can render either a faceted filter or a search filter based on the `options` prop.
@@ -71,7 +74,7 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
     {
       id: "description",
       label: "Descrizione",
-      placeholder: "Filter description...",
+      placeholder: "Cerca transazione...",
     },
     {
       id: "category",
@@ -122,12 +125,23 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
         floatingBar={<TransactionsTableFloatingBar table={table} />}
       >
         <DataTableToolbar table={table} filterFields={filterFields}>
-          <>
-            {/* <TransactionsTableToolbarActions table={table} /> */}
-            <AddTransactionButton label="Crea Transazione" />
-          </>
+          <TransactionsTableToolbarActions
+            table={table}
+            setTableAction={setTableAction}
+          />
         </DataTableToolbar>
       </DataTable>
+      <CreateTransactionDrawerSheet
+        open={tableAction?.type === "create"}
+        onOpenChange={() => setTableAction(null)}
+        accounts={accounts}
+        categories={categories}
+      />
+      <ImportTransactionDrawerDialog
+        open={tableAction?.type === "import"}
+        onOpenChange={() => setTableAction(null)}
+        accounts={accounts}
+      />
       <UpdateTransactionDrawerSheet
         open={rowAction?.type === "update"}
         onOpenChange={() => setRowAction(null)}

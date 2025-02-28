@@ -1,10 +1,11 @@
 "use client";
 
 import type { Table } from "@tanstack/react-table";
-import { DownloadIcon } from "lucide-react";
+import { type Dispatch, type SetStateAction } from "react";
+import { ImportIcon, PlusIcon } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
-import { exportTableToCSV } from "~/utils/export";
+import { type DataTableAction } from "~/utils/data-table";
 import { type getTransactions_CACHED } from "../../server/cached-queries";
 
 export type TransactionType = Awaited<
@@ -12,9 +13,10 @@ export type TransactionType = Awaited<
 >["data"][number];
 
 export function TransactionsTableToolbarActions({
-  table,
+  setTableAction,
 }: {
   table: Table<TransactionType>;
+  setTableAction: Dispatch<SetStateAction<DataTableAction | null>>;
 }) {
   return (
     <div className="flex items-center gap-2">
@@ -26,7 +28,7 @@ export function TransactionsTableToolbarActions({
           onSuccess={() => table.toggleAllRowsSelected(false)}
         />
       ) : null} */}
-      <Button
+      {/* <Button
         variant="outline"
         size="sm"
         onClick={() =>
@@ -39,10 +41,28 @@ export function TransactionsTableToolbarActions({
       >
         <DownloadIcon className="size-4" aria-hidden="true" />
         Export
+      </Button> */}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setTableAction({ type: "import" })}
+        className="gap-2"
+      >
+        <ImportIcon className="size-4" aria-hidden="true" />
+        Importa
+      </Button>
+      <Button
+        variant="default"
+        size="sm"
+        onClick={() => setTableAction({ type: "create" })}
+        className="gap-2"
+      >
+        <PlusIcon className="size-4" aria-hidden="true" />
+        Aggiungi
       </Button>
       {/**
        * Other actions can be added here.
-       * For example, import, view, etc.
+       * For example, export, view, etc.
        */}
     </div>
   );

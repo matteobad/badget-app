@@ -48,6 +48,10 @@ export type Filter<TData> = Prettify<
   }
 >;
 
+export interface DataTableAction {
+  type: "create" | "import";
+}
+
 export interface DataTableRowAction<TData> {
   row: Row<TData>;
   type: "update" | "delete";
