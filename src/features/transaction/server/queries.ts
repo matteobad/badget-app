@@ -38,6 +38,8 @@ export async function getTransactions_QUERY(
     const offset = (input.page - 1) * input.perPage;
     const fromDate = input.from ? new Date(input.from) : undefined;
     const toDate = input.to ? new Date(input.to) : undefined;
+    const minAmount = input.min ? input.min : undefined;
+    const maxAmount = input.max ? input.max : undefined;
 
     const where = and(
       input.description
@@ -55,6 +57,8 @@ export async function getTransactions_QUERY(
         : undefined,
       fromDate ? gte(transaction_table.date, fromDate) : undefined,
       toDate ? lte(transaction_table.date, toDate) : undefined,
+      minAmount ? gte(transaction_table.amount, minAmount) : undefined,
+      maxAmount ? lte(transaction_table.amount, maxAmount) : undefined,
       eq(transaction_table.userId, userId),
     );
 

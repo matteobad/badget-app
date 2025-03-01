@@ -35,6 +35,7 @@ export interface DataTableFilterField<TData> {
   label: string;
   placeholder?: string;
   options?: Option[];
+  values?: string[];
 }
 
 export interface DataTableAdvancedFilterField<TData>

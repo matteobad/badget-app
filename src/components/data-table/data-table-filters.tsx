@@ -97,7 +97,7 @@ export function DataTableFilters<TData>({
                     />
                   )}
                   {filter.type === "date" && <DateFilter />}
-                  {filter.type === "number" && <NumberFilter />}
+                  {filter.type === "number" && <NumberFilter filter={filter} />}
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>

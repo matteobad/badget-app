@@ -22,6 +22,8 @@ export const transactionsParsers = {
   account: parseAsArrayOf(parseAsString).withDefault([]),
   from: parseAsString.withDefault(""),
   to: parseAsString.withDefault(""),
+  min: parseAsString.withDefault(""),
+  max: parseAsString.withDefault(""),
 };
 
 export const transactionsSearchParamsCache =

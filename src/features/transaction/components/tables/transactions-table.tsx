@@ -93,6 +93,7 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
       id: "amount",
       label: "Importo",
       type: "number",
+      values: data.map((item) => item.amount),
     },
     {
       id: "category",
