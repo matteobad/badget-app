@@ -1,6 +1,5 @@
-import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
-import { type Column, type Table } from "@tanstack/react-table";
+import { type Table } from "@tanstack/react-table";
 import {
   CalendarIcon,
   ChartNoAxesColumnIcon,
@@ -12,21 +11,8 @@ import {
 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "~/components/ui/command";
 import { cn } from "~/lib/utils";
-import {
-  type DataTableAdvancedFilterField,
-  type Option,
-} from "~/utils/data-table";
-import Component from "../comp-265";
-import { Calendar } from "../ui/calendar";
+import { type DataTableAdvancedFilterField } from "~/utils/data-table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,92 +22,9 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-
-function MultiSelectFilter<TData, TValue>({
-  column,
-  options,
-  setOpen,
-}: {
-  column: Column<TData, TValue>;
-  options: Option[];
-  setOpen: Dispatch<SetStateAction<boolean>>;
-}) {
-  const unknownValue = column?.getFilterValue();
-  const selectedValues = new Set(
-    Array.isArray(unknownValue) ? unknownValue : [],
-  );
-
-  return (
-    <Command>
-      <CommandInput placeholder="Type a command or search..." />
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup>
-          {options.map((option) => {
-            const isSelected = selectedValues.has(option.value);
-
-            return (
-              <CommandItem
-                className="group flex items-center gap-2 text-muted-foreground"
-                key={option.value}
-                value={option.value}
-                onSelect={() => {
-                  if (isSelected) {
-                    selectedValues.delete(option.value);
-                  } else {
-                    selectedValues.add(option.value);
-                  }
-                  const filterValues = Array.from(selectedValues);
-                  column?.setFilterValue(
-                    filterValues.length ? filterValues : undefined,
-                  );
-
-                  setOpen(false);
-                }}
-              >
-                {
-                  // @ts-expect-error should type this better
-                  <option.icon />
-                }
-                <span className="text-accent-foreground">{option.label}</span>
-                {option.label && (
-                  <span className="ml-auto text-xs text-muted-foreground">
-                    {option.count}
-                  </span>
-                )}
-              </CommandItem>
-            );
-          })}
-        </CommandGroup>
-      </CommandList>
-    </Command>
-  );
-}
-
-function DateFilter<TData, TValue>({
-  column,
-}: {
-  column: Column<TData, TValue>;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-}) {
-  return (
-    <Calendar
-      initialFocus
-      mode="range"
-      defaultMonth={new Date()}
-      // selected={date}
-      onSelect={(value) => {
-        // TODO: aply filter
-        if (!value) return;
-        column.setFilterValue({
-          from: value.from?.toISOString() ?? "",
-          to: value.to?.toISOString() ?? "",
-        });
-      }}
-      numberOfMonths={1}
-    />
-  );
-}
+import { DateFilter } from "./filters/date-filter";
+import { MultiSelectFilter } from "./filters/multi-select-filter";
+import NumberFilter from "./filters/number-filter";
 
 const getFilterIcon = (filterId: string) => {
   switch (filterId) {
@@ -152,16 +55,6 @@ export function DataTableFilters<TData>({
   filterableColumns,
 }: DataTableFiltersProps<TData>) {
   const [open, setOpen] = useState(false);
-
-  // const [filters, setFilters] = useQueryState(
-  //   "filters",
-  //   getFiltersStateParser(table.getRowModel().rows[0]?.original)
-  //     .withDefault([])
-  //     .withOptions({
-  //       clearOnDefault: true,
-  //       shallow: false,
-  //     }),
-  // );
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -201,16 +94,10 @@ export function DataTableFilters<TData>({
                     <MultiSelectFilter
                       column={table.getColumn(String(filter.id))!}
                       options={filter.options!}
-                      setOpen={setOpen}
                     />
                   )}
-                  {filter.type === "date" && (
-                    <DateFilter
-                      column={table.getColumn(String(filter.id))!}
-                      setOpen={setOpen}
-                    />
-                  )}
-                  {filter.type === "number" && <Component />}
+                  {filter.type === "date" && <DateFilter />}
+                  {filter.type === "number" && <NumberFilter />}
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>

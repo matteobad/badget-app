@@ -2,12 +2,14 @@
 
 import type { dynamicIconImports } from "lucide-react/dynamic";
 import { use, useMemo, useState } from "react";
+import { Wallet2Icon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import { DataTable } from "~/components/data-table/data-table";
 import { DataTableToolbar } from "~/components/data-table/data-table-toolbar";
-import AccountIcon from "~/features/account/components/account-icon";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { type getAccounts_CACHED } from "~/features/account/server/cached-queries";
+import { type getTags_CACHED } from "~/features/category/server/cached-queries";
 import { type getCategories_QUERY } from "~/features/category/server/queries";
 import ImportTransactionDrawerDialog from "~/features/import-csv/components/import-transaction-drawer-dialog";
 import { useDataTable } from "~/hooks/use-data-table";
@@ -20,6 +22,7 @@ import {
   type getTransactionAccountCounts_CACHED,
   type getTransactionCategoryCounts_CACHED,
   type getTransactions_CACHED,
+  type getTransactionTagCounts_CACHED,
 } from "../../server/cached-queries";
 import CreateTransactionDrawerSheet from "../create-transaction-drawer-sheet";
 import { DeleteTransactionsDialog } from "../delete-transactions-dialog";
@@ -37,8 +40,10 @@ interface TransactionsTableProps {
     [
       Awaited<ReturnType<typeof getTransactions_CACHED>>,
       Awaited<ReturnType<typeof getTransactionCategoryCounts_CACHED>>,
+      Awaited<ReturnType<typeof getTransactionTagCounts_CACHED>>,
       Awaited<ReturnType<typeof getTransactionAccountCounts_CACHED>>,
       Awaited<ReturnType<typeof getCategories_QUERY>>,
+      Awaited<ReturnType<typeof getTags_CACHED>>,
       Awaited<ReturnType<typeof getAccounts_CACHED>>,
     ]
   >;
@@ -48,8 +53,10 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
   const [
     { data, pageCount },
     categoryCounts,
+    tagCounts,
     accountCounts,
     categories,
+    tags,
     accounts,
   ] = use(promises);
 
@@ -103,16 +110,16 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
         count: categoryCounts[category.id],
       })),
     },
-    // {
-    //   id: "tags",
-    //   label: "Tags",
-    //   options: accounts.map((account) => ({
-    //     label: account.name,
-    //     value: account.id,
-    //     icon: () => <AccountIcon type={account.type} />,
-    //     count: accountCounts[account.id],
-    //   })),
-    // },
+    {
+      id: "tags",
+      label: "Tags",
+      type: "multi-select",
+      options: tags.map((tag) => ({
+        label: tag.text,
+        value: tag.id,
+        count: tagCounts[tag.id],
+      })),
+    },
     {
       id: "account",
       label: "Conto",
@@ -120,7 +127,17 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
       options: accounts.map((account) => ({
         label: account.name,
         value: account.id,
-        icon: () => <AccountIcon type={account.type} />,
+        icon: () => (
+          <Avatar className="mr-2 size-4">
+            <AvatarImage
+              src={account.logoUrl!}
+              alt={`${account.name} logo`}
+            ></AvatarImage>
+            <AvatarFallback>
+              <Wallet2Icon className="size-3" />
+            </AvatarFallback>
+          </Avatar>
+        ),
         count: accountCounts[account.id],
       })),
     },

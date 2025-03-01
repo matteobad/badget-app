@@ -131,7 +131,7 @@ const items = [
   { id: 120, price: 900 },
 ];
 
-export default function Component() {
+export default function NumberFilter() {
   const id = useId();
 
   // Define the number of ticks
@@ -232,7 +232,7 @@ export default function Component() {
           <div className="relative">
             <Input
               id={`${id}-min`}
-              className="peer ps-6"
+              className="peer h-9 ps-6"
               type="text"
               inputMode="decimal"
               value={inputValues[0]}
@@ -255,7 +255,7 @@ export default function Component() {
           <div className="relative">
             <Input
               id={`${id}-max`}
-              className="peer ps-6"
+              className="peer h-9 ps-6"
               type="text"
               inputMode="decimal"
               value={inputValues[1]}
@@ -276,7 +276,7 @@ export default function Component() {
       </div>
 
       {/* Button */}
-      <Button className="w-full" variant="outline">
+      <Button className="w-full" variant="outline" size="sm">
         Show {countItemsInRange(sliderValue[0]!, sliderValue[1]!)} items
       </Button>
     </div>

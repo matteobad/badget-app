@@ -9,6 +9,7 @@ import { type dynamicIconImports } from "lucide-react/dynamic";
 import { CategoryBadge } from "~/components/category-badge";
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
@@ -20,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
+import { type DB_TagType } from "~/server/db/schema/transactions";
 import { type DataTableRowAction } from "~/utils/data-table";
 import { formatAmount } from "~/utils/format";
 import { type getTransactions_CACHED } from "../../server/cached-queries";
@@ -111,6 +113,31 @@ export function getColumns({
               color={color}
               icon={icon as keyof typeof dynamicIconImports}
             />
+          </div>
+        );
+      },
+      filterFn: (row, id, value) => {
+        return Array.isArray(value) && value.includes(row.getValue(id));
+      },
+      enableSorting: false,
+    },
+    {
+      accessorKey: "tags",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Tags" />
+      ),
+      cell: ({ row }) => {
+        const tags: DB_TagType[] = row.getValue("tags");
+
+        return (
+          <div className="flex items-center gap-2">
+            {tags.map((tag) => {
+              return (
+                <Badge variant="secondary" key={tag.id}>
+                  {tag.text}
+                </Badge>
+              );
+            })}
           </div>
         );
       },

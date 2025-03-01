@@ -26,7 +26,7 @@ import {
   attachment_table,
   tag_table as tagTable,
   transaction_table,
-  transaction_to_tag_table as transactionToTagTable,
+  transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
 import { type transactionsSearchParamsCache } from "../utils/search-params";
 
@@ -46,6 +46,10 @@ export async function getTransactions_QUERY(
       input.category.length > 0
         ? inArray(transaction_table.categoryId, input.category)
         : undefined,
+      // TODO: filter by tags
+      // input.tags.length > 0
+      //   ? inArray(transaction_to_tag_table.tagId, input.tags)
+      //   : undefined,
       input.account.length > 0
         ? inArray(transaction_table.accountId, input.account)
         : undefined,
@@ -81,10 +85,10 @@ export async function getTransactions_QUERY(
           eq(transaction_table.categoryId, categoryTable.id),
         )
         .leftJoin(
-          transactionToTagTable,
-          eq(transaction_table.id, transactionToTagTable.transactionId),
+          transaction_to_tag_table,
+          eq(transaction_table.id, transaction_to_tag_table.transactionId),
         ) // Join transaction_tags
-        .leftJoin(tagTable, eq(transactionToTagTable.tagId, tagTable.id)) // Join with tags
+        .leftJoin(tagTable, eq(transaction_to_tag_table.tagId, tagTable.id)) // Join with tags
         .limit(input.perPage)
         .offset(offset)
         .where(where)
@@ -128,6 +132,36 @@ export async function getTransactionCategoryCounts_QUERY(userId: string) {
         res.reduce(
           (acc, { categoryId, count }) => {
             acc[categoryId ?? "null"] = count;
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
+      );
+  } catch (err) {
+    console.error(err);
+    return {} as Record<string, number>;
+  }
+}
+
+export async function getTransactionTagCounts_QUERY(userId: string) {
+  try {
+    return await db
+      .select({
+        tagId: transaction_to_tag_table.tagId,
+        count: count(),
+      })
+      .from(transaction_table)
+      .leftJoin(
+        transaction_to_tag_table,
+        eq(transaction_to_tag_table.transactionId, transaction_table.id),
+      )
+      .where(eq(transaction_table.userId, userId))
+      .groupBy(transaction_to_tag_table.tagId)
+      .having(gt(count(), 0))
+      .then((res) =>
+        res.reduce(
+          (acc, { tagId, count }) => {
+            acc[tagId ?? "null"] = count;
             return acc;
           },
           {} as Record<string, number>,
@@ -221,12 +255,12 @@ export const updateTransactionTags = async (
 ) => {
   const existingTags = await client
     .select({
-      id: transactionToTagTable.tagId,
+      id: transaction_to_tag_table.tagId,
       text: tagTable.text,
     })
-    .from(transactionToTagTable)
-    .innerJoin(tagTable, eq(transactionToTagTable.tagId, tagTable.id))
-    .where(eq(transactionToTagTable.transactionId, transactionId));
+    .from(transaction_to_tag_table)
+    .innerJoin(tagTable, eq(transaction_to_tag_table.tagId, tagTable.id))
+    .where(eq(transaction_to_tag_table.transactionId, transactionId));
 
   const existingTagNames = existingTags.map((t) => t.text);
 
@@ -263,7 +297,7 @@ export const updateTransactionTags = async (
 
   // Insert new tag associations
   if (newTagIds.length > 0) {
-    await client.insert(transactionToTagTable).values(
+    await client.insert(transaction_to_tag_table).values(
       newTagIds.map((tagId) => ({
         transactionId,
         tagId,
@@ -276,19 +310,19 @@ export const updateTransactionTags = async (
     const tagIdsToRemove = tagsToRemove.map((tag) => tag.id);
 
     await client
-      .delete(transactionToTagTable)
+      .delete(transaction_to_tag_table)
       .where(
         and(
-          eq(transactionToTagTable.transactionId, transactionId),
-          inArray(transactionToTagTable.tagId, tagIdsToRemove),
+          eq(transaction_to_tag_table.transactionId, transactionId),
+          inArray(transaction_to_tag_table.tagId, tagIdsToRemove),
         ),
       );
 
     // Delete tags if they are no longer used
     const unusedTags = await client
-      .select({ id: transactionToTagTable.tagId })
-      .from(transactionToTagTable)
-      .where(inArray(transactionToTagTable.tagId, tagIdsToRemove));
+      .select({ id: transaction_to_tag_table.tagId })
+      .from(transaction_to_tag_table)
+      .where(inArray(transaction_to_tag_table.tagId, tagIdsToRemove));
 
     const unusedTagIds = tagIdsToRemove.filter(
       (id) => !unusedTags.some((t) => t.id === id),

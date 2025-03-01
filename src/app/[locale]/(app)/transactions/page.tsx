@@ -5,13 +5,17 @@ import { type SearchParams } from "nuqs/server";
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton";
 import LinkInstitutionDrawerDialog from "~/features/account/components/link-institution-drawer-dialog";
 import { getAccounts_CACHED } from "~/features/account/server/cached-queries";
-import { getCategories_CACHED } from "~/features/category/server/cached-queries";
+import {
+  getCategories_CACHED,
+  getTags_CACHED,
+} from "~/features/category/server/cached-queries";
 import { getInstitutionsForCountry } from "~/features/open-banking/server/queries";
 import { TransactionsTable } from "~/features/transaction/components/tables/transactions-table";
 import {
   getTransactionAccountCounts_CACHED,
   getTransactionCategoryCounts_CACHED,
   getTransactions_CACHED,
+  getTransactionTagCounts_CACHED,
 } from "~/features/transaction/server/cached-queries";
 import { transactionsSearchParamsCache } from "~/features/transaction/utils/search-params";
 
@@ -32,8 +36,10 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
   const promises = Promise.all([
     getTransactions_CACHED({ ...search }, session.userId),
     getTransactionCategoryCounts_CACHED(session.userId),
+    getTransactionTagCounts_CACHED(session.userId),
     getTransactionAccountCounts_CACHED(session.userId),
     getCategories_CACHED(session.userId),
+    getTags_CACHED(session.userId),
     getAccounts_CACHED(session.userId),
   ]);
 

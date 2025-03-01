@@ -13,6 +13,7 @@ import {
   getTransactionAccountCounts_QUERY,
   getTransactionCategoryCounts_QUERY,
   getTransactions_QUERY,
+  getTransactionTagCounts_QUERY,
 } from "./queries";
 
 type TransactionType = DB_TransactionType & {
@@ -73,6 +74,22 @@ export const getTransactionCategoryCounts_CACHED = (userId: string) => {
   return unstable_cache(
     async () => {
       const data = await getTransactionCategoryCounts_QUERY(userId);
+      return data;
+    },
+    cacheKeys,
+    {
+      tags: cacheKeys,
+      revalidate: 3600,
+    },
+  )();
+};
+
+export const getTransactionTagCounts_CACHED = (userId: string) => {
+  const cacheKeys = ["transaction", `transaction_tag_count_${userId}`];
+
+  return unstable_cache(
+    async () => {
+      const data = await getTransactionTagCounts_QUERY(userId);
       return data;
     },
     cacheKeys,

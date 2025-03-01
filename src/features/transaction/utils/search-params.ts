@@ -18,6 +18,7 @@ export const transactionsParsers = {
   ]),
   description: parseAsString.withDefault(""),
   category: parseAsArrayOf(parseAsString).withDefault([]),
+  tags: parseAsArrayOf(parseAsString).withDefault([]),
   account: parseAsArrayOf(parseAsString).withDefault([]),
   from: parseAsString.withDefault(""),
   to: parseAsString.withDefault(""),
