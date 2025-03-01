@@ -1,7 +1,15 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import { type Column, type Table } from "@tanstack/react-table";
-import { ListFilterIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  ChartNoAxesColumnIcon,
+  FilterIcon,
+  LandmarkIcon,
+  ListFilterIcon,
+  ShapesIcon,
+  TagIcon,
+} from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -90,20 +98,49 @@ function MultiSelectFilter<TData, TValue>({
   );
 }
 
-function DateFilter({}: { setOpen: Dispatch<SetStateAction<boolean>> }) {
+function DateFilter<TData, TValue>({
+  column,
+}: {
+  column: Column<TData, TValue>;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+}) {
   return (
     <Calendar
       initialFocus
       mode="range"
       defaultMonth={new Date()}
       // selected={date}
-      onSelect={() => {
+      onSelect={(value) => {
         // TODO: aply filter
+        if (!value) return;
+        column.setFilterValue({
+          from: value.from?.toISOString() ?? "",
+          to: value.to?.toISOString() ?? "",
+        });
       }}
       numberOfMonths={1}
     />
   );
 }
+
+const getFilterIcon = (filterId: string) => {
+  switch (filterId) {
+    case "date":
+      return <CalendarIcon className="mr-1 size-3 text-muted-foreground" />;
+    case "amount":
+      return (
+        <ChartNoAxesColumnIcon className="mr-1 size-3 text-muted-foreground" />
+      );
+    case "category":
+      return <ShapesIcon className="mr-1 size-3 text-muted-foreground" />;
+    case "tags":
+      return <TagIcon className="mr-1 size-3 text-muted-foreground" />;
+    case "account":
+      return <LandmarkIcon className="mr-1 size-3 text-muted-foreground" />;
+    default:
+      return <FilterIcon />;
+  }
+};
 
 interface DataTableFiltersProps<TData> {
   table: Table<TData>;
@@ -115,6 +152,16 @@ export function DataTableFilters<TData>({
   filterableColumns,
 }: DataTableFiltersProps<TData>) {
   const [open, setOpen] = useState(false);
+
+  // const [filters, setFilters] = useQueryState(
+  //   "filters",
+  //   getFiltersStateParser(table.getRowModel().rows[0]?.original)
+  //     .withDefault([])
+  //     .withOptions({
+  //       clearOnDefault: true,
+  //       shallow: false,
+  //     }),
+  // );
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -144,7 +191,10 @@ export function DataTableFilters<TData>({
         {filterableColumns.map((filter) => {
           return (
             <DropdownMenuSub key={filter.id}>
-              <DropdownMenuSubTrigger>{filter.label}</DropdownMenuSubTrigger>
+              <DropdownMenuSubTrigger>
+                {getFilterIcon(filter.id)}
+                {filter.label}
+              </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent sideOffset={8} className="p-0">
                   {filter.type === "multi-select" && (
@@ -154,7 +204,12 @@ export function DataTableFilters<TData>({
                       setOpen={setOpen}
                     />
                   )}
-                  {filter.type === "date" && <DateFilter setOpen={setOpen} />}
+                  {filter.type === "date" && (
+                    <DateFilter
+                      column={table.getColumn(String(filter.id))!}
+                      setOpen={setOpen}
+                    />
+                  )}
                   {filter.type === "number" && <Component />}
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>

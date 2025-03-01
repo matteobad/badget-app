@@ -70,7 +70,7 @@ export function DataTableToolbar<TData>({
             (column) =>
               table.getColumn(column.id ? String(column.id) : "") && (
                 <div className="relative" key={String(column.id)}>
-                  <SearchIcon className="absolute top-2.5 left-4 size-4 text-muted-foreground" />
+                  <SearchIcon className="absolute top-2.5 left-3 size-4 text-muted-foreground" />
                   <Input
                     placeholder={column.placeholder}
                     value={
@@ -83,7 +83,7 @@ export function DataTableToolbar<TData>({
                         .getColumn(String(column.id))
                         ?.setFilterValue(event.target.value)
                     }
-                    className="h-9 w-40 pl-12 lg:w-64"
+                    className="h-9 w-40 pl-10 lg:w-64"
                   />
                 </div>
               ),
