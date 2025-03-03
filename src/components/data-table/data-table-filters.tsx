@@ -60,7 +60,7 @@ export function DataTableFilters<TData>({
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
         asChild
-        className="absolute left-40 -translate-x-8 lg:left-64"
+        className="absolute left-44 -translate-x-8 lg:left-64"
       >
         <Button
           variant="ghost"
@@ -79,7 +79,7 @@ export function DataTableFilters<TData>({
         align="end"
         sideOffset={10}
         alignOffset={-8}
-        className="w-40 lg:w-64"
+        className="w-44 lg:w-64"
       >
         {filterableColumns.map((filter) => {
           return (

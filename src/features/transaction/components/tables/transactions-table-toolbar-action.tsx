@@ -49,7 +49,7 @@ export function TransactionsTableToolbarActions({
         className="gap-2"
       >
         <ImportIcon className="size-4" aria-hidden="true" />
-        Importa
+        <span className="hidden lg:flex">Importa</span>
       </Button>
       <Button
         variant="default"
@@ -58,7 +58,7 @@ export function TransactionsTableToolbarActions({
         className="gap-2"
       >
         <PlusIcon className="size-4" aria-hidden="true" />
-        Aggiungi
+        <span className="hidden lg:flex">Aggiungi</span>
       </Button>
       {/**
        * Other actions can be added here.

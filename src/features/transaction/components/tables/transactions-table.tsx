@@ -82,7 +82,7 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
       id: "description",
       label: "Descrizione",
       type: "text",
-      placeholder: "Cerca transazione...",
+      placeholder: "Cerca o filtra",
     },
     {
       id: "date",
