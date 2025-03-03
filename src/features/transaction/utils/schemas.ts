@@ -39,6 +39,11 @@ export const TransactionUpdateSchema = createInsertSchema(transaction_table, {
     tags: z.array(TagInsertSchema).default([]),
   });
 
+export const TransactionUpdateBulkSchema = z.object({
+  ids: z.array(z.string()),
+  categoryId: z.string().optional(),
+});
+
 export const TransactionDeleteSchema = z.object({
   ids: z.array(z.string()),
 });

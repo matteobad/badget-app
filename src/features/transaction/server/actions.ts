@@ -2,6 +2,7 @@
 
 import { revalidateTag } from "next/cache";
 import { parse } from "@fast-csv/parse";
+import { and, eq } from "drizzle-orm";
 
 import type { CSVRow, CSVRowParsed } from "../utils/schemas";
 import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
@@ -21,6 +22,7 @@ import {
   TransactionDeleteSchema,
   TransactionImportSchema,
   TransactionInsertSchema,
+  TransactionUpdateBulkSchema,
   TransactionUpdateSchema,
 } from "../utils/schemas";
 import {
@@ -104,6 +106,37 @@ export const updateTransactionAction = authActionClient
     // Invalidate cache
     revalidateTag(`transaction_${ctx.userId}`);
     revalidateTag(`attachment_${ctx.userId}`);
+
+    // Return success message
+    return { message: "update-transaction-success-message" };
+  });
+
+export const updateTransactionBulkAction = authActionClient
+  .schema(TransactionUpdateBulkSchema)
+  .metadata({ actionName: "update-transaction-bulk" })
+  .action(async ({ parsedInput, ctx }) => {
+    // Prepare data
+    const userId = ctx.userId;
+    const { categoryId } = parsedInput;
+
+    // Mutate data
+    await withTransaction(async (tx) => {
+      // update transaction
+      for (const id of parsedInput.ids) {
+        await tx
+          .update(transaction_table)
+          .set({ categoryId })
+          .where(
+            and(
+              eq(transaction_table.id, id),
+              eq(transaction_table.userId, userId),
+            ),
+          );
+      }
+    });
+
+    // Invalidate cache
+    revalidateTag(`transaction_${ctx.userId}`);
 
     // Return success message
     return { message: "update-transaction-success-message" };

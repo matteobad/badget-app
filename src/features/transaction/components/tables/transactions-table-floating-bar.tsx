@@ -1,17 +1,28 @@
 import type { Table } from "@tanstack/react-table";
 import * as React from "react";
-import { Download, Loader, Trash2, X } from "lucide-react";
+import { SelectTrigger } from "@radix-ui/react-select";
+import { Download, Loader, ShapesIcon, Trash2, X } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
 
 import { Portal } from "~/components/custom/portal";
 import { Kbd } from "~/components/kbd";
 import { Button } from "~/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { type getCategories_CACHED } from "~/features/category/server/cached-queries";
 import { exportTableToCSV } from "~/utils/export";
+import { updateTransactionBulkAction } from "../../server/actions";
 import { type getTransactions_CACHED } from "../../server/cached-queries";
 
 export type TransactionType = Awaited<
@@ -20,14 +31,21 @@ export type TransactionType = Awaited<
 
 export function TransactionsTableFloatingBar({
   table,
+  categories,
 }: {
   table: Table<TransactionType>;
+  categories: Awaited<ReturnType<typeof getCategories_CACHED>>;
 }) {
   const rows = table.getFilteredSelectedRowModel().rows;
 
+  const { isExecuting, execute } = useAction(updateTransactionBulkAction, {
+    onSuccess: ({ data }) => toast.success(data?.message),
+    onError: ({ error }) => toast.error(error.serverError),
+  });
+
   const [isPending, startTransition] = React.useTransition();
   const [action, setAction] = React.useState<
-    "update-status" | "update-priority" | "export" | "delete"
+    "update-category" | "update-account" | "export" | "delete"
   >();
 
   // Clear selection on Escape key press
@@ -49,7 +67,7 @@ export function TransactionsTableFloatingBar({
           <div className="mx-auto flex w-fit items-center gap-2 rounded-md border bg-background p-2 text-foreground shadow">
             <div className="flex h-7 items-center rounded-md border border-dashed pr-1 pl-2.5">
               <span className="text-xs whitespace-nowrap">
-                {rows.length} selected
+                {rows.length} selezionate
               </span>
               <Separator orientation="vertical" className="mr-1 ml-2" />
               <Tooltip>
@@ -64,7 +82,7 @@ export function TransactionsTableFloatingBar({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="flex items-center border bg-accent px-2 py-1 font-semibold text-foreground dark:bg-zinc-900">
-                  <p className="mr-2">Clear selection</p>
+                  <p className="mr-2">Pulisci</p>
                   <Kbd abbrTitle="Escape" variant="outline">
                     Esc
                   </Kbd>
@@ -73,22 +91,11 @@ export function TransactionsTableFloatingBar({
             </div>
             <Separator orientation="vertical" className="hidden h-5 sm:block" />
             <div className="flex items-center gap-1.5">
-              {/* <Select
-                onValueChange={(value: DB_TransactionType["status"]) => {
-                  setAction("update-status");
-
-                  startTransition(async () => {
-                    const { error } = await updateTasks({
-                      ids: rows.map((row) => row.original.id),
-                      status: value,
-                    });
-
-                    if (error) {
-                      toast.error(error);
-                      return;
-                    }
-
-                    toast.success("Tasks updated");
+              <Select
+                onValueChange={(value) => {
+                  execute({
+                    ids: rows.map((row) => row.original.id),
+                    categoryId: value,
                   });
                 }}
               >
@@ -99,97 +106,37 @@ export function TransactionsTableFloatingBar({
                         variant="secondary"
                         size="icon"
                         className="size-7 border data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
-                        disabled={isPending}
+                        disabled={isExecuting}
                       >
-                        {isPending && action === "update-status" ? (
+                        {isExecuting ? (
                           <Loader
                             className="size-3.5 animate-spin"
                             aria-hidden="true"
                           />
                         ) : (
-                          <CheckCircle2
-                            className="size-3.5"
-                            aria-hidden="true"
-                          />
+                          <ShapesIcon className="size-3.5" aria-hidden="true" />
                         )}
                       </Button>
                     </TooltipTrigger>
                   </SelectTrigger>
                   <TooltipContent className="border bg-accent font-semibold text-foreground dark:bg-zinc-900">
-                    <p>Update status</p>
+                    <p>Cambia categoria</p>
                   </TooltipContent>
                 </Tooltip>
                 <SelectContent align="center">
                   <SelectGroup>
-                    {tasks.status.enumValues.map((status) => (
+                    {categories.map((category) => (
                       <SelectItem
-                        key={status}
-                        value={status}
+                        key={category.id}
+                        value={category.id}
                         className="capitalize"
                       >
-                        {status}
+                        {category.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <Select
-                onValueChange={(value: Task["priority"]) => {
-                  setAction("update-priority");
-
-                  startTransition(async () => {
-                    const { error } = await updateTasks({
-                      ids: rows.map((row) => row.original.id),
-                      priority: value,
-                    });
-
-                    if (error) {
-                      toast.error(error);
-                      return;
-                    }
-
-                    toast.success("Tasks updated");
-                  });
-                }}
-              >
-                <Tooltip>
-                  <SelectTrigger asChild>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="size-7 border data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
-                        disabled={isPending}
-                      >
-                        {isPending && action === "update-priority" ? (
-                          <Loader
-                            className="size-3.5 animate-spin"
-                            aria-hidden="true"
-                          />
-                        ) : (
-                          <ArrowUp className="size-3.5" aria-hidden="true" />
-                        )}
-                      </Button>
-                    </TooltipTrigger>
-                  </SelectTrigger>
-                  <TooltipContent className="border bg-accent font-semibold text-foreground dark:bg-zinc-900">
-                    <p>Update priority</p>
-                  </TooltipContent>
-                </Tooltip>
-                <SelectContent align="center">
-                  <SelectGroup>
-                    {tasks.priority.enumValues.map((priority) => (
-                      <SelectItem
-                        key={priority}
-                        value={priority}
-                        className="capitalize"
-                      >
-                        {priority}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select> */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button

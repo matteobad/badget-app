@@ -163,7 +163,9 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
     <>
       <DataTable
         table={table}
-        floatingBar={<TransactionsTableFloatingBar table={table} />}
+        floatingBar={
+          <TransactionsTableFloatingBar table={table} categories={categories} />
+        }
       >
         <DataTableToolbar table={table} filterFields={filterFields}>
           <TransactionsTableToolbarActions
