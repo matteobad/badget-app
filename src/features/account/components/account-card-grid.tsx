@@ -18,7 +18,7 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card } from "~/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,7 +30,6 @@ import { type getAccountsForUser_CACHED } from "~/features/account/server/cached
 import { CONNECTION_STATUS } from "~/server/db/schema/enum";
 import { formatAmount } from "~/utils/format";
 import { deleteConnectionAction } from "../server/actions";
-import AccountIcon from "./account-icon";
 import AccountList from "./account-list";
 import ConnectionStatusBadge from "./connection-status-badge";
 
@@ -50,89 +49,8 @@ export default function AccountCardGrid({ data }: { data: GroupedAccount[] }) {
     },
   });
 
-  const totalSavings = data.reduce((acc, value) => {
-    acc += value.accounts.reduce((tot, account) => {
-      tot += account.type === "savings" ? parseFloat(account.balance) : 0;
-      return tot;
-    }, 0);
-    return acc;
-  }, 0);
-  const totalChecking = data.reduce((acc, value) => {
-    acc += value.accounts.reduce((tot, account) => {
-      tot += account.type === "checking" ? parseFloat(account.balance) : 0;
-      return tot;
-    }, 0);
-    return acc;
-  }, 0);
-  const totalInvestment = data.reduce((acc, value) => {
-    acc += value.accounts.reduce((tot, account) => {
-      tot += account.type === "investment" ? parseFloat(account.balance) : 0;
-      return tot;
-    }, 0);
-    return acc;
-  }, 0);
-
   return (
     <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-4">
-      <Card className="shadow-none">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Totale</CardTitle>
-          <AccountIcon type="other" size="sm" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {formatAmount({
-              amount: totalChecking + totalSavings + totalInvestment,
-            })}
-          </div>
-          <p className="text-xs text-muted-foreground">4 conti totali</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Totale liquido</CardTitle>
-          <AccountIcon type="checking" size="sm" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {formatAmount({
-              amount: totalChecking,
-            })}
-          </div>
-          <p className="text-xs text-muted-foreground">2 conti correnti</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Totale risparmi</CardTitle>
-          <AccountIcon type="savings" size="sm" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {formatAmount({
-              amount: totalSavings,
-            })}
-          </div>
-          <p className="text-xs text-muted-foreground">2 conti deposito</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Totale investimenti
-          </CardTitle>
-          <AccountIcon type="investment" size="sm" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {formatAmount({
-              amount: totalInvestment,
-            })}
-          </div>
-          <p className="text-xs text-muted-foreground">Nessun investimento</p>
-        </CardContent>
-      </Card>
-
       {data.map((item) => {
         const total = item.accounts.reduce((acc, value) => {
           return (acc += parseFloat(value.balance));

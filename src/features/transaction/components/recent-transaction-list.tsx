@@ -2,6 +2,7 @@
 
 import type { dynamicIconImports } from "lucide-react/dynamic";
 import { use } from "react";
+import Link from "next/link";
 import { format } from "date-fns";
 import { ArrowDownLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
@@ -22,14 +23,7 @@ export default function RecentTransactionList({
   const [{ data }] = use(promises);
 
   return (
-    <Card
-      className={cn(
-        "col-span-2 row-span-2 mx-auto w-full max-w-xl",
-        "bg-white dark:bg-zinc-900/70",
-        "border border-zinc-100 dark:border-zinc-800",
-        "rounded-xl",
-      )}
-    >
+    <Card className={cn("col-span-2 row-span-2 mx-auto w-full max-w-xl")}>
       <div className="p-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
@@ -105,12 +99,17 @@ export default function RecentTransactionList({
 
       <div className="border-t border-zinc-100 p-2 dark:border-zinc-800">
         <Button
+          asChild
           size="sm"
           type="button"
-          className={cn("flex w-full items-center justify-center gap-2")}
+          className={cn(
+            "flex w-full items-center justify-center gap-2 text-xs font-medium",
+          )}
         >
-          <span>Vedi tutte le transazioni</span>
-          <ArrowRight className="h-3.5 w-3.5" />
+          <Link href={"/transactions"}>
+            <span>Vedi tutte le transazioni</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </Button>
       </div>
     </Card>
