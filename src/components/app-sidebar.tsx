@@ -18,8 +18,6 @@ import {
 } from "lucide-react";
 
 import { NavMain } from "~/components/nav-main";
-import { NavSecondary } from "~/components/nav-secondary";
-import { NavUser } from "~/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -120,10 +118,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavPillars items={data.navPillars} />
         <NavWealth items={data.navWealth} />
         <NavSettings settings={data.settings} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <span className="text-center text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Badget. All rights reserved.
+        </span>
       </SidebarFooter>
     </Sidebar>
   );
