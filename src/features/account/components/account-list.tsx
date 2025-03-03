@@ -5,7 +5,7 @@ import { useQueryStates } from "nuqs";
 import { cn } from "~/lib/utils";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { formatAmount } from "~/utils/format";
-import { connectionsParsers } from "../../open-banking/utils/search-params";
+import { connectionsParsers } from "../utils/search-params";
 import AccountIcon from "./account-icon";
 
 export default function AccountList({

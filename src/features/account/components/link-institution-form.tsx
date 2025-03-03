@@ -23,10 +23,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
-import { connectGocardlessAction } from "~/features/open-banking/server/actions";
-import { ConnectGocardlessSchema } from "~/features/open-banking/utils/schemas";
 import { cn } from "~/lib/utils";
 import { type DB_InstitutionType } from "~/server/db/schema/open-banking";
+import { connectGocardlessAction } from "../server/actions";
+import { ConnectGocardlessSchema } from "../utils/schemas";
 
 const countries = [
   {

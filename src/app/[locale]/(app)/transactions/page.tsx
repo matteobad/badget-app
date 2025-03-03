@@ -5,11 +5,11 @@ import { type SearchParams } from "nuqs/server";
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton";
 import LinkInstitutionDrawerDialog from "~/features/account/components/link-institution-drawer-dialog";
 import { getAccounts_CACHED } from "~/features/account/server/cached-queries";
+import { getInstitutionsForCountry } from "~/features/account/server/queries";
 import {
   getCategories_CACHED,
   getTags_CACHED,
 } from "~/features/category/server/cached-queries";
-import { getInstitutionsForCountry } from "~/features/open-banking/server/queries";
 import { TransactionsTable } from "~/features/transaction/components/tables/transactions-table";
 import {
   getTransactionAccountCounts_CACHED,

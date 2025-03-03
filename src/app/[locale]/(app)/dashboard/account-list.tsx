@@ -29,38 +29,45 @@ interface List01Props {
 const ACCOUNTS: AccountItem[] = [
   {
     id: "1",
-    title: "Main Savings",
+    title: "Liquidità",
     description: "Personal savings",
     balance: "$8,459.45",
-    type: "savings",
-  },
-  {
-    id: "2",
-    title: "Checking Account",
-    description: "Daily expenses",
-    balance: "$2,850.00",
     type: "checking",
   },
   {
+    id: "2",
+    title: "Fondo di emergenza",
+    description: "Daily expenses",
+    balance: "$2,850.00",
+    type: "savings",
+  },
+  {
     id: "3",
-    title: "Investment Portfolio",
+    title: "Obiettivi a breve",
     description: "Stock & ETFs",
     balance: "$15,230.80",
     type: "investment",
   },
   {
     id: "4",
-    title: "Credit Card",
+    title: "Investimenti",
     description: "Pending charges",
     balance: "$1,200.00",
-    type: "debt",
+    type: "investment",
   },
   {
     id: "5",
-    title: "Savings Account",
+    title: "Beni patrimoniali",
     description: "Emergency fund",
     balance: "$3,000.00",
     type: "savings",
+  },
+  {
+    id: "6",
+    title: "Passività",
+    description: "Emergency fund",
+    balance: "$3,000.00",
+    type: "debt",
   },
 ];
 
@@ -81,7 +88,7 @@ export default function AccountList({
       {/* Total Balance Section */}
       <div className="border-b border-zinc-100 p-4 dark:border-zinc-800">
         <p className="text-xs text-zinc-600 dark:text-zinc-400">
-          Total Balance
+          Patrimonio complessivo
         </p>
         <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
           {totalBalance}

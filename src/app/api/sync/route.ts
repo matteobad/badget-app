@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import { clerkClient } from "@clerk/nextjs/server";
 
 import { env } from "~/env";
-import { getBankAccountProvider } from "~/features/open-banking/server/providers";
-import { getConnectionsforUser } from "~/features/open-banking/server/queries";
+import { getBankAccountProvider } from "~/features/account/server/providers";
+import { getConnectionsforUser } from "~/features/account/server/queries";
 import { db } from "~/server/db";
 import { QUERIES } from "~/server/db/queries";
 import { account_table } from "~/server/db/schema/accounts";

@@ -5,7 +5,7 @@ import SyncConnection from "~/features/account/components/sync-connection";
 import {
   getConnectionByKey,
   getInstitutionById,
-} from "~/features/open-banking/server/queries";
+} from "~/features/account/server/queries";
 
 export default async function SyncPage({
   searchParams,
@@ -17,10 +17,10 @@ export default async function SyncPage({
 
   const params = await searchParams;
   const conn = await getConnectionByKey(params.ref);
-  if (!conn[0]) throw new Error("Connection not found");
-  if (conn[0].userId !== session.userId) throw new Error("User not authorized");
+  if (!conn) throw new Error("Connection not found");
+  if (conn.userId !== session.userId) throw new Error("User not authorized");
 
-  const institution = await getInstitutionById(conn[0].institutionId);
+  const institution = await getInstitutionById(conn.institutionId);
 
   return (
     <div className="mx-auto flex max-w-2xl flex-1 flex-col justify-center p-4 text-center">

@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { type getAccounts_CACHED } from "~/features/account/server/cached-queries";
 import { type getTags_CACHED } from "~/features/category/server/cached-queries";
 import { type getCategories_QUERY } from "~/features/category/server/queries";
-import ImportTransactionDrawerDialog from "~/features/import-csv/components/import-transaction-drawer-dialog";
+import ImportTransactionDrawerDialog from "~/features/transaction/components/import-transaction-drawer-dialog";
 import { useDataTable } from "~/hooks/use-data-table";
 import {
   type DataTableAction,

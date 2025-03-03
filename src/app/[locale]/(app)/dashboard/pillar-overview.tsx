@@ -1,8 +1,9 @@
 import type { LucideIcon } from "lucide-react";
 import React from "react";
+import Link from "next/link";
 import {
   AlertCircle,
-  ArrowRight,
+  ArrowRightIcon,
   Calendar,
   CheckCircle2,
   CreditCard,
@@ -11,6 +12,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 
+import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 
@@ -182,20 +184,21 @@ export default function PillarOverview({
             </div>
 
             <div className="mt-auto border-t border-zinc-100 dark:border-zinc-800">
-              <button
+              <Button
+                asChild
+                variant="ghost"
                 className={cn(
                   "flex w-full items-center justify-center gap-2",
+                  "rounded-t-none",
                   "px-3 py-2.5",
                   "text-xs font-medium",
-                  "text-zinc-600 dark:text-zinc-400",
-                  "hover:text-zinc-900 dark:hover:text-zinc-100",
-                  "hover:bg-zinc-100 dark:hover:bg-zinc-800/50",
-                  "transition-colors duration-200",
                 )}
               >
-                View Details
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
+                <Link href={"/banking"}>
+                  Vedi dettagli
+                  <ArrowRightIcon className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
             </div>
           </Card>
         ))}

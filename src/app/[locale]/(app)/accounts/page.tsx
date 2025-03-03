@@ -7,8 +7,8 @@ import CreateAccountDrawerSheet from "~/features/account/components/create-accou
 import LinkInstitutionDrawerDialog from "~/features/account/components/link-institution-drawer-dialog";
 import UpdateAccountDrawerSheet from "~/features/account/components/update-account-drawer-sheet";
 import { getAccountsForUser_CACHED } from "~/features/account/server/cached-queries";
+import { getInstitutionsForCountry } from "~/features/account/server/queries";
 import { accountsSearchParamsCache } from "~/features/account/utils/search-params";
-import { getInstitutionsForCountry } from "~/features/open-banking/server/queries";
 import { AccountsEmptyPlaceholder } from "../../../../features/account/components/accounts-empty-placeholder";
 
 type BankingAccountsPageProps = {

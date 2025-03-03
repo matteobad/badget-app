@@ -1,8 +1,15 @@
 "server-only";
 
-import { eq, getTableColumns, isNull, or } from "drizzle-orm";
+import {
+  arrayContains,
+  desc,
+  eq,
+  getTableColumns,
+  isNull,
+  or,
+} from "drizzle-orm";
 
-import { getBankAccountProvider } from "~/features/open-banking/server/providers";
+import { getBankAccountProvider } from "~/features/account/server/providers";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { category_table } from "~/server/db/schema/categories";
@@ -14,45 +21,28 @@ import { transaction_table } from "~/server/db/schema/transactions";
 import { buildConflictUpdateColumns } from "~/server/db/utils";
 import { categorizeTransactions } from "~/utils/categorization";
 
-export const getAccountsForUser = (userId: string) => {
-  return db
-    .select({
-      ...getTableColumns(account_table),
-      connection: connection_table,
-      institution: institution_table,
-    })
-    .from(account_table)
-    .leftJoin(
-      connection_table,
-      eq(connection_table.id, account_table.connectionId),
-    )
-    .leftJoin(
-      institution_table,
-      eq(institution_table.id, account_table.institutionId),
-    )
-    .where(eq(account_table.userId, userId));
-};
-
-export const getAccounts_QUERY = (userId: string) => {
-  return db
-    .select({
-      ...getTableColumns(account_table),
-      institution: institution_table,
-    })
-    .from(account_table)
-    .leftJoin(
-      institution_table,
-      eq(institution_table.id, account_table.institutionId),
-    )
-    .where(eq(account_table.userId, userId));
-};
-
-export const getCategoriesForUser_QUERY = (userId: string) => {
+// institutions
+export const getInstitutionsForCountry = (countryCode: string) => {
   return db
     .select()
-    .from(category_table)
-    .where(or(eq(category_table.userId, userId), isNull(category_table.userId)))
-    .orderBy(category_table.name);
+    .from(institution_table)
+    .where(arrayContains(institution_table.countries, [countryCode]))
+    .orderBy(desc(institution_table.popularity));
+};
+
+export const getInstitutionById = (institutionId: string) => {
+  return db
+    .select()
+    .from(institution_table)
+    .where(eq(institution_table.id, institutionId));
+};
+
+// connections
+export const getConnectionsforUser = (userId: string) => {
+  return db
+    .select()
+    .from(connection_table)
+    .where(eq(connection_table.userId, userId));
 };
 
 export const getConnectionByKey = async (key: string) => {
@@ -120,4 +110,46 @@ export const syncUserConnection_MUTATION = async (
         });
     }
   });
+};
+
+// accounts
+export const getAccountsForUser = (userId: string) => {
+  return db
+    .select({
+      ...getTableColumns(account_table),
+      connection: connection_table,
+      institution: institution_table,
+    })
+    .from(account_table)
+    .leftJoin(
+      connection_table,
+      eq(connection_table.id, account_table.connectionId),
+    )
+    .leftJoin(
+      institution_table,
+      eq(institution_table.id, account_table.institutionId),
+    )
+    .where(eq(account_table.userId, userId));
+};
+
+export const getAccounts_QUERY = (userId: string) => {
+  return db
+    .select({
+      ...getTableColumns(account_table),
+      institution: institution_table,
+    })
+    .from(account_table)
+    .leftJoin(
+      institution_table,
+      eq(institution_table.id, account_table.institutionId),
+    )
+    .where(eq(account_table.userId, userId));
+};
+
+export const getCategoriesForUser_QUERY = (userId: string) => {
+  return db
+    .select()
+    .from(category_table)
+    .where(or(eq(category_table.userId, userId), isNull(category_table.userId)))
+    .orderBy(category_table.name);
 };

@@ -1,5 +1,7 @@
 "use client";
 
+import { useQueryStates } from "nuqs";
+
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -20,6 +22,7 @@ import {
 import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { type DB_InstitutionType } from "~/server/db/schema/open-banking";
+import { actionsParsers } from "~/utils/search-params";
 import LinkInstitutionForm from "./link-institution-form";
 
 interface LinkInstitutionDrawerDialogProps
@@ -29,9 +32,16 @@ interface LinkInstitutionDrawerDialogProps
 
 export default function LinkInstitutionDrawerDialog({
   institutions,
-  ...props
 }: LinkInstitutionDrawerDialogProps) {
   const isMobile = useIsMobile();
+
+  const [{ action }, setParams] = useQueryStates(actionsParsers);
+
+  const open = action === "link-institution";
+
+  const handleClose = () => {
+    void setParams({ action: null });
+  };
 
   const PanelContent = () => (
     <LinkInstitutionForm
@@ -42,7 +52,7 @@ export default function LinkInstitutionDrawerDialog({
 
   if (isMobile) {
     return (
-      <Drawer {...props}>
+      <Drawer open={open} onOpenChange={handleClose}>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Collega il tuo conto bancario</DrawerTitle>
@@ -65,7 +75,7 @@ export default function LinkInstitutionDrawerDialog({
   }
 
   return (
-    <Dialog {...props}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="p-4">
         <div className="flex h-full flex-col">
           <DialogHeader className="mb-6">
