@@ -17,7 +17,7 @@ import {
 } from "./queries";
 
 type TransactionType = DB_TransactionType & {
-  account: DB_AccountType;
+  account: DB_AccountType | null;
   category: DB_CategoryType | null;
   tags: DB_TagType[];
 };

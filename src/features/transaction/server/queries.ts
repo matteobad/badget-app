@@ -13,6 +13,7 @@ import {
   inArray,
   lte,
 } from "drizzle-orm";
+import { type PgSelect } from "drizzle-orm/pg-core";
 
 import type { DBClient } from "~/server/db";
 import type {
@@ -20,10 +21,17 @@ import type {
   DB_TransactionInsertType,
 } from "~/server/db/schema/transactions";
 import { db } from "~/server/db";
-import { account_table as accountTable } from "~/server/db/schema/accounts";
-import { category_table as categoryTable } from "~/server/db/schema/categories";
+import {
+  account_table,
+  account_table as accountTable,
+} from "~/server/db/schema/accounts";
+import {
+  category_table,
+  category_table as categoryTable,
+} from "~/server/db/schema/categories";
 import {
   attachment_table,
+  tag_table,
   tag_table as tagTable,
   transaction_table,
   transaction_to_tag_table,
@@ -42,24 +50,22 @@ export async function getTransactions_QUERY(
     const maxAmount = input.max ? input.max : undefined;
 
     const where = and(
-      input.description
-        ? ilike(transaction_table.description, `%${input.description}%`)
-        : undefined,
-      input.category.length > 0
-        ? inArray(transaction_table.categoryId, input.category)
-        : undefined,
-      // TODO: filter by tags
-      // input.tags.length > 0
-      //   ? inArray(transaction_to_tag_table.tagId, input.tags)
-      //   : undefined,
-      input.account.length > 0
-        ? inArray(transaction_table.accountId, input.account)
-        : undefined,
-      fromDate ? gte(transaction_table.date, fromDate) : undefined,
-      toDate ? lte(transaction_table.date, toDate) : undefined,
-      minAmount ? gte(transaction_table.amount, minAmount) : undefined,
-      maxAmount ? lte(transaction_table.amount, maxAmount) : undefined,
-      eq(transaction_table.userId, userId),
+      ...[
+        input.description
+          ? ilike(transaction_table.description, `%${input.description}%`)
+          : undefined,
+        input.category.length > 0
+          ? inArray(transaction_table.categoryId, input.category)
+          : undefined,
+        input.account.length > 0
+          ? inArray(transaction_table.accountId, input.account)
+          : undefined,
+        fromDate ? gte(transaction_table.date, fromDate) : undefined,
+        toDate ? lte(transaction_table.date, toDate) : undefined,
+        minAmount ? gte(transaction_table.amount, minAmount) : undefined,
+        maxAmount ? lte(transaction_table.amount, maxAmount) : undefined,
+        eq(transaction_table.userId, userId),
+      ].filter(Boolean),
     );
 
     const orderBy =
@@ -72,44 +78,41 @@ export async function getTransactions_QUERY(
         : [desc(transaction_table.date)];
 
     const { data, total } = await db.transaction(async (tx) => {
-      const data = await tx
+      const dataQuery = tx
         .select({
           ...getTableColumns(transaction_table),
           account: accountTable,
           category: categoryTable,
-          tags: tagTable,
+          tags: tag_table,
         })
         .from(transaction_table)
-        .innerJoin(
-          accountTable,
-          eq(transaction_table.accountId, accountTable.id),
+        .leftJoin(
+          category_table,
+          eq(transaction_table.categoryId, category_table.id),
         )
         .leftJoin(
-          categoryTable,
-          eq(transaction_table.categoryId, categoryTable.id),
+          account_table,
+          eq(transaction_table.accountId, account_table.id),
         )
-        .leftJoin(
-          transaction_to_tag_table,
-          eq(transaction_table.id, transaction_to_tag_table.transactionId),
-        ) // Join transaction_tags
-        .leftJoin(tagTable, eq(transaction_to_tag_table.tagId, tagTable.id)) // Join with tags
         .limit(input.perPage)
         .offset(offset)
         .where(where)
-        .orderBy(...orderBy);
+        .orderBy(...orderBy)
+        .$dynamic();
 
-      const total = await tx
+      const totalQuery = tx
         .select({
           count: count(),
         })
         .from(transaction_table)
         .where(where)
-        .execute()
-        .then((res) => res[0]?.count ?? 0);
+        .$dynamic();
 
       return {
-        data,
-        total,
+        data: await withTags(dataQuery, input.tags),
+        total: await withTags(totalQuery, input.tags).then(
+          (res) => res[0]?.count ?? 0,
+        ),
       };
     });
 
@@ -360,4 +363,18 @@ export const deleteTransactionAttachment = (
     .where(
       and(eq(attachment_table.id, id), eq(attachment_table.userId, userId)),
     );
+};
+
+const withTags = <T extends PgSelect>(qb: T, tags: string[]) => {
+  return qb
+    .leftJoin(
+      transaction_to_tag_table,
+      and(
+        eq(transaction_table.id, transaction_to_tag_table.transactionId),
+        tags.length > 0
+          ? inArray(transaction_to_tag_table.tagId, tags)
+          : undefined,
+      ),
+    )
+    .leftJoin(tag_table, eq(transaction_to_tag_table.tagId, tag_table.id));
 };
