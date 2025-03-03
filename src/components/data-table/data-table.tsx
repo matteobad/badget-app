@@ -1,6 +1,7 @@
 import type { Table as TanstackTable } from "@tanstack/react-table";
 import type * as React from "react";
 import { flexRender } from "@tanstack/react-table";
+import { ListXIcon } from "lucide-react";
 
 import { DataTablePagination } from "~/components/data-table/data-table-pagination";
 import {
@@ -13,6 +14,7 @@ import {
 } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 import { getCommonPinningStyles } from "~/utils/data-table";
+import { Button } from "../ui/button";
 
 interface DataTableProps<TData> extends React.HTMLAttributes<HTMLDivElement> {
   /**
@@ -95,9 +97,25 @@ export function DataTable<TData>({
               <TableRow>
                 <TableCell
                   colSpan={table.getAllColumns().length}
-                  className="h-24 text-center"
+                  className="text-center"
                 >
-                  No results.
+                  <div className="flex flex-col items-center justify-center gap-6 p-4">
+                    <ListXIcon className="size-6" />
+                    <div className="flex flex-col gap-2">
+                      <h2 className="text-lg">Nessun risultato.</h2>
+                      <span className="text-muted-foreground">
+                        {"Prova un'altra ricerca o aggiusta i filtri"}
+                      </span>
+                    </div>
+                    <Button
+                      aria-label="Reset filters"
+                      variant="outline"
+                      className="px-2 lg:px-3"
+                      onClick={() => table.resetColumnFilters()}
+                    >
+                      Pulisci filtri
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
