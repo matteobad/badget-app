@@ -13,7 +13,6 @@ import {
   inArray,
   lte,
 } from "drizzle-orm";
-import { type PgSelect } from "drizzle-orm/pg-core";
 
 import type { DBClient } from "~/server/db";
 import type {
@@ -21,14 +20,8 @@ import type {
   DB_TransactionInsertType,
 } from "~/server/db/schema/transactions";
 import { db } from "~/server/db";
-import {
-  account_table,
-  account_table as accountTable,
-} from "~/server/db/schema/accounts";
-import {
-  category_table,
-  category_table as categoryTable,
-} from "~/server/db/schema/categories";
+import { account_table } from "~/server/db/schema/accounts";
+import { category_table } from "~/server/db/schema/categories";
 import {
   attachment_table,
   tag_table,
@@ -60,6 +53,9 @@ export async function getTransactions_QUERY(
         input.account.length > 0
           ? inArray(transaction_table.accountId, input.account)
           : undefined,
+        input.tags.length > 0
+          ? inArray(transaction_to_tag_table.tagId, input.tags)
+          : undefined,
         fromDate ? gte(transaction_table.date, fromDate) : undefined,
         toDate ? lte(transaction_table.date, toDate) : undefined,
         minAmount ? gte(transaction_table.amount, minAmount) : undefined,
@@ -78,11 +74,11 @@ export async function getTransactions_QUERY(
         : [desc(transaction_table.date)];
 
     const { data, total } = await db.transaction(async (tx) => {
-      const dataQuery = tx
+      const data = await tx
         .select({
           ...getTableColumns(transaction_table),
-          account: accountTable,
-          category: categoryTable,
+          account: account_table,
+          category: category_table,
           tags: tag_table,
         })
         .from(transaction_table)
@@ -94,25 +90,43 @@ export async function getTransactions_QUERY(
           account_table,
           eq(transaction_table.accountId, account_table.id),
         )
+        .leftJoin(
+          transaction_to_tag_table,
+          and(
+            eq(transaction_table.id, transaction_to_tag_table.transactionId),
+            input.tags.length > 0
+              ? inArray(transaction_to_tag_table.tagId, input.tags)
+              : undefined,
+          ),
+        )
+        .leftJoin(tag_table, eq(transaction_to_tag_table.tagId, tag_table.id))
         .limit(input.perPage)
         .offset(offset)
         .where(where)
-        .orderBy(...orderBy)
-        .$dynamic();
+        .orderBy(...orderBy);
 
-      const totalQuery = tx
+      const total = await tx
         .select({
           count: count(),
         })
         .from(transaction_table)
+        .leftJoin(
+          transaction_to_tag_table,
+          and(
+            eq(transaction_table.id, transaction_to_tag_table.transactionId),
+            input.tags.length > 0
+              ? inArray(transaction_to_tag_table.tagId, input.tags)
+              : undefined,
+          ),
+        )
+        .leftJoin(tag_table, eq(transaction_to_tag_table.tagId, tag_table.id))
         .where(where)
-        .$dynamic();
+        .execute()
+        .then((res) => res[0]?.count ?? 0);
 
       return {
-        data: await withTags(dataQuery, input.tags),
-        total: await withTags(totalQuery, input.tags).then(
-          (res) => res[0]?.count ?? 0,
-        ),
+        data,
+        total,
       };
     });
 
@@ -363,18 +377,4 @@ export const deleteTransactionAttachment = (
     .where(
       and(eq(attachment_table.id, id), eq(attachment_table.userId, userId)),
     );
-};
-
-const withTags = <T extends PgSelect>(qb: T, tags: string[]) => {
-  return qb
-    .leftJoin(
-      transaction_to_tag_table,
-      and(
-        eq(transaction_table.id, transaction_to_tag_table.transactionId),
-        tags.length > 0
-          ? inArray(transaction_to_tag_table.tagId, tags)
-          : undefined,
-      ),
-    )
-    .leftJoin(tag_table, eq(transaction_to_tag_table.tagId, tag_table.id));
 };
