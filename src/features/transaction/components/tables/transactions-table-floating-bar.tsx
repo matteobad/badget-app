@@ -1,7 +1,9 @@
 import type { Table } from "@tanstack/react-table";
+import type { dynamicIconImports } from "lucide-react/dynamic";
 import * as React from "react";
 import { SelectTrigger } from "@radix-ui/react-select";
 import { Download, Loader, ShapesIcon, Trash2, X } from "lucide-react";
+import { DynamicIcon } from "lucide-react/dynamic";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -131,7 +133,15 @@ export function TransactionsTableFloatingBar({
                         value={category.id}
                         className="capitalize"
                       >
-                        {category.name}
+                        <div className="flex items-center gap-2">
+                          <DynamicIcon
+                            size={16}
+                            name={
+                              category.icon as keyof typeof dynamicIconImports
+                            }
+                          />
+                          {category.name}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectGroup>
