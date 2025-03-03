@@ -2,13 +2,13 @@
 
 import type { Table } from "@tanstack/react-table";
 import * as React from "react";
-import { SearchIcon, X } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 
 import { DataTableViewOptions } from "~/components/data-table/data-table-view-options";
-import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 import { type DataTableAdvancedFilterField } from "~/utils/data-table";
+import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { DataTableFilters } from "./data-table-filters";
 
 interface DataTableToolbarProps<TData>
@@ -46,8 +46,6 @@ export function DataTableToolbar<TData>({
   className,
   ...props
 }: DataTableToolbarProps<TData>) {
-  const isFiltered = table.getState().columnFilters.length > 0;
-
   // Memoize computation of searchableColumns and filterableColumns
   const { searchableColumns, filterableColumns } = React.useMemo(() => {
     return {
@@ -94,7 +92,7 @@ export function DataTableToolbar<TData>({
               table={table}
               filterableColumns={filterableColumns}
             />
-            {/* {filterableColumns.map(
+            {filterableColumns.map(
               (column) =>
                 table.getColumn(column.id ? String(column.id) : "") && (
                   <DataTableFacetedFilter
@@ -104,19 +102,8 @@ export function DataTableToolbar<TData>({
                     options={column.options ?? []}
                   />
                 ),
-            )} */}
+            )}
           </>
-        )}
-        {isFiltered && (
-          <Button
-            aria-label="Reset filters"
-            variant="ghost"
-            className="h-8 px-2 lg:px-3"
-            onClick={() => table.resetColumnFilters()}
-          >
-            Reset
-            <X className="ml-2 size-4" aria-hidden="true" />
-          </Button>
         )}
       </div>
       <div className="flex items-center gap-2">
