@@ -135,3 +135,12 @@ export const ToggleAccountSchema = z.object({
 export type ToggleAccountType = z.infer<typeof ToggleAccountSchema> & {
   userId: string;
 };
+
+// Define the feedback schema
+export const FeedbackSchema = z.object({
+  message: z.string().min(3, "Feedback must be at least 3 characters long"),
+  category: z.enum(["bug", "feature", "other"]).default("other"),
+});
+
+// Type for the feedback data
+export type FeedbackType = z.infer<typeof FeedbackSchema>;

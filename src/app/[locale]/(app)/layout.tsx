@@ -1,6 +1,7 @@
 import { type PropsWithChildren } from "react";
 
 import { AppSidebar } from "~/components/app-sidebar";
+import { FeedbackDialog } from "~/components/feedback-dialog";
 import { DynamicBreadcrumb } from "~/components/layouts/dynamic-breadcrumb";
 import { NavUser } from "~/components/nav-user";
 import { Separator } from "~/components/ui/separator";
@@ -25,6 +26,7 @@ export default function AppLayout(props: PropsWithChildren) {
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
               <DynamicBreadcrumb />
+              <FeedbackDialog />
               <NavUser />
             </div>
           </header>
