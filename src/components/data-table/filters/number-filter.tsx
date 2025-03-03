@@ -1,0 +1,224 @@
+"use client";
+
+import { useId, useMemo } from "react";
+import { parseAsString, useQueryStates } from "nuqs";
+
+import { CurrencyInput } from "~/components/custom/currency-input";
+import { Button } from "~/components/ui/button";
+import { Label } from "~/components/ui/label";
+import { Slider } from "~/components/ui/slider";
+import { useSliderWithInput } from "~/hooks/use-slider-with-input";
+import { type DataTableAdvancedFilterField } from "~/utils/data-table";
+
+interface NumberFilterProps<TData> {
+  filter: DataTableAdvancedFilterField<TData>;
+  /**
+   * The selected amount range.
+   * @default undefined
+   * @type DateRange
+   * @example { from: new Date(), to: new Date() }
+   */
+  defaultAmountRange?: { min: number; max: number };
+
+  /**
+   * The placeholder text of the calendar trigger button.
+   * @default "Pick a date"
+   * @type string | undefined
+   */
+  placeholder?: string;
+
+  /**
+   * Controls whether query states are updated client-side only (default: true).
+   * Setting to `false` triggers a network request to update the querystring.
+   * @default true
+   */
+  shallow?: boolean;
+}
+
+export default function NumberFilter<TData>({
+  filter,
+  defaultAmountRange,
+  shallow = false,
+}: NumberFilterProps<TData>) {
+  const [amountParams, setAmountParams] = useQueryStates(
+    {
+      min: parseAsString.withDefault(""),
+      max: parseAsString.withDefault(""),
+    },
+    {
+      clearOnDefault: true,
+      shallow,
+    },
+  );
+
+  const amount = useMemo(() => {
+    return {
+      min: amountParams.min ?? defaultAmountRange?.min,
+      max: amountParams.max ?? defaultAmountRange?.max,
+    };
+  }, [amountParams, defaultAmountRange]);
+
+  const id = useId();
+
+  // Define the number of ticks
+  const tick_count = 40;
+  // Find the min and max values across all items
+  const items = filter.values!;
+  const minValue = Math.min(...items.map((item) => parseFloat(item)));
+  const maxValue = Math.max(...items.map((item) => parseFloat(item)));
+
+  const {
+    sliderValue,
+    inputValues,
+    validateAndUpdateValue,
+    handleInputChange,
+    handleSliderChange,
+  } = useSliderWithInput({
+    minValue,
+    maxValue,
+    initialValue: [parseFloat(amount.min), parseFloat(amount.max)],
+  }); // set initialValue: [minValue, maxValue] to show all items by default
+
+  // Calculate the price step based on the min and max prices
+  const priceStep = (maxValue - minValue) / tick_count;
+
+  // Calculate item counts for each price range
+  const itemCounts = Array(tick_count)
+    .fill(0)
+    .map((_, tick) => {
+      const rangeMin = minValue + tick * priceStep;
+      const rangeMax = minValue + (tick + 1) * priceStep;
+      return items.filter(
+        (item) => parseFloat(item) >= rangeMin && parseFloat(item) < rangeMax,
+      ).length;
+    });
+
+  // Find maximum count for scaling
+  const maxCount = Math.max(...itemCounts);
+
+  const handleSliderValueChange = (values: number[]) => {
+    handleSliderChange(values);
+  };
+
+  // Function to count items in the selected range
+  const countItemsInRange = (min: number, max: number) => {
+    return items.filter(
+      (item) => parseFloat(item) >= min && parseFloat(item) <= max,
+    ).length;
+  };
+
+  const isBarInSelectedRange = (
+    index: number,
+    minValue: number,
+    priceStep: number,
+    sliderValue: number[],
+  ) => {
+    const rangeMin = minValue + index * priceStep;
+    const rangeMax = minValue + (index + 1) * priceStep;
+    return (
+      countItemsInRange(sliderValue[0]!, sliderValue[1]!) > 0 &&
+      rangeMin <= sliderValue[1]! &&
+      rangeMax >= sliderValue[0]!
+    );
+  };
+
+  return (
+    <div className="flex w-64 flex-col gap-2 p-2">
+      <Label className="sr-only">Price slider</Label>
+      <div>
+        {/* Histogram bars */}
+        <div className="flex h-12 w-full items-end px-3" aria-hidden="true">
+          {itemCounts.map((count, i) => (
+            <div
+              key={i}
+              className="flex flex-1 justify-center"
+              style={{
+                height: `${(count / maxCount) * 100}%`,
+              }}
+            >
+              <span
+                data-selected={isBarInSelectedRange(
+                  i,
+                  minValue,
+                  priceStep,
+                  sliderValue,
+                )}
+                className="h-full w-full bg-primary/20"
+              ></span>
+            </div>
+          ))}
+        </div>
+        <Slider
+          value={sliderValue}
+          onValueChange={handleSliderValueChange}
+          min={minValue}
+          max={maxValue}
+          aria-label="Price range"
+        />
+      </div>
+
+      {/* Inputs */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="*:not-first:mt-1">
+          <Label htmlFor={`${id}-min`} className="text-xs">
+            Importo minimo
+          </Label>
+          <div className="relative">
+            <CurrencyInput
+              id={`${id}-min`}
+              value={inputValues[0]}
+              onChange={(e) => handleInputChange(e, 0)}
+              onBlur={() => validateAndUpdateValue(inputValues[0]!, 0)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  validateAndUpdateValue(inputValues[0]!, 0);
+                }
+              }}
+            />
+
+            <span className="pointer-events-none absolute inset-y-0 end-3 flex items-center justify-center ps-3 text-sm text-muted-foreground peer-disabled:opacity-50">
+              €
+            </span>
+          </div>
+        </div>
+        <div className="*:not-first:mt-1">
+          <Label htmlFor={`${id}-max`} className="text-xs">
+            Importo massimo
+          </Label>
+          <div className="relative">
+            <CurrencyInput
+              id={`${id}-max`}
+              value={inputValues[1]}
+              onChange={(e) => handleInputChange(e, 1)}
+              onBlur={() => validateAndUpdateValue(inputValues[1]!, 1)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  validateAndUpdateValue(inputValues[1]!, 1);
+                }
+              }}
+            />
+
+            <span className="pointer-events-none absolute inset-y-0 end-3 flex items-center justify-center ps-3 text-sm text-muted-foreground peer-disabled:opacity-50">
+              €
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Button */}
+      <Button
+        className="w-full"
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          void setAmountParams({
+            min: inputValues[0],
+            max: inputValues[1],
+          });
+        }}
+      >
+        Mostra {countItemsInRange(sliderValue[0]!, sliderValue[1]!)} transazioni
+      </Button>
+    </div>
+  );
+}

@@ -1,7 +1,5 @@
 "use client";
 
-import { useQueryStates } from "nuqs";
-
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -19,22 +17,21 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "~/components/ui/drawer";
+import { type Sheet } from "~/components/ui/sheet";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
-import { type DB_CategoryType } from "~/server/db/schema/categories";
-import { actionsParsers } from "~/utils/search-params";
 import ImportTransactionForm from "./import-transaction-form";
+
+interface ImportTransactionDrawerDialogProps
+  extends React.ComponentPropsWithRef<typeof Sheet> {
+  accounts: DB_AccountType[];
+}
 
 export default function ImportTransactionDrawerDialog({
   accounts,
-}: {
-  accounts: DB_AccountType[];
-  categories: DB_CategoryType[];
-}) {
-  const [{ action }, setParams] = useQueryStates(actionsParsers);
-  const open = action === "import-transaction";
-
+  ...props
+}: ImportTransactionDrawerDialogProps) {
   const isMobile = useIsMobile();
 
   const DrawerDialogContent = () => (
@@ -46,7 +43,7 @@ export default function ImportTransactionDrawerDialog({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={() => setParams({ action: null })}>
+      <Drawer {...props}>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Importazione rapida da CSV</DrawerTitle>
@@ -68,7 +65,7 @@ export default function ImportTransactionDrawerDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={() => setParams({ action: null })}>
+    <Dialog {...props}>
       <DialogContent className="p-4">
         <div className="flex h-full flex-col">
           <DialogHeader className="mb-6">

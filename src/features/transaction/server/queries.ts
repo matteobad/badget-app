@@ -1,6 +1,18 @@
 "server-only";
 
-import { and, desc, eq, getTableColumns, inArray } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  getTableColumns,
+  gt,
+  gte,
+  ilike,
+  inArray,
+  lte,
+} from "drizzle-orm";
 
 import type { DBClient } from "~/server/db";
 import type {
@@ -8,41 +20,205 @@ import type {
   DB_TransactionInsertType,
 } from "~/server/db/schema/transactions";
 import { db } from "~/server/db";
-import { account_table as accountTable } from "~/server/db/schema/accounts";
-import { category_table as categoryTable } from "~/server/db/schema/categories";
+import { account_table } from "~/server/db/schema/accounts";
+import { category_table } from "~/server/db/schema/categories";
 import {
   attachment_table,
+  tag_table,
   tag_table as tagTable,
   transaction_table,
-  transaction_to_tag_table as transactionToTagTable,
+  transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
+import { type transactionsSearchParamsCache } from "../utils/search-params";
 
-export const getTransactionForUser = (userId: string) => {
-  return db
-    .select({
-      ...getTableColumns(transaction_table),
-      account: accountTable,
-      category: categoryTable,
-      tags: tagTable,
-    })
-    .from(transaction_table)
-    .innerJoin(accountTable, eq(transaction_table.accountId, accountTable.id))
-    .leftJoin(categoryTable, eq(transaction_table.categoryId, categoryTable.id))
-    .leftJoin(
-      transactionToTagTable,
-      eq(transaction_table.id, transactionToTagTable.transactionId),
-    ) // Join transaction_tags
-    .leftJoin(tagTable, eq(transactionToTagTable.tagId, tagTable.id)) // Join with tags
-    .where(eq(transaction_table.userId, userId))
-    .orderBy(desc(transaction_table.date), desc(transaction_table.createdAt));
-};
+export async function getTransactions_QUERY(
+  input: Awaited<ReturnType<typeof transactionsSearchParamsCache.parse>>,
+  userId: string,
+) {
+  try {
+    const offset = (input.page - 1) * input.perPage;
+    const fromDate = input.from ? new Date(input.from) : undefined;
+    const toDate = input.to ? new Date(input.to) : undefined;
+    const minAmount = input.min ? input.min : undefined;
+    const maxAmount = input.max ? input.max : undefined;
 
-export const getTransactionById = (transactionId: string) => {
-  return db
-    .select()
-    .from(transaction_table)
-    .where(eq(transaction_table.id, transactionId));
-};
+    const where = and(
+      ...[
+        input.description
+          ? ilike(transaction_table.description, `%${input.description}%`)
+          : undefined,
+        input.category.length > 0
+          ? inArray(transaction_table.categoryId, input.category)
+          : undefined,
+        input.account.length > 0
+          ? inArray(transaction_table.accountId, input.account)
+          : undefined,
+        input.tags.length > 0
+          ? inArray(transaction_to_tag_table.tagId, input.tags)
+          : undefined,
+        fromDate ? gte(transaction_table.date, fromDate) : undefined,
+        toDate ? lte(transaction_table.date, toDate) : undefined,
+        minAmount ? gte(transaction_table.amount, minAmount) : undefined,
+        maxAmount ? lte(transaction_table.amount, maxAmount) : undefined,
+        eq(transaction_table.userId, userId),
+      ].filter(Boolean),
+    );
+
+    const orderBy =
+      input.sort.length > 0
+        ? input.sort.map((item) =>
+            item.desc
+              ? desc(transaction_table[item.id])
+              : asc(transaction_table[item.id]),
+          )
+        : [desc(transaction_table.date)];
+
+    const { data, total } = await db.transaction(async (tx) => {
+      const data = await tx
+        .select({
+          ...getTableColumns(transaction_table),
+          account: account_table,
+          category: category_table,
+          tags: tag_table,
+        })
+        .from(transaction_table)
+        .leftJoin(
+          category_table,
+          eq(transaction_table.categoryId, category_table.id),
+        )
+        .leftJoin(
+          account_table,
+          eq(transaction_table.accountId, account_table.id),
+        )
+        .leftJoin(
+          transaction_to_tag_table,
+          and(
+            eq(transaction_table.id, transaction_to_tag_table.transactionId),
+            input.tags.length > 0
+              ? inArray(transaction_to_tag_table.tagId, input.tags)
+              : undefined,
+          ),
+        )
+        .leftJoin(tag_table, eq(transaction_to_tag_table.tagId, tag_table.id))
+        .limit(input.perPage)
+        .offset(offset)
+        .where(where)
+        .orderBy(...orderBy);
+
+      const total = await tx
+        .select({
+          count: count(),
+        })
+        .from(transaction_table)
+        .leftJoin(
+          transaction_to_tag_table,
+          and(
+            eq(transaction_table.id, transaction_to_tag_table.transactionId),
+            input.tags.length > 0
+              ? inArray(transaction_to_tag_table.tagId, input.tags)
+              : undefined,
+          ),
+        )
+        .leftJoin(tag_table, eq(transaction_to_tag_table.tagId, tag_table.id))
+        .where(where)
+        .execute()
+        .then((res) => res[0]?.count ?? 0);
+
+      return {
+        data,
+        total,
+      };
+    });
+
+    const pageCount = Math.ceil(total / input.perPage);
+    return { data, pageCount };
+  } catch (err) {
+    console.error(err);
+    return { data: [], pageCount: 0 };
+  }
+}
+
+export async function getTransactionCategoryCounts_QUERY(userId: string) {
+  try {
+    return await db
+      .select({
+        categoryId: transaction_table.categoryId,
+        count: count(),
+      })
+      .from(transaction_table)
+      .where(eq(transaction_table.userId, userId))
+      .groupBy(transaction_table.categoryId)
+      .having(gt(count(), 0))
+      .then((res) =>
+        res.reduce(
+          (acc, { categoryId, count }) => {
+            acc[categoryId ?? "null"] = count;
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
+      );
+  } catch (err) {
+    console.error(err);
+    return {} as Record<string, number>;
+  }
+}
+
+export async function getTransactionTagCounts_QUERY(userId: string) {
+  try {
+    return await db
+      .select({
+        tagId: transaction_to_tag_table.tagId,
+        count: count(),
+      })
+      .from(transaction_table)
+      .leftJoin(
+        transaction_to_tag_table,
+        eq(transaction_to_tag_table.transactionId, transaction_table.id),
+      )
+      .where(eq(transaction_table.userId, userId))
+      .groupBy(transaction_to_tag_table.tagId)
+      .having(gt(count(), 0))
+      .then((res) =>
+        res.reduce(
+          (acc, { tagId, count }) => {
+            acc[tagId ?? "null"] = count;
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
+      );
+  } catch (err) {
+    console.error(err);
+    return {} as Record<string, number>;
+  }
+}
+
+export async function getTransactionAccountCounts_QUERY(userId: string) {
+  try {
+    return await db
+      .select({
+        accountId: transaction_table.accountId,
+        count: count(),
+      })
+      .from(transaction_table)
+      .where(eq(transaction_table.userId, userId))
+      .groupBy(transaction_table.accountId)
+      .having(gt(count(), 0))
+      .then((res) =>
+        res.reduce(
+          (acc, { accountId, count }) => {
+            acc[accountId] = count;
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
+      );
+  } catch (err) {
+    console.error(err);
+    return {} as Record<string, number>;
+  }
+}
 
 export const createTransaction = (
   transaction: DB_TransactionInsertType,
@@ -100,12 +276,12 @@ export const updateTransactionTags = async (
 ) => {
   const existingTags = await client
     .select({
-      id: transactionToTagTable.tagId,
+      id: transaction_to_tag_table.tagId,
       text: tagTable.text,
     })
-    .from(transactionToTagTable)
-    .innerJoin(tagTable, eq(transactionToTagTable.tagId, tagTable.id))
-    .where(eq(transactionToTagTable.transactionId, transactionId));
+    .from(transaction_to_tag_table)
+    .innerJoin(tagTable, eq(transaction_to_tag_table.tagId, tagTable.id))
+    .where(eq(transaction_to_tag_table.transactionId, transactionId));
 
   const existingTagNames = existingTags.map((t) => t.text);
 
@@ -142,7 +318,7 @@ export const updateTransactionTags = async (
 
   // Insert new tag associations
   if (newTagIds.length > 0) {
-    await client.insert(transactionToTagTable).values(
+    await client.insert(transaction_to_tag_table).values(
       newTagIds.map((tagId) => ({
         transactionId,
         tagId,
@@ -155,19 +331,19 @@ export const updateTransactionTags = async (
     const tagIdsToRemove = tagsToRemove.map((tag) => tag.id);
 
     await client
-      .delete(transactionToTagTable)
+      .delete(transaction_to_tag_table)
       .where(
         and(
-          eq(transactionToTagTable.transactionId, transactionId),
-          inArray(transactionToTagTable.tagId, tagIdsToRemove),
+          eq(transaction_to_tag_table.transactionId, transactionId),
+          inArray(transaction_to_tag_table.tagId, tagIdsToRemove),
         ),
       );
 
     // Delete tags if they are no longer used
     const unusedTags = await client
-      .select({ id: transactionToTagTable.tagId })
-      .from(transactionToTagTable)
-      .where(inArray(transactionToTagTable.tagId, tagIdsToRemove));
+      .select({ id: transaction_to_tag_table.tagId })
+      .from(transaction_to_tag_table)
+      .where(inArray(transaction_to_tag_table.tagId, tagIdsToRemove));
 
     const unusedTagIds = tagIdsToRemove.filter(
       (id) => !unusedTags.some((t) => t.id === id),

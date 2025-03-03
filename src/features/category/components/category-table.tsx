@@ -43,10 +43,10 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { deleteCategoryAction } from "../server/actions";
-import { type getCategoriesForUser_QUERY } from "../server/queries";
+import { type getCategories_QUERY } from "../server/queries";
 import { categoriesParsers } from "../utils/search-params";
 
-type Category = Awaited<ReturnType<typeof getCategoriesForUser_QUERY>>[number];
+type Category = Awaited<ReturnType<typeof getCategories_QUERY>>[number];
 
 export default function CategoryDataTable({
   categories,

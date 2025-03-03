@@ -37,12 +37,12 @@ import {
   deleteTransactionAttachmentAction,
   updateTransactionAction,
 } from "../server/actions";
-import { type getTransactionForUser_CACHED } from "../server/cached-queries";
+import { type getTransactions_CACHED } from "../server/cached-queries";
 import { TransactionUpdateSchema } from "../utils/schemas";
 
 type Transaction = Awaited<
-  ReturnType<typeof getTransactionForUser_CACHED>
->[number];
+  ReturnType<typeof getTransactions_CACHED>
+>["data"][number];
 
 export default function UpdateTransactionForm({
   accounts,

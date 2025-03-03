@@ -1,8 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
-import { useQueryStates } from "nuqs";
-
 import { Button } from "~/components/ui/button";
 import {
   Drawer,
@@ -24,35 +21,27 @@ import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
-import { type getTransactionForUser_CACHED } from "../server/cached-queries";
-import { transactionsParsers } from "../utils/search-params";
+import { type getTransactions_CACHED } from "../server/cached-queries";
 import UpdateTransactionForm from "./update-transaction-form";
 
-type Transaction = Awaited<
-  ReturnType<typeof getTransactionForUser_CACHED>
->[number];
+type TransactionType = Awaited<
+  ReturnType<typeof getTransactions_CACHED>
+>["data"][number];
+
+interface UpdateTransactionDrawerSheetProps
+  extends React.ComponentPropsWithRef<typeof Sheet> {
+  accounts: DB_AccountType[];
+  categories: DB_CategoryType[];
+  transaction: TransactionType | null;
+}
 
 export default function UpdateTransactionDrawerSheet({
   accounts,
   categories,
-  transactions,
-}: {
-  accounts: DB_AccountType[];
-  categories: DB_CategoryType[];
-  transactions: Transaction[];
-}) {
-  const [{ id }, setParams] = useQueryStates(transactionsParsers);
+  transaction,
+  ...props
+}: UpdateTransactionDrawerSheetProps) {
   const isMobile = useIsMobile();
-
-  const open = !!id;
-
-  const transaction = useMemo(() => {
-    return transactions.find((t) => t.id === id);
-  }, [id, transactions]);
-
-  const handleClose = () => {
-    void setParams({ id: null });
-  };
 
   if (!transaction) return;
 
@@ -62,13 +51,13 @@ export default function UpdateTransactionDrawerSheet({
       accounts={accounts}
       categories={categories}
       transaction={transaction}
-      onComplete={handleClose}
+      onComplete={() => props.onOpenChange?.(false)}
     />
   );
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleClose}>
+      <Drawer {...props}>
         <DrawerContent>
           <DrawerHeader className="sr-only">
             <DrawerTitle>Modifica spesa o entrata</DrawerTitle>
@@ -90,7 +79,7 @@ export default function UpdateTransactionDrawerSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
+    <Sheet {...props}>
       <SheetContent className="p-4 [&>button]:hidden">
         <div className="flex h-full flex-col">
           <SheetHeader className="sr-only">

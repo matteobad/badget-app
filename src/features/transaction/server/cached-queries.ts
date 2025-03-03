@@ -8,25 +8,39 @@ import {
   type DB_TagType,
   type DB_TransactionType,
 } from "~/server/db/schema/transactions";
-import { getTransactionForUser } from "./queries";
+import { type transactionsSearchParamsCache } from "../utils/search-params";
+import {
+  getTransactionAccountCounts_QUERY,
+  getTransactionCategoryCounts_QUERY,
+  getTransactions_QUERY,
+  getTransactionTagCounts_QUERY,
+} from "./queries";
 
-type TransactionForUser = DB_TransactionType & {
-  account: DB_AccountType;
+type TransactionType = DB_TransactionType & {
+  account: DB_AccountType | null;
   category: DB_CategoryType | null;
   tags: DB_TagType[];
 };
 
-export const getTransactionForUser_CACHED = (userId: string) => {
-  const cacheKeys = ["transaction", `transaction_${userId}`];
+export const getTransactions_CACHED = (
+  input: Awaited<ReturnType<typeof transactionsSearchParamsCache.parse>>,
+  userId: string,
+) => {
+  const cacheKeys = [
+    "transaction",
+    `transaction_${userId}`,
+    JSON.stringify(input),
+  ];
+
   return unstable_cache(
     async () => {
-      const result = await getTransactionForUser(userId);
+      const { data, pageCount } = await getTransactions_QUERY(input, userId);
 
       // NOTE: do whatever you want here, map, aggregate filter...
       // result will be cached and typesafety preserved
-      const transactions: TransactionForUser[] = [];
+      const transactions: TransactionType[] = [];
 
-      for (const row of result) {
+      for (const row of data) {
         const { tags, ...rest } = row;
         const existing = transactions.find((t) => t.id === row.id);
 
@@ -41,7 +55,58 @@ export const getTransactionForUser_CACHED = (userId: string) => {
         }
       }
 
-      return transactions;
+      return {
+        data: transactions,
+        pageCount,
+      };
+    },
+    cacheKeys,
+    {
+      tags: cacheKeys,
+      revalidate: 3600,
+    },
+  )();
+};
+
+export const getTransactionCategoryCounts_CACHED = (userId: string) => {
+  const cacheKeys = ["transaction", `transaction_category_count_${userId}`];
+
+  return unstable_cache(
+    async () => {
+      const data = await getTransactionCategoryCounts_QUERY(userId);
+      return data;
+    },
+    cacheKeys,
+    {
+      tags: cacheKeys,
+      revalidate: 3600,
+    },
+  )();
+};
+
+export const getTransactionTagCounts_CACHED = (userId: string) => {
+  const cacheKeys = ["transaction", `transaction_tag_count_${userId}`];
+
+  return unstable_cache(
+    async () => {
+      const data = await getTransactionTagCounts_QUERY(userId);
+      return data;
+    },
+    cacheKeys,
+    {
+      tags: cacheKeys,
+      revalidate: 3600,
+    },
+  )();
+};
+
+export const getTransactionAccountCounts_CACHED = (userId: string) => {
+  const cacheKeys = ["transaction", `transaction_account_count_${userId}`];
+
+  return unstable_cache(
+    async () => {
+      const data = await getTransactionAccountCounts_QUERY(userId);
+      return data;
     },
     cacheKeys,
     {

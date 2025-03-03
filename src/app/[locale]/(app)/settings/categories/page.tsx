@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import CategoryDataTable from "~/features/category/components/category-table";
 import CreateCategoryDrawerSheet from "~/features/category/components/create-category-drawer-sheet";
 import UpdateCategoryDrawerSheet from "~/features/category/components/update-category-drawer-sheet";
-import { getCategoriesForUser_QUERY } from "~/features/category/server/queries";
+import { getCategories_QUERY } from "~/features/category/server/queries";
 import { categoriesSearchParamsCache } from "~/features/category/utils/search-params";
 
 export default async function BudgetsPage({
@@ -20,7 +20,7 @@ export default async function BudgetsPage({
   if (!session.userId) throw new Error("User not found");
 
   const userId = session.userId;
-  const categories = await getCategoriesForUser_QUERY(userId);
+  const categories = await getCategories_QUERY(userId);
 
   return (
     <>
