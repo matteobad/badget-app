@@ -9,6 +9,7 @@ import { db } from "~/server/db";
 import { QUERIES } from "~/server/db/queries";
 import { account_table } from "~/server/db/schema/accounts";
 import { transaction_table } from "~/server/db/schema/transactions";
+import { buildConflictUpdateColumns } from "~/server/db/utils";
 import { categorizeTransactions } from "~/utils/categorization";
 
 export async function GET(request: NextRequest) {
@@ -65,7 +66,8 @@ export async function GET(request: NextRequest) {
               .onConflictDoUpdate({
                 target: [account_table.userId, account_table.rawId],
                 set: {
-                  ...account,
+                  balance: account.balance,
+                  currency: account.currency,
                   connectionId: connection.id,
                   institutionId: connection.institutionId,
                 },
@@ -86,10 +88,12 @@ export async function GET(request: NextRequest) {
               )
               .onConflictDoUpdate({
                 target: [transaction_table.userId, transaction_table.rawId],
-                set: {
-                  ...transaction_table,
-                  accountId: upserted[0]!.insertedId,
-                },
+                set: buildConflictUpdateColumns(transaction_table, [
+                  "amount",
+                  "currency",
+                  "date",
+                  "description",
+                ]),
               });
           }
         });
