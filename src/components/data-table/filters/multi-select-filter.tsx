@@ -1,6 +1,7 @@
 import { type Column } from "@tanstack/react-table";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, XIcon } from "lucide-react";
 
+import { Badge } from "~/components/ui/badge";
 import {
   Command,
   CommandEmpty,
@@ -93,5 +94,40 @@ export function MultiSelectFilter<TData, TValue>({
         )}
       </CommandList>
     </Command>
+  );
+}
+
+export function MultiSelectFaceted<TData, TValue>({
+  column,
+  options,
+}: {
+  column: Column<TData, TValue>;
+  options: Option[];
+}) {
+  const unknownValue = column?.getFilterValue();
+  const selectedValues = new Set(
+    Array.isArray(unknownValue) ? unknownValue : [],
+  );
+
+  if (selectedValues?.size <= 0) return;
+
+  return (
+    <Badge
+      variant="secondary"
+      className="group rounded-sm p-1.5 px-2 font-normal"
+      onClick={() => column?.setFilterValue(undefined)}
+    >
+      <span className="capitalize lg:hidden">
+        {selectedValues.size} {column.id}
+      </span>
+      <span className="hidden lg:flex">
+        {options
+          .filter((option) => selectedValues.has(option.value))
+          .map((option) => option.label)
+          .join(", ")}
+      </span>
+
+      <XIcon className="" />
+    </Badge>
   );
 }

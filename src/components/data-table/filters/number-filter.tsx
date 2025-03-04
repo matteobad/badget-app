@@ -1,14 +1,20 @@
 "use client";
 
-import { useId, useMemo } from "react";
+import React, { useId, useMemo } from "react";
 import { type Column } from "@tanstack/react-table";
+import { XIcon } from "lucide-react";
 
 import { CurrencyInput } from "~/components/custom/currency-input";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Slider } from "~/components/ui/slider";
 import { useSliderWithInput } from "~/hooks/use-slider-with-input";
 import { type DB_TransactionType } from "~/server/db/schema/transactions";
+
+const numberFormat = new Intl.NumberFormat("it", {
+  currency: "EUR",
+});
 
 type NumberRange = {
   min: number | undefined;
@@ -205,5 +211,48 @@ export default function NumberFilter<TData, TValue>({
         Mostra {countItemsInRange(sliderValue[0]!, sliderValue[1]!)} transazioni
       </Button>
     </div>
+  );
+}
+
+export function NumberFilterFaceted<TData, TValue>({
+  column,
+}: {
+  column: Column<TData, TValue>;
+}) {
+  const unknownValue = column?.getFilterValue();
+
+  const selected = React.useMemo<NumberRange | undefined>(() => {
+    function parseNumber(numberString?: string) {
+      if (!numberString) return undefined;
+      const parsedNumber = parseFloat(numberString);
+      return Number.isNaN(parsedNumber) ? undefined : parsedNumber;
+    }
+    return Array.isArray(unknownValue)
+      ? {
+          min: parseNumber(unknownValue[0] as string),
+          ...(!!unknownValue[1] && {
+            max: parseNumber(unknownValue[1] as string),
+          }),
+        }
+      : undefined;
+  }, [unknownValue]);
+
+  console.log("selected", selected);
+  if (!selected?.min) return;
+
+  return (
+    <Badge
+      variant="secondary"
+      className="group rounded-sm p-1.5 px-2 font-normal"
+      onClick={() => column?.setFilterValue(undefined)}
+    >
+      {selected.max ? (
+        <span>{numberFormat.formatRange(selected.min, selected.max)}</span>
+      ) : (
+        <span>{numberFormat.format(selected.min)}</span>
+      )}
+
+      <XIcon className="" />
+    </Badge>
   );
 }
