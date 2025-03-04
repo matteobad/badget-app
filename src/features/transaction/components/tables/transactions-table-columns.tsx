@@ -173,7 +173,7 @@ export function getColumns({
                 <Wallet2Icon className="size-3" />
               </AvatarFallback>
             </Avatar>
-            {account.name}
+            <span className="whitespace-nowrap">{account.name}</span>
           </div>
         );
       },

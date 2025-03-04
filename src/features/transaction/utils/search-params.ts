@@ -12,7 +12,7 @@ import { type DB_TransactionType } from "~/server/db/schema/transactions";
 
 export const transactionsParsers = {
   page: parseAsInteger.withDefault(1),
-  perPage: parseAsInteger.withDefault(10),
+  perPage: parseAsInteger.withDefault(20),
   sort: getSortingStateParser<DB_TransactionType>().withDefault([
     { id: "date", desc: true },
   ]),
