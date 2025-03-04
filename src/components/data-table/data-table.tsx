@@ -81,6 +81,7 @@ export function DataTable<TData>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
+                      className="p-3 px-4"
                       style={{
                         ...getCommonPinningStyles({ column: cell.column }),
                       }}

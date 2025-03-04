@@ -1,69 +1,59 @@
 "use client";
 
-import { useId, useMemo } from "react";
-import { parseAsString, useQueryStates } from "nuqs";
+import React, { useId, useMemo } from "react";
+import { type Column } from "@tanstack/react-table";
+import { XIcon } from "lucide-react";
 
 import { CurrencyInput } from "~/components/custom/currency-input";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Slider } from "~/components/ui/slider";
 import { useSliderWithInput } from "~/hooks/use-slider-with-input";
-import { type DataTableFilterField } from "~/utils/data-table";
+import { type DB_TransactionType } from "~/server/db/schema/transactions";
 
-interface NumberFilterProps<TData> {
-  filter: DataTableFilterField<TData>;
-  /**
-   * The selected amount range.
-   * @default undefined
-   * @type DateRange
-   * @example { from: new Date(), to: new Date() }
-   */
-  defaultAmountRange?: { min: number; max: number };
+const numberFormat = new Intl.NumberFormat("it", {
+  currency: "EUR",
+});
 
-  /**
-   * The placeholder text of the calendar trigger button.
-   * @default "Pick a date"
-   * @type string | undefined
-   */
-  placeholder?: string;
+type NumberRange = {
+  min: number | undefined;
+  max?: number | undefined;
+};
 
-  /**
-   * Controls whether query states are updated client-side only (default: true).
-   * Setting to `false` triggers a network request to update the querystring.
-   * @default true
-   */
-  shallow?: boolean;
+interface NumberFilterProps<TData, TValue> {
+  column: Column<TData, TValue>;
+  data: TData[];
 }
 
-export default function NumberFilter<TData>({
-  filter,
-  defaultAmountRange,
-  shallow = false,
-}: NumberFilterProps<TData>) {
-  const [amountParams, setAmountParams] = useQueryStates(
-    {
-      min: parseAsString.withDefault(""),
-      max: parseAsString.withDefault(""),
-    },
-    {
-      clearOnDefault: true,
-      shallow,
-    },
-  );
+export default function NumberFilter<TData, TValue>({
+  column,
+  data,
+}: NumberFilterProps<TData, TValue>) {
+  const unknownValue = column?.getFilterValue();
 
-  const amount = useMemo(() => {
-    return {
-      min: amountParams.min ?? defaultAmountRange?.min,
-      max: amountParams.max ?? defaultAmountRange?.max,
-    };
-  }, [amountParams, defaultAmountRange]);
+  const selected = useMemo<NumberRange | undefined>(() => {
+    function parseNumber(numberString?: string) {
+      if (!numberString) return undefined;
+      const parsedNumber = parseFloat(numberString);
+      return Number.isNaN(parsedNumber) ? undefined : parsedNumber;
+    }
+    return Array.isArray(unknownValue)
+      ? {
+          min: parseNumber(unknownValue[0] as string),
+          ...(!!unknownValue[1] && {
+            max: parseNumber(unknownValue[1] as string),
+          }),
+        }
+      : undefined;
+  }, [unknownValue]);
 
   const id = useId();
 
   // Define the number of ticks
   const tick_count = 40;
   // Find the min and max values across all items
-  const items = filter.values!;
+  const items = data?.map((t) => (t as DB_TransactionType).amount) ?? [];
   const minValue = Math.min(...items.map((item) => parseFloat(item)));
   const maxValue = Math.max(...items.map((item) => parseFloat(item)));
 
@@ -76,7 +66,7 @@ export default function NumberFilter<TData>({
   } = useSliderWithInput({
     minValue,
     maxValue,
-    initialValue: [parseFloat(amount.min), parseFloat(amount.max)],
+    initialValue: [selected?.min ?? minValue, selected?.max ?? maxValue],
   }); // set initialValue: [minValue, maxValue] to show all items by default
 
   // Calculate the price step based on the min and max prices
@@ -211,14 +201,58 @@ export default function NumberFilter<TData>({
         variant="outline"
         size="sm"
         onClick={() => {
-          void setAmountParams({
-            min: inputValues[0],
-            max: inputValues[1],
-          });
+          column.setFilterValue(
+            inputValues
+              ? [inputValues[0] ?? "", inputValues[1] ?? ""]
+              : undefined,
+          );
         }}
       >
         Mostra {countItemsInRange(sliderValue[0]!, sliderValue[1]!)} transazioni
       </Button>
     </div>
+  );
+}
+
+export function NumberFilterFaceted<TData, TValue>({
+  column,
+}: {
+  column: Column<TData, TValue>;
+}) {
+  const unknownValue = column?.getFilterValue();
+
+  const selected = React.useMemo<NumberRange | undefined>(() => {
+    function parseNumber(numberString?: string) {
+      if (!numberString) return undefined;
+      const parsedNumber = parseFloat(numberString);
+      return Number.isNaN(parsedNumber) ? undefined : parsedNumber;
+    }
+    return Array.isArray(unknownValue)
+      ? {
+          min: parseNumber(unknownValue[0] as string),
+          ...(!!unknownValue[1] && {
+            max: parseNumber(unknownValue[1] as string),
+          }),
+        }
+      : undefined;
+  }, [unknownValue]);
+
+  console.log("selected", selected);
+  if (!selected?.min) return;
+
+  return (
+    <Badge
+      variant="secondary"
+      className="group rounded-sm p-1.5 px-2 font-normal"
+      onClick={() => column?.setFilterValue(undefined)}
+    >
+      {selected.max ? (
+        <span>{numberFormat.formatRange(selected.min, selected.max)}</span>
+      ) : (
+        <span>{numberFormat.format(selected.min)}</span>
+      )}
+
+      <XIcon className="" />
+    </Badge>
   );
 }

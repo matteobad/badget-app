@@ -8,8 +8,10 @@ import { DataTableViewOptions } from "~/components/data-table/data-table-view-op
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 import { type DataTableFilterField } from "~/utils/data-table";
-import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { DataTableFilters } from "./data-table-filters";
+import { DateFilterFaceted } from "./filters/date-filter";
+import { MultiSelectFaceted } from "./filters/multi-select-filter";
+import { NumberFilterFaceted } from "./filters/number-filter";
 
 interface DataTableToolbarProps<TData>
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -92,17 +94,28 @@ export function DataTableToolbar<TData>({
               table={table}
               filterableColumns={filterableColumns}
             />
-            {filterableColumns.map(
-              (column) =>
-                table.getColumn(column.id ? String(column.id) : "") && (
-                  <DataTableFacetedFilter
-                    key={String(column.id)}
-                    column={table.getColumn(column.id ? String(column.id) : "")}
-                    title={column.label}
-                    options={column.options ?? []}
-                  />
-                ),
-            )}
+            {filterableColumns.map((filterableColumn) => {
+              const column = table.getColumn(
+                filterableColumn.id ? String(filterableColumn.id) : "",
+              );
+
+              return (
+                <React.Fragment key={filterableColumn.id}>
+                  {filterableColumn.type === "date" && (
+                    <DateFilterFaceted column={column!} />
+                  )}
+                  {filterableColumn.type === "multi-select" && (
+                    <MultiSelectFaceted
+                      column={column!}
+                      options={filterableColumn.options!}
+                    />
+                  )}
+                  {filterableColumn.type === "number" && (
+                    <NumberFilterFaceted column={column!} />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </>
         )}
       </div>

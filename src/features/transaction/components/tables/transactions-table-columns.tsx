@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import * as React from "react";
-import { format } from "date-fns";
+import { format, isWithinInterval, parseISO } from "date-fns";
 import { Ellipsis, Wallet2Icon } from "lucide-react";
 import { type dynamicIconImports } from "lucide-react/dynamic";
 
@@ -20,7 +20,6 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_TagType } from "~/server/db/schema/transactions";
 import { type DataTableRowAction } from "~/utils/data-table";
 import { formatAmount } from "~/utils/format";
@@ -71,6 +70,13 @@ export function getColumns({
         <DataTableColumnHeader column={column} title="Data" />
       ),
       cell: ({ cell }) => format(cell.getValue() as Date, "LLL dd"),
+      filterFn: (row, id, value) => {
+        if (!Array.isArray(value) || !value[0] || !value[1]) return false;
+        const date: TransactionType["date"] = row.getValue(id);
+        const start = parseISO(value[0] as string);
+        const end = parseISO(value[1] as string);
+        return isWithinInterval(date, { start, end });
+      },
       size: 100,
     },
     {
@@ -95,9 +101,10 @@ export function getColumns({
         if (isNaN(amount)) return null;
         return <div>{formatAmount({ amount, currency })}</div>;
       },
+      filterFn: "inNumberRange",
     },
     {
-      accessorKey: "category",
+      accessorKey: "categoryId",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Categoria" />
       ),
@@ -116,9 +123,7 @@ export function getColumns({
           </div>
         );
       },
-      filterFn: (row, id, value) => {
-        return Array.isArray(value) && value.includes(row.getValue(id));
-      },
+      filterFn: "arrIncludesSome",
       enableSorting: false,
     },
     {
@@ -142,17 +147,20 @@ export function getColumns({
         );
       },
       filterFn: (row, id, value) => {
-        return Array.isArray(value) && value.includes(row.getValue(id));
+        const tags: TransactionType["tags"] = row.getValue(id);
+        const tagSet = new Set(tags.map((t) => t.id));
+        const selectedTagSet = new Set(Array.isArray(value) ? value : []);
+        return tagSet.intersection(selectedTagSet).size > 0;
       },
       enableSorting: false,
     },
     {
-      accessorKey: "account",
+      accessorKey: "accountId",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Conto" />
       ),
       cell: ({ row }) => {
-        const account: DB_AccountType = row.getValue("account");
+        const account = row.original.account!;
 
         return (
           <div className="flex items-center gap-2">
@@ -165,13 +173,11 @@ export function getColumns({
                 <Wallet2Icon className="size-3" />
               </AvatarFallback>
             </Avatar>
-            {account.name}
+            <span className="whitespace-nowrap">{account.name}</span>
           </div>
         );
       },
-      filterFn: (row, id, value) => {
-        return Array.isArray(value) && value.includes(row.getValue(id));
-      },
+      filterFn: "arrIncludesSome",
       enableSorting: false,
     },
     {

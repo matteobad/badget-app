@@ -12,17 +12,16 @@ import { type DB_TransactionType } from "~/server/db/schema/transactions";
 
 export const transactionsParsers = {
   page: parseAsInteger.withDefault(1),
-  perPage: parseAsInteger.withDefault(10),
+  perPage: parseAsInteger.withDefault(20),
   sort: getSortingStateParser<DB_TransactionType>().withDefault([
     { id: "date", desc: true },
   ]),
   date: parseAsArrayOf(parseAsString).withDefault([]),
   description: parseAsString.withDefault(""),
+  amount: parseAsArrayOf(parseAsString).withDefault([]),
   category: parseAsArrayOf(parseAsString).withDefault([]),
   tags: parseAsArrayOf(parseAsString).withDefault([]),
   account: parseAsArrayOf(parseAsString).withDefault([]),
-  min: parseAsString.withDefault(""),
-  max: parseAsString.withDefault(""),
 };
 
 export const transactionsSearchParamsCache =

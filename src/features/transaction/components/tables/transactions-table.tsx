@@ -51,7 +51,7 @@ interface TransactionsTableProps {
 
 export function TransactionsTable({ promises }: TransactionsTableProps) {
   const [
-    { data, pageCount },
+    { data },
     categoryCounts,
     tagCounts,
     accountCounts,
@@ -96,7 +96,7 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
       values: data.map((item) => item.amount),
     },
     {
-      id: "category",
+      id: "categoryId",
       label: "Categoria",
       type: "multi-select",
       options: categories.map((category) => ({
@@ -122,7 +122,7 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
       })),
     },
     {
-      id: "account",
+      id: "accountId",
       label: "Conto",
       type: "multi-select",
       options: accounts.map((account) => ({
@@ -147,14 +147,13 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
   const { table } = useDataTable({
     data,
     columns,
-    pageCount,
     filterFields,
     initialState: {
       sorting: [{ id: "date", desc: true }],
       columnPinning: { right: ["actions"] },
     },
     getRowId: (originalRow) => originalRow.id,
-    shallow: false,
+    shallow: true,
     clearOnDefault: true,
   });
 

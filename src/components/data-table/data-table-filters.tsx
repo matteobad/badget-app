@@ -34,11 +34,11 @@ const getFilterIcon = (filterId: string) => {
       return (
         <ChartNoAxesColumnIcon className="mr-1 size-3 text-muted-foreground" />
       );
-    case "category":
+    case "categoryId":
       return <ShapesIcon className="mr-1 size-3 text-muted-foreground" />;
     case "tags":
       return <TagIcon className="mr-1 size-3 text-muted-foreground" />;
-    case "account":
+    case "accountId":
       return <LandmarkIcon className="mr-1 size-3 text-muted-foreground" />;
     default:
       return <FilterIcon />;
@@ -82,6 +82,9 @@ export function DataTableFilters<TData>({
         className="w-44 lg:w-64"
       >
         {filterableColumns.map((filter) => {
+          const column = table.getColumn(String(filter.id))!;
+          const options = filter.options;
+
           return (
             <DropdownMenuSub key={filter.id}>
               <DropdownMenuSubTrigger>
@@ -91,15 +94,12 @@ export function DataTableFilters<TData>({
               <DropdownMenuPortal>
                 <DropdownMenuSubContent sideOffset={8} className="p-0">
                   {filter.type === "multi-select" && (
-                    <MultiSelectFilter
-                      column={table.getColumn(String(filter.id))!}
-                      options={filter.options!}
-                    />
+                    <MultiSelectFilter column={column} options={options!} />
                   )}
-                  {filter.type === "date" && (
-                    <DateFilter column={table.getColumn(String(filter.id))!} />
+                  {filter.type === "date" && <DateFilter column={column} />}
+                  {filter.type === "number" && (
+                    <NumberFilter column={column} data={table.options.data} />
                   )}
-                  {filter.type === "number" && <NumberFilter filter={filter} />}
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>

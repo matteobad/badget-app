@@ -2,16 +2,12 @@
 
 import {
   and,
-  asc,
   count,
   desc,
   eq,
   getTableColumns,
   gt,
-  gte,
-  ilike,
   inArray,
-  lte,
 } from "drizzle-orm";
 
 import type { DBClient } from "~/server/db";
@@ -29,51 +25,36 @@ import {
   transaction_table,
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
-import { type transactionsSearchParamsCache } from "../utils/search-params";
 
-export async function getTransactions_QUERY(
-  input: Awaited<ReturnType<typeof transactionsSearchParamsCache.parse>>,
-  userId: string,
-) {
+export function getRecentTransactions_QUERY(userId: string) {
   try {
-    const offset = (input.page - 1) * input.perPage;
-    const fromDate = input.date[0] ? new Date(input.date[0]) : undefined;
-    const toDate = input.date[1] ? new Date(input.date[1]) : undefined;
-    const minAmount = input.min ? input.min : undefined;
-    const maxAmount = input.max ? input.max : undefined;
+    return db
+      .select({
+        ...getTableColumns(transaction_table),
+        account: account_table,
+        category: category_table,
+      })
+      .from(transaction_table)
+      .leftJoin(
+        category_table,
+        eq(transaction_table.categoryId, category_table.id),
+      )
+      .leftJoin(
+        account_table,
+        eq(transaction_table.accountId, account_table.id),
+      )
+      .where(eq(transaction_table.userId, userId))
+      .limit(10)
+      .orderBy(desc(transaction_table.date));
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+}
 
-    const where = and(
-      ...[
-        input.description
-          ? ilike(transaction_table.description, `%${input.description}%`)
-          : undefined,
-        input.category.length > 0
-          ? inArray(transaction_table.categoryId, input.category)
-          : undefined,
-        input.account.length > 0
-          ? inArray(transaction_table.accountId, input.account)
-          : undefined,
-        input.tags.length > 0
-          ? inArray(transaction_to_tag_table.tagId, input.tags)
-          : undefined,
-        fromDate ? gte(transaction_table.date, fromDate) : undefined,
-        toDate ? lte(transaction_table.date, toDate) : undefined,
-        minAmount ? gte(transaction_table.amount, minAmount) : undefined,
-        maxAmount ? lte(transaction_table.amount, maxAmount) : undefined,
-        eq(transaction_table.userId, userId),
-      ].filter(Boolean),
-    );
-
-    const orderBy =
-      input.sort.length > 0
-        ? input.sort.map((item) =>
-            item.desc
-              ? desc(transaction_table[item.id])
-              : asc(transaction_table[item.id]),
-          )
-        : [desc(transaction_table.date)];
-
-    const { data, total } = await db.transaction(async (tx) => {
+export async function getTransactions_QUERY(userId: string) {
+  try {
+    const { data } = await db.transaction(async (tx) => {
       const data = await tx
         .select({
           ...getTableColumns(transaction_table),
@@ -92,46 +73,18 @@ export async function getTransactions_QUERY(
         )
         .leftJoin(
           transaction_to_tag_table,
-          and(
-            eq(transaction_table.id, transaction_to_tag_table.transactionId),
-            input.tags.length > 0
-              ? inArray(transaction_to_tag_table.tagId, input.tags)
-              : undefined,
-          ),
+          and(eq(transaction_table.id, transaction_to_tag_table.transactionId)),
         )
         .leftJoin(tag_table, eq(transaction_to_tag_table.tagId, tag_table.id))
-        .limit(input.perPage)
-        .offset(offset)
-        .where(where)
-        .orderBy(...orderBy);
-
-      const total = await tx
-        .select({
-          count: count(),
-        })
-        .from(transaction_table)
-        .leftJoin(
-          transaction_to_tag_table,
-          and(
-            eq(transaction_table.id, transaction_to_tag_table.transactionId),
-            input.tags.length > 0
-              ? inArray(transaction_to_tag_table.tagId, input.tags)
-              : undefined,
-          ),
-        )
-        .leftJoin(tag_table, eq(transaction_to_tag_table.tagId, tag_table.id))
-        .where(where)
-        .execute()
-        .then((res) => res[0]?.count ?? 0);
+        .where(eq(transaction_table.userId, userId))
+        .orderBy(desc(transaction_table.date));
 
       return {
         data,
-        total,
       };
     });
 
-    const pageCount = Math.ceil(total / input.perPage);
-    return { data, pageCount };
+    return { data };
   } catch (err) {
     console.error(err);
     return { data: [], pageCount: 0 };
