@@ -34,11 +34,11 @@ const getFilterIcon = (filterId: string) => {
       return (
         <ChartNoAxesColumnIcon className="mr-1 size-3 text-muted-foreground" />
       );
-    case "category":
+    case "categoryId":
       return <ShapesIcon className="mr-1 size-3 text-muted-foreground" />;
     case "tags":
       return <TagIcon className="mr-1 size-3 text-muted-foreground" />;
-    case "account":
+    case "accountId":
       return <LandmarkIcon className="mr-1 size-3 text-muted-foreground" />;
     default:
       return <FilterIcon />;

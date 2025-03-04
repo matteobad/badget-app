@@ -34,19 +34,17 @@ import {
   type DataTableFilterField,
   type ExtendedSortingState,
 } from "~/utils/data-table";
-import { useDebouncedCallback } from "./use-debounce-callback";
 
 interface UseDataTableProps<TData>
   extends Omit<
-      TableOptions<TData>,
-      | "state"
-      | "pageCount"
-      | "getCoreRowModel"
-      | "manualFiltering"
-      | "manualPagination"
-      | "manualSorting"
-    >,
-    Required<Pick<TableOptions<TData>, "pageCount">> {
+    TableOptions<TData>,
+    | "state"
+    | "pageCount"
+    | "getCoreRowModel"
+    | "manualFiltering"
+    | "manualPagination"
+    | "manualSorting"
+  > {
   /**
    * Defines filter fields for the table. Supports both dynamic faceted filters and search filters.
    * - Faceted filters are rendered when `options` are provided for a filter field.
@@ -77,13 +75,6 @@ interface UseDataTableProps<TData>
   filterFields?: DataTableFilterField<TData>[];
 
   /**
-   * Determines how query updates affect history.
-   * `push` creates a new history entry; `replace` (default) updates the current entry.
-   * @default "replace"
-   */
-  history?: "push" | "replace";
-
-  /**
    * Indicates whether the page should scroll to the top when the URL changes.
    * @default false
    */
@@ -95,19 +86,6 @@ interface UseDataTableProps<TData>
    * @default true
    */
   shallow?: boolean;
-
-  /**
-   * Maximum time (ms) to wait between URL query string updates.
-   * Helps with browser rate-limiting. Minimum effective value is 50ms.
-   * @default 50
-   */
-  throttleMs?: number;
-
-  /**
-   * Debounce time (ms) for filter updates to enhance performance during rapid input.
-   * @default 300
-   */
-  debounceMs?: number;
 
   /**
    * Observe Server Component loading states for non-shallow updates.
@@ -132,13 +110,9 @@ interface UseDataTableProps<TData>
 }
 
 export function useDataTable<TData>({
-  pageCount = -1,
   filterFields = [],
-  history = "replace",
   scroll = false,
   shallow = true,
-  throttleMs = 50,
-  debounceMs = 300,
   clearOnDefault = false,
   startTransition,
   initialState,
@@ -148,23 +122,12 @@ export function useDataTable<TData>({
     Omit<UseQueryStateOptions<string>, "parse">
   >(() => {
     return {
-      history,
       scroll,
       shallow,
-      throttleMs,
-      debounceMs,
       clearOnDefault,
       startTransition,
     };
-  }, [
-    history,
-    scroll,
-    shallow,
-    throttleMs,
-    debounceMs,
-    clearOnDefault,
-    startTransition,
-  ]);
+  }, [scroll, shallow, clearOnDefault, startTransition]);
 
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
     initialState?.rowSelection ?? {},
@@ -208,11 +171,6 @@ export function useDataTable<TData>({
   }, [filterFields, queryStateOptions]);
 
   const [filterValues, setFilterValues] = useQueryStates(filterParsers);
-
-  const debouncedSetFilterValues = useDebouncedCallback(
-    setFilterValues,
-    debounceMs,
-  );
 
   // Paginate
   const pagination: PaginationState = {
@@ -294,18 +252,16 @@ export function useDataTable<TData>({
         }
 
         void setPage(1);
-
-        debouncedSetFilterValues(filterUpdates);
+        void setFilterValues(filterUpdates);
         return next;
       });
     },
-    [debouncedSetFilterValues, filterableColumns, searchableColumns, setPage],
+    [setFilterValues, filterableColumns, searchableColumns, setPage],
   );
 
   const table = useReactTable({
     ...props,
     initialState,
-    pageCount,
     state: {
       pagination,
       sorting,
@@ -314,20 +270,17 @@ export function useDataTable<TData>({
       columnFilters,
     },
     enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
     onPaginationChange,
     onSortingChange,
-    onColumnFiltersChange,
+    onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnFiltersChange,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    manualPagination: true,
-    manualSorting: true,
-    manualFiltering: true,
   });
 
   return { table };

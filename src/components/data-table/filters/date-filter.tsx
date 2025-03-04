@@ -41,7 +41,6 @@ export function DateFilter<TData, TValue>({
         defaultMonth={selected?.from}
         selected={selected}
         onSelect={(newDateRange) => {
-          console.log("onSelect", newDateRange);
           column.setFilterValue(
             newDateRange
               ? [

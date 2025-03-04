@@ -8,7 +8,6 @@ import {
   type DB_TagType,
   type DB_TransactionType,
 } from "~/server/db/schema/transactions";
-import { type transactionsSearchParamsCache } from "../utils/search-params";
 import {
   getTransactionAccountCounts_QUERY,
   getTransactionCategoryCounts_QUERY,
@@ -22,19 +21,12 @@ type TransactionType = DB_TransactionType & {
   tags: DB_TagType[];
 };
 
-export const getTransactions_CACHED = (
-  input: Awaited<ReturnType<typeof transactionsSearchParamsCache.parse>>,
-  userId: string,
-) => {
-  const cacheKeys = [
-    "transaction",
-    `transaction_${userId}`,
-    JSON.stringify(input),
-  ];
+export const getTransactions_CACHED = (userId: string) => {
+  const cacheKeys = ["transaction", `transaction_${userId}`];
 
   return unstable_cache(
     async () => {
-      const { data, pageCount } = await getTransactions_QUERY(input, userId);
+      const { data } = await getTransactions_QUERY(userId);
 
       // NOTE: do whatever you want here, map, aggregate filter...
       // result will be cached and typesafety preserved
@@ -57,7 +49,6 @@ export const getTransactions_CACHED = (
 
       return {
         data: transactions,
-        pageCount,
       };
     },
     cacheKeys,
