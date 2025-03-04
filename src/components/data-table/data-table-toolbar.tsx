@@ -7,7 +7,7 @@ import { SearchIcon } from "lucide-react";
 import { DataTableViewOptions } from "~/components/data-table/data-table-view-options";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import { type DataTableAdvancedFilterField } from "~/utils/data-table";
+import { type DataTableFilterField } from "~/utils/data-table";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { DataTableFilters } from "./data-table-filters";
 
@@ -36,7 +36,7 @@ interface DataTableToolbarProps<TData>
    *   }
    * ]
    */
-  filterFields?: DataTableAdvancedFilterField<TData>[];
+  filterFields?: DataTableFilterField<TData>[];
 }
 
 export function DataTableToolbar<TData>({

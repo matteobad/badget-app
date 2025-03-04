@@ -37,8 +37,8 @@ export async function getTransactions_QUERY(
 ) {
   try {
     const offset = (input.page - 1) * input.perPage;
-    const fromDate = input.from ? new Date(input.from) : undefined;
-    const toDate = input.to ? new Date(input.to) : undefined;
+    const fromDate = input.date[0] ? new Date(input.date[0]) : undefined;
+    const toDate = input.date[1] ? new Date(input.date[1]) : undefined;
     const minAmount = input.min ? input.min : undefined;
     const maxAmount = input.max ? input.max : undefined;
 

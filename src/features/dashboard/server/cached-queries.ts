@@ -20,8 +20,6 @@ export const getBankingKPI_CACHED = (userId: string) => {
         getDebtKPI_QUERY(userId),
       ]);
 
-      console.log(result);
-
       return {
         banking: result[0].total ?? 0,
         emergency: result[1].total ?? 0,

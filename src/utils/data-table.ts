@@ -1,6 +1,5 @@
 import type { Column, ColumnSort, Row } from "@tanstack/react-table";
 import { type SQL } from "drizzle-orm";
-import { Pickaxe, SquareSquare } from "lucide-react";
 import { type z } from "zod";
 
 import { type filterSchema } from "~/lib/validators";
@@ -33,14 +32,10 @@ export type JoinOperator = DataTableConfig["joinOperators"][number]["value"];
 export interface DataTableFilterField<TData> {
   id: StringKeyOf<TData>;
   label: string;
+  type: ColumnType; // TODO: type optional based on type
   placeholder?: string;
   options?: Option[];
   values?: string[];
-}
-
-export interface DataTableAdvancedFilterField<TData>
-  extends DataTableFilterField<TData> {
-  type: ColumnType;
 }
 
 export type Filter<TData> = Prettify<
@@ -68,22 +63,6 @@ export interface QueryBuilderOpts {
 export type DataTableConfig = typeof dataTableConfig;
 
 export const dataTableConfig = {
-  featureFlags: [
-    {
-      label: "Advanced table",
-      value: "advancedTable" as const,
-      icon: Pickaxe,
-      tooltipTitle: "Toggle advanced table",
-      tooltipDescription: "A filter and sort builder to filter and sort rows.",
-    },
-    {
-      label: "Floating bar",
-      value: "floatingBar" as const,
-      icon: SquareSquare,
-      tooltipTitle: "Toggle floating bar",
-      tooltipDescription: "A floating bar that sticks to the top of the table.",
-    },
-  ],
   textOperators: [
     { label: "Contains", value: "iLike" as const },
     { label: "Does not contain", value: "notILike" as const },

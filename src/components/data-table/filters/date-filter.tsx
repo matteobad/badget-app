@@ -1,101 +1,55 @@
 "use client";
 
-import type { DateRange } from "react-day-picker";
 import * as React from "react";
-import { parseAsString, useQueryStates } from "nuqs";
+import { type Column } from "@tanstack/react-table";
+import { type DateRange } from "react-day-picker";
 
-import type { ButtonProps } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import { type PopoverContent } from "~/components/ui/popover";
 
-interface DateFilterProps
+interface DateFilterProps<TData, TValue>
   extends React.ComponentPropsWithoutRef<typeof PopoverContent> {
-  /**
-   * The selected date range.
-   * @default undefined
-   * @type DateRange
-   * @example { from: new Date(), to: new Date() }
-   */
-  defaultDateRange?: DateRange;
-
-  /**
-   * The placeholder text of the calendar trigger button.
-   * @default "Pick a date"
-   * @type string | undefined
-   */
-  placeholder?: string;
-
-  /**
-   * The variant of the calendar trigger button.
-   * @default "outline"
-   * @type "default" | "outline" | "secondary" | "ghost"
-   */
-  triggerVariant?: Exclude<ButtonProps["variant"], "destructive" | "link">;
-
-  /**
-   * The size of the calendar trigger button.
-   * @default "default"
-   * @type "default" | "sm" | "lg"
-   */
-  triggerSize?: Exclude<ButtonProps["size"], "icon">;
-
-  /**
-   * The class name of the calendar trigger button.
-   * @default undefined
-   * @type string
-   */
-  triggerClassName?: string;
-
-  /**
-   * Controls whether query states are updated client-side only (default: true).
-   * Setting to `false` triggers a network request to update the querystring.
-   * @default true
-   */
-  shallow?: boolean;
+  column: Column<TData, TValue>;
 }
 
-export function DateFilter({
-  defaultDateRange,
-  shallow = false,
-}: DateFilterProps) {
-  const [dateParams, setDateParams] = useQueryStates(
-    {
-      from: parseAsString.withDefault(
-        defaultDateRange?.from?.toISOString() ?? "",
-      ),
-      to: parseAsString.withDefault(defaultDateRange?.to?.toISOString() ?? ""),
-    },
-    {
-      clearOnDefault: true,
-      shallow,
-    },
-  );
+export function DateFilter<TData, TValue>({
+  column,
+}: DateFilterProps<TData, TValue>) {
+  const unknownValue = column?.getFilterValue();
 
-  const date = React.useMemo(() => {
-    function parseDate(dateString: string | null) {
+  const selected = React.useMemo<DateRange | undefined>(() => {
+    function parseDate(dateString?: string) {
       if (!dateString) return undefined;
       const parsedDate = new Date(dateString);
       return Number.isNaN(parsedDate.getTime()) ? undefined : parsedDate;
     }
-
-    return {
-      from: parseDate(dateParams.from) ?? defaultDateRange?.from,
-      to: parseDate(dateParams.to) ?? defaultDateRange?.to,
-    };
-  }, [dateParams, defaultDateRange]);
+    return Array.isArray(unknownValue)
+      ? {
+          from: parseDate(unknownValue[0] as string),
+          ...(!!unknownValue[1] && {
+            to: parseDate(unknownValue[1] as string),
+          }),
+        }
+      : undefined;
+  }, [unknownValue]);
 
   return (
     <div className="grid gap-2">
       <Calendar
         initialFocus
         mode="range"
-        defaultMonth={date?.from}
-        selected={date}
+        defaultMonth={selected?.from}
+        selected={selected}
         onSelect={(newDateRange) => {
-          void setDateParams({
-            from: newDateRange?.from?.toISOString() ?? "",
-            to: newDateRange?.to?.toISOString() ?? "",
-          });
+          console.log("onSelect", newDateRange);
+          column.setFilterValue(
+            newDateRange
+              ? [
+                  newDateRange.from?.toISOString() ?? "",
+                  newDateRange.to?.toISOString() ?? "",
+                ]
+              : undefined,
+          );
         }}
         numberOfMonths={1}
       />

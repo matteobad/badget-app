@@ -15,7 +15,7 @@ import ImportTransactionDrawerDialog from "~/features/transaction/components/imp
 import { useDataTable } from "~/hooks/use-data-table";
 import {
   type DataTableAction,
-  type DataTableAdvancedFilterField,
+  type DataTableFilterField,
   type DataTableRowAction,
 } from "~/utils/data-table";
 import {
@@ -77,7 +77,7 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
    * @prop {React.ReactNode} [icon] - An optional icon to display next to the label.
    * @prop {boolean} [withCount] - An optional boolean to display the count of the filter option.
    */
-  const filterFields: DataTableAdvancedFilterField<TransactionType>[] = [
+  const filterFields: DataTableFilterField<TransactionType>[] = [
     {
       id: "description",
       label: "Descrizione",
@@ -149,7 +149,6 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
     columns,
     pageCount,
     filterFields,
-    enableAdvancedFilter: false,
     initialState: {
       sorting: [{ id: "date", desc: true }],
       columnPinning: { right: ["actions"] },

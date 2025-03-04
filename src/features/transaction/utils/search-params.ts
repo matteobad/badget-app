@@ -16,12 +16,11 @@ export const transactionsParsers = {
   sort: getSortingStateParser<DB_TransactionType>().withDefault([
     { id: "date", desc: true },
   ]),
+  date: parseAsArrayOf(parseAsString).withDefault([]),
   description: parseAsString.withDefault(""),
   category: parseAsArrayOf(parseAsString).withDefault([]),
   tags: parseAsArrayOf(parseAsString).withDefault([]),
   account: parseAsArrayOf(parseAsString).withDefault([]),
-  from: parseAsString.withDefault(""),
-  to: parseAsString.withDefault(""),
   min: parseAsString.withDefault(""),
   max: parseAsString.withDefault(""),
 };

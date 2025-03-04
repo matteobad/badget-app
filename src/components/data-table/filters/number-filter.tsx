@@ -8,10 +8,10 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Slider } from "~/components/ui/slider";
 import { useSliderWithInput } from "~/hooks/use-slider-with-input";
-import { type DataTableAdvancedFilterField } from "~/utils/data-table";
+import { type DataTableFilterField } from "~/utils/data-table";
 
 interface NumberFilterProps<TData> {
-  filter: DataTableAdvancedFilterField<TData>;
+  filter: DataTableFilterField<TData>;
   /**
    * The selected amount range.
    * @default undefined

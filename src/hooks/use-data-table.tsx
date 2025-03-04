@@ -125,14 +125,6 @@ interface UseDataTableProps<TData>
    */
   clearOnDefault?: boolean;
 
-  /**
-   * Enable notion like column filters.
-   * Advanced filters and column filters cannot be used at the same time.
-   * @default false
-   * @type boolean
-   */
-  enableAdvancedFilter?: boolean;
-
   initialState?: Omit<Partial<TableState>, "sorting"> & {
     // Extend to make the sorting id typesafe
     sorting?: ExtendedSortingState<TData>;
@@ -142,7 +134,6 @@ interface UseDataTableProps<TData>
 export function useDataTable<TData>({
   pageCount = -1,
   filterFields = [],
-  enableAdvancedFilter = false,
   history = "replace",
   scroll = false,
   shallow = true,
@@ -250,40 +241,33 @@ export function useDataTable<TData>({
 
   // Filter
   const initialColumnFilters: ColumnFiltersState = React.useMemo(() => {
-    return enableAdvancedFilter
-      ? []
-      : Object.entries(filterValues).reduce<ColumnFiltersState>(
-          (filters, [key, value]) => {
-            if (value !== null) {
-              filters.push({
-                id: key,
-                value: Array.isArray(value) ? value : [value],
-              });
-            }
-            return filters;
-          },
-          [],
-        );
-  }, [filterValues, enableAdvancedFilter]);
+    return Object.entries(filterValues).reduce<ColumnFiltersState>(
+      (filters, [key, value]) => {
+        if (value !== null) {
+          filters.push({
+            id: key,
+            value: Array.isArray(value) ? value : [value],
+          });
+        }
+        return filters;
+      },
+      [],
+    );
+  }, [filterValues]);
 
   const [columnFilters, setColumnFilters] =
     React.useState<ColumnFiltersState>(initialColumnFilters);
 
   // Memoize computation of searchableColumns and filterableColumns
   const { searchableColumns, filterableColumns } = React.useMemo(() => {
-    return enableAdvancedFilter
-      ? { searchableColumns: [], filterableColumns: [] }
-      : {
-          searchableColumns: filterFields.filter((field) => !field.options),
-          filterableColumns: filterFields.filter((field) => field.options),
-        };
-  }, [filterFields, enableAdvancedFilter]);
+    return {
+      searchableColumns: filterFields.filter((field) => !field.options),
+      filterableColumns: filterFields.filter((field) => field.options),
+    };
+  }, [filterFields]);
 
   const onColumnFiltersChange = React.useCallback(
     (updaterOrValue: Updater<ColumnFiltersState>) => {
-      // Don't process filters if advanced filtering is enabled
-      if (enableAdvancedFilter) return;
-
       setColumnFilters((prev) => {
         const next =
           typeof updaterOrValue === "function"
@@ -315,13 +299,7 @@ export function useDataTable<TData>({
         return next;
       });
     },
-    [
-      debouncedSetFilterValues,
-      enableAdvancedFilter,
-      filterableColumns,
-      searchableColumns,
-      setPage,
-    ],
+    [debouncedSetFilterValues, filterableColumns, searchableColumns, setPage],
   );
 
   const table = useReactTable({
@@ -333,7 +311,7 @@ export function useDataTable<TData>({
       sorting,
       columnVisibility,
       rowSelection,
-      columnFilters: enableAdvancedFilter ? [] : columnFilters,
+      columnFilters,
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
@@ -342,15 +320,11 @@ export function useDataTable<TData>({
     onColumnFiltersChange,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: enableAdvancedFilter
-      ? undefined
-      : getFilteredRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: enableAdvancedFilter ? undefined : getFacetedRowModel(),
-    getFacetedUniqueValues: enableAdvancedFilter
-      ? undefined
-      : getFacetedUniqueValues(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,

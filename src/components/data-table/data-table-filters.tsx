@@ -12,7 +12,7 @@ import {
 
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import { type DataTableAdvancedFilterField } from "~/utils/data-table";
+import { type DataTableFilterField } from "~/utils/data-table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,7 +47,7 @@ const getFilterIcon = (filterId: string) => {
 
 interface DataTableFiltersProps<TData> {
   table: Table<TData>;
-  filterableColumns: DataTableAdvancedFilterField<TData>[];
+  filterableColumns: DataTableFilterField<TData>[];
 }
 
 export function DataTableFilters<TData>({
@@ -96,7 +96,9 @@ export function DataTableFilters<TData>({
                       options={filter.options!}
                     />
                   )}
-                  {filter.type === "date" && <DateFilter />}
+                  {filter.type === "date" && (
+                    <DateFilter column={table.getColumn(String(filter.id))!} />
+                  )}
                   {filter.type === "number" && <NumberFilter filter={filter} />}
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
