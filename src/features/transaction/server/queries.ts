@@ -26,6 +26,32 @@ import {
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
 
+export function getRecentTransactions_QUERY(userId: string) {
+  try {
+    return db
+      .select({
+        ...getTableColumns(transaction_table),
+        account: account_table,
+        category: category_table,
+      })
+      .from(transaction_table)
+      .leftJoin(
+        category_table,
+        eq(transaction_table.categoryId, category_table.id),
+      )
+      .leftJoin(
+        account_table,
+        eq(transaction_table.accountId, account_table.id),
+      )
+      .where(eq(transaction_table.userId, userId))
+      .limit(10)
+      .orderBy(desc(transaction_table.date));
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+}
+
 export async function getTransactions_QUERY(userId: string) {
   try {
     const { data } = await db.transaction(async (tx) => {

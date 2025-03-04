@@ -1,6 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
 import { CreditCard, Package } from "lucide-react";
-import { type SearchParams } from "nuqs";
 
 import {
   Card,
@@ -10,27 +9,18 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { getBankingKPI_CACHED } from "~/features/dashboard/server/cached-queries";
-import { getTransactions_CACHED } from "~/features/transaction/server/cached-queries";
-import { transactionsSearchParamsCache } from "~/features/transaction/utils/search-params";
+import { getRecentTransactions_CACHED } from "~/features/transaction/server/cached-queries";
 import PillarOverview from "../../../../features/dashboard/components/pillar-overview";
 import RecentTransactionList from "../../../../features/transaction/components/recent-transaction-list";
 
-type PageProps = {
-  searchParams: Promise<SearchParams>; // Next.js 15+: async searchParams prop
-};
-
-export default async function DashboardPage({ searchParams }: PageProps) {
-  // ⚠️ Don't forget to call `parse` here.
-  // You can access type-safe values from the returned object:
-  const search = await transactionsSearchParamsCache.parse(searchParams);
-
+export default async function DashboardPage() {
   const session = await auth();
   if (!session.userId) throw new Error("User not found");
 
   const promises = Promise.all([getBankingKPI_CACHED(session.userId)]);
 
   const transactionPromise = Promise.all([
-    getTransactions_CACHED({ ...search, perPage: 9 }, session.userId),
+    getRecentTransactions_CACHED(session.userId),
   ]);
 
   return (

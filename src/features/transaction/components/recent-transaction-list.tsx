@@ -11,16 +11,16 @@ import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 import { formatAmount } from "~/utils/format";
-import { type getTransactions_CACHED } from "../server/cached-queries";
+import { type getRecentTransactions_CACHED } from "../server/cached-queries";
 
 interface RecentTransactionListProps {
-  promises: Promise<[Awaited<ReturnType<typeof getTransactions_CACHED>>]>;
+  promises: Promise<[Awaited<ReturnType<typeof getRecentTransactions_CACHED>>]>;
 }
 
 export default function RecentTransactionList({
   promises,
 }: RecentTransactionListProps) {
-  const [{ data }] = use(promises);
+  const [data] = use(promises);
 
   return (
     <Card className={cn("col-span-2 row-span-2 mx-auto w-full max-w-xl")}>

@@ -18,11 +18,10 @@ export const transactionsParsers = {
   ]),
   date: parseAsArrayOf(parseAsString).withDefault([]),
   description: parseAsString.withDefault(""),
+  amount: parseAsArrayOf(parseAsString).withDefault([]),
   category: parseAsArrayOf(parseAsString).withDefault([]),
   tags: parseAsArrayOf(parseAsString).withDefault([]),
   account: parseAsArrayOf(parseAsString).withDefault([]),
-  min: parseAsString.withDefault(""),
-  max: parseAsString.withDefault(""),
 };
 
 export const transactionsSearchParamsCache =

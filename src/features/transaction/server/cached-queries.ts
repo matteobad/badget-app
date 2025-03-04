@@ -9,6 +9,7 @@ import {
   type DB_TransactionType,
 } from "~/server/db/schema/transactions";
 import {
+  getRecentTransactions_QUERY,
   getTransactionAccountCounts_QUERY,
   getTransactionCategoryCounts_QUERY,
   getTransactions_QUERY,
@@ -19,6 +20,25 @@ type TransactionType = DB_TransactionType & {
   account: DB_AccountType | null;
   category: DB_CategoryType | null;
   tags: DB_TagType[];
+};
+
+export const getRecentTransactions_CACHED = (userId: string) => {
+  const cacheKeys = ["transaction", `transaction_${userId}`];
+
+  return unstable_cache(
+    async () => {
+      const data = await getRecentTransactions_QUERY(userId);
+
+      // NOTE: do whatever you want here, map, aggregate filter...
+      // result will be cached and typesafety preserved
+      return data;
+    },
+    cacheKeys,
+    {
+      tags: cacheKeys,
+      revalidate: 3600,
+    },
+  )();
 };
 
 export const getTransactions_CACHED = (userId: string) => {
