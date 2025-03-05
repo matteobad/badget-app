@@ -2,9 +2,7 @@
 
 import type {
   ColumnFiltersState,
-  PaginationState,
   RowSelectionState,
-  SortingState,
   TableOptions,
   TableState,
   Updater,
@@ -21,15 +19,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  parseAsArrayOf,
-  parseAsInteger,
-  parseAsString,
-  useQueryState,
-  useQueryStates,
-} from "nuqs";
+import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
 
-import { getSortingStateParser } from "~/lib/validators";
 import {
   type DataTableFilterField,
   type ExtendedSortingState,
@@ -135,23 +126,6 @@ export function useDataTable<TData>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(initialState?.columnVisibility ?? {});
 
-  const [page, setPage] = useQueryState(
-    "page",
-    parseAsInteger.withOptions(queryStateOptions).withDefault(1),
-  );
-  const [perPage, setPerPage] = useQueryState(
-    "perPage",
-    parseAsInteger
-      .withOptions(queryStateOptions)
-      .withDefault(initialState?.pagination?.pageSize ?? 20),
-  );
-  const [sorting, setSorting] = useQueryState(
-    "sort",
-    getSortingStateParser<TData>()
-      .withOptions(queryStateOptions)
-      .withDefault(initialState?.sorting ?? []),
-  );
-
   // Create parsers for each filter field
   const filterParsers = React.useMemo(() => {
     return filterFields.reduce<
@@ -171,31 +145,6 @@ export function useDataTable<TData>({
   }, [filterFields, queryStateOptions]);
 
   const [filterValues, setFilterValues] = useQueryStates(filterParsers);
-
-  // Paginate
-  const pagination: PaginationState = {
-    pageIndex: page - 1, // zero-based index -> one-based index
-    pageSize: perPage,
-  };
-
-  function onPaginationChange(updaterOrValue: Updater<PaginationState>) {
-    if (typeof updaterOrValue === "function") {
-      const newPagination = updaterOrValue(pagination);
-      void setPage(newPagination.pageIndex + 1);
-      void setPerPage(newPagination.pageSize);
-    } else {
-      void setPage(updaterOrValue.pageIndex + 1);
-      void setPerPage(updaterOrValue.pageSize);
-    }
-  }
-
-  // Sort
-  function onSortingChange(updaterOrValue: Updater<SortingState>) {
-    if (typeof updaterOrValue === "function") {
-      const newSorting = updaterOrValue(sorting) as ExtendedSortingState<TData>;
-      void setSorting(newSorting);
-    }
-  }
 
   // Filter
   const initialColumnFilters: ColumnFiltersState = React.useMemo(() => {
@@ -251,27 +200,22 @@ export function useDataTable<TData>({
           }
         }
 
-        void setPage(1);
         void setFilterValues(filterUpdates);
         return next;
       });
     },
-    [setFilterValues, filterableColumns, searchableColumns, setPage],
+    [setFilterValues, filterableColumns, searchableColumns],
   );
 
   const table = useReactTable({
     ...props,
     initialState,
     state: {
-      pagination,
-      sorting,
       columnVisibility,
       rowSelection,
       columnFilters,
     },
     enableRowSelection: true,
-    onPaginationChange,
-    onSortingChange,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange,

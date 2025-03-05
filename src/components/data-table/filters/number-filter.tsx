@@ -237,7 +237,6 @@ export function NumberFilterFaceted<TData, TValue>({
       : undefined;
   }, [unknownValue]);
 
-  console.log("selected", selected);
   if (!selected?.min) return;
 
   return (

@@ -85,7 +85,6 @@ export function DateFilterFaceted<TData, TValue>({
       : undefined;
   }, [unknownValue]);
 
-  console.log("selected", selected);
   if (!selected?.from) return;
 
   return (
