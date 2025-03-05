@@ -1,14 +1,15 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
-import { Pie, PieChart } from "recharts";
+import React from "react";
+import { isWithinInterval } from "date-fns";
+import { type DateRange } from "react-day-picker";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";
 
 import type { ChartConfig } from "~/components/ui/chart";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
@@ -17,75 +18,112 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "~/components/ui/chart";
-
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 187, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 90, fill: "var(--color-other)" },
-];
+import { type getCategories_CACHED } from "~/features/category/server/cached-queries";
+import { type getTransactions_CACHED } from "~/features/transaction/server/cached-queries";
+import { getChildCategoryIds } from "../../utils";
 
 const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
+  desktop: {
+    label: "Desktop",
     color: "var(--chart-1)",
-  },
-  safari: {
-    label: "Safari",
-    color: "var(--chart-2)",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "var(--chart-3)",
-  },
-  edge: {
-    label: "Edge",
-    color: "var(--chart-4)",
-  },
-  other: {
-    label: "Other",
-    color: "var(--chart-5)",
   },
 } satisfies ChartConfig;
 
-export function ExpensesDistributionChart() {
+type TransactionType = Awaited<
+  ReturnType<typeof getTransactions_CACHED>
+>["data"][number];
+type CategoryType = Awaited<ReturnType<typeof getCategories_CACHED>>[number];
+
+export function ExpensesDistributionChart({
+  dateRange,
+  transactions,
+  categories,
+}: {
+  dateRange: DateRange | undefined;
+  transactions: TransactionType[];
+  categories: CategoryType[];
+}) {
+  const expenseId = categories.find((c) => c.slug === "expense")!.id;
+  const expenseIds = getChildCategoryIds(categories, expenseId);
+
+  const chartData = React.useMemo(() => {
+    if (!dateRange?.from || !dateRange.to) return [];
+
+    const currentPeriod = {
+      start: dateRange.from,
+      end: dateRange.to,
+    };
+
+    const expensesByCategory = transactions
+      .filter(({ date }) => isWithinInterval(date, currentPeriod))
+      .filter(({ categoryId }) => expenseIds.includes(categoryId ?? ""))
+      .reduce(
+        (acc, transaction) => {
+          const category =
+            categories.find((c) => c.id === transaction.categoryId)?.name ??
+            "Other";
+          const amount = parseFloat(transaction.amount);
+          acc[category] = (acc[category] ?? 0) + amount;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+    const chartData = Object.entries(expensesByCategory).map(
+      ([category, amount]) => ({
+        category,
+        amount: Math.abs(amount),
+        fill: `var(--chart-${Math.floor(Math.random() * 5) + 1})`,
+      }),
+    );
+
+    return chartData;
+  }, [categories, dateRange, expenseIds, transactions]);
+
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
-        <CardTitle>Pie Chart - Donut</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+    <Card>
+      <CardHeader>
+        <CardTitle>Distribuzione spese</CardTitle>
+        <CardDescription>
+          Ripartizione delle spese per categoria
+        </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
-        >
-          <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Pie
+      <CardContent>
+        {chartData.length === 0 ? (
+          <div>Ancora nessuna spesa per questo periodo</div>
+        ) : (
+          <ChartContainer config={chartConfig}>
+            <BarChart
+              accessibilityLayer
               data={chartData}
-              dataKey="visitors"
-              nameKey="browser"
-              innerRadius={60}
-            />
-          </PieChart>
-        </ChartContainer>
+              margin={{
+                top: 20,
+              }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="category"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                tickFormatter={(value: string) => value.slice(0, 3)}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Bar dataKey="amount" fill="var(--color-desktop)" radius={8}>
+                <LabelList
+                  position="top"
+                  offset={12}
+                  className="fill-foreground"
+                  fontSize={12}
+                />
+              </Bar>
+            </BarChart>
+          </ChartContainer>
+        )}
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 leading-none font-medium">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
-        </div>
-      </CardFooter>
     </Card>
   );
 }

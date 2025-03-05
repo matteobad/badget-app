@@ -37,8 +37,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { type getCategories_CACHED } from "~/features/category/server/cached-queries";
 import { type getTransactions_CACHED } from "~/features/transaction/server/cached-queries";
 import { cn } from "~/lib/utils";
-import { CashflowChart } from "./charts/cashflow-chart";
 import { ExpensesDistributionChart } from "./charts/expenses-distribution-chart";
+import { IncomeDistributionChart } from "./charts/income-distribution-chart";
 import { ExpenseCard } from "./expense-card";
 import { IncomeCard } from "./income-card";
 import { SavingsCard } from "./savings-card";
@@ -62,11 +62,11 @@ export function BankingDashboard({
   });
 
   return (
-    <div className="flex flex-col gap-4 md:gap-8">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Liquidità</h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Gestisci e analizza i tuoi flussi di cassa
           </p>
         </div>
@@ -119,10 +119,11 @@ export function BankingDashboard({
           <TabsTrigger value="overview">Panoramica</TabsTrigger>
           <TabsTrigger value="income">Entrate</TabsTrigger>
           <TabsTrigger value="expenses">Uscite</TabsTrigger>
+          <TabsTrigger value="savings">Risparmio</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3">
             <IncomeCard
               dateRange={date}
               transactions={transactions.data}
@@ -143,8 +144,16 @@ export function BankingDashboard({
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-            <CashflowChart />
-            <ExpensesDistributionChart />
+            <IncomeDistributionChart
+              dateRange={date}
+              transactions={transactions.data}
+              categories={categories}
+            />
+            <ExpensesDistributionChart
+              dateRange={date}
+              transactions={transactions.data}
+              categories={categories}
+            />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

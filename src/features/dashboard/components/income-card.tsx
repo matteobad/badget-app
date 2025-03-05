@@ -1,6 +1,11 @@
 import { useMemo } from "react";
 import { isWithinInterval, subMonths } from "date-fns";
-import { ArrowUpIcon, TrendingUpIcon } from "lucide-react";
+import {
+  ArrowUp01Icon,
+  EqualIcon,
+  TrendingDownIcon,
+  TrendingUpIcon,
+} from "lucide-react";
 import { type DateRange } from "react-day-picker";
 
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -66,17 +71,29 @@ export function IncomeCard({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Entrate</CardTitle>
-        <ArrowUpIcon className="h-4 w-4 text-emerald-500" />
+        <ArrowUp01Icon className="h-4 w-4 text-green-600" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">
           {formatAmount({ amount: income })}
         </div>
         <p className="text-xs text-muted-foreground">
-          <span className="flex items-center text-emerald-500">
-            <TrendingUpIcon className="mr-1 h-4 w-4" /> {delta}
-          </span>{" "}
-          rispetto alla media
+          {delta > 0 && (
+            <span className="flex items-center text-green-600">
+              <TrendingUpIcon className="mr-1 h-4 w-4" /> {delta.toFixed(2)} %
+            </span>
+          )}{" "}
+          {delta < 0 && (
+            <span className="flex items-center text-red-500">
+              <TrendingDownIcon className="mr-1 h-4 w-4" /> {delta.toFixed(2)} %
+            </span>
+          )}{" "}
+          {!delta && (
+            <span className="flex items-center text-slate-500">
+              <EqualIcon className="mr-1 h-4 w-4" /> Stabile
+            </span>
+          )}{" "}
+          rispetto al periodo precedente
         </p>
       </CardContent>
     </Card>
