@@ -40,7 +40,7 @@ const chartConfig = {
 
 export function CashflowChart() {
   return (
-    <Card>
+    <Card className="col-span-2">
       <CardHeader>
         <CardTitle>Flusso di cassa</CardTitle>
         <CardDescription>

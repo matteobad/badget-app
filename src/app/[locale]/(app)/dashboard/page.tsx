@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { CashflowChart } from "~/features/dashboard/components/charts/cashflow-chart";
 import { getBankingKPI_CACHED } from "~/features/dashboard/server/cached-queries";
 import { getRecentTransactions_CACHED } from "~/features/transaction/server/cached-queries";
 import PillarOverview from "../../../../features/dashboard/components/pillar-overview";
@@ -57,16 +58,7 @@ export default async function DashboardPage() {
 
             <RecentTransactionList promises={transactionPromise} />
 
-            <Card className="col-span-2">
-              <CardHeader>
-                <CardTitle>Panoramica Finanziaria</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 pt-2">
-                <div className="flex h-[250px] w-full items-center justify-center rounded-md bg-muted text-muted-foreground">
-                  Grafico distribuzione asset
-                </div>
-              </CardContent>
-            </Card>
+            <CashflowChart />
           </div>
         </div>
       </div>

@@ -62,13 +62,10 @@ export function BankingDashboard({
   });
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 p-2">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Liquidità</h1>
-          <p className="text-sm text-muted-foreground">
-            Gestisci e analizza i tuoi flussi di cassa
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">Primo Pilastro</h1>
         </div>
         <div className="flex items-center gap-2">
           <Popover>

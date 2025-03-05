@@ -44,7 +44,7 @@ export function getRecentTransactions_QUERY(userId: string) {
         eq(transaction_table.accountId, account_table.id),
       )
       .where(eq(transaction_table.userId, userId))
-      .limit(10)
+      .limit(9)
       .orderBy(desc(transaction_table.date));
   } catch (err) {
     console.error(err);
