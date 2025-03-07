@@ -2,7 +2,7 @@
 
 import type { dynamicIconImports } from "lucide-react/dynamic";
 import { use, useMemo, useState } from "react";
-import { Wallet2Icon } from "lucide-react";
+import { CircleDashed, Wallet2Icon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import { DataTable } from "~/components/data-table/data-table";
@@ -64,7 +64,10 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
     useState<DataTableRowAction<TransactionType> | null>(null);
   const [tableAction, setTableAction] = useState<DataTableAction | null>(null);
 
-  const columns = useMemo(() => getColumns({ setRowAction }), []);
+  const columns = useMemo(
+    () => getColumns({ accounts, categories, setRowAction }),
+    [accounts, categories],
+  );
 
   /**
    * This component can render either a faceted filter or a search filter based on the `options` prop.
@@ -99,17 +102,25 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
       id: "categoryId",
       label: "Categoria",
       type: "multi-select",
-      options: categories.map((category) => ({
-        label: category.name,
-        value: category.id,
-        icon: () => (
-          <DynamicIcon
-            className="mr-2 size-3.5"
-            name={category.icon as keyof typeof dynamicIconImports}
-          />
-        ),
-        count: categoryCounts[category.id],
-      })),
+      options: [
+        ...categories.map((category) => ({
+          label: category.name,
+          value: category.id,
+          icon: () => (
+            <DynamicIcon
+              className="mr-2 size-3.5"
+              name={category.icon as keyof typeof dynamicIconImports}
+            />
+          ),
+          count: categoryCounts[category.id],
+        })),
+        {
+          label: "Uncategorized",
+          value: "null",
+          icon: () => <CircleDashed className="mr-2 size-3.5" />,
+          count: categoryCounts.null,
+        },
+      ],
     },
     {
       id: "tags",

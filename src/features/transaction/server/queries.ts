@@ -58,19 +58,9 @@ export async function getTransactions_QUERY(userId: string) {
       const data = await tx
         .select({
           ...getTableColumns(transaction_table),
-          account: account_table,
-          category: category_table,
           tags: tag_table,
         })
         .from(transaction_table)
-        .leftJoin(
-          category_table,
-          eq(transaction_table.categoryId, category_table.id),
-        )
-        .leftJoin(
-          account_table,
-          eq(transaction_table.accountId, account_table.id),
-        )
         .leftJoin(
           transaction_to_tag_table,
           and(eq(transaction_table.id, transaction_to_tag_table.transactionId)),

@@ -20,6 +20,8 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { type getAccounts_CACHED } from "~/features/account/server/cached-queries";
+import { type getCategories_CACHED } from "~/features/category/server/cached-queries";
 import { type DB_TagType } from "~/server/db/schema/transactions";
 import { type DataTableRowAction } from "~/utils/data-table";
 import { formatAmount } from "~/utils/format";
@@ -30,12 +32,16 @@ export type TransactionType = Awaited<
 >["data"][number];
 
 interface GetColumnsProps {
+  accounts: Awaited<ReturnType<typeof getAccounts_CACHED>>;
+  categories: Awaited<ReturnType<typeof getCategories_CACHED>>;
   setRowAction: React.Dispatch<
     React.SetStateAction<DataTableRowAction<TransactionType> | null>
   >;
 }
 
 export function getColumns({
+  accounts,
+  categories,
   setRowAction,
 }: GetColumnsProps): ColumnDef<TransactionType>[] {
   return [
@@ -109,21 +115,29 @@ export function getColumns({
         <DataTableColumnHeader column={column} title="Categoria" />
       ),
       cell: ({ row }) => {
-        const name = row.original.category?.name ?? undefined;
-        const color = row.original.category?.color ?? undefined;
-        const icon = row.original.category?.icon ?? undefined;
+        const id = row.getValue("categoryId");
+        const category = categories.find((c) => c.id === id);
 
         return (
           <div className="flex items-center gap-2">
             <CategoryBadge
-              name={name}
-              color={color}
-              icon={icon as keyof typeof dynamicIconImports}
+              name={category?.name ?? "Uncategorized"}
+              color={category?.color ?? ""}
+              icon={
+                (category?.icon ??
+                  "circle-dashed") as keyof typeof dynamicIconImports
+              }
             />
           </div>
         );
       },
-      filterFn: "arrIncludesSome",
+      filterFn: (row, id, value) => {
+        const categoryId = row.getValue(id);
+        const selectedCategories = Array.isArray(value) ? value : [];
+        return selectedCategories.some((v) =>
+          v === "null" ? categoryId === null : v === categoryId,
+        );
+      },
       enableSorting: false,
     },
     {
@@ -160,20 +174,21 @@ export function getColumns({
         <DataTableColumnHeader column={column} title="Conto" />
       ),
       cell: ({ row }) => {
-        const account = row.original.account!;
+        const id = row.getValue("accountId");
+        const account = accounts.find((c) => c.id === id);
 
         return (
           <div className="flex items-center gap-2">
             <Avatar className="size-5">
               <AvatarImage
-                src={account.logoUrl!}
-                alt={`${account.name} logo`}
+                src={account?.logoUrl ?? ""}
+                alt={`${account?.name} logo`}
               ></AvatarImage>
               <AvatarFallback>
                 <Wallet2Icon className="size-3" />
               </AvatarFallback>
             </Avatar>
-            <span className="whitespace-nowrap">{account.name}</span>
+            <span className="whitespace-nowrap">{account?.name}</span>
           </div>
         );
       },

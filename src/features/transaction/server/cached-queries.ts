@@ -2,8 +2,6 @@ import "server-only";
 
 import { unstable_cache } from "next/cache";
 
-import { type DB_AccountType } from "~/server/db/schema/accounts";
-import { type DB_CategoryType } from "~/server/db/schema/categories";
 import {
   type DB_TagType,
   type DB_TransactionType,
@@ -17,8 +15,6 @@ import {
 } from "./queries";
 
 type TransactionType = DB_TransactionType & {
-  account: DB_AccountType | null;
-  category: DB_CategoryType | null;
   tags: DB_TagType[];
 };
 
