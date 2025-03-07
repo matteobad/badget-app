@@ -2,6 +2,7 @@
 
 import type {
   ColumnFiltersState,
+  PaginationState,
   RowSelectionState,
   TableOptions,
   TableState,
@@ -19,7 +20,12 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
+import {
+  parseAsArrayOf,
+  parseAsInteger,
+  parseAsString,
+  useQueryStates,
+} from "nuqs";
 
 import {
   type DataTableFilterField,
@@ -120,6 +126,11 @@ export function useDataTable<TData>({
     };
   }, [scroll, shallow, clearOnDefault, startTransition]);
 
+  const [{ page, pageSize }, setPaginationState] = useQueryStates({
+    page: parseAsInteger.withDefault(1).withOptions(queryStateOptions),
+    pageSize: parseAsInteger.withDefault(10).withOptions(queryStateOptions),
+  });
+
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
     initialState?.rowSelection ?? {},
   );
@@ -207,18 +218,53 @@ export function useDataTable<TData>({
     [setFilterValues, filterableColumns, searchableColumns],
   );
 
+  const onPaginationChange = React.useCallback(
+    (updaterOrValue: Updater<PaginationState>) => {
+      if (typeof updaterOrValue === "function") {
+        const current = { pageIndex: page - 1, pageSize };
+        const next = updaterOrValue(current);
+        if (
+          current.pageIndex === next.pageIndex &&
+          current.pageSize === next.pageSize
+        )
+          return;
+        void setPaginationState({
+          page: next.pageIndex + 1,
+          pageSize: next.pageSize,
+        });
+      } else {
+        void setPaginationState({
+          page: updaterOrValue.pageIndex + 1,
+          pageSize: updaterOrValue.pageSize,
+        });
+      }
+    },
+    [page, pageSize, setPaginationState],
+  );
+
   const table = useReactTable({
     ...props,
-    initialState,
+    initialState: {
+      ...initialState,
+      pagination: {
+        pageIndex: page - 1,
+        pageSize,
+      },
+    },
     state: {
       columnVisibility,
       rowSelection,
       columnFilters,
+      pagination: {
+        pageIndex: page - 1,
+        pageSize,
+      },
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange,
+    onPaginationChange,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

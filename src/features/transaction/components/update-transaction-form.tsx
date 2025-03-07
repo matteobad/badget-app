@@ -59,22 +59,18 @@ export default function UpdateTransactionForm({
   const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
-  const { execute, isExecuting, reset } = useAction(updateTransactionAction, {
+  const { execute, isExecuting } = useAction(updateTransactionAction, {
     onError: ({ error }) => {
-      console.error(error);
       toast.error(error.serverError);
     },
     onSuccess: ({ data }) => {
-      console.log(data?.message);
-      toast.success("Transazione aggiornata!");
-      reset();
+      toast.success(data?.message);
       onComplete();
     },
   });
 
   const deleteAttachment = useAction(deleteTransactionAttachmentAction, {
     onError: ({ error }) => {
-      console.error(error);
       toast.error(error.serverError);
     },
     onSuccess: ({ data, input }) => {
