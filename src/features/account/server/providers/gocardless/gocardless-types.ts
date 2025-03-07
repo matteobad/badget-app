@@ -137,6 +137,8 @@ export type GC_Transaction = {
   internalTransactionId: string;
   bookingDate: string;
   valueDate?: string;
+  bookingDateTime?: string;
+  valueDateTime?: string;
   additionalInformation?: string;
   creditorName?: string;
   creditorAccount?: { iban?: string };

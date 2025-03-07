@@ -212,7 +212,7 @@ export const mapTransactionsResponse = (transaction: GC_Transaction) => {
 
   return {
     rawId: transaction.internalTransactionId ?? transaction.transactionId,
-    date: parseISO(transaction.bookingDate),
+    date: parseISO(transaction.bookingDateTime ?? transaction.bookingDate),
     // method,
     amount: transaction.transactionAmount.amount,
     currency: transaction.transactionAmount.currency,

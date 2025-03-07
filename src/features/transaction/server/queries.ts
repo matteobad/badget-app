@@ -54,10 +54,14 @@ export function getRecentTransactions_QUERY(userId: string) {
 
 export async function getTransactions_QUERY(userId: string) {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { createdAt, rawId, updatedAt, ...rest } =
+      getTableColumns(transaction_table);
+
     const { data } = await db.transaction(async (tx) => {
       const data = await tx
         .select({
-          ...getTableColumns(transaction_table),
+          ...rest,
           tags: tag_table,
         })
         .from(transaction_table)
