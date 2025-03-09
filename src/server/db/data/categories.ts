@@ -1,6 +1,8 @@
 // import { type Category } from "..";
 // import { CategoryType } from "../schema/enum";
 
+import { type dynamicIconImports } from "lucide-react/dynamic";
+
 import { type DB_CategoryInsertType } from "../schema/categories";
 
 // const userId = "user_2jnV56cv1CJrRNLFsUdm6XAf7GD";
@@ -55,3 +57,57 @@ export const DEFAULT_CATEGORIES: DB_CategoryInsertType[] = [
     userId: null,
   },
 ];
+
+export const categoryIcons = [
+  "shopping-bag",
+  "utensils",
+  "car",
+  "bus",
+  "train",
+  "plane",
+  "home",
+  "building",
+  "dumbbell",
+  "stethoscope",
+  "pill",
+  "heartbeat",
+  "baby",
+  "graduation-cap",
+  "book",
+  "briefcase",
+  "coffee",
+  "beer",
+  "wine",
+  "gift",
+  "gamepad",
+  "tv",
+  "music",
+  "headphones",
+  "camera",
+  "phone",
+  "laptop",
+  "server",
+  "wrench",
+  "tools",
+  "credit-card",
+  "banknote",
+  "piggy-bank",
+  "wallet",
+  "receipt",
+  "shopping-cart",
+  "leaf",
+  "sun",
+  "flower",
+  "paw-print",
+  "hand-heart",
+  "users",
+  "globe",
+  "plane-departure",
+  "plane-arrival",
+  "file-text",
+  "file-invoice",
+  "alarm-clock",
+  "calendar",
+  "heart",
+  "sparkles",
+] as Array<keyof typeof dynamicIconImports>;

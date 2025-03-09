@@ -1,117 +1,102 @@
 import "dotenv/config";
 
-import type { DB_AccountInsertType } from "./schema/accounts";
-import type { DB_ConnectionInsertType } from "./schema/open-banking";
-import { db } from ".";
-import { DEFAULT_CATEGORIES } from "./data/categories";
-import { category_table } from "./schema/categories";
-import { buildConflictUpdateColumns } from "./utils";
+import { reset, seed } from "drizzle-seed";
 
-// import { DEFAULT_CATEGORIES } from "./data/categories";
-
-// eslint-disable-next-line drizzle/enforce-delete-with-where
-// await db.delete(schema.category);
-// await db.insert(schema.category).values(
-//   DEFAULT_CATEGORIES.map((c) => {
-//     return {
-//       ...c,
-//       manual: false,
-//       userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
-//     };
-//   }),
-// );
-// // eslint-disable-next-line drizzle/enforce-delete-with-where
-// await db.delete(schema.institutions);
-// await db.insert(schema.institutions).values(institutionsMock);
-// // eslint-disable-next-line drizzle/enforce-delete-with-where
-// await db.delete(schema.accounts);
-// await db.insert(schema.accounts).values(accountsMock);
-// // eslint-disable-next-line drizzle/enforce-delete-with-where
-// await db.delete(schema.balances);
-// await db.insert(schema.balances).values(balancesMock);
-
-// eslint-disable-next-line drizzle/enforce-delete-with-where
-// await db.delete(schema.pensionFunds);
-// await db.delete(schema.pensionAccounts);
-// await db.delete(schema.investmentBranches);
-// await db.delete(schema.investmentBranchesPerf);
-
-// for (const [_, { investmentBranches, ...rest }] of pensionFundsMock) {
-//   const inserted = await db
-//     .insert(schema.pensionFunds)
-//     .values(rest)
-//     .returning({ insertedId: schema.pensionFunds.id });
-
-//   for (const investmentBranch of investmentBranches) {
-//     const insertedBranches = await db
-//       .insert(schema.investmentBranches)
-//       .values({
-//         ...investmentBranch,
-//         pensionFundId: inserted[0]?.insertedId,
-//       })
-//       .returning({ insertedId: schema.pensionFunds.id });
-
-//     await db.insert(schema.investmentBranchesPerf).values(
-//       investmentBranch.performances.map((perf) => {
-//         return {
-//           ...perf,
-//           investmentBranchId: insertedBranches[0]?.insertedId!,
-//         };
-//       }),
-//     );
-//   }
-// }
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const CONNECTIONS_DATA: DB_ConnectionInsertType[] = [
-  {
-    institutionId: "n5doi0t2ubrvn7wtdjhrtf16",
-    provider: "GOCARDLESS",
-    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
-    referenceId: "d33ae4ee-6952-4e16-85c7-fa9c8bc0a2a5",
-  },
-];
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const ACCOUNTS_DATA: DB_AccountInsertType[] = [
-  {
-    name: "Revolut",
-    balance: "0",
-    currency: "EUR",
-    type: "checking",
-    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
-  },
-  {
-    name: "N26",
-    balance: "0",
-    currency: "EUR",
-    type: "checking",
-    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
-  },
-  {
-    name: "Hype",
-    balance: "0",
-    currency: "EUR",
-    type: "checking",
-    userId: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD",
-  },
-];
+import { db, schema } from ".";
+import { categoryIcons } from "./data/categories";
+import { AccountType, CONNECTION_STATUS, Provider } from "./schema/enum";
 
 async function main() {
-  // await reset(db, schema);
+  /* eslint-disable */
+  const {
+    groups,
+    groupsRelations,
+    users,
+    usersToGroupsRelations,
+    usersRelations,
+    usersToGroups,
+    workspaceToAccounts,
+    workspaceToAccountsRelations,
+    ...rest
+  } = schema;
+  /* eslint-enable */
 
-  // await db.insert(connection_table).values(CONNECTIONS_DATA);
-  // await db.insert(account_table).values(ACCOUNTS_DATA);
-  await db
-    .insert(category_table)
-    .values(DEFAULT_CATEGORIES)
-    .onConflictDoUpdate({
-      target: [category_table.slug, category_table.userId],
-      set: buildConflictUpdateColumns(category_table, ["color", "icon"]),
-    });
-  // await seed(db, schema, {
-  //   count: 10,
-  // });
+  await reset(db, rest);
+
+  await seed(db, rest).refine((f) => ({
+    category_table: {
+      columns: {
+        icon: f.valuesFromArray({ values: categoryIcons, isUnique: true }),
+        description: f.loremIpsum({ sentencesCount: 1 }),
+        userId: f.default({ defaultValue: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD" }),
+        deletedAt: f.default({ defaultValue: null }),
+      },
+      count: 10,
+    },
+    institution_table: {
+      columns: {
+        popularity: f.int({ minValue: 0, maxValue: 100 }),
+        name: f.companyName({ isUnique: true }),
+        originalId: f.uuid(),
+        provider: f.valuesFromArray({
+          values: Object.values(Provider),
+        }),
+        countries: f.default({ defaultValue: ["IT"] }),
+        deletedAt: f.default({ defaultValue: null }),
+      },
+      count: 100,
+    },
+    connection_table: {
+      columns: {
+        provider: f.valuesFromArray({
+          values: Object.values(Provider),
+        }),
+        status: f.valuesFromArray({
+          values: Object.values(CONNECTION_STATUS),
+        }),
+        referenceId: f.uuid(),
+        userId: f.default({ defaultValue: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD" }),
+        deletedAt: f.default({ defaultValue: null }),
+      },
+      with: {
+        account_table: 3,
+      },
+      count: 5,
+    },
+    account_table: {
+      columns: {
+        name: f.companyName(),
+        balance: f.int({ minValue: 0 }),
+        currency: f.default({ defaultValue: "EUR" }),
+        description: f.loremIpsum({ sentencesCount: 1 }),
+        type: f.valuesFromArray({
+          values: Object.values(AccountType),
+        }),
+        userId: f.default({ defaultValue: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD" }),
+        deletedAt: f.default({ defaultValue: null }),
+      },
+      with: {
+        transaction_table: 500,
+      },
+    },
+    transaction_table: {
+      columns: {
+        amount: f.int({ minValue: 0 }),
+        currency: f.default({ defaultValue: "EUR" }),
+        description: f.loremIpsum({ sentencesCount: 1 }),
+        note: f.loremIpsum({ sentencesCount: 2 }),
+        rawId: f.uuid(),
+        userId: f.default({ defaultValue: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD" }),
+        deletedAt: f.default({ defaultValue: null }),
+      },
+    },
+    tag_table: {
+      columns: {
+        userId: f.default({ defaultValue: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD" }),
+        deletedAt: f.default({ defaultValue: null }),
+      },
+    },
+  }));
 
   await db.$client.end();
 }

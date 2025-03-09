@@ -26,7 +26,7 @@ type PageProps = {
 export default async function TransactionsPage({ searchParams }: PageProps) {
   // ⚠️ Don't forget to call `parse` here.
   // You can access type-safe values from the returned object:
-  const {} = await transactionsSearchParamsCache.parse(searchParams);
+  const { ...search } = await transactionsSearchParamsCache.parse(searchParams);
 
   const session = await auth();
   if (!session.userId) throw new Error("User not found");
@@ -34,7 +34,7 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
   const [institutions] = await Promise.all([getInstitutionsForCountry("IT")]);
 
   const promises = Promise.all([
-    getTransactions_CACHED(session.userId),
+    getTransactions_CACHED(search, session.userId),
     getTransactionCategoryCounts_CACHED(session.userId),
     getTransactionTagCounts_CACHED(session.userId),
     getTransactionAccountCounts_CACHED(session.userId),

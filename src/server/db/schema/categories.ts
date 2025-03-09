@@ -31,7 +31,7 @@ export const category_table = pgTable(
     slug: varchar({ length: 64 }).notNull(),
     color: varchar({ length: 32 }),
     icon: varchar({ length: 32 }),
-    description: varchar({ length: 128 }),
+    description: text(),
 
     ...timestamps,
   },

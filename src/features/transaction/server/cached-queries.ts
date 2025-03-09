@@ -1,11 +1,11 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
-
+import { unstable_cache } from "~/lib/unstable-cache";
 import {
   type DB_TagType,
   type DB_TransactionType,
 } from "~/server/db/schema/transactions";
+import { type GeTransactionType } from "../utils/search-params";
 import {
   getRecentTransactions_QUERY,
   getTransactionAccountCounts_QUERY,
@@ -37,12 +37,15 @@ export const getRecentTransactions_CACHED = (userId: string) => {
   )();
 };
 
-export const getTransactions_CACHED = (userId: string) => {
-  const cacheKeys = ["transaction", `transaction_${userId}`];
+export const getTransactions_CACHED = (
+  input: GeTransactionType,
+  userId: string,
+) => {
+  const cacheKeys = [`transaction_${JSON.stringify({ ...input, userId })}`];
 
   return unstable_cache(
     async () => {
-      const { data } = await getTransactions_QUERY(userId);
+      const { data, pageCount } = await getTransactions_QUERY(input, userId);
 
       // NOTE: do whatever you want here, map, aggregate filter...
       // result will be cached and typesafety preserved
@@ -65,11 +68,12 @@ export const getTransactions_CACHED = (userId: string) => {
 
       return {
         data: transactions,
+        pageCount,
       };
     },
     cacheKeys,
     {
-      tags: cacheKeys,
+      tags: [`transaction_${userId}`],
       revalidate: 3600,
     },
   )();

@@ -51,7 +51,7 @@ interface TransactionsTableProps {
 
 export function TransactionsTable({ promises }: TransactionsTableProps) {
   const [
-    { data },
+    { data, pageCount },
     categoryCounts,
     tagCounts,
     accountCounts,
@@ -59,6 +59,8 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
     tags,
     accounts,
   ] = use(promises);
+
+  console.log("tags", tags);
 
   const [rowAction, setRowAction] =
     useState<DataTableRowAction<TransactionType> | null>(null);
@@ -158,13 +160,14 @@ export function TransactionsTable({ promises }: TransactionsTableProps) {
   const { table } = useDataTable({
     data,
     columns,
+    pageCount,
     filterFields,
     initialState: {
       sorting: [{ id: "date", desc: true }],
       columnPinning: { right: ["actions"] },
     },
     getRowId: (originalRow) => originalRow.id,
-    shallow: true,
+    shallow: false,
     clearOnDefault: true,
   });
 

@@ -12,17 +12,21 @@ import { type DB_TransactionType } from "~/server/db/schema/transactions";
 
 export const transactionsParsers = {
   page: parseAsInteger.withDefault(1),
-  perPage: parseAsInteger.withDefault(20),
+  perPage: parseAsInteger.withDefault(10),
   sort: getSortingStateParser<DB_TransactionType>().withDefault([
     { id: "date", desc: true },
   ]),
   date: parseAsArrayOf(parseAsString).withDefault([]),
   description: parseAsString.withDefault(""),
   amount: parseAsArrayOf(parseAsString).withDefault([]),
-  category: parseAsArrayOf(parseAsString).withDefault([]),
+  categoryId: parseAsArrayOf(parseAsString).withDefault([]),
   tags: parseAsArrayOf(parseAsString).withDefault([]),
-  account: parseAsArrayOf(parseAsString).withDefault([]),
+  accountId: parseAsArrayOf(parseAsString).withDefault([]),
 };
 
 export const transactionsSearchParamsCache =
   createSearchParamsCache(transactionsParsers);
+
+export type GeTransactionType = Awaited<
+  ReturnType<typeof transactionsSearchParamsCache.parse>
+>;
