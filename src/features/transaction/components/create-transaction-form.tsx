@@ -116,9 +116,6 @@ export default function CreateTransactionForm({
     },
   });
 
-  const category = form.watch("categoryId");
-  const incomeId = categories.find((c) => c.slug === "income")!.id;
-
   return (
     <Form {...form}>
       <form
@@ -201,12 +198,7 @@ export default function CreateTransactionForm({
 
                       if (form.getFieldState("categoryId").isDirty) return;
 
-                      if (values.floatValue && values.floatValue > 0) {
-                        form.setValue("categoryId", incomeId);
-                      }
-
                       if (
-                        category === incomeId &&
                         values.floatValue !== undefined &&
                         values.floatValue < 0
                       ) {
