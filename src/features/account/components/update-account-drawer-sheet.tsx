@@ -1,10 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
-import { useQueryStates } from "nuqs";
-
 import { AccountAvatar } from "~/components/account-avatar";
 import { Button } from "~/components/ui/button";
+import { type Dialog } from "~/components/ui/dialog";
 import {
   Drawer,
   DrawerClose,
@@ -25,50 +23,32 @@ import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { formatAmount } from "~/utils/format";
 import { type getAccountsForUser_CACHED } from "../server/cached-queries";
-import { accountsParsers } from "../utils/search-params";
 import UpdateAccountForm from "./update-account-form";
 
-type GroupedAccount = Awaited<
+type AccountType = Awaited<
   ReturnType<typeof getAccountsForUser_CACHED>
->[number];
+>[number][number];
+
+interface UpdateAccountDrawerSheetProps
+  extends React.ComponentPropsWithRef<typeof Dialog> {
+  account: AccountType;
+}
 
 export default function UpdateAccountDrawerSheet({
-  data,
-}: {
-  data: GroupedAccount[];
-}) {
-  const [{ id }, setParams] = useQueryStates(accountsParsers);
+  account,
+  ...props
+}: UpdateAccountDrawerSheetProps) {
   const isMobile = useIsMobile();
-
-  const open = !!id;
-
-  const handleClose = () => {
-    void setParams({ id: null });
-  };
-
-  const { account, connection, institution } = useMemo(() => {
-    const item = data.find((_) => _.accounts.find((a) => a.id === id));
-    return {
-      account: item?.accounts.find((a) => a.id === id),
-      connection: item?.connection ?? null,
-      institution: item?.institution ?? null,
-    };
-  }, [id, data]);
-
-  if (!account) return;
 
   const DrawerSheetContent = () => (
     <>
       <div className="mb-8 flex justify-between">
         <AccountAvatar
           account={{
-            name: institution?.name ?? "",
-            logoUrl: institution?.logo ?? "",
+            name: account.institution?.name ?? "",
+            logoUrl: account.institution?.logo ?? "",
           }}
         />
-        <div className="text-sm text-muted-foreground">
-          {connection?.provider.toLowerCase()}
-        </div>
       </div>
 
       <div className="mb-8 flex flex-col gap-2">
@@ -81,14 +61,14 @@ export default function UpdateAccountDrawerSheet({
       <UpdateAccountForm
         className={cn({ "px-4": isMobile })}
         account={account}
-        onComplete={handleClose}
+        onComplete={() => props.onOpenChange!(false)}
       />
     </>
   );
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleClose}>
+      <Drawer {...props}>
         <DrawerContent>
           <DrawerHeader className="sr-only">
             <DrawerTitle>Modifica spesa o entrata</DrawerTitle>
@@ -110,7 +90,7 @@ export default function UpdateAccountDrawerSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
+    <Sheet {...props}>
       <SheetContent className="p-4 [&>button]:hidden">
         <div className="flex h-full flex-col">
           <SheetHeader className="sr-only">

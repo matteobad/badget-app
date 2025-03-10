@@ -40,8 +40,18 @@ export const getInstitutionById = (institutionId: string) => {
 // connections
 export const getConnectionsforUser = (userId: string) => {
   return db
-    .select()
+    .select({
+      ...getTableColumns(connection_table),
+      institution: {
+        name: institution_table.name,
+        logo: institution_table.logo,
+      },
+    })
     .from(connection_table)
+    .leftJoin(
+      institution_table,
+      eq(institution_table.id, connection_table.institutionId),
+    )
     .where(eq(connection_table.userId, userId));
 };
 
@@ -117,14 +127,9 @@ export const getAccountsForUser = (userId: string) => {
   return db
     .select({
       ...getTableColumns(account_table),
-      connection: connection_table,
       institution: institution_table,
     })
     .from(account_table)
-    .leftJoin(
-      connection_table,
-      eq(connection_table.id, account_table.connectionId),
-    )
     .leftJoin(
       institution_table,
       eq(institution_table.id, account_table.institutionId),
