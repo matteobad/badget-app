@@ -11,6 +11,7 @@ import {
 
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
+import { type CategoryType } from "./enum";
 
 export const category_table = pgTable(
   "category_table",
@@ -27,6 +28,7 @@ export const category_table = pgTable(
       { onDelete: "set null" },
     ),
 
+    type: text().$type<CategoryType>().notNull(),
     name: varchar({ length: 64 }).notNull(),
     slug: varchar({ length: 64 }).notNull(),
     color: varchar({ length: 32 }),
@@ -35,8 +37,7 @@ export const category_table = pgTable(
 
     ...timestamps,
   },
-  // REF: https://github.com/drizzle-team/drizzle-orm/issues/3764
-  (t) => [unique().on(t.slug, t.userId).nullsNotDistinct()],
+  (t) => [unique().on(t.slug, t.userId)],
 );
 
 export type DB_CategoryType = typeof category_table.$inferSelect;

@@ -13,8 +13,7 @@ import {
   PiggyBank,
   ReceiptIcon,
   Send,
-  Settings,
-  Shapes,
+  ShapesIcon,
 } from "lucide-react";
 
 import { NavMain } from "~/components/nav-main";
@@ -25,7 +24,6 @@ import {
   SidebarHeader,
 } from "~/components/ui/sidebar";
 import { NavPillars } from "./nav-pillars";
-import { NavSettings } from "./nav-settings";
 import { NavWealth } from "./nav-wealth";
 import { TeamSwitcher } from "./team-switcher";
 
@@ -45,6 +43,11 @@ const data = {
       title: "Transazioni",
       url: "/transactions",
       icon: ReceiptIcon,
+    },
+    {
+      title: "Categorie",
+      url: "/categories",
+      icon: ShapesIcon,
     },
   ],
   navPillars: [
@@ -93,18 +96,6 @@ const data = {
       icon: Send,
     },
   ],
-  settings: [
-    {
-      name: "Preferenze",
-      url: "/settings",
-      icon: Settings,
-    },
-    {
-      name: "Categorie",
-      url: "/settings/categories",
-      icon: Shapes,
-    },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -117,7 +108,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
         <NavPillars items={data.navPillars} />
         <NavWealth items={data.navWealth} />
-        <NavSettings settings={data.settings} />
       </SidebarContent>
       <SidebarFooter>
         <span className="text-center text-xs text-muted-foreground">

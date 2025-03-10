@@ -4,7 +4,12 @@ import { reset, seed } from "drizzle-seed";
 
 import { db, schema } from ".";
 import { categoryIcons } from "./data/categories";
-import { AccountType, CONNECTION_STATUS, Provider } from "./schema/enum";
+import {
+  AccountType,
+  CATEGORY_TYPE,
+  CONNECTION_STATUS,
+  Provider,
+} from "./schema/enum";
 
 async function main() {
   /* eslint-disable */
@@ -26,6 +31,10 @@ async function main() {
   await seed(db, rest).refine((f) => ({
     category_table: {
       columns: {
+        parentId: f.default({ defaultValue: null }),
+        type: f.valuesFromArray({
+          values: Object.values(CATEGORY_TYPE),
+        }),
         icon: f.valuesFromArray({ values: categoryIcons, isUnique: true }),
         description: f.loremIpsum({ sentencesCount: 1 }),
         userId: f.default({ defaultValue: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD" }),
