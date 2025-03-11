@@ -2,10 +2,11 @@
 
 import type { JSX } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Box,
-  ChevronDown,
+  CalendarIcon,
   ChevronRight,
   Folder,
   Info,
@@ -33,6 +34,9 @@ import {
 } from "~/components/ui/hover-card";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
+import { Calendar } from "./ui/calendar";
+import { Card } from "./ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 export interface TreeViewItem {
   id: string;
@@ -471,7 +475,7 @@ function TreeItem({
                   </HoverCard>
                 </div>
               ) : (
-                <div className="group flex flex-1 items-center gap-2 pl-8">
+                <div className="group flex flex-1 items-center gap-2 pl-[11px]">
                   {showAccessRights && (
                     <div
                       className="relative flex h-4 w-4 cursor-pointer items-center justify-center hover:opacity-80"
@@ -498,6 +502,9 @@ function TreeItem({
                       )}
                     </div>
                   )}
+                  <div className="flex size-5 items-center justify-center">
+                    <span className="size-1.5 rounded-full bg-slate-200"></span>
+                  </div>
                   {renderIcon()}
                   <span className="flex-1">{item.name}</span>
                   <HoverCard>
@@ -629,6 +636,7 @@ export default function TreeView({
   const [isDragging, setIsDragging] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const [date, setDate] = useState<Date>();
 
   const dragRef = useRef<HTMLDivElement>(null);
   const lastSelectedId = useRef<string | null>(null);
@@ -892,9 +900,9 @@ export default function TreeView({
 
   return (
     <div className="flex gap-4">
-      <div
+      <Card
         ref={treeRef}
-        className="relative w-full max-w-2xl space-y-4 bg-background"
+        className="relative w-full max-w-2xl space-y-4 bg-background p-4"
       >
         <AnimatePresence mode="wait">
           {selectedIds.size > 0 ? (
@@ -969,31 +977,60 @@ export default function TreeView({
                   className="h-10 pl-9"
                 />
               </div>
-              {showExpandAll && (
-                <div className="flex shrink-0 gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-10 px-2"
-                    onClick={handleExpandAll}
+                    variant={"outline"}
+                    className={cn(
+                      "w-[250px] justify-start text-left font-normal",
+                      !date && "text-muted-foreground",
+                    )}
                   >
-                    <ChevronDown className="mr-1 h-4 w-4" />
-                    Expand All
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-10 px-2"
-                    onClick={handleCollapseAll}
-                  >
-                    <ChevronRight className="mr-1 h-4 w-4" />
-                    Collapse All
-                  </Button>
-                </div>
-              )}
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </motion.div>
           )}
         </AnimatePresence>
+
+        <div className="flex items-center gap-4">
+          <div className="flex flex-1 items-center gap-4">
+            <h3 className="text-lg font-medium">Categorie</h3>
+
+            {showExpandAll && (
+              <div className="flex shrink-0 gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="px-2 text-xs"
+                  onClick={handleExpandAll}
+                >
+                  Expand All
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="px-2 text-xs"
+                  onClick={handleCollapseAll}
+                >
+                  Collapse All
+                </Button>
+              </div>
+            )}
+          </div>
+          <p className="text-sm font-medium text-muted-foreground">Budget</p>
+          <p className="text-sm font-medium text-muted-foreground">Speso</p>
+        </div>
 
         <div
           ref={dragRef}
@@ -1036,7 +1073,7 @@ export default function TreeView({
             />
           ))}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
