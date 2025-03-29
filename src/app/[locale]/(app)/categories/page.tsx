@@ -11,7 +11,7 @@ import {
 } from "~/components/ui/card";
 import { CategoryFilters } from "~/features/category/components/category-filters";
 import { CategoryTreeview } from "~/features/category/components/category-treeview";
-import { getCategories_QUERY } from "~/features/category/server/queries";
+import { getCategoriesWithBudgets_CACHED } from "~/features/category/server/cached-queries";
 import { categoriesSearchParamsCache } from "~/features/category/utils/search-params";
 
 export default async function BudgetsPage({
@@ -27,7 +27,7 @@ export default async function BudgetsPage({
   if (!session.userId) throw new Error("User not found");
 
   const userId = session.userId;
-  const promise = Promise.all([getCategories_QUERY(userId)]);
+  const promise = Promise.all([getCategoriesWithBudgets_CACHED(userId)]);
 
   return (
     <div className="flex flex-1 flex-col gap-2 p-4 pt-0">
@@ -42,9 +42,9 @@ export default async function BudgetsPage({
           <Button size="sm" variant="outline">
             <ScaleIcon /> Ridistribuisci
           </Button>
-          <div className="flex items-center gap-4 text-muted-foreground">
-            Restante:{" "}
-            <span className="font-mono text-primary">250€ / mese</span>
+          <div className="flex items-center text-muted-foreground">
+            <span className="font-mono text-primary">250 €</span>
+            <span className="w-[86px] text-right">rimanenti</span>
           </div>
         </CardFooter>
         {/* <CategoryDataTable categories={categories} /> */}

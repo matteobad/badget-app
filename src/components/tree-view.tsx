@@ -3,7 +3,15 @@
 import type { JSX } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Box, ChevronRight, Folder, Info } from "lucide-react";
+import {
+  Box,
+  ChevronRight,
+  EllipsisVerticalIcon,
+  Folder,
+  Info,
+  RefreshCwIcon,
+  UnlinkIcon,
+} from "lucide-react";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -18,13 +26,22 @@ import {
   HoverCardTrigger,
 } from "~/components/ui/hover-card";
 import { cn } from "~/lib/utils";
+import { type DB_BudgetType } from "~/server/db/schema/budgets";
 import { CATEGORY_TYPE } from "~/server/db/schema/enum";
+import { formatAmount } from "~/utils/format";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 export interface TreeViewItem {
   id: string;
   name: string;
   type: string;
   icon: string;
+  budgets: DB_BudgetType[];
   children?: TreeViewItem[];
 }
 
@@ -106,7 +123,6 @@ function TreeItem({
   const isOpen = expandedIds.has(item.id);
   const isSelected = selectedIds.has(item.id);
   const itemRef = useRef<HTMLDivElement>(null);
-  const [selectionStyle, setSelectionStyle] = useState("");
 
   // Get all visible items in order
   const getVisibleItems = useCallback(
@@ -124,37 +140,6 @@ function TreeItem({
     },
     [expandedIds],
   );
-
-  useEffect(() => {
-    if (!isSelected) {
-      setSelectionStyle("");
-      return;
-    }
-
-    // Get all visible items from the entire tree
-    const visibleItems = getVisibleItems(allItems);
-    const currentIndex = visibleItems.findIndex((i) => i.id === item.id);
-
-    const prevItem = visibleItems[currentIndex - 1];
-    const nextItem = visibleItems[currentIndex + 1];
-
-    const isPrevSelected = prevItem && selectedIds.has(prevItem.id);
-    const isNextSelected = nextItem && selectedIds.has(nextItem.id);
-
-    const roundTop = !isPrevSelected;
-    const roundBottom = !isNextSelected;
-
-    setSelectionStyle(
-      `${roundTop ? "rounded-t-md" : ""} ${roundBottom ? "rounded-b-md" : ""}`,
-    );
-  }, [
-    isSelected,
-    selectedIds,
-    expandedIds,
-    item.id,
-    getVisibleItems,
-    allItems,
-  ]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -267,10 +252,11 @@ function TreeItem({
         data-id={item.id}
         data-depth={depth}
         data-folder-closed={item.children && !isOpen}
-        className={`cursor-pointer select-none ${
-          isSelected ? `bg-orange-100 ${selectionStyle}` : "text-foreground"
-        } px-1`}
-        style={{ paddingLeft: `${depth * 20}px` }}
+        className={cn("cursor-pointer select-none", {
+          "bg-orange-100": isSelected,
+          "text-foreground": !isSelected,
+        })}
+        style={{ paddingLeft: `${depth * 30}px` }}
         onClick={handleClick}
       >
         <div className="flex h-8 items-center">
@@ -296,15 +282,7 @@ function TreeItem({
                 </CollapsibleTrigger>
               </Collapsible>
               {renderIcon()}
-              <span className="flex-1">{item.name}</span>
-              {selectedCount !== null && selectedCount > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="mr-2 bg-blue-100 hover:bg-blue-100"
-                >
-                  {selectedCount} selected
-                </Badge>
-              )}
+              <span className="flex-1 pl-1 whitespace-nowrap">{item.name}</span>
               <HoverCard>
                 <HoverCardTrigger asChild>
                   <Button
@@ -340,10 +318,36 @@ function TreeItem({
                   </div>
                 </HoverCardContent>
               </HoverCard>
+              {selectedCount !== null && selectedCount > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="mr-2 bg-blue-100 hover:bg-blue-100"
+                >
+                  {selectedCount} selected
+                </Badge>
+              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="size-6 p-0">
+                    <span className="sr-only">Open menu</span>
+                    <EllipsisVerticalIcon className="size-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>
+                    <RefreshCwIcon className="size-3" />
+                    Modifica
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive">
+                    <UnlinkIcon className="size-3" />
+                    Elimina
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ) : (
-            <div className="group flex flex-1 items-center gap-2 pl-[11px]">
-              <div className="flex size-5 items-center justify-center">
+            <div className="group flex flex-1 items-center gap-2">
+              <div className="flex size-6 items-center justify-center">
                 <span
                   className={cn("size-1.5 rounded-full bg-slate-200", {
                     "bg-green-200": item.type === CATEGORY_TYPE.INCOME,
@@ -355,7 +359,7 @@ function TreeItem({
                 ></span>
               </div>
               {renderIcon()}
-              <span className="flex-1">{item.name}</span>
+              <span className="flex-1 pl-1 whitespace-nowrap">{item.name}</span>
               <HoverCard>
                 <HoverCardTrigger asChild>
                   <Button
@@ -387,6 +391,44 @@ function TreeItem({
                   </div>
                 </HoverCardContent>
               </HoverCard>
+
+              <div className="flex items-center gap-4">
+                {item.budgets.length > 1 && (
+                  <Badge variant="secondary">
+                    {item.budgets.length + " budgets"}
+                  </Badge>
+                )}
+
+                <span className="w-[80px] text-right font-mono">
+                  {item.budgets[0]?.amount
+                    ? formatAmount({
+                        amount: parseFloat(item.budgets[0].amount),
+                        maximumFractionDigits: 0,
+                      })
+                    : "n/a"}
+                </span>
+                <span className="w-[30px] font-mono text-xs text-muted-foreground">
+                  100%
+                </span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="size-6 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <EllipsisVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>
+                      <RefreshCwIcon className="size-3" />
+                      Modifica
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive">
+                      <UnlinkIcon className="size-3" />
+                      Elimina
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           )}
         </div>
@@ -707,7 +749,9 @@ export default function TreeView({
         <span className="text-sm text-muted-foreground">
           Hai configurato {itemsCount} categorie
         </span>
-        <span className="text-sm text-muted-foreground">Budget / periodo</span>
+        <span className="pr-[86px] font-mono text-sm text-muted-foreground">
+          Budget
+        </span>
       </div>
       <div ref={treeRef} className="relative w-full max-w-2xl">
         <div

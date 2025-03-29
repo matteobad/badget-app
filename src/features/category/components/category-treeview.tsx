@@ -7,8 +7,9 @@ import { DynamicIcon } from "lucide-react/dynamic";
 import type { TreeViewItem } from "~/components/tree-view";
 import TreeView from "~/components/tree-view";
 import { cn } from "~/lib/utils";
+import { type DB_BudgetType } from "~/server/db/schema/budgets";
 import { CATEGORY_TYPE } from "~/server/db/schema/enum";
-import { type getCategories_QUERY } from "../server/queries";
+import { type getCategoriesWithBudgets_CACHED } from "../server/cached-queries";
 
 type Category = {
   id: string;
@@ -16,6 +17,7 @@ type Category = {
   type: string;
   parentId: string | null;
   icon: string | null;
+  budgets: DB_BudgetType[];
   children: Category[];
 };
 
@@ -28,6 +30,7 @@ function mapCategoriesToTreeView(categories: Category[]): TreeViewItem[] {
       name: cat.name,
       type: cat.type,
       icon: hasChildren ? cat.children.length.toString() : cat.icon!, // Necessario per il mapping delle icone
+      budgets: cat.budgets,
       children: hasChildren ? mapCategoriesToTreeView(cat.children) : undefined,
     };
   });
@@ -36,9 +39,13 @@ function mapCategoriesToTreeView(categories: Category[]): TreeViewItem[] {
 export function CategoryTreeview({
   promise,
 }: {
-  promise: Promise<[Awaited<ReturnType<typeof getCategories_QUERY>>]>;
+  promise: Promise<
+    [Awaited<ReturnType<typeof getCategoriesWithBudgets_CACHED>>]
+  >;
 }) {
   const [categories] = use(promise);
+
+  console.log(categories);
 
   const data = useMemo(() => {
     const categoryMap = new Map<string, Category>(
@@ -106,10 +113,12 @@ export function CategoryTreeview({
       }
 
       return (
-        <DynamicIcon
-          name={item.icon as keyof typeof dynamicIconImports}
-          className={"size-4"}
-        />
+        <div className="flex size-5 items-center justify-center">
+          <DynamicIcon
+            name={item.icon as keyof typeof dynamicIconImports}
+            className={"size-4"}
+          />
+        </div>
       );
     },
     [],
