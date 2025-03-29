@@ -1,11 +1,13 @@
 "use client";
 
-import { use, useMemo } from "react";
-import { CircleIcon } from "lucide-react";
+import type { dynamicIconImports } from "lucide-react/dynamic";
+import React, { use, useCallback, useMemo } from "react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { TreeViewItem } from "~/components/tree-view";
 import TreeView from "~/components/tree-view";
+import { cn } from "~/lib/utils";
+import { CATEGORY_TYPE } from "~/server/db/schema/enum";
 import { type getCategories_QUERY } from "../server/queries";
 
 type Category = {
@@ -24,30 +26,11 @@ function mapCategoriesToTreeView(categories: Category[]): TreeViewItem[] {
     return {
       id: cat.id,
       name: cat.name,
-      type: hasChildren ? cat.children.length.toString() : cat.icon!, // Necessario per il mapping delle icone
+      type: cat.type,
+      icon: hasChildren ? cat.children.length.toString() : cat.icon!, // Necessario per il mapping delle icone
       children: hasChildren ? mapCategoriesToTreeView(cat.children) : undefined,
     };
   });
-}
-
-function getCategoryIcon(iconName: string | null, childCount: number) {
-  console.log(iconName, childCount);
-  if (childCount > 0) {
-    return (
-      <div className="relative flex h-6 w-6 items-center justify-center">
-        <CircleIcon className="h-6 w-6 text-gray-400" />
-        <span className="absolute text-xs font-bold text-white">
-          {childCount}
-        </span>
-      </div>
-    );
-  }
-
-  if (iconName) {
-    return <DynamicIcon name={iconName} />;
-  }
-
-  return null;
 }
 
 export function CategoryTreeview({
@@ -77,51 +60,60 @@ export function CategoryTreeview({
       }
     }
 
-    return mapCategoriesToTreeView(categoryTree);
+    return mapCategoriesToTreeView(categoryTree).sort((a, b) => {
+      const typeOrder = {
+        [CATEGORY_TYPE.INCOME]: 0,
+        [CATEGORY_TYPE.EXPENSE]: 1,
+        [CATEGORY_TYPE.SAVINGS]: 2,
+        [CATEGORY_TYPE.INVESTMENT]: 3,
+        [CATEGORY_TYPE.TRANSFER]: 4,
+      };
+
+      return (
+        typeOrder[a.type as keyof typeof typeOrder] -
+        typeOrder[b.type as keyof typeof typeOrder]
+      );
+    });
   }, [categories]);
 
-  const handleCheckChange = (item: TreeViewItem, checked: boolean) => {
-    console.log(`Item ${item.name} checked:`, checked);
-  };
+  const getIcon = useCallback(
+    (item: TreeViewItem, _depth: number): React.ReactNode => {
+      // Check if item.icon can be parsed as an integer
+      if (item.children && item.children.length > 0) {
+        return (
+          <div
+            className={cn(
+              "relative flex size-5 items-center justify-center rounded border border-dashed",
+              {
+                "border-green-800 bg-green-200 text-green-800":
+                  item.type === CATEGORY_TYPE.INCOME,
+                "border-red-800 bg-red-200 text-red-800":
+                  item.type === CATEGORY_TYPE.EXPENSE,
+                "border-violet-800 bg-violet-200 text-violet-800":
+                  item.type === CATEGORY_TYPE.SAVINGS,
+                "border-blue-800 bg-blue-200 text-blue-800":
+                  item.type === CATEGORY_TYPE.INVESTMENT,
+                "border-neutral-800 bg-neutral-200 text-neutral-800":
+                  item.type === CATEGORY_TYPE.TRANSFER,
+              },
+            )}
+          >
+            <span className="absolute text-xs font-bold">
+              {item.children.length}
+            </span>
+          </div>
+        );
+      }
 
-  console.log(data);
-
-  const customIconMap = useMemo<Record<string, React.ReactNode>>(() => {
-    const result: Record<string, React.ReactNode> = {
-      "1": (
-        <div className="relative flex size-5 items-center justify-center rounded border border-dashed bg-slate-100">
-          <span className="absolute text-xs font-bold">1</span>
-        </div>
-      ),
-      "2": (
-        <div className="relative flex size-5 items-center justify-center rounded border border-dashed bg-slate-100">
-          <span className="absolute text-xs font-bold">2</span>
-        </div>
-      ),
-      "3": (
-        <div className="relative flex size-5 items-center justify-center rounded border border-dashed bg-slate-100">
-          <span className="absolute text-xs font-bold">3</span>
-        </div>
-      ),
-    };
-    return categories.reduce((acc, value) => {
-      acc[value.icon] = (
+      return (
         <DynamicIcon
-          name={value.icon}
-          className="h-4 w-4"
-          style={{ color: value.color! }}
+          name={item.icon as keyof typeof dynamicIconImports}
+          className={"size-4"}
         />
       );
-      return acc;
-    }, result);
-  }, [categories]);
-
-  return (
-    <TreeView
-      data={data}
-      title="Tree View Demo"
-      iconMap={customIconMap}
-      onCheckChange={handleCheckChange}
-    />
+    },
+    [],
   );
+
+  return <TreeView data={data} title="Tree View Demo" getIcon={getIcon} />;
 }

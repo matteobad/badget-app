@@ -2,17 +2,8 @@
 
 import type { JSX } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Box,
-  CalendarIcon,
-  ChevronRight,
-  Folder,
-  Info,
-  Search,
-  X,
-} from "lucide-react";
+import { Box, ChevronRight, Folder, Info } from "lucide-react";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -22,28 +13,19 @@ import {
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "~/components/ui/context-menu";
-import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "~/components/ui/hover-card";
-import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import { Calendar } from "./ui/calendar";
-import { Card } from "./ui/card";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { CATEGORY_TYPE } from "~/server/db/schema/enum";
 
 export interface TreeViewItem {
   id: string;
   name: string;
   type: string;
+  icon: string;
   children?: TreeViewItem[];
-  checked?: boolean;
 }
 
 export type TreeViewIconMap = Record<string, React.ReactNode | undefined>;
@@ -59,19 +41,10 @@ export interface TreeViewProps {
   className?: string;
   data: TreeViewItem[];
   title?: string;
-  showExpandAll?: boolean;
-  showCheckboxes?: boolean;
-  checkboxPosition?: "left" | "right";
-  searchPlaceholder?: string;
   selectionText?: string;
-  checkboxLabels?: {
-    check: string;
-    uncheck: string;
-  };
   getIcon?: (item: TreeViewItem, depth: number) => React.ReactNode;
   onSelectionChange?: (selectedItems: TreeViewItem[]) => void;
   onAction?: (action: string, items: TreeViewItem[]) => void;
-  onCheckChange?: (item: TreeViewItem, checked: boolean) => void;
   iconMap?: TreeViewIconMap;
   menuItems?: TreeViewMenuItem[];
 }
@@ -104,45 +77,6 @@ const buildItemMap = (items: TreeViewItem[]): Map<string, TreeViewItem> => {
   };
   items.forEach(processItem);
   return map;
-};
-
-// Update the getCheckState function to work bottom-up
-const getCheckState = (
-  item: TreeViewItem,
-  itemMap: Map<string, TreeViewItem>,
-): "checked" | "unchecked" | "indeterminate" => {
-  // Get the original item from the map
-  const originalItem = itemMap.get(item.id);
-  if (!originalItem) return "unchecked";
-
-  // If it's a leaf node (no children), return its check state
-  if (!originalItem.children || originalItem.children.length === 0) {
-    return originalItem.checked ? "checked" : "unchecked";
-  }
-
-  // Count the check states of immediate children
-  let checkedCount = 0;
-  let indeterminateCount = 0;
-
-  originalItem.children.forEach((child) => {
-    const childState = getCheckState(child, itemMap);
-    if (childState === "checked") checkedCount++;
-    if (childState === "indeterminate") indeterminateCount++;
-  });
-
-  // Calculate parent state based on children states
-  const totalChildren = originalItem.children.length;
-
-  // If all children are checked
-  if (checkedCount === totalChildren) {
-    return "checked";
-  }
-  // If any child is checked or indeterminate
-  if (checkedCount > 0 || indeterminateCount > 0) {
-    return "indeterminate";
-  }
-  // If no children are checked or indeterminate
-  return "unchecked";
 };
 
 // Add this default icon map
@@ -268,47 +202,13 @@ function TreeItem({
     onSelect(newSelection);
   };
 
-  const handleAction = (action: string) => {
-    if (onAction) {
-      // Get all selected items, or just this item if none selected
-      const selectedItems =
-        selectedIds.size > 0
-          ? allItems
-              .flatMap((item) => getAllDescendants(item))
-              .filter((item) => selectedIds.has(item.id))
-          : [item];
-      onAction(action, selectedItems);
-    }
-  };
-
-  // Helper function to get all descendants of an item (including the item itself)
-  const getAllDescendants = (item: TreeViewItem): TreeViewItem[] => {
-    const descendants = [item];
-    if (item.children) {
-      item.children.forEach((child) => {
-        descendants.push(...getAllDescendants(child));
-      });
-    }
-    return descendants;
-  };
-
-  const handleAccessClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onAccessChange) {
-      const currentState = getCheckState(item, itemMap);
-      // Toggle between checked and unchecked, treating indeterminate as unchecked
-      const newChecked = currentState === "checked" ? false : true;
-      onAccessChange(item, newChecked);
-    }
-  };
-
   const renderIcon = () => {
     if (getIcon) {
       return getIcon(item, depth);
     }
 
     // Use the provided iconMap or fall back to default
-    return iconMap[item.type] ?? iconMap.folder ?? defaultIconMap.folder;
+    return iconMap[item.icon] ?? iconMap.folder ?? defaultIconMap.folder;
   };
 
   const getItemPath = (item: TreeViewItem, items: TreeViewItem[]): string => {
@@ -356,274 +256,194 @@ function TreeItem({
 
   // Get selected count only if item has children and is collapsed
   const selectedCount =
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     (item.children && !isOpen && getSelectedChildrenCount(item)) || null;
 
   return (
-    <ContextMenu>
-      <ContextMenuTrigger>
-        <div>
-          <div
-            ref={itemRef}
-            data-tree-item
-            data-id={item.id}
-            data-depth={depth}
-            data-folder-closed={item.children && !isOpen}
-            className={`cursor-pointer select-none ${
-              isSelected ? `bg-orange-100 ${selectionStyle}` : "text-foreground"
-            } px-1`}
-            style={{ paddingLeft: `${depth * 20}px` }}
-            onClick={handleClick}
-          >
-            <div className="flex h-8 items-center">
-              {item.children ? (
-                <div className="group flex flex-1 items-center gap-2">
-                  <Collapsible
-                    open={isOpen}
-                    onOpenChange={(open) => onToggleExpand(item.id, open)}
-                  >
-                    <CollapsibleTrigger
-                      asChild
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Button variant="ghost" size="icon" className="h-6 w-6">
-                        <motion.div
-                          initial={false}
-                          animate={{ rotate: isOpen ? 90 : 0 }}
-                          transition={{ duration: 0.1 }}
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </motion.div>
-                      </Button>
-                    </CollapsibleTrigger>
-                  </Collapsible>
-                  {showAccessRights && (
-                    <div
-                      className="relative flex h-4 w-4 cursor-pointer items-center justify-center hover:opacity-80"
-                      onClick={handleAccessClick}
-                    >
-                      {getCheckState(item, itemMap) === "checked" && (
-                        <div className="flex h-4 w-4 items-center justify-center rounded border border-primary bg-primary">
-                          <svg
-                            className="h-3 w-3 text-primary-foreground"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </div>
-                      )}
-                      {getCheckState(item, itemMap) === "unchecked" && (
-                        <div className="h-4 w-4 rounded border border-input" />
-                      )}
-                      {getCheckState(item, itemMap) === "indeterminate" && (
-                        <div className="flex h-4 w-4 items-center justify-center rounded border border-primary bg-primary">
-                          <div className="h-0.5 w-2 bg-primary-foreground" />
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {renderIcon()}
-                  <span className="flex-1">{item.name}</span>
-                  {selectedCount !== null && selectedCount > 0 && (
-                    <Badge
-                      variant="secondary"
-                      className="mr-2 bg-blue-100 hover:bg-blue-100"
-                    >
-                      {selectedCount} selected
-                    </Badge>
-                  )}
-                  <HoverCard>
-                    <HoverCardTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 items-center justify-center p-0 opacity-0 group-hover:opacity-100"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Info className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-80">
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-semibold">{item.name}</h4>
-                        <div className="space-y-1 text-sm text-muted-foreground">
-                          <div>
-                            <span className="font-medium">Type:</span>{" "}
-                            {item.type.charAt(0).toUpperCase() +
-                              item.type.slice(1).replace("_", " ")}
-                          </div>
-                          <div>
-                            <span className="font-medium">ID:</span> {item.id}
-                          </div>
-                          <div>
-                            <span className="font-medium">Location:</span>{" "}
-                            {getItemPath(item, allItems)}
-                          </div>
-                          <div>
-                            <span className="font-medium">Items:</span>{" "}
-                            {item.children?.length || 0} direct items
-                          </div>
-                        </div>
-                      </div>
-                    </HoverCardContent>
-                  </HoverCard>
-                </div>
-              ) : (
-                <div className="group flex flex-1 items-center gap-2 pl-[11px]">
-                  {showAccessRights && (
-                    <div
-                      className="relative flex h-4 w-4 cursor-pointer items-center justify-center hover:opacity-80"
-                      onClick={handleAccessClick}
-                    >
-                      {item.checked ? (
-                        <div className="flex h-4 w-4 items-center justify-center rounded border border-primary bg-primary">
-                          <svg
-                            className="h-3 w-3 text-primary-foreground"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </div>
-                      ) : (
-                        <div className="h-4 w-4 rounded border border-input" />
-                      )}
-                    </div>
-                  )}
-                  <div className="flex size-5 items-center justify-center">
-                    <span className="size-1.5 rounded-full bg-slate-200"></span>
-                  </div>
-                  {renderIcon()}
-                  <span className="flex-1">{item.name}</span>
-                  <HoverCard>
-                    <HoverCardTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 items-center justify-center p-0 opacity-0 group-hover:opacity-100"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Info className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-80">
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-semibold">{item.name}</h4>
-                        <div className="space-y-1 text-sm text-muted-foreground">
-                          <div>
-                            <span className="font-medium">Type:</span>{" "}
-                            {item.type.charAt(0).toUpperCase() +
-                              item.type.slice(1).replace("_", " ")}
-                          </div>
-                          <div>
-                            <span className="font-medium">ID:</span> {item.id}
-                          </div>
-                          <div>
-                            <span className="font-medium">Location:</span>{" "}
-                            {getItemPath(item, allItems)}
-                          </div>
-                        </div>
-                      </div>
-                    </HoverCardContent>
-                  </HoverCard>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {item.children && (
-            <Collapsible
-              open={isOpen}
-              onOpenChange={(open) => onToggleExpand(item.id, open)}
-            >
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <CollapsibleContent forceMount asChild>
+    <div>
+      <div
+        ref={itemRef}
+        data-tree-item
+        data-id={item.id}
+        data-depth={depth}
+        data-folder-closed={item.children && !isOpen}
+        className={`cursor-pointer select-none ${
+          isSelected ? `bg-orange-100 ${selectionStyle}` : "text-foreground"
+        } px-1`}
+        style={{ paddingLeft: `${depth * 20}px` }}
+        onClick={handleClick}
+      >
+        <div className="flex h-8 items-center">
+          {item.children ? (
+            <div className="group flex flex-1 items-center gap-2">
+              <Collapsible
+                open={isOpen}
+                onOpenChange={(open) => onToggleExpand(item.id, open)}
+              >
+                <CollapsibleTrigger
+                  asChild
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Button variant="ghost" size="icon" className="size-6">
                     <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.05 }}
+                      initial={false}
+                      animate={{ rotate: isOpen ? 90 : 0 }}
+                      transition={{ duration: 0.1 }}
                     >
-                      {item.children?.map((child) => (
-                        <TreeItem
-                          key={child.id}
-                          item={child}
-                          depth={depth + 1}
-                          selectedIds={selectedIds}
-                          lastSelectedId={lastSelectedId}
-                          onSelect={onSelect}
-                          expandedIds={expandedIds}
-                          onToggleExpand={onToggleExpand}
-                          getIcon={getIcon}
-                          onAction={onAction}
-                          onAccessChange={onAccessChange}
-                          allItems={allItems}
-                          showAccessRights={showAccessRights}
-                          itemMap={itemMap}
-                          iconMap={iconMap}
-                          menuItems={menuItems}
-                          getSelectedItems={getSelectedItems}
-                        />
-                      ))}
+                      <ChevronRight className="h-4 w-4" />
                     </motion.div>
-                  </CollapsibleContent>
-                )}
-              </AnimatePresence>
-            </Collapsible>
+                  </Button>
+                </CollapsibleTrigger>
+              </Collapsible>
+              {renderIcon()}
+              <span className="flex-1">{item.name}</span>
+              {selectedCount !== null && selectedCount > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="mr-2 bg-blue-100 hover:bg-blue-100"
+                >
+                  {selectedCount} selected
+                </Badge>
+              )}
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 items-center justify-center p-0 opacity-0 group-hover:opacity-100"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80">
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold">{item.name}</h4>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <div>
+                        <span className="font-medium">Type:</span>{" "}
+                        {item.type.charAt(0).toUpperCase() +
+                          item.type.slice(1).replace("_", " ")}
+                      </div>
+                      <div>
+                        <span className="font-medium">ID:</span> {item.id}
+                      </div>
+                      <div>
+                        <span className="font-medium">Location:</span>{" "}
+                        {getItemPath(item, allItems)}
+                      </div>
+                      <div>
+                        <span className="font-medium">Items:</span>{" "}
+                        {item.children?.length || 0} direct items
+                      </div>
+                    </div>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
+            </div>
+          ) : (
+            <div className="group flex flex-1 items-center gap-2 pl-[11px]">
+              <div className="flex size-5 items-center justify-center">
+                <span
+                  className={cn("size-1.5 rounded-full bg-slate-200", {
+                    "bg-green-200": item.type === CATEGORY_TYPE.INCOME,
+                    "bg-red-200": item.type === CATEGORY_TYPE.EXPENSE,
+                    "bg-violet-200": item.type === CATEGORY_TYPE.SAVINGS,
+                    "bg-blue-200": item.type === CATEGORY_TYPE.INVESTMENT,
+                    "bg-neutral-200": item.type === CATEGORY_TYPE.TRANSFER,
+                  })}
+                ></span>
+              </div>
+              {renderIcon()}
+              <span className="flex-1">{item.name}</span>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 items-center justify-center p-0 opacity-0 group-hover:opacity-100"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80">
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold">{item.name}</h4>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <div>
+                        <span className="font-medium">Type:</span>{" "}
+                        {item.type.charAt(0).toUpperCase() +
+                          item.type.slice(1).replace("_", " ")}
+                      </div>
+                      <div>
+                        <span className="font-medium">ID:</span> {item.id}
+                      </div>
+                      <div>
+                        <span className="font-medium">Location:</span>{" "}
+                        {getItemPath(item, allItems)}
+                      </div>
+                    </div>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
+            </div>
           )}
         </div>
-      </ContextMenuTrigger>
-      <ContextMenuContent className="w-64">
-        {menuItems?.map((menuItem) => (
-          <ContextMenuItem
-            key={menuItem.id}
-            onClick={() => {
-              const items = selectedIds.has(item.id)
-                ? getSelectedItems()
-                : [item];
-              menuItem.action(items);
-            }}
-          >
-            {menuItem.icon && (
-              <span className="mr-2 h-4 w-4">{menuItem.icon}</span>
+      </div>
+
+      {item.children && (
+        <Collapsible
+          open={isOpen}
+          onOpenChange={(open) => onToggleExpand(item.id, open)}
+        >
+          <AnimatePresence initial={false}>
+            {isOpen && (
+              <CollapsibleContent forceMount asChild>
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.05 }}
+                >
+                  {item.children?.map((child) => (
+                    <TreeItem
+                      key={child.id}
+                      item={child}
+                      depth={depth + 1}
+                      selectedIds={selectedIds}
+                      lastSelectedId={lastSelectedId}
+                      onSelect={onSelect}
+                      expandedIds={expandedIds}
+                      onToggleExpand={onToggleExpand}
+                      getIcon={getIcon}
+                      onAction={onAction}
+                      onAccessChange={onAccessChange}
+                      allItems={allItems}
+                      showAccessRights={showAccessRights}
+                      itemMap={itemMap}
+                      iconMap={iconMap}
+                      menuItems={menuItems}
+                      getSelectedItems={getSelectedItems}
+                    />
+                  ))}
+                </motion.div>
+              </CollapsibleContent>
             )}
-            {menuItem.label}
-          </ContextMenuItem>
-        ))}
-      </ContextMenuContent>
-    </ContextMenu>
+          </AnimatePresence>
+        </Collapsible>
+      )}
+    </div>
   );
 }
 
 export default function TreeView({
   className,
-  checkboxLabels = {
-    check: "Check",
-    uncheck: "Uncheck",
-  },
   data,
   iconMap,
-  searchPlaceholder = "Search...",
-  selectionText = "selected",
-  showExpandAll = true,
-  showCheckboxes = false,
   getIcon,
   onSelectionChange,
   onAction,
-  onCheckChange,
   menuItems,
 }: TreeViewProps) {
   const [currentMousePos, setCurrentMousePos] = useState<number>(0);
@@ -635,8 +455,7 @@ export default function TreeView({
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [isDragging, setIsDragging] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [searchQuery, setSearchQuery] = useState("");
-  const [date, setDate] = useState<Date>();
+  const [searchQuery] = useState("");
 
   const dragRef = useRef<HTMLDivElement>(null);
   const lastSelectedId = useRef<string | null>(null);
@@ -648,7 +467,7 @@ export default function TreeView({
   const itemMap = useMemo(() => buildItemMap(data), [data]);
 
   // Memoize the search results and expanded IDs
-  const { filteredData, searchExpandedIds } = useMemo(() => {
+  const { filteredData } = useMemo(() => {
     if (!searchQuery.trim()) {
       return { filteredData: data, searchExpandedIds: new Set<string>() };
     }
@@ -697,14 +516,37 @@ export default function TreeView({
     };
   }, [data, searchQuery]);
 
-  // Update expanded IDs when search changes
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      setExpandedIds((prev) => new Set([...prev, ...searchExpandedIds]));
-    }
-  }, [searchExpandedIds, searchQuery]);
+  // Memoize the items count
+  const { itemsCount } = useMemo(() => {
+    const countItems = (items: TreeViewItem[]): number => {
+      return items.reduce((count, item) => {
+        // Count current item
+        let itemCount = 1;
+        // Recursively count children if they exist
+        if (item.children?.length) {
+          itemCount += countItems(item.children);
+        }
+        return count + itemCount;
+      }, 0);
+    };
+
+    return {
+      itemsCount: countItems(data),
+    };
+  }, [data]);
 
   useEffect(() => {
+    const getAllFolderIds = (items: TreeViewItem[]): string[] => {
+      let ids: string[] = [];
+      items.forEach((item) => {
+        if (item.children) {
+          ids.push(item.id);
+          ids = [...ids, ...getAllFolderIds(item.children)];
+        }
+      });
+      return ids;
+    };
+
     const handleClickAway = (e: MouseEvent) => {
       const target = e.target as Element;
 
@@ -721,29 +563,12 @@ export default function TreeView({
       }
     };
 
+    setExpandedIds(new Set(getAllFolderIds(data)));
+
     document.addEventListener("mousedown", handleClickAway);
     return () => document.removeEventListener("mousedown", handleClickAway);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Function to collect all folder IDs
-  const getAllFolderIds = (items: TreeViewItem[]): string[] => {
-    let ids: string[] = [];
-    items.forEach((item) => {
-      if (item.children) {
-        ids.push(item.id);
-        ids = [...ids, ...getAllFolderIds(item.children)];
-      }
-    });
-    return ids;
-  };
-
-  const handleExpandAll = () => {
-    setExpandedIds(new Set(getAllFolderIds(data)));
-  };
-
-  const handleCollapseAll = () => {
-    setExpandedIds(new Set());
-  };
 
   const handleToggleExpand = (id: string, isOpen: boolean) => {
     const newExpandedIds = new Set(expandedIds);
@@ -767,28 +592,6 @@ export default function TreeView({
     data.forEach(processItem);
     return items;
   }, [selectedIds, data]);
-
-  // Get selected items, filtering out parents if their children are selected
-  const getEffectiveSelectedItems = useCallback((): TreeViewItem[] => {
-    const selectedItems = getSelectedItems();
-
-    // Build a set of all selected IDs for quick lookup
-    const selectedIdsSet = new Set(selectedItems.map((item) => item.id));
-
-    // Filter out parents whose children are also selected
-    return selectedItems.filter((item) => {
-      // If this item has no children, always include it
-      if (!item.children) return true;
-
-      // Check if any children of this item are selected
-      const hasSelectedChildren = item.children.some((child) =>
-        selectedIdsSet.has(child.id),
-      );
-
-      // Only include this item if none of its children are selected
-      return !hasSelectedChildren;
-    });
-  }, [getSelectedItems]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     // Only track on left click and not on buttons
@@ -899,142 +702,17 @@ export default function TreeView({
   }, [selectedIds, onSelectionChange, getSelectedItems]);
 
   return (
-    <div className="flex gap-4">
-      <Card
-        ref={treeRef}
-        className="relative w-full max-w-2xl space-y-4 bg-background p-4"
-      >
-        <AnimatePresence mode="wait">
-          {selectedIds.size > 0 ? (
-            <motion.div
-              key="selection"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="flex h-10 items-center justify-between rounded-lg border bg-background px-4"
-            >
-              <div
-                className="flex cursor-pointer items-center font-medium"
-                title="Clear selection"
-                onClick={() => {
-                  setSelectedIds(new Set());
-                  lastSelectedId.current = null;
-                }}
-              >
-                <X className="mr-2 h-4 w-4" />
-                {selectedIds.size} {selectionText}
-              </div>
-
-              {showCheckboxes && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const effectiveItems = getEffectiveSelectedItems();
-                      const processItem = (item: TreeViewItem) => {
-                        onCheckChange?.(item, true);
-                        item.children?.forEach(processItem);
-                      };
-                      effectiveItems.forEach(processItem);
-                    }}
-                    className="text-green-600 hover:bg-green-50 hover:text-green-700"
-                  >
-                    {checkboxLabels.check}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const effectiveItems = getEffectiveSelectedItems();
-                      const processItem = (item: TreeViewItem) => {
-                        onCheckChange?.(item, false);
-                        item.children?.forEach(processItem);
-                      };
-                      effectiveItems.forEach(processItem);
-                    }}
-                    className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                  >
-                    {checkboxLabels.uncheck}
-                  </Button>
-                </div>
-              )}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="search"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="flex h-10 items-center gap-2"
-            >
-              <div className="relative flex-1">
-                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder={searchPlaceholder}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-10 pl-9"
-                />
-              </div>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[250px] justify-start text-left font-normal",
-                      !date && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="flex items-center gap-4">
-          <div className="flex flex-1 items-center gap-4">
-            <h3 className="text-lg font-medium">Categorie</h3>
-
-            {showExpandAll && (
-              <div className="flex shrink-0 gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="px-2 text-xs"
-                  onClick={handleExpandAll}
-                >
-                  Expand All
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="px-2 text-xs"
-                  onClick={handleCollapseAll}
-                >
-                  Collapse All
-                </Button>
-              </div>
-            )}
-          </div>
-          <p className="text-sm font-medium text-muted-foreground">Budget</p>
-          <p className="text-sm font-medium text-muted-foreground">Speso</p>
-        </div>
-
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-muted-foreground">
+          Hai configurato {itemsCount} categorie
+        </span>
+        <span className="text-sm text-muted-foreground">Budget / periodo</span>
+      </div>
+      <div ref={treeRef} className="relative w-full max-w-2xl">
         <div
           ref={dragRef}
-          className={cn("relative rounded-lg bg-card select-none", className)}
+          className={cn("relative select-none", className)}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
         >
@@ -1063,9 +741,7 @@ export default function TreeView({
               onToggleExpand={handleToggleExpand}
               getIcon={getIcon}
               onAction={onAction}
-              onAccessChange={onCheckChange}
               allItems={data}
-              showAccessRights={showCheckboxes}
               itemMap={itemMap}
               iconMap={iconMap}
               menuItems={menuItems}
@@ -1073,7 +749,7 @@ export default function TreeView({
             />
           ))}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
