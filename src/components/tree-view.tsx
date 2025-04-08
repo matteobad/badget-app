@@ -1,7 +1,13 @@
 "use client";
 
 import type { JSX } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Box,
@@ -26,9 +32,8 @@ import {
   HoverCardTrigger,
 } from "~/components/ui/hover-card";
 import { cn } from "~/lib/utils";
-import { type DB_BudgetType } from "~/server/db/schema/budgets";
 import { CATEGORY_TYPE } from "~/server/db/schema/enum";
-import { formatAmount } from "~/utils/format";
+import { formatAmount, formatPerc } from "~/utils/format";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,7 +46,7 @@ export interface TreeViewItem {
   name: string;
   type: string;
   icon: string;
-  budgets: DB_BudgetType[];
+  budget: number;
   children?: TreeViewItem[];
 }
 
@@ -60,10 +65,7 @@ export interface TreeViewProps {
   title?: string;
   selectionText?: string;
   getIcon?: (item: TreeViewItem, depth: number) => React.ReactNode;
-  onSelectionChange?: (selectedItems: TreeViewItem[]) => void;
-  onAction?: (action: string, items: TreeViewItem[]) => void;
   iconMap?: TreeViewIconMap;
-  menuItems?: TreeViewMenuItem[];
 }
 
 interface TreeItemProps {
@@ -75,13 +77,9 @@ interface TreeItemProps {
   expandedIds: Set<string>;
   onToggleExpand: (id: string, isOpen: boolean) => void;
   getIcon?: (item: TreeViewItem, depth: number) => React.ReactNode;
-  onAction?: (action: string, items: TreeViewItem[]) => void;
-  onAccessChange?: (item: TreeViewItem, hasAccess: boolean) => void;
   allItems: TreeViewItem[];
-  showAccessRights?: boolean;
   itemMap: Map<string, TreeViewItem>;
   iconMap?: TreeViewIconMap;
-  menuItems?: TreeViewMenuItem[];
   getSelectedItems: () => TreeViewItem[];
 }
 
@@ -111,13 +109,9 @@ function TreeItem({
   expandedIds,
   onToggleExpand,
   getIcon,
-  onAction,
-  onAccessChange,
   allItems,
-  showAccessRights,
   itemMap,
   iconMap = defaultIconMap,
-  menuItems,
   getSelectedItems,
 }: TreeItemProps): JSX.Element {
   const isOpen = expandedIds.has(item.id);
@@ -196,31 +190,6 @@ function TreeItem({
     return iconMap[item.icon] ?? iconMap.folder ?? defaultIconMap.folder;
   };
 
-  const getItemPath = (item: TreeViewItem, items: TreeViewItem[]): string => {
-    const path: string[] = [item.name];
-
-    const findParent = (
-      currentItem: TreeViewItem,
-      allItems: TreeViewItem[],
-    ) => {
-      for (const potentialParent of allItems) {
-        if (
-          potentialParent.children?.some((child) => child.id === currentItem.id)
-        ) {
-          path.unshift(potentialParent.name);
-          findParent(potentialParent, allItems);
-          break;
-        }
-        if (potentialParent.children) {
-          findParent(currentItem, potentialParent.children);
-        }
-      }
-    };
-
-    findParent(item, items);
-    return path.join(" → ");
-  };
-
   // Add function to count selected items in a folder
   const getSelectedChildrenCount = (item: TreeViewItem): number => {
     let count = 0;
@@ -260,7 +229,7 @@ function TreeItem({
         onClick={handleClick}
       >
         <div className="flex h-8 items-center">
-          {item.children ? (
+          {(item.children?.length ?? 0 > 0) ? (
             <div className="group flex flex-1 items-center gap-2">
               <Collapsible
                 open={isOpen}
@@ -283,41 +252,8 @@ function TreeItem({
               </Collapsible>
               {renderIcon()}
               <span className="flex-1 pl-1 whitespace-nowrap">{item.name}</span>
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 items-center justify-center p-0 opacity-0 group-hover:opacity-100"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Info className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-80">
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-semibold">{item.name}</h4>
-                    <div className="space-y-1 text-sm text-muted-foreground">
-                      <div>
-                        <span className="font-medium">Type:</span>{" "}
-                        {item.type.charAt(0).toUpperCase() +
-                          item.type.slice(1).replace("_", " ")}
-                      </div>
-                      <div>
-                        <span className="font-medium">ID:</span> {item.id}
-                      </div>
-                      <div>
-                        <span className="font-medium">Location:</span>{" "}
-                        {getItemPath(item, allItems)}
-                      </div>
-                      <div>
-                        <span className="font-medium">Items:</span>{" "}
-                        {item.children?.length || 0} direct items
-                      </div>
-                    </div>
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
+              <TreeItemHover item={item} />
+
               {selectedCount !== null && selectedCount > 0 && (
                 <Badge
                   variant="secondary"
@@ -326,24 +262,18 @@ function TreeItem({
                   {selectedCount} selected
                 </Badge>
               )}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="size-6 p-0">
-                    <span className="sr-only">Open menu</span>
-                    <EllipsisVerticalIcon className="size-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <RefreshCwIcon className="size-3" />
-                    Modifica
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive">
-                    <UnlinkIcon className="size-3" />
-                    Elimina
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex items-center gap-4">
+                <span className="w-[80px] text-right font-mono">
+                  {formatAmount({
+                    amount: item.budget,
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
+                <span className="w-[30px] font-mono text-xs text-muted-foreground">
+                  {formatPerc(100)}
+                </span>
+                <TreeItemAction />
+              </div>
             </div>
           ) : (
             <div className="group flex flex-1 items-center gap-2">
@@ -360,74 +290,25 @@ function TreeItem({
               </div>
               {renderIcon()}
               <span className="flex-1 pl-1 whitespace-nowrap">{item.name}</span>
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 items-center justify-center p-0 opacity-0 group-hover:opacity-100"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Info className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-80">
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-semibold">{item.name}</h4>
-                    <div className="space-y-1 text-sm text-muted-foreground">
-                      <div>
-                        <span className="font-medium">Type:</span>{" "}
-                        {item.type.charAt(0).toUpperCase() +
-                          item.type.slice(1).replace("_", " ")}
-                      </div>
-                      <div>
-                        <span className="font-medium">ID:</span> {item.id}
-                      </div>
-                      <div>
-                        <span className="font-medium">Location:</span>{" "}
-                        {getItemPath(item, allItems)}
-                      </div>
-                    </div>
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
+              <TreeItemHover item={item} />
 
               <div className="flex items-center gap-4">
-                {item.budgets.length > 1 && (
+                {/* {item.budgets.length > 1 && (
                   <Badge variant="secondary">
                     {item.budgets.length + " budgets"}
                   </Badge>
-                )}
+                )} */}
 
                 <span className="w-[80px] text-right font-mono">
-                  {item.budgets[0]?.amount
-                    ? formatAmount({
-                        amount: parseFloat(item.budgets[0].amount),
-                        maximumFractionDigits: 0,
-                      })
-                    : "n/a"}
+                  {formatAmount({
+                    amount: item.budget,
+                    maximumFractionDigits: 0,
+                  })}
                 </span>
                 <span className="w-[30px] font-mono text-xs text-muted-foreground">
-                  100%
+                  {formatPerc(100)}
                 </span>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="size-6 p-0">
-                      <span className="sr-only">Open menu</span>
-                      <EllipsisVerticalIcon className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <RefreshCwIcon className="size-3" />
-                      Modifica
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">
-                      <UnlinkIcon className="size-3" />
-                      Elimina
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <TreeItemAction />
               </div>
             </div>
           )}
@@ -459,13 +340,9 @@ function TreeItem({
                       expandedIds={expandedIds}
                       onToggleExpand={onToggleExpand}
                       getIcon={getIcon}
-                      onAction={onAction}
-                      onAccessChange={onAccessChange}
                       allItems={allItems}
-                      showAccessRights={showAccessRights}
                       itemMap={itemMap}
                       iconMap={iconMap}
-                      menuItems={menuItems}
                       getSelectedItems={getSelectedItems}
                     />
                   ))}
@@ -484,9 +361,6 @@ export default function TreeView({
   data,
   iconMap,
   getIcon,
-  onSelectionChange,
-  onAction,
-  menuItems,
 }: TreeViewProps) {
   const [currentMousePos, setCurrentMousePos] = useState<number>(0);
   const [dragStart, setDragStart] = useState<number | null>(null);
@@ -736,15 +610,8 @@ export default function TreeView({
     };
   }, [isDragging, handleMouseUp]);
 
-  // Call onSelectionChange when selection changes
-  useEffect(() => {
-    if (onSelectionChange) {
-      onSelectionChange(getSelectedItems());
-    }
-  }, [selectedIds, onSelectionChange, getSelectedItems]);
-
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex w-full flex-col gap-4">
       <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">
           Hai configurato {itemsCount} categorie
@@ -753,7 +620,7 @@ export default function TreeView({
           Budget
         </span>
       </div>
-      <div ref={treeRef} className="relative w-full max-w-2xl">
+      <div ref={treeRef} className="relative w-full">
         <div
           ref={dragRef}
           className={cn("relative select-none", className)}
@@ -784,16 +651,76 @@ export default function TreeView({
               expandedIds={expandedIds}
               onToggleExpand={handleToggleExpand}
               getIcon={getIcon}
-              onAction={onAction}
               allItems={data}
               itemMap={itemMap}
               iconMap={iconMap}
-              menuItems={menuItems}
               getSelectedItems={getSelectedItems}
             />
           ))}
         </div>
       </div>
     </div>
+  );
+}
+
+function TreeItemAction({
+  ...props
+}: React.ComponentProps<typeof DropdownMenu>) {
+  return (
+    <DropdownMenu {...props}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="size-6 p-0">
+          <span className="sr-only">Open menu</span>
+          <EllipsisVerticalIcon className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem>
+          <RefreshCwIcon className="size-3" />
+          Modifica
+        </DropdownMenuItem>
+        <DropdownMenuItem className="text-destructive">
+          <UnlinkIcon className="size-3" />
+          Elimina
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function TreeItemHover({
+  item,
+  ...props
+}: React.ComponentProps<typeof HoverCard> & {
+  item: TreeViewItem;
+}) {
+  return (
+    <HoverCard {...props}>
+      <HoverCardTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 w-6 items-center justify-center p-0 opacity-0 group-hover:opacity-100"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Info className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-80">
+        <div className="space-y-2">
+          <h4 className="text-sm font-semibold">{item.name}</h4>
+          <div className="space-y-1 text-sm text-muted-foreground">
+            <div>
+              <span className="font-medium">Type:</span>{" "}
+              {item.type.charAt(0).toUpperCase() +
+                item.type.slice(1).replace("_", " ")}
+            </div>
+            <div>
+              <span className="font-medium">ID:</span> {item.id}
+            </div>
+          </div>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
   );
 }

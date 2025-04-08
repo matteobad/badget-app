@@ -88,6 +88,9 @@ importers:
       "@t3-oss/env-nextjs":
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.7.3)(zod@3.24.2)
+      "@tanstack/react-query":
+        specifier: ^5.71.3
+        version: 5.71.3(react@19.0.0)
       "@tanstack/react-table":
         specifier: ^8.21.2
         version: 8.21.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -97,6 +100,15 @@ importers:
       "@trigger.dev/sdk":
         specifier: 3.3.13
         version: 3.3.13(zod@3.24.2)
+      "@trpc/client":
+        specifier: ^11.0.1
+        version: 11.0.1(@trpc/server@11.0.1(typescript@5.7.3))(typescript@5.7.3)
+      "@trpc/react-query":
+        specifier: ^11.0.1
+        version: 11.0.1(@tanstack/react-query@5.71.3(react@19.0.0))(@trpc/client@11.0.1(@trpc/server@11.0.1(typescript@5.7.3))(typescript@5.7.3))(@trpc/server@11.0.1(typescript@5.7.3))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.7.3)
+      "@trpc/server":
+        specifier: ^11.0.1
+        version: 11.0.1(typescript@5.7.3)
       "@uploadthing/react":
         specifier: ^7.2.1
         version: 7.3.0(next@15.2.4(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)(uploadthing@7.5.2(next@15.2.4(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(tailwindcss@4.0.8))
@@ -118,6 +130,9 @@ importers:
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
+      client-only:
+        specifier: ^0.0.1
+        version: 0.0.1
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -175,6 +190,12 @@ importers:
       nuqs:
         specifier: ^2.4.0
         version: 2.4.0(next@15.2.4(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
+      papaparse:
+        specifier: ^5.5.2
+        version: 5.5.2
+      postgres-range:
+        specifier: ^1.1.4
+        version: 1.1.4
       react:
         specifier: 19.0.0
         version: 19.0.0
@@ -187,6 +208,9 @@ importers:
       react-dom:
         specifier: 19.0.0
         version: 19.0.0(react@19.0.0)
+      react-error-boundary:
+        specifier: ^5.0.0
+        version: 5.0.0(react@19.0.0)
       react-hook-form:
         specifier: ^7.54.2
         version: 7.54.2(react@19.0.0)
@@ -205,6 +229,9 @@ importers:
       stopword:
         specifier: ^3.1.4
         version: 3.1.4
+      superjson:
+        specifier: ^2.2.2
+        version: 2.2.2
       svix:
         specifier: ^1.45.1
         version: 1.59.1
@@ -227,7 +254,7 @@ importers:
         specifier: ^8.18.0
         version: 8.18.1
       zod:
-        specifier: ^3.24.1
+        specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
       "@clerk/types":
@@ -254,6 +281,9 @@ importers:
       "@types/node":
         specifier: ^22.13.0
         version: 22.13.5
+      "@types/papaparse":
+        specifier: ^5.3.15
+        version: 5.3.15
       "@types/react":
         specifier: ^19
         version: 19.0.10
@@ -3263,6 +3293,20 @@ packages:
         integrity: sha512-SUwlrXjn1ycmUbA0o0n3Y0LqlXqxN5R8HR+ti+OBbRS79wl2seDmiypEs3xJCuQXe07ol81s1AmRMitBmPveJA==,
       }
 
+  "@tanstack/query-core@5.71.3":
+    resolution:
+      {
+        integrity: sha512-SW7PXYpKiQCZU5pPOXG2UiHX1oSAxLyxoJiYbQ3aLYiABJW0UnfBZ9PVnO/x4ZCIVK30wfDn0h6Mrsr10q922Q==,
+      }
+
+  "@tanstack/react-query@5.71.3":
+    resolution:
+      {
+        integrity: sha512-4GZxKqiMX+CH4CxXiUBNipbqzk2V5jUU8Z4d6J+lSDu8OejcLtjx1hEDJzabFZHwd+ZHCsYLAJmM54kCS1/ekA==,
+      }
+    peerDependencies:
+      react: ^18 || ^19
+
   "@tanstack/react-table@8.21.2":
     resolution:
       {
@@ -3319,6 +3363,36 @@ packages:
     engines: { node: ">=18.20.0" }
     peerDependencies:
       zod: ^3.0.0
+
+  "@trpc/client@11.0.1":
+    resolution:
+      {
+        integrity: sha512-HvOrvWAXbGBwt4om+NfuxrK4f+ik2aaNIXq7WLrJbEp7U+YXfh5++1a5p4JDaikrvSaObJ389DhYAGWz90xSGw==,
+      }
+    peerDependencies:
+      "@trpc/server": 11.0.1
+      typescript: ">=5.7.2"
+
+  "@trpc/react-query@11.0.1":
+    resolution:
+      {
+        integrity: sha512-astHk2cchLjyXx4cScUZj4zOM5um10zdX4ExVUllBI+kU5sUTbztigDZCGDz8WbdsOiSzYHL4KINdERaQrXWAQ==,
+      }
+    peerDependencies:
+      "@tanstack/react-query": ^5.67.1
+      "@trpc/client": 11.0.1
+      "@trpc/server": 11.0.1
+      react: ">=18.2.0"
+      react-dom: ">=18.2.0"
+      typescript: ">=5.7.2"
+
+  "@trpc/server@11.0.1":
+    resolution:
+      {
+        integrity: sha512-DZS3+bONLno4oJjHBMrS3xRPtoZsnmBImDH/Mmo1QhaFt3Xp/S0Riu7WU/oofsLTVj2m1UO5LlgLJFumvlSNoQ==,
+      }
+    peerDependencies:
+      typescript: ">=5.7.2"
 
   "@types/bun@1.2.3":
     resolution:
@@ -3414,6 +3488,12 @@ packages:
     resolution:
       {
         integrity: sha512-+lTU0PxZXn0Dr1NBtC7Y8cR21AJr87dLLU953CWA6pMxxv/UDc7jYAY90upcrie1nRcD6XNG5HOYEDtgW5TxAg==,
+      }
+
+  "@types/papaparse@5.3.15":
+    resolution:
+      {
+        integrity: sha512-JHe6vF6x/8Z85nCX4yFdDslN11d+1pr12E526X8WAfhadOeaOTx5AuIkvDKIBopfvlzpzkdMx4YyvSKCM9oqtw==,
       }
 
   "@types/pg@8.11.6":
@@ -6310,6 +6390,12 @@ packages:
         integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==,
       }
 
+  papaparse@5.5.2:
+    resolution:
+      {
+        integrity: sha512-PZXg8UuAc4PcVwLosEEDYjPyfWnTEhOrUfdv+3Bx+NuAb+5NhDmXzg5fHWmdCh1mP5p7JAZfFr3IMQfcntNAdA==,
+      }
+
   parent-module@1.0.1:
     resolution:
       {
@@ -6727,6 +6813,14 @@ packages:
     peerDependencies:
       react: ">=16.4.0"
       react-dom: ">=16.4.0"
+
+  react-error-boundary@5.0.0:
+    resolution:
+      {
+        integrity: sha512-tnjAxG+IkpLephNcePNA7v6F/QpWLH8He65+DmedchDwg162JZqx4NmbXj0mlAYVVEd81OW7aFhmbsScYfiAFQ==,
+      }
+    peerDependencies:
+      react: ">=16.13.1"
 
   react-hook-form@7.54.2:
     resolution:
@@ -7413,10 +7507,10 @@ packages:
         integrity: sha512-AvzE8FmSoXC7nC+oU5GlQJbip2UO7tmOhOfQyOmPhrStOGXHU08j8mZEHZ4BmCqY5dWTCo4ClWkNyRNx1wpT0g==,
       }
 
-  tailwind-merge@3.0.2:
+  tailwind-merge@3.2.0:
     resolution:
       {
-        integrity: sha512-l7z+OYZ7mu3DTqrL88RiKrKIqO3NcpEO8V/Od04bNpvk0kiIFndGEoqfuzvj4yuhRkHKjRkII2z+KS2HfPcSxw==,
+        integrity: sha512-FQT/OVqCD+7edmmJpsgCsY820RTD5AkBryuG5IUqR5YQZSdj5xlH5nLgH7YPths7WsLPSpSBNneJdM8aS8aeFA==,
       }
 
   tailwindcss-animate@1.0.7:
@@ -9789,6 +9883,13 @@ snapshots:
       postcss: 8.5.3
       tailwindcss: 4.0.8
 
+  "@tanstack/query-core@5.71.3": {}
+
+  "@tanstack/react-query@5.71.3(react@19.0.0)":
+    dependencies:
+      "@tanstack/query-core": 5.71.3
+      react: 19.0.0
+
   "@tanstack/react-table@8.21.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)":
     dependencies:
       "@tanstack/table-core": 8.21.2
@@ -9907,6 +10008,24 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  "@trpc/client@11.0.1(@trpc/server@11.0.1(typescript@5.7.3))(typescript@5.7.3)":
+    dependencies:
+      "@trpc/server": 11.0.1(typescript@5.7.3)
+      typescript: 5.7.3
+
+  "@trpc/react-query@11.0.1(@tanstack/react-query@5.71.3(react@19.0.0))(@trpc/client@11.0.1(@trpc/server@11.0.1(typescript@5.7.3))(typescript@5.7.3))(@trpc/server@11.0.1(typescript@5.7.3))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.7.3)":
+    dependencies:
+      "@tanstack/react-query": 5.71.3(react@19.0.0)
+      "@trpc/client": 11.0.1(@trpc/server@11.0.1(typescript@5.7.3))(typescript@5.7.3)
+      "@trpc/server": 11.0.1(typescript@5.7.3)
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+      typescript: 5.7.3
+
+  "@trpc/server@11.0.1(typescript@5.7.3)":
+    dependencies:
+      typescript: 5.7.3
+
   "@types/bun@1.2.3":
     dependencies:
       bun-types: 1.2.3
@@ -9951,6 +10070,10 @@ snapshots:
   "@types/node@22.13.5":
     dependencies:
       undici-types: 6.20.0
+
+  "@types/papaparse@5.3.15":
+    dependencies:
+      "@types/node": 22.13.5
 
   "@types/pg@8.11.6":
     dependencies:
@@ -10564,7 +10687,7 @@ snapshots:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
       react-easy-sort: 1.6.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      tailwind-merge: 3.0.2
+      tailwind-merge: 3.2.0
       tsup: 6.7.0(postcss@8.5.3)(typescript@5.7.3)
     transitivePeerDependencies:
       - "@swc/core"
@@ -11823,6 +11946,8 @@ snapshots:
 
   package-json-from-dist@1.0.1: {}
 
+  papaparse@5.5.2: {}
+
   parent-module@1.0.1:
     dependencies:
       callsites: 3.1.0
@@ -12021,6 +12146,11 @@ snapshots:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
       tslib: 2.0.1
+
+  react-error-boundary@5.0.0(react@19.0.0):
+    dependencies:
+      "@babel/runtime": 7.26.9
+      react: 19.0.0
 
   react-hook-form@7.54.2(react@19.0.0):
     dependencies:
@@ -12513,7 +12643,7 @@ snapshots:
 
   tailwind-merge@3.0.1: {}
 
-  tailwind-merge@3.0.2: {}
+  tailwind-merge@3.2.0: {}
 
   tailwindcss-animate@1.0.7(tailwindcss@4.0.8):
     dependencies:

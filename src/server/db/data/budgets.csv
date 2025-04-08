@@ -1,0 +1,17 @@
+id,categoryId,amount,period,startDate,endDate,userId
+1,income_id,2600,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+2,salary_id,2500,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+3,extra_income_id,100,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+4,expense_id,1500,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+5,housing_id,500,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+6,transportation_id,100,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+7,food_id,500,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+8,restaurant_id,100,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+9,groceries_id,400,month,2025-01-01,2025-03-31,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+10,groceries_id,100,week,2025-04-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+11,healthcare_id,50,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+12,entertainment_id,100,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+13,savings_id,800,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+14,emergency_fund_id,700,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+15,major_purchase_id,100,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+16,investments_id,100,month,2025-01-01,,user_2jnV56cv1CJrRNLFsUdm6XAf7GD

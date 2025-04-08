@@ -3,12 +3,8 @@ import "dotenv/config";
 import { reset, seed } from "drizzle-seed";
 
 import { db, schema } from ".";
-import {
-  ROOT_CATEGORIES,
-  SUB_CATEGORIES,
-  SUB_CATEGORIES_2,
-  SUB_CATEGORIES_BUDGETS,
-} from "./data/categories";
+import { budgetList } from "./data/budgets";
+import { categoriesIds, categoriesMap } from "./data/categories";
 import { AccountType, CONNECTION_STATUS, Provider } from "./schema/enum";
 
 async function main() {
@@ -37,15 +33,10 @@ async function main() {
   await db.delete(budget_table).execute();
 
   // Insert categories into the database
-  await db.insert(category_table).values(ROOT_CATEGORIES);
-
-  const inserted = await db
-    .insert(category_table)
-    .values(SUB_CATEGORIES)
-    .returning({ id: category_table.id });
-
-  await db.insert(category_table).values(SUB_CATEGORIES_2);
-  await db.insert(budget_table).values(SUB_CATEGORIES_BUDGETS);
+  await db.insert(category_table).values(categoriesMap[0]!);
+  await db.insert(category_table).values(categoriesMap[1]!);
+  await db.insert(category_table).values(categoriesMap[2]!);
+  await db.insert(budget_table).values(budgetList);
 
   await seed(db, rest).refine((f) => ({
     institution_table: {
@@ -100,7 +91,7 @@ async function main() {
     transaction_table: {
       columns: {
         amount: f.int({ minValue: 0 }),
-        categoryId: f.valuesFromArray({ values: inserted.map((_) => _.id) }),
+        categoryId: f.valuesFromArray({ values: categoriesIds }),
         currency: f.default({ defaultValue: "EUR" }),
         description: f.loremIpsum({ sentencesCount: 1 }),
         note: f.loremIpsum({ sentencesCount: 2 }),

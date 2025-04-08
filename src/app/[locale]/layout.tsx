@@ -11,6 +11,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { extractRouterConfig } from "uploadthing/server";
 
 import { Toaster } from "~/components/ui/sonner";
+import { TRPCReactProvider } from "~/lib/trpc/react";
 import { I18nProviderClient } from "~/locales/client";
 import { TailwindIndicator } from "../../components/tailwind-indicator";
 import { ThemeProvider } from "../../components/theme-provider";
@@ -39,12 +40,18 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <body>
-          <I18nProviderClient locale={locale}>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-              <NuqsAdapter>{children}</NuqsAdapter>
-              <TailwindIndicator />
-            </ThemeProvider>
-          </I18nProviderClient>
+          <TRPCReactProvider>
+            <I18nProviderClient locale={locale}>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+              >
+                <NuqsAdapter>{children}</NuqsAdapter>
+                <TailwindIndicator />
+              </ThemeProvider>
+            </I18nProviderClient>
+          </TRPCReactProvider>
           <Toaster />
           <Analytics />
           <SpeedInsights />

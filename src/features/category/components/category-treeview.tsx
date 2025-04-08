@@ -1,73 +1,65 @@
 "use client";
 
 import type { dynamicIconImports } from "lucide-react/dynamic";
-import React, { use, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
+import { ScaleIcon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
+import { useQueryStates } from "nuqs";
 
 import type { TreeViewItem } from "~/components/tree-view";
 import TreeView from "~/components/tree-view";
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { api } from "~/lib/trpc/react";
 import { cn } from "~/lib/utils";
-import { type DB_BudgetType } from "~/server/db/schema/budgets";
 import { CATEGORY_TYPE } from "~/server/db/schema/enum";
-import { type getCategoriesWithBudgets_CACHED } from "../server/cached-queries";
+import { categoriesFiltersParsers } from "../utils/search-params";
+import { CategoryFilters } from "./category-filters";
 
-type Category = {
-  id: string;
-  name: string;
-  type: string;
-  parentId: string | null;
-  icon: string | null;
-  budgets: DB_BudgetType[];
-  children: Category[];
-};
-
-function mapCategoriesToTreeView(categories: Category[]): TreeViewItem[] {
-  return categories.map((cat) => {
-    const hasChildren = cat.children.length > 0;
-
-    return {
-      id: cat.id,
-      name: cat.name,
-      type: cat.type,
-      icon: hasChildren ? cat.children.length.toString() : cat.icon!, // Necessario per il mapping delle icone
-      budgets: cat.budgets,
-      children: hasChildren ? mapCategoriesToTreeView(cat.children) : undefined,
-    };
-  });
-}
-
-export function CategoryTreeview({
-  promise,
-}: {
-  promise: Promise<
-    [Awaited<ReturnType<typeof getCategoriesWithBudgets_CACHED>>]
-  >;
-}) {
-  const [categories] = use(promise);
-
-  console.log(categories);
+export function CategoryTreeview() {
+  const [filters] = useQueryStates(categoriesFiltersParsers);
+  const [categories] =
+    api.category.getCategoriesWithBudgets.useSuspenseQuery(filters);
 
   const data = useMemo(() => {
-    const categoryMap = new Map<string, Category>(
-      categories.map((cat) => [cat.id, { ...cat, children: [] }]),
+    // Array che conterrà le categorie di livello top (senza parent)
+    const tree: TreeViewItem[] = [];
+
+    // Mappa per accedere rapidamente a ogni categoria per id
+    const categoryMap = new Map<string, TreeViewItem>(
+      categories.map((category) => {
+        return [
+          category.id,
+          {
+            id: category.id,
+            name: category.name,
+            type: category.type,
+            icon: category.icon ?? "dashed-circle",
+            budget: category.budget,
+          },
+        ];
+      }),
     );
 
-    const categoryTree: Category[] = [];
-
-    for (const cat of categories) {
-      if (!categoryMap.has(cat.id)) continue;
-
-      if (!cat.parentId) {
-        categoryTree.push(categoryMap.get(cat.id)!);
+    // Costruisci la struttura ad albero: assegna ogni categoria al padre se presente
+    categories.forEach((cat) => {
+      const currentItem = categoryMap.get(cat.id)!;
+      if (cat.parentId && categoryMap.has(cat.parentId)) {
+        const parentItem = categoryMap.get(cat.parentId)!;
+        parentItem.children = [...(parentItem.children ?? []), currentItem];
       } else {
-        const parent = categoryMap.get(cat.parentId);
-        if (parent) {
-          parent.children.push(categoryMap.get(cat.id)!);
-        }
+        // Se non ha parentId, è un nodo di livello top
+        tree.push(currentItem);
       }
-    }
+    });
 
-    return mapCategoriesToTreeView(categoryTree).sort((a, b) => {
+    return tree.sort((a, b) => {
       const typeOrder = {
         [CATEGORY_TYPE.INCOME]: 0,
         [CATEGORY_TYPE.EXPENSE]: 1,
@@ -124,5 +116,28 @@ export function CategoryTreeview({
     [],
   );
 
-  return <TreeView data={data} title="Tree View Demo" getIcon={getIcon} />;
+  return (
+    <Card>
+      <CardHeader className="flex flex-row justify-between">
+        <CardTitle>Categorie</CardTitle>
+        <CategoryFilters />
+      </CardHeader>
+      <CardContent>
+        <TreeView data={data} getIcon={getIcon}></TreeView>
+      </CardContent>
+      <CardFooter>
+        <Button size="sm" variant="outline">
+          <ScaleIcon /> Ridistribuisci
+        </Button>
+        <div className="flex items-center text-muted-foreground">
+          <span className="font-mono text-primary">250 €</span>
+          <span className="w-[86px] text-right">rimanenti</span>
+        </div>
+      </CardFooter>
+    </Card>
+  );
+
+  // return <TreeView data={data} title="Tree View Demo" getIcon={getIcon} />;
 }
+
+// export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

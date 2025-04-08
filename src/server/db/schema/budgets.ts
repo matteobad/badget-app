@@ -1,7 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
-import { decimal, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { decimal, text, varchar } from "drizzle-orm/pg-core";
 
-import { timestamps } from "../utils";
+import { timestamps, timezoneRange } from "../utils";
 import { pgTable } from "./_table";
 import { category_table } from "./categories";
 import { type BudgetPeriod } from "./enum";
@@ -17,11 +17,9 @@ export const budget_table = pgTable("budget_table", {
   }),
   userId: varchar({ length: 32 }),
 
-  name: text().notNull(), // Example: "Groceries Budget"
   amount: decimal({ precision: 10, scale: 2 }).notNull(), // Budgeted amount
   period: text().$type<BudgetPeriod>().notNull(),
-  startDate: timestamp().notNull(), // When budget starts
-  endDate: timestamp().notNull(), // When budget ends
+  sysPeriod: timezoneRange({ notNull: true, default: true }),
 
   ...timestamps,
 });

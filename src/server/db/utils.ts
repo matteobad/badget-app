@@ -1,8 +1,14 @@
 import type { SQL } from "drizzle-orm";
 import type { PgSelect, PgTable } from "drizzle-orm/pg-core";
 import { getTableColumns, sql } from "drizzle-orm";
-import { timestamp } from "drizzle-orm/pg-core";
+import { customType, timestamp } from "drizzle-orm/pg-core";
 import { type SQLiteTable } from "drizzle-orm/sqlite-core";
+import {
+  Range,
+  RANGE_LB_INC,
+  parse as rangeParse,
+  serialize as rangeSerialize,
+} from "postgres-range";
 
 export type DrizzleWhere<T> =
   | SQL<unknown>
@@ -40,3 +46,67 @@ export function withPagination<T extends PgSelect>(
 ) {
   return qb.limit(pageSize).offset((page - 1) * pageSize);
 }
+
+interface TimeRangeInput {
+  endMs: number;
+  startMs: number;
+}
+
+type RangeBound<T> = {
+  value: T;
+  inclusive: boolean;
+};
+
+// TODO: change to drizzle TimezoneRange when it will be supported (discussion: https://github.com/drizzle-team/drizzle-orm/discussions/2438).
+export class TimezoneRange {
+  constructor(public readonly range: Range<Date | null>) {}
+
+  get start(): RangeBound<Date> | null {
+    return this.range.lower != null
+      ? {
+          value: new Date(this.range.lower),
+          inclusive: this.range.isLowerBoundClosed(),
+        }
+      : null;
+  }
+
+  get end(): RangeBound<Date> | null {
+    return this.range.upper != null
+      ? {
+          value: new Date(this.range.upper),
+          inclusive: this.range.isUpperBoundClosed(),
+        }
+      : null;
+  }
+
+  static fromInput(input: TimeRangeInput): TimezoneRange {
+    const range = new Range<Date>(
+      new Date(input.startMs),
+      new Date(input.endMs),
+      RANGE_LB_INC,
+    );
+
+    return new TimezoneRange(range);
+  }
+}
+
+export const timezoneRange = customType<{
+  data: TimezoneRange;
+}>({
+  dataType: () => "tstzrange",
+  fromDriver: (value: unknown): TimezoneRange => {
+    if (typeof value !== "string") {
+      throw new Error("Expected string");
+    }
+
+    const parsed = rangeParse(value, (val) => new Date(val));
+    return new TimezoneRange(parsed);
+  },
+  toDriver: (value: TimezoneRange): string => {
+    const res = rangeSerialize(
+      value.range,
+      (date) => date?.toISOString() ?? "",
+    );
+    return res.replaceAll('""', "");
+  },
+});

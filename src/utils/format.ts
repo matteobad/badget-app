@@ -35,3 +35,10 @@ export function formatAmount({
     maximumFractionDigits,
   }).format(amount);
 }
+
+export function formatPerc(value: number) {
+  return Intl.NumberFormat("it-IT", {
+    style: "percent",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
