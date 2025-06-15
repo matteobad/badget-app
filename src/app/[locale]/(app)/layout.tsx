@@ -1,5 +1,4 @@
 import { type PropsWithChildren } from "react";
-
 import { AppSidebar } from "~/components/app-sidebar";
 import { FeedbackDialog } from "~/components/feedback-dialog";
 import { DynamicBreadcrumb } from "~/components/layouts/dynamic-breadcrumb";

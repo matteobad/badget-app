@@ -1,6 +1,4 @@
 import { type Column } from "@tanstack/react-table";
-import { CheckIcon, XIcon } from "lucide-react";
-
 import { Badge } from "~/components/ui/badge";
 import {
   Command,
@@ -13,6 +11,7 @@ import {
 } from "~/components/ui/command";
 import { cn } from "~/lib/utils";
 import { type Option } from "~/utils/data-table";
+import { CheckIcon, XIcon } from "lucide-react";
 
 export function MultiSelectFilter<TData, TValue>({
   column,

@@ -1,3 +1,6 @@
+import { env } from "~/env";
+import { redis } from "~/server/redis";
+
 import type {
   GC_AccessTokenResponse,
   GC_CreateAgreementRequest,
@@ -17,8 +20,6 @@ import type {
   GC_GetRequisitionByIdResponse,
   GC_RefreshTokenResponse,
 } from "./gocardless-types";
-import { env } from "~/env";
-import { redis } from "~/server/redis";
 import {
   type GC_GetTransactionsRequest,
   type GC_GetTransactionsResponse,

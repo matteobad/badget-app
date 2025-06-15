@@ -1,10 +1,4 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2Icon } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { type z } from "zod";
-
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import {
   Accordion,
@@ -32,6 +26,12 @@ import {
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 import { UploadDropzone } from "~/utils/uploadthing";
+import { Loader2Icon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { type z } from "zod/v4";
+
 import { createAccountAction } from "../server/actions";
 import { AccountInsertSchema } from "../utils/schemas";
 import { AccountTypePicker } from "./account-type-picker";
@@ -55,7 +55,7 @@ export default function CreateAccountForm({
   });
 
   const form = useForm<z.infer<typeof AccountInsertSchema>>({
-    resolver: zodResolver(AccountInsertSchema),
+    resolver: standardSchemaResolver(AccountInsertSchema),
     defaultValues: {
       name: "",
       balance: "0",

@@ -1,8 +1,7 @@
 import type { VariantProps } from "class-variance-authority";
 import * as React from "react";
-import { cva } from "class-variance-authority";
-
 import { cn } from "~/lib/utils";
+import { cva } from "class-variance-authority";
 
 const kbdVariants = cva(
   "select-none rounded border px-1.5 py-px font-mono font-normal text-[0.7rem] shadow-sm disabled:opacity-50",

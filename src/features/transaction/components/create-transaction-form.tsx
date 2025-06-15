@@ -1,13 +1,7 @@
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { type Tag } from "emblor";
-import { CalendarIcon, Loader2Icon, X } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { type z } from "zod";
+"use client";
 
+import { useState } from "react";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { AccountPicker } from "~/components/forms/account-picker";
 import { CategoryPicker } from "~/components/forms/category-picker";
@@ -48,6 +42,14 @@ import { type DB_CategoryType } from "~/server/db/schema/categories";
 import { type DB_AttachmentType } from "~/server/db/schema/transactions";
 import { formatSize } from "~/utils/format";
 import { UploadDropzone } from "~/utils/uploadthing";
+import { format } from "date-fns";
+import { type Tag } from "emblor";
+import { CalendarIcon, Loader2Icon, X } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { type z } from "zod/v4";
+
 import {
   categorizeTransactionAction,
   createTransactionAction,
@@ -105,7 +107,7 @@ export default function CreateTransactionForm({
   });
 
   const form = useForm<z.infer<typeof TransactionInsertSchema>>({
-    resolver: zodResolver(TransactionInsertSchema),
+    resolver: standardSchemaResolver(TransactionInsertSchema),
     defaultValues: {
       date: new Date(),
       description: "",

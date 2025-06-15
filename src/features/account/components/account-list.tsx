@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { cn } from "~/lib/utils";
 import { formatAmount } from "~/utils/format";
+
 import { type getAccountsForUser_CACHED } from "../server/cached-queries";
 import UpdateAccountDrawerSheet from "./update-account-drawer-sheet";
 

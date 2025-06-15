@@ -1,8 +1,5 @@
 "use client";
 
-import { FilePlus, Landmark, Plus } from "lucide-react";
-import { useQueryStates } from "nuqs";
-
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -11,6 +8,8 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { actionsParsers } from "~/utils/search-params";
+import { FilePlus, Landmark, Plus } from "lucide-react";
+import { useQueryStates } from "nuqs";
 
 export function AddAccountButton({ label }: { label?: string }) {
   const [, setState] = useQueryStates(actionsParsers, { shallow: false });

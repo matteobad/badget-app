@@ -5,7 +5,7 @@ import { reset, seed } from "drizzle-seed";
 import { db, schema } from ".";
 import { budgetList } from "./data/budgets";
 import { categoriesIds, categoriesMap } from "./data/categories";
-import { AccountType, CONNECTION_STATUS, Provider } from "./schema/enum";
+import { ACCOUNT_TYPE, CONNECTION_STATUS, Provider } from "./schema/enum";
 
 async function main() {
   /* eslint-disable */
@@ -78,7 +78,7 @@ async function main() {
         currency: f.default({ defaultValue: "EUR" }),
         description: f.loremIpsum({ sentencesCount: 1 }),
         type: f.valuesFromArray({
-          values: Object.values(AccountType),
+          values: Object.values(ACCOUNT_TYPE),
         }),
         userId: f.default({ defaultValue: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD" }),
         updatedAt: f.default({ defaultValue: null }),

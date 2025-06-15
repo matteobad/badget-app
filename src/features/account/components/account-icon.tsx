@@ -1,6 +1,8 @@
 "use client";
 
+import type { AccountType } from "~/server/db/schema/enum";
 import type { VariantProps } from "class-variance-authority";
+import { cn } from "~/lib/utils";
 import { cva } from "class-variance-authority";
 import {
   ArrowUpRight,
@@ -10,9 +12,6 @@ import {
   PiggyBankIcon,
   Wallet2Icon,
 } from "lucide-react";
-
-import { cn } from "~/lib/utils";
-import { type AccountType } from "~/server/db/schema/enum";
 
 const iconVariants = cva("rounded-lg", {
   variants: {

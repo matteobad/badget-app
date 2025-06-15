@@ -1,9 +1,6 @@
 "use client";
 
-import type { Table } from "@tanstack/react-table";
 import * as React from "react";
-import { Check, Columns3Icon } from "lucide-react";
-
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -19,6 +16,9 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
+import { Check, Columns3Icon } from "lucide-react";
+
+import type { Table } from "@tanstack/react-table";
 
 interface DataTableViewOptionsProps<TData> {
   table: Table<TData>;

@@ -1,10 +1,5 @@
 "use client";
 
-import { format } from "date-fns";
-import { CalendarIcon, PlusIcon } from "lucide-react";
-import { useQueryStates } from "nuqs";
-import { type DateRange } from "react-day-picker";
-
 import Component from "~/components/comp-507";
 import { Button } from "~/components/ui/button";
 import {
@@ -13,10 +8,15 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon, PlusIcon } from "lucide-react";
+import { useQueryStates } from "nuqs";
+import { type DateRange } from "react-day-picker";
+
 import { categoriesFiltersParsers } from "../utils/search-params";
 
 export const CategoryFilters = () => {
-  const [{ from }, setFilters] = useQueryStates(categoriesFiltersParsers, {
+  const [{ from, to }, setFilters] = useQueryStates(categoriesFiltersParsers, {
     shallow: false,
   });
 
@@ -83,7 +83,10 @@ export const CategoryFilters = () => {
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-fit p-0">
-            <Component handleChange={handleDateRangeChange} />
+            <Component
+              handleChange={handleDateRangeChange}
+              defaultValue={{ from, to }}
+            />
           </PopoverContent>
         </Popover>
         <Button size="sm">

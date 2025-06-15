@@ -1,7 +1,5 @@
 "use client";
 
-import { useQueryStates } from "nuqs";
-
 import { Button } from "~/components/ui/button";
 import {
   Drawer,
@@ -21,6 +19,8 @@ import {
 } from "~/components/ui/sheet";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
+import { useQueryStates } from "nuqs";
+
 import { categoriesParsers } from "../utils/search-params";
 import CreateCategoryForm from "./create-category-form";
 

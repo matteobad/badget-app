@@ -1,34 +1,64 @@
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { CategoryFilters } from "~/features/category/components/category-filters";
+import { CategoryTree } from "~/features/category/components/category-tree";
+import {
+  getQueryClient,
+  HydrateClient,
+  trpc,
+} from "~/shared/helpers/trpc/server";
+import { BudgetFilterParamsSchema } from "~/shared/validators/budget.schema";
+import { categoryFilterParamsSchema } from "~/shared/validators/category.schema";
+import { createLoader } from "nuqs/server";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { CategoryTreeview } from "~/features/category/components/category-treeview";
-import { api, HydrateClient } from "~/lib/trpc/server";
-import { categoriesSearchParamsCache } from "../../../../features/category/utils/search-params";
-
-export default async function BudgetsPage({
-  searchParams,
-}: {
+type CategoriesPageProps = {
   searchParams: Promise<SearchParams>;
-}) {
-  // ⚠️ Don't forget to call `parse` here.
-  // You can access type-safe values from the returned object:
-  const params = await categoriesSearchParamsCache.parse(searchParams);
+};
 
-  void api.category.getCategoriesWithBudgets.prefetch(params);
-  // const { userId } = await auth();
-  // if (!userId) unauthorized();
+export default async function CategoriesPage(props: CategoriesPageProps) {
+  // Load search parameters
+  const searchParams = await props.searchParams;
+  const loadCategoryFilterParams = createLoader(categoryFilterParamsSchema);
+  const loadBudgetFilterParams = createLoader(BudgetFilterParamsSchema);
+  const categoryFilters = loadCategoryFilterParams(searchParams);
+  const budgetFilters = loadBudgetFilterParams(searchParams);
 
-  // const promise = getCategoriesWithBudgets_CACHED(userId, { from, to, period });
+  // Prepare query client form tRPC calls
+  const queryClient = getQueryClient();
+  // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
+  // prefetch(trpc.todo.getAll.queryOptions());
+  await queryClient.fetchQuery(
+    trpc.category.getCategoryTree.queryOptions({
+      categoryFilters,
+      budgetFilters,
+    }),
+  );
 
   return (
     <HydrateClient>
       <div className="flex flex-1 flex-col gap-2 p-4 pt-0">
-        <ErrorBoundary fallback={<div>Something went wrong</div>}>
-          <Suspense fallback={<div>Loading...</div>}>
-            <CategoryTreeview />
-          </Suspense>
-        </ErrorBoundary>
+        <Card>
+          <CardHeader className="flex-row items-center justify-between">
+            <CardTitle>Categorie</CardTitle>
+            <CategoryFilters />
+          </CardHeader>
+          <CardContent>
+            <ErrorBoundary fallback={<div>Something went wrong</div>}>
+              <Suspense fallback={<div>Loading...</div>}>
+                <CategoryTree />
+              </Suspense>
+            </ErrorBoundary>
+          </CardContent>
+          <CardFooter className="border-t pt-6">TODO</CardFooter>
+        </Card>
 
         {/* <CreateCategoryDrawerSheet categories={categories} />
       <UpdateCategoryDrawerSheet categories={categories} /> */}

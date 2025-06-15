@@ -1,7 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { clerkClient } from "@clerk/nextjs/server";
-
 import { env } from "~/env";
 import { getBankAccountProvider } from "~/features/account/server/providers";
 import { getConnectionsforUser } from "~/features/account/server/queries";

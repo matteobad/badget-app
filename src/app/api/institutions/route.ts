@@ -1,6 +1,5 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-
 import { env } from "~/env";
 import { getBankAccountProvider } from "~/features/account/server/providers";
 import { db } from "~/server/db";

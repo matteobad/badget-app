@@ -1,15 +1,6 @@
 "use client";
 
 import React from "react";
-import {
-  EllipsisVerticalIcon,
-  RefreshCwIcon,
-  UnlinkIcon,
-  Wallet2Icon,
-} from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
-
 import { InstitutionInfo } from "~/components/institution-info";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -20,6 +11,15 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
+import {
+  EllipsisVerticalIcon,
+  RefreshCwIcon,
+  UnlinkIcon,
+  Wallet2Icon,
+} from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import {
   connectGocardlessAction,
   deleteConnectionAction,
@@ -84,6 +84,7 @@ export default function ConnectionsList({
                       disabled={connectAction.isExecuting}
                       onClick={() => {
                         connectAction.execute({
+                          countryCode: "IT",
                           institutionId: connection.institutionId,
                           provider: connection.provider,
                           redirectBase: window.location.origin,

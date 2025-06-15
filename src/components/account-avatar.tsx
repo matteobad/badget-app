@@ -1,7 +1,7 @@
 import React from "react";
+import { cn } from "~/lib/utils";
 import { Wallet2Icon } from "lucide-react";
 
-import { cn } from "~/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 type AccountAvatarProps = {

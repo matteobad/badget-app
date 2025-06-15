@@ -1,13 +1,5 @@
 import type { dynamicIconImports } from "lucide-react/dynamic";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronsUpDown, CircleDashedIcon, Loader2Icon } from "lucide-react";
-import { DynamicIcon } from "lucide-react/dynamic";
-import { useAction } from "next-safe-action/hooks";
-import { HslColorPicker } from "react-colorful";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { type z } from "zod";
-
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { CategoryPicker } from "~/components/forms/category-picker";
 import {
   Accordion,
@@ -40,6 +32,14 @@ import {
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
+import { ChevronsUpDown, CircleDashedIcon, Loader2Icon } from "lucide-react";
+import { DynamicIcon } from "lucide-react/dynamic";
+import { useAction } from "next-safe-action/hooks";
+import { HslColorPicker } from "react-colorful";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { type z } from "zod/v4";
+
 import { updateCategoryAction } from "../server/actions";
 import { CategoryUpdateSchema } from "../utils/schemas";
 
@@ -66,7 +66,7 @@ export default function UpdateCategoryForm({
   });
 
   const form = useForm<z.infer<typeof CategoryUpdateSchema>>({
-    resolver: zodResolver(CategoryUpdateSchema),
+    resolver: standardSchemaResolver(CategoryUpdateSchema),
     defaultValues: {
       ...category,
       description: category.description ?? undefined,

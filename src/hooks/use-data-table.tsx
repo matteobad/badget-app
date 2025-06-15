@@ -1,15 +1,5 @@
 "use client";
 
-import type {
-  ColumnFiltersState,
-  PaginationState,
-  RowSelectionState,
-  SortingState,
-  TableOptions,
-  TableState,
-  Updater,
-  VisibilityState,
-} from "@tanstack/react-table";
 import type { Parser, UseQueryStateOptions } from "nuqs";
 import * as React from "react";
 import {
@@ -21,6 +11,11 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { getSortingStateParser } from "~/lib/validators";
+import {
+  type DataTableFilterField,
+  type ExtendedSortingState,
+} from "~/utils/data-table";
 import {
   parseAsArrayOf,
   parseAsInteger,
@@ -29,11 +24,16 @@ import {
   useQueryStates,
 } from "nuqs";
 
-import { getSortingStateParser } from "~/lib/validators";
-import {
-  type DataTableFilterField,
-  type ExtendedSortingState,
-} from "~/utils/data-table";
+import type {
+  ColumnFiltersState,
+  PaginationState,
+  RowSelectionState,
+  SortingState,
+  TableOptions,
+  TableState,
+  Updater,
+  VisibilityState,
+} from "@tanstack/react-table";
 import { useDebouncedCallback } from "./use-debounce-callback";
 
 interface UseDataTableProps<TData>

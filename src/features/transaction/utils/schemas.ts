@@ -1,13 +1,12 @@
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
-
 import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
 import { TagInsertSchema } from "~/lib/validators";
 import { transaction_table } from "~/server/db/schema/transactions";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
 
 export const TransactionInsertSchema = createInsertSchema(transaction_table, {
-  date: z.coerce.date(),
-  amount: z.coerce.string(),
+  date: z.date(),
+  amount: z.string(),
   note: z.string().optional(),
 })
   .omit({
@@ -24,8 +23,8 @@ export const TransactionInsertSchema = createInsertSchema(transaction_table, {
 
 export const TransactionUpdateSchema = createInsertSchema(transaction_table, {
   id: z.string(),
-  date: z.coerce.date().optional(),
-  amount: z.coerce.string().optional(),
+  date: z.date().optional(),
+  amount: z.string().optional(),
   note: z.string().optional(),
 })
   .omit({

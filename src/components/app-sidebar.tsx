@@ -1,6 +1,13 @@
 "use client";
 
 import * as React from "react";
+import { NavMain } from "~/components/nav-main";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+} from "~/components/ui/sidebar";
 import {
   CalendarClockIcon,
   CandlestickChart,
@@ -16,13 +23,6 @@ import {
   ShapesIcon,
 } from "lucide-react";
 
-import { NavMain } from "~/components/nav-main";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-} from "~/components/ui/sidebar";
 import { NavPillars } from "./nav-pillars";
 import { NavWealth } from "./nav-wealth";
 import { TeamSwitcher } from "./team-switcher";

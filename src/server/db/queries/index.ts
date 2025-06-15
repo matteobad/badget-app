@@ -1,9 +1,9 @@
 "server-only";
 
+import { type ToggleAccountType } from "~/lib/validators";
 import { and, asc, eq } from "drizzle-orm";
 
 import type { DBClient } from "..";
-import { type ToggleAccountType } from "~/lib/validators";
 import { db } from "..";
 import { account_table as accountSchema } from "../schema/accounts";
 import { connection_table as connectionSchema } from "../schema/open-banking";

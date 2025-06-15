@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
 import {
   endOfMonth,
   endOfYear,
@@ -10,13 +12,12 @@ import {
 } from "date-fns";
 import { type DateRange } from "react-day-picker";
 
-import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
-
 export default function Component({
   handleChange,
+  defaultValue,
 }: {
   handleChange: (dateRange?: DateRange) => void;
+  defaultValue: DateRange;
 }) {
   const today = new Date();
   const yesterday = {
@@ -48,7 +49,7 @@ export default function Component({
     to: endOfYear(subYears(today, 1)),
   };
   const [month, setMonth] = useState(today);
-  const [date, setDate] = useState<DateRange | undefined>(last7Days);
+  const [date, setDate] = useState<DateRange | undefined>(defaultValue);
 
   return (
     <div className="flex max-sm:flex-col">

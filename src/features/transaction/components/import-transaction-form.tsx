@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Info } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { type z } from "zod";
-
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { AccountPicker } from "~/components/forms/account-picker";
 import {
   Accordion,
@@ -40,6 +34,12 @@ import {
 import { cn } from "~/lib/utils";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { UploadDropzone } from "~/utils/uploadthing";
+import { ArrowRight, Info } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { type z } from "zod/v4";
+
 import { importTransactionAction, parseCsv } from "../server/actions";
 import { TransactionImportSchema } from "../utils/schemas";
 
@@ -69,7 +69,7 @@ export default function ImportTransactionForm({
   });
 
   const form = useForm<z.infer<typeof TransactionImportSchema>>({
-    resolver: zodResolver(TransactionImportSchema),
+    resolver: standardSchemaResolver(TransactionImportSchema),
     defaultValues: {
       settings: { inverted: false },
     },

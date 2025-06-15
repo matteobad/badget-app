@@ -1,10 +1,9 @@
 import type { FileRouter } from "uploadthing/next";
 import { auth } from "@clerk/nextjs/server";
-import { createUploadthing } from "uploadthing/next";
-import { UploadThingError } from "uploadthing/server";
-
 import { db } from "~/server/db";
 import { attachment_table } from "~/server/db/schema/transactions";
+import { createUploadthing } from "uploadthing/next";
+import { UploadThingError } from "uploadthing/server";
 
 const f = createUploadthing();
 

@@ -5,14 +5,14 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Toaster } from "~/components/ui/sonner";
+import { TRPCReactProvider } from "~/shared/helpers/trpc/client";
+import { I18nProviderClient } from "~/shared/locales/client";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { extractRouterConfig } from "uploadthing/server";
 
-import { Toaster } from "~/components/ui/sonner";
-import { TRPCReactProvider } from "~/lib/trpc/react";
-import { I18nProviderClient } from "~/locales/client";
 import { TailwindIndicator } from "../../components/tailwind-indicator";
 import { ThemeProvider } from "../../components/theme-provider";
 import { ourFileRouter } from "../api/uploadthing/core";

@@ -1,11 +1,8 @@
 "use server";
 
+import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
 import { revalidateTag } from "next/cache";
 import { parse } from "@fast-csv/parse";
-import { and, eq } from "drizzle-orm";
-
-import type { CSVRow, CSVRowParsed } from "../utils/schemas";
-import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
 import { authActionClient } from "~/lib/safe-action";
 import { db, withTransaction } from "~/server/db";
 import { transaction_table } from "~/server/db/schema/transactions";
@@ -15,6 +12,9 @@ import {
   categorizeTransactions,
   updateOrCreateRule,
 } from "~/utils/categorization";
+import { and, eq } from "drizzle-orm";
+
+import type { CSVRow, CSVRowParsed } from "../utils/schemas";
 import { transformCSV } from "../utils";
 import {
   AttachmentDeleteSchema,
@@ -36,7 +36,7 @@ import {
 
 // transaction
 export const createTransactionAction = authActionClient
-  .schema(TransactionInsertSchema)
+  .inputSchema(TransactionInsertSchema)
   .metadata({ actionName: "create-transaction" })
   .action(async ({ parsedInput, ctx }) => {
     // Prepare data
@@ -74,7 +74,7 @@ export const createTransactionAction = authActionClient
   });
 
 export const updateTransactionAction = authActionClient
-  .schema(TransactionUpdateSchema)
+  .inputSchema(TransactionUpdateSchema)
   .metadata({ actionName: "update-transaction" })
   .action(async ({ parsedInput, ctx }) => {
     // Prepare data
@@ -112,7 +112,7 @@ export const updateTransactionAction = authActionClient
   });
 
 export const updateTransactionBulkAction = authActionClient
-  .schema(TransactionUpdateBulkSchema)
+  .inputSchema(TransactionUpdateBulkSchema)
   .metadata({ actionName: "update-transaction-bulk" })
   .action(async ({ parsedInput, ctx }) => {
     // Prepare data
@@ -143,7 +143,7 @@ export const updateTransactionBulkAction = authActionClient
   });
 
 export const deleteTransactionAction = authActionClient
-  .schema(TransactionDeleteSchema)
+  .inputSchema(TransactionDeleteSchema)
   .metadata({ actionName: "delete-transaction" })
   .action(async ({ parsedInput, ctx }) => {
     // Mutate data
@@ -161,7 +161,7 @@ export const deleteTransactionAction = authActionClient
   });
 
 export const deleteTransactionAttachmentAction = authActionClient
-  .schema(AttachmentDeleteSchema)
+  .inputSchema(AttachmentDeleteSchema)
   .metadata({ actionName: "delete-transaction-attachment" })
   .action(async ({ parsedInput, ctx }) => {
     // Mutate data

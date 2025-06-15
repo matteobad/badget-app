@@ -2,9 +2,6 @@
 
 import type { dynamicIconImports } from "lucide-react/dynamic";
 import { use, useMemo, useState } from "react";
-import { CircleDashed, Wallet2Icon } from "lucide-react";
-import { DynamicIcon } from "lucide-react/dynamic";
-
 import { DataTable } from "~/components/data-table/data-table";
 import { DataTableToolbar } from "~/components/data-table/data-table-toolbar";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -18,6 +15,9 @@ import {
   type DataTableFilterField,
   type DataTableRowAction,
 } from "~/utils/data-table";
+import { CircleDashed, Wallet2Icon } from "lucide-react";
+import { DynamicIcon } from "lucide-react/dynamic";
+
 import {
   type getTransactionAccountCounts_CACHED,
   type getTransactionCategoryCounts_CACHED,

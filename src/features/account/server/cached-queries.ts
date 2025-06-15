@@ -33,7 +33,7 @@ export const getAccountsForUser_CACHED = (userId: string) => {
       return result.reduce(
         (acc, account) => {
           const type = account.type;
-          if (!acc[type]) acc[type] = [];
+          acc[type] ??= [];
           acc[type].push(account);
           return acc;
         },

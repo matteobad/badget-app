@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useFormStatus } from "react-dom";
-import { useForm } from "react-hook-form";
-import { useDebouncedCallback } from "use-debounce";
-import { z } from "zod";
-
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import {
   Form,
   FormControl,
@@ -15,6 +10,10 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { useFormStatus } from "react-dom";
+import { useForm } from "react-hook-form";
+import { useDebouncedCallback } from "use-debounce";
+import { z } from "zod/v4";
 
 const FormSchema = z.object({
   query: z.string(),
@@ -32,7 +31,7 @@ export function SearchInstitutions({ query }: { query?: string }) {
   );
 
   const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+    resolver: standardSchemaResolver(FormSchema),
     defaultValues: {
       query: query,
     },

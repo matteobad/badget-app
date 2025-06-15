@@ -1,21 +1,6 @@
 "use client";
 
 import { use, useState } from "react";
-// import { AreaChart, BarChart, PieChart } from "~/components/ui/chart";
-import { endOfMonth, format, startOfMonth } from "date-fns";
-import {
-  CalendarIcon,
-  DollarSignIcon,
-  HomeIcon,
-  ShoppingBagIcon,
-  ShoppingCartIcon,
-  TrendingUpIcon,
-  UtensilsIcon,
-  WifiIcon,
-  ZapIcon,
-} from "lucide-react";
-import { type DateRange } from "react-day-picker";
-
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -37,6 +22,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { type getCategories_CACHED } from "~/features/category/server/cached-queries";
 import { type getTransactions_CACHED } from "~/features/transaction/server/cached-queries";
 import { cn } from "~/lib/utils";
+// import { AreaChart, BarChart, PieChart } from "~/components/ui/chart";
+import { endOfMonth, format, startOfMonth } from "date-fns";
+import {
+  CalendarIcon,
+  DollarSignIcon,
+  HomeIcon,
+  ShoppingBagIcon,
+  ShoppingCartIcon,
+  TrendingUpIcon,
+  UtensilsIcon,
+  WifiIcon,
+  ZapIcon,
+} from "lucide-react";
+import { type DateRange } from "react-day-picker";
+
 import { ExpensesDistributionChart } from "./charts/expenses-distribution-chart";
 import { IncomeDistributionChart } from "./charts/income-distribution-chart";
 import { ExpenseCard } from "./expense-card";

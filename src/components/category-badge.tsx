@@ -1,8 +1,8 @@
 import type { dynamicIconImports } from "lucide-react/dynamic";
+import { cn } from "~/lib/utils";
 import { type VariantProps } from "class-variance-authority";
 import { DynamicIcon } from "lucide-react/dynamic";
 
-import { cn } from "~/lib/utils";
 import { Badge, badgeVariants } from "./ui/badge";
 
 export function CategoryBadge({

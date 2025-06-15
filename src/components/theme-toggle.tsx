@@ -7,11 +7,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-
 import { System } from "~/components/icons";
 import { Button } from "~/components/ui/button";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 export default function ThemeToggle(props: {
   align?: "center" | "start" | "end";

@@ -1,4 +1,8 @@
 import { useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { type getCategories_CACHED } from "~/features/category/server/cached-queries";
+import { type getTransactions_CACHED } from "~/features/transaction/server/cached-queries";
+import { formatAmount } from "~/utils/format";
 import { isWithinInterval, subMonths } from "date-fns";
 import {
   ArrowUp01Icon,
@@ -8,10 +12,6 @@ import {
 } from "lucide-react";
 import { type DateRange } from "react-day-picker";
 
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { type getCategories_CACHED } from "~/features/category/server/cached-queries";
-import { type getTransactions_CACHED } from "~/features/transaction/server/cached-queries";
-import { formatAmount } from "~/utils/format";
 import { getChildCategoryIds } from "../utils";
 
 type TransactionType = Awaited<

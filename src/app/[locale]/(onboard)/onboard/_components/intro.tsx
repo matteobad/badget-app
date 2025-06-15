@@ -1,10 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Button } from "~/components/ui/button";
 import { motion } from "framer-motion";
 import { useDebounce } from "use-debounce";
-
-import { Button } from "~/components/ui/button";
 
 export default function Intro() {
   const router = useRouter();

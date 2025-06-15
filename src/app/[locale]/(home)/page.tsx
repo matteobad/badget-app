@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-
 import { Button } from "~/components/ui/button";
 
 export default function HomePage() {

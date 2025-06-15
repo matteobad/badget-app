@@ -1,7 +1,5 @@
 "use client";
 
-import { useQueryStates } from "nuqs";
-
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -23,6 +21,8 @@ import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { type DB_InstitutionType } from "~/server/db/schema/open-banking";
 import { actionsParsers } from "~/utils/search-params";
+import { useQueryStates } from "nuqs";
+
 import LinkInstitutionForm from "./link-institution-form";
 
 interface LinkInstitutionDrawerDialogProps

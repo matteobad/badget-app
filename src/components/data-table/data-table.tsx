@@ -1,8 +1,5 @@
-import type { Table as TanstackTable } from "@tanstack/react-table";
 import type * as React from "react";
 import { flexRender } from "@tanstack/react-table";
-import { ListXIcon } from "lucide-react";
-
 import { DataTablePagination } from "~/components/data-table/data-table-pagination";
 import {
   Table,
@@ -14,6 +11,9 @@ import {
 } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 import { getCommonPinningStyles } from "~/utils/data-table";
+import { ListXIcon } from "lucide-react";
+
+import type { Table as TanstackTable } from "@tanstack/react-table";
 import { Button } from "../ui/button";
 
 interface DataTableProps<TData> extends React.HTMLAttributes<HTMLDivElement> {

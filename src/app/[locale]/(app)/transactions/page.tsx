@@ -1,7 +1,5 @@
 import { Suspense } from "react";
 import { auth } from "@clerk/nextjs/server";
-import { type SearchParams } from "nuqs/server";
-
 import { DataTableSkeleton } from "~/components/data-table/data-table-skeleton";
 import LinkInstitutionDrawerDialog from "~/features/account/components/link-institution-drawer-dialog";
 import { getAccounts_CACHED } from "~/features/account/server/cached-queries";
@@ -18,6 +16,7 @@ import {
   getTransactionTagCounts_CACHED,
 } from "~/features/transaction/server/cached-queries";
 import { transactionsSearchParamsCache } from "~/features/transaction/utils/search-params";
+import { type SearchParams } from "nuqs/server";
 
 type PageProps = {
   searchParams: Promise<SearchParams>; // Next.js 15+: async searchParams prop

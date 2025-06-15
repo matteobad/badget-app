@@ -1,11 +1,12 @@
-import type { Row } from "@tanstack/react-table";
-import { createInsertSchema } from "drizzle-zod";
-import { createParser } from "nuqs/server";
-import { z } from "zod";
-
 import type { ExtendedSortingState, Filter } from "~/utils/data-table";
+import { SAVING_TYPE } from "~/server/db/schema/enum";
 import { tag_table } from "~/server/db/schema/transactions";
 import { dataTableConfig } from "~/utils/data-table";
+import { createInsertSchema } from "drizzle-zod";
+import { createParser } from "nuqs/server";
+import { z } from "zod/v4";
+
+import type { Row } from "@tanstack/react-table";
 
 export const sortingItemSchema = z.object({
   id: z.string(),
@@ -99,9 +100,7 @@ export const getFiltersStateParser = <T>(originalRow?: Row<T>["original"]) => {
 
 // savings
 export const addSavingsAccountFormSchema = z.object({
-  type: z.enum(["pension", "emergency"], {
-    required_error: "Please select an account type.",
-  }),
+  type: z.enum(Object.values(SAVING_TYPE)),
 });
 
 export const CreatePensionAccountSchema = z.object({
@@ -139,7 +138,7 @@ export type ToggleAccountType = z.infer<typeof ToggleAccountSchema> & {
 // Define the feedback schema
 export const FeedbackSchema = z.object({
   message: z.string().min(3, "Feedback must be at least 3 characters long"),
-  category: z.enum(["bug", "feature", "other"]).default("other"),
+  category: z.enum(["bug", "feature", "other"]),
 });
 
 // Type for the feedback data

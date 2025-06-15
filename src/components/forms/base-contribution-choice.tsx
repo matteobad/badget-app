@@ -1,8 +1,7 @@
 "use client";
 
-import { RocketIcon } from "lucide-react";
-
 import { Button } from "~/components/ui/button";
+import { RocketIcon } from "lucide-react";
 
 export function BaseContributionChoice() {
   return (

@@ -1,3 +1,4 @@
+import type { BudgetPeriod } from "~/server/db/schema/enum";
 import {
   addMonths,
   addWeeks,
@@ -14,8 +15,6 @@ import {
   startOfWeek,
   startOfYear,
 } from "date-fns";
-
-import type { BudgetPeriod } from "~/server/db/schema/enum";
 
 export const computeBudgetOfCompetence = (
   budget: {

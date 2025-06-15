@@ -1,8 +1,6 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from "lucide-react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   DropdownMenu,
@@ -13,6 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from "lucide-react";
+
 import { Skeleton } from "./ui/skeleton";
 
 export function NavUser() {

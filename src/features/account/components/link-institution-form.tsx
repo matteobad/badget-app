@@ -1,13 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Landmark, Loader2Icon, SearchIcon } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { type z } from "zod";
-
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Form, FormField, FormItem, FormMessage } from "~/components/ui/form";
@@ -25,6 +19,12 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
 import { type DB_InstitutionType } from "~/server/db/schema/open-banking";
+import { Landmark, Loader2Icon, SearchIcon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { type z } from "zod/v4";
+
 import { connectGocardlessAction } from "../server/actions";
 import { ConnectGocardlessSchema } from "../utils/schemas";
 
@@ -53,7 +53,7 @@ export default function LinkInstitutionForm({
   });
 
   const form = useForm<z.infer<typeof ConnectGocardlessSchema>>({
-    resolver: zodResolver(ConnectGocardlessSchema),
+    resolver: standardSchemaResolver(ConnectGocardlessSchema),
     defaultValues: {
       provider: "GOCARDLESS",
       redirectBase: window.location.origin,

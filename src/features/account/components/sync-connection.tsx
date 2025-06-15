@@ -2,11 +2,11 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { Button } from "~/components/ui/button";
 import { Loader2Icon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
-import { Button } from "~/components/ui/button";
 import { syncConnectionAction } from "../server/actions";
 
 export default function SyncConnection({ id }: { id: string }) {

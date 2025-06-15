@@ -1,10 +1,4 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2Icon } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { type z } from "zod";
-
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import {
   Accordion,
   AccordionContent,
@@ -26,6 +20,12 @@ import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { UploadDropzone } from "~/utils/uploadthing";
+import { Loader2Icon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { type z } from "zod/v4";
+
 import { updateAccountAction } from "../server/actions";
 import { AccountUpdateSchema } from "../utils/schemas";
 import { AccountTypePicker } from "./account-type-picker";
@@ -52,7 +52,7 @@ export default function UpdateAccountForm({
   });
 
   const form = useForm<z.infer<typeof AccountUpdateSchema>>({
-    resolver: zodResolver(AccountUpdateSchema),
+    resolver: standardSchemaResolver(AccountUpdateSchema),
     defaultValues: {
       id: account.id,
       balance: account.balance,

@@ -1,14 +1,5 @@
 "server-only";
 
-import {
-  arrayContains,
-  desc,
-  eq,
-  getTableColumns,
-  isNull,
-  or,
-} from "drizzle-orm";
-
 import { getBankAccountProvider } from "~/features/account/server/providers";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
@@ -20,6 +11,14 @@ import {
 import { transaction_table } from "~/server/db/schema/transactions";
 import { buildConflictUpdateColumns } from "~/server/db/utils";
 import { categorizeTransactions } from "~/utils/categorization";
+import {
+  arrayContains,
+  desc,
+  eq,
+  getTableColumns,
+  isNull,
+  or,
+} from "drizzle-orm";
 
 // institutions
 export const getInstitutionsForCountry = (countryCode: string) => {

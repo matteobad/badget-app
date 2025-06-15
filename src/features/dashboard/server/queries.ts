@@ -1,19 +1,18 @@
 "server-only";
 
-import { and, eq, inArray, sum } from "drizzle-orm";
-
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
-import { AccountType } from "~/server/db/schema/enum";
+import { ACCOUNT_TYPE } from "~/server/db/schema/enum";
+import { and, eq, inArray, sum } from "drizzle-orm";
 
 const standardAccountType = [
-  AccountType.CASH,
-  AccountType.CHECKING,
-  AccountType.OTHER,
+  ACCOUNT_TYPE.CASH,
+  ACCOUNT_TYPE.CHECKING,
+  ACCOUNT_TYPE.OTHER,
 ];
-const savingAccountType = [AccountType.SAVINGS];
-const investmentAccountType = [AccountType.INVESTMENTS];
-const debtAccountType = [AccountType.DEBT];
+const savingAccountType = [ACCOUNT_TYPE.SAVINGS];
+const investmentAccountType = [ACCOUNT_TYPE.INVESTMENTS];
+const debtAccountType = [ACCOUNT_TYPE.DEBT];
 
 export const getBankingKPI_QUERY = async (userId: string) => {
   const data = await db

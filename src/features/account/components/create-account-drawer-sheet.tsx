@@ -1,7 +1,5 @@
 "use client";
 
-import { useQueryStates } from "nuqs";
-
 import { Button } from "~/components/ui/button";
 import {
   Drawer,
@@ -21,6 +19,8 @@ import {
 } from "~/components/ui/sheet";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { actionsParsers } from "~/utils/search-params";
+import { useQueryStates } from "nuqs";
+
 import CreateAccountForm from "./create-account-form";
 
 export default function CreateAccountDrawerSheet() {

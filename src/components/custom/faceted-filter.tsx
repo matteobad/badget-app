@@ -1,8 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Check } from "lucide-react";
-
 import {
   Command,
   CommandEmpty,
@@ -19,6 +17,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
+import { Check } from "lucide-react";
 
 const FacetedFilter = Popover;
 

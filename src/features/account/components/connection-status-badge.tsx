@@ -2,8 +2,8 @@
 
 import type { ConnectionStatusType } from "~/server/db/schema/enum";
 import { Badge } from "~/components/ui/badge";
-import { useScopedI18n } from "~/locales/client";
 import { CONNECTION_STATUS } from "~/server/db/schema/enum";
+import { useScopedI18n } from "~/shared/locales/client";
 
 export default function ConnectionStatusBadge({
   status,

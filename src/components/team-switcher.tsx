@@ -2,8 +2,6 @@
 
 import * as React from "react";
 import { useOrganization, useOrganizationList, useUser } from "@clerk/nextjs";
-import { ChevronsUpDown, Plus } from "lucide-react";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +17,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "~/components/ui/sidebar";
+import { ChevronsUpDown, Plus } from "lucide-react";
+
 import { CreateTeamModal } from "./create-team-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Skeleton } from "./ui/skeleton";

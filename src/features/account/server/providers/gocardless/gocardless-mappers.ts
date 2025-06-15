@@ -1,3 +1,4 @@
+import { CONNECTION_STATUS, Provider } from "~/server/db/schema/enum";
 import { capitalCase } from "change-case";
 import { addDays, formatISO, parseISO, subDays } from "date-fns";
 
@@ -18,7 +19,6 @@ import type {
   GC_GetInstitutionsRequest,
   GC_GetInstitutionsResponse,
 } from "./gocardless-types";
-import { CONNECTION_STATUS, Provider } from "~/server/db/schema/enum";
 import { type GetTransactionsRequest, type GetTransactionsResponse } from "..";
 import {
   type GC_GetTransactionsRequest,

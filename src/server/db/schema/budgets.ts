@@ -1,28 +1,28 @@
 import { createId } from "@paralleldrive/cuid2";
-import { decimal, text, varchar } from "drizzle-orm/pg-core";
 
 import { timestamps, timezoneRange } from "../utils";
 import { pgTable } from "./_table";
 import { category_table } from "./categories";
 import { type BudgetPeriod } from "./enum";
 
-export const budget_table = pgTable("budget_table", {
-  id: varchar({ length: 128 })
+export const budget_table = pgTable("budget_table", (d) => ({
+  id: d
+    .varchar({ length: 128 })
     .primaryKey()
     .$defaultFn(() => createId())
     .notNull(),
 
-  categoryId: varchar({ length: 128 }).references(() => category_table.id, {
+  categoryId: d.varchar({ length: 128 }).references(() => category_table.id, {
     onDelete: "cascade",
   }),
-  userId: varchar({ length: 32 }),
+  userId: d.varchar({ length: 32 }),
 
-  amount: decimal({ precision: 10, scale: 2 }).notNull(), // Budgeted amount
-  period: text().$type<BudgetPeriod>().notNull(),
+  amount: d.numeric({ precision: 10, scale: 2 }).notNull(), // Budgeted amount
+  period: d.text().$type<BudgetPeriod>().notNull(),
   sysPeriod: timezoneRange({ notNull: true, default: true }),
 
   ...timestamps,
-});
+}));
 
 export type DB_BudgetType = typeof budget_table.$inferSelect;
 export type DB_BudgetInsertType = typeof budget_table.$inferInsert;

@@ -2,12 +2,11 @@
 
 import * as React from "react";
 import { type Column } from "@tanstack/react-table";
-import { XIcon } from "lucide-react";
-import { type DateRange } from "react-day-picker";
-
 import { Badge } from "~/components/ui/badge";
 import { Calendar } from "~/components/ui/calendar";
 import { type PopoverContent } from "~/components/ui/popover";
+import { XIcon } from "lucide-react";
+import { type DateRange } from "react-day-picker";
 
 const dateTimeFormat = new Intl.DateTimeFormat("it", {
   year: "2-digit",

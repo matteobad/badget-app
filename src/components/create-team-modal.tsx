@@ -1,11 +1,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useOrganizationList } from "@clerk/nextjs";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -24,6 +20,9 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import * as z from "zod/v4";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -43,7 +42,7 @@ export function CreateTeamModal({
   const [isCreating, setIsCreating] = React.useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: standardSchemaResolver(formSchema),
     defaultValues: {
       name: "",
     },

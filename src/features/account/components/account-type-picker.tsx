@@ -1,5 +1,4 @@
 import React from "react";
-
 import { Button } from "~/components/ui/button";
 import {
   Select,
@@ -10,8 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { useScopedI18n } from "~/locales/client";
-import { AccountType } from "~/server/db/schema/enum";
+import { ACCOUNT_TYPE } from "~/server/db/schema/enum";
+import { useScopedI18n } from "~/shared/locales/client";
+
 import AccountIcon from "./account-icon";
 
 type AccountTypePickerProps = {
@@ -31,7 +31,7 @@ export function AccountTypePicker({
       </SelectTrigger>
       <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2 [&_*[role=option]>span]:flex [&_*[role=option]>span]:items-center [&_*[role=option]>span]:gap-2 [&_*[role=option]>span>svg]:shrink-0 [&_*[role=option]>span>svg]:text-muted-foreground/80">
         <SelectGroup>
-          {Object.values(AccountType).map((option) => {
+          {Object.values(ACCOUNT_TYPE).map((option) => {
             return (
               <SelectItem value={option} key={option}>
                 <AccountIcon type={option} size="sm" />

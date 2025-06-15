@@ -8,6 +8,7 @@
     "resolveJsonModule": true,
     "moduleDetection": "force",
     "isolatedModules": true,
+    "verbatimModuleSyntax": true,
 
     /* Strictness */
     "strict": true,
@@ -15,7 +16,7 @@
     "checkJs": true,
 
     /* Bundled projects */
-    "lib": ["dom", "dom.iterable", "ES2022"],
+    "lib": ["dom", "dom.iterable", "ESNext"],
     "noEmit": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
@@ -33,7 +34,7 @@
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
   "include": [
-    ".eslintrc.cjs",
+    "eslint.config.js",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
@@ -42,5 +43,5 @@
     ".next/types/**/*.ts",
     "trigger.config.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", ".next"]
 }

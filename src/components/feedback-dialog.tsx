@@ -1,13 +1,8 @@
 "use client";
 
+import type z from "zod/v4";
 import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { SendIcon } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-
-import type { FeedbackType } from "~/lib/validators";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -36,12 +31,16 @@ import {
 import { Textarea } from "~/components/ui/textarea";
 import { FeedbackSchema } from "~/lib/validators";
 import { submitFeedbackAction } from "~/server/actions";
+import { SendIcon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export function FeedbackDialog() {
   const [open, setOpen] = useState(false);
 
-  const form = useForm<FeedbackType>({
-    resolver: zodResolver(FeedbackSchema),
+  const form = useForm<z.infer<typeof FeedbackSchema>>({
+    resolver: standardSchemaResolver(FeedbackSchema),
     defaultValues: {
       message: "",
       category: "other",

@@ -1,6 +1,5 @@
 "use client";
 
-import type { ColumnDef } from "@tanstack/react-table";
 import type dynamicIconImports from "lucide-react/dynamicIconImports";
 import { Fragment, useMemo, useState } from "react";
 import {
@@ -9,19 +8,6 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  ArrowRightIcon,
-  ChevronDown,
-  ChevronUp,
-  Columns3Icon,
-  FilterIcon,
-  MoreHorizontal,
-  PlusIcon,
-} from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useQueryStates } from "nuqs";
-import { toast } from "sonner";
-
 import { CategoryBadge } from "~/components/category-badge";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -42,6 +28,20 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import {
+  ArrowRightIcon,
+  ChevronDown,
+  ChevronUp,
+  Columns3Icon,
+  FilterIcon,
+  MoreHorizontal,
+  PlusIcon,
+} from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useQueryStates } from "nuqs";
+import { toast } from "sonner";
+
+import type { ColumnDef } from "@tanstack/react-table";
 import { deleteCategoryAction } from "../server/actions";
 import { type getCategories_QUERY } from "../server/queries";
 import { categoriesParsers } from "../utils/search-params";

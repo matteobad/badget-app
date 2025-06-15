@@ -1,7 +1,5 @@
 "use client";
 
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-
 import type { ChartConfig } from "~/components/ui/chart";
 import {
   Card,
@@ -16,6 +14,7 @@ import {
   ChartTooltipContent,
 } from "~/components/ui/chart";
 import { formatAmount } from "~/utils/format";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 const chartData = [
   { month: "January", desktop: 186 },

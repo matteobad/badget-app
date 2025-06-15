@@ -1,6 +1,4 @@
 import { auth } from "@clerk/nextjs/server";
-import { CreditCard, Package } from "lucide-react";
-
 import {
   Card,
   CardContent,
@@ -11,6 +9,8 @@ import {
 import { CashflowChart } from "~/features/dashboard/components/charts/cashflow-chart";
 import { getBankingKPI_CACHED } from "~/features/dashboard/server/cached-queries";
 import { getRecentTransactions_CACHED } from "~/features/transaction/server/cached-queries";
+import { CreditCard, Package } from "lucide-react";
+
 import PillarOverview from "../../../../features/dashboard/components/pillar-overview";
 import RecentTransactionList from "../../../../features/transaction/components/recent-transaction-list";
 

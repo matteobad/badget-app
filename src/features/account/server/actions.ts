@@ -2,8 +2,6 @@
 
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { and, eq, sql } from "drizzle-orm";
-
 import { gocardlessClient } from "~/features/account/server/providers/gocardless/gocardless-api";
 import {
   mapRequisitionStatus,
@@ -16,6 +14,8 @@ import {
   connection_table,
   institution_table,
 } from "~/server/db/schema/open-banking";
+import { and, eq, sql } from "drizzle-orm";
+
 import {
   AccountDeleteSchema,
   AccountInsertSchema,
@@ -28,7 +28,7 @@ import {
 import { syncUserConnection_MUTATION } from "./queries";
 
 export const connectGocardlessAction = authActionClient
-  .schema(ConnectGocardlessSchema)
+  .inputSchema(ConnectGocardlessSchema)
   .metadata({ actionName: "connect-gocardless" })
   .action(async ({ parsedInput, ctx }) => {
     const { institutionId, provider, redirectBase } = parsedInput;
@@ -79,14 +79,14 @@ export const connectGocardlessAction = authActionClient
   });
 
 export const updateConnectedAccountAction = authActionClient
-  .schema(ConnectionUpdateSchema)
+  .inputSchema(ConnectionUpdateSchema)
   .metadata({ actionName: "update-connected-account" })
   .action(async () => {
     return { message: "todo" };
   });
 
 export const syncConnectionAction = authActionClient
-  .schema(SyncConnectionSchema)
+  .inputSchema(SyncConnectionSchema)
   .metadata({ actionName: "sync-connection" })
   .action(async ({ parsedInput, ctx }) => {
     // Mutate data
@@ -106,7 +106,7 @@ export const syncConnectionAction = authActionClient
   });
 
 export const deleteConnectionAction = authActionClient
-  .schema(ConnectionDeleteSchema)
+  .inputSchema(ConnectionDeleteSchema)
   .metadata({ actionName: "delete-connection" })
   .action(async ({ parsedInput, ctx }) => {
     // Mutate data
@@ -126,7 +126,7 @@ export const deleteConnectionAction = authActionClient
   });
 
 export const createAccountAction = authActionClient
-  .schema(AccountInsertSchema)
+  .inputSchema(AccountInsertSchema)
   .metadata({ actionName: "create-account" })
   .action(async ({ parsedInput, ctx }) => {
     // Mutate data

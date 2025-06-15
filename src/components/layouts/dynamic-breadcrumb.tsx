@@ -1,12 +1,12 @@
 "use client";
 
+import type locale from "~/shared/locales/it";
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useScopedI18n } from "~/shared/locales/client";
+import { locales } from "~/shared/locales/config";
 
-import type locale from "~/locales/it";
-import { useScopedI18n } from "~/locales/client";
-import { locales } from "~/locales/config";
 import {
   Breadcrumb,
   BreadcrumbItem,

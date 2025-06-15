@@ -2,8 +2,6 @@
 
 import React, { useId, useMemo } from "react";
 import { type Column } from "@tanstack/react-table";
-import { XIcon } from "lucide-react";
-
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -11,6 +9,7 @@ import { Label } from "~/components/ui/label";
 import { Slider } from "~/components/ui/slider";
 import { useSliderWithInput } from "~/hooks/use-slider-with-input";
 import { type DB_TransactionType } from "~/server/db/schema/transactions";
+import { XIcon } from "lucide-react";
 
 const numberFormat = new Intl.NumberFormat("it", {
   currency: "EUR",

@@ -1,10 +1,9 @@
 "use client";
 
-import { LinkIcon } from "lucide-react";
-import { useQueryStates } from "nuqs";
-
 import { Button } from "~/components/ui/button";
 import { actionsParsers } from "~/utils/search-params";
+import { LinkIcon } from "lucide-react";
+import { useQueryStates } from "nuqs";
 
 export function ManageConnectionsButton() {
   const [, setState] = useQueryStates(actionsParsers, { shallow: false });

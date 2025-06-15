@@ -8,17 +8,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  Box,
-  ChevronRight,
-  EllipsisVerticalIcon,
-  Folder,
-  Info,
-  RefreshCwIcon,
-  UnlinkIcon,
-} from "lucide-react";
-
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -34,6 +23,17 @@ import {
 import { cn } from "~/lib/utils";
 import { CATEGORY_TYPE } from "~/server/db/schema/enum";
 import { formatAmount, formatPerc } from "~/utils/format";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Box,
+  ChevronRight,
+  EllipsisVerticalIcon,
+  Folder,
+  Info,
+  RefreshCwIcon,
+  UnlinkIcon,
+} from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -117,6 +117,14 @@ function TreeItem({
   const isOpen = expandedIds.has(item.id);
   const isSelected = selectedIds.has(item.id);
   const itemRef = useRef<HTMLDivElement>(null);
+
+  const income = useMemo(() => {
+    return Math.max(
+      ...allItems
+        .filter((item) => item.type === CATEGORY_TYPE.INCOME)
+        .map((item) => item.budget),
+    );
+  }, [allItems]);
 
   // Get all visible items in order
   const getVisibleItems = useCallback(
@@ -263,14 +271,9 @@ function TreeItem({
                 </Badge>
               )}
               <div className="flex items-center gap-4">
-                <span className="w-[80px] text-right font-mono">
-                  {formatAmount({
-                    amount: item.budget,
-                    maximumFractionDigits: 0,
-                  })}
-                </span>
+                <BudgetAmount item={item} depth={depth} />
                 <span className="w-[30px] font-mono text-xs text-muted-foreground">
-                  {formatPerc(100)}
+                  {formatPerc(item.budget / income)}
                 </span>
                 <TreeItemAction />
               </div>
@@ -299,14 +302,9 @@ function TreeItem({
                   </Badge>
                 )} */}
 
-                <span className="w-[80px] text-right font-mono">
-                  {formatAmount({
-                    amount: item.budget,
-                    maximumFractionDigits: 0,
-                  })}
-                </span>
+                <BudgetAmount item={item} depth={depth} />
                 <span className="w-[30px] font-mono text-xs text-muted-foreground">
-                  {formatPerc(100)}
+                  {formatPerc(item.budget / income)}
                 </span>
                 <TreeItemAction />
               </div>
@@ -722,5 +720,29 @@ function TreeItemHover({
         </div>
       </HoverCardContent>
     </HoverCard>
+  );
+}
+
+function BudgetAmount({ item, depth }: { item: TreeViewItem; depth: number }) {
+  return (
+    <div
+      className={cn("flex w-[80px] items-center justify-end font-mono", {
+        "text-green-800": item.type === CATEGORY_TYPE.INCOME,
+        "text-green-500": item.type === CATEGORY_TYPE.INCOME && depth !== 0,
+        "text-red-800": item.type === CATEGORY_TYPE.EXPENSE,
+        "text-red-500": item.type === CATEGORY_TYPE.EXPENSE && depth !== 0,
+        "text-violet-800": item.type === CATEGORY_TYPE.SAVINGS,
+        "text-violet-500": item.type === CATEGORY_TYPE.SAVINGS && depth !== 0,
+        "text-blue-800": item.type === CATEGORY_TYPE.INVESTMENT,
+        "text-blue-500": item.type === CATEGORY_TYPE.INVESTMENT && depth !== 0,
+        "text-neutral-800": item.type === CATEGORY_TYPE.TRANSFER,
+        "text-neutral-500": item.type === CATEGORY_TYPE.TRANSFER && depth !== 0,
+      })}
+    >
+      {formatAmount({
+        amount: item.budget,
+        maximumFractionDigits: 0,
+      })}
+    </div>
   );
 }

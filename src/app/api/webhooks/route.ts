@@ -1,9 +1,8 @@
 import { headers } from "next/headers";
 import { type WebhookEvent } from "@clerk/nextjs/server";
-import { Webhook } from "svix";
-
 import { env } from "~/env";
 import { deleteUser, upsertUser } from "~/server/db/mutations/users-mutations";
+import { Webhook } from "svix";
 
 // @see: https://clerk.com/docs/webhooks/sync-data
 export async function POST(req: Request) {

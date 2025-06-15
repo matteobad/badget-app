@@ -2,8 +2,6 @@
 
 import type { LucideIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { ChevronRight } from "lucide-react";
-
 import {
   Collapsible,
   CollapsibleContent,
@@ -20,6 +18,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "~/components/ui/sidebar";
+import { ChevronRight } from "lucide-react";
 
 export function NavPillars({
   items,

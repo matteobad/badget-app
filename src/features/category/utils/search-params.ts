@@ -1,4 +1,5 @@
 import type { inferParserType } from "nuqs/server";
+import { BUDGET_PERIOD } from "~/server/db/schema/enum";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import {
   createParser,
@@ -7,8 +8,6 @@ import {
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
-
-import { BUDGET_PERIOD } from "~/server/db/schema/enum";
 
 // Note: import from 'nuqs/server' to avoid the "use client" directive
 

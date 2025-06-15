@@ -6,12 +6,15 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
+import { cache } from "react";
 import { auth } from "@clerk/nextjs/server";
-import { initTRPC, TRPCError } from "@trpc/server";
+import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
-import { ZodError } from "zod";
+import { ZodError } from "zod/v4";
 
-import { db } from "~/server/db";
+import { db } from "../../db";
+import { authMiddleware } from "./middleware/auth";
+import { timingMiddleware } from "./middleware/timing";
 
 /**
  * 1. CONTEXT
@@ -25,14 +28,14 @@ import { db } from "~/server/db";
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: { headers: Headers }) => {
+export const createTRPCContext = cache(async (opts: { headers: Headers }) => {
   const session = await auth();
   return {
     db,
     session,
     ...opts,
   };
-};
+});
 
 /**
  * 2. INITIALIZATION
@@ -77,29 +80,6 @@ export const createCallerFactory = t.createCallerFactory;
 export const createTRPCRouter = t.router;
 
 /**
- * Middleware for timing procedure execution and adding an artificial delay in development.
- *
- * You can remove this if you don't like it, but it can help catch unwanted waterfalls by simulating
- * network latency that would occur in production but not in local development.
- */
-const timingMiddleware = t.middleware(async ({ next, path }) => {
-  const start = Date.now();
-
-  if (t._config.isDev) {
-    // artificial delay in dev
-    const waitMs = Math.floor(Math.random() * 400) + 100;
-    await new Promise((resolve) => setTimeout(resolve, waitMs));
-  }
-
-  const result = await next();
-
-  const end = Date.now();
-  console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
-
-  return result;
-});
-
-/**
  * Public (unauthenticated) procedure
  *
  * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
@@ -108,16 +88,9 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
 
-export const protectedProcedure = t.procedure.use(async (opts) => {
-  const { session } = opts.ctx;
-
-  if (!session.userId) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-
-  return opts.next({
-    ctx: {
-      session,
-    },
-  });
-});
+/**
+ * Private (authenticated) procedure
+ *
+ * Use this when you need to guarantee that a user querying is authorized.
+ */
+export const protectedProcedure = t.procedure.use(authMiddleware);

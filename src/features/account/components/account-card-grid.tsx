@@ -1,7 +1,7 @@
 "use client";
 
+import type { AccountType } from "~/server/db/schema/enum";
 import { use } from "react";
-
 import {
   Accordion,
   AccordionContent,
@@ -10,9 +10,9 @@ import {
 } from "~/components/ui/accordion";
 import { Card } from "~/components/ui/card";
 import { type getAccountsForUser_CACHED } from "~/features/account/server/cached-queries";
-import { useScopedI18n } from "~/locales/client";
-import { type AccountType } from "~/server/db/schema/enum";
+import { useScopedI18n } from "~/shared/locales/client";
 import { formatAmount } from "~/utils/format";
+
 import AccountIcon from "./account-icon";
 import AccountList from "./account-list";
 

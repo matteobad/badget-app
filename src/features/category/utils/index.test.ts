@@ -1,7 +1,7 @@
+import { BUDGET_PERIOD } from "~/server/db/schema/enum";
 import { describe, expect, it } from "bun:test";
 import { parseISO } from "date-fns";
 
-import { BUDGET_PERIOD } from "~/server/db/schema/enum";
 import { computeBudgetOfCompetence } from "./index";
 
 const date = (str: string) => parseISO(str);

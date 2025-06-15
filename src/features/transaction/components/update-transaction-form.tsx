@@ -1,12 +1,5 @@
 import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { Loader2Icon, X } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { type z } from "zod";
-
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { AccountAvatar } from "~/components/account-avatar";
 import { CategoryPicker } from "~/components/forms/category-picker";
 import TagsPicker from "~/components/forms/tags-picker";
@@ -33,6 +26,13 @@ import { type DB_CategoryType } from "~/server/db/schema/categories";
 import { type DB_AttachmentType } from "~/server/db/schema/transactions";
 import { formatAmount, formatSize } from "~/utils/format";
 import { UploadDropzone } from "~/utils/uploadthing";
+import { format } from "date-fns";
+import { Loader2Icon, X } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { type z } from "zod/v4";
+
 import {
   deleteTransactionAttachmentAction,
   updateTransactionAction,
@@ -82,7 +82,7 @@ export default function UpdateTransactionForm({
   const account = accounts.find((a) => a.id === transaction.accountId);
 
   const form = useForm<z.infer<typeof TransactionUpdateSchema>>({
-    resolver: zodResolver(TransactionUpdateSchema),
+    resolver: standardSchemaResolver(TransactionUpdateSchema),
     defaultValues: {
       ...transaction,
       note: transaction?.note ?? undefined,

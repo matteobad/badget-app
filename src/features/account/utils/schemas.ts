@@ -1,19 +1,19 @@
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
-
 import { account_table } from "~/server/db/schema/accounts";
-import { AccountType, Provider } from "~/server/db/schema/enum";
+import { ACCOUNT_TYPE, Provider } from "~/server/db/schema/enum";
 import { connection_table } from "~/server/db/schema/open-banking";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
 
 export const ConnectGocardlessSchema = z.object({
   institutionId: z.string(),
-  countryCode: z.string().default("IT"),
-  provider: z.nativeEnum(Provider),
-  redirectBase: z.string().url(),
+  countryCode: z.string(),
+  provider: z.enum(Provider),
+  redirectBase: z.url(),
 });
 
 export const ConnectedAccountSchema = createInsertSchema(account_table, {
-  id: z.string(),
+  id: z.cuid2(),
+  type: z.enum(ACCOUNT_TYPE),
 }).omit({
   userId: true,
   createdAt: true,
@@ -23,6 +23,7 @@ export const ConnectedAccountSchema = createInsertSchema(account_table, {
 
 export const ConnectionUpdateSchema = createInsertSchema(connection_table, {
   id: z.string(),
+  provider: z.enum(Provider),
 })
   .omit({
     userId: true,
@@ -39,8 +40,8 @@ export const SyncConnectionSchema = z.object({
 });
 
 export const AccountInsertSchema = createInsertSchema(account_table, {
-  balance: z.coerce.string(),
-  type: z.nativeEnum(AccountType),
+  balance: z.string(),
+  type: z.enum(ACCOUNT_TYPE),
   description: z.string().optional(),
 }).omit({
   id: true,
@@ -52,8 +53,8 @@ export const AccountInsertSchema = createInsertSchema(account_table, {
 
 export const AccountUpdateSchema = createInsertSchema(account_table, {
   id: z.string(),
-  balance: z.coerce.string(),
-  type: z.nativeEnum(AccountType),
+  balance: z.string(),
+  type: z.enum(ACCOUNT_TYPE),
   description: z.string().optional(),
 }).omit({
   userId: true,
@@ -63,10 +64,10 @@ export const AccountUpdateSchema = createInsertSchema(account_table, {
 });
 
 export const AccountDeleteSchema = z.object({
-  ids: z.array(z.string()),
+  ids: z.array(z.cuid2()),
 });
 
 export const ConnectionDeleteSchema = z.object({
   id: z.string(),
-  provider: z.nativeEnum(Provider).default("GOCARDLESS"),
+  provider: z.enum(Provider).default("GOCARDLESS"),
 });

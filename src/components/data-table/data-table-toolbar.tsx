@@ -1,13 +1,13 @@
 "use client";
 
-import type { Table } from "@tanstack/react-table";
 import * as React from "react";
-import { SearchIcon } from "lucide-react";
-
 import { DataTableViewOptions } from "~/components/data-table/data-table-view-options";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 import { type DataTableFilterField } from "~/utils/data-table";
+import { SearchIcon } from "lucide-react";
+
+import type { Table } from "@tanstack/react-table";
 import { DataTableFilters } from "./data-table-filters";
 import { DateFilterFaceted } from "./filters/date-filter";
 import { MultiSelectFaceted } from "./filters/multi-select-filter";

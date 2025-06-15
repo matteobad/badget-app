@@ -1,12 +1,11 @@
+import { getSortingStateParser } from "~/lib/validators";
+import { type DB_TransactionType } from "~/server/db/schema/transactions";
 import {
   createSearchParamsCache,
   parseAsArrayOf,
   parseAsInteger,
   parseAsString,
 } from "nuqs/server";
-
-import { getSortingStateParser } from "~/lib/validators";
-import { type DB_TransactionType } from "~/server/db/schema/transactions";
 
 // Note: import from 'nuqs/server' to avoid the "use client" directive
 

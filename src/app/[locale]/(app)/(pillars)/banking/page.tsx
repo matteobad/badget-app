@@ -1,10 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
-import { type SearchParams } from "nuqs";
-
 import { getCategories_CACHED } from "~/features/category/server/cached-queries";
 import { BankingDashboard } from "~/features/dashboard/components/banking-dashboard";
 import { getTransactions_CACHED } from "~/features/transaction/server/cached-queries";
 import { transactionsSearchParamsCache } from "~/features/transaction/utils/search-params";
+import { type SearchParams } from "nuqs";
 
 type PageProps = {
   searchParams: Promise<SearchParams>; // Next.js 15+: async searchParams prop

@@ -1,3 +1,5 @@
+import { Card } from "~/components/ui/card";
+import { cn } from "~/lib/utils";
 import {
   ArrowDownLeft,
   ArrowRight,
@@ -8,9 +10,6 @@ import {
   SendHorizontal,
   Wallet,
 } from "lucide-react";
-
-import { Card } from "~/components/ui/card";
-import { cn } from "~/lib/utils";
 
 interface AccountItem {
   id: string;

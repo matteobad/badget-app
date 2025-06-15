@@ -1,8 +1,8 @@
-import type { Column, ColumnSort, Row } from "@tanstack/react-table";
-import { type SQL } from "drizzle-orm";
-import { type z } from "zod";
-
 import { type filterSchema } from "~/lib/validators";
+import { type SQL } from "drizzle-orm";
+import { type z } from "zod/v4";
+
+import type { Column, ColumnSort, Row } from "@tanstack/react-table";
 
 export type Prettify<T> = {
   [K in keyof T]: T[K];

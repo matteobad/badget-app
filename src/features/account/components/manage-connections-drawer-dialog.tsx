@@ -1,8 +1,6 @@
 "use client";
 
 import { use } from "react";
-import { useQueryStates } from "nuqs";
-
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -23,6 +21,8 @@ import {
 import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { actionsParsers } from "~/utils/search-params";
+import { useQueryStates } from "nuqs";
+
 import { type getConnectionsForUser_CACHED } from "../server/cached-queries";
 import ConnectionsList from "./connections-list";
 

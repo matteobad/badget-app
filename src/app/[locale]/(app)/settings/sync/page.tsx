@@ -1,5 +1,4 @@
 import { auth } from "@clerk/nextjs/server";
-
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import SyncConnection from "~/features/account/components/sync-connection";
 import {

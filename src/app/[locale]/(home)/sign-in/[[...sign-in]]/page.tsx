@@ -4,8 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import * as Clerk from "@clerk/elements/common";
 import * as SignIn from "@clerk/elements/sign-in";
-import { Loader2Icon } from "lucide-react";
-
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -17,6 +15,7 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Loader2Icon } from "lucide-react";
 
 export default function Page() {
   return (

@@ -5,7 +5,7 @@ export const Provider = {
 } as const;
 export type Provider = (typeof Provider)[keyof typeof Provider];
 
-export const AccountType = {
+export const ACCOUNT_TYPE = {
   CHECKING: "checking",
   SAVINGS: "savings",
   INVESTMENTS: "investment",
@@ -13,7 +13,13 @@ export const AccountType = {
   CASH: "cash",
   OTHER: "other",
 } as const;
-export type AccountType = (typeof AccountType)[keyof typeof AccountType];
+export type AccountType = (typeof ACCOUNT_TYPE)[keyof typeof ACCOUNT_TYPE];
+
+export const SAVING_TYPE = {
+  PENSION: "pension",
+  EMERGENCY: "emergency",
+} as const;
+export type SavingType = (typeof SAVING_TYPE)[keyof typeof SAVING_TYPE];
 
 // TODO: reduce possible status
 export const CONNECTION_STATUS = {

@@ -1,11 +1,7 @@
 "use client";
 
-import React from "react";
-import { isWithinInterval } from "date-fns";
-import { type DateRange } from "react-day-picker";
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";
-
 import type { ChartConfig } from "~/components/ui/chart";
+import React from "react";
 import {
   Card,
   CardContent,
@@ -20,6 +16,10 @@ import {
 } from "~/components/ui/chart";
 import { type getCategories_CACHED } from "~/features/category/server/cached-queries";
 import { type getTransactions_CACHED } from "~/features/transaction/server/cached-queries";
+import { isWithinInterval } from "date-fns";
+import { type DateRange } from "react-day-picker";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";
+
 import { getChildCategoryIds } from "../../utils";
 
 const chartConfig = {

@@ -1,7 +1,5 @@
 import { Suspense } from "react";
 import { auth } from "@clerk/nextjs/server";
-import { type SearchParams } from "nuqs/server";
-
 import { Skeleton } from "~/components/ui/skeleton";
 import AccountCardGrid from "~/features/account/components/account-card-grid";
 import { AddAccountButton } from "~/features/account/components/add-account-button";
@@ -15,6 +13,7 @@ import {
 } from "~/features/account/server/cached-queries";
 import { getInstitutionsForCountry } from "~/features/account/server/queries";
 import { accountsSearchParamsCache } from "~/features/account/utils/search-params";
+import { type SearchParams } from "nuqs/server";
 
 type BankingAccountsPageProps = {
   searchParams: Promise<SearchParams>; // Next.js 15+: async searchParams prop
