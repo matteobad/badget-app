@@ -1,132 +1,26 @@
-import type { BudgetPeriod } from "~/server/db/schema/enum";
-import {
-  addMonths,
-  addWeeks,
-  addYears,
-  differenceInCalendarDays,
-  endOfMonth,
-  endOfWeek,
-  endOfYear,
-  isBefore,
-  isEqual,
-  max,
-  min,
-  startOfMonth,
-  startOfWeek,
-  startOfYear,
-} from "date-fns";
+import type { CategoryType } from "~/server/db/schema/enum";
+import { CATEGORY_TYPE } from "~/server/db/schema/enum";
 
-export const computeBudgetOfCompetence = (
-  budget: {
-    amount: string;
-    period: BudgetPeriod;
-    startDate: Date;
-    endDate: Date | null;
-  } | null,
-  periodStart: Date,
-  periodEnd: Date,
-): number => {
-  if (!budget) return 0;
+export const getIconColors = (type: CategoryType) => {
+  return {
+    "border-green-700 bg-green-100 text-green-700":
+      type === CATEGORY_TYPE.INCOME,
+    "border-red-700 bg-red-100 text-red-700": type === CATEGORY_TYPE.EXPENSE,
+    "border-violet-700 bg-violet-100 text-violet-700":
+      type === CATEGORY_TYPE.SAVINGS,
+    "border-blue-700 bg-blue-100 text-blue-700":
+      type === CATEGORY_TYPE.INVESTMENTS,
+    "border-neutral-700 bg-neutral-100 text-neutral-700":
+      type === CATEGORY_TYPE.TRANSFER,
+  };
+};
 
-  const { amount: rawAmount, period, startDate, endDate } = budget;
-  const amount = parseFloat(rawAmount);
-  const budgetStart = startDate;
-  const budgetEnd = endDate ?? periodEnd;
-
-  const intersectionStart = max([budgetStart, periodStart]);
-  const intersectionEnd = min([budgetEnd, periodEnd]);
-
-  if (intersectionStart > intersectionEnd) return 0;
-
-  let total = 0;
-
-  switch (period) {
-    case "week": {
-      let currentStart = startOfWeek(intersectionStart, { weekStartsOn: 1 });
-
-      while (
-        isBefore(currentStart, intersectionEnd) ||
-        isEqual(currentStart, intersectionEnd)
-      ) {
-        const currentEnd = endOfWeek(currentStart, { weekStartsOn: 1 });
-
-        const overlapStart = max([currentStart, intersectionStart]);
-        const overlapEnd = min([currentEnd, intersectionEnd]);
-
-        const overlapDays =
-          differenceInCalendarDays(overlapEnd, overlapStart) + 1;
-        if (overlapDays > 0) {
-          total += (overlapDays / 7) * amount;
-        }
-
-        currentStart = addWeeks(currentStart, 1);
-      }
-      break;
-    }
-
-    case "month": {
-      let currentStart = startOfMonth(intersectionStart);
-
-      while (
-        isBefore(currentStart, intersectionEnd) ||
-        isEqual(currentStart, intersectionEnd)
-      ) {
-        const currentEnd = endOfMonth(currentStart);
-
-        const overlapStart = max([currentStart, intersectionStart]);
-        const overlapEnd = min([currentEnd, intersectionEnd]);
-
-        const daysInMonth =
-          differenceInCalendarDays(currentEnd, currentStart) + 1;
-        const overlapDays =
-          differenceInCalendarDays(overlapEnd, overlapStart) + 1;
-
-        if (overlapDays > 0) {
-          total += (overlapDays / daysInMonth) * amount;
-        }
-
-        currentStart = addMonths(currentStart, 1);
-      }
-      break;
-    }
-
-    case "year": {
-      let currentStart = startOfYear(intersectionStart);
-
-      while (
-        isBefore(currentStart, intersectionEnd) ||
-        isEqual(currentStart, intersectionEnd)
-      ) {
-        const currentEnd = endOfYear(currentStart);
-
-        const overlapStart = max([currentStart, intersectionStart]);
-        const overlapEnd = min([currentEnd, intersectionEnd]);
-
-        const daysInYear =
-          differenceInCalendarDays(currentEnd, currentStart) + 1;
-        const overlapDays =
-          differenceInCalendarDays(overlapEnd, overlapStart) + 1;
-
-        if (overlapDays > 0) {
-          total += (overlapDays / daysInYear) * amount;
-        }
-
-        currentStart = addYears(currentStart, 1);
-      }
-      break;
-    }
-
-    case "custom": {
-      const totalDays = differenceInCalendarDays(budgetEnd, budgetStart) + 1;
-      const overlapDays =
-        differenceInCalendarDays(intersectionEnd, intersectionStart) + 1;
-
-      if (totalDays > 0 && overlapDays > 0) {
-        total += (overlapDays / totalDays) * amount;
-      }
-      break;
-    }
-  }
-
-  return total;
+export const getCategoryListColors = (type: CategoryType) => {
+  return {
+    "border-green-100 text-green-700": type === CATEGORY_TYPE.INCOME,
+    "border-red-100 text-red-700": type === CATEGORY_TYPE.EXPENSE,
+    "border-violet-100 text-violet-700": type === CATEGORY_TYPE.SAVINGS,
+    "border-blue-100 text-blue-700": type === CATEGORY_TYPE.INVESTMENTS,
+    "border-neutral-100 text-neutral-700": type === CATEGORY_TYPE.TRANSFER,
+  };
 };

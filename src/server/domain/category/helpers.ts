@@ -1,4 +1,6 @@
+import type { CategoryType } from "~/server/db/schema/enum";
 import type { TreeNode, WithIdAndParentId } from "~/shared/types";
+import { CATEGORY_TYPE } from "~/server/db/schema/enum";
 
 export const buildCategoryTree = <T extends WithIdAndParentId>(data: T[]) => {
   const lookup = new Map<string, TreeNode<T>>();
@@ -21,5 +23,21 @@ export const buildCategoryTree = <T extends WithIdAndParentId>(data: T[]) => {
     }
   }
 
+  // TODO: move to method for single responsability and test
+  const typeOrder: Record<CategoryType, number> = {
+    [CATEGORY_TYPE.INCOME]: 0,
+    [CATEGORY_TYPE.EXPENSE]: 1,
+    [CATEGORY_TYPE.SAVINGS]: 2,
+    [CATEGORY_TYPE.INVESTMENTS]: 3,
+    [CATEGORY_TYPE.TRANSFER]: 4,
+  };
+
+  function getTypeOrder(node: TreeNode<T>) {
+    // @ts-expect-error: type property expected on T
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+    return typeOrder[node[0]?.type] ?? 99;
+  }
+
+  roots.sort((a, b) => getTypeOrder(a) - getTypeOrder(b));
   return roots;
 };

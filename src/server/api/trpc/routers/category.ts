@@ -21,6 +21,7 @@ export const categoryRouter = createTRPCRouter({
         ctx.session.userId!,
       );
 
-      return buildCategoryTree(categoriesWithBudgets);
+      const categoryTree = buildCategoryTree(categoriesWithBudgets);
+      return categoryTree;
     }),
 });
