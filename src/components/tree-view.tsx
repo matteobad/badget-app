@@ -286,7 +286,7 @@ function TreeItem({
                     "bg-green-200": item.type === CATEGORY_TYPE.INCOME,
                     "bg-red-200": item.type === CATEGORY_TYPE.EXPENSE,
                     "bg-violet-200": item.type === CATEGORY_TYPE.SAVINGS,
-                    "bg-blue-200": item.type === CATEGORY_TYPE.INVESTMENT,
+                    "bg-blue-200": item.type === CATEGORY_TYPE.INVESTMENTS,
                     "bg-neutral-200": item.type === CATEGORY_TYPE.TRANSFER,
                   })}
                 ></span>
@@ -733,8 +733,8 @@ function BudgetAmount({ item, depth }: { item: TreeViewItem; depth: number }) {
         "text-red-500": item.type === CATEGORY_TYPE.EXPENSE && depth !== 0,
         "text-violet-800": item.type === CATEGORY_TYPE.SAVINGS,
         "text-violet-500": item.type === CATEGORY_TYPE.SAVINGS && depth !== 0,
-        "text-blue-800": item.type === CATEGORY_TYPE.INVESTMENT,
-        "text-blue-500": item.type === CATEGORY_TYPE.INVESTMENT && depth !== 0,
+        "text-blue-800": item.type === CATEGORY_TYPE.INVESTMENTS,
+        "text-blue-500": item.type === CATEGORY_TYPE.INVESTMENTS && depth !== 0,
         "text-neutral-800": item.type === CATEGORY_TYPE.TRANSFER,
         "text-neutral-500": item.type === CATEGORY_TYPE.TRANSFER && depth !== 0,
       })}

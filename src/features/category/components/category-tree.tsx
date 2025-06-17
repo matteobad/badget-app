@@ -15,7 +15,7 @@ import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { ChevronRightIcon, DotIcon } from "lucide-react";
 
-import { getCategoryListColors, getIconColors } from "../utils";
+import { getCategoryListColors } from "../utils";
 import { CategoryIcon } from "./category-icon";
 
 type Category = RouterOutput["category"]["getCategoryTree"][number][0];
