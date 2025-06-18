@@ -30,8 +30,8 @@ export const getBudgetsQuery = (
       categoryId: budget_table.categoryId,
       amount: budget_table.amount,
       period: budget_table.period,
-      startDate: sql`lower(${budget_table.sysPeriod})`.as("startDate"),
-      endDate: sql`upper(${budget_table.sysPeriod})`.as("endDate"),
+      startDate: sql<Date>`lower(${budget_table.sysPeriod})`.as("startDate"),
+      endDate: sql<Date>`upper(${budget_table.sysPeriod})`.as("endDate"),
     })
     .from(budget_table)
     .where(and(...where));

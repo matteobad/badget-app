@@ -1,6 +1,7 @@
 import { budget_table } from "~/server/db/schema/budgets";
 import { BUDGET_PERIOD } from "~/server/db/schema/enum";
 import { TimezoneRange } from "~/server/db/utils";
+import { endOfMonth, startOfMonth } from "date-fns";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -60,17 +61,15 @@ export const updateBudgetSchema = createUpdateSchema(budget_table, {
 export const deleteBudgetSchema = z.object({ id: z.cuid2() });
 
 // Query filter schema
-export const budgetFilterSchema = z
-  .object({
-    from: z.date().nullable(),
-    to: z.date().nullable(),
-    deleted: z.boolean().default(false),
-  })
-  .optional();
+export const budgetFilterSchema = z.object({
+  from: z.date().default(startOfMonth(new Date())),
+  to: z.date().default(endOfMonth(new Date())),
+  deleted: z.boolean().default(false),
+});
 
 // Search params filter schema
 export const BudgetFilterParamsSchema = {
-  from: parseAsIsoDate,
-  to: parseAsIsoDate,
+  from: parseAsIsoDate.withDefault(startOfMonth(new Date())),
+  to: parseAsIsoDate.withDefault(endOfMonth(new Date())),
   deleted: parseAsBoolean.withDefault(false),
 };
