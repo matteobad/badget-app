@@ -2,6 +2,7 @@
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { TreeNode } from "~/shared/types";
+import type { dynamicIconImports } from "lucide-react/dynamic";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import {
@@ -29,9 +30,9 @@ import {
   RefreshCwIcon,
   UnlinkIcon,
 } from "lucide-react";
+import { DynamicIcon } from "lucide-react/dynamic";
 
 import { getCategoryListColors } from "../utils";
-import { CategoryIcon } from "./category-icon";
 
 type Category = RouterOutput["category"]["getCategoryTree"][number][0];
 
@@ -77,24 +78,7 @@ function Tree({ item }: { item: CategoryTreeNode }) {
       {hasChildren ? (
         <Collapsible defaultOpen>
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton className="mr-0 flex w-full items-center justify-between gap-2 [&[data-state=open]>div>svg:first-child]:rotate-90">
-              <div className="flex items-center gap-2">
-                <ChevronRightIcon
-                  className={cn(
-                    categoryListColors,
-                    "size-4 transition-transform",
-                  )}
-                />
-                <CategoryIcon item={item} />
-                <span className="truncate text-primary">{category.name}</span>
-              </div>
-              <div className="flex items-center justify-end">
-                <CategoryBudgets budgets={category.budgets} />
-                <CategoryTotal category={category} />
-                <CategoryPercentage category={category} />
-                <CategoryActions category={category} />
-              </div>
-            </SidebarMenuButton>
+            <TreeItem category={category} hasChildren={true} />
           </CollapsibleTrigger>
           <CollapsibleContent>
             <SidebarMenuSub className={cn(categoryListColors, "mr-0 pr-0")}>
@@ -105,21 +89,44 @@ function Tree({ item }: { item: CategoryTreeNode }) {
           </CollapsibleContent>
         </Collapsible>
       ) : (
-        <SidebarMenuButton className="flex w-full items-center justify-between gap-2 pr-[9px] pl-1">
-          <div className="flex items-center gap-2">
-            <DotIcon className={cn(categoryListColors, "size-6")} />
-            <CategoryIcon item={item} />
-            <span className="truncate text-primary">{category.name}</span>
-          </div>
-          <div className="flex items-center justify-end">
-            <CategoryBudgets budgets={category.budgets} />
-            <CategoryTotal category={category} />
-            <CategoryPercentage category={category} />
-            <CategoryActions category={category} />
-          </div>
-        </SidebarMenuButton>
+        <TreeItem category={category} hasChildren={false} />
       )}
     </div>
+  );
+}
+
+function TreeItem({
+  category,
+  hasChildren,
+}: {
+  category: Category;
+  hasChildren: boolean;
+}) {
+  const categoryListColors = getCategoryListColors(category.type);
+
+  return (
+    <SidebarMenuButton className="mr-0 flex w-full items-center justify-between gap-2 [&[data-state=open]>div>svg:first-child]:rotate-90">
+      <div className="flex items-center gap-2">
+        {hasChildren ? (
+          <ChevronRightIcon
+            className={cn(categoryListColors, "size-4 transition-transform")}
+          />
+        ) : (
+          <DotIcon className={cn(categoryListColors, "-ml-1 size-6")} />
+        )}
+        <DynamicIcon
+          name={category.icon as keyof typeof dynamicIconImports}
+          className={cn("size-5 text-primary")}
+        />
+        <span className="truncate text-primary">{category.name}</span>
+      </div>
+      <div className="flex items-center justify-end">
+        <CategoryBudgets budgets={category.budgets} />
+        <CategoryTotal category={category} />
+        <CategoryPercentage category={category} />
+        <CategoryActions category={category} />
+      </div>
+    </SidebarMenuButton>
   );
 }
 
