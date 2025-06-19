@@ -4,7 +4,7 @@ import type { budgetFilterSchema } from "~/shared/validators/budget.schema";
 import type z from "zod/v4";
 import { db } from "~/server/db";
 import { budget_table } from "~/server/db/schema/budgets";
-import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
 export const getBudgetsQuery = (
   filters: z.infer<typeof budgetFilterSchema>,
@@ -18,11 +18,7 @@ export const getBudgetsQuery = (
     );
   }
 
-  if (filters?.deleted) {
-    where.push(isNotNull(budget_table.deletedAt));
-  } else {
-    where.push(isNull(budget_table.deletedAt));
-  }
+  where.push(isNull(budget_table.deletedAt));
 
   return db
     .select({
@@ -30,8 +26,20 @@ export const getBudgetsQuery = (
       categoryId: budget_table.categoryId,
       amount: budget_table.amount,
       period: budget_table.period,
-      startDate: sql<Date>`lower(${budget_table.sysPeriod})`.as("startDate"),
-      endDate: sql<Date>`upper(${budget_table.sysPeriod})`.as("endDate"),
+      startDate: sql<Date>`lower(${budget_table.sysPeriod})`
+        .mapWith({
+          mapFromDriverValue: (value: string) => {
+            return new Date(value);
+          },
+        })
+        .as("startDate"),
+      endDate: sql<Date | null>`upper(${budget_table.sysPeriod})`
+        .mapWith({
+          mapFromDriverValue: (value: string | null) => {
+            return value ? new Date(value) : null;
+          },
+        })
+        .as("endDate"),
     })
     .from(budget_table)
     .where(and(...where));

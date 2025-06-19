@@ -32,10 +32,9 @@ import {
 } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
-import { getCategoryListColors } from "../utils";
+import { getBudgetTotalColor, getCategoryListColors } from "../utils";
 
 type Category = RouterOutput["category"]["getCategoryTree"][number][0];
-
 type CategoryTreeNode = TreeNode<Category>;
 
 export function CategoryTree({ ...props }: React.ComponentProps<"div">) {
@@ -59,8 +58,8 @@ export function CategoryTree({ ...props }: React.ComponentProps<"div">) {
         <div className="flex items-center justify-end px-2 text-right">
           <span className="w-[120px]">Budget</span>
           <span className="w-[120px]">Totale</span>
-          <span className="w-10">%</span>
-          <span className="w-10"></span>
+          <span className="w-[80px]">%</span>
+          <span className="w-12"></span>
         </div>
       </div>
       {data?.map((item) => <Tree key={item[0].id} item={item} />)}
@@ -145,7 +144,7 @@ function CategoryBudgets({ budgets }: { budgets: Category["budgets"] }) {
     <div className="flex w-[120px] items-center justify-end gap-2 font-mono text-neutral-300">
       <span className="">
         {formatAmount({
-          amount: parseFloat(budget.amount),
+          amount: budget.amount,
           maximumFractionDigits: 0,
         })}
       </span>
@@ -156,12 +155,14 @@ function CategoryBudgets({ budgets }: { budgets: Category["budgets"] }) {
   );
 }
 
-function CategoryTotal({}: { category: Category }) {
+function CategoryTotal({ category }: { category: Category }) {
+  const categoryListColors = getBudgetTotalColor(category.type, true);
+
   return (
     <div className="flex w-[120px] items-center justify-end gap-1 font-mono text-muted-foreground">
-      <span className="">
+      <span className={cn(categoryListColors)}>
         {formatAmount({
-          amount: parseFloat("0"),
+          amount: category.categoryBudget ?? category.childrenBudget,
           maximumFractionDigits: 0,
         })}
       </span>
@@ -171,15 +172,15 @@ function CategoryTotal({}: { category: Category }) {
 
 function CategoryPercentage({}: { category: Category }) {
   return (
-    <div className="flex w-10 items-center justify-end gap-1 font-mono text-neutral-300">
-      <span className="">{formatPerc(0)}</span>
+    <div className="flex w-[80px] items-center justify-end gap-1 font-mono text-neutral-300">
+      <span className="text-xs">{formatPerc(0)}</span>
     </div>
   );
 }
 
 function CategoryActions({}: { category: Category }) {
   return (
-    <div className="flex w-10 justify-end text-primary">
+    <div className="flex w-12 justify-end text-primary">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">

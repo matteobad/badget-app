@@ -64,7 +64,7 @@ export const deleteBudgetSchema = z.object({ id: z.cuid2() });
 export const budgetFilterSchema = z.object({
   from: z.date().default(startOfMonth(new Date())),
   to: z.date().default(endOfMonth(new Date())),
-  deleted: z.boolean().default(false),
+  // deleted: z.boolean().default(false),
 });
 
 // Search params filter schema

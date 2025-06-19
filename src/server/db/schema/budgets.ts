@@ -12,12 +12,15 @@ export const budget_table = pgTable("budget_table", (d) => ({
     .$defaultFn(() => createId())
     .notNull(),
 
-  categoryId: d.varchar({ length: 128 }).references(() => category_table.id, {
-    onDelete: "cascade",
-  }),
+  categoryId: d
+    .varchar({ length: 128 })
+    .references(() => category_table.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
   userId: d.varchar({ length: 32 }),
 
-  amount: d.numeric({ precision: 10, scale: 2 }).notNull(), // Budgeted amount
+  amount: d.numeric({ precision: 10, scale: 2 }).$type<number>().notNull(), // Budgeted amount
   period: d.text().$type<BudgetPeriod>().notNull(),
   sysPeriod: timezoneRange({ notNull: true, default: true }),
 

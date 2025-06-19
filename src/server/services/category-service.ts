@@ -1,10 +1,15 @@
+import type { TreeNode } from "~/shared/types";
 import type { budgetFilterSchema } from "~/shared/validators/budget.schema";
 import type { categoryFilterSchema } from "~/shared/validators/category.schema";
 import type z from "zod/v4";
-import { differenceInCalendarDays, max, min } from "date-fns";
 
+import { getBudgetForPeriod } from "../domain/budget/helpers";
 import { getBudgetsQuery } from "../domain/budget/queries";
 import { getCategoriesQuery } from "../domain/category/queries";
+
+type CategoryWithBudgetsType = Awaited<
+  ReturnType<typeof getCategoriesWithBudgets>
+>[number];
 
 export const mapCategoriesWithBudgets = (
   categories: Awaited<ReturnType<typeof getCategoriesQuery>>,
@@ -20,32 +25,37 @@ export const mapCategoriesWithBudgets = (
   });
 };
 
-export const enrichCategoryBudgets = (
-  categoryWithBudgets: ReturnType<typeof mapCategoriesWithBudgets>[number],
+export const enrichCategoryTree = (
+  categoryTree: TreeNode<CategoryWithBudgetsType>[],
   budgetFilters: z.infer<typeof budgetFilterSchema>,
-) => {
-  const { from: periodFrom, to: periodTo } = budgetFilters;
+): TreeNode<
+  CategoryWithBudgetsType & {
+    categoryBudget: number;
+    childrenBudget: number;
+  }
+>[] => {
+  return categoryTree.map((item) => {
+    const [category, children] = item;
 
-  // TODO: fix and test this
-  const total = categoryWithBudgets.budgets.reduce((tot, budget) => {
-    const { startDate: budgetFrom, endDate: budgetTo, amount } = budget;
+    // 1. compute total budget for category (categoryBudget)
+    const categoryBudget = getBudgetForPeriod(category.budgets, budgetFilters);
 
-    const intersectionStart = max([budgetFrom, periodFrom]);
-    const intersectionEnd = min([budgetTo, periodTo]);
-    const totalDays = differenceInCalendarDays(budgetTo, budgetFrom) + 1;
-    const overlapDays =
-      differenceInCalendarDays(intersectionEnd, intersectionStart) + 1;
+    // 2. recursively enrich children and compute their total budget (childrenBudget)
+    const enrichedChildren = enrichCategoryTree(children, budgetFilters);
+    const childrenBudget = enrichedChildren.reduce(
+      (tot, [childCategory]) => tot + (childCategory.categoryBudget ?? 0),
+      0,
+    );
 
-    return (tot +=
-      totalDays > 0 && overlapDays > 0
-        ? (overlapDays / totalDays) * parseFloat(amount)
-        : 0);
-  }, 0);
-
-  return {
-    ...categoryWithBudgets,
-    budgetTotal: total,
-  };
+    return [
+      {
+        ...category,
+        categoryBudget, // budget for this category only
+        childrenBudget, // budget for all children
+      },
+      enrichedChildren,
+    ];
+  });
 };
 
 export async function getCategoriesWithBudgets(
@@ -56,9 +66,5 @@ export async function getCategoriesWithBudgets(
   const categories = await getCategoriesQuery(categoryFilters, userId);
   const budgets = await getBudgetsQuery(budgetFilters, userId);
 
-  const categoriesWithbudgets = mapCategoriesWithBudgets(categories, budgets);
-
-  return categoriesWithbudgets.map((categoryWithBudgets) =>
-    enrichCategoryBudgets(categoryWithBudgets, budgetFilters),
-  );
+  return mapCategoriesWithBudgets(categories, budgets);
 }
