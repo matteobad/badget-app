@@ -63,10 +63,12 @@ export function findBudgetWarnings(
   for (const parent of categories) {
     const parentBudgets = budgets.filter((b) => b.categoryId === parent.id);
 
-    const parentTotal = getBudgetForPeriod(parentBudgets, budgetFilters, {
-      startOfWeek,
-    });
-    const childrenTotal = getEffectiveChildrenTotal(parent.id);
+    const parentTotal = Math.round(
+      getBudgetForPeriod(parentBudgets, budgetFilters, {
+        startOfWeek,
+      }),
+    );
+    const childrenTotal = Math.round(getEffectiveChildrenTotal(parent.id));
 
     if (parentTotal && childrenTotal > parentTotal) {
       warnings.push({
