@@ -58,8 +58,8 @@ export function CategoryTree({ ...props }: React.ComponentProps<"div">) {
         <div className="flex items-center justify-end px-2 text-right">
           <span className="w-[120px]">Budget</span>
           <span className="w-[120px]">Totale</span>
-          <span className="w-[80px]">%</span>
-          <span className="w-12"></span>
+          <span className="w-[50px]">%</span>
+          {/* <span className="w-12"></span> */}
         </div>
       </div>
       {data?.map((item) => <Tree key={item[0].id} item={item} />)}
@@ -77,55 +77,85 @@ function Tree({ item }: { item: CategoryTreeNode }) {
       {hasChildren ? (
         <Collapsible defaultOpen>
           <CollapsibleTrigger asChild>
-            <TreeItem category={category} hasChildren={true} />
+            <div
+              className={cn(
+                "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+                "mr-0 flex w-full items-center justify-between gap-2 [&[data-state=open]>div>svg:first-child]:rotate-90",
+              )}
+            >
+              <div className="flex items-center gap-2">
+                {hasChildren ? (
+                  <ChevronRightIcon
+                    className={cn(
+                      categoryListColors,
+                      "mr-1 ml-1 size-4 transition-transform",
+                    )}
+                  />
+                ) : (
+                  <DotIcon className={cn(categoryListColors, "size-6")} />
+                )}
+                <DynamicIcon
+                  name={category.icon as keyof typeof dynamicIconImports}
+                  className={cn("size-5 text-primary")}
+                />
+                <span className="truncate text-primary">{category.name}</span>
+              </div>
+              <div className="flex items-center justify-end">
+                <CategoryBudgets budgets={category.budgets} />
+                <CategoryTotal category={category} />
+                <CategoryPercentage category={category} />
+                {/* <CategoryActions category={category} /> */}
+              </div>
+            </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <SidebarMenuSub className={cn(categoryListColors, "mr-0 pr-0")}>
+            <div
+              className={cn(
+                "mx-4.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5",
+                "group-data-[collapsible=icon]:hidden",
+                categoryListColors,
+                "mr-0 pr-0",
+              )}
+            >
               {children.map((child) => (
                 <Tree key={child[0].id} item={child} />
               ))}
-            </SidebarMenuSub>
+            </div>
           </CollapsibleContent>
         </Collapsible>
       ) : (
-        <TreeItem category={category} hasChildren={false} />
+        <div
+          className={cn(
+            "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+            "mr-0 flex w-full items-center justify-between gap-2 [&[data-state=open]>div>svg:first-child]:rotate-90",
+          )}
+        >
+          <div className="flex items-center gap-2">
+            {hasChildren ? (
+              <ChevronRightIcon
+                className={cn(
+                  categoryListColors,
+                  "mr-1 size-4 transition-transform",
+                )}
+              />
+            ) : (
+              <DotIcon className={cn(categoryListColors, "size-6")} />
+            )}
+            <DynamicIcon
+              name={category.icon as keyof typeof dynamicIconImports}
+              className={cn("size-5 text-primary")}
+            />
+            <span className="truncate text-primary">{category.name}</span>
+          </div>
+          <div className="flex items-center justify-end">
+            <CategoryBudgets budgets={category.budgets} />
+            <CategoryTotal category={category} />
+            <CategoryPercentage category={category} />
+            {/* <CategoryActions category={category} /> */}
+          </div>
+        </div>
       )}
     </div>
-  );
-}
-
-function TreeItem({
-  category,
-  hasChildren,
-}: {
-  category: Category;
-  hasChildren: boolean;
-}) {
-  const categoryListColors = getCategoryListColors(category.type);
-
-  return (
-    <SidebarMenuButton className="mr-0 flex w-full items-center justify-between gap-2 [&[data-state=open]>div>svg:first-child]:rotate-90">
-      <div className="flex items-center gap-2">
-        {hasChildren ? (
-          <ChevronRightIcon
-            className={cn(categoryListColors, "size-4 transition-transform")}
-          />
-        ) : (
-          <DotIcon className={cn(categoryListColors, "-ml-1 size-6")} />
-        )}
-        <DynamicIcon
-          name={category.icon as keyof typeof dynamicIconImports}
-          className={cn("size-5 text-primary")}
-        />
-        <span className="truncate text-primary">{category.name}</span>
-      </div>
-      <div className="flex items-center justify-end">
-        <CategoryBudgets budgets={category.budgets} />
-        <CategoryTotal category={category} />
-        <CategoryPercentage category={category} />
-        <CategoryActions category={category} />
-      </div>
-    </SidebarMenuButton>
   );
 }
 
@@ -172,33 +202,8 @@ function CategoryTotal({ category }: { category: Category }) {
 
 function CategoryPercentage({}: { category: Category }) {
   return (
-    <div className="flex w-[80px] items-center justify-end gap-1 font-mono text-neutral-300">
-      <span className="text-xs">{formatPerc(0)}</span>
-    </div>
-  );
-}
-
-function CategoryActions({}: { category: Category }) {
-  return (
-    <div className="flex w-12 justify-end text-primary">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <EllipsisVerticalIcon className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem>
-            <RefreshCwIcon className="size-3" />
-            Modifica
-          </DropdownMenuItem>
-          <DropdownMenuItem className="text-destructive">
-            <UnlinkIcon className="size-3" />
-            Elimina
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+    <div className="flex w-[50px] items-center justify-end gap-1 font-mono text-neutral-300">
+      <span className="text-xs">{formatPerc(1)}</span>
     </div>
   );
 }
