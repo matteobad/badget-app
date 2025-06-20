@@ -6,6 +6,7 @@ import {
   createTRPCRouter,
   publicProcedure,
 } from "../init";
+import { budgetRouter } from "./budget";
 import { categoryRouter } from "./category";
 import { dashboardRouter } from "./dashboard";
 
@@ -17,6 +18,7 @@ import { dashboardRouter } from "./dashboard";
 export const appRouter = createTRPCRouter({
   dashboard: dashboardRouter,
   category: categoryRouter,
+  budget: budgetRouter,
   health: publicProcedure.query(async () => {
     try {
       await checkHealth();

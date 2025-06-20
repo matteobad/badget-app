@@ -21,6 +21,7 @@ import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { useScopedI18n } from "~/shared/locales/client";
 import { formatAmount, formatPerc } from "~/utils/format";
 import {
   ChevronRightIcon,
@@ -28,6 +29,7 @@ import {
   EllipsisVerticalIcon,
   PlusIcon,
   RefreshCwIcon,
+  TriangleAlertIcon,
   UnlinkIcon,
 } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
@@ -37,11 +39,14 @@ import { getBudgetTotalColor, getCategoryListColors } from "../utils";
 type Category = RouterOutput["category"]["getCategoryTree"][number][0];
 type CategoryTreeNode = TreeNode<Category>;
 
-export function CategoryTree({ ...props }: React.ComponentProps<"div">) {
+export function CategoryTree() {
+  const t = useScopedI18n("categories.budget");
+
   const { filter: categoryFilters } = useCategoryFilterParams();
   const { filter: budgetFilters } = useBudgetFilterParams();
 
   const trpc = useTRPC();
+
   const { data } = useSuspenseQuery(
     trpc.category.getCategoryTree.queryOptions({
       categoryFilters,
@@ -49,11 +54,21 @@ export function CategoryTree({ ...props }: React.ComponentProps<"div">) {
     }),
   );
 
+  const { data: warnings } = useSuspenseQuery(
+    trpc.budget.getBudgetWarnings.queryOptions({
+      categoryFilters,
+      budgetFilters,
+    }),
+  );
+
   // data is TreeNode<Category>[]
   return (
-    <div {...props} className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span className="flex-1">Abbiamo notato 1 problema nel budget</span>
+        <span className="flex flex-1 items-center gap-2">
+          {t("warning", { count: warnings.length })}
+          {warnings.length > 0 && <TriangleAlertIcon className="size-4" />}
+        </span>
 
         <div className="flex items-center justify-end px-2 text-right">
           <span className="w-[120px]">Budget</span>

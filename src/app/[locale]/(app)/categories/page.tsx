@@ -42,6 +42,14 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
     }),
   );
 
+  // prefetch warnings
+  await queryClient.fetchQuery(
+    trpc.budget.getBudgetWarnings.queryOptions({
+      categoryFilters,
+      budgetFilters,
+    }),
+  );
+
   return (
     <HydrateClient>
       <div className="flex flex-1 flex-col gap-2 p-4 pt-0">

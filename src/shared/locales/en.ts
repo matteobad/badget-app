@@ -31,4 +31,9 @@ export default {
       unknown: "Disconnected",
     },
   },
+
+  "categories.budget.warning#zero": "There are no problem with your budget",
+  "categories.budget.warning#one": "We found one problem with your budget",
+  "categories.budget.warning#other":
+    "We found {count} problems with your budget",
 } as const;

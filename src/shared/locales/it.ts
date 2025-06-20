@@ -31,4 +31,9 @@ export default {
       unknown: "Non connesso",
     },
   },
+
+  "categories.budget.warning#zero": "Non ci sono problemi col tuo budget",
+  "categories.budget.warning#one": "Abbiamo notato un problema nel budget",
+  "categories.budget.warning#other":
+    "Abbiamo notato {count} problemi nel budget",
 } as const;

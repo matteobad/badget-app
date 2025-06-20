@@ -18,17 +18,12 @@ type BudgetWarning = {
   excess: number; // quanto in più rispetto al budget del padre
 };
 
-export function findBudgetWarnings({
-  categories,
-  budgets,
-  budgetFilters,
-  options,
-}: {
-  categories: CategoryType[];
-  budgets: BudgetType[];
-  budgetFilters: z.infer<typeof budgetFilterSchema>;
-  options?: { startOfWeek?: number; recursive?: boolean };
-}): BudgetWarning[] {
+export function findBudgetWarnings(
+  categories: CategoryType[],
+  budgets: BudgetType[],
+  budgetFilters: z.infer<typeof budgetFilterSchema>,
+  options?: { startOfWeek?: number },
+): BudgetWarning[] {
   const { startOfWeek = 1 } = options ?? {};
 
   // Mappa genitore → figli
@@ -46,29 +41,34 @@ export function findBudgetWarnings({
     const directChildren = categoryMap.get(categoryId) ?? [];
     return directChildren.flatMap((child) => [
       child.id,
-      ...getAllDescendants(child.id),
+      //...getAllDescendants(child.id),
     ]);
+  }
+
+  function getEffectiveChildrenTotal(categoryId: string): number {
+    const descendantIds = getAllDescendants(categoryId);
+
+    return descendantIds.reduce((tot, id) => {
+      const childBudgets = budgets.filter((b) => b.categoryId === id);
+      const budgetTotal = getBudgetForPeriod(childBudgets, budgetFilters, {
+        startOfWeek,
+      });
+      const childrenEffectiveTotal = getEffectiveChildrenTotal(id);
+      return (tot += Math.max(budgetTotal, childrenEffectiveTotal));
+    }, 0);
   }
 
   const warnings: BudgetWarning[] = [];
 
   for (const parent of categories) {
-    const descendantIds = getAllDescendants(parent.id);
-    if (descendantIds.length === 0) continue;
-
     const parentBudgets = budgets.filter((b) => b.categoryId === parent.id);
-    const childrenBudgets = budgets.filter((b) =>
-      descendantIds.includes(b.categoryId),
-    );
 
     const parentTotal = getBudgetForPeriod(parentBudgets, budgetFilters, {
       startOfWeek,
     });
-    const childrenTotal = getBudgetForPeriod(childrenBudgets, budgetFilters, {
-      startOfWeek,
-    });
+    const childrenTotal = getEffectiveChildrenTotal(parent.id);
 
-    if (childrenTotal > parentTotal) {
+    if (parentTotal && childrenTotal > parentTotal) {
       warnings.push({
         parentId: parent.id,
         parentAmount: parentTotal,
