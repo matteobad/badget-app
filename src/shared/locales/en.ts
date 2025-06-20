@@ -36,4 +36,5 @@ export default {
   "categories.budget.warning#one": "We found one problem with your budget",
   "categories.budget.warning#other":
     "We found {count} problems with your budget",
+  "categories.budget.node.warning": "{excess} below total children budget",
 } as const;

@@ -38,6 +38,7 @@ import { getBudgetTotalColor, getCategoryListColors } from "../utils";
 
 type Category = RouterOutput["category"]["getCategoryTree"][number][0];
 type CategoryTreeNode = TreeNode<Category>;
+type BudgetWarning = RouterOutput["budget"]["getBudgetWarnings"][number];
 
 export function CategoryTree() {
   const t = useScopedI18n("categories.budget");
@@ -71,21 +72,32 @@ export function CategoryTree() {
         </span>
 
         <div className="flex items-center justify-end px-2 text-right">
-          <span className="w-[120px]">Budget</span>
-          <span className="w-[120px]">Totale</span>
-          <span className="w-[50px]">%</span>
+          <span className="w-full">Budget</span>
+          <span className="w-[120px] shrink-0">Totale</span>
+          <span className="w-[50px] shrink-0">%</span>
           {/* <span className="w-12"></span> */}
         </div>
       </div>
-      {data?.map((item) => <Tree key={item[0].id} item={item} />)}
+      {data?.map((item) => (
+        <Tree key={item[0].id} item={item} warnings={warnings} />
+      ))}
     </div>
   );
 }
 
-function Tree({ item, depth = 0 }: { item: CategoryTreeNode; depth?: number }) {
+function Tree({
+  item,
+  warnings,
+  depth = 0,
+}: {
+  item: CategoryTreeNode;
+  warnings: BudgetWarning[];
+  depth?: number;
+}) {
   const [category, children] = item;
   const hasChildren = children.length > 0;
   const categoryListColors = getCategoryListColors(item[0].type);
+  const warning = warnings.find((w) => w.parentId === category.id);
 
   return (
     <div className="w-full">
@@ -114,10 +126,12 @@ function Tree({ item, depth = 0 }: { item: CategoryTreeNode; depth?: number }) {
                   name={category.icon as keyof typeof dynamicIconImports}
                   className={cn("size-5 text-primary")}
                 />
-                <span className="truncate text-primary">{category.name}</span>
+                <span className="flex-1 truncate text-primary">
+                  {category.name}
+                </span>
               </div>
-              <div className="flex items-center justify-end">
-                <CategoryBudgets budgets={category.budgets} />
+              <div className="flex flex-1 items-center justify-end">
+                <CategoryBudgets budgets={category.budgets} warning={warning} />
                 <CategoryTotal category={category} />
                 <CategoryPercentage category={category} />
                 {/* <CategoryActions category={category} /> */}
@@ -134,7 +148,12 @@ function Tree({ item, depth = 0 }: { item: CategoryTreeNode; depth?: number }) {
               )}
             >
               {children.map((child) => (
-                <Tree key={child[0].id} item={child} depth={depth + 1} />
+                <Tree
+                  key={child[0].id}
+                  item={child}
+                  warnings={warnings}
+                  depth={depth + 1}
+                />
               ))}
             </div>
           </CollapsibleContent>
@@ -165,7 +184,7 @@ function Tree({ item, depth = 0 }: { item: CategoryTreeNode; depth?: number }) {
             <span className="truncate text-primary">{category.name}</span>
           </div>
           <div className="flex items-center justify-end">
-            <CategoryBudgets budgets={category.budgets} />
+            <CategoryBudgets budgets={category.budgets} warning={warning} />
             <CategoryTotal category={category} />
             <CategoryPercentage category={category} />
             {/* <CategoryActions category={category} /> */}
@@ -176,7 +195,14 @@ function Tree({ item, depth = 0 }: { item: CategoryTreeNode; depth?: number }) {
   );
 }
 
-function CategoryBudgets({ budgets }: { budgets: Category["budgets"] }) {
+function CategoryBudgets({
+  budgets,
+  warning,
+}: {
+  budgets: Category["budgets"];
+  warning?: BudgetWarning;
+}) {
+  const t = useScopedI18n("categories.budget.node");
   const budget = budgets[0];
 
   if (!budget) {
@@ -188,7 +214,17 @@ function CategoryBudgets({ budgets }: { budgets: Category["budgets"] }) {
   }
 
   return (
-    <div className="flex w-[120px] items-center justify-end gap-2 font-mono text-neutral-300">
+    <div className="flex grow items-center justify-end gap-2 font-mono text-neutral-300">
+      {warning && (
+        <span className="mr-2 truncate text-xs">
+          {t("warning", {
+            excess: formatAmount({
+              amount: warning.excess,
+              maximumFractionDigits: 0,
+            }),
+          })}
+        </span>
+      )}
       <span className="">
         {formatAmount({
           amount: budget.amount,
