@@ -44,13 +44,9 @@ import { createCategoryAction } from "../server/actions";
 import { CategoryInsertSchema } from "../utils/schemas";
 
 export default function CreateCategoryForm({
-  categories,
-  onComplete,
   className,
-}: {
-  categories: DB_CategoryType[];
-  onComplete: () => void;
-} & React.ComponentProps<"form">) {
+}: React.ComponentProps<"form">) {
+  const categories: DB_CategoryType[] = [];
   const { execute, isExecuting, reset } = useAction(createCategoryAction, {
     onError: ({ error }) => {
       console.error(error);
@@ -59,7 +55,6 @@ export default function CreateCategoryForm({
     onSuccess: ({ data }) => {
       toast.success(data?.message);
       reset();
-      onComplete();
     },
   });
 

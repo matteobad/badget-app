@@ -7,6 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { useCategoryParams } from "~/hooks/use-category-params";
 import {
   endOfMonth,
   endOfWeek,
@@ -22,9 +23,10 @@ import { ChevronDownIcon, PlusIcon } from "lucide-react";
 import { useQueryStates } from "nuqs";
 import { type DateRange } from "react-day-picker";
 
-import { categoriesFiltersParsers } from "../utils/search-params";
+import { categoriesFiltersParsers } from "../../features/category/utils/search-params";
 
 export const CategoryFilters = () => {
+  const { params, setParams } = useCategoryParams();
   const [filters, setFilters] = useQueryStates(categoriesFiltersParsers, {
     shallow: false,
   });
@@ -96,7 +98,7 @@ export const CategoryFilters = () => {
           />
         </PopoverContent>
       </Popover>
-      <Button>
+      <Button onClick={() => void setParams({ createCategory: true })}>
         <PlusIcon className="size-4" />
         Crea
       </Button>

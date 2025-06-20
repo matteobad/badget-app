@@ -17,30 +17,20 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
+import { useCategoryParams } from "~/hooks/use-category-params";
 import { useIsMobile } from "~/hooks/use-mobile";
-import { type DB_CategoryType } from "~/server/db/schema/categories";
-import { useQueryStates } from "nuqs";
 
-import { categoriesParsers } from "../utils/search-params";
-import CreateCategoryForm from "./create-category-form";
+import CreateCategoryForm from "../../features/category/components/create-category-form";
 
-export default function CreateCategoryDrawerSheet({
-  categories,
-}: {
-  categories: DB_CategoryType[];
-}) {
+export default function CreateCategoryDrawerSheet() {
   const isMobile = useIsMobile();
-  const [{ add }, setParams] = useQueryStates(categoriesParsers);
+  const { params, setParams } = useCategoryParams();
 
-  const open = !!add;
-
-  const handleClose = () => {
-    void setParams({ add: null });
-  };
+  const isOpen = !!params.createCategory;
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleClose}>
+      <Drawer open={isOpen} onOpenChange={() => setParams(null)}>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Crea una nuova categoria</DrawerTitle>
@@ -49,11 +39,7 @@ export default function CreateCategoryDrawerSheet({
               finanze.
             </DrawerDescription>
           </DrawerHeader>
-          <CreateCategoryForm
-            className="px-4"
-            categories={categories}
-            onComplete={handleClose}
-          />
+          <CreateCategoryForm className="px-4" />
           <DrawerFooter>
             <DrawerClose>
               <Button variant="outline" asChild>
@@ -67,7 +53,7 @@ export default function CreateCategoryDrawerSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
+    <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
       <SheetContent className="p-4">
         <div className="flex h-full flex-col">
           <SheetHeader className="mb-6">
@@ -77,10 +63,7 @@ export default function CreateCategoryDrawerSheet({
               finanze.
             </SheetDescription>
           </SheetHeader>
-          <CreateCategoryForm
-            categories={categories}
-            onComplete={handleClose}
-          />
+          <CreateCategoryForm />
         </div>
       </SheetContent>
     </Sheet>

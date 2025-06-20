@@ -1,5 +1,6 @@
 import { type PropsWithChildren } from "react";
 import { AppSidebar } from "~/components/app-sidebar";
+import CreateCategoryDrawerSheet from "~/components/category/create-category-drawer-sheet";
 import { FeedbackDialog } from "~/components/feedback-dialog";
 import { DynamicBreadcrumb } from "~/components/layouts/dynamic-breadcrumb";
 import { NavUser } from "~/components/nav-user";
@@ -11,10 +12,6 @@ import {
 } from "~/components/ui/sidebar";
 
 export default function AppLayout(props: PropsWithChildren) {
-  // const BackfillPanel = dynamic(
-  //   () => import("~/app/[locale]/(app)/(pillars)/banking/backfill-panel"),
-  // );
-
   return (
     <>
       <SidebarProvider>
@@ -33,7 +30,8 @@ export default function AppLayout(props: PropsWithChildren) {
         </SidebarInset>
       </SidebarProvider>
 
-      {/* <BackfillPanel /> */}
+      {/* Global Sheets here */}
+      <CreateCategoryDrawerSheet />
     </>
   );
 }

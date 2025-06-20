@@ -1,5 +1,7 @@
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
+import { CategoryFilters } from "~/components/category/category-filters";
+import { CategoryTree } from "~/components/category/category-tree";
 import {
   Card,
   CardContent,
@@ -7,8 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { CategoryFilters } from "~/features/category/components/category-filters";
-import { CategoryTree } from "~/features/category/components/category-tree";
 import {
   getQueryClient,
   HydrateClient,

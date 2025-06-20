@@ -24,13 +24,17 @@ export const createCategorySchema = createInsertSchema(category_table, {
 
 export const updateCategorySchema = createUpdateSchema(category_table, {
   id: z.cuid2(),
+  userId: z.string(),
   type: z.enum(Object.values(CATEGORY_TYPE)),
 }).omit({
   createdAt: true,
   updatedAt: true,
 });
 
-export const deleteCategorySchema = z.object({ id: z.cuid2() });
+export const deleteCategorySchema = z.object({
+  id: z.cuid2(),
+  userId: z.string(),
+});
 
 // Query filter schema
 export const categoryFilterSchema = z
@@ -48,4 +52,10 @@ export const categoryFilterParamsSchema = {
   slug: parseAsString,
   type: parseAsStringLiteral(Object.values(CATEGORY_TYPE)),
   deleted: parseAsBoolean.withDefault(false),
+};
+
+// Search params for sheets
+export const categoryParamsSchema = {
+  categoryId: parseAsString,
+  createCategory: parseAsBoolean,
 };

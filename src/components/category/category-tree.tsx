@@ -24,7 +24,10 @@ import {
 } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
-import { getBudgetTotalColor, getCategoryListColors } from "../utils";
+import {
+  getBudgetTotalColor,
+  getCategoryListColors,
+} from "../../features/category/utils";
 
 type Category = RouterOutput["category"]["getCategoryTree"][number][0];
 type CategoryTreeNode = TreeNode<Category>;
