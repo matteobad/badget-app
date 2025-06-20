@@ -10,13 +10,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import { SidebarMenuButton, SidebarMenuSub } from "~/components/ui/sidebar";
 import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
 import { cn } from "~/lib/utils";
@@ -26,11 +19,8 @@ import { formatAmount, formatPerc } from "~/utils/format";
 import {
   ChevronRightIcon,
   DotIcon,
-  EllipsisVerticalIcon,
   PlusIcon,
-  RefreshCwIcon,
   TriangleAlertIcon,
-  UnlinkIcon,
 } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
@@ -62,6 +52,8 @@ export function CategoryTree() {
     }),
   );
 
+  const totalIncome = data[0]![0].categoryBudget ?? data[0]![0].childrenBudget;
+
   // data is TreeNode<Category>[]
   return (
     <div className="flex flex-col gap-2">
@@ -79,7 +71,12 @@ export function CategoryTree() {
         </div>
       </div>
       {data?.map((item) => (
-        <Tree key={item[0].id} item={item} warnings={warnings} />
+        <Tree
+          key={item[0].id}
+          item={item}
+          warnings={warnings}
+          total={totalIncome}
+        />
       ))}
     </div>
   );
@@ -88,10 +85,12 @@ export function CategoryTree() {
 function Tree({
   item,
   warnings,
+  total,
   depth = 0,
 }: {
   item: CategoryTreeNode;
   warnings: BudgetWarning[];
+  total?: number;
   depth?: number;
 }) {
   const [category, children] = item;
@@ -133,7 +132,7 @@ function Tree({
               <div className="flex flex-1 items-center justify-end">
                 <CategoryBudgets budgets={category.budgets} warning={warning} />
                 <CategoryTotal category={category} />
-                <CategoryPercentage category={category} />
+                <CategoryPercentage category={category} total={total} />
                 {/* <CategoryActions category={category} /> */}
               </div>
             </div>
@@ -153,6 +152,7 @@ function Tree({
                   item={child}
                   warnings={warnings}
                   depth={depth + 1}
+                  total={total}
                 />
               ))}
             </div>
@@ -186,7 +186,7 @@ function Tree({
           <div className="flex items-center justify-end">
             <CategoryBudgets budgets={category.budgets} warning={warning} />
             <CategoryTotal category={category} />
-            <CategoryPercentage category={category} />
+            <CategoryPercentage category={category} total={total} />
             {/* <CategoryActions category={category} /> */}
           </div>
         </div>
@@ -253,10 +253,19 @@ function CategoryTotal({ category }: { category: Category }) {
   );
 }
 
-function CategoryPercentage({}: { category: Category }) {
+function CategoryPercentage({
+  category,
+  total,
+}: {
+  category: Category;
+  total?: number;
+}) {
+  const perc = !total
+    ? 0
+    : (category.categoryBudget ?? category.childrenBudget) / total;
   return (
     <div className="flex w-[50px] items-center justify-end gap-1 font-mono text-neutral-300">
-      <span className="text-xs">{formatPerc(1)}</span>
+      <span className="text-xs">{formatPerc(perc)}</span>
     </div>
   );
 }
