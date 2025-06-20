@@ -1,99 +1,105 @@
 "use client";
 
-import Component from "~/components/comp-507";
 import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { cn } from "~/lib/utils";
-import { format } from "date-fns";
-import { CalendarIcon, PlusIcon } from "lucide-react";
+import {
+  endOfMonth,
+  endOfWeek,
+  endOfYear,
+  format,
+  getWeekOfMonth,
+  isSameDay,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
+} from "date-fns";
+import { ChevronDownIcon, PlusIcon } from "lucide-react";
 import { useQueryStates } from "nuqs";
 import { type DateRange } from "react-day-picker";
 
 import { categoriesFiltersParsers } from "../utils/search-params";
 
 export const CategoryFilters = () => {
-  const [{ from, to }, setFilters] = useQueryStates(categoriesFiltersParsers, {
+  const [filters, setFilters] = useQueryStates(categoriesFiltersParsers, {
     shallow: false,
   });
+
+  const getDisplayText = (range: DateRange | undefined) => {
+    if (!range?.from || !range?.to) {
+      return "Select date";
+    }
+
+    const { from, to } = range;
+
+    // Check if entire year is selected
+    const yearStart = startOfYear(from);
+    const yearEnd = endOfYear(from);
+    if (isSameDay(from, yearStart) && isSameDay(to, yearEnd)) {
+      return format(from, "yyyy");
+    }
+
+    // Check if entire month is selected
+    const monthStart = startOfMonth(from);
+    const monthEnd = endOfMonth(from);
+    if (isSameDay(from, monthStart) && isSameDay(to, monthEnd)) {
+      return format(from, "MMMM yyyy");
+    }
+
+    // Check if entire week is selected
+    const weekStart = startOfWeek(from, { weekStartsOn: 1 }); // Monday start
+    const weekEnd = endOfWeek(from, { weekStartsOn: 1 });
+    if (isSameDay(from, weekStart) && isSameDay(to, weekEnd)) {
+      const weekNumber = getWeekOfMonth(from, { weekStartsOn: 1 });
+      const ordinal =
+        weekNumber === 1
+          ? "1st"
+          : weekNumber === 2
+            ? "2nd"
+            : weekNumber === 3
+              ? "3rd"
+              : `${weekNumber}th`;
+      return `${ordinal} week of ${format(from, "MMMM yyyy")}`;
+    }
+
+    // Default behavior for partial periods
+    return `${from.toLocaleDateString()} - ${to.toLocaleDateString()}`;
+  };
 
   const handleDateRangeChange = (dateRange?: DateRange) => {
     void setFilters({ ...dateRange });
   };
 
   return (
-    <div className="flex items-center justify-between">
-      {/* <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            void setFilters({
-              date: new Date(),
-              period: BUDGET_PERIOD.MONTHLY,
-            });
-          }}
-        >
-          Current
-        </Button>
-        <div className="flex items-center sm:gap-2">
+    <div className="flex items-center gap-4">
+      <Popover>
+        <PopoverTrigger asChild>
           <Button
-            variant="ghost"
-            size="icon"
-            className="size-9"
-            onClick={() => {
-              const value = handleDateChange(-1);
-              console.log("change", value);
-              void setFilters({ date: value, period });
-            }}
+            variant="outline"
+            id="dates"
+            className="w-56 justify-between font-normal"
           >
-            <ChevronLeftIcon className="size-4" />
+            {getDisplayText(filters)}
+            <ChevronDownIcon />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-9"
-            onClick={() => {
-              const value = handleDateChange(1);
-              void setFilters({ date: value, period });
-            }}
-          >
-            <ChevronRightIcon />
-          </Button>
-        </div>
-        <div className="text-sm font-semibold whitespace-nowrap sm:text-lg md:text-xl">
-          {format(date, "LLLL yyyy")}
-        </div>
-      </div> */}
-      <div className="flex w-full items-center justify-end gap-2">
-        <Popover>
-          <PopoverTrigger>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-auto justify-start text-left font-normal",
-                !from && "text-muted-foreground",
-              )}
-            >
-              <CalendarIcon />
-              {from ? format(from, "LLLL yyyy") : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-fit p-0">
-            <Component
-              handleChange={handleDateRangeChange}
-              defaultValue={{ from, to }}
-            />
-          </PopoverContent>
-        </Popover>
-        <Button size="sm">
-          <PlusIcon className="size-4" />
-          Crea
-        </Button>
-      </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+          <Calendar
+            mode="range"
+            selected={filters}
+            captionLayout="dropdown"
+            onSelect={handleDateRangeChange}
+          />
+        </PopoverContent>
+      </Popover>
+      <Button>
+        <PlusIcon className="size-4" />
+        Crea
+      </Button>
     </div>
   );
 };
