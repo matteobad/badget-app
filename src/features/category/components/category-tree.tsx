@@ -175,7 +175,7 @@ function Tree({
                 )}
               />
             ) : (
-              <DotIcon className={cn(categoryListColors, "size-6")} />
+              <DotIcon className={cn(categoryListColors, "size-5")} />
             )}
             <DynamicIcon
               name={category.icon as keyof typeof dynamicIconImports}
