@@ -1,3 +1,4 @@
+import type { DB_BudgetInsertType } from "~/server/db/schema/budgets";
 import { budget_table } from "~/server/db/schema/budgets";
 import { BUDGET_PERIOD } from "~/server/db/schema/enum";
 import { TimezoneRange } from "~/server/db/utils";
@@ -7,7 +8,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import { parseAsBoolean, parseAsIsoDate } from "nuqs/server";
+import { parseAsBoolean, parseAsIsoDate, parseAsString } from "nuqs/server";
 import { Range, RANGE_LB_INC } from "postgres-range";
 import z from "zod/v4";
 
@@ -29,10 +30,11 @@ export const createBudgetSchema = createInsertSchema(budget_table, {
 
     return {
       id: budget.id,
+      categoryId: budget.categoryId,
       amount: budget.amount,
       period: budget.period,
-      sys_period: new TimezoneRange(range),
-    };
+      sysPeriod: new TimezoneRange(range),
+    } satisfies DB_BudgetInsertType;
   });
 
 export const updateBudgetSchema = createUpdateSchema(budget_table, {
@@ -72,4 +74,10 @@ export const BudgetFilterParamsSchema = {
   from: parseAsIsoDate.withDefault(startOfMonth(new Date())),
   to: parseAsIsoDate.withDefault(startOfDay(endOfMonth(new Date()))),
   deleted: parseAsBoolean.withDefault(false),
+};
+
+// Search params for sheets
+export const budgetParamsSchema = {
+  budgetId: parseAsString,
+  createBudget: parseAsBoolean,
 };

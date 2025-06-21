@@ -18,12 +18,13 @@ type CSV_BudgetType = {
 };
 
 const mapParsedRow = (row: CSV_BudgetType) => {
-  const { startDate, endDate, ...rest } = row;
+  const { startDate, endDate, amount, ...rest } = row;
   const start = new Date(startDate);
   const end = endDate ? new Date(endDate) : null;
 
   return {
     ...rest,
+    amount: parseFloat(amount),
     sysPeriod: new TimezoneRange(new Range<Date>(start, end, RANGE_LB_INC)),
   } satisfies DB_BudgetInsertType;
 };

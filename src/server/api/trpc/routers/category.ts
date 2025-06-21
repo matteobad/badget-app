@@ -4,6 +4,7 @@ import {
   deleteCategoryMutation,
   updateCategoryMutation,
 } from "~/server/domain/category/mutations";
+import { getCategoriesQuery } from "~/server/domain/category/queries";
 import {
   enrichCategoryTree,
   getCategoriesWithBudgets,
@@ -39,6 +40,13 @@ export const categoryRouter = createTRPCRouter({
       const categoryTree = buildCategoryTree(categoriesWithBudgets);
       const enrichedTree = enrichCategoryTree(categoryTree, budgetFilters);
       return enrichedTree;
+    }),
+
+  getAll: protectedProcedure
+    .input(categoryFilterSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.userId!;
+      return await getCategoriesQuery(input, userId);
     }),
 
   createCategory: protectedProcedure

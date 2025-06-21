@@ -1,3 +1,4 @@
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { dynamicIconImports } from "lucide-react/dynamic";
 import React from "react";
 import { DynamicIcon } from "lucide-react/dynamic";
@@ -14,11 +15,7 @@ import {
 } from "../ui/select";
 
 type CategoryPickerProps = {
-  options: {
-    id: string;
-    icon: string | null;
-    name: string;
-  }[];
+  options: RouterOutput["category"]["getAll"];
   onReset?: () => void;
 };
 

@@ -1,6 +1,6 @@
 import { type PropsWithChildren } from "react";
 import { AppSidebar } from "~/components/app-sidebar";
-import CreateCategoryDrawerSheet from "~/components/category/create-category-drawer-sheet";
+import CreateCategoryDrawerDialog from "~/components/category/create-category-drawer-dialog";
 import { FeedbackDialog } from "~/components/feedback-dialog";
 import { DynamicBreadcrumb } from "~/components/layouts/dynamic-breadcrumb";
 import { NavUser } from "~/components/nav-user";
@@ -31,7 +31,7 @@ export default function AppLayout(props: PropsWithChildren) {
       </SidebarProvider>
 
       {/* Global Sheets here */}
-      <CreateCategoryDrawerSheet />
+      <CreateCategoryDrawerDialog />
     </>
   );
 }

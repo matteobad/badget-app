@@ -26,7 +26,7 @@ import { type DateRange } from "react-day-picker";
 import { categoriesFiltersParsers } from "../../features/category/utils/search-params";
 
 export const CategoryFilters = () => {
-  const { params, setParams } = useCategoryParams();
+  const { setParams } = useCategoryParams();
   const [filters, setFilters] = useQueryStates(categoriesFiltersParsers, {
     shallow: false,
   });

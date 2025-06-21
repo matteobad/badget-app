@@ -16,6 +16,7 @@ export const selectCategorySchema = createSelectSchema(category_table);
 
 export const createCategorySchema = createInsertSchema(category_table, {
   type: z.enum(Object.values(CATEGORY_TYPE)),
+  parentId: z.string().min(1),
 }).omit({
   id: true,
   createdAt: true,

@@ -13,7 +13,7 @@ import { eq } from "drizzle-orm";
 export async function createBudgetMutation(
   params: z.infer<typeof createBudgetSchema>,
 ) {
-  await db.insert(budget_table).values(params);
+  return await db.insert(budget_table).values(params).returning();
 }
 
 export async function updateBudgetMutation(
