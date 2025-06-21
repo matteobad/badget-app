@@ -15,12 +15,17 @@ import { Input } from "~/components/ui/input";
 import { useBudgetParams } from "~/hooks/use-budget-params";
 import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
+import { AVAILABLE_COLORS } from "~/shared/constants/colors";
+import { AVAILABLE_ICONS } from "~/shared/constants/icons";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createCategorySchema } from "~/shared/validators/category.schema";
 import { Loader2Icon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 import { useForm } from "react-hook-form";
 import { type z } from "zod/v4";
+
+import { ColorPicker } from "../forms/color-picker";
+import { IconPicker } from "../forms/icon-picker";
 
 export default function CreateCategoryForm({
   className,
@@ -49,8 +54,8 @@ export default function CreateCategoryForm({
     resolver: standardSchemaResolver(createCategorySchema),
     defaultValues: {
       name: "",
-      color: "",
-      description: "",
+      color: "neutral",
+      icon: "star",
     },
   });
 
@@ -82,33 +87,59 @@ export default function CreateCategoryForm({
         </pre>
 
         <div className="grid gap-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="grid gap-3">
-                <FormLabel>Nome categoria</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder=""
-                    autoComplete="off"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck="false"
-                    onChange={(event) => {
-                      field.onChange(event);
-                      form.setValue(
-                        "slug",
-                        event.target.value.replaceAll(" ", "_").toLowerCase(),
-                      );
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="relative flex items-center gap-2">
+            <FormField
+              control={form.control}
+              name="color"
+              render={({ field }) => (
+                <FormItem className="absolute left-2 grid gap-3">
+                  <FormControl>
+                    <ColorPicker {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="icon"
+              render={({ field }) => (
+                <FormItem className="absolute left-10 grid gap-3">
+                  <FormControl>
+                    <IconPicker {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="grid gap-3">
+                  <FormLabel>Nome categoria</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder=""
+                      autoComplete="off"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck="false"
+                      onChange={(event) => {
+                        field.onChange(event);
+                        form.setValue(
+                          "slug",
+                          event.target.value.replaceAll(" ", "_").toLowerCase(),
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             control={form.control}
             name="parentId"
