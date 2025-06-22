@@ -1,4 +1,6 @@
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import type { ColorKey } from "~/shared/constants/colors";
+import type { IconKey } from "~/shared/constants/icons";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CategoryPicker } from "~/components/forms/category-picker";
@@ -15,8 +17,6 @@ import { Input } from "~/components/ui/input";
 import { useBudgetParams } from "~/hooks/use-budget-params";
 import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
-import { AVAILABLE_COLORS } from "~/shared/constants/colors";
-import { AVAILABLE_ICONS } from "~/shared/constants/icons";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createCategorySchema } from "~/shared/validators/category.schema";
 import { Loader2Icon } from "lucide-react";
@@ -67,11 +67,6 @@ export default function CreateCategoryForm({
     createMutation.mutate(formattedData);
   };
 
-  // const icons: Array<keyof typeof dynamicIconImports> = [
-  //   "hand-coins",
-  //   "airplay",
-  // ];
-
   if (createMutation.isSuccess) {
     return <CreateBudgetConfirm category={createMutation.data[0]!} />;
   }
@@ -82,19 +77,22 @@ export default function CreateCategoryForm({
         onSubmit={form.handleSubmit(handleSubmit)}
         className={cn("flex h-full flex-col gap-6", className)}
       >
-        <pre>
+        {/* <pre>
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
-        </pre>
+        </pre> */}
 
         <div className="grid gap-4">
-          <div className="relative flex items-center gap-2">
+          <div className="relative flex w-full items-center gap-2 divide-x">
             <FormField
               control={form.control}
               name="color"
               render={({ field }) => (
-                <FormItem className="absolute left-2 grid gap-3">
+                <FormItem className="absolute top-9 left-3 grid gap-3 pr-2.5">
                   <FormControl>
-                    <ColorPicker {...field} />
+                    <ColorPicker
+                      value={field.value as ColorKey}
+                      onChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -104,9 +102,12 @@ export default function CreateCategoryForm({
               control={form.control}
               name="icon"
               render={({ field }) => (
-                <FormItem className="absolute left-10 grid gap-3">
+                <FormItem className="absolute top-9 left-12 grid gap-3 pr-2.5">
                   <FormControl>
-                    <IconPicker {...field} />
+                    <IconPicker
+                      value={field.value as IconKey}
+                      onChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -116,22 +117,35 @@ export default function CreateCategoryForm({
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem className="grid gap-3">
+                <FormItem className="grid w-full gap-3">
                   <FormLabel>Nome categoria</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
+                      className="pl-23"
                       placeholder=""
                       autoComplete="off"
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck="false"
                       onChange={(event) => {
+                        // TODO: validate unique slug
                         field.onChange(event);
                         form.setValue(
                           "slug",
                           event.target.value.replaceAll(" ", "_").toLowerCase(),
                         );
+                      }}
+                      onBlur={(event) => {
+                        const slug = event.target.value
+                          .replaceAll(" ", "_")
+                          .toLowerCase();
+                        const alreadyExists = categories?.some(
+                          (c) => c.slug === slug,
+                        );
+                        if (alreadyExists)
+                          form.setError("name", { message: "Already exists" });
+                        else form.clearErrors("name");
                       }}
                     />
                   </FormControl>

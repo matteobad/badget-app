@@ -25,17 +25,17 @@ export function IconPicker({ value, onChange, disabled }: IconPickerProps) {
           variant="ghost"
           size="sm"
           disabled={disabled}
-          className="size-8 p-0 transition-colors hover:bg-muted"
+          className="size-4 p-0 transition-transform hover:scale-105 hover:bg-transparent"
           aria-label={`Selected icon: ${AVAILABLE_ICONS[value].name}`}
         >
           <SelectedIcon className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-4" align="center">
+      <PopoverContent className="mt-2 -ml-12 w-94 p-4" align="start">
         <div className="space-y-3">
           <h4 className="text-sm font-medium">Choose an icon</h4>
-          <ScrollArea className="h-64">
-            <div className="grid grid-cols-6 gap-2 pr-4">
+          <ScrollArea className="h-58">
+            <div className="grid grid-cols-7 gap-2 pr-4">
               {Object.entries(AVAILABLE_ICONS).map(([key, icon]) => {
                 const IconComponent = icon.component;
                 return (

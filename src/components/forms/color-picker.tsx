@@ -31,10 +31,10 @@ export function ColorPicker({ value, onChange, disabled }: ColorPickerProps) {
           <span className="sr-only">Pick a color</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-64 p-4" align="start">
+      <PopoverContent className="mt-2 -ml-3 w-94 p-4" align="start">
         <div className="space-y-3">
           <h4 className="text-sm font-medium">Choose a color</h4>
-          <div className="grid grid-cols-6 gap-2">
+          <div className="grid grid-cols-7 gap-2">
             {Object.entries(AVAILABLE_COLORS).map(([key, color]) => (
               <Button
                 key={key}
