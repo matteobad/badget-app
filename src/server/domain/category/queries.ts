@@ -45,11 +45,28 @@ export async function getCategoriesQuery(
     .where(and(...where));
 }
 
-export async function getCategoryByIdQuery(params: { id: string }) {
+export async function getCategoryByIdQuery(params: {
+  id: string;
+  userId: string;
+}) {
   const result = await db
-    .select()
+    .select({
+      id: category_table.id,
+      name: category_table.name,
+      slug: category_table.slug,
+      type: category_table.type,
+      color: category_table.color,
+      icon: category_table.icon,
+      description: category_table.description,
+      parentId: category_table.parentId,
+    })
     .from(category_table)
-    .where(eq(category_table.id, params.id));
+    .where(
+      and(
+        eq(category_table.id, params.id),
+        // eq(category_table.userId, params.userId),
+      ),
+    );
 
   return result[0];
 }

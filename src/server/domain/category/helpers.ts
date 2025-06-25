@@ -1,4 +1,6 @@
+import type { TreeDataItem } from "~/components/tree-view";
 import type { CategoryType } from "~/server/db/schema/enum";
+import type { getCategoriesWithBudgets } from "~/server/services/category-service";
 import type { TreeNode, WithIdAndParentId } from "~/shared/types";
 import { CATEGORY_TYPE } from "~/server/db/schema/enum";
 
@@ -40,4 +42,28 @@ export const buildCategoryTree = <T extends WithIdAndParentId>(data: T[]) => {
 
   roots.sort((a, b) => getTypeOrder(a) - getTypeOrder(b));
   return roots;
+};
+
+type CategoryWithBudgets = Awaited<
+  ReturnType<typeof getCategoriesWithBudgets>
+>[number];
+
+export const buildTreeData = (
+  data: CategoryWithBudgets[],
+): TreeDataItem<CategoryWithBudgets>[] => {
+  function mapNode(
+    node: TreeNode<CategoryWithBudgets>,
+  ): TreeDataItem<CategoryWithBudgets> {
+    const [category, children] = node;
+    return {
+      id: category.id,
+      name: category.name,
+      data: category,
+      ...(children.length > 0 && { children: children.map(mapNode) }),
+      // children: children.length > 0 ? children.map(mapNode) : undefined,
+    };
+  }
+
+  const tree = buildCategoryTree<CategoryWithBudgets>(data);
+  return tree.map(mapNode);
 };

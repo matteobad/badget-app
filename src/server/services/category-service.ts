@@ -1,7 +1,9 @@
+import type { TreeDataItem } from "~/components/tree-view";
 import type { TreeNode } from "~/shared/types";
 import type { budgetFilterSchema } from "~/shared/validators/budget.schema";
 import type { categoryFilterSchema } from "~/shared/validators/category.schema";
 import type z from "zod/v4";
+import { resolveMetadata } from "next/dist/lib/metadata/resolve-metadata";
 
 import { getBudgetForPeriod } from "../domain/budget/helpers";
 import { getBudgetsQuery } from "../domain/budget/queries";
@@ -55,6 +57,40 @@ export const enrichCategoryTree = (
       },
       enrichedChildren,
     ];
+  });
+};
+
+export const enrichTreeData = (
+  categoryTree: TreeDataItem<CategoryWithBudgetsType>[],
+  budgetFilters: z.infer<typeof budgetFilterSchema>,
+): TreeDataItem<
+  CategoryWithBudgetsType & {
+    categoryBudget: number;
+    childrenBudget: number;
+  }
+>[] => {
+  return categoryTree.map((item) => {
+    const { children, data: category, ...rest } = item;
+
+    // 1. compute total budget for category (categoryBudget)
+    const categoryBudget = getBudgetForPeriod(category.budgets, budgetFilters);
+
+    // 2. recursively enrich children and compute their total budget (childrenBudget)
+    const enrichedChildren = enrichTreeData(children ?? [], budgetFilters);
+    const childrenBudget = enrichedChildren.reduce(
+      (tot, childCategory) => tot + (childCategory.data.categoryBudget ?? 0),
+      0,
+    );
+
+    return {
+      ...rest,
+      children: enrichedChildren,
+      data: {
+        ...category,
+        categoryBudget, // budget for this category only
+        childrenBudget, // budget for all children
+      },
+    };
   });
 };
 

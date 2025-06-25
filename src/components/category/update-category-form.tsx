@@ -1,4 +1,3 @@
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { ColorKey } from "~/shared/constants/colors";
 import type { IconKey } from "~/shared/constants/icons";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
@@ -14,33 +13,41 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { useBudgetParams } from "~/hooks/use-budget-params";
-import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { createCategorySchema } from "~/shared/validators/category.schema";
+import { updateCategorySchema } from "~/shared/validators/category.schema";
 import { Loader2Icon } from "lucide-react";
-import { DynamicIcon } from "lucide-react/dynamic";
 import { useForm } from "react-hook-form";
 import { type z } from "zod/v4";
 
 import { ColorPicker } from "../forms/color-picker";
 import { IconPicker } from "../forms/icon-picker";
 
-export default function CreateCategoryForm({
-  className,
-}: React.ComponentProps<"form">) {
-  const { setParams } = useCategoryParams();
-
+export default function UpdateCategoryForm({
+  categoryId,
+}: {
+  categoryId: string;
+}) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data: categories, isLoading } = useQuery(
+  const { data: categories, isLoading: isLoadingCategories } = useQuery(
     trpc.category.getAll.queryOptions(),
   );
+  const { data: category, isLoading } = useQuery(
+    trpc.category.getById.queryOptions({ id: categoryId }),
+  );
 
-  const createMutation = useMutation(
-    trpc.category.createCategory.mutationOptions({
+  const form = useForm<z.infer<typeof updateCategorySchema>>({
+    resolver: standardSchemaResolver(updateCategorySchema),
+    defaultValues: {
+      ...category,
+      description: category?.description ?? "",
+    },
+  });
+
+  const updateMutation = useMutation(
+    trpc.category.updateCategory.mutationOptions({
       onSuccess: (_data) => {
         void queryClient.invalidateQueries({
           queryKey: trpc.category.getCategoryTree.queryKey(),
@@ -52,32 +59,19 @@ export default function CreateCategoryForm({
     }),
   );
 
-  const form = useForm<z.infer<typeof createCategorySchema>>({
-    resolver: standardSchemaResolver(createCategorySchema),
-    defaultValues: {
-      name: "",
-      color: "neutral",
-      icon: "star",
-    },
-  });
-
-  const handleSubmit = (data: z.infer<typeof createCategorySchema>) => {
+  const handleSubmit = (data: z.infer<typeof updateCategorySchema>) => {
     const formattedData = {
       ...data,
     };
 
-    createMutation.mutate(formattedData);
+    updateMutation.mutate(formattedData);
   };
-
-  if (createMutation.isSuccess) {
-    return <CreateBudgetConfirm category={createMutation.data[0]!} />;
-  }
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className={cn("flex h-full flex-col gap-6", className)}
+        className={cn("mt-8 flex h-full flex-col")}
       >
         {/* <pre>
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
@@ -165,7 +159,7 @@ export default function CreateCategoryForm({
                 <CategoryPicker
                   defaultValue={field.value ?? undefined}
                   options={categories ?? []}
-                  isLoading={isLoading}
+                  isLoading={isLoadingCategories}
                   onValueChange={(value) => {
                     const parent = categories?.find((c) => c.id === value);
                     if (!parent) return console.error("Invalid parent");
@@ -179,73 +173,24 @@ export default function CreateCategoryForm({
           />
         </div>
 
-        <div className="flex items-center justify-end gap-3">
+        <div className="grow"></div>
+        <div className="flex items-center gap-4">
           <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              // close modal
-              void setParams(null);
-            }}
+            className="w-full"
+            type="submit"
+            disabled={updateMutation.isPending}
           >
-            Annulla
-          </Button>
-          <Button type="submit" disabled={createMutation.isPending}>
-            {createMutation.isPending ? (
+            {updateMutation.isPending ? (
               <>
                 <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                Creo categoria...
+                Modifico categoria...
               </>
             ) : (
-              "Salva"
+              "Modifica categoria"
             )}
           </Button>
         </div>
       </form>
     </Form>
-  );
-}
-
-function CreateBudgetConfirm({
-  category,
-}: {
-  category: RouterOutput["category"]["createCategory"][number];
-}) {
-  const { setParams: setCategoryParams } = useCategoryParams();
-  const { setParams: setBudgetParams } = useBudgetParams();
-
-  return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col justify-center gap-2">
-        <DynamicIcon name="circle-dashed" />
-        <span className="text-lg font-semibold">{category.name}</span>
-        <p className="mt-2 text-muted-foreground">
-          La categoria è stata creata con successo. Vuoi creare anche un budget?
-        </p>
-      </div>
-      <div className="flex items-center justify-center gap-3">
-        <Button
-          className="flex-1"
-          variant="outline"
-          onClick={() => {
-            // close modal
-            void setCategoryParams(null);
-            void setBudgetParams(null);
-          }}
-        >
-          Non ora
-        </Button>
-        <Button
-          className="flex-1"
-          onClick={() => {
-            // create budget form
-            void setCategoryParams(null);
-            void setBudgetParams({ createBudget: true });
-          }}
-        >
-          Crea budget
-        </Button>
-      </div>
-    </div>
   );
 }

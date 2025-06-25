@@ -7,7 +7,7 @@ import CreateBudgetForm from "../budget/create-budget-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import CreateCategoryForm from "./create-category-form";
 
-export default function CreateCategoryDrawerSheet() {
+export default function CreateCategoryDialog() {
   const { params: categoryParams, setParams: setCategoryParams } =
     useCategoryParams();
   const { params: budgetParams, setParams: setbudgetParams } =

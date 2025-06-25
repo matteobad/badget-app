@@ -12,6 +12,7 @@ import {
 } from "~/components/ui/collapsible";
 import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
+import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
@@ -19,15 +20,26 @@ import { formatAmount, formatPerc } from "~/utils/format";
 import {
   ChevronRightIcon,
   DotIcon,
+  EllipsisVerticalIcon,
   PlusIcon,
+  RefreshCwIcon,
   TriangleAlertIcon,
+  UnlinkIcon,
 } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
+import type { TreeDataItem } from "../tree-view";
 import {
   getBudgetTotalColor,
   getCategoryListColors,
 } from "../../features/category/utils";
+import { TreeView } from "../tree-view";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 type Category = RouterOutput["category"]["getCategoryTree"][number][0];
 type CategoryTreeNode = TreeNode<Category>;
@@ -42,7 +54,7 @@ export function CategoryTree() {
   const trpc = useTRPC();
 
   const { data } = useSuspenseQuery(
-    trpc.category.getCategoryTree.queryOptions({
+    trpc.category.getTreeData.queryOptions({
       categoryFilters,
       budgetFilters,
     }),
@@ -55,7 +67,40 @@ export function CategoryTree() {
     }),
   );
 
-  const totalIncome = data[0]![0].categoryBudget ?? data[0]![0].childrenBudget;
+  // const treeData: TreeDataItem<any>[] = [
+  //   {
+  //     id: "1",
+  //     name: "Item 1",
+  //     children: [
+  //       {
+  //         id: "2",
+  //         name: "Item 1.1",
+  //         children: [
+  //           {
+  //             id: "3",
+  //             name: "Item 1.1.1",
+  //           },
+  //           {
+  //             id: "4",
+  //             name: "Item 1.1.2",
+  //           },
+  //         ],
+  //       },
+  //       {
+  //         id: "5",
+  //         name: "Item 1.2 (disabled)",
+  //         disabled: true,
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     id: "6",
+  //     name: "Item 2 (draggable)",
+  //     draggable: true,
+  //   },
+  // ];
+
+  // const totalIncome = data[0]![0].categoryBudget ?? data[0]![0].childrenBudget;
 
   // data is TreeNode<Category>[]
   return (
@@ -70,17 +115,18 @@ export function CategoryTree() {
           <span className="w-full">Budget</span>
           <span className="w-[120px] shrink-0">Totale</span>
           <span className="w-[50px] shrink-0">%</span>
-          {/* <span className="w-12"></span> */}
+          <span className="w-[48px] shrink-0"></span>
         </div>
       </div>
-      {data?.map((item) => (
+      <TreeView data={data} />
+      {/* {data?.map((item) => (
         <Tree
           key={item[0].id}
           item={item}
           warnings={warnings}
           total={totalIncome}
         />
-      ))}
+      ))} */}
     </div>
   );
 }
@@ -136,7 +182,7 @@ function Tree({
                 <CategoryBudgets budgets={category.budgets} warning={warning} />
                 <CategoryTotal category={category} />
                 <CategoryPercentage category={category} total={total} />
-                {/* <CategoryActions category={category} /> */}
+                <CategoryActions category={category} />
               </div>
             </div>
           </CollapsibleTrigger>
@@ -190,7 +236,7 @@ function Tree({
             <CategoryBudgets budgets={category.budgets} warning={warning} />
             <CategoryTotal category={category} />
             <CategoryPercentage category={category} total={total} />
-            {/* <CategoryActions category={category} /> */}
+            <CategoryActions category={category} />
           </div>
         </div>
       )}
@@ -269,6 +315,37 @@ function CategoryPercentage({
   return (
     <div className="flex w-[50px] items-center justify-end gap-1 font-mono text-neutral-300">
       <span className="text-xs">{formatPerc(perc)}</span>
+    </div>
+  );
+}
+
+function CategoryActions({ category }: { category: Category }) {
+  const { setParams } = useCategoryParams();
+
+  const handleEditCategory = () => {
+    void setParams({ categoryId: category.id });
+  };
+
+  return (
+    <div className="flex w-12 justify-end text-primary">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="size-6 p-0">
+            <span className="sr-only">Open menu</span>
+            <EllipsisVerticalIcon className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={handleEditCategory}>
+            <RefreshCwIcon className="size-3" />
+            Modifica
+          </DropdownMenuItem>
+          <DropdownMenuItem className="text-destructive">
+            <UnlinkIcon className="size-3" />
+            Elimina
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

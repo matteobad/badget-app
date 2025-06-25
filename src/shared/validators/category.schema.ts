@@ -15,7 +15,7 @@ import z from "zod/v4";
 export const selectCategorySchema = createSelectSchema(category_table);
 
 export const createCategorySchema = createInsertSchema(category_table, {
-  type: z.enum(Object.values(CATEGORY_TYPE)),
+  type: z.enum(CATEGORY_TYPE),
   parentId: z.string().min(1),
 }).omit({
   id: true,
@@ -25,8 +25,7 @@ export const createCategorySchema = createInsertSchema(category_table, {
 
 export const updateCategorySchema = createUpdateSchema(category_table, {
   id: z.cuid2(),
-  userId: z.string(),
-  type: z.enum(Object.values(CATEGORY_TYPE)),
+  type: z.enum(CATEGORY_TYPE),
 }).omit({
   createdAt: true,
   updatedAt: true,

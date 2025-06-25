@@ -1,12 +1,19 @@
-import { buildCategoryTree } from "~/server/domain/category/helpers";
+import {
+  buildCategoryTree,
+  buildTreeData,
+} from "~/server/domain/category/helpers";
 import {
   createCategoryMutation,
   deleteCategoryMutation,
   updateCategoryMutation,
 } from "~/server/domain/category/mutations";
-import { getCategoriesQuery } from "~/server/domain/category/queries";
+import {
+  getCategoriesQuery,
+  getCategoryByIdQuery,
+} from "~/server/domain/category/queries";
 import {
   enrichCategoryTree,
+  enrichTreeData,
   getCategoriesWithBudgets,
 } from "~/server/services/category-service";
 import { budgetFilterSchema } from "~/shared/validators/budget.schema";
@@ -42,11 +49,39 @@ export const categoryRouter = createTRPCRouter({
       return enrichedTree;
     }),
 
+  getTreeData: protectedProcedure
+    .input(
+      z.object({
+        categoryFilters: categoryFilterSchema,
+        budgetFilters: budgetFilterSchema,
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { categoryFilters, budgetFilters } = input;
+
+      const categoriesWithBudgets = await getCategoriesWithBudgets(
+        categoryFilters,
+        budgetFilters,
+        ctx.session.userId!,
+      );
+
+      const categoryTree = buildTreeData(categoriesWithBudgets);
+      const enrichedTree = enrichTreeData(categoryTree, budgetFilters);
+      return enrichedTree;
+    }),
+
   getAll: protectedProcedure
     .input(categoryFilterSchema)
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.userId!;
       return await getCategoriesQuery(input, userId);
+    }),
+
+  getById: protectedProcedure
+    .input(z.object({ id: z.string().min(1) })) // TODO: change to cuid2
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.userId!;
+      return await getCategoryByIdQuery({ ...input, userId });
     }),
 
   createCategory: protectedProcedure
