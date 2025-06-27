@@ -32,6 +32,7 @@ export default {
     },
   },
 
+  categories: "Hai {count} categorie",
   "categories.budget.warning#zero": "Non ci sono problemi col tuo budget",
   "categories.budget.warning#one": "Abbiamo notato un problema nel budget",
   "categories.budget.warning#other":

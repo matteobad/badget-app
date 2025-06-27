@@ -1,5 +1,6 @@
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
+import { CategoryBudgets } from "~/components/category/category-budgets";
 import { CategoryFilters } from "~/components/category/category-filters";
 import { CategoryTree } from "~/components/category/category-tree";
 import {
@@ -36,7 +37,7 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
   // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
   // prefetch(trpc.todo.getAll.queryOptions());
   await queryClient.fetchQuery(
-    trpc.category.getTreeData.queryOptions({
+    trpc.category.getFlatTree.queryOptions({
       categoryFilters,
       budgetFilters,
     }),
@@ -52,16 +53,29 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
 
   return (
     <HydrateClient>
-      <div className="flex flex-1 flex-col gap-2 p-4 pt-0">
-        <Card>
-          <CardHeader className="flex-row items-center justify-between">
+      <div className="grid grid-cols-3 gap-4 p-4 pt-0">
+        <Card className="col-span-2">
+          <CardHeader className="sr-only flex-row items-center justify-between">
             <CardTitle>Categorie</CardTitle>
-            <CategoryFilters />
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <ErrorBoundary fallback={<div>Something went wrong</div>}>
               <Suspense fallback={<div>Loading...</div>}>
                 <CategoryTree />
+              </Suspense>
+            </ErrorBoundary>
+          </CardContent>
+          {/* <CardFooter className="border-t pt-6">TODO</CardFooter> */}
+        </Card>
+
+        <Card className="col-span-1">
+          <CardHeader className="sr-only flex-row items-center justify-between">
+            <CardTitle>Category Budgets</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <ErrorBoundary fallback={<div>Something went wrong</div>}>
+              <Suspense fallback={<div>Loading...</div>}>
+                <CategoryBudgets />
               </Suspense>
             </ErrorBoundary>
           </CardContent>

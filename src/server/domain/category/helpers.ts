@@ -1,4 +1,3 @@
-import type { TreeDataItem } from "~/components/tree-view";
 import type { CategoryType } from "~/server/db/schema/enum";
 import type { getCategoriesWithBudgets } from "~/server/services/category-service";
 import type { TreeNode, WithIdAndParentId } from "~/shared/types";
@@ -50,20 +49,33 @@ type CategoryWithBudgets = Awaited<
 
 export const buildTreeData = (
   data: CategoryWithBudgets[],
-): TreeDataItem<CategoryWithBudgets>[] => {
-  function mapNode(
-    node: TreeNode<CategoryWithBudgets>,
-  ): TreeDataItem<CategoryWithBudgets> {
-    const [category, children] = node;
-    return {
-      id: category.id,
-      name: category.name,
-      data: category,
-      ...(children.length > 0 && { children: children.map(mapNode) }),
-      // children: children.length > 0 ? children.map(mapNode) : undefined,
-    };
+): Record<string, CategoryWithBudgets> => {
+  // Step 1: Create a map of id -> category (with empty children)
+  const map: Record<string, CategoryWithBudgets> = {
+    root_id: {
+      id: "root_id",
+      name: "root",
+      slug: "root",
+      budgets: [],
+      color: "",
+      icon: "",
+      description: "",
+      parentId: null,
+      type: CATEGORY_TYPE.TRANSFER,
+      children: data.filter((c) => c.parentId === null).map((c) => c.id),
+    },
+  };
+
+  for (const item of data) {
+    map[item.id] = { ...item, children: [] };
   }
 
-  const tree = buildCategoryTree<CategoryWithBudgets>(data);
-  return tree.map(mapNode);
+  // Step 2: Populate children arrays
+  for (const item of data) {
+    if (item.parentId) {
+      map[item.parentId]!.children.push(item.id);
+    }
+  }
+
+  return map;
 };

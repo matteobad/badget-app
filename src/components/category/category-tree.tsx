@@ -1,60 +1,87 @@
 "use client";
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import type { TreeNode } from "~/shared/types";
 import type { dynamicIconImports } from "lucide-react/dynamic";
+import { useState } from "react";
+import {
+  expandAllFeature,
+  hotkeysCoreFeature,
+  searchFeature,
+  selectionFeature,
+  syncDataLoaderFeature,
+} from "@headless-tree/core";
+import { useTree } from "@headless-tree/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "~/components/ui/collapsible";
 import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
 import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { useScopedI18n } from "~/shared/locales/client";
+import { useI18n, useScopedI18n } from "~/shared/locales/client";
 import { formatAmount, formatPerc } from "~/utils/format";
 import {
-  ChevronRightIcon,
+  DeleteIcon,
   DotIcon,
-  EllipsisVerticalIcon,
+  PencilIcon,
   PlusIcon,
-  RefreshCwIcon,
+  SearchIcon,
   TriangleAlertIcon,
-  UnlinkIcon,
 } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
-import type { TreeDataItem } from "../tree-view";
-import {
-  getBudgetTotalColor,
-  getCategoryListColors,
-} from "../../features/category/utils";
-import { TreeView } from "../tree-view";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+import type { FeatureImplementation, TreeState } from "@headless-tree/core";
+import { Tree, TreeItem, TreeItemLabel } from "../tree";
+import { Input } from "../ui/input";
+import { CategoryFilters } from "./category-filters";
 
-type Category = RouterOutput["category"]["getCategoryTree"][number][0];
-type CategoryTreeNode = TreeNode<Category>;
-type BudgetWarning = RouterOutput["budget"]["getBudgetWarnings"][number];
+type Category = RouterOutput["category"]["getFlatTree"][number];
+
+const indent = 24;
+
+const doubleClickExpandFeature: FeatureImplementation = {
+  itemInstance: {
+    getProps: ({ tree, item, prev }) => ({
+      ...prev?.(),
+      onDoubleClick: (_e: React.MouseEvent) => {
+        item.primaryAction();
+
+        if (!item.isFolder()) {
+          return;
+        }
+
+        if (item.isExpanded()) {
+          item.collapse();
+        } else {
+          item.expand();
+        }
+      },
+      onClick: (e: React.MouseEvent) => {
+        if (e.shiftKey) {
+          item.selectUpTo(e.ctrlKey || e.metaKey);
+        } else if (e.ctrlKey || e.metaKey) {
+          item.toggleSelect();
+        } else {
+          tree.setSelectedItems([item.getItemMeta().itemId]);
+        }
+
+        item.setFocused();
+      },
+    }),
+  },
+};
 
 export function CategoryTree() {
-  const t = useScopedI18n("categories.budget");
+  const t = useI18n();
+  const tScoped = useScopedI18n("categories.budget");
 
   const { filter: categoryFilters } = useCategoryFilterParams();
   const { filter: budgetFilters } = useBudgetFilterParams();
 
   const trpc = useTRPC();
 
-  const { data } = useSuspenseQuery(
-    trpc.category.getTreeData.queryOptions({
+  const { data: items } = useSuspenseQuery(
+    trpc.category.getFlatTree.queryOptions({
       categoryFilters,
       budgetFilters,
     }),
@@ -67,192 +94,151 @@ export function CategoryTree() {
     }),
   );
 
-  // const treeData: TreeDataItem<any>[] = [
-  //   {
-  //     id: "1",
-  //     name: "Item 1",
-  //     children: [
-  //       {
-  //         id: "2",
-  //         name: "Item 1.1",
-  //         children: [
-  //           {
-  //             id: "3",
-  //             name: "Item 1.1.1",
-  //           },
-  //           {
-  //             id: "4",
-  //             name: "Item 1.1.2",
-  //           },
-  //         ],
-  //       },
-  //       {
-  //         id: "5",
-  //         name: "Item 1.2 (disabled)",
-  //         disabled: true,
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     id: "6",
-  //     name: "Item 2 (draggable)",
-  //     draggable: true,
-  //   },
-  // ];
+  // Store the initial expanded items to reset when search is cleared
+  const initialExpandedItems = Object.values(items)
+    .filter((item) => item.children)
+    .map((item) => item.id);
+  const [state, setState] = useState<Partial<TreeState<Category>>>({});
 
-  // const totalIncome = data[0]![0].categoryBudget ?? data[0]![0].childrenBudget;
+  const tree = useTree<Category>({
+    state,
+    setState,
+    initialState: {
+      expandedItems: initialExpandedItems,
+    },
+    indent,
+    rootItemId: "root_id",
+    getItemName: (item) => item.getItemData().name,
+    isItemFolder: (item) => (item.getItemData()?.children?.length ?? 0) > 0,
+    dataLoader: {
+      getItem: (itemId) => items[itemId]!,
+      getChildren: (itemId) => items[itemId]?.children ?? [],
+    },
+    features: [
+      syncDataLoaderFeature,
+      hotkeysCoreFeature,
+      selectionFeature,
+      searchFeature,
+      expandAllFeature,
+      doubleClickExpandFeature,
+    ],
+  });
 
-  // data is TreeNode<Category>[]
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span className="flex flex-1 items-center gap-2">
-          {t("warning", { count: warnings.length })}
+      <div className="flex h-full flex-col gap-2 *:nth-2:grow">
+        <div className="mb-2 flex w-full items-center justify-center gap-2 rounded border border-yellow-600 bg-yellow-50 px-4 py-2 text-yellow-600">
+          {tScoped("warning", { count: warnings.length })}
           {warnings.length > 0 && <TriangleAlertIcon className="size-4" />}
-        </span>
-
-        <div className="flex items-center justify-end px-2 text-right">
-          <span className="w-full">Budget</span>
-          <span className="w-[120px] shrink-0">Totale</span>
-          <span className="w-[50px] shrink-0">%</span>
-          <span className="w-[48px] shrink-0"></span>
         </div>
-      </div>
-      <TreeView data={data} />
-      {/* {data?.map((item) => (
+        <div className="relative mb-2 flex gap-4">
+          <Input
+            className="peer ps-9"
+            {...{
+              ...tree.getSearchInputElementProps(),
+              onChange: (e) => {
+                // First call the original onChange handler from getSearchInputElementProps
+                const originalProps = tree.getSearchInputElementProps();
+                if (originalProps.onChange) {
+                  originalProps.onChange(e);
+                }
+
+                // Then handle our custom logic
+                const value = e.target.value;
+
+                if (value.length > 0) {
+                  // If input has at least one character, expand all items
+                  void tree.expandAll();
+                } else {
+                  // If input is cleared, reset to initial expanded state
+                  setState((prevState) => {
+                    return {
+                      ...prevState,
+                      expandedItems: initialExpandedItems,
+                    };
+                  });
+                }
+              },
+            }}
+            type="search"
+            placeholder="Quick search..."
+          />
+          <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
+            <SearchIcon className="size-4" aria-hidden="true" />
+          </div>
+          <CategoryFilters />
+        </div>
+        <div className="flex items-center justify-between px-1 text-sm text-muted-foreground">
+          <span className="flex flex-1 items-center gap-2">
+            {t("categories", { count: Object.entries(items).length })}
+          </span>
+
+          <div className="flex items-center justify-end px-2 text-right">
+            <span className="w-full">Budget</span>
+            <span className="w-[120px] shrink-0">Totale</span>
+            <span className="w-[50px] shrink-0">%</span>
+          </div>
+        </div>
         <Tree
-          key={item[0].id}
-          item={item}
-          warnings={warnings}
-          total={totalIncome}
-        />
-      ))} */}
-    </div>
-  );
-}
-
-function Tree({
-  item,
-  warnings,
-  total,
-  depth = 0,
-}: {
-  item: CategoryTreeNode;
-  warnings: BudgetWarning[];
-  total?: number;
-  depth?: number;
-}) {
-  const [category, children] = item;
-  const hasChildren = children.length > 0;
-  const categoryListColors = getCategoryListColors(item[0].type);
-  const warning = warnings.find((w) => w.parentId === category.id);
-
-  return (
-    <div className="w-full">
-      {hasChildren ? (
-        <Collapsible defaultOpen>
-          <CollapsibleTrigger asChild>
-            <div
-              className={cn(
-                "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
-                "mr-0 flex w-full items-center justify-between gap-2 [&[data-state=open]>div>svg:first-child]:rotate-90",
-              )}
-              style={{ borderRight: depth + "px solid transparent" }}
-            >
-              <div className="flex items-center gap-2">
-                {hasChildren ? (
-                  <ChevronRightIcon
-                    className={cn(
-                      categoryListColors,
-                      "mr-1 ml-1 size-4 transition-transform",
-                    )}
-                  />
-                ) : (
-                  <DotIcon className={cn(categoryListColors, "size-6")} />
-                )}
-                <DynamicIcon
-                  name={category.icon as keyof typeof dynamicIconImports}
-                  className={cn("size-5 text-primary")}
-                />
-                <span className="flex-1 truncate text-primary">
-                  {category.name}
-                </span>
-              </div>
-              <div className="flex flex-1 items-center justify-end">
-                <CategoryBudgets budgets={category.budgets} warning={warning} />
-                <CategoryTotal category={category} />
-                <CategoryPercentage category={category} total={total} />
-                <CategoryActions category={category} />
-              </div>
-            </div>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div
-              className={cn(
-                "mx-4.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5",
-                "group-data-[collapsible=icon]:hidden",
-                categoryListColors,
-                "mr-0 pr-0",
-              )}
-            >
-              {children.map((child) => (
-                <Tree
-                  key={child[0].id}
-                  item={child}
-                  warnings={warnings}
-                  depth={depth + 1}
-                  total={total}
-                />
-              ))}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-      ) : (
-        <div
-          style={{ borderRight: depth + "px solid transparent" }}
-          className={cn(
-            "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
-            "mr-0 flex w-full items-center justify-between gap-2 [&[data-state=open]>div>svg:first-child]:rotate-90",
-          )}
+          className="relative -ml-1 before:absolute before:inset-0 before:-ms-1 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]"
+          indent={indent}
+          tree={tree}
         >
-          <div className="flex items-center gap-2">
-            {hasChildren ? (
-              <ChevronRightIcon
-                className={cn(
-                  categoryListColors,
-                  "mr-1 size-4 transition-transform",
-                )}
-              />
-            ) : (
-              <DotIcon className={cn(categoryListColors, "size-5")} />
-            )}
-            <DynamicIcon
-              name={category.icon as keyof typeof dynamicIconImports}
-              className={cn("size-5 text-primary")}
-            />
-            <span className="truncate text-primary">{category.name}</span>
-          </div>
-          <div className="flex items-center justify-end">
-            <CategoryBudgets budgets={category.budgets} warning={warning} />
-            <CategoryTotal category={category} />
-            <CategoryPercentage category={category} total={total} />
-            <CategoryActions category={category} />
-          </div>
-        </div>
-      )}
+          {/* <AssistiveTreeDescription tree={tree} /> */}
+          {tree.getItems().map((item) => {
+            // Merge styles
+            const mergedStyle = {
+              color: `${item.getItemData().color}`,
+            } as React.CSSProperties;
+
+            return (
+              <TreeItem key={item.getId()} item={item}>
+                <TreeItemLabel className="group relative gap-2 not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background">
+                  <span className="flex items-center gap-2">
+                    {!item.isFolder() && (
+                      <DotIcon style={mergedStyle} className={cn("size-4")} />
+                    )}
+
+                    <DynamicIcon
+                      name={
+                        item.getItemData()
+                          .icon as keyof typeof dynamicIconImports
+                      }
+                      className={cn(
+                        "pointer-events-none size-4 text-muted-foreground",
+                      )}
+                    />
+                    {item.getItemName()}
+                  </span>
+                  <div className="flex flex-1 items-center justify-end">
+                    <CategoryActions category={item.getItemData()} />
+                    <CategoryBudgets
+                      category={item.getItemData()}
+                      warnings={warnings}
+                    />
+                    <CategoryTotal category={item.getItemData()} />
+                    <CategoryPercentage category={item.getItemData()} />
+                  </div>
+                </TreeItemLabel>
+              </TreeItem>
+            );
+          })}
+        </Tree>
+      </div>
     </div>
   );
 }
 
 function CategoryBudgets({
-  budgets,
-  warning,
+  category,
+  warnings,
 }: {
-  budgets: Category["budgets"];
-  warning?: BudgetWarning;
+  category: Category;
+  warnings: RouterOutput["budget"]["getBudgetWarnings"];
 }) {
   const t = useScopedI18n("categories.budget.node");
-  const budget = budgets[0];
+  const budget = category.budgets[0];
+  const warning = warnings.find((w) => w.parentId === category.id);
 
   if (!budget) {
     return (
@@ -288,11 +274,9 @@ function CategoryBudgets({
 }
 
 function CategoryTotal({ category }: { category: Category }) {
-  const categoryListColors = getBudgetTotalColor(category.type, true);
-
   return (
     <div className="flex w-[120px] items-center justify-end gap-1 font-mono text-muted-foreground">
-      <span className={cn(categoryListColors)}>
+      <span>
         {formatAmount({
           amount: category.categoryBudget ?? category.childrenBudget,
           maximumFractionDigits: 0,
@@ -302,19 +286,10 @@ function CategoryTotal({ category }: { category: Category }) {
   );
 }
 
-function CategoryPercentage({
-  category,
-  total,
-}: {
-  category: Category;
-  total?: number;
-}) {
-  const perc = !total
-    ? 0
-    : (category.categoryBudget ?? category.childrenBudget) / total;
+function CategoryPercentage({ category }: { category: Category }) {
   return (
     <div className="flex w-[50px] items-center justify-end gap-1 font-mono text-neutral-300">
-      <span className="text-xs">{formatPerc(perc)}</span>
+      <span className="text-xs">{formatPerc(category.perc)}</span>
     </div>
   );
 }
@@ -327,25 +302,13 @@ function CategoryActions({ category }: { category: Category }) {
   };
 
   return (
-    <div className="flex w-12 justify-end text-primary">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="size-6 p-0">
-            <span className="sr-only">Open menu</span>
-            <EllipsisVerticalIcon className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleEditCategory}>
-            <RefreshCwIcon className="size-3" />
-            Modifica
-          </DropdownMenuItem>
-          <DropdownMenuItem className="text-destructive">
-            <UnlinkIcon className="size-3" />
-            Elimina
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+    <div className="ml-4 hidden justify-end gap-3 text-primary group-hover:flex">
+      <Button variant="ghost" size="icon" className="size-4 text-neutral-300">
+        <PencilIcon className="size-4" />
+      </Button>
+      <Button variant="ghost" size="icon" className="size-4 text-neutral-300">
+        <DeleteIcon className="size-4" />
+      </Button>
     </div>
   );
 }

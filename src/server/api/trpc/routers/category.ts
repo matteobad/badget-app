@@ -13,7 +13,6 @@ import {
 } from "~/server/domain/category/queries";
 import {
   enrichCategoryTree,
-  enrichTreeData,
   getCategoriesWithBudgets,
 } from "~/server/services/category-service";
 import { budgetFilterSchema } from "~/shared/validators/budget.schema";
@@ -49,7 +48,7 @@ export const categoryRouter = createTRPCRouter({
       return enrichedTree;
     }),
 
-  getTreeData: protectedProcedure
+  getFlatTree: protectedProcedure
     .input(
       z.object({
         categoryFilters: categoryFilterSchema,
@@ -65,9 +64,8 @@ export const categoryRouter = createTRPCRouter({
         ctx.session.userId!,
       );
 
-      const categoryTree = buildTreeData(categoriesWithBudgets);
-      const enrichedTree = enrichTreeData(categoryTree, budgetFilters);
-      return enrichedTree;
+      const flatTreeData = buildTreeData(categoriesWithBudgets);
+      return flatTreeData;
     }),
 
   getAll: protectedProcedure

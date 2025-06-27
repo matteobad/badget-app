@@ -1,17 +1,25 @@
-import type { TreeDataItem } from "~/components/tree-view";
 import type { TreeNode } from "~/shared/types";
 import type { budgetFilterSchema } from "~/shared/validators/budget.schema";
 import type { categoryFilterSchema } from "~/shared/validators/category.schema";
 import type z from "zod/v4";
-import { resolveMetadata } from "next/dist/lib/metadata/resolve-metadata";
 
+import { CATEGORY_TYPE } from "../db/schema/enum";
 import { getBudgetForPeriod } from "../domain/budget/helpers";
 import { getBudgetsQuery } from "../domain/budget/queries";
 import { getCategoriesQuery } from "../domain/category/queries";
 
-type CategoryWithBudgetsType = Awaited<
-  ReturnType<typeof getCategoriesWithBudgets>
->[number];
+type CategoryType = Awaited<ReturnType<typeof getCategoriesQuery>>[number];
+type BudgetType = Awaited<ReturnType<typeof getBudgetsQuery>>[number];
+
+type CategoryWithBudget = CategoryType & {
+  budgets: BudgetType[];
+  children: string[];
+};
+type CategoryWithBudgetEnriched = CategoryWithBudget & {
+  categoryBudget: number;
+  childrenBudget: number;
+  perc: number;
+};
 
 export const mapCategoriesWithBudgets = (
   categories: Awaited<ReturnType<typeof getCategoriesQuery>>,
@@ -23,15 +31,16 @@ export const mapCategoriesWithBudgets = (
     return {
       ...category,
       budgets: categoryBudgets,
+      children: [] as string[],
     };
   });
 };
 
 export const enrichCategoryTree = (
-  categoryTree: TreeNode<CategoryWithBudgetsType>[],
+  categoryTree: TreeNode<CategoryWithBudget>[],
   budgetFilters: z.infer<typeof budgetFilterSchema>,
 ): TreeNode<
-  CategoryWithBudgetsType & {
+  CategoryWithBudget & {
     categoryBudget: number;
     childrenBudget: number;
   }
@@ -60,36 +69,35 @@ export const enrichCategoryTree = (
   });
 };
 
-export const enrichTreeData = (
-  categoryTree: TreeDataItem<CategoryWithBudgetsType>[],
+export const enrichCategories = (
+  categoriesWithBudgets: CategoryWithBudget[],
   budgetFilters: z.infer<typeof budgetFilterSchema>,
-): TreeDataItem<
-  CategoryWithBudgetsType & {
-    categoryBudget: number;
-    childrenBudget: number;
-  }
->[] => {
-  return categoryTree.map((item) => {
-    const { children, data: category, ...rest } = item;
+): CategoryWithBudgetEnriched[] => {
+  const totalIncome = getBudgetForPeriod(
+    categoriesWithBudgets.find(
+      (c) => !c.parentId && c.type === CATEGORY_TYPE.INCOME,
+    )?.budgets ?? [],
+    budgetFilters,
+  );
 
+  return categoriesWithBudgets.map((item) => {
+    const { budgets, id } = item;
     // 1. compute total budget for category (categoryBudget)
-    const categoryBudget = getBudgetForPeriod(category.budgets, budgetFilters);
+    const categoryBudget = getBudgetForPeriod(budgets, budgetFilters);
 
     // 2. recursively enrich children and compute their total budget (childrenBudget)
-    const enrichedChildren = enrichTreeData(children ?? [], budgetFilters);
+    const children = categoriesWithBudgets.filter((c) => c.parentId === id);
+    const enrichedChildren = enrichCategories(children ?? [], budgetFilters);
     const childrenBudget = enrichedChildren.reduce(
-      (tot, childCategory) => tot + (childCategory.data.categoryBudget ?? 0),
+      (tot, { categoryBudget }) => tot + (categoryBudget ?? 0),
       0,
     );
 
     return {
-      ...rest,
-      children: enrichedChildren,
-      data: {
-        ...category,
-        categoryBudget, // budget for this category only
-        childrenBudget, // budget for all children
-      },
+      ...item,
+      categoryBudget, // budget for this category only
+      childrenBudget, // budget for all children
+      perc: Math.max(categoryBudget, childrenBudget) / totalIncome,
     };
   });
 };
@@ -102,5 +110,8 @@ export async function getCategoriesWithBudgets(
   const categories = await getCategoriesQuery(categoryFilters, userId);
   const budgets = await getBudgetsQuery(budgetFilters, userId);
 
-  return mapCategoriesWithBudgets(categories, budgets);
+  const mappedData = mapCategoriesWithBudgets(categories, budgets);
+  const enrichedData = enrichCategories(mappedData, budgetFilters);
+
+  return enrichedData;
 }
