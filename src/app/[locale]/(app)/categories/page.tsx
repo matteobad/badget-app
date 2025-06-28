@@ -1,15 +1,7 @@
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 import { CategoryBudgets } from "~/components/category/category-budgets";
-import { CategoryFilters } from "~/components/category/category-filters";
 import { CategoryTree } from "~/components/category/category-tree";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
 import {
   ResizableHandle,
   ResizablePanel,

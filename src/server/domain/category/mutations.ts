@@ -23,7 +23,7 @@ export async function updateCategoryMutation(
   await db
     .update(category_table)
     .set(rest)
-    .where(and(eq(category_table.id, id), eq(category_table.userId, userId)));
+    .where(and(eq(category_table.id, id), eq(category_table.userId, userId!)));
 }
 
 export async function deleteCategoryMutation(

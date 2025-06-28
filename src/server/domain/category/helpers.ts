@@ -62,6 +62,9 @@ export const buildTreeData = (
       description: "",
       parentId: null,
       type: CATEGORY_TYPE.TRANSFER,
+      categoryBudget: 0,
+      childrenBudget: 0,
+      perc: 0,
       children: data.filter((c) => c.parentId === null).map((c) => c.id),
     },
   };

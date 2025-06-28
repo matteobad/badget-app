@@ -1,6 +1,4 @@
-import type { DateRange } from "react-day-picker";
 import type { z } from "zod/v4";
-import { useState } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
@@ -27,8 +25,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 export default function CreateBudgetForm({
   className,
 }: React.ComponentProps<"form">) {
-  const [range, setRange] = useState<DateRange | undefined>(undefined);
-
   const { setParams } = useBudgetParams();
 
   const trpc = useTRPC();

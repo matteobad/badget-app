@@ -25,7 +25,7 @@ export default function UpdateCategoryDialog({
 
   const trpc = useTRPC();
 
-  const { data: category, isLoading } = useQuery(
+  const { data: category } = useQuery(
     trpc.category.getById.queryOptions(
       { id: categoryId },
       { enabled: !!categoryId },
@@ -52,7 +52,7 @@ export default function UpdateCategoryDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {!isLoading && (
+        {!!category && (
           <UpdateCategoryForm category={category} onComplete={closeModal} />
         )}
       </DialogContent>

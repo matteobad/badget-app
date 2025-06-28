@@ -165,6 +165,7 @@ export default function CreateCategoryForm({
                 <CategoryPicker
                   defaultValue={field.value ?? undefined}
                   options={categories ?? []}
+                  disabledOptions={[]}
                   isLoading={isLoading}
                   onValueChange={(value) => {
                     const parent = categories?.find((c) => c.id === value);

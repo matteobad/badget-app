@@ -1,9 +1,6 @@
 import type { TreeNode } from "~/shared/types";
 import type { budgetFilterSchema } from "~/shared/validators/budget.schema";
-import type {
-  categoryFilterSchema,
-  selectCategorySchema,
-} from "~/shared/validators/category.schema";
+import type { categoryFilterSchema } from "~/shared/validators/category.schema";
 import type z from "zod/v4";
 
 import { CATEGORY_TYPE } from "../db/schema/enum";

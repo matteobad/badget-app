@@ -14,7 +14,6 @@ import {
   HandCoinsIcon,
   Heart,
   HelpCircle,
-  Home,
   HouseIcon,
   ImageIcon,
   Info,

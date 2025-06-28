@@ -1,16 +1,17 @@
 "use client";
 
 import * as React from "react";
+import { System } from "~/components/icons";
+import { Button } from "~/components/ui/button";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
-import { System } from "~/components/icons";
-import { Button } from "~/components/ui/button";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
+} from "./ui/dropdown-menu";
 
 export default function ThemeToggle(props: {
   align?: "center" | "start" | "end";

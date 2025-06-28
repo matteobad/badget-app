@@ -128,8 +128,11 @@ export function CategoryTree() {
               ...tree.getSearchInputElementProps(),
               onChange: (e) => {
                 // First call the original onChange handler from getSearchInputElementProps
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 const originalProps = tree.getSearchInputElementProps();
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 if (originalProps.onChange) {
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
                   originalProps.onChange(e);
                 }
 

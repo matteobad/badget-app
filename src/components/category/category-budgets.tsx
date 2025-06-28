@@ -1,11 +1,5 @@
 "use client";
 
-import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
-import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
-import { useScopedI18n } from "~/shared/locales/client";
-import { Area, AreaChart, Line, LineChart } from "recharts";
-
-import type { ChartConfig } from "../ui/chart";
 import CreateBudgetForm from "../budget/create-budget-form";
 import {
   Card,
@@ -14,34 +8,28 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { ChartContainer } from "../ui/chart";
 
-const data = [
-  { month: "January", budget: 100, actual: 90 },
-  { month: "February", budget: 100, actual: 120 },
-  { month: "March", budget: 150, actual: 130 },
-  { month: "April", budget: 150, actual: 140 },
-  { month: "May", budget: 150, actual: 100 },
-  { month: "June", budget: 100, actual: 100 },
-];
+// const data = [
+//   { month: "January", budget: 100, actual: 90 },
+//   { month: "February", budget: 100, actual: 120 },
+//   { month: "March", budget: 150, actual: 130 },
+//   { month: "April", budget: 150, actual: 140 },
+//   { month: "May", budget: 150, actual: 100 },
+//   { month: "June", budget: 100, actual: 100 },
+// ];
 
-const chartConfig = {
-  budget: {
-    label: "Budget",
-    color: "var(--chart-1)",
-  },
-  actual: {
-    label: "Actual",
-    color: "var(--primary)",
-  },
-} satisfies ChartConfig;
+// const chartConfig = {
+//   budget: {
+//     label: "Budget",
+//     color: "var(--chart-1)",
+//   },
+//   actual: {
+//     label: "Actual",
+//     color: "var(--primary)",
+//   },
+// } satisfies ChartConfig;
 
 export function CategoryBudgets() {
-  const tScoped = useScopedI18n("categories.budget");
-
-  const { filter: categoryFilters } = useCategoryFilterParams();
-  const { filter: budgetFilters } = useBudgetFilterParams();
-
   // const trpc = useTRPC();
 
   // const { data: items } = useSuspenseQuery(
