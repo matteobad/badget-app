@@ -32,7 +32,7 @@ export const updateCategorySchema = createUpdateSchema(category_table, {
 });
 
 export const deleteCategorySchema = z.object({
-  id: z.cuid2(),
+  id: z.string().min(1), // TODO: change to cuid2
   userId: z.string(),
 });
 

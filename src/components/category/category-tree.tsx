@@ -34,6 +34,7 @@ import type { FeatureImplementation, TreeState } from "@headless-tree/core";
 import { Tree, TreeItem, TreeItemLabel } from "../tree";
 import { Input } from "../ui/input";
 import { CategoryFilters } from "./category-filters";
+import { DeleteCategoryDialog } from "./delete-category-dialog";
 
 type Category = RouterOutput["category"]["getFlatTree"][number];
 
@@ -306,9 +307,7 @@ function CategoryActions({ category }: { category: Category }) {
       <Button variant="ghost" size="icon" className="size-4 text-neutral-300">
         <PencilIcon className="size-4" />
       </Button>
-      <Button variant="ghost" size="icon" className="size-4 text-neutral-300">
-        <DeleteIcon className="size-4" />
-      </Button>
+      <DeleteCategoryDialog categoryId={category.id} />
     </div>
   );
 }
