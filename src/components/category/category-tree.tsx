@@ -121,10 +121,6 @@ export function CategoryTree() {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex h-full flex-col gap-2 *:nth-2:grow">
-        <div className="mb-2 flex w-full items-center justify-center gap-2 rounded border border-yellow-600 bg-yellow-50 px-4 py-2 text-yellow-600">
-          {tScoped("warning", { count: warnings.length })}
-          {warnings.length > 0 && <TriangleAlertIcon className="size-4" />}
-        </div>
         <div className="relative mb-2 flex gap-4">
           <Input
             className="peer ps-9"
@@ -161,6 +157,10 @@ export function CategoryTree() {
             <SearchIcon className="size-4" aria-hidden="true" />
           </div>
           <CategoryFilters />
+        </div>
+        <div className="mb-2 flex w-full items-center justify-center gap-2 rounded border border-yellow-600 bg-yellow-50 px-4 py-2 text-yellow-600">
+          {tScoped("warning", { count: warnings.length })}
+          {warnings.length > 0 && <TriangleAlertIcon className="size-4" />}
         </div>
         <div className="flex items-center justify-between px-1 text-sm text-muted-foreground">
           <span className="flex flex-1 items-center gap-2">

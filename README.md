@@ -2,7 +2,8 @@
 
 ## Notes 2025-03-10
 
-- [ ] add category type and remove default ones
-- [ ] transaction filter by amount range
-- [ ] reduce relevance when removing category from transaction
-- [ ] RLS with neon + Clerk
+- [ ] edit category parent dropdown with treeview select (map possible warnings and problems)
+- [ ] category default sorting (alfabetico)
+- [ ] expand tree on single click on chevron
+- [ ] drag & drop within same category type
+- [ ]

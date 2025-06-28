@@ -1,7 +1,7 @@
 "server-only";
 
+import type { DB_BudgetInsertType } from "~/server/db/schema/budgets";
 import type {
-  createBudgetSchema,
   deleteBudgetSchema,
   updateBudgetSchema,
 } from "~/shared/validators/budget.schema";
@@ -10,10 +10,8 @@ import { db } from "~/server/db";
 import { budget_table } from "~/server/db/schema/budgets";
 import { eq } from "drizzle-orm";
 
-export async function createBudgetMutation(
-  params: z.infer<typeof createBudgetSchema>,
-) {
-  return await db.insert(budget_table).values(params).returning();
+export async function createBudgetMutation(value: DB_BudgetInsertType) {
+  return await db.insert(budget_table).values(value).returning();
 }
 
 export async function updateBudgetMutation(

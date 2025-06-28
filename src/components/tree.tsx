@@ -140,7 +140,7 @@ function TreeItemLabel<T = any>({
   ...props
 }: TreeItemLabelProps<T>) {
   const { currentItem } = useTreeContext<T>();
-  const item = propItem || currentItem;
+  const item = propItem ?? currentItem;
 
   if (!item) {
     console.warn("TreeItemLabel: No item provided via props or context");
@@ -159,7 +159,7 @@ function TreeItemLabel<T = any>({
       {item.isFolder() && (
         <ChevronDownIcon className="size-4 text-muted-foreground in-aria-[expanded=false]:-rotate-90" />
       )}
-      {children ||
+      {children ??
         (typeof item.getItemName === "function" ? item.getItemName() : null)}
     </span>
   );

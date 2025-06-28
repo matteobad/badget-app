@@ -1,6 +1,8 @@
+import type { DateRange } from "react-day-picker";
+import type { z } from "zod/v4";
+import { useState } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CategoryPicker } from "~/components/forms/category-picker";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -10,30 +12,36 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
 import { useBudgetParams } from "~/hooks/use-budget-params";
 import { cn } from "~/lib/utils";
-import { type DB_CategoryType } from "~/server/db/schema/categories";
+import { BUDGET_PERIOD } from "~/server/db/schema/enum";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { createCategorySchema } from "~/shared/validators/category.schema";
-import { Loader2Icon } from "lucide-react";
+import { createBudgetSchema } from "~/shared/validators/budget.schema";
+import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
+import { ChevronDownIcon, Loader2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { type z } from "zod/v4";
+
+import { Calendar } from "../ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 export default function CreateBudgetForm({
   className,
 }: React.ComponentProps<"form">) {
-  const categories: DB_CategoryType[] = [];
+  const [range, setRange] = useState<DateRange | undefined>(undefined);
+
   const { setParams } = useBudgetParams();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   const createMutation = useMutation(
-    trpc.category.createCategory.mutationOptions({
+    trpc.budget.createBudget.mutationOptions({
       onSuccess: (_data) => {
         void queryClient.invalidateQueries({
-          queryKey: trpc.category.getCategoryTree.queryKey(),
+          queryKey: trpc.budget.getBudgetWarnings.queryKey(),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: trpc.category.getFlatTree.queryKey(),
         });
 
         // reset form
@@ -45,17 +53,20 @@ export default function CreateBudgetForm({
     }),
   );
 
-  const form = useForm<z.infer<typeof createCategorySchema>>({
-    resolver: standardSchemaResolver(createCategorySchema),
+  const form = useForm<z.infer<typeof createBudgetSchema>>({
+    resolver: standardSchemaResolver(createBudgetSchema),
     defaultValues: {
-      name: "",
-      color: "",
-      slug: "",
-      description: "",
+      period: BUDGET_PERIOD.MONTHLY,
+      dateRange: {
+        from: startOfMonth(new Date()),
+        to: startOfDay(endOfMonth(new Date())),
+      },
+      repeat: false,
+      amount: 0,
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof createCategorySchema>) => {
+  const handleSubmit = (data: z.infer<typeof createBudgetSchema>) => {
     const formattedData = {
       ...data,
     };
@@ -67,7 +78,7 @@ export default function CreateBudgetForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className={cn("flex h-full flex-col gap-6", className)}
+        className={cn("flex flex-col gap-6", className)}
       >
         {/* <pre>
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
@@ -76,42 +87,41 @@ export default function CreateBudgetForm({
         <div className="grid gap-4">
           <FormField
             control={form.control}
-            name="name"
+            name="dateRange"
             render={({ field }) => (
               <FormItem className="grid gap-3">
-                <FormLabel>Nome categoria</FormLabel>
+                <FormLabel>Periodo</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder=""
-                    autoComplete="off"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck="false"
-                    onChange={(event) => {
-                      field.onChange(event);
-                      form.setValue(
-                        "slug",
-                        event.target.value.replaceAll(" ", "_").toLowerCase(),
-                      );
-                    }}
-                  />
+                  <div className="flex flex-col gap-3">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          id="dates"
+                          className="w-56 justify-between font-normal"
+                        >
+                          {field.value?.from && field.value?.to
+                            ? `${field.value.from.toLocaleDateString()} - ${field.value.to.toLocaleDateString()}`
+                            : "Select date"}
+                          <ChevronDownIcon />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="w-auto overflow-hidden p-0"
+                        align="start"
+                      >
+                        <Calendar
+                          mode="range"
+                          selected={field.value}
+                          captionLayout="dropdown"
+                          onSelect={(range) => {
+                            field.onChange(range);
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="parentId"
-            render={({ field }) => (
-              <FormItem className="grid gap-3">
-                <FormLabel>Categoria Padre</FormLabel>
-                <CategoryPicker
-                  onValueChange={field.onChange}
-                  defaultValue={field.value ?? undefined}
-                  options={categories}
-                />
                 <FormMessage />
               </FormItem>
             )}

@@ -1,5 +1,11 @@
-import type { budgetFilterSchema } from "~/shared/validators/budget.schema";
+import type { DB_BudgetInsertType } from "~/server/db/schema/budgets";
+import type {
+  budgetFilterSchema,
+  createBudgetSchema,
+} from "~/shared/validators/budget.schema";
 import type z from "zod/v4";
+import { TimezoneRange } from "~/server/db/utils";
+import { Range, RANGE_LB_INC } from "postgres-range";
 
 import type { getBudgetsQuery } from "./queries";
 
@@ -124,4 +130,22 @@ export function getBudgetForPeriod(
         return total;
     }
   }, 0);
+}
+
+export function buildBudgetInsert(
+  input: z.infer<typeof createBudgetSchema>,
+  userId: string,
+) {
+  const { dateRange, repeat, ...rest } = input;
+  const range = new Range<Date>(
+    dateRange.from,
+    repeat ? null : dateRange.to,
+    RANGE_LB_INC,
+  );
+
+  return {
+    userId,
+    ...rest,
+    sysPeriod: new TimezoneRange(range),
+  } satisfies DB_BudgetInsertType;
 }

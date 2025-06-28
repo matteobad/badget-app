@@ -67,7 +67,7 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
           </ErrorBoundary>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel className="p-4" defaultSize={30} minSize={30}>
+        <ResizablePanel defaultSize={30} minSize={30}>
           <ErrorBoundary fallback={<div>Something went wrong</div>}>
             <Suspense fallback={<div>Loading...</div>}>
               <CategoryBudgets />
