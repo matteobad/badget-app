@@ -39,9 +39,9 @@ export const deleteCategorySchema = z.object({
 // Query filter schema
 export const categoryFilterSchema = z
   .object({
-    name: z.string().nullable(),
-    slug: z.string().nullable(),
-    type: z.enum(Object.values(CATEGORY_TYPE)).nullable(),
+    name: z.string().nullable().optional(),
+    slug: z.string().nullable().optional(),
+    type: z.enum(CATEGORY_TYPE).nullable().optional(),
     deleted: z.boolean().default(false),
   })
   .optional();

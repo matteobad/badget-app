@@ -28,14 +28,14 @@ export default function UpdateCategoryForm({
   category,
   onComplete,
 }: {
-  category: RouterOutput["category"]["getById"];
+  category: NonNullable<RouterOutput["category"]["getById"]>;
   onComplete: () => void;
 }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   const { data: categories, isLoading: isLoadingCategories } = useQuery(
-    trpc.category.getAll.queryOptions(),
+    trpc.category.getAll.queryOptions({ type: category.type }),
   );
 
   const form = useForm<z.infer<typeof updateCategorySchema>>({
@@ -158,6 +158,7 @@ export default function UpdateCategoryForm({
               <FormItem className="grid gap-3">
                 <FormLabel>Categoria Padre</FormLabel>
                 <CategoryPicker
+                  disabledOptions={[category.id]}
                   value={field.value ?? undefined}
                   options={categories ?? []}
                   isLoading={isLoadingCategories}

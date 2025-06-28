@@ -17,6 +17,7 @@ import { Skeleton } from "../ui/skeleton";
 
 type CategoryPickerProps = {
   options: RouterOutput["category"]["getAll"];
+  disabledOptions: string[];
   isLoading: boolean;
   onReset?: () => void;
 };
@@ -24,6 +25,7 @@ type CategoryPickerProps = {
 export function CategoryPicker({
   options,
   isLoading,
+  disabledOptions,
   onReset,
   ...props
 }: React.ComponentPropsWithoutRef<typeof Select> & CategoryPickerProps) {
@@ -39,7 +41,11 @@ export function CategoryPicker({
           ) : (
             options.map((option) => {
               return (
-                <SelectItem value={option.id} key={option.id}>
+                <SelectItem
+                  value={option.id}
+                  key={option.id}
+                  disabled={disabledOptions.includes(option.id)}
+                >
                   <DynamicIcon
                     className="size-4"
                     name={option.icon as keyof typeof dynamicIconImports}

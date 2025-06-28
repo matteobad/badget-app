@@ -1,6 +1,9 @@
 import type { TreeNode } from "~/shared/types";
 import type { budgetFilterSchema } from "~/shared/validators/budget.schema";
-import type { categoryFilterSchema } from "~/shared/validators/category.schema";
+import type {
+  categoryFilterSchema,
+  selectCategorySchema,
+} from "~/shared/validators/category.schema";
 import type z from "zod/v4";
 
 import { CATEGORY_TYPE } from "../db/schema/enum";
@@ -114,4 +117,11 @@ export async function getCategoriesWithBudgets(
   const enrichedData = enrichCategories(mappedData, budgetFilters);
 
   return enrichedData;
+}
+
+export async function getCategories(
+  filters: z.infer<typeof categoryFilterSchema>,
+  userId: string,
+) {
+  return await getCategoriesQuery(filters, userId);
 }

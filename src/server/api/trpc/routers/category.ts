@@ -7,12 +7,10 @@ import {
   deleteCategoryMutation,
   updateCategoryMutation,
 } from "~/server/domain/category/mutations";
-import {
-  getCategoriesQuery,
-  getCategoryByIdQuery,
-} from "~/server/domain/category/queries";
+import { getCategoryByIdQuery } from "~/server/domain/category/queries";
 import {
   enrichCategoryTree,
+  getCategories,
   getCategoriesWithBudgets,
 } from "~/server/services/category-service";
 import { budgetFilterSchema } from "~/shared/validators/budget.schema";
@@ -72,7 +70,7 @@ export const categoryRouter = createTRPCRouter({
     .input(categoryFilterSchema)
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.userId!;
-      return await getCategoriesQuery(input, userId);
+      return await getCategories(input, userId);
     }),
 
   getById: protectedProcedure
