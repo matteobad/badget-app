@@ -1,3 +1,4 @@
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { ColorKey } from "~/shared/constants/colors";
 import type { IconKey } from "~/shared/constants/icons";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
@@ -24,9 +25,11 @@ import { ColorPicker } from "../forms/color-picker";
 import { IconPicker } from "../forms/icon-picker";
 
 export default function UpdateCategoryForm({
-  categoryId,
+  category,
+  onComplete,
 }: {
-  categoryId: string;
+  category: RouterOutput["category"]["getById"];
+  onComplete: () => void;
 }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -34,15 +37,11 @@ export default function UpdateCategoryForm({
   const { data: categories, isLoading: isLoadingCategories } = useQuery(
     trpc.category.getAll.queryOptions(),
   );
-  const { data: category, isLoading } = useQuery(
-    trpc.category.getById.queryOptions({ id: categoryId }),
-  );
 
   const form = useForm<z.infer<typeof updateCategorySchema>>({
     resolver: standardSchemaResolver(updateCategorySchema),
     defaultValues: {
       ...category,
-      description: category?.description ?? "",
     },
   });
 
@@ -50,11 +49,13 @@ export default function UpdateCategoryForm({
     trpc.category.updateCategory.mutationOptions({
       onSuccess: (_data) => {
         void queryClient.invalidateQueries({
-          queryKey: trpc.category.getCategoryTree.queryKey(),
+          queryKey: trpc.category.getFlatTree.queryKey(),
         });
 
         // reset form
         form.reset();
+        // close dialog
+        onComplete();
       },
     }),
   );
@@ -71,7 +72,7 @@ export default function UpdateCategoryForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className={cn("mt-8 flex h-full flex-col")}
+        className={cn("flex h-full flex-col gap-6")}
       >
         {/* <pre>
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
@@ -157,7 +158,7 @@ export default function UpdateCategoryForm({
               <FormItem className="grid gap-3">
                 <FormLabel>Categoria Padre</FormLabel>
                 <CategoryPicker
-                  defaultValue={field.value ?? undefined}
+                  value={field.value ?? undefined}
                   options={categories ?? []}
                   isLoading={isLoadingCategories}
                   onValueChange={(value) => {
@@ -173,20 +174,18 @@ export default function UpdateCategoryForm({
           />
         </div>
 
-        <div className="grow"></div>
-        <div className="flex items-center gap-4">
-          <Button
-            className="w-full"
-            type="submit"
-            disabled={updateMutation.isPending}
-          >
+        <div className="flex items-center justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onComplete}>
+            Annulla
+          </Button>
+          <Button type="submit" disabled={updateMutation.isPending}>
             {updateMutation.isPending ? (
               <>
                 <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                Modifico categoria...
+                Salvo categoria...
               </>
             ) : (
-              "Modifica categoria"
+              "Salva"
             )}
           </Button>
         </div>

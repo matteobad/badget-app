@@ -15,19 +15,11 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
-import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useI18n, useScopedI18n } from "~/shared/locales/client";
 import { formatAmount, formatPerc } from "~/utils/format";
-import {
-  DeleteIcon,
-  DotIcon,
-  PencilIcon,
-  PlusIcon,
-  SearchIcon,
-  TriangleAlertIcon,
-} from "lucide-react";
+import { DotIcon, PlusIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { FeatureImplementation, TreeState } from "@headless-tree/core";
@@ -35,6 +27,7 @@ import { Tree, TreeItem, TreeItemLabel } from "../tree";
 import { Input } from "../ui/input";
 import { CategoryFilters } from "./category-filters";
 import { DeleteCategoryDialog } from "./delete-category-dialog";
+import UpdateCategoryDialog from "./update-category-dialog";
 
 type Category = RouterOutput["category"]["getFlatTree"][number];
 
@@ -212,7 +205,10 @@ export function CategoryTree() {
                     {item.getItemName()}
                   </span>
                   <div className="flex flex-1 items-center justify-end">
-                    <CategoryActions category={item.getItemData()} />
+                    {item.getItemData().parentId !== null && (
+                      <CategoryActions category={item.getItemData()} />
+                    )}
+
                     <CategoryBudgets
                       category={item.getItemData()}
                       warnings={warnings}
@@ -296,17 +292,9 @@ function CategoryPercentage({ category }: { category: Category }) {
 }
 
 function CategoryActions({ category }: { category: Category }) {
-  const { setParams } = useCategoryParams();
-
-  const handleEditCategory = () => {
-    void setParams({ categoryId: category.id });
-  };
-
   return (
     <div className="ml-4 hidden justify-end gap-3 text-primary group-hover:flex">
-      <Button variant="ghost" size="icon" className="size-4 text-neutral-300">
-        <PencilIcon className="size-4" />
-      </Button>
+      <UpdateCategoryDialog categoryId={category.id} />
       <DeleteCategoryDialog categoryId={category.id} />
     </div>
   );

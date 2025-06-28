@@ -1,5 +1,7 @@
 import {
   AlertCircle,
+  BanknoteArrowDown,
+  BanknoteArrowUp,
   Calendar,
   Camera,
   Check,
@@ -9,9 +11,11 @@ import {
   Edit,
   File,
   Folder,
+  HandCoinsIcon,
   Heart,
   HelpCircle,
   Home,
+  HouseIcon,
   ImageIcon,
   Info,
   Key,
@@ -34,7 +38,7 @@ import {
 
 // Define available icons with their components and names
 export const AVAILABLE_ICONS = {
-  home: { name: "Home", component: Home },
+  house: { name: "House", component: HouseIcon },
   user: { name: "User", component: User },
   settings: { name: "Settings", component: Settings },
   search: { name: "Search", component: Search },
@@ -65,6 +69,12 @@ export const AVAILABLE_ICONS = {
   shield: { name: "Shield", component: Shield },
   key: { name: "Key", component: Key },
   database: { name: "Database", component: Database },
+  "hand-coins": { name: "HandCoins", component: HandCoinsIcon },
+  "banknote-arrow-up": { name: "BanknoteArrowUp", component: BanknoteArrowUp },
+  "banknote-arrow-down": {
+    name: "BanknoteArrowDown",
+    component: BanknoteArrowDown,
+  },
 } as const;
 
 export type IconKey = keyof typeof AVAILABLE_ICONS;
