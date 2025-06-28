@@ -11,6 +11,11 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "~/components/ui/resizable";
+import {
   getQueryClient,
   HydrateClient,
   trpc,
@@ -53,38 +58,26 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
 
   return (
     <HydrateClient>
-      <div className="grid grid-cols-3 gap-4 p-4 pt-0">
-        <Card className="col-span-2">
-          <CardHeader className="sr-only flex-row items-center justify-between">
-            <CardTitle>Categorie</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ErrorBoundary fallback={<div>Something went wrong</div>}>
-              <Suspense fallback={<div>Loading...</div>}>
-                <CategoryTree />
-              </Suspense>
-            </ErrorBoundary>
-          </CardContent>
-          {/* <CardFooter className="border-t pt-6">TODO</CardFooter> */}
-        </Card>
+      <ResizablePanelGroup direction="horizontal" className="md:min-w-[450px]">
+        <ResizablePanel className="p-4" defaultSize={70} minSize={50}>
+          <ErrorBoundary fallback={<div>Something went wrong</div>}>
+            <Suspense fallback={<div>Loading...</div>}>
+              <CategoryTree />
+            </Suspense>
+          </ErrorBoundary>
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel className="p-4" defaultSize={30} minSize={30}>
+          <ErrorBoundary fallback={<div>Something went wrong</div>}>
+            <Suspense fallback={<div>Loading...</div>}>
+              <CategoryBudgets />
+            </Suspense>
+          </ErrorBoundary>
+        </ResizablePanel>
+      </ResizablePanelGroup>
 
-        <Card className="col-span-1">
-          <CardHeader className="sr-only flex-row items-center justify-between">
-            <CardTitle>Category Budgets</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ErrorBoundary fallback={<div>Something went wrong</div>}>
-              <Suspense fallback={<div>Loading...</div>}>
-                <CategoryBudgets />
-              </Suspense>
-            </ErrorBoundary>
-          </CardContent>
-          <CardFooter className="border-t pt-6">TODO</CardFooter>
-        </Card>
-
-        {/* <CreateCategoryDrawerSheet categories={categories} />
+      {/* <CreateCategoryDrawerSheet categories={categories} />
       <UpdateCategoryDrawerSheet categories={categories} /> */}
-      </div>
     </HydrateClient>
   );
 }
