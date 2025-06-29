@@ -425,7 +425,11 @@ export async function getTransactionByIdQuery(id: string, _userId: string) {
   return result[0];
 }
 
-export async function getTransactionAmountRangeQuery(_userId: string) {
-  // TODO: implement this
-  return [{ amount: 0 }, { amount: 1000 }];
+export async function getTransactionAmountRangeQuery(userId: string) {
+  return await db
+    .select({
+      amount: transaction_table.amount,
+    })
+    .from(transaction_table)
+    .where(eq(transaction_table.userId, userId));
 }

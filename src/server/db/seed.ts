@@ -93,7 +93,7 @@ async function main() {
     },
     transaction_table: {
       columns: {
-        amount: f.int({ minValue: 0 }),
+        amount: f.int({ minValue: -1230, maxValue: 2500 }),
         categoryId: f.valuesFromArray({ values: categoriesIds }),
         currency: f.default({ defaultValue: "EUR" }),
         description: f.loremIpsum({ sentencesCount: 1 }),
