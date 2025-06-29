@@ -90,7 +90,7 @@ export function CategoryTree() {
   );
 
   // Store the initial expanded items to reset when search is cleared
-  const initialExpandedItems = items
+  const initialExpandedItems = Object.values(items)
     .filter((item) => item.children)
     .map((item) => item.id);
   const [state, setState] = useState<Partial<TreeState<Category>>>({});
@@ -108,10 +108,8 @@ export function CategoryTree() {
     getItemName: (item) => item.getItemData().name,
     isItemFolder: (item) => (item.getItemData()?.children?.length ?? 0) > 0,
     dataLoader: {
-      getItem: (itemId) => items.find((item) => item.id === itemId)!,
-      getChildren: (itemId) =>
-        items.find((item) => item.id === itemId)?.children.map((c) => c.id) ??
-        [],
+      getItem: (itemId) => items[itemId]!,
+      getChildren: (itemId) => items[itemId]?.children ?? [],
     },
     features: [
       syncDataLoaderFeature,
@@ -196,7 +194,7 @@ export function CategoryTree() {
             return (
               <TreeItem key={item.getId()} item={item}>
                 <TreeItemLabel className="group relative gap-2 not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background">
-                  <span className="flex items-center gap-2">
+                  <span className="line-clamp-1 flex max-w-[100px] items-center gap-2 text-ellipsis md:max-w-none">
                     {!item.isFolder() && (
                       <DotIcon style={mergedStyle} className={cn("size-4")} />
                     )}

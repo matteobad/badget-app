@@ -10,9 +10,12 @@ import { CATEGORY_TYPE } from "../db/schema/enum";
 import { getBudgetForPeriod } from "../domain/budget/helpers";
 import { getBudgetsQuery } from "../domain/budget/queries";
 import { createCategoryMutation } from "../domain/category/mutations";
-import { getCategoriesQuery } from "../domain/category/queries";
+import {
+  getCategoriesQuery,
+  getCategoriesQuery_v1,
+} from "../domain/category/queries";
 
-type CategoryType = Awaited<ReturnType<typeof getCategoriesQuery>>[number];
+type CategoryType = Awaited<ReturnType<typeof getCategoriesQuery_v1>>[number];
 type BudgetType = Awaited<ReturnType<typeof getBudgetsQuery>>[number];
 
 type CategoryWithBudget = CategoryType & {
@@ -26,7 +29,7 @@ type CategoryWithBudgetEnriched = CategoryWithBudget & {
 };
 
 export const mapCategoriesWithBudgets = (
-  categories: Awaited<ReturnType<typeof getCategoriesQuery>>,
+  categories: Awaited<ReturnType<typeof getCategoriesQuery_v1>>,
   budgets: Awaited<ReturnType<typeof getBudgetsQuery>>,
 ) => {
   return categories.map((category) => {
@@ -35,6 +38,7 @@ export const mapCategoriesWithBudgets = (
     return {
       ...category,
       budgets: categoryBudgets,
+      children: [] as string[],
     };
   });
 };
@@ -110,7 +114,7 @@ export async function getCategoriesWithBudgets(
   budgetFilters: z.infer<typeof budgetFilterSchema>,
   userId: string,
 ) {
-  const categories = await getCategoriesQuery(categoryFilters, userId);
+  const categories = await getCategoriesQuery_v1(categoryFilters, userId);
   const budgets = await getBudgetsQuery(budgetFilters, userId);
 
   const mappedData = mapCategoriesWithBudgets(categories, budgets);

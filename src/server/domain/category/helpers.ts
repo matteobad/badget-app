@@ -48,9 +48,9 @@ type CategoryWithBudgets = Awaited<
 >[number];
 
 export const buildTreeData = (data: CategoryWithBudgets[]) => {
-  return [
-    ...data,
-    {
+  // Step 1: Create a map of id -> category (with empty children)
+  const map: Record<string, CategoryWithBudgets> = {
+    root_id: {
       id: "root_id",
       name: "root",
       slug: "root",
@@ -63,7 +63,20 @@ export const buildTreeData = (data: CategoryWithBudgets[]) => {
       categoryBudget: 0,
       childrenBudget: 0,
       perc: 0,
-      children: data.filter((c) => c.parentId === null),
+      children: data.filter((c) => c.parentId === null).map((c) => c.id),
     },
-  ];
+  };
+
+  for (const item of data) {
+    map[item.id] = { ...item, children: [] };
+  }
+
+  // Step 2: Populate children arrays
+  for (const item of data) {
+    if (item.parentId) {
+      map[item.parentId]!.children.push(item.id);
+    }
+  }
+
+  return map;
 };

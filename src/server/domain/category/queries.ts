@@ -70,6 +70,27 @@ export async function getCategoriesQuery(
   }));
 }
 
+export async function getCategoriesQuery_v1(
+  params: z.infer<typeof getCategoriesSchema>,
+  userId: string,
+) {
+  const where = [eq(category_table.userId, userId)];
+
+  return await db
+    .select({
+      id: category_table.id,
+      name: category_table.name,
+      slug: category_table.slug,
+      type: category_table.type,
+      color: category_table.color,
+      icon: category_table.icon,
+      description: category_table.description,
+      parentId: category_table.parentId,
+    })
+    .from(category_table)
+    .where(and(...where));
+}
+
 export async function getCategoryByIdQuery(params: {
   id: string;
   userId: string;
