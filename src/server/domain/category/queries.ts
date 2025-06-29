@@ -1,36 +1,19 @@
 "server-only";
 
-import type { categoryFilterSchema } from "~/shared/validators/category.schema";
+import type { getCategoriesSchema } from "~/shared/validators/category.schema";
 import type z from "zod/v4";
 import { db } from "~/server/db";
 import { category_table } from "~/server/db/schema/categories";
-import { and, eq, ilike, isNotNull, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull } from "drizzle-orm";
 
 export async function getCategoriesQuery(
-  filters: z.infer<typeof categoryFilterSchema>,
+  params: z.infer<typeof getCategoriesSchema>,
   userId: string,
 ) {
-  const where = [eq(category_table.userId, userId)];
+  const { limit = 1000 } = params;
 
-  if (filters?.name) {
-    where.push(ilike(category_table.name, filters.name));
-  }
-
-  if (filters?.slug) {
-    where.push(eq(category_table.slug, filters.slug));
-  }
-
-  if (filters?.type) {
-    where.push(eq(category_table.type, filters.type));
-  }
-
-  if (filters?.deleted) {
-    where.push(isNotNull(category_table.deletedAt));
-  } else {
-    where.push(isNull(category_table.deletedAt));
-  }
-
-  return db
+  // First get all parent categories (categories with no parentId)
+  const parentCategories = await db
     .select({
       id: category_table.id,
       name: category_table.name,
@@ -42,7 +25,49 @@ export async function getCategoriesQuery(
       parentId: category_table.parentId,
     })
     .from(category_table)
-    .where(and(...where));
+    .where(
+      and(eq(category_table.userId, userId), isNull(category_table.parentId)),
+    )
+    .orderBy(desc(category_table.createdAt), asc(category_table.name))
+    .limit(limit);
+
+  // Then get all child categories for these parents
+  const childCategories = await db
+    .select({
+      id: category_table.id,
+      name: category_table.name,
+      slug: category_table.slug,
+      type: category_table.type,
+      color: category_table.color,
+      icon: category_table.icon,
+      description: category_table.description,
+      parentId: category_table.parentId,
+    })
+    .from(category_table)
+    .where(
+      and(
+        eq(category_table.userId, userId),
+        isNotNull(category_table.parentId),
+      ),
+    )
+    .orderBy(asc(category_table.name));
+
+  // Group children by parentId for efficient lookup
+  const childrenByParentId = new Map<string, typeof childCategories>();
+  for (const child of childCategories) {
+    if (child.parentId) {
+      if (!childrenByParentId.has(child.parentId)) {
+        childrenByParentId.set(child.parentId, []);
+      }
+      childrenByParentId.get(child.parentId)!.push(child);
+    }
+  }
+
+  // Attach children to their parents
+  return parentCategories.map((parent) => ({
+    ...parent,
+    children: childrenByParentId.get(parent.id) ?? [],
+  }));
 }
 
 export async function getCategoryByIdQuery(params: {

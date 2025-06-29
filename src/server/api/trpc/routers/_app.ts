@@ -6,9 +6,11 @@ import {
   createTRPCRouter,
   publicProcedure,
 } from "../init";
+import { bankAccountRouter } from "./bank-account";
 import { budgetRouter } from "./budget";
 import { categoryRouter } from "./category";
 import { dashboardRouter } from "./dashboard";
+import { tagRouter } from "./tag";
 import { transactionRouter } from "./transaction";
 
 /**
@@ -18,6 +20,8 @@ import { transactionRouter } from "./transaction";
  */
 export const appRouter = createTRPCRouter({
   dashboard: dashboardRouter,
+  bankAccount: bankAccountRouter,
+  tag: tagRouter,
   category: categoryRouter,
   budget: budgetRouter,
   transaction: transactionRouter,

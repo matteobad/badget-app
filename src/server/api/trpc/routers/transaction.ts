@@ -1,18 +1,11 @@
 import {
-  createCategoryMutation,
-  deleteCategoryMutation,
-  updateCategoryMutation,
-} from "~/server/domain/category/mutations";
-import { getCategoryByIdQuery } from "~/server/domain/category/queries";
-import { getCategories } from "~/server/services/category-service";
-import {
   deleteTransaction,
+  getTransactionAmountRange,
   getTransactionById,
   getTransactions,
   updateTransaction,
 } from "~/server/services/transaction-service";
 import {
-  createTransactionSchema,
   deleteTransactionSchema,
   getTransactionsSchema,
   updateTransactionSchema,
@@ -36,12 +29,17 @@ export const transactionRouter = createTRPCRouter({
       return await getTransactionById(input.id, userId);
     }),
 
-  create: protectedProcedure
-    .input(createTransactionSchema)
-    .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
-      return await createCategoryMutation({ ...input, userId });
-    }),
+  getAmountRange: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.userId!;
+    return await getTransactionAmountRange(userId);
+  }),
+
+  // create: protectedProcedure
+  //   .input(createTransactionSchema)
+  //   .mutation(async ({ ctx, input }) => {
+  //     const userId = ctx.session.userId!;
+  //     return await createCategoryMutation(input, userId);
+  //   }),
 
   update: protectedProcedure
     .input(updateTransactionSchema)

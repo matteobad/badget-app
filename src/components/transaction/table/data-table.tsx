@@ -234,7 +234,7 @@ export function DataTable({
           <div className="w-full">
             <div
               ref={tableScroll.containerRef}
-              className="scrollbar-hide overflow-x-auto overscroll-x-none border-border md:border-r md:border-l"
+              className="scrollbar-hide overflow-x-auto overscroll-x-none border-t border-border"
             >
               <Table>
                 <DataTableHeader table={table} tableScroll={tableScroll} />

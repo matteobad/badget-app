@@ -1,11 +1,15 @@
 import type { TreeNode } from "~/shared/types";
 import type { budgetFilterSchema } from "~/shared/validators/budget.schema";
-import type { categoryFilterSchema } from "~/shared/validators/category.schema";
+import type {
+  createCategorySchema,
+  getCategoriesSchema,
+} from "~/shared/validators/category.schema";
 import type z from "zod/v4";
 
 import { CATEGORY_TYPE } from "../db/schema/enum";
 import { getBudgetForPeriod } from "../domain/budget/helpers";
 import { getBudgetsQuery } from "../domain/budget/queries";
+import { createCategoryMutation } from "../domain/category/mutations";
 import { getCategoriesQuery } from "../domain/category/queries";
 
 type CategoryType = Awaited<ReturnType<typeof getCategoriesQuery>>[number];
@@ -103,7 +107,7 @@ export const enrichCategories = (
 };
 
 export async function getCategoriesWithBudgets(
-  categoryFilters: z.infer<typeof categoryFilterSchema>,
+  categoryFilters: z.infer<typeof getCategoriesSchema>,
   budgetFilters: z.infer<typeof budgetFilterSchema>,
   userId: string,
 ) {
@@ -117,8 +121,16 @@ export async function getCategoriesWithBudgets(
 }
 
 export async function getCategories(
-  filters: z.infer<typeof categoryFilterSchema>,
+  filters: z.infer<typeof getCategoriesSchema>,
   userId: string,
 ) {
   return await getCategoriesQuery(filters, userId);
+}
+
+export async function createCategory(
+  params: z.infer<typeof createCategorySchema>,
+  userId: string,
+) {
+  const [result] = await createCategoryMutation(params, userId);
+  return result;
 }

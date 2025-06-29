@@ -12,8 +12,12 @@ import { and, eq } from "drizzle-orm";
 
 export async function createCategoryMutation(
   params: z.infer<typeof createCategorySchema>,
+  userId: string,
 ) {
-  return await db.insert(category_table).values(params).returning();
+  return await db
+    .insert(category_table)
+    .values({ ...params, userId })
+    .returning();
 }
 
 export async function updateCategoryMutation(

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { cn } from "~/lib/utils";
 
 import type { VisibilityState } from "@tanstack/react-table";
@@ -23,13 +23,16 @@ export function useStickyColumns({
   table,
   loading,
 }: UseStickyColumnsProps) {
-  const isVisible = (id: string) =>
-    loading ||
-    table
-      ?.getAllLeafColumns()
-      .find((col) => col.id === id)
-      ?.getIsVisible() ||
-    (columnVisibility && columnVisibility[id] !== false);
+  const isVisible = useCallback(
+    (id: string) =>
+      loading ??
+      table
+        ?.getAllLeafColumns()
+        .find((col) => col.id === id)
+        ?.getIsVisible() ??
+      (columnVisibility && columnVisibility[id] !== false),
+    [columnVisibility, loading, table],
+  );
 
   // Calculate dynamic sticky positions for transaction columns
   const stickyPositions = useMemo(() => {

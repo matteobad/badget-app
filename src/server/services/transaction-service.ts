@@ -10,6 +10,7 @@ import {
   updateTransactionMutation,
 } from "../domain/transaction/mutations";
 import {
+  getTransactionAmountRangeQuery,
   getTransactionByIdQuery,
   getTransactionsQuery,
 } from "../domain/transaction/queries";
@@ -23,6 +24,10 @@ export async function getTransactions(
 
 export async function getTransactionById(id: string, userId: string) {
   return await getTransactionByIdQuery(id, userId);
+}
+
+export async function getTransactionAmountRange(userId: string) {
+  return await getTransactionAmountRangeQuery(userId);
 }
 
 export async function updateTransaction(

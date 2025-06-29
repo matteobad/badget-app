@@ -32,6 +32,7 @@ export const account_table = pgTable(
     balance: d.numeric({ precision: 10, scale: 2 }).notNull(),
     currency: d.char({ length: 3 }).notNull(),
     enabled: d.boolean().notNull().default(true),
+    manual: d.boolean().notNull().default(false),
 
     ...timestamps,
   }),

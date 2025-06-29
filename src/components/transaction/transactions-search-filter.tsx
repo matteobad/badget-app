@@ -1,18 +1,34 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTransactionFilterParams } from "~/hooks/use-transaction-filter-params";
 import { useTransactionFilterParamsWithPersistence } from "~/hooks/use-transaction-filter-params-with-persistence";
 import { cn } from "~/lib/utils";
+import { generateTransactionsFilters } from "~/server/domain/transaction/actions";
 import { formatAccountName } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
-import { CalendarIcon, FilterIcon, SearchIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  CircleQuestionMark,
+  CircleQuestionMarkIcon,
+  EuroIcon,
+  FileIcon,
+  FilterIcon,
+  LandmarkIcon,
+  Repeat1Icon,
+  SearchIcon,
+  ShapesIcon,
+  TagsIcon,
+} from "lucide-react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { generateTransactionsFilters } from "@/actions/ai/filters/generate-transactions-filters";
+import { AmountRange } from "../amount-range";
+import { FilterList } from "../custom/filter-list";
+import { SelectCategory } from "../custom/select-category";
 import { Calendar } from "../ui/calendar";
 import {
   DropdownMenu,
@@ -26,9 +42,6 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Input } from "../ui/input";
-import { AmountRange } from "./amount-range";
-import { FilterList } from "./filter-list";
-import { SelectCategory } from "./select-category";
 
 type StatusFilter = "completed" | "uncompleted" | "archived" | "excluded";
 type AttachmentFilter = "include" | "exclude";
@@ -43,7 +56,7 @@ interface FilterItem<T extends string> extends BaseFilterItem {
 }
 
 interface FilterMenuItemProps {
-  icon: (typeof Icons)[keyof typeof Icons];
+  icon: LucideIcon;
   label: string;
   children: React.ReactNode;
 }
@@ -147,25 +160,25 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
   const shouldFetch = isOpen || isFocused;
 
   const { data: tagsData } = useQuery({
-    ...trpc.tags.get.queryOptions(),
+    ...trpc.tag.get.queryOptions({}),
     enabled: shouldFetch || Boolean(filter.tags?.length),
   });
 
   const { data: bankAccountsData } = useQuery({
-    ...trpc.bankAccounts.get.queryOptions({
+    ...trpc.bankAccount.get.queryOptions({
       enabled: shouldFetch || Boolean(filter.accounts?.length),
     }),
   });
 
   // We want to fetch the categories data on mount
   const { data: categoriesData } = useQuery({
-    ...trpc.transactionCategories.get.queryOptions(),
+    ...trpc.category.get.queryOptions({}),
   });
 
   return {
     tags: tagsData?.map((tag) => ({
       id: tag.id,
-      name: tag.name,
+      text: tag.text,
     })),
     accounts: bankAccountsData?.map((bankAccount) => ({
       id: bankAccount.id,
@@ -251,7 +264,7 @@ export function TransactionsSearchFilter() {
         prompt,
         `
           Categories: ${categories?.map((category) => category.name).join(", ")}
-          Tags: ${tags?.map((tag) => tag.name).join(", ")}
+          Tags: ${tags?.map((tag) => tag.text).join(", ")}
         `,
       );
 
@@ -334,10 +347,10 @@ export function TransactionsSearchFilter() {
           className="relative flex-1 sm:flex-initial"
           onSubmit={(e) => {
             e.preventDefault();
-            handleSubmit();
+            void handleSubmit();
           }}
         >
-          <SearchIcon className="pointer-events-none absolute top-[11px] left-3" />
+          <SearchIcon className="pointer-events-none absolute top-[11px] left-3 size-4" />
           <Input
             ref={inputRef}
             placeholder={placeholder}
@@ -362,7 +375,7 @@ export function TransactionsSearchFilter() {
                 isOpen && "opacity-100",
               )}
             >
-              <FilterIcon />
+              <FilterIcon className="size-4" />
             </button>
           </DropdownMenuTrigger>
         </form>
@@ -391,8 +404,9 @@ export function TransactionsSearchFilter() {
         <FilterMenuItem icon={CalendarIcon} label="Date">
           <Calendar
             mode="range"
-            initialFocus
-            toDate={new Date()}
+            autoFocus
+            // toDate={new Date()}
+            hidden={{ after: new Date() }}
             selected={{
               from: filter.start ? new Date(filter.start) : undefined,
               to: filter.end ? new Date(filter.end) : undefined,
@@ -414,13 +428,13 @@ export function TransactionsSearchFilter() {
           />
         </FilterMenuItem>
 
-        <FilterMenuItem icon={Icons.Amount} label="Amount">
+        <FilterMenuItem icon={EuroIcon} label="Amount">
           <div className="w-[280px] p-4">
             <AmountRange />
           </div>
         </FilterMenuItem>
 
-        <FilterMenuItem icon={Icons.Status} label="Status">
+        <FilterMenuItem icon={CircleQuestionMarkIcon} label="Status">
           {statusFilters.map(({ id, name }) => (
             <FilterCheckboxItem
               key={id}
@@ -434,7 +448,7 @@ export function TransactionsSearchFilter() {
           ))}
         </FilterMenuItem>
 
-        <FilterMenuItem icon={Icons.Attachments} label="Attachments">
+        <FilterMenuItem icon={FileIcon} label="Attachments">
           {attachmentsFilters.map(({ id, name }) => (
             <FilterCheckboxItem
               key={id}
@@ -450,7 +464,7 @@ export function TransactionsSearchFilter() {
           ))}
         </FilterMenuItem>
 
-        <FilterMenuItem icon={Icons.Category} label="Categories">
+        <FilterMenuItem icon={ShapesIcon} label="Categories">
           <div className="h-[270px] w-[250px]">
             <SelectCategory
               headless
@@ -466,14 +480,14 @@ export function TransactionsSearchFilter() {
           </div>
         </FilterMenuItem>
 
-        <FilterMenuItem icon={Icons.Status} label="Tags">
+        <FilterMenuItem icon={TagsIcon} label="Tags">
           <div className="max-h-[400px] overflow-y-auto">
             {tags && tags.length > 0 ? (
               tags.map((tag) => (
                 <FilterCheckboxItem
                   key={tag.id}
                   id={tag.id}
-                  name={tag.name}
+                  name={tag.text}
                   checked={filter?.tags?.includes(tag.id)}
                   onCheckedChange={() =>
                     updateArrayFilter(tag.id, filter.tags, setFilter, "tags")
@@ -486,7 +500,7 @@ export function TransactionsSearchFilter() {
           </div>
         </FilterMenuItem>
 
-        <FilterMenuItem icon={Icons.Accounts} label="Accounts">
+        <FilterMenuItem icon={LandmarkIcon} label="Accounts">
           {accounts?.map((account) => (
             <FilterCheckboxItem
               key={account.id}
@@ -508,7 +522,7 @@ export function TransactionsSearchFilter() {
           ))}
         </FilterMenuItem>
 
-        <FilterMenuItem icon={Icons.Repeat} label="Recurring">
+        <FilterMenuItem icon={Repeat1Icon} label="Recurring">
           {recurringFilters.map(({ id, name }) => (
             <FilterCheckboxItem
               key={id}

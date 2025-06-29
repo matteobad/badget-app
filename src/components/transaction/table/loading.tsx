@@ -6,16 +6,14 @@ import { cn } from "~/lib/utils";
 
 import { DataTableHeader } from "./data-table-header";
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const data = [...Array(40)].map((_, i) => ({ id: i.toString() }));
 
 export function Loading({ isEmpty }: { isEmpty?: boolean }) {
   return (
     <div className="w-full">
       <div
-        className={cn(
-          "overflow-x-auto",
-          !isEmpty && "border-border md:border-r md:border-l",
-        )}
+        className={cn("overflow-x-auto", !isEmpty && "border-t border-border")}
       >
         <Table
           className={cn(

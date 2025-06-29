@@ -80,6 +80,9 @@ async function main() {
         type: f.valuesFromArray({
           values: Object.values(ACCOUNT_TYPE),
         }),
+        logoUrl: f.default({
+          defaultValue: "https://cdn-engine.midday.ai/default.jpg",
+        }),
         userId: f.default({ defaultValue: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD" }),
         updatedAt: f.default({ defaultValue: null }),
         deletedAt: f.default({ defaultValue: null }),

@@ -1,6 +1,8 @@
 "use client";
 
+import type { dynamicIconImports } from "lucide-react/dynamic";
 import { cn } from "~/lib/utils";
+import { DynamicIcon } from "lucide-react/dynamic";
 
 type CategoryIconProps = {
   color?: string;
@@ -29,12 +31,14 @@ type Props = {
   name: string;
   className?: string;
   color?: string;
+  icon?: keyof typeof dynamicIconImports;
 };
 
-export function Category({ name, color, className }: Props) {
+export function Category({ name, color, icon, className }: Props) {
   return (
     <div className={cn("flex items-center space-x-2", className)}>
       <CategoryColor color={color} />
+      {icon && <DynamicIcon name={icon} />}
       {name && <span>{name}</span>}
     </div>
   );

@@ -12,6 +12,10 @@ import {
 } from "nuqs/server";
 import z from "zod/v4";
 
+export const getCategoriesSchema = z.object({
+  limit: z.number().default(1000),
+});
+
 export const selectCategorySchema = createSelectSchema(category_table);
 
 export const createCategorySchema = createInsertSchema(category_table, {

@@ -1,13 +1,13 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AddTransactionButton } from "~/features/transaction/components/add-transaction-button";
 import { useTransactionsStore } from "~/lib/stores/transaction";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { DeleteIcon, Loader2 } from "lucide-react";
 
-import { AddTransactions } from "@/components/add-transactions";
-import { BulkActions } from "@/components/bulk-actions";
-import { TransactionsColumnVisibility } from "@/components/transactions-column-visibility";
+// import { AddTransactions } from "@/components/add-transactions";
+// import { BulkActions } from "@/components/bulk-actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +20,7 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
+import { TransactionsColumnVisibility } from "./transactions-column-visibility";
 
 export function TransactionsActions() {
   const { setRowSelection, canDelete, rowSelection } = useTransactionsStore();
@@ -49,7 +50,7 @@ export function TransactionsActions() {
             <div className="mr-4 ml-4 h-8 w-[1px] bg-border" />
 
             <div className="flex space-x-2">
-              <BulkActions ids={transactionIds} />
+              {/* <BulkActions ids={transactionIds} /> */}
 
               <div>
                 {canDelete && (
@@ -98,7 +99,7 @@ export function TransactionsActions() {
   return (
     <div className="hidden space-x-2 md:flex">
       <TransactionsColumnVisibility />
-      <AddTransactions />
+      <AddTransactionButton label="Aggiungi" />
     </div>
   );
 }

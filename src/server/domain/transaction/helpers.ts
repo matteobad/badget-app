@@ -8,6 +8,7 @@ export async function getInitialTransactionsColumnVisibility() {
 
   const savedColumns = cookieStore.get(Cookies.TransactionsColumns)?.value;
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return savedColumns
     ? JSON.parse(savedColumns)
     : columnsToHide.reduce(

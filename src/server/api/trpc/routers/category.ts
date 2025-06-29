@@ -1,7 +1,4 @@
-import {
-  buildCategoryTree,
-  buildTreeData,
-} from "~/server/domain/category/helpers";
+import { buildTreeData } from "~/server/domain/category/helpers";
 import {
   createCategoryMutation,
   deleteCategoryMutation,
@@ -9,7 +6,7 @@ import {
 } from "~/server/domain/category/mutations";
 import { getCategoryByIdQuery } from "~/server/domain/category/queries";
 import {
-  enrichCategoryTree,
+  createCategory,
   getCategories,
   getCategoriesWithBudgets,
 } from "~/server/services/category-service";
@@ -18,6 +15,7 @@ import {
   categoryFilterSchema,
   createCategorySchema,
   deleteCategorySchema,
+  getCategoriesSchema,
   updateCategorySchema,
 } from "~/shared/validators/category.schema";
 import { z } from "zod/v4";
@@ -25,25 +23,11 @@ import { z } from "zod/v4";
 import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const categoryRouter = createTRPCRouter({
-  getCategoryTree: protectedProcedure
-    .input(
-      z.object({
-        categoryFilters: categoryFilterSchema,
-        budgetFilters: budgetFilterSchema,
-      }),
-    )
+  get: protectedProcedure
+    .input(getCategoriesSchema)
     .query(async ({ ctx, input }) => {
-      const { categoryFilters, budgetFilters } = input;
-
-      const categoriesWithBudgets = await getCategoriesWithBudgets(
-        categoryFilters,
-        budgetFilters,
-        ctx.session.userId!,
-      );
-
-      const categoryTree = buildCategoryTree(categoriesWithBudgets);
-      const enrichedTree = enrichCategoryTree(categoryTree, budgetFilters);
-      return enrichedTree;
+      const userId = ctx.session.userId!;
+      return await getCategories(input, userId);
     }),
 
   getFlatTree: protectedProcedure
@@ -80,11 +64,11 @@ export const categoryRouter = createTRPCRouter({
       return await getCategoryByIdQuery({ ...input, userId });
     }),
 
-  createCategory: protectedProcedure
+  create: protectedProcedure
     .input(createCategorySchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.userId!;
-      return await createCategoryMutation({ ...input, userId });
+      return await createCategory(input, userId);
     }),
 
   updateCategory: protectedProcedure

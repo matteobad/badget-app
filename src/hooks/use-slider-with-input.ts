@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useState } from "react";
 
 type UseSliderWithInputProps = {
@@ -20,9 +18,10 @@ export function useSliderWithInput({
     initialValue.map((v) => v.toString()),
   );
 
-  const showReset =
-    sliderValue.length === defaultValue.length &&
-    !sliderValue.every((value, index) => value === defaultValue[index]);
+  const setValues = useCallback((values: number[]) => {
+    setSliderValue(values);
+    setInputValues(values.map((v) => v.toString()));
+  }, []);
 
   const validateAndUpdateValue = useCallback(
     (rawValue: string, index: number) => {
@@ -37,11 +36,11 @@ export function useSliderWithInput({
         return;
       }
 
-      const numValue = parseFloat(rawValue);
+      const numValue = Number.parseFloat(rawValue);
 
-      if (isNaN(numValue)) {
+      if (Number.isNaN(numValue)) {
         const newInputValues = [...inputValues];
-        newInputValues[index] = sliderValue[index]!.toString();
+        newInputValues[index] = sliderValue?.[index]?.toString?.() ?? "0";
         setInputValues(newInputValues);
         return;
       }
@@ -50,9 +49,15 @@ export function useSliderWithInput({
 
       if (sliderValue.length > 1) {
         if (index === 0) {
-          clampedValue = Math.min(clampedValue, sliderValue[1]!);
+          clampedValue = Math.min(
+            clampedValue,
+            typeof sliderValue[1] === "number" ? sliderValue[1] : clampedValue,
+          );
         } else {
-          clampedValue = Math.max(clampedValue, sliderValue[0]!);
+          clampedValue = Math.max(
+            clampedValue,
+            typeof sliderValue[0] === "number" ? sliderValue[0] : clampedValue,
+          );
         }
       }
 
@@ -96,6 +101,6 @@ export function useSliderWithInput({
     handleInputChange,
     handleSliderChange,
     resetToDefault,
-    showReset,
+    setValues,
   };
 }

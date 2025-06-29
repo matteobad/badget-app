@@ -233,9 +233,10 @@ export async function getTransactionsQuery(
       ),
       category: {
         id: category_table.id,
+        slug: category_table.slug,
         name: category_table.name,
         color: category_table.color,
-        slug: category_table.slug,
+        icon: category_table.icon,
       },
       account: {
         id: account_table.id,
@@ -258,7 +259,7 @@ export async function getTransactionsQuery(
     .leftJoin(
       category_table,
       and(
-        eq(transaction_table.categorySlug, category_table.slug),
+        eq(transaction_table.categoryId, category_table.id),
         eq(category_table.userId, userId),
       ),
     )
@@ -410,7 +411,7 @@ export async function getTransactionsQuery(
   };
 }
 
-export async function getTransactionByIdQuery(id: string, userId: string) {
+export async function getTransactionByIdQuery(id: string, _userId: string) {
   const result = await db
     .select()
     .from(transaction_table)
@@ -422,4 +423,9 @@ export async function getTransactionByIdQuery(id: string, userId: string) {
     );
 
   return result[0];
+}
+
+export async function getTransactionAmountRangeQuery(_userId: string) {
+  // TODO: implement this
+  return [{ amount: 0 }, { amount: 1000 }];
 }
