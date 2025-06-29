@@ -18,12 +18,13 @@ export async function createCategoryMutation(
 
 export async function updateCategoryMutation(
   params: z.infer<typeof updateCategorySchema>,
+  userId: string,
 ) {
-  const { id, userId, ...rest } = params;
+  const { id, ...rest } = params;
   await db
     .update(category_table)
     .set(rest)
-    .where(and(eq(category_table.id, id), eq(category_table.userId, userId!)));
+    .where(and(eq(category_table.id, id), eq(category_table.userId, userId)));
 }
 
 export async function deleteCategoryMutation(

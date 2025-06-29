@@ -110,3 +110,23 @@ export const timezoneRange = customType<{
     return res.replaceAll('""', "");
   },
 });
+
+type NumericConfig = {
+  precision?: number;
+  scale?: number;
+};
+
+export const numericCasted = customType<{
+  data: number;
+  driverData: string;
+  config: NumericConfig;
+}>({
+  dataType: (config) => {
+    if (config?.precision && config?.scale) {
+      return `numeric(${config.precision}, ${config.scale})`;
+    }
+    return "numeric";
+  },
+  fromDriver: (value: string) => Number.parseFloat(value),
+  toDriver: (value: number) => value.toString(),
+});

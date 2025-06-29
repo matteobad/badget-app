@@ -9,6 +9,7 @@ import {
 import { budgetRouter } from "./budget";
 import { categoryRouter } from "./category";
 import { dashboardRouter } from "./dashboard";
+import { transactionRouter } from "./transaction";
 
 /**
  * This is the primary router for your server.
@@ -19,6 +20,7 @@ export const appRouter = createTRPCRouter({
   dashboard: dashboardRouter,
   category: categoryRouter,
   budget: budgetRouter,
+  transaction: transactionRouter,
   health: publicProcedure.query(async () => {
     try {
       await checkHealth();

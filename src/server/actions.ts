@@ -1,10 +1,14 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
+import { cookies } from "next/headers";
 import { authActionClient } from "~/lib/safe-action";
 import { sendToTelegram } from "~/lib/telegram";
 import { FeedbackSchema, ToggleAccountSchema } from "~/lib/validators";
 import { MUTATIONS } from "~/server/db/queries";
+import { addYears } from "date-fns";
+
+import type { VisibilityState } from "@tanstack/react-table";
 
 export const toggleAccountAction = authActionClient
   .schema(ToggleAccountSchema)
@@ -49,3 +53,16 @@ export const submitFeedbackAction = authActionClient
       };
     }
   });
+
+type Props = {
+  key: string;
+  data: VisibilityState;
+};
+
+export async function updateColumnVisibilityAction({ key, data }: Props) {
+  (await cookies()).set(key, JSON.stringify(data), {
+    expires: addYears(new Date(), 1),
+  });
+
+  return Promise.resolve(data);
+}

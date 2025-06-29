@@ -1,3 +1,4 @@
+import { parseAsArrayOf, parseAsString } from "nuqs/server";
 import z from "zod/v4";
 
 export const dateRangeSchema = z.object(
@@ -13,3 +14,7 @@ export const dateRangeSchema = z.object(
 //   path: ["dateRange"],
 //   message: "From date must be before to date",
 // });
+
+export const sortParamsSchema = {
+  sort: parseAsArrayOf(parseAsString),
+};

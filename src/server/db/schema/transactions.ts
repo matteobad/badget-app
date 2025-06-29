@@ -3,17 +3,35 @@ import {
   boolean,
   char,
   integer,
-  numeric,
+  pgEnum,
   text,
   timestamp,
   unique,
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { timestamps } from "../utils";
+import { numericCasted, timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { account_table } from "./accounts";
 import { category_table } from "./categories";
+
+export const transactionStatusEnum = pgEnum("transactionStatus", [
+  "posted",
+  "pending",
+  "excluded",
+  "completed",
+  "archived",
+]);
+
+export const transactionFrequencyEnum = pgEnum("transaction_frequency", [
+  "weekly",
+  "biweekly",
+  "monthly",
+  "semi_monthly",
+  "annually",
+  "irregular",
+  "unknown",
+]);
 
 export const transaction_table = pgTable(
   "transaction_table",
@@ -30,12 +48,17 @@ export const transaction_table = pgTable(
     categoryId: varchar({ length: 128 }).references(() => category_table.id),
 
     rawId: text().unique(),
-    amount: numeric({ precision: 10, scale: 2 }).notNull(),
+    amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
     currency: char({ length: 3 }).notNull(),
     date: timestamp({ withTimezone: true }).notNull(),
     description: text().notNull(),
+    manual: boolean().default(false),
+    categorySlug: text(),
+    counterpartyName: text(),
     exclude: boolean().notNull().default(false),
     recurring: boolean().notNull().default(false),
+    frequency: transactionFrequencyEnum(),
+    status: transactionStatusEnum().default("posted"),
     note: text(),
 
     ...timestamps,
