@@ -38,4 +38,11 @@ export default {
   "categories.budget.warning#other":
     "We found {count} problems with your budget",
   "categories.budget.node.warning": "{excess} below total children budget",
+
+  bottom_bar: {
+    "transactions#one": "1 Transaction",
+    "transactions#other": "{count} Transactions",
+    multi_currency: "Multi currency",
+    description: "Includes transactions from all pages of results",
+  },
 } as const;

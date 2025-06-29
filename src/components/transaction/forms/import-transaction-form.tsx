@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { useQuery } from "@tanstack/react-query";
 import { AccountPicker } from "~/components/forms/account-picker";
 import {
   Accordion,
@@ -32,7 +33,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
-import { type DB_AccountType } from "~/server/db/schema/accounts";
+import { trpc } from "~/shared/helpers/trpc/server";
 import { UploadDropzone } from "~/utils/uploadthing";
 import { ArrowRight, Info } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
@@ -40,8 +41,11 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod/v4";
 
-import { importTransactionAction, parseCsv } from "../server/actions";
-import { TransactionImportSchema } from "../utils/schemas";
+import {
+  importTransactionAction,
+  parseCsv,
+} from "../../../features/transaction/server/actions";
+import { TransactionImportSchema } from "../../../features/transaction/utils/schemas";
 
 const CSV_REQUIRED_FIELDS: (keyof TransactionImportSchema["fieldMapping"])[] = [
   "date",
@@ -50,12 +54,11 @@ const CSV_REQUIRED_FIELDS: (keyof TransactionImportSchema["fieldMapping"])[] = [
 ]; // Example predefined fields
 
 export default function ImportTransactionForm({
-  accounts,
   className,
-}: {
-  accounts: DB_AccountType[];
-} & React.ComponentProps<"form">) {
+}: {} & React.ComponentProps<"form">) {
   const [parsedCSV, setParsedCSV] = useState<Record<string, string>>({});
+
+  const { data: accounts } = useQuery(trpc.bankAccount.get.queryOptions({}));
 
   const { execute, isExecuting } = useAction(importTransactionAction, {
     onError: ({ error }) => {

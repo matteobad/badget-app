@@ -33,7 +33,7 @@ type FormatAmountParams = {
 export function formatAmount({
   currency,
   amount,
-  locale = "en-US",
+  locale = "it-IT",
   minimumFractionDigits,
   maximumFractionDigits,
 }: FormatAmountParams) {

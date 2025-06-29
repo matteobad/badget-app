@@ -27,8 +27,8 @@ import { Loader, Trash } from "lucide-react";
 import { toast } from "sonner";
 
 import type { Row } from "@tanstack/react-table";
-import { deleteTransactionAction } from "../server/actions";
-import { type getTransactions_CACHED } from "../server/cached-queries";
+import { deleteTransactionAction } from "../../../features/transaction/server/actions";
+import { type getTransactions_CACHED } from "../../../features/transaction/server/cached-queries";
 
 export type TransactionType = Awaited<
   ReturnType<typeof getTransactions_CACHED>

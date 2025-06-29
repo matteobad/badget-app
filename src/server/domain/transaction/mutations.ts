@@ -1,6 +1,7 @@
 "server-only";
 
 import type {
+  createTransactionSchema,
   deleteTransactionSchema,
   updateTransactionSchema,
 } from "~/shared/validators/transaction.schema";
@@ -8,6 +9,16 @@ import type z from "zod/v4";
 import { db } from "~/server/db";
 import { transaction_table } from "~/server/db/schema/transactions";
 import { and, eq } from "drizzle-orm";
+
+export async function createTransactionMutation(
+  input: z.infer<typeof createTransactionSchema>,
+  userId: string,
+) {
+  return await db
+    .insert(transaction_table)
+    .values({ ...input, userId })
+    .returning();
+}
 
 export async function updateTransactionMutation(
   input: z.infer<typeof updateTransactionSchema>,

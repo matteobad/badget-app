@@ -21,21 +21,30 @@ type Props = {
   hideLoading?: boolean;
 };
 
-function transformCategory(category: {
+type CategoryType = {
   id: string;
   name: string;
   color: string | null;
   slug: string | null;
   description: string | null;
   parentId: string | null;
-  children?: any[];
-}): {
+  children?: CategoryType[];
+};
+
+type CategoryTransformedType = {
   id: string;
   label: string;
   color: string;
   slug: string;
-  children: any[];
-} {
+  children: CategoryTransformedType[];
+};
+
+type CategoryFlattenedType = CategoryTransformedType & {
+  isChild: boolean;
+  parentId?: string;
+};
+
+function transformCategory(category: CategoryType): CategoryTransformedType {
   return {
     id: category.id,
     label: category.name,
@@ -46,8 +55,8 @@ function transformCategory(category: {
 }
 
 // Flatten categories to include both parents and children
-function flattenCategories(categories: any[]): any[] {
-  const flattened: any[] = [];
+function flattenCategories(categories: CategoryTransformedType[]) {
+  const flattened: CategoryFlattenedType[] = [];
 
   for (const category of categories) {
     // Add parent category

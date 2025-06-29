@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { AccountPicker } from "~/components/forms/account-picker";
 import { CategoryPicker } from "~/components/forms/category-picker";
@@ -37,9 +38,9 @@ import {
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
-import { type DB_AccountType } from "~/server/db/schema/accounts";
-import { type DB_CategoryType } from "~/server/db/schema/categories";
 import { type DB_AttachmentType } from "~/server/db/schema/transactions";
+import { useTRPC } from "~/shared/helpers/trpc/client";
+import { createTransactionSchema } from "~/shared/validators/transaction.schema";
 import { formatSize } from "~/utils/format";
 import { UploadDropzone } from "~/utils/uploadthing";
 import { format } from "date-fns";
@@ -52,38 +53,41 @@ import { type z } from "zod/v4";
 
 import {
   categorizeTransactionAction,
-  createTransactionAction,
   deleteTransactionAttachmentAction,
-} from "../server/actions";
-import { TransactionInsertSchema } from "../utils/schemas";
+} from "../../../features/transaction/server/actions";
 
 export default function CreateTransactionForm({
-  accounts,
-  categories,
-  onComplete,
   className,
-}: {
-  accounts: DB_AccountType[];
-  categories: DB_CategoryType[];
-  onComplete: () => void;
-} & React.ComponentProps<"form">) {
+}: {} & React.ComponentProps<"form">) {
   const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
-  const createTransaction = useAction(createTransactionAction, {
-    onError: ({ error }) => {
-      console.error(error);
-      toast.error(error.serverError);
-    },
-    onSuccess: ({ data }) => {
-      console.log(data?.message);
-      toast.success(data?.message);
-      createTransaction.reset();
-      form.reset();
-      onComplete();
-    },
-  });
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const { data: categories, isLoading: isLoadingCategories } = useQuery(
+    trpc.category.getAll.queryOptions(),
+  );
+  const { data: accounts } = useQuery(trpc.bankAccount.get.queryOptions({}));
+
+  const createTransactionMutation = useMutation(
+    trpc.transaction.create.mutationOptions({
+      onError: (error) => {
+        toast.error(error.message);
+      },
+      onSuccess: (_data) => {
+        toast.success("Transazione creata");
+        void queryClient.invalidateQueries({
+          queryKey: trpc.transaction.get.infiniteQueryKey(),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: trpc.transaction.getAmountRange.queryKey(),
+        });
+        form.reset();
+      },
+    }),
+  );
 
   const categorizeTransaction = useAction(categorizeTransactionAction, {
     onError: ({ error }) => {
@@ -106,22 +110,30 @@ export default function CreateTransactionForm({
     },
   });
 
-  const form = useForm<z.infer<typeof TransactionInsertSchema>>({
-    resolver: standardSchemaResolver(TransactionInsertSchema),
+  const form = useForm<z.infer<typeof createTransactionSchema>>({
+    resolver: standardSchemaResolver(createTransactionSchema),
     defaultValues: {
       date: new Date(),
       description: "",
-      amount: "0",
+      amount: 0,
       currency: "EUR",
-      accountId: accounts[0]?.id ?? undefined,
-      attachment_ids: [],
+      accountId: accounts ? accounts[0]?.id : undefined,
+      // attachment_ids: [],
     },
   });
+
+  const handleSubmit = (data: z.infer<typeof createTransactionSchema>) => {
+    const formattedData = {
+      ...data,
+    };
+
+    createTransactionMutation.mutate(formattedData);
+  };
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(createTransaction.execute)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className={cn("flex h-full flex-col gap-6", className)}
       >
         {/* <pre>
@@ -152,8 +164,8 @@ export default function CreateTransactionForm({
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      initialFocus
-                      toDate={new Date()}
+                      autoFocus
+                      hidden={{ after: new Date() }}
                     />
                   </PopoverContent>
                 </Popover>
@@ -243,7 +255,7 @@ export default function CreateTransactionForm({
               <FormItem className="flex flex-col">
                 <FormLabel>Conto</FormLabel>
                 <AccountPicker
-                  options={accounts}
+                  options={accounts ?? []}
                   value={field.value ?? undefined}
                   onValueChange={field.onChange}
                 />
@@ -258,7 +270,9 @@ export default function CreateTransactionForm({
               <FormItem className="flex flex-col">
                 <FormLabel>Categoria</FormLabel>
                 <CategoryPicker
-                  options={categories}
+                  options={categories ?? []}
+                  disabledOptions={[]}
+                  isLoading={isLoadingCategories}
                   value={field.value ?? undefined}
                   onValueChange={field.onChange}
                   onReset={() => {
@@ -385,9 +399,9 @@ export default function CreateTransactionForm({
           <Button
             className="w-full"
             type="submit"
-            disabled={createTransaction.isExecuting}
+            disabled={createTransactionMutation.isPending}
           >
-            {createTransaction.isExecuting ? (
+            {createTransactionMutation.isPending ? (
               <>
                 <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
                 Creo transazione...

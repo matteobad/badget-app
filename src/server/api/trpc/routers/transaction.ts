@@ -1,4 +1,5 @@
 import {
+  createTransaction,
   deleteTransaction,
   getTransactionAmountRange,
   getTransactionById,
@@ -6,6 +7,7 @@ import {
   updateTransaction,
 } from "~/server/services/transaction-service";
 import {
+  createTransactionSchema,
   deleteTransactionSchema,
   getTransactionsSchema,
   updateTransactionSchema,
@@ -34,12 +36,12 @@ export const transactionRouter = createTRPCRouter({
     return await getTransactionAmountRange(userId);
   }),
 
-  // create: protectedProcedure
-  //   .input(createTransactionSchema)
-  //   .mutation(async ({ ctx, input }) => {
-  //     const userId = ctx.session.userId!;
-  //     return await createCategoryMutation(input, userId);
-  //   }),
+  create: protectedProcedure
+    .input(createTransactionSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.userId!;
+      return await createTransaction(input, userId);
+    }),
 
   update: protectedProcedure
     .input(updateTransactionSchema)

@@ -38,10 +38,10 @@ export const categoryRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { categoryFilters, budgetFilters } = input;
+      const { budgetFilters } = input;
 
       const categoriesWithBudgets = await getCategoriesWithBudgets(
-        categoryFilters,
+        { limit: 100 },
         budgetFilters,
         ctx.session.userId!,
       );

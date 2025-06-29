@@ -1,14 +1,11 @@
+import { transactionParamsSchema } from "~/shared/validators/transaction.schema";
 import { useQueryStates } from "nuqs";
-import { parseAsBoolean, parseAsString } from "nuqs/server";
 
 export function useTransactionParams() {
-  const [params, setParams] = useQueryStates({
-    transactionId: parseAsString,
-    createTransaction: parseAsBoolean,
-  });
+  const [params, setParams] = useQueryStates(transactionParamsSchema);
 
   return {
-    ...params,
+    params,
     setParams,
   };
 }

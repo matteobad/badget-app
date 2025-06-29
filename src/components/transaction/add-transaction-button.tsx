@@ -7,36 +7,43 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { actionsParsers } from "~/utils/search-params";
+import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { FilePlus, FileSpreadsheet, Landmark, Plus } from "lucide-react";
-import { useQueryStates } from "nuqs";
 
 export function AddTransactionButton({ label }: { label?: string }) {
-  const [, setState] = useQueryStates(actionsParsers, { shallow: false });
+  const { params, setParams } = useTransactionParams();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="w-[180px]">
+        <Button>
           <Plus className="size-4" />
           {label}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[180px]">
-        <DropdownMenuItem
-          onClick={() => void setState({ action: "link-institution" })}
-        >
+      <DropdownMenuContent className="w-[180px]" align="end">
+        <DropdownMenuItem>
           <Landmark />
           Collega un conto
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => void setState({ action: "import-transaction" })}
+          onClick={() =>
+            void setParams({
+              createTransaction: null,
+              importTransaction: true,
+            })
+          }
         >
           <FileSpreadsheet />
           Importa da CSV
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => void setState({ action: "create-transaction" })}
+          onClick={() =>
+            void setParams({
+              createTransaction: true,
+              importTransaction: null,
+            })
+          }
         >
           <FilePlus /> Crea transazione
         </DropdownMenuItem>

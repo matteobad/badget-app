@@ -80,7 +80,7 @@ export function BottomBar() {
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger className="flex items-center space-x-2">
-              <InfoIcon className="text-[#606060]" />
+              <InfoIcon className="size-5 text-[#606060]" />
               <span className="text-sm">
                 {multiCurrency
                   ? t("bottom_bar.multi_currency")

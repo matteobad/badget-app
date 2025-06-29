@@ -15,7 +15,7 @@ export function TransactionStatus({ fullfilled }: Props) {
   if (fullfilled) {
     return (
       <div className="flex justify-end">
-        <CheckIcon />
+        <CheckIcon className="size-5" />
       </div>
     );
   }
@@ -25,7 +25,7 @@ export function TransactionStatus({ fullfilled }: Props) {
       <TooltipProvider delayDuration={50}>
         <Tooltip>
           <TooltipTrigger>
-            <AlertCircleIcon />
+            <AlertCircleIcon className="size-5" />
           </TooltipTrigger>
           <TooltipContent
             className="px-3 py-1.5 text-xs"

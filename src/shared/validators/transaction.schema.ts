@@ -72,6 +72,7 @@ export const transactionFilterParamsSchema = {
 
 // Search params for sheets
 export const transactionParamsSchema = {
-  categoryId: parseAsString,
-  createCategory: parseAsBoolean,
+  transactionId: parseAsString,
+  createTransaction: parseAsBoolean,
+  importTransaction: parseAsBoolean,
 };

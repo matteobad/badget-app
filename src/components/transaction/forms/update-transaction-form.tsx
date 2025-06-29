@@ -36,9 +36,9 @@ import { type z } from "zod/v4";
 import {
   deleteTransactionAttachmentAction,
   updateTransactionAction,
-} from "../server/actions";
-import { type getTransactions_CACHED } from "../server/cached-queries";
-import { TransactionUpdateSchema } from "../utils/schemas";
+} from "../../../features/transaction/server/actions";
+import { type getTransactions_CACHED } from "../../../features/transaction/server/cached-queries";
+import { TransactionUpdateSchema } from "../../../features/transaction/utils/schemas";
 
 type Transaction = Awaited<
   ReturnType<typeof getTransactions_CACHED>

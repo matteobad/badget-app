@@ -1,4 +1,5 @@
 import type {
+  createTransactionSchema,
   deleteTransactionSchema,
   getTransactionsSchema,
   updateTransactionSchema,
@@ -6,6 +7,7 @@ import type {
 import type z from "zod/v4";
 
 import {
+  createTransactionMutation,
   deleteTransactionMutation,
   updateTransactionMutation,
 } from "../domain/transaction/mutations";
@@ -28,6 +30,13 @@ export async function getTransactionById(id: string, userId: string) {
 
 export async function getTransactionAmountRange(userId: string) {
   return await getTransactionAmountRangeQuery(userId);
+}
+
+export async function createTransaction(
+  input: z.infer<typeof createTransactionSchema>,
+  userId: string,
+) {
+  return await createTransactionMutation(input, userId);
 }
 
 export async function updateTransaction(

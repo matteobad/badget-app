@@ -40,10 +40,10 @@ export default function CreateCategoryForm({
   );
 
   const createMutation = useMutation(
-    trpc.category.createCategory.mutationOptions({
+    trpc.category.create.mutationOptions({
       onSuccess: (_data) => {
         void queryClient.invalidateQueries({
-          queryKey: trpc.category.getCategoryTree.queryKey(),
+          queryKey: trpc.category.get.queryKey(),
         });
 
         // reset form
@@ -70,7 +70,7 @@ export default function CreateCategoryForm({
   };
 
   if (createMutation.isSuccess) {
-    return <CreateBudgetConfirm category={createMutation.data[0]!} />;
+    return <CreateBudgetConfirm category={createMutation.data!} />;
   }
 
   return (
@@ -210,7 +210,7 @@ export default function CreateCategoryForm({
 function CreateBudgetConfirm({
   category,
 }: {
-  category: RouterOutput["category"]["createCategory"][number];
+  category: NonNullable<RouterOutput["category"]["create"]>;
 }) {
   const { setParams: setCategoryParams } = useCategoryParams();
   const { setParams: setBudgetParams } = useBudgetParams();

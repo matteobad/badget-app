@@ -18,37 +18,29 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { useIsMobile } from "~/hooks/use-mobile";
+import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
-import { type DB_AccountType } from "~/server/db/schema/accounts";
-import { type DB_CategoryType } from "~/server/db/schema/categories";
 
-import CreateTransactionForm from "./create-transaction-form";
+import CreateTransactionForm from "../forms/create-transaction-form";
 
-interface CreateTransactionDrawerSheetProps
-  extends React.ComponentPropsWithRef<typeof Sheet> {
-  accounts: DB_AccountType[];
-  categories: DB_CategoryType[];
-}
-
-export default function CreateTransactionDrawerSheet({
-  accounts,
-  categories,
-  ...props
-}: CreateTransactionDrawerSheetProps) {
+export default function CreateTransactionDrawerSheet() {
   const isMobile = useIsMobile();
 
+  const { params, setParams } = useTransactionParams();
+
+  const isOpen = !!params.createTransaction;
+
+  const onOpenChange = () => {
+    void setParams(null);
+  };
+
   const DrawerSheetContent = () => (
-    <CreateTransactionForm
-      className={cn({ "px-4": isMobile })}
-      accounts={accounts}
-      categories={categories}
-      onComplete={() => props.onOpenChange?.(false)}
-    />
+    <CreateTransactionForm className={cn({ "px-4": isMobile })} />
   );
 
   if (isMobile) {
     return (
-      <Drawer {...props}>
+      <Drawer open={isOpen} onOpenChange={onOpenChange}>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Nuova spesa o entrata</DrawerTitle>
@@ -70,7 +62,7 @@ export default function CreateTransactionDrawerSheet({
   }
 
   return (
-    <Sheet {...props}>
+    <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="p-4">
         <div className="flex h-full flex-col">
           <SheetHeader className="mb-6">

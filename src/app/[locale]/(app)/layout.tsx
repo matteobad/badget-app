@@ -4,6 +4,8 @@ import CreateCategoryDialog from "~/components/category/create-category-dialog";
 import { FeedbackDialog } from "~/components/feedback-dialog";
 import { DynamicBreadcrumb } from "~/components/layouts/dynamic-breadcrumb";
 import { NavUser } from "~/components/nav-user";
+import CreateTransactionDrawerSheet from "~/components/transaction/sheets/create-transaction-drawer-sheet";
+import ImportTransactionDrawerDialog from "~/components/transaction/sheets/import-transaction-drawer-dialog";
 import { Separator } from "~/components/ui/separator";
 import {
   SidebarInset,
@@ -32,6 +34,8 @@ export default function AppLayout(props: PropsWithChildren) {
 
       {/* Global Sheets here */}
       <CreateCategoryDialog />
+      <CreateTransactionDrawerSheet />
+      {/* <ImportTransactionDrawerDialog /> */}
     </>
   );
 }

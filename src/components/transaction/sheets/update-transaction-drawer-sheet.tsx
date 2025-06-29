@@ -22,8 +22,8 @@ import { cn } from "~/lib/utils";
 import { type DB_AccountType } from "~/server/db/schema/accounts";
 import { type DB_CategoryType } from "~/server/db/schema/categories";
 
-import { type getTransactions_CACHED } from "../server/cached-queries";
-import UpdateTransactionForm from "./update-transaction-form";
+import { type getTransactions_CACHED } from "../../../features/transaction/server/cached-queries";
+import UpdateTransactionForm from "../forms/update-transaction-form";
 
 type TransactionType = Awaited<
   ReturnType<typeof getTransactions_CACHED>

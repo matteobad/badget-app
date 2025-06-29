@@ -261,13 +261,11 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
         {isVisible("actions") && (
           <TableHead
             className={cn(
-              "z-10 w-[100px] bg-background md:sticky md:right-0",
+              "z-10 w-[64px] bg-background md:sticky md:right-0",
               "before:absolute before:top-0 before:bottom-0 before:left-0 before:w-px before:bg-border",
               "after:absolute after:top-0 after:bottom-0 after:left-[-24px] after:z-[-1] after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background",
             )}
-          >
-            Actions
-          </TableHead>
+          ></TableHead>
         )}
       </TableRow>
     </TableHeader>

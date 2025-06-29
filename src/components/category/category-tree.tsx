@@ -16,9 +16,10 @@ import { Button } from "~/components/ui/button";
 import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
 import { cn } from "~/lib/utils";
+import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useI18n, useScopedI18n } from "~/shared/locales/client";
-import { formatAmount, formatPerc } from "~/utils/format";
+import { formatPerc } from "~/utils/format";
 import { DotIcon, PlusIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
@@ -89,10 +90,12 @@ export function CategoryTree() {
   );
 
   // Store the initial expanded items to reset when search is cleared
-  const initialExpandedItems = Object.values(items)
+  const initialExpandedItems = items
     .filter((item) => item.children)
     .map((item) => item.id);
   const [state, setState] = useState<Partial<TreeState<Category>>>({});
+
+  console.log(items);
 
   const tree = useTree<Category>({
     state,
@@ -105,8 +108,10 @@ export function CategoryTree() {
     getItemName: (item) => item.getItemData().name,
     isItemFolder: (item) => (item.getItemData()?.children?.length ?? 0) > 0,
     dataLoader: {
-      getItem: (itemId) => items[itemId]!,
-      getChildren: (itemId) => items[itemId]?.children ?? [],
+      getItem: (itemId) => items.find((item) => item.id === itemId)!,
+      getChildren: (itemId) =>
+        items.find((item) => item.id === itemId)?.children.map((c) => c.id) ??
+        [],
     },
     features: [
       syncDataLoaderFeature,
@@ -255,6 +260,7 @@ function CategoryBudgets({
           {t("warning", {
             excess: formatAmount({
               amount: warning.excess,
+              currency: "eur",
               maximumFractionDigits: 0,
             }),
           })}
@@ -263,6 +269,7 @@ function CategoryBudgets({
       <span className="">
         {formatAmount({
           amount: budget.amount,
+          currency: "eur",
           maximumFractionDigits: 0,
         })}
       </span>
@@ -279,6 +286,7 @@ function CategoryTotal({ category }: { category: Category }) {
       <span>
         {formatAmount({
           amount: category.categoryBudget ?? category.childrenBudget,
+          currency: "eur",
           maximumFractionDigits: 0,
         })}
       </span>

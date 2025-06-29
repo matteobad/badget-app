@@ -35,7 +35,6 @@ export const mapCategoriesWithBudgets = (
     return {
       ...category,
       budgets: categoryBudgets,
-      children: [] as string[],
     };
   });
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AddTransactionButton } from "~/features/transaction/components/add-transaction-button";
+import { AddTransactionButton } from "~/components/transaction/add-transaction-button";
 import { useTransactionsStore } from "~/lib/stores/transaction";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { DeleteIcon, Loader2 } from "lucide-react";
