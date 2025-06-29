@@ -1,6 +1,8 @@
+import type { dynamicIconImports } from "lucide-react/dynamic";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getColorFromName } from "~/shared/helpers/categories";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { DynamicIcon } from "lucide-react/dynamic";
 
 import { CategoryColor } from "../category";
 import { Spinner } from "../load-more";
@@ -25,7 +27,8 @@ type CategoryType = {
   id: string;
   name: string;
   color: string | null;
-  slug: string | null;
+  slug: string;
+  icon: string | null;
   description: string | null;
   parentId: string | null;
   children?: CategoryType[];
@@ -36,6 +39,7 @@ type CategoryTransformedType = {
   label: string;
   color: string;
   slug: string;
+  icon: string;
   children: CategoryTransformedType[];
 };
 
@@ -50,6 +54,7 @@ function transformCategory(category: CategoryType): CategoryTransformedType {
     label: category.name,
     color: category.color ?? getColorFromName(category.name) ?? "#606060",
     slug: category.slug ?? "",
+    icon: category.icon ?? "",
     children: category.children?.map(transformCategory) ?? [],
   };
 }
@@ -170,7 +175,10 @@ export function SelectCategory({
       renderListItem={({ item }) => {
         return (
           <div className="flex items-center space-x-2">
-            <CategoryColor color={item.color} />
+            <DynamicIcon
+              className="size-4"
+              name={item.icon as keyof typeof dynamicIconImports}
+            />
             <span className="line-clamp-1">{item.label}</span>
           </div>
         );

@@ -16,6 +16,7 @@ import { useTableScroll } from "~/hooks/use-table-scroll";
 import { useTransactionFilterParamsWithPersistence } from "~/hooks/use-transaction-filter-params-with-persistence";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { useTransactionsStore } from "~/lib/stores/transaction";
+import { cn } from "~/lib/utils";
 import { updateColumnVisibilityAction } from "~/server/actions";
 import { Cookies } from "~/shared/constants/cookies";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -249,9 +250,12 @@ export function DataTable({
                         {row.getVisibleCells().map((cell) => (
                           <TableCell
                             key={cell.id}
-                            className={getStickyClassName(
-                              cell.column.id,
-                              cell.column.columnDef.meta?.className,
+                            className={cn(
+                              getStickyClassName(
+                                cell.column.id,
+                                cell.column.columnDef.meta?.className,
+                              ),
+                              "py-4",
                             )}
                             style={getStickyStyle(cell.column.id)}
                             onClick={() => {

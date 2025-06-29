@@ -1,8 +1,8 @@
 "use client";
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import type { dynamicIconImports } from "lucide-react/dynamic";
 import { memo, useCallback } from "react";
-import { Category } from "~/components/category";
 import { FormatAmount } from "~/components/format-amount";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -21,7 +21,8 @@ import {
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { formatDate } from "~/shared/helpers/format";
-import { MoreHorizontalIcon } from "lucide-react";
+import { CircleDashedIcon, MoreHorizontalIcon } from "lucide-react";
+import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { TransactionBankAccount } from "../transaction-bank-account";
@@ -120,6 +121,41 @@ const AmountCell = memo(
 );
 
 AmountCell.displayName = "AmountCell";
+
+const CategoryCell = memo(
+  ({
+    category,
+  }: {
+    category?: {
+      id: string;
+      slug: string;
+      name: string;
+      color: string | null;
+      icon: string | null;
+    };
+  }) => {
+    if (!category) {
+      return (
+        <div className="flex w-fit items-center space-x-2 rounded-md border px-2 py-1">
+          <CircleDashedIcon className="size-4" />
+          <span>Uncategorized</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex w-fit items-center space-x-2 rounded-md border px-2 py-1">
+        <DynamicIcon
+          className="size-4"
+          name={category.icon as keyof typeof dynamicIconImports}
+        />
+        <span>{category.name}</span>
+      </div>
+    );
+  },
+);
+
+CategoryCell.displayName = "CategoryCell";
 
 const TagsCell = memo(
   ({ tags }: { tags?: { id: string; name: string | null }[] }) => (
@@ -298,12 +334,7 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "category",
     header: "Category",
-    cell: ({ row }) => (
-      <Category
-        name={row.original?.category?.name ?? ""}
-        color={row.original?.category?.color ?? ""}
-      />
-    ),
+    cell: ({ row }) => <CategoryCell category={row.original.category} />,
   },
   {
     accessorKey: "counterparty",
@@ -332,7 +363,7 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "status",
     cell: ({ row }) => {
       const fullfilled =
-        row.original.status === "completed" || row.original.isFulfilled;
+        row.original.status === "booked" || row.original.isFulfilled;
 
       return <TransactionStatus fullfilled={fullfilled} />;
     },

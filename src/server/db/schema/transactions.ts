@@ -15,11 +15,10 @@ import { pgTable } from "./_table";
 import { account_table } from "./accounts";
 import { category_table } from "./categories";
 
-export const transactionStatusEnum = pgEnum("transactionStatus", [
-  "posted",
+export const transactionStatusEnum = pgEnum("transaction_status", [
+  "booked",
   "pending",
   "excluded",
-  "completed",
   "archived",
 ]);
 
@@ -58,7 +57,7 @@ export const transaction_table = pgTable(
     exclude: boolean().notNull().default(false),
     recurring: boolean().notNull().default(false),
     frequency: transactionFrequencyEnum(),
-    status: transactionStatusEnum().default("posted"),
+    status: transactionStatusEnum().default("booked"),
     note: text(),
 
     ...timestamps,

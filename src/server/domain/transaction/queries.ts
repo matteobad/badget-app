@@ -99,9 +99,9 @@ export async function getTransactionsQuery(
   } else if (statuses?.includes("archived")) {
     whereConditions.push(eq(transaction_table.status, "archived"));
   } else {
-    // Default: pending, posted, or completed
+    // Default: pending, booked
     whereConditions.push(
-      inArray(transaction_table.status, ["pending", "posted", "completed"]),
+      inArray(transaction_table.status, ["pending", "booked"]),
     );
   }
 
