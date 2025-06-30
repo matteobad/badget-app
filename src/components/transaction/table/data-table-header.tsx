@@ -174,24 +174,6 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
           </TableHead>
         )}
 
-        {isVisible("counterparty") && (
-          <TableHead className="w-[200px] min-w-[200px] px-3 py-2 md:px-4">
-            <Button
-              className="space-x-2 p-0 hover:bg-transparent"
-              variant="ghost"
-              onClick={() => createSortQuery("counterparty")}
-            >
-              <span>From / To</span>
-              {"counterparty" === column && value === "asc" && (
-                <ArrowDown size={16} />
-              )}
-              {"counterparty" === column && value === "desc" && (
-                <ArrowUp size={16} />
-              )}
-            </Button>
-          </TableHead>
-        )}
-
         {isVisible("tags") && (
           <TableHead className="w-[280px] max-w-[280px] px-3 py-2 md:px-4">
             <Button

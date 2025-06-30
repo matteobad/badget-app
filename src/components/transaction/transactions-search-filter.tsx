@@ -13,10 +13,7 @@ import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
 import {
   CalendarIcon,
-  CircleQuestionMark,
-  CircleQuestionMarkIcon,
   EuroIcon,
-  FileIcon,
   FilterIcon,
   LandmarkIcon,
   Repeat1Icon,
@@ -84,12 +81,11 @@ const defaultSearch = {
 };
 
 const PLACEHOLDERS = [
-  "Software and taxes last month",
+  "Expenses last month",
   "Income last year",
-  "Software last Q4",
   "From Google without receipt",
   "Search or filter",
-  "Without receipts this month",
+  "Revolut this month",
 ];
 
 const statusFilters: FilterItem<StatusFilter>[] = [
@@ -432,36 +428,6 @@ export function TransactionsSearchFilter() {
           <div className="w-[280px] p-4">
             <AmountRange />
           </div>
-        </FilterMenuItem>
-
-        <FilterMenuItem icon={CircleQuestionMarkIcon} label="Status">
-          {statusFilters.map(({ id, name }) => (
-            <FilterCheckboxItem
-              key={id}
-              id={id}
-              name={name}
-              checked={filter?.statuses?.includes(id)}
-              onCheckedChange={() =>
-                updateArrayFilter(id, filter.statuses, setFilter, "statuses")
-              }
-            />
-          ))}
-        </FilterMenuItem>
-
-        <FilterMenuItem icon={FileIcon} label="Attachments">
-          {attachmentsFilters.map(({ id, name }) => (
-            <FilterCheckboxItem
-              key={id}
-              id={id}
-              name={name}
-              checked={filter?.attachments === id}
-              onCheckedChange={() => {
-                setFilter({
-                  attachments: id,
-                });
-              }}
-            />
-          ))}
         </FilterMenuItem>
 
         <FilterMenuItem icon={ShapesIcon} label="Categories">

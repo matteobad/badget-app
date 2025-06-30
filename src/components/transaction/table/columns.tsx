@@ -337,11 +337,6 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => <CategoryCell category={row.original.category} />,
   },
   {
-    accessorKey: "counterparty",
-    header: "From / To",
-    cell: ({ row }) => row.original.counterpartyName ?? "-",
-  },
-  {
     accessorKey: "tags",
     header: "Tags",
     meta: {
