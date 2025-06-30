@@ -13,8 +13,6 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
   const [hasError, setHasError] = useState(false);
   const showingFallback = !src || hasError;
 
-  console.log(src);
-
   return (
     <Avatar
       style={{ width: size, height: size }}

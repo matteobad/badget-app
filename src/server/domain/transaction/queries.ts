@@ -110,11 +110,9 @@ export async function getTransactionsQuery(
     const categoryConditions: (SQL | undefined)[] = [];
     for (const categorySlug of filterCategories) {
       if (categorySlug === "uncategorized") {
-        categoryConditions.push(isNull(transaction_table.categorySlug));
+        categoryConditions.push(isNull(category_table.slug));
       } else {
-        categoryConditions.push(
-          eq(transaction_table.categorySlug, categorySlug),
-        );
+        categoryConditions.push(eq(category_table.slug, categorySlug));
       }
     }
     const definedCategoryConditions = categoryConditions.filter(

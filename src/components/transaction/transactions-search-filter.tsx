@@ -433,10 +433,10 @@ export function TransactionsSearchFilter() {
         <FilterMenuItem icon={ShapesIcon} label="Categories">
           <div className="h-[270px] w-[250px]">
             <SelectCategory
-              headless
+              selected={filter.categories}
               onChange={(selected) =>
                 updateArrayFilter(
-                  selected.slug,
+                  selected,
                   filter.categories,
                   setFilter,
                   "categories",

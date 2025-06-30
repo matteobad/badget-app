@@ -21,8 +21,6 @@ export function AmountRange() {
     trpc.transaction.getAmountRange.queryOptions(),
   );
 
-  console.log(items);
-
   const [amountRange, setAmountRange] = useQueryState(
     "amount_range",
     parseAsArrayOf(parseAsInteger),

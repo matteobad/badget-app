@@ -1,126 +1,31 @@
 import type { dynamicIconImports } from "lucide-react/dynamic";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getColorFromName } from "~/shared/helpers/categories";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { DynamicIcon } from "lucide-react/dynamic";
 
-import { CategoryColor } from "../category";
 import { Spinner } from "../load-more";
-import { ComboboxDropdown } from "../ui/combobox-dropdown";
-
-type Selected = {
-  id: string;
-  name: string;
-  color?: string | null;
-  slug: string;
-  children?: Selected[];
-};
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../ui/command";
 
 type Props = {
-  selected?: Selected;
-  onChange: (selected: Selected) => void;
-  headless?: boolean;
+  selected?: string[] | null;
+  onChange: (selected: string) => void;
   hideLoading?: boolean;
 };
 
-type CategoryType = {
-  id: string;
-  name: string;
-  color: string | null;
-  slug: string;
-  icon: string | null;
-  description: string | null;
-  parentId: string | null;
-  children?: CategoryType[];
-};
-
-type CategoryTransformedType = {
-  id: string;
-  label: string;
-  color: string;
-  slug: string;
-  icon: string;
-  children: CategoryTransformedType[];
-};
-
-type CategoryFlattenedType = CategoryTransformedType & {
-  isChild: boolean;
-  parentId?: string;
-};
-
-function transformCategory(category: CategoryType): CategoryTransformedType {
-  return {
-    id: category.id,
-    label: category.name,
-    color: category.color ?? getColorFromName(category.name) ?? "#606060",
-    slug: category.slug ?? "",
-    icon: category.icon ?? "",
-    children: category.children?.map(transformCategory) ?? [],
-  };
-}
-
-// Flatten categories to include both parents and children
-function flattenCategories(categories: CategoryTransformedType[]) {
-  const flattened: CategoryFlattenedType[] = [];
-
-  for (const category of categories) {
-    // Add parent category
-    flattened.push({
-      ...category,
-      isChild: false,
-    });
-
-    // Add children if they exist
-    if (category.children && category.children.length > 0) {
-      for (const child of category.children) {
-        flattened.push({
-          ...child,
-          label: `  ${child.label}`, // Add indentation for visual hierarchy
-          isChild: true,
-          parentId: category.id,
-        });
-      }
-    }
-  }
-
-  return flattened;
-}
-
-export function SelectCategory({
-  selected,
-  onChange,
-  headless,
-  hideLoading,
-}: Props) {
+export function SelectCategory({ selected, onChange, hideLoading }: Props) {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery(trpc.category.get.queryOptions({}));
-
-  // Transform and flatten categories to include children
-  const transformedCategories = data?.map(transformCategory) ?? [];
-  const categories = flattenCategories(transformedCategories);
-
-  const createCategoryMutation = useMutation(
-    trpc.category.create.mutationOptions({
-      onSuccess: (data) => {
-        void queryClient.invalidateQueries({
-          queryKey: trpc.category.get.queryKey({}),
-        });
-
-        if (data) {
-          onChange({
-            id: data.id,
-            name: data.name,
-            color: data.color,
-            slug: data.slug,
-          });
-        }
-      },
-    }),
+  const { data: categories, isLoading } = useQuery(
+    trpc.category.get.queryOptions({}),
   );
-
-  // @ts-expect-error - slug is not nullable
-  const selectedValue = selected ? transformCategory(selected) : undefined;
 
   if (!selected && isLoading && !hideLoading) {
     return (
@@ -131,58 +36,43 @@ export function SelectCategory({
   }
 
   return (
-    <ComboboxDropdown
-      headless={headless}
-      disabled={createCategoryMutation.isPending}
-      placeholder="Select category"
-      searchPlaceholder="Search category"
-      items={categories}
-      selectedItem={selectedValue}
-      onSelect={(item) => {
-        onChange({
-          id: item.id,
-          name: item.label,
-          color: item.color,
-          slug: item.slug,
-        });
-      }}
-      {...(!headless && {
-        onCreate: (value) => {
-          createCategoryMutation.mutate({
-            name: value,
-            color: getColorFromName(value),
-          });
-        },
-      })}
-      renderSelectedItem={(selectedItem) => (
-        <div className="flex items-center space-x-2">
-          <CategoryColor color={selectedItem.color} />
-          <span className="max-w-[90%] truncate text-left">
-            {selectedItem.label}
-          </span>
-        </div>
-      )}
-      renderOnCreate={(value) => {
-        if (!headless) {
-          return (
-            <div className="flex items-center space-x-2">
-              <CategoryColor color={getColorFromName(value)} />
-              <span>{`Create "${value}"`}</span>
-            </div>
-          );
-        }
-      }}
-      renderListItem={({ item }) => {
-        return (
-          <div className="flex items-center space-x-2">
-            <DynamicIcon
-              className="size-4"
-              name={item.icon as keyof typeof dynamicIconImports}
-            />
-            <span className="line-clamp-1">{item.label}</span>
-          </div>
-        );
-      }}
-    />
+    <div className="h-full w-full *:not-first:mt-2">
+      <Command>
+        <CommandInput placeholder="Search category..." />
+        <CommandList>
+          <CommandEmpty>No category found.</CommandEmpty>
+          <CommandGroup className="[&>div]:flex [&>div]:flex-col [&>div]:gap-0.5">
+            {categories?.map((item) => (
+              <CommandItem
+                key={item.slug}
+                value={item.slug}
+                onSelect={(value) => {
+                  const slug = categories.find((c) => c.slug === value)?.slug;
+                  if (slug) {
+                    onChange(slug);
+                  }
+                }}
+                className={cn("flex items-center justify-between", {
+                  "bg-accent text-accent-foreground": selected?.includes(
+                    item.slug,
+                  ),
+                })}
+              >
+                <div className="flex items-center gap-2">
+                  <DynamicIcon
+                    name={item.icon as keyof typeof dynamicIconImports}
+                    className="size-4 text-muted-foreground"
+                  />
+                  {item.name}
+                </div>
+                {/* <span className="text-xs text-muted-foreground">
+                      {item.number.toLocaleString()}
+                    </span> */}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </div>
   );
 }

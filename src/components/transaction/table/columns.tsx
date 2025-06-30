@@ -334,7 +334,7 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "category",
     header: "Category",
-    cell: ({ row }) => <CategoryCell category={row.original.category} />,
+    cell: ({ row }) => <CategoryCell category={row.original.category!} />,
   },
   {
     accessorKey: "tags",
