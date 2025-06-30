@@ -1,10 +1,9 @@
-import type { dynamicIconImports } from "lucide-react/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { LoaderCircleIcon } from "lucide-react";
-import { DynamicIcon } from "lucide-react/dynamic";
 
+import { BankLogo } from "../bank-logo";
 import { Spinner } from "../load-more";
 import {
   Command,
@@ -21,60 +20,61 @@ type Props = {
   hideLoading?: boolean;
 };
 
-export function SelectCategory({ selected, onChange, hideLoading }: Props) {
+export function SelectAccount({ selected, onChange, hideLoading }: Props) {
   const trpc = useTRPC();
 
-  const { data: categories, isLoading } = useQuery(
-    trpc.category.get.queryOptions({}),
+  const { data: accounts, isLoading } = useQuery(
+    trpc.bankAccount.get.queryOptions({}),
   );
 
-  const { data: categoryCounts, isLoading: isLoadingCategoryCounts } = useQuery(
-    trpc.transaction.getCategoryCounts.queryOptions(),
+  const { data: accountCounts, isLoading: isLoadingAccountCounts } = useQuery(
+    trpc.transaction.getAccountCounts.queryOptions(),
   );
 
   if (!selected && isLoading && !hideLoading) {
     return (
-      <div className="flex h-full w-full items-center justify-center">
+      <div className="flex size-full items-center justify-center">
         <Spinner />
       </div>
     );
   }
 
   return (
-    <div className="h-full w-full *:not-first:mt-2">
+    <div className="size-full *:not-first:mt-2">
       <Command>
         <CommandInput placeholder="Search category..." />
         <CommandList className="max-h-[245px]">
-          <CommandEmpty>No category found.</CommandEmpty>
+          <CommandEmpty>No account found.</CommandEmpty>
           <CommandGroup className="[&>div]:flex [&>div]:flex-col [&>div]:gap-0.5">
-            {categories?.map((item) => (
+            {accounts?.map((item) => (
               <CommandItem
-                key={item.slug}
-                value={item.slug}
+                key={item.id}
+                value={item.id}
                 onSelect={(value) => {
-                  const slug = categories.find((c) => c.slug === value)?.slug;
-                  if (slug) {
-                    onChange(slug);
+                  const id = accounts.find((c) => c.id === value)?.id;
+                  if (id) {
+                    onChange(id);
                   }
                 }}
                 className={cn("flex items-center justify-between", {
                   "bg-accent text-accent-foreground": selected?.includes(
-                    item.slug,
+                    item.id,
                   ),
                 })}
               >
-                <div className="flex items-center gap-2">
-                  <DynamicIcon
-                    name={item.icon as keyof typeof dynamicIconImports}
-                    className="size-4 text-muted-foreground"
+                <div className="line-clamp-1 flex items-center gap-2 overflow-hidden">
+                  <BankLogo
+                    src={item.logoUrl}
+                    alt={`${item.name} logo`}
+                    size={20}
                   />
-                  {item.name}
+                  <span className="line-clamp-1 text-sm">{item.name}</span>
                 </div>
-                {isLoadingCategoryCounts ? (
+                {isLoadingAccountCounts ? (
                   <LoaderCircleIcon className="size-4 animate-spin text-muted-foreground" />
                 ) : (
                   <span className="text-xs text-muted-foreground">
-                    {categoryCounts![item.id]?.toLocaleString()}
+                    {accountCounts![item.id]?.toLocaleString()}
                   </span>
                 )}
               </CommandItem>

@@ -12,10 +12,12 @@ import {
   updateTransactionMutation,
 } from "../domain/transaction/mutations";
 import {
+  getTransactionAccountCountsQuery,
   getTransactionAmountRangeQuery,
   getTransactionByIdQuery,
   getTransactionCategoryCountsQuery,
   getTransactionsQuery,
+  getTransactionTagCountsQuery,
 } from "../domain/transaction/queries";
 
 export async function getTransactions(
@@ -35,6 +37,14 @@ export async function getTransactionAmountRange(userId: string) {
 
 export async function getTransactionCategoryCounts(userId: string) {
   return await getTransactionCategoryCountsQuery(userId);
+}
+
+export async function getTransactionTagsCounts(userId: string) {
+  return await getTransactionTagCountsQuery(userId);
+}
+
+export async function getTransactionAccountCounts(userId: string) {
+  return await getTransactionAccountCountsQuery(userId);
 }
 
 export async function createTransaction(

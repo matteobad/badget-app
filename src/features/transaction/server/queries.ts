@@ -14,15 +14,7 @@ import {
   transaction_table,
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
-import {
-  and,
-  count,
-  desc,
-  eq,
-  getTableColumns,
-  gt,
-  inArray,
-} from "drizzle-orm";
+import { and, desc, eq, getTableColumns, inArray } from "drizzle-orm";
 
 export function getRecentTransactions_QUERY(userId: string) {
   try {
@@ -47,62 +39,6 @@ export function getRecentTransactions_QUERY(userId: string) {
   } catch (err) {
     console.error(err);
     return [];
-  }
-}
-
-export async function getTransactionTagCounts_QUERY(userId: string) {
-  try {
-    return await db
-      .select({
-        tagId: transaction_to_tag_table.tagId,
-        count: count(),
-      })
-      .from(transaction_table)
-      .leftJoin(
-        transaction_to_tag_table,
-        eq(transaction_to_tag_table.transactionId, transaction_table.id),
-      )
-      .where(eq(transaction_table.userId, userId))
-      .groupBy(transaction_to_tag_table.tagId)
-      .having(gt(count(), 0))
-      .then((res) =>
-        res.reduce(
-          (acc, { tagId, count }) => {
-            acc[tagId ?? "null"] = count;
-            return acc;
-          },
-          {} as Record<string, number>,
-        ),
-      );
-  } catch (err) {
-    console.error(err);
-    return {} as Record<string, number>;
-  }
-}
-
-export async function getTransactionAccountCounts_QUERY(userId: string) {
-  try {
-    return await db
-      .select({
-        accountId: transaction_table.accountId,
-        count: count(),
-      })
-      .from(transaction_table)
-      .where(eq(transaction_table.userId, userId))
-      .groupBy(transaction_table.accountId)
-      .having(gt(count(), 0))
-      .then((res) =>
-        res.reduce(
-          (acc, { accountId, count }) => {
-            acc[accountId] = count;
-            return acc;
-          },
-          {} as Record<string, number>,
-        ),
-      );
-  } catch (err) {
-    console.error(err);
-    return {} as Record<string, number>;
   }
 }
 

@@ -459,3 +459,59 @@ export async function getTransactionCategoryCountsQuery(userId: string) {
     return {} as Record<string, number>;
   }
 }
+
+export async function getTransactionAccountCountsQuery(userId: string) {
+  try {
+    return await db
+      .select({
+        accountId: transaction_table.accountId,
+        count: count(),
+      })
+      .from(transaction_table)
+      .where(eq(transaction_table.userId, userId))
+      .groupBy(transaction_table.accountId)
+      .having(gt(count(), 0))
+      .then((res) =>
+        res.reduce(
+          (acc, { accountId, count }) => {
+            acc[accountId] = count;
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
+      );
+  } catch (err) {
+    console.error(err);
+    return {} as Record<string, number>;
+  }
+}
+
+export async function getTransactionTagCountsQuery(userId: string) {
+  try {
+    return await db
+      .select({
+        tagId: transaction_to_tag_table.tagId,
+        count: count(),
+      })
+      .from(transaction_table)
+      .leftJoin(
+        transaction_to_tag_table,
+        eq(transaction_to_tag_table.transactionId, transaction_table.id),
+      )
+      .where(eq(transaction_table.userId, userId))
+      .groupBy(transaction_to_tag_table.tagId)
+      .having(gt(count(), 0))
+      .then((res) =>
+        res.reduce(
+          (acc, { tagId, count }) => {
+            acc[tagId ?? "null"] = count;
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
+      );
+  } catch (err) {
+    console.error(err);
+    return {} as Record<string, number>;
+  }
+}

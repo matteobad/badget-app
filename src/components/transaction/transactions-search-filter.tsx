@@ -7,7 +7,6 @@ import { useTransactionFilterParams } from "~/hooks/use-transaction-filter-param
 import { useTransactionFilterParamsWithPersistence } from "~/hooks/use-transaction-filter-params-with-persistence";
 import { cn } from "~/lib/utils";
 import { generateTransactionsFilters } from "~/server/domain/transaction/actions";
-import { formatAccountName } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
@@ -25,6 +24,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 import { AmountRange } from "../amount-range";
 import { FilterList } from "../custom/filter-list";
+import { SelectAccount } from "../custom/select-account";
 import { SelectCategory } from "../custom/select-category";
 import { Calendar } from "../ui/calendar";
 import {
@@ -431,7 +431,7 @@ export function TransactionsSearchFilter() {
         </FilterMenuItem>
 
         <FilterMenuItem icon={ShapesIcon} label="Categories">
-          <div className="h-[280px] w-[250px]">
+          <div className="max-h-[280px] w-[250px]">
             <SelectCategory
               selected={filter.categories}
               onChange={(selected) =>
@@ -467,25 +467,19 @@ export function TransactionsSearchFilter() {
         </FilterMenuItem>
 
         <FilterMenuItem icon={LandmarkIcon} label="Accounts">
-          {accounts?.map((account) => (
-            <FilterCheckboxItem
-              key={account.id}
-              id={account.id}
-              name={formatAccountName({
-                name: account.name,
-                currency: account.currency,
-              })}
-              checked={filter?.accounts?.includes(account.id)}
-              onCheckedChange={() =>
+          <div className="max-h-[280px] w-[250px]">
+            <SelectAccount
+              selected={filter.accounts}
+              onChange={(selected) =>
                 updateArrayFilter(
-                  account.id,
+                  selected,
                   filter.accounts,
                   setFilter,
                   "accounts",
                 )
               }
             />
-          ))}
+          </div>
         </FilterMenuItem>
 
         <FilterMenuItem icon={Repeat1Icon} label="Recurring">
