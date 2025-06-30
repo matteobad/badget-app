@@ -222,24 +222,6 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
           </TableHead>
         )}
 
-        {isVisible("status") && (
-          <TableHead className="w-[100px] px-3 py-2 md:px-4">
-            <Button
-              className="space-x-2 p-0 hover:bg-transparent"
-              variant="ghost"
-              onClick={() => createSortQuery("attachment")}
-            >
-              <span>Status</span>
-              {"attachment" === column && value === "asc" && (
-                <ArrowDown size={16} />
-              )}
-              {"attachment" === column && value === "desc" && (
-                <ArrowUp size={16} />
-              )}
-            </Button>
-          </TableHead>
-        )}
-
         {isVisible("actions") && (
           <TableHead
             className={cn(

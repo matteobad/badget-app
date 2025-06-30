@@ -26,7 +26,6 @@ import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { TransactionBankAccount } from "../transaction-bank-account";
-import { TransactionStatus } from "../transaction-status";
 
 type Transaction = RouterOutput["transaction"]["get"]["data"][number];
 
@@ -204,10 +203,6 @@ const ActionsCell = memo(
       onUpdateTransaction?.({ id: transaction.id, status: "posted" });
     }, [transaction.id, onUpdateTransaction]);
 
-    const handleUpdateToCompleted = useCallback(() => {
-      onUpdateTransaction?.({ id: transaction.id, status: "completed" });
-    }, [transaction.id, onUpdateTransaction]);
-
     const handleUpdateToExcluded = useCallback(() => {
       onUpdateTransaction?.({ id: transaction.id, status: "excluded" });
     }, [transaction.id, onUpdateTransaction]);
@@ -233,18 +228,6 @@ const ActionsCell = memo(
           {!transaction.manual && transaction.status === "excluded" && (
             <DropdownMenuItem onClick={handleUpdateToPosted}>
               Include
-            </DropdownMenuItem>
-          )}
-
-          {!transaction.isFulfilled && (
-            <DropdownMenuItem onClick={handleUpdateToCompleted}>
-              Mark as completed
-            </DropdownMenuItem>
-          )}
-
-          {transaction.isFulfilled && transaction.status === "completed" && (
-            <DropdownMenuItem onClick={handleUpdateToPosted}>
-              Mark as uncompleted
             </DropdownMenuItem>
           )}
 
@@ -353,15 +336,6 @@ export const columns: ColumnDef<Transaction>[] = [
         logoUrl={row.original?.account?.logoUrl ?? undefined}
       />
     ),
-  },
-  {
-    accessorKey: "status",
-    cell: ({ row }) => {
-      const fullfilled =
-        row.original.status === "booked" || row.original.isFulfilled;
-
-      return <TransactionStatus fullfilled={fullfilled} />;
-    },
   },
   {
     id: "actions",

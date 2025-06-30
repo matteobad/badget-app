@@ -26,6 +26,7 @@ import { AmountRange } from "../amount-range";
 import { FilterList } from "../custom/filter-list";
 import { SelectAccount } from "../custom/select-account";
 import { SelectCategory } from "../custom/select-category";
+import { SelectTag } from "../custom/select-tag";
 import { Calendar } from "../ui/calendar";
 import {
   DropdownMenu,
@@ -447,22 +448,13 @@ export function TransactionsSearchFilter() {
         </FilterMenuItem>
 
         <FilterMenuItem icon={TagsIcon} label="Tags">
-          <div className="max-h-[400px] overflow-y-auto">
-            {tags && tags.length > 0 ? (
-              tags.map((tag) => (
-                <FilterCheckboxItem
-                  key={tag.id}
-                  id={tag.id}
-                  name={tag.text}
-                  checked={filter?.tags?.includes(tag.id)}
-                  onCheckedChange={() =>
-                    updateArrayFilter(tag.id, filter.tags, setFilter, "tags")
-                  }
-                />
-              ))
-            ) : (
-              <p className="px-2 text-sm text-[#878787]">No tags found</p>
-            )}
+          <div className="max-h-[280px] w-[250px]">
+            <SelectTag
+              selected={filter.tags}
+              onChange={(selected) =>
+                updateArrayFilter(selected, filter.tags, setFilter, "tags")
+              }
+            />
           </div>
         </FilterMenuItem>
 

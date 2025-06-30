@@ -45,8 +45,6 @@ export async function getTransactionsQuery(
     cursor,
     pageSize = 40,
     q,
-    statuses,
-    attachments,
     categories: filterCategories,
     tags: filterTags,
     type,
@@ -85,28 +83,6 @@ export async function getTransactionsQuery(
     }
   }
 
-  // Status filtering - simplified logic using direct EXISTS subqueries
-  if (statuses?.includes("uncompleted") || attachments === "exclude") {
-    // Transaction is NOT fulfilled (no attachments AND status is not completed) AND status is not excluded
-    whereConditions.push(
-      sql`NOT (EXISTS (SELECT 1 FROM ${attachment_table} WHERE ${eq(attachment_table.transactionId, transaction_table.id)} AND ${eq(attachment_table.userId, userId)}) OR ${transaction_table.status} = 'completed') AND ${transaction_table.status} != 'excluded'`,
-    );
-  } else if (statuses?.includes("completed") || attachments === "include") {
-    // Transaction is fulfilled (has attachments OR status is completed)
-    whereConditions.push(
-      sql`(EXISTS (SELECT 1 FROM ${attachment_table} WHERE ${eq(attachment_table.transactionId, transaction_table.id)} AND ${eq(attachment_table.userId, userId)}) OR ${transaction_table.status} = 'completed')`,
-    );
-  } else if (statuses?.includes("excluded")) {
-    whereConditions.push(eq(transaction_table.status, "excluded"));
-  } else if (statuses?.includes("archived")) {
-    whereConditions.push(eq(transaction_table.status, "archived"));
-  } else {
-    // Default: pending, booked
-    whereConditions.push(
-      inArray(transaction_table.status, ["pending", "booked"]),
-    );
-  }
-
   // Categories filter
   if (filterCategories && filterCategories.length > 0) {
     const categoryConditions: (SQL | undefined)[] = [];
@@ -134,6 +110,7 @@ export async function getTransactionsQuery(
       .where(
         and(
           eq(transaction_to_tag_table.transactionId, transaction_table.id), // Correlate with the outer transaction
+          // eq(transactionTags.userId, userId), // Ensure transactionTags are for the correct user
           inArray(tag_table.id, filterTags), // Filter by the provided tag IDs
         ),
       );
@@ -216,10 +193,6 @@ export async function getTransactionsQuery(
       frequency: transaction_table.frequency,
       description: transaction_table.description,
       createdAt: transaction_table.createdAt,
-      isFulfilled:
-        sql<boolean>`(EXISTS (SELECT 1 FROM ${attachment_table} WHERE ${eq(attachment_table.transactionId, transaction_table.id)} AND ${eq(attachment_table.userId, userId)}) OR ${transaction_table.status} = 'completed')`.as(
-          "isFulfilled",
-        ),
       attachments: sql<
         Array<{
           id: string;
@@ -244,11 +217,6 @@ export async function getTransactionsQuery(
         currency: account_table.currency,
         logoUrl: account_table.logoUrl,
       },
-      // connection: {
-      //   id: institution_table.id,
-      //   name: connection_table.name,
-      //   logoUrl: connection_table.logoUrl,
-      // },
       tags: sql<
         Array<{ id: string; name: string | null }>
       >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tag_table.id}, 'text', ${tag_table.text})) FILTER (WHERE ${tag_table.id} IS NOT NULL), '[]'::json)`.as(
