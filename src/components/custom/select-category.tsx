@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { LoaderCircleIcon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import { Spinner } from "../load-more";
@@ -23,8 +24,13 @@ type Props = {
 
 export function SelectCategory({ selected, onChange, hideLoading }: Props) {
   const trpc = useTRPC();
+
   const { data: categories, isLoading } = useQuery(
     trpc.category.get.queryOptions({}),
+  );
+
+  const { data: categoryCounts, isLoading: isLoadingCategoryCounts } = useQuery(
+    trpc.transaction.getCategoryCounts.queryOptions(),
   );
 
   if (!selected && isLoading && !hideLoading) {
@@ -65,9 +71,13 @@ export function SelectCategory({ selected, onChange, hideLoading }: Props) {
                   />
                   {item.name}
                 </div>
-                {/* <span className="text-xs text-muted-foreground">
-                      {item.number.toLocaleString()}
-                    </span> */}
+                {isLoadingCategoryCounts ? (
+                  <LoaderCircleIcon className="size-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <span className="text-xs text-muted-foreground">
+                    {categoryCounts![item.id]?.toLocaleString()}
+                  </span>
+                )}
               </CommandItem>
             ))}
           </CommandGroup>

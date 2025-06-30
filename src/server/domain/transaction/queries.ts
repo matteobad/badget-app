@@ -17,8 +17,10 @@ import {
 import {
   and,
   asc,
+  count,
   desc,
   eq,
+  gt,
   gte,
   inArray,
   isNull,
@@ -430,4 +432,30 @@ export async function getTransactionAmountRangeQuery(userId: string) {
     })
     .from(transaction_table)
     .where(eq(transaction_table.userId, userId));
+}
+
+export async function getTransactionCategoryCountsQuery(userId: string) {
+  try {
+    return await db
+      .select({
+        categoryId: transaction_table.categoryId,
+        count: count(),
+      })
+      .from(transaction_table)
+      .where(eq(transaction_table.userId, userId))
+      .groupBy(transaction_table.categoryId)
+      .having(gt(count(), 0))
+      .then((res) =>
+        res.reduce(
+          (acc, { categoryId, count }) => {
+            acc[categoryId ?? "null"] = count;
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
+      );
+  } catch (err) {
+    console.error(err);
+    return {} as Record<string, number>;
+  }
 }

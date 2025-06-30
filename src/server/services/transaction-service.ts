@@ -14,6 +14,7 @@ import {
 import {
   getTransactionAmountRangeQuery,
   getTransactionByIdQuery,
+  getTransactionCategoryCountsQuery,
   getTransactionsQuery,
 } from "../domain/transaction/queries";
 
@@ -30,6 +31,10 @@ export async function getTransactionById(id: string, userId: string) {
 
 export async function getTransactionAmountRange(userId: string) {
   return await getTransactionAmountRangeQuery(userId);
+}
+
+export async function getTransactionCategoryCounts(userId: string) {
+  return await getTransactionCategoryCountsQuery(userId);
 }
 
 export async function createTransaction(

@@ -431,7 +431,7 @@ export function TransactionsSearchFilter() {
         </FilterMenuItem>
 
         <FilterMenuItem icon={ShapesIcon} label="Categories">
-          <div className="h-[270px] w-[250px]">
+          <div className="h-[280px] w-[250px]">
             <SelectCategory
               selected={filter.categories}
               onChange={(selected) =>

@@ -10,26 +10,19 @@ import { account_table } from "~/server/db/schema/accounts";
 import { category_table } from "~/server/db/schema/categories";
 import {
   attachment_table,
-  tag_table,
   tag_table as tagTable,
   transaction_table,
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
 import {
   and,
-  asc,
   count,
   desc,
   eq,
   getTableColumns,
   gt,
-  gte,
-  ilike,
   inArray,
-  lte,
 } from "drizzle-orm";
-
-import { type GeTransactionType } from "../utils/search-params";
 
 export function getRecentTransactions_QUERY(userId: string) {
   try {
@@ -54,122 +47,6 @@ export function getRecentTransactions_QUERY(userId: string) {
   } catch (err) {
     console.error(err);
     return [];
-  }
-}
-
-export async function getTransactions_QUERY(
-  input: GeTransactionType,
-  userId: string,
-) {
-  try {
-    const offset = (input.page - 1) * input.perPage;
-    const fromDate = input.date[0] ? new Date(input.date[0]) : undefined;
-    const toDate = input.date[1] ? new Date(input.date[1]) : undefined;
-    const minAmount = input.amount[0] ? parseFloat(input.amount[0]) : undefined;
-    const maxAmount = input.amount[1] ? parseFloat(input.amount[1]) : undefined;
-
-    const where = and(
-      input.description
-        ? ilike(transaction_table.description, `%${input.description}%`)
-        : undefined,
-      input.categoryId.length > 0
-        ? inArray(transaction_table.categoryId, input.categoryId)
-        : undefined,
-      input.accountId.length > 0
-        ? inArray(transaction_table.accountId, input.accountId)
-        : undefined,
-      input.tags.length > 0
-        ? inArray(transaction_to_tag_table.tagId, input.tags)
-        : undefined,
-      fromDate ? gte(transaction_table.date, fromDate) : undefined,
-      toDate ? lte(transaction_table.date, toDate) : undefined,
-      minAmount
-        ? gte(transaction_table.amount, minAmount.toFixed(2))
-        : undefined,
-      maxAmount
-        ? lte(transaction_table.amount, maxAmount.toFixed(2))
-        : undefined,
-      eq(transaction_table.userId, userId),
-    );
-
-    const orderBy =
-      input.sort.length > 0
-        ? input.sort.map((item) =>
-            item.desc
-              ? desc(transaction_table[item.id])
-              : asc(transaction_table[item.id]),
-          )
-        : [desc(transaction_table.date)];
-
-    const { data, total } = await db.transaction(async (tx) => {
-      const data = await tx
-        .select({
-          ...getTableColumns(transaction_table),
-          tags: tag_table,
-        })
-        .from(transaction_table)
-        .leftJoin(
-          transaction_to_tag_table,
-          and(eq(transaction_table.id, transaction_to_tag_table.transactionId)),
-        )
-        .leftJoin(tag_table, eq(transaction_to_tag_table.tagId, tag_table.id))
-        .limit(input.perPage)
-        .offset(offset)
-        .where(where)
-        .orderBy(...orderBy);
-
-      const total = await tx
-        .select({
-          count: count(),
-        })
-        .from(transaction_table)
-        .leftJoin(
-          transaction_to_tag_table,
-          and(eq(transaction_table.id, transaction_to_tag_table.transactionId)),
-        )
-        .leftJoin(tag_table, eq(transaction_to_tag_table.tagId, tag_table.id))
-
-        .where(where)
-        .execute()
-        .then((res) => res[0]?.count ?? 0);
-
-      return {
-        data,
-        total,
-      };
-    });
-
-    const pageCount = Math.ceil(total / input.perPage);
-    return { data, pageCount };
-  } catch (err) {
-    console.error(err);
-    return { data: [], pageCount: 0 };
-  }
-}
-
-export async function getTransactionCategoryCounts_QUERY(userId: string) {
-  try {
-    return await db
-      .select({
-        categoryId: transaction_table.categoryId,
-        count: count(),
-      })
-      .from(transaction_table)
-      .where(eq(transaction_table.userId, userId))
-      .groupBy(transaction_table.categoryId)
-      .having(gt(count(), 0))
-      .then((res) =>
-        res.reduce(
-          (acc, { categoryId, count }) => {
-            acc[categoryId ?? "null"] = count;
-            return acc;
-          },
-          {} as Record<string, number>,
-        ),
-      );
-  } catch (err) {
-    console.error(err);
-    return {} as Record<string, number>;
   }
 }
 

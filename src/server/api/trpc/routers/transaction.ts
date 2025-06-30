@@ -3,6 +3,7 @@ import {
   deleteTransaction,
   getTransactionAmountRange,
   getTransactionById,
+  getTransactionCategoryCounts,
   getTransactions,
   updateTransaction,
 } from "~/server/services/transaction-service";
@@ -34,6 +35,11 @@ export const transactionRouter = createTRPCRouter({
   getAmountRange: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.userId!;
     return await getTransactionAmountRange(userId);
+  }),
+
+  getCategoryCounts: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.userId!;
+    return await getTransactionCategoryCounts(userId);
   }),
 
   create: protectedProcedure
