@@ -161,10 +161,7 @@ export function FilterList({
         const tagsValue = value as FilterValue["tags"];
         if (!tagsValue) return null;
         return tagsValue
-          .map(
-            (id) =>
-              tags?.find((tag) => tag?.id === id || tag?.slug === id)?.name,
-          )
+          .map((id) => tags?.find((tag) => tag?.id === id)?.text)
           .join(", ");
       }
 

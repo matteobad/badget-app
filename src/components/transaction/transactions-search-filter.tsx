@@ -6,9 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTransactionFilterParams } from "~/hooks/use-transaction-filter-params";
 import { useTransactionFilterParamsWithPersistence } from "~/hooks/use-transaction-filter-params-with-persistence";
 import { cn } from "~/lib/utils";
-import { generateTransactionsFilters } from "~/server/domain/transaction/actions";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
 import {
   CalendarIcon,
@@ -162,9 +160,8 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
   });
 
   const { data: bankAccountsData } = useQuery({
-    ...trpc.bankAccount.get.queryOptions({
-      enabled: shouldFetch || Boolean(filter.accounts?.length),
-    }),
+    ...trpc.bankAccount.get.queryOptions({}),
+    enabled: shouldFetch || Boolean(filter.accounts?.length),
   });
 
   // We want to fetch the categories data on mount
@@ -209,7 +206,7 @@ function updateArrayFilter(
 export function TransactionsSearchFilter() {
   const [placeholder, setPlaceholder] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const [streaming, setStreaming] = useState(false);
+  const [streaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const { filter = defaultSearch, setFilter } =
@@ -254,49 +251,8 @@ export function TransactionsSearchFilter() {
   };
 
   const handleSubmit = async () => {
-    if (prompt.split(" ").length > 1) {
-      setStreaming(true);
-
-      const { object } = await generateTransactionsFilters(
-        prompt,
-        `
-          Categories: ${categories?.map((category) => category.name).join(", ")}
-          Tags: ${tags?.map((tag) => tag.text).join(", ")}
-        `,
-      );
-
-      let finalObject = {};
-
-      for await (const partialObject of readStreamableValue(object)) {
-        if (partialObject) {
-          finalObject = {
-            ...finalObject,
-            ...partialObject,
-            categories:
-              partialObject?.categories?.map(
-                (name: string) =>
-                  categories?.find((category) => category.name === name)?.slug,
-              ) ?? null,
-            tags:
-              partialObject?.tags?.map(
-                (name: string) => tags?.find((tag) => tag.name === name)?.id,
-              ) ?? null,
-            recurring: partialObject?.recurring ?? null,
-            q: partialObject?.name ?? null,
-            amount_range: partialObject?.amount_range ?? null,
-          };
-        }
-      }
-
-      setFilter({
-        q: null,
-        ...finalObject,
-      });
-
-      setStreaming(false);
-    } else {
-      setFilter({ q: prompt.length > 0 ? prompt : null });
-    }
+    // TODO: add AI filtering @ref: midday
+    setFilter({ q: prompt.length > 0 ? prompt : null });
   };
 
   const validFilters = Object.fromEntries(

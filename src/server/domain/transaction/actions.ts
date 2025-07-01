@@ -44,23 +44,21 @@ export async function generateTransactionsFilters(
 ) {
   const stream = createStreamableValue();
 
-  (async () => {
-    const { partialObjectStream } = await streamObject({
-      model: openai("gpt-4o-mini"),
-      system: `You are a helpful assistant that generates filters for a given prompt. \n
+  const { partialObjectStream } = streamObject({
+    model: openai("gpt-4o-mini"),
+    system: `You are a helpful assistant that generates filters for a given prompt. \n
                Current date is: ${new Date().toISOString().split("T")[0]} \n
                ${context}
       `,
-      schema,
-      prompt,
-    });
+    schema,
+    prompt,
+  });
 
-    for await (const partialObject of partialObjectStream) {
-      stream.update(partialObject);
-    }
+  for await (const partialObject of partialObjectStream) {
+    stream.update(partialObject);
+  }
 
-    stream.done();
-  })();
+  stream.done();
 
   return { object: stream.value };
 }
