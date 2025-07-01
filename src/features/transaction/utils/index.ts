@@ -25,13 +25,13 @@ export function transformCSV(
   if (column in row) description = row[column]!;
   else throw new Error(`Col ${column} is not present in the CSV`);
 
-  let amount: string;
+  let amount: number;
   column = fieldMapping.amount;
-  if (column in row) amount = parseFloat(row[column]!).toFixed(2);
+  if (column in row) amount = parseFloat(row[column]!);
   else throw new Error(`Col ${column} is not present in the CSV`);
 
   // settings
-  if (settings.inverted) amount = (-parseFloat(amount)).toFixed(2);
+  if (settings.inverted) amount *= -1;
 
   // add other columns mapping here
 

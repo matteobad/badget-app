@@ -53,8 +53,8 @@ export default function NumberFilter<TData, TValue>({
   const tick_count = 40;
   // Find the min and max values across all items
   const items = data?.map((t) => (t as DB_TransactionType).amount) ?? [];
-  const minValue = Math.min(...items.map((item) => parseFloat(item)));
-  const maxValue = Math.max(...items.map((item) => parseFloat(item)));
+  const minValue = Math.min(...items.map((item) => item));
+  const maxValue = Math.max(...items.map((item) => item));
 
   const {
     sliderValue,
@@ -77,9 +77,7 @@ export default function NumberFilter<TData, TValue>({
     .map((_, tick) => {
       const rangeMin = minValue + tick * priceStep;
       const rangeMax = minValue + (tick + 1) * priceStep;
-      return items.filter(
-        (item) => parseFloat(item) >= rangeMin && parseFloat(item) < rangeMax,
-      ).length;
+      return items.filter((item) => item >= rangeMin && item < rangeMax).length;
     });
 
   // Find maximum count for scaling
@@ -91,9 +89,7 @@ export default function NumberFilter<TData, TValue>({
 
   // Function to count items in the selected range
   const countItemsInRange = (min: number, max: number) => {
-    return items.filter(
-      (item) => parseFloat(item) >= min && parseFloat(item) <= max,
-    ).length;
+    return items.filter((item) => item >= min && item <= max).length;
   };
 
   const isBarInSelectedRange = (

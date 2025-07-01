@@ -93,6 +93,7 @@ async function main() {
     },
     transaction_table: {
       columns: {
+        id: f.uuid(),
         amount: f.int({ minValue: -1230, maxValue: 2500 }),
         categoryId: f.valuesFromArray({ values: categoriesIds }),
         currency: f.default({ defaultValue: "EUR" }),

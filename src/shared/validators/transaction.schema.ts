@@ -25,20 +25,20 @@ export const createTransactionSchema = createInsertSchema(
 });
 
 export const updateTransactionSchema = createUpdateSchema(transaction_table, {
-  id: z.string().min(1), // TODO: change to cuid2
+  id: z.cuid2(),
 }).omit({
   createdAt: true,
   updatedAt: true,
 });
 
 export const deleteTransactionSchema = z.object({
-  id: z.string().min(1), // TODO: change to cuid2
+  id: z.cuid2(),
 });
 
 // Query filter schema
 export const getTransactionsSchema = z.object({
   cursor: z.string().nullable().optional(),
-  sort: z.array(z.string(), z.string()).nullable().optional(),
+  sort: z.array(z.string()).min(2).max(2).nullable().optional(),
   pageSize: z.coerce.number().min(1).max(10000).optional(),
 
   q: z.string().nullable().optional(),
