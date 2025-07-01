@@ -16,7 +16,7 @@ import {
 import { Skeleton } from "../ui/skeleton";
 
 type CategoryPickerProps = {
-  options: RouterOutput["category"]["getAll"];
+  options: RouterOutput["category"]["get"];
   disabledOptions: string[];
   isLoading: boolean;
   onReset?: () => void;

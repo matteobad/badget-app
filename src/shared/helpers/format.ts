@@ -38,7 +38,7 @@ export function formatAmount({
   maximumFractionDigits,
 }: FormatAmountParams) {
   if (!currency) {
-    return;
+    return "";
   }
 
   // Fix: locale can be null, but Intl.NumberFormat expects string | string[] | undefined

@@ -13,6 +13,7 @@ import {
 import z from "zod/v4";
 
 export const getCategoriesSchema = z.object({
+  type: z.enum(CATEGORY_TYPE).optional(),
   limit: z.number().default(1000),
 });
 

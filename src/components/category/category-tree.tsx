@@ -84,7 +84,7 @@ export function CategoryTree() {
 
   const { data: warnings } = useSuspenseQuery(
     trpc.budget.getBudgetWarnings.queryOptions({
-      categoryFilters,
+      categoryFilters: {},
       budgetFilters,
     }),
   );
@@ -239,7 +239,7 @@ function CategoryBudgets({
   category: Category;
   warnings: RouterOutput["budget"]["getBudgetWarnings"];
 }) {
-  const t = useScopedI18n("categories.budget.node");
+  const t = useI18n();
   const budget = category.budgets[0];
   const warning = warnings.find((w) => w.parentId === category.id);
 
@@ -255,13 +255,7 @@ function CategoryBudgets({
     <div className="flex grow items-center justify-end gap-2 font-mono text-neutral-300">
       {warning && (
         <span className="mr-2 truncate text-xs">
-          {t("warning", {
-            excess: formatAmount({
-              amount: warning.excess,
-              currency: "eur",
-              maximumFractionDigits: 0,
-            }),
-          })}
+          {t("categories.budget.warning.node")}
         </span>
       )}
       <span className="">

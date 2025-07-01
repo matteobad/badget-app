@@ -67,7 +67,7 @@ export default function CreateTransactionForm({
   const queryClient = useQueryClient();
 
   const { data: categories, isLoading: isLoadingCategories } = useQuery(
-    trpc.category.getAll.queryOptions(),
+    trpc.category.get.queryOptions({}),
   );
   const { data: accounts } = useQuery(trpc.bankAccount.get.queryOptions({}));
 

@@ -46,8 +46,9 @@ export function DataTable({
   const deferredSearch = useDeferredValue(filter.q);
   const { params } = useSortParams();
   const { ref, inView } = useInView();
-  const { transactionId, setParams } = useTransactionParams();
+  const { params: transactionParams, setParams } = useTransactionParams();
 
+  const transactionId = transactionParams.transactionId;
   const showBottomBar = hasFilters && !Object.keys(rowSelection).length;
   const initialColumnVisibility = use(columnVisibilityPromise);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(

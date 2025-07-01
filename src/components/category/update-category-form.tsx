@@ -35,7 +35,7 @@ export default function UpdateCategoryForm({
   const queryClient = useQueryClient();
 
   const { data: categories, isLoading: isLoadingCategories } = useQuery(
-    trpc.category.getAll.queryOptions({ type: category.type }),
+    trpc.category.get.queryOptions({ type: category.type }),
   );
 
   const form = useForm<z.infer<typeof updateCategorySchema>>({
@@ -48,6 +48,10 @@ export default function UpdateCategoryForm({
   const updateMutation = useMutation(
     trpc.category.updateCategory.mutationOptions({
       onSuccess: (_data) => {
+        void queryClient.invalidateQueries({
+          queryKey: trpc.category.get.queryKey(),
+        });
+
         void queryClient.invalidateQueries({
           queryKey: trpc.category.getFlatTree.queryKey(),
         });
@@ -126,7 +130,6 @@ export default function UpdateCategoryForm({
                       autoCorrect="off"
                       spellCheck="false"
                       onChange={(event) => {
-                        // TODO: validate unique slug
                         field.onChange(event);
                         form.setValue(
                           "slug",

@@ -43,7 +43,7 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
   // prefetch warnings
   await queryClient.fetchQuery(
     trpc.budget.getBudgetWarnings.queryOptions({
-      categoryFilters,
+      categoryFilters: {},
       budgetFilters,
     }),
   );

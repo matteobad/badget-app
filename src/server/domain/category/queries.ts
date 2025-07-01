@@ -10,9 +10,13 @@ export async function getCategoriesQuery(
   params: z.infer<typeof getCategoriesSchema>,
   userId: string,
 ) {
-  const { limit = 1000 } = params;
+  const { type, limit = 1000 } = params;
 
   const where = [eq(category_table.userId, userId)];
+
+  if (type) {
+    where.push(eq(category_table.type, type));
+  }
 
   // First get all categories
   const categories = await db

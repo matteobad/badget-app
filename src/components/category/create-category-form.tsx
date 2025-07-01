@@ -36,7 +36,7 @@ export default function CreateCategoryForm({
   const queryClient = useQueryClient();
 
   const { data: categories, isLoading } = useQuery(
-    trpc.category.getAll.queryOptions(),
+    trpc.category.get.queryOptions({}),
   );
 
   const createMutation = useMutation(

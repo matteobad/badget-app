@@ -8,7 +8,7 @@ import {
   budgetFilterSchema,
   createBudgetSchema,
 } from "~/shared/validators/budget.schema";
-import { categoryFilterSchema } from "~/shared/validators/category.schema";
+import { getCategoriesSchema } from "~/shared/validators/category.schema";
 import { z } from "zod/v4";
 
 import { createTRPCRouter, protectedProcedure } from "../init";
@@ -17,7 +17,7 @@ export const budgetRouter = createTRPCRouter({
   getBudgetWarnings: protectedProcedure
     .input(
       z.object({
-        categoryFilters: categoryFilterSchema,
+        categoryFilters: getCategoriesSchema,
         budgetFilters: budgetFilterSchema,
       }),
     )

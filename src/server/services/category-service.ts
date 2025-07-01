@@ -3,13 +3,17 @@ import type { budgetFilterSchema } from "~/shared/validators/budget.schema";
 import type {
   createCategorySchema,
   getCategoriesSchema,
+  updateCategorySchema,
 } from "~/shared/validators/category.schema";
 import type z from "zod/v4";
 
 import { CATEGORY_TYPE } from "../db/schema/enum";
 import { getBudgetForPeriod } from "../domain/budget/helpers";
 import { getBudgetsQuery } from "../domain/budget/queries";
-import { createCategoryMutation } from "../domain/category/mutations";
+import {
+  createCategoryMutation,
+  updateCategoryMutation,
+} from "../domain/category/mutations";
 import { getCategoriesQuery } from "../domain/category/queries";
 
 type CategoryType = Awaited<ReturnType<typeof getCategoriesQuery>>[number];
@@ -132,5 +136,13 @@ export async function createCategory(
   userId: string,
 ) {
   const [result] = await createCategoryMutation(params, userId);
+  return result;
+}
+
+export async function updateCategory(
+  params: z.infer<typeof updateCategorySchema>,
+  userId: string,
+) {
+  const result = await updateCategoryMutation(params, userId);
   return result;
 }

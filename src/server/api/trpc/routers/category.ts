@@ -1,14 +1,11 @@
 import { buildTreeData } from "~/server/domain/category/helpers";
-import {
-  createCategoryMutation,
-  deleteCategoryMutation,
-  updateCategoryMutation,
-} from "~/server/domain/category/mutations";
+import { deleteCategoryMutation } from "~/server/domain/category/mutations";
 import { getCategoryByIdQuery } from "~/server/domain/category/queries";
 import {
   createCategory,
   getCategories,
   getCategoriesWithBudgets,
+  updateCategory,
 } from "~/server/services/category-service";
 import { budgetFilterSchema } from "~/shared/validators/budget.schema";
 import {
@@ -50,13 +47,6 @@ export const categoryRouter = createTRPCRouter({
       return flatTreeData;
     }),
 
-  getAll: protectedProcedure
-    .input(categoryFilterSchema)
-    .query(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
-      return await getCategories(input, userId);
-    }),
-
   getById: protectedProcedure
     .input(z.object({ id: z.string().min(1) })) // TODO: change to cuid2
     .query(async ({ ctx, input }) => {
@@ -75,7 +65,7 @@ export const categoryRouter = createTRPCRouter({
     .input(updateCategorySchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.userId!;
-      return await updateCategoryMutation({ ...input, userId });
+      return await updateCategory(input, userId);
     }),
 
   deleteCategory: protectedProcedure

@@ -218,7 +218,7 @@ export async function getTransactionsQuery(
         logoUrl: account_table.logoUrl,
       },
       tags: sql<
-        Array<{ id: string; name: string | null }>
+        Array<{ id: string; text: string | null }>
       >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tag_table.id}, 'text', ${tag_table.text})) FILTER (WHERE ${tag_table.id} IS NOT NULL), '[]'::json)`.as(
         "tags",
       ),
