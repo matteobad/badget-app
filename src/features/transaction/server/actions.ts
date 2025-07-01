@@ -8,7 +8,6 @@ import { db, withTransaction } from "~/server/db";
 import { transaction_table } from "~/server/db/schema/transactions";
 import { utapi } from "~/server/uploadthing";
 import {
-  categorizeTransaction,
   categorizeTransactions,
   updateOrCreateRule,
 } from "~/utils/categorization";
@@ -18,61 +17,18 @@ import type { CSVRow, CSVRowParsed } from "../utils/schemas";
 import { transformCSV } from "../utils";
 import {
   AttachmentDeleteSchema,
-  CategorizeTransactionSchema,
   TransactionDeleteSchema,
   TransactionImportSchema,
-  TransactionInsertSchema,
   TransactionUpdateBulkSchema,
   TransactionUpdateSchema,
 } from "../utils/schemas";
 import {
-  createTransaction,
   deleteTransaction,
   deleteTransactionAttachment,
   updateTransaction,
-  updateTransactionAttachment,
-  updateTransactionTags,
 } from "./queries";
 
 // transaction
-export const createTransactionAction = authActionClient
-  .inputSchema(TransactionInsertSchema)
-  .metadata({ actionName: "create-transaction" })
-  .action(async ({ parsedInput, ctx }) => {
-    // Prepare data
-    const userId = ctx.userId;
-    const categoryId = parsedInput.categoryId;
-
-    // Mutate data
-    await withTransaction(async (tx) => {
-      // update transaction
-      const inserted = await createTransaction({ ...parsedInput, userId }, tx);
-
-      if (!inserted[0]?.id) return tx.rollback();
-      const transactionId = inserted[0].id;
-
-      for (const id of parsedInput.attachment_ids) {
-        const updatedAttachment = { id, userId, transactionId };
-        await updateTransactionAttachment(updatedAttachment, tx);
-      }
-
-      // update transaction tags
-      const tags = parsedInput.tags.map((t) => t.text);
-      await updateTransactionTags(tags, transactionId, userId, tx);
-
-      // update category rule relevance
-      const description = parsedInput.description;
-      await updateOrCreateRule(userId, description, categoryId);
-    });
-
-    // Invalidate cache
-    revalidateTag(`transaction_${ctx.userId}`);
-    revalidateTag(`attachment_${ctx.userId}`);
-
-    // Return success message
-    return { message: "create-transaction-success-message" };
-  });
-
 export const updateTransactionAction = authActionClient
   .inputSchema(TransactionUpdateSchema)
   .metadata({ actionName: "update-transaction" })
@@ -255,12 +211,4 @@ export const importTransactionAction = authActionClient
 
     // Return success message
     return { message: "import-transaction-success-message" };
-  });
-
-export const categorizeTransactionAction = authActionClient
-  .schema(CategorizeTransactionSchema)
-  .metadata({ actionName: "categorize-transaction" })
-  .action(async ({ parsedInput, ctx }) => {
-    const categoryId = await categorizeTransaction(ctx.userId, parsedInput);
-    return { categoryId };
   });

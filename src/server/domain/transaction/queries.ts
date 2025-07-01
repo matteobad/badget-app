@@ -1,6 +1,7 @@
 "server-only";
 
 import type { transactionFrequencyEnum } from "~/server/db/schema/transactions";
+import type { getTransactionTagsSchema } from "~/shared/validators/tag.schema";
 import type { getTransactionsSchema } from "~/shared/validators/transaction.schema";
 import type { SQL } from "drizzle-orm";
 import type z from "zod/v4";
@@ -391,6 +392,20 @@ export async function getTransactionByIdQuery(id: string, _userId: string) {
     );
 
   return result[0];
+}
+
+export async function getTransactionTagsQuery(
+  params: z.infer<typeof getTransactionTagsSchema>,
+  _userId: string,
+) {
+  return await db
+    .select({
+      id: transaction_to_tag_table.tagId,
+      text: tag_table.text,
+    })
+    .from(transaction_to_tag_table)
+    .innerJoin(tag_table, eq(transaction_to_tag_table.tagId, tag_table.id))
+    .where(eq(transaction_to_tag_table.transactionId, params.transactionId));
 }
 
 export async function getTransactionAmountRangeQuery(userId: string) {

@@ -16,13 +16,19 @@ import z from "zod/v4";
 
 export const selectTransactionSchema = createSelectSchema(transaction_table);
 
-export const createTransactionSchema = createInsertSchema(
-  transaction_table,
-).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+export const createTransactionSchema = createInsertSchema(transaction_table, {
+  note: z.string().optional(),
+})
+  .extend({
+    attachment_ids: z.array(z.string()).optional(),
+    tags: z.array(z.object({ id: z.string(), text: z.string() })).optional(),
+  })
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+    userId: true,
+  });
 
 export const updateTransactionSchema = createUpdateSchema(transaction_table, {
   id: z.cuid2(),
@@ -31,7 +37,16 @@ export const updateTransactionSchema = createUpdateSchema(transaction_table, {
   updatedAt: true,
 });
 
+export const updateTransactionTagsSchema = z.object({
+  transactionId: z.cuid2(),
+  tags: z.array(z.string()),
+});
+
 export const deleteTransactionSchema = z.object({
+  id: z.cuid2(),
+});
+
+export const categorizeTransactionSchema = z.object({
   id: z.cuid2(),
 });
 

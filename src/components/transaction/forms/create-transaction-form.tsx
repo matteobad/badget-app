@@ -51,10 +51,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod/v4";
 
-import {
-  categorizeTransactionAction,
-  deleteTransactionAttachmentAction,
-} from "../../../features/transaction/server/actions";
+import { deleteTransactionAttachmentAction } from "../../../features/transaction/server/actions";
 
 export default function CreateTransactionForm({
   className,
@@ -70,6 +67,16 @@ export default function CreateTransactionForm({
     trpc.category.get.queryOptions({}),
   );
   const { data: accounts } = useQuery(trpc.bankAccount.get.queryOptions({}));
+
+  const categorizeTransactionMutation = useMutation(
+    trpc.transaction.categorize.mutationOptions({
+      onError: console.error,
+      onSuccess: (data) => {
+        if (form.getFieldState("categoryId").isDirty) return;
+        form.setValue("categoryId", data);
+      },
+    }),
+  );
 
   const createTransactionMutation = useMutation(
     trpc.transaction.create.mutationOptions({
@@ -88,16 +95,6 @@ export default function CreateTransactionForm({
       },
     }),
   );
-
-  const categorizeTransaction = useAction(categorizeTransactionAction, {
-    onError: ({ error }) => {
-      console.error(error);
-    },
-    onSuccess: ({ data }) => {
-      if (form.getFieldState("categoryId").isDirty) return;
-      form.setValue("categoryId", data?.categoryId);
-    },
-  });
 
   const deleteAttachment = useAction(deleteTransactionAttachmentAction, {
     onError: ({ error }) => {
@@ -118,7 +115,8 @@ export default function CreateTransactionForm({
       amount: 0,
       currency: "EUR",
       accountId: accounts ? accounts[0]?.id : undefined,
-      // attachment_ids: [],
+      attachment_ids: [],
+      tags: tags,
     },
   });
 
@@ -149,23 +147,33 @@ export default function CreateTransactionForm({
                 <FormLabel>Data</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {format(field.value, "MMMM dd'th', yyyy")}
-                    </Button>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground",
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd MMMM yyyy")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent
+                    className="w-auto overflow-hidden p-0"
+                    align="start"
+                  >
                     <Calendar
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      autoFocus
-                      hidden={{ after: new Date() }}
+                      disabled={(date) => date < new Date("1900-01-01")}
+                      captionLayout="dropdown"
                     />
                   </PopoverContent>
                 </Popover>
@@ -181,6 +189,7 @@ export default function CreateTransactionForm({
                 <FormLabel>Descrizione</FormLabel>
                 <FormControl>
                   <Input
+                    className="bg-background"
                     placeholder=""
                     autoComplete="off"
                     autoCapitalize="none"
@@ -188,7 +197,8 @@ export default function CreateTransactionForm({
                     spellCheck="false"
                     {...field}
                     onBlur={(event) => {
-                      categorizeTransaction.execute({
+                      if (event.target.value.length < 3) return;
+                      categorizeTransactionMutation.mutate({
                         description: event.target.value,
                       });
                     }}
@@ -296,8 +306,7 @@ export default function CreateTransactionForm({
                   className="sm:min-w-[450px]"
                   setTags={(newTags) => {
                     setTags(newTags);
-                    form.setValue("tags", newTags as [Tag, ...Tag[]]);
-                    console.log(newTags);
+                    form.setValue("tags", newTags as Tag[]);
                   }}
                   activeTagIndex={activeTagIndex}
                   setActiveTagIndex={setActiveTagIndex}
@@ -382,7 +391,7 @@ export default function CreateTransactionForm({
                     <FormControl>
                       <Textarea
                         placeholder="Informazioni aggiuntive"
-                        className="min-h-[100px] resize-none"
+                        className="min-h-[100px] resize-none bg-background"
                         {...field}
                       />
                     </FormControl>

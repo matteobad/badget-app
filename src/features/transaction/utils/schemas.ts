@@ -4,23 +4,6 @@ import { transaction_table } from "~/server/db/schema/transactions";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const TransactionInsertSchema = createInsertSchema(transaction_table, {
-  date: z.date(),
-  amount: z.string(),
-  note: z.string().optional(),
-})
-  .omit({
-    id: true,
-    userId: true,
-    createdAt: true,
-    updatedAt: true,
-    deletedAt: true,
-  })
-  .extend({
-    attachment_ids: z.array(z.string()),
-    tags: z.array(TagInsertSchema).default([]),
-  });
-
 export const TransactionUpdateSchema = createInsertSchema(transaction_table, {
   id: z.string(),
   date: z.date().optional(),

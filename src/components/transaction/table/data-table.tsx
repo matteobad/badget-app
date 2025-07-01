@@ -128,12 +128,7 @@ export function DataTable({
       updateTransaction: (data: { id: string; status: string }) => {
         updateTransactionMutation.mutate({
           id: data.id,
-          status: data.status as
-            | "pending"
-            | "archived"
-            | "completed"
-            | "posted"
-            | "excluded",
+          status: data.status as "pending" | "archived" | "booked" | "excluded",
         });
       },
       onDeleteTransaction: (id: string) => {
@@ -236,7 +231,7 @@ export function DataTable({
           <div className="w-full">
             <div
               ref={tableScroll.containerRef}
-              className="scrollbar-hide overflow-x-auto overscroll-x-none border-t border-border"
+              className="scrollbar-hide overflow-x-auto overscroll-x-none border-y border-border"
             >
               <Table>
                 <DataTableHeader table={table} tableScroll={tableScroll} />
@@ -254,6 +249,8 @@ export function DataTable({
                             className={cn(
                               getStickyClassName(
                                 cell.column.id,
+                                // @ts-expect-error - TODO: fix this
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                                 cell.column.columnDef.meta?.className,
                               ),
                               "py-4",

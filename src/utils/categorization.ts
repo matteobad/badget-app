@@ -129,7 +129,7 @@ export const updateOrCreateRule = async (
 };
 
 // Categorize transaction
-export const categorizeTransaction = async (
+export const categorizeUserTransaction = async (
   userId: string,
   transaction: Transaction,
 ): Promise<string | null> => {
@@ -160,7 +160,7 @@ export const categorizeTransactions = async (
   return Promise.all(
     transactions.map(async (tx) => ({
       ...tx,
-      categoryId: await categorizeTransaction(userId, tx),
+      categoryId: await categorizeUserTransaction(userId, tx),
     })),
   );
 };

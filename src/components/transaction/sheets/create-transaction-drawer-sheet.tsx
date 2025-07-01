@@ -10,6 +10,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "~/components/ui/drawer";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -71,7 +72,10 @@ export default function CreateTransactionDrawerSheet() {
               Registra un movimento per tenere tutto sotto controllo.
             </SheetDescription>
           </SheetHeader>
+
+          {/* <ScrollArea className="h-full p-0"> */}
           <DrawerSheetContent />
+          {/* </ScrollArea> */}
         </div>
       </SheetContent>
     </Sheet>

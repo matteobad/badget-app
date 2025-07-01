@@ -1,20 +1,15 @@
 "server-only";
 
 import type { DBClient } from "~/server/db";
-import type {
-  DB_AttachmentInsertType,
-  DB_TransactionInsertType,
-} from "~/server/db/schema/transactions";
+import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { category_table } from "~/server/db/schema/categories";
 import {
   attachment_table,
-  tag_table as tagTable,
   transaction_table,
-  transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
-import { and, desc, eq, getTableColumns, inArray } from "drizzle-orm";
+import { and, desc, eq, getTableColumns } from "drizzle-orm";
 
 export function getRecentTransactions_QUERY(userId: string) {
   try {
@@ -70,111 +65,6 @@ export const updateTransaction = (
         eq(transaction_table.userId, transaction.userId),
       ),
     );
-};
-
-export const updateTransactionAttachment = (
-  attachment: Partial<DB_AttachmentInsertType>,
-  client: DBClient = db,
-) => {
-  if (!attachment.id || !attachment.userId || !attachment.transactionId)
-    throw new Error("invalid attachment");
-
-  return client
-    .update(attachment_table)
-    .set(attachment)
-    .where(
-      and(
-        eq(attachment_table.id, attachment.id),
-        eq(attachment_table.userId, attachment.userId),
-      ),
-    );
-};
-
-export const updateTransactionTags = async (
-  tags: string[],
-  transactionId: string,
-  userId: string,
-  client: DBClient,
-) => {
-  const existingTags = await client
-    .select({
-      id: transaction_to_tag_table.tagId,
-      text: tagTable.text,
-    })
-    .from(transaction_to_tag_table)
-    .innerJoin(tagTable, eq(transaction_to_tag_table.tagId, tagTable.id))
-    .where(eq(transaction_to_tag_table.transactionId, transactionId));
-
-  const existingTagNames = existingTags.map((t) => t.text);
-
-  // Determine tags to add and remove
-  const tagsToAdd = tags.filter((name) => !existingTagNames.includes(name));
-  const tagsToRemove = existingTags.filter((tag) => !tags.includes(tag.text));
-
-  let newTagIds: string[] = [];
-
-  // Create tags if they don’t exist
-  if (tagsToAdd.length > 0) {
-    const existingTagRecords = await client
-      .select({ id: tagTable.id, name: tagTable.text })
-      .from(tagTable)
-      .where(inArray(tagTable.text, tagsToAdd));
-
-    const existingTagMap = new Map(
-      existingTagRecords.map((t) => [t.name, t.id]),
-    );
-
-    const tagsToInsert = tagsToAdd.filter((name) => !existingTagMap.has(name));
-
-    if (tagsToInsert.length > 0) {
-      const insertedTags = await client
-        .insert(tagTable)
-        .values(tagsToInsert.map((text) => ({ text, userId })))
-        .returning({ id: tagTable.id, text: tagTable.text });
-
-      insertedTags.forEach(({ id, text }) => existingTagMap.set(text, id));
-    }
-
-    newTagIds = tagsToAdd.map((name) => existingTagMap.get(name)!);
-  }
-
-  // Insert new tag associations
-  if (newTagIds.length > 0) {
-    await client.insert(transaction_to_tag_table).values(
-      newTagIds.map((tagId) => ({
-        transactionId,
-        tagId,
-      })),
-    );
-  }
-
-  // Remove old tag associations
-  if (tagsToRemove.length > 0) {
-    const tagIdsToRemove = tagsToRemove.map((tag) => tag.id);
-
-    await client
-      .delete(transaction_to_tag_table)
-      .where(
-        and(
-          eq(transaction_to_tag_table.transactionId, transactionId),
-          inArray(transaction_to_tag_table.tagId, tagIdsToRemove),
-        ),
-      );
-
-    // Delete tags if they are no longer used
-    const unusedTags = await client
-      .select({ id: transaction_to_tag_table.tagId })
-      .from(transaction_to_tag_table)
-      .where(inArray(transaction_to_tag_table.tagId, tagIdsToRemove));
-
-    const unusedTagIds = tagIdsToRemove.filter(
-      (id) => !unusedTags.some((t) => t.id === id),
-    );
-
-    if (unusedTagIds.length > 0) {
-      await client.delete(tagTable).where(inArray(tagTable.id, unusedTagIds));
-    }
-  }
 };
 
 export const deleteTransaction = (

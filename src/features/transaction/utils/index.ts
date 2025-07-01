@@ -1,5 +1,6 @@
+import { createTransactionSchema } from "~/shared/validators/transaction.schema";
+
 import type { CSVRow, CSVRowParsed, TransactionImportSchema } from "./schemas";
-import { TransactionInsertSchema } from "./schemas";
 
 export function transformCSV(
   row: CSVRow,
@@ -45,7 +46,7 @@ export function transformCSV(
 
   console.info("Mapped row", { mappedRow });
 
-  const parsedRow = TransactionInsertSchema.safeParse(mappedRow);
+  const parsedRow = createTransactionSchema.safeParse(mappedRow);
 
   if (!parsedRow.success) {
     console.warn("Failed to parse mapped row", {

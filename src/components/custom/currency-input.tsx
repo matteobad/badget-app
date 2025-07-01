@@ -9,6 +9,7 @@ export function CurrencyInput({
 }: NumericFormatProps) {
   return (
     <NumericFormat
+      className="bg-background"
       thousandSeparator={thousandSeparator}
       customInput={Input}
       {...props}
