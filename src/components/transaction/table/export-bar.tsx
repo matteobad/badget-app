@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
 import NumberFlow from "@number-flow/react";
 import { Button } from "~/components/ui/button";
 import { useTransactionsStore } from "~/lib/stores/transaction";
 import { AnimatePresence, motion } from "framer-motion";
+import { DownloadIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -75,7 +75,7 @@ export function ExportBar() {
             >
               <div className="flex items-center space-x-2">
                 <span>Export</span>
-                <Icons.ArrowCoolDown className="size-4" />
+                <DownloadIcon className="size-4" />
               </div>
             </SubmitButton>
           </div>

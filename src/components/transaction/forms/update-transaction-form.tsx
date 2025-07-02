@@ -1,7 +1,6 @@
 import type { DB_AttachmentType } from "~/server/db/schema/transactions";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SelectCategory } from "~/components/category/forms/select-category";
 import { FormatAmount } from "~/components/format-amount";
 import TagsPicker from "~/components/forms/tags-picker";
 import {
@@ -12,11 +11,6 @@ import {
 } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -41,7 +35,7 @@ import { TransactionBankAccount } from "../transaction-bank-account";
 import { TransactionShortcuts } from "../transaction-shortcuts";
 
 export default function UpdateTransactionForm() {
-  const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
+  const [, setAttachments] = useState<DB_AttachmentType[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   const { params } = useTransactionParams();
@@ -322,7 +316,7 @@ export default function UpdateTransactionForm() {
           placeholder="Enter a tag"
           tags={data?.tags}
           className="sm:min-w-[450px]"
-          setTags={(newTags) => {
+          setTags={(_newTags) => {
             // form.setValue("tags", newTags as Tag[]);
             console.log("update tags");
           }}
@@ -485,7 +479,7 @@ export default function UpdateTransactionForm() {
               placeholder="Informazioni aggiuntive"
               className="min-h-[100px] resize-none bg-background"
               defaultValue={data?.note ?? ""}
-              onChange={(value) => {
+              onChange={(_value) => {
                 updateTransactionMutation.mutate({
                   id: data?.id,
                   // note: value,

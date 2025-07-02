@@ -81,7 +81,8 @@ export function TransactionsActions() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                deleteTransactionsMutation.mutate(transactionIds);
+                console.log("TODO delete");
+                // deleteTransactionsMutation.mutate(transactionIds);
               }}
             >
               {deleteTransactionsMutation.isPending ? (
