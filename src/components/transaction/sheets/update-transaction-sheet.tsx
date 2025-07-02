@@ -9,6 +9,8 @@ import {
 } from "~/components/ui/sheet";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 
+import UpdateTransactionForm from "../forms/update-transaction-form";
+
 export default function UpdateTransactionSheet() {
   const { params, setParams } = useTransactionParams();
 
@@ -29,8 +31,7 @@ export default function UpdateTransactionSheet() {
             </SheetDescription>
           </SheetHeader>
 
-          <div>TODO</div>
-          {/* <UpdateTransactionForm /> */}
+          <UpdateTransactionForm />
         </div>
       </SheetContent>
     </Sheet>

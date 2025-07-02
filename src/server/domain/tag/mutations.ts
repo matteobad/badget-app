@@ -1,6 +1,6 @@
 "server-only";
 
-import type { TXType } from "~/server/db";
+import type { DBClient } from "~/server/db";
 import type {
   createTagSchema,
   deleteTagSchema,
@@ -11,22 +11,22 @@ import { tag_table } from "~/server/db/schema/transactions";
 import { and, eq } from "drizzle-orm";
 
 export async function createTagMutation(
-  tx: TXType,
+  client: DBClient,
   input: z.infer<typeof createTagSchema>,
   userId: string,
 ) {
-  return await tx
+  return await client
     .insert(tag_table)
     .values({ ...input, userId })
     .returning();
 }
 
 export async function updateTagMutation(
-  tx: TXType,
+  client: DBClient,
   input: z.infer<typeof updateTagSchema>,
   userId: string,
 ) {
-  return await tx
+  return await client
     .update(tag_table)
     .set(input)
     .where(and(eq(tag_table.id, input.id), eq(tag_table.userId, userId)))
@@ -34,11 +34,11 @@ export async function updateTagMutation(
 }
 
 export async function deleteTagMutation(
-  tx: TXType,
+  client: DBClient,
   input: z.infer<typeof deleteTagSchema>,
   userId: string,
 ) {
-  return await tx
+  return await client
     .delete(tag_table)
     .where(and(eq(tag_table.id, input.id), eq(tag_table.userId, userId)));
 }

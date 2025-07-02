@@ -21,10 +21,10 @@ import {
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { AmountRange } from "../amount-range";
+import { SelectCategory } from "../category/forms/select-category";
 import { FilterList } from "../custom/filter-list";
 import { SelectAccount } from "../custom/select-account";
-import { SelectCategory } from "../custom/select-category";
-import { SelectTag } from "../custom/select-tag";
+import { SelectTags } from "../custom/select-tags";
 import { Calendar } from "../ui/calendar";
 import {
   DropdownMenu,
@@ -405,7 +405,7 @@ export function TransactionsSearchFilter() {
 
         <FilterMenuItem icon={TagsIcon} label="Tags">
           <div className="max-h-[280px] w-[250px]">
-            <SelectTag
+            <SelectTags
               selected={filter.tags}
               onChange={(selected) =>
                 updateArrayFilter(selected, filter.tags, setFilter, "tags")

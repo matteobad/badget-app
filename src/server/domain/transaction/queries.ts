@@ -380,15 +380,111 @@ export async function getTransactionsQuery(
   };
 }
 
-export async function getTransactionByIdQuery(id: string, _userId: string) {
+export async function getTransactionByIdQuery(id: string, userId: string) {
   const result = await db
-    .select()
-    .from(transaction_table)
-    .where(
-      and(
-        eq(transaction_table.id, id),
-        // eq(category_table.userId, params.userId),
+    .select({
+      id: transaction_table.id,
+      date: transaction_table.date,
+      amount: transaction_table.amount,
+      currency: transaction_table.currency,
+      status: transaction_table.status,
+      note: transaction_table.note,
+      manual: transaction_table.manual,
+      recurring: transaction_table.recurring,
+      counterpartyName: transaction_table.counterpartyName,
+      frequency: transaction_table.frequency,
+      description: transaction_table.description,
+      createdAt: transaction_table.createdAt,
+      attachments: sql<
+        Array<{
+          id: string;
+          filename: string | null;
+          path: string | null;
+          type: string;
+          size: number;
+        }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${attachment_table.id}, 'filename', ${attachment_table.fileName}, 'path', ${attachment_table.fileUrl}, 'type', ${attachment_table.fileType}, 'size', ${attachment_table.fileSize})) FILTER (WHERE ${attachment_table.id} IS NOT NULL), '[]'::json)`.as(
+        "attachments",
       ),
+      category: {
+        id: category_table.id,
+        slug: category_table.slug,
+        name: category_table.name,
+        color: category_table.color,
+        icon: category_table.icon,
+      },
+      account: {
+        id: account_table.id,
+        name: account_table.name,
+        currency: account_table.currency,
+        logoUrl: account_table.logoUrl,
+      },
+      tags: sql<
+        Array<{ id: string; text: string }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tag_table.id}, 'text', ${tag_table.text})) FILTER (WHERE ${tag_table.id} IS NOT NULL), '[]'::json)`.as(
+        "tags",
+      ),
+    })
+    .from(transaction_table)
+    .leftJoin(
+      category_table,
+      and(
+        eq(transaction_table.categoryId, category_table.id),
+        eq(category_table.userId, userId),
+      ),
+    )
+    .leftJoin(
+      account_table,
+      and(
+        eq(transaction_table.accountId, account_table.id),
+        eq(account_table.userId, userId),
+      ),
+    )
+    .leftJoin(
+      connection_table,
+      eq(account_table.connectionId, connection_table.id),
+    )
+    .leftJoin(
+      transaction_to_tag_table,
+      and(eq(transaction_to_tag_table.transactionId, transaction_table.id)),
+    )
+    .leftJoin(
+      tag_table,
+      and(
+        eq(tag_table.id, transaction_to_tag_table.tagId),
+        eq(tag_table.userId, userId),
+      ),
+    )
+    .leftJoin(
+      attachment_table,
+      and(
+        eq(attachment_table.transactionId, transaction_table.id),
+        eq(attachment_table.userId, userId),
+      ),
+    )
+    .where(
+      and(eq(transaction_table.id, id), eq(transaction_table.userId, userId)),
+    )
+    .groupBy(
+      transaction_table.id,
+      transaction_table.date,
+      transaction_table.amount,
+      transaction_table.currency,
+      transaction_table.status,
+      transaction_table.note,
+      transaction_table.manual,
+      transaction_table.recurring,
+      transaction_table.frequency,
+      transaction_table.description,
+      transaction_table.createdAt,
+      category_table.id,
+      category_table.name,
+      category_table.color,
+      category_table.slug,
+      account_table.id,
+      account_table.name,
+      account_table.currency,
+      account_table.logoUrl,
     );
 
   return result[0];

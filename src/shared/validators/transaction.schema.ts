@@ -32,10 +32,17 @@ export const createTransactionSchema = createInsertSchema(transaction_table, {
 
 export const updateTransactionSchema = createUpdateSchema(transaction_table, {
   id: z.cuid2(),
-}).omit({
-  createdAt: true,
-  updatedAt: true,
-});
+  note: z.string().nullable().optional(),
+})
+  .extend({
+    attachment_ids: z.array(z.string()).optional(),
+    tags: z.array(z.object({ id: z.string(), text: z.string() })).optional(),
+  })
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+    userId: true,
+  });
 
 export const updateTransactionTagsSchema = z.object({
   transactionId: z.cuid2(),
