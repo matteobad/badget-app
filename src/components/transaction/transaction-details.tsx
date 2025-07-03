@@ -289,6 +289,7 @@ export function TransactionDetails() {
               updateTransactionMutation.mutate({
                 id: transactionId,
                 categoryId: value,
+                description: data.description,
               });
             }}
           />

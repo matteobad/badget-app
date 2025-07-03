@@ -83,7 +83,12 @@ export async function updateTransaction(
   input: z.infer<typeof updateTransactionSchema>,
   userId: string,
 ) {
-  return await updateTransactionMutation(input, userId);
+  const transaction = await updateTransactionMutation(input, userId);
+  if (input.description) {
+    await updateOrCreateRule(userId, input.description, input.categoryId);
+  }
+
+  return transaction;
 }
 
 export async function deleteTransaction(
