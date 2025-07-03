@@ -2,16 +2,15 @@
 
 import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { CurrencyInput } from "~/components/custom/currency-input";
+import { Button } from "~/components/ui/button";
+import { Label } from "~/components/ui/label";
+import { Slider } from "~/components/ui/slider";
 import { useSliderWithInput } from "~/hooks/use-slider-with-input";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { parseAsArrayOf, parseAsInteger, useQueryState } from "nuqs";
 
-import { CurrencyInput } from "./custom/currency-input";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
-import { Slider } from "./ui/slider";
-
-export function AmountRange() {
+export function TransactionAmountFilter() {
   const minInputRef = useRef<HTMLInputElement>(null);
   const maxInputRef = useRef<HTMLInputElement>(null);
 

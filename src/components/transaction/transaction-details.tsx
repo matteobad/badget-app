@@ -1,8 +1,8 @@
 import type { DB_AttachmentType } from "~/server/db/schema/transactions";
+import type { Tag } from "emblor";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormatAmount } from "~/components/format-amount";
-import TagsPicker from "~/components/forms/tags-picker";
 import {
   Accordion,
   AccordionContent,
@@ -31,22 +31,24 @@ import { format } from "date-fns";
 import { XIcon } from "lucide-react";
 import { toast } from "sonner";
 
-import { TransactionBankAccount } from "../transaction-bank-account";
-import { TransactionShortcuts } from "../transaction-shortcuts";
+import { CategorySelect } from "../category/forms/category-select";
+import { TagsSelect } from "../tag/tags-select";
+import { TransactionBankAccount } from "./transaction-bank-account";
+import { TransactionShortcuts } from "./transaction-shortcuts";
 
-export default function UpdateTransactionForm() {
+export function TransactionDetails() {
   const [, setAttachments] = useState<DB_AttachmentType[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   const { params } = useTransactionParams();
-  const transactionId = params.transactionId;
+  const transactionId = params.transactionId!;
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery(
     trpc.transaction.getById.queryOptions(
-      { id: transactionId! },
+      { id: transactionId },
       {
         enabled: !!transactionId,
         staleTime: 0, // Always consider data stale so it always refetches
@@ -79,7 +81,7 @@ export default function UpdateTransactionForm() {
         await Promise.all([
           queryClient.cancelQueries({
             queryKey: trpc.transaction.getById.queryKey({
-              id: transactionId!,
+              id: transactionId,
             }),
           }),
           queryClient.cancelQueries({
@@ -90,7 +92,7 @@ export default function UpdateTransactionForm() {
         // Snapshot the previous values
         const previousData = {
           details: queryClient.getQueryData(
-            trpc.transaction.getById.queryKey({ id: transactionId! }),
+            trpc.transaction.getById.queryKey({ id: transactionId }),
           ),
           list: queryClient.getQueryData(
             trpc.transaction.get.infiniteQueryKey(),
@@ -99,7 +101,7 @@ export default function UpdateTransactionForm() {
 
         // Optimistically update details view
         queryClient.setQueryData(
-          trpc.transaction.getById.queryKey({ id: transactionId! }),
+          trpc.transaction.getById.queryKey({ id: transactionId }),
           (old: any) => {
             if (variables.categorySlug) {
               const categories = queryClient.getQueryData(
@@ -158,7 +160,7 @@ export default function UpdateTransactionForm() {
       onError: (_, __, context) => {
         // Revert both caches on error
         queryClient.setQueryData(
-          trpc.transaction.getById.queryKey({ id: transactionId! }),
+          trpc.transaction.getById.queryKey({ id: transactionId }),
           context?.previousData.details,
         );
         queryClient.setQueryData(
@@ -168,7 +170,7 @@ export default function UpdateTransactionForm() {
       },
       onSettled: () => {
         void queryClient.invalidateQueries({
-          queryKey: trpc.transaction.getById.queryKey({ id: transactionId! }),
+          queryKey: trpc.transaction.getById.queryKey({ id: transactionId }),
         });
 
         void queryClient.invalidateQueries({
@@ -178,27 +180,33 @@ export default function UpdateTransactionForm() {
     }),
   );
 
-  const createTagMutation = useMutation(
-    trpc.tag.create.mutationOptions({
+  const createTransactionTagMutation = useMutation(
+    trpc.transactionTag.create.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries({
-          queryKey: trpc.transaction.getById.queryKey({ id: transactionId! }),
+          queryKey: trpc.transaction.getById.queryKey({ id: transactionId }),
         });
         void queryClient.invalidateQueries({
           queryKey: trpc.transaction.get.infiniteQueryKey(),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: trpc.tag.get.queryKey({}),
         });
       },
     }),
   );
 
-  const deleteTagMutation = useMutation(
-    trpc.tag.delete.mutationOptions({
+  const deleteTransactionTagMutation = useMutation(
+    trpc.transactionTag.delete.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries({
-          queryKey: trpc.transaction.getById.queryKey({ id: transactionId! }),
+          queryKey: trpc.transaction.getById.queryKey({ id: transactionId }),
         });
         void queryClient.invalidateQueries({
           queryKey: trpc.transaction.get.infiniteQueryKey(),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: trpc.tag.get.queryKey({}),
         });
       },
     }),
@@ -208,7 +216,7 @@ export default function UpdateTransactionForm() {
     return null;
   }
 
-  const defaultValue = ["attachment"];
+  const defaultValue = [""];
 
   if (data?.note) {
     defaultValue.push("note");
@@ -275,54 +283,52 @@ export default function UpdateTransactionForm() {
             Category
           </Label>
 
-          {/* <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className="w-[200px] justify-between"
-              >
-                {value
-                  ? frameworks.find((framework) => framework.value === value)
-                      ?.label
-                  : "Select framework..."}
-                <ChevronsUpDown className="opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0">
-              <SelectCategory
-                selected={[data?.category?.id ?? ""]}
-                onChange={async (category) => {
-                  if (category) {
-                    updateTransactionMutation.mutate({
-                      id: data?.id,
-                      categoryId: category,
-                    });
-                  }
-                }}
-              />
-            </PopoverContent>
-          </Popover> */}
+          <CategorySelect
+            value={data.category?.id}
+            onValueChange={(value) => {
+              updateTransactionMutation.mutate({
+                id: transactionId,
+                categoryId: value,
+              });
+            }}
+          />
         </div>
-      </div>
+        <div>
+          <Label htmlFor="tags" className="mb-2 block">
+            Tags
+          </Label>
 
-      <div className="mt-6">
-        <Label htmlFor="tags" className="mb-2 block">
-          Tags
-        </Label>
+          <TagsSelect
+            key={data?.id + data?.tags?.length}
+            tags={data?.tags}
+            setTags={(newTags) => {
+              const tags = newTags as Tag[];
+              const prevTags = Array.isArray(data?.tags) ? data.tags : [];
+              const tagsToAdd = tags.filter(
+                (tag) => !prevTags.some((prev) => prev.id === tag.id),
+              );
+              const tagsToRemove = prevTags.filter(
+                (prev) => !tags.some((tag) => tag.id === prev.id),
+              );
 
-        <TagsPicker
-          placeholder="Enter a tag"
-          tags={data?.tags}
-          className="sm:min-w-[450px]"
-          setTags={(_newTags) => {
-            // form.setValue("tags", newTags as Tag[]);
-            console.log("update tags");
-          }}
-          activeTagIndex={activeTagIndex}
-          setActiveTagIndex={setActiveTagIndex}
-        />
+              for (const tag of tagsToAdd) {
+                createTransactionTagMutation.mutate({
+                  tag: tag,
+                  transactionId: transactionId,
+                });
+              }
+
+              for (const tag of tagsToRemove) {
+                deleteTransactionTagMutation.mutate({
+                  tagId: tag.id,
+                  transactionId: transactionId,
+                });
+              }
+            }}
+            activeTagIndex={activeTagIndex}
+            setActiveTagIndex={setActiveTagIndex}
+          />
+        </div>
       </div>
 
       <Accordion type="multiple" defaultValue={defaultValue}>

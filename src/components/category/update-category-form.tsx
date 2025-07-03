@@ -3,7 +3,7 @@ import type { ColorKey } from "~/shared/constants/colors";
 import type { IconKey } from "~/shared/constants/icons";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CategoryPicker } from "~/components/forms/category-picker";
+import { CategorySelect } from "~/components/category/forms/category-select";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -160,7 +160,7 @@ export default function UpdateCategoryForm({
             render={({ field }) => (
               <FormItem className="grid gap-3">
                 <FormLabel>Categoria Padre</FormLabel>
-                <CategoryPicker
+                <CategorySelect
                   disabledOptions={[category.id]}
                   value={field.value ?? undefined}
                   options={categories ?? []}

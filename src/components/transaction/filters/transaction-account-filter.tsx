@@ -1,10 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { cn } from "~/lib/utils";
-import { useTRPC } from "~/shared/helpers/trpc/client";
-import { LoaderCircleIcon } from "lucide-react";
-
-import { BankLogo } from "../bank-logo";
-import { Spinner } from "../load-more";
+import { BankLogo } from "~/components/bank-logo";
+import { Spinner } from "~/components/load-more";
 import {
   Command,
   CommandEmpty,
@@ -12,7 +8,10 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "../ui/command";
+} from "~/components/ui/command";
+import { cn } from "~/lib/utils";
+import { useTRPC } from "~/shared/helpers/trpc/client";
+import { LoaderCircleIcon } from "lucide-react";
 
 type Props = {
   selected?: string[] | null;
@@ -20,7 +19,11 @@ type Props = {
   hideLoading?: boolean;
 };
 
-export function SelectAccount({ selected, onChange, hideLoading }: Props) {
+export function TransactionAccountFilter({
+  selected,
+  onChange,
+  hideLoading,
+}: Props) {
   const trpc = useTRPC();
 
   const { data: accounts, isLoading } = useQuery(

@@ -3,6 +3,19 @@
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Calendar } from "~/components/ui/calendar";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { Input } from "~/components/ui/input";
 import { useTransactionFilterParams } from "~/hooks/use-transaction-filter-params";
 import { useTransactionFilterParamsWithPersistence } from "~/hooks/use-transaction-filter-params-with-persistence";
 import { cn } from "~/lib/utils";
@@ -20,24 +33,11 @@ import {
 } from "lucide-react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { AmountRange } from "../amount-range";
-import { SelectCategory } from "../category/forms/select-category";
-import { FilterList } from "../custom/filter-list";
-import { SelectAccount } from "../custom/select-account";
-import { SelectTags } from "../custom/select-tags";
-import { Calendar } from "../ui/calendar";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuPortal,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { Input } from "../ui/input";
+import { FilterList } from "./filter-list";
+import { TransactionAccountFilter } from "./transaction-account-filter";
+import { TransactionAmountFilter } from "./transaction-amount-filter";
+import { TransactionCategoryFilter } from "./transaction-category-filter";
+import { TransactionTagFilter } from "./transaction-tag-filter";
 
 type StatusFilter = "completed" | "uncompleted" | "archived" | "excluded";
 type AttachmentFilter = "include" | "exclude";
@@ -383,13 +383,13 @@ export function TransactionsSearchFilter() {
 
         <FilterMenuItem icon={EuroIcon} label="Amount">
           <div className="w-[280px] p-4">
-            <AmountRange />
+            <TransactionAmountFilter />
           </div>
         </FilterMenuItem>
 
         <FilterMenuItem icon={ShapesIcon} label="Categories">
           <div className="max-h-[280px] w-[250px]">
-            <SelectCategory
+            <TransactionCategoryFilter
               selected={filter.categories}
               onChange={(selected) =>
                 updateArrayFilter(
@@ -405,7 +405,7 @@ export function TransactionsSearchFilter() {
 
         <FilterMenuItem icon={TagsIcon} label="Tags">
           <div className="max-h-[280px] w-[250px]">
-            <SelectTags
+            <TransactionTagFilter
               selected={filter.tags}
               onChange={(selected) =>
                 updateArrayFilter(selected, filter.tags, setFilter, "tags")
@@ -416,7 +416,7 @@ export function TransactionsSearchFilter() {
 
         <FilterMenuItem icon={LandmarkIcon} label="Accounts">
           <div className="max-h-[280px] w-[250px]">
-            <SelectAccount
+            <TransactionAccountFilter
               selected={filter.accounts}
               onChange={(selected) =>
                 updateArrayFilter(

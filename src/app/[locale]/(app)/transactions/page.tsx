@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
+import { TransactionsSearchFilter } from "~/components/transaction/filters/transactions-search-filter";
 import { DataTable } from "~/components/transaction/table/data-table";
 import { Loading } from "~/components/transaction/table/loading";
 import { TransactionsActions } from "~/components/transaction/transactions-actions";
-import { TransactionsSearchFilter } from "~/components/transaction/transactions-search-filter";
 import { loadSortParams } from "~/hooks/use-sort-params";
 import { getInitialTransactionsColumnVisibility } from "~/server/domain/transaction/helpers";
 import {

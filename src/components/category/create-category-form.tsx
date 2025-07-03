@@ -3,7 +3,7 @@ import type { ColorKey } from "~/shared/constants/colors";
 import type { IconKey } from "~/shared/constants/icons";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CategoryPicker } from "~/components/forms/category-picker";
+import { CategorySelect } from "~/components/category/forms/category-select";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -35,9 +35,7 @@ export default function CreateCategoryForm({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data: categories, isLoading } = useQuery(
-    trpc.category.get.queryOptions({}),
-  );
+  const { data: categories } = useQuery(trpc.category.get.queryOptions({}));
 
   const createMutation = useMutation(
     trpc.category.create.mutationOptions({
@@ -162,11 +160,9 @@ export default function CreateCategoryForm({
             render={({ field }) => (
               <FormItem className="grid gap-3">
                 <FormLabel>Categoria Padre</FormLabel>
-                <CategoryPicker
-                  defaultValue={field.value ?? undefined}
-                  options={categories ?? []}
+                <CategorySelect
+                  {...field}
                   disabledOptions={[]}
-                  isLoading={isLoading}
                   onValueChange={(value) => {
                     const parent = categories?.find((c) => c.id === value);
                     if (!parent) return console.error("Invalid parent");

@@ -10,6 +10,7 @@ export const updateTagSchema = createUpdateSchema(tag_table, {
 
 export const deleteTagSchema = z.object({
   id: z.cuid2(),
+  userId: z.string().min(1),
 });
 
 export const getTagsSchema = z.object({});

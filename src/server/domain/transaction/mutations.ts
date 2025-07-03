@@ -1,6 +1,6 @@
 "server-only";
 
-import type { TXType } from "~/server/db";
+import type { DBClient, TXType } from "~/server/db";
 import type {
   createTransactionSchema,
   deleteTransactionSchema,
@@ -41,7 +41,7 @@ export async function updateTransactionMutation(
 }
 
 export async function updateTransactionTagsMutation(
-  tx: TXType,
+  tx: DBClient,
   input: z.infer<typeof updateTransactionTagsSchema>,
   userId: string,
 ) {

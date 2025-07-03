@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CategorySelect } from "~/components/category/forms/category-select";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { AccountPicker } from "~/components/forms/account-picker";
-import { CategoryPicker } from "~/components/forms/category-picker";
-import TagsPicker from "~/components/forms/tags-picker";
+import { TagsSelect } from "~/components/tag/tags-select";
 import {
   Accordion,
   AccordionContent,
@@ -63,9 +63,6 @@ export default function CreateTransactionForm({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data: categories, isLoading: isLoadingCategories } = useQuery(
-    trpc.category.get.queryOptions({}),
-  );
   const { data: accounts } = useQuery(trpc.bankAccount.get.queryOptions({}));
 
   const categorizeTransactionMutation = useMutation(
@@ -279,10 +276,7 @@ export default function CreateTransactionForm({
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Categoria</FormLabel>
-                <CategoryPicker
-                  options={categories ?? []}
-                  disabledOptions={[]}
-                  isLoading={isLoadingCategories}
+                <CategorySelect
                   value={field.value ?? undefined}
                   onValueChange={field.onChange}
                   onReset={() => {
@@ -299,7 +293,7 @@ export default function CreateTransactionForm({
             render={({ field }) => (
               <FormItem className="col-span-2 flex flex-col">
                 <FormLabel>Tags</FormLabel>
-                <TagsPicker
+                <TagsSelect
                   {...field}
                   placeholder="Enter a tag"
                   tags={tags}

@@ -1,9 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { cn } from "~/lib/utils";
-import { useTRPC } from "~/shared/helpers/trpc/client";
-import { LoaderCircleIcon } from "lucide-react";
-
-import { Spinner } from "../load-more";
+import { Spinner } from "~/components/load-more";
 import {
   Command,
   CommandEmpty,
@@ -11,7 +7,10 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "../ui/command";
+} from "~/components/ui/command";
+import { cn } from "~/lib/utils";
+import { useTRPC } from "~/shared/helpers/trpc/client";
+import { LoaderCircleIcon } from "lucide-react";
 
 type Props = {
   selected?: string[] | null;
@@ -19,7 +18,11 @@ type Props = {
   hideLoading?: boolean;
 };
 
-export function SelectTags({ selected, onChange, hideLoading }: Props) {
+export function TransactionTagFilter({
+  selected,
+  onChange,
+  hideLoading,
+}: Props) {
   const trpc = useTRPC();
 
   const { data: tags, isLoading } = useQuery(trpc.tag.get.queryOptions({}));

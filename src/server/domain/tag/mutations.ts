@@ -1,8 +1,8 @@
 "server-only";
 
 import type { DBClient } from "~/server/db";
+import type { DB_TagInsertType } from "~/server/db/schema/transactions";
 import type {
-  createTagSchema,
   deleteTagSchema,
   updateTagSchema,
 } from "~/shared/validators/tag.schema";
@@ -12,13 +12,15 @@ import { and, eq } from "drizzle-orm";
 
 export async function createTagMutation(
   client: DBClient,
-  input: z.infer<typeof createTagSchema>,
-  userId: string,
+  input: DB_TagInsertType,
 ) {
-  return await client
+  const result = await client
     .insert(tag_table)
-    .values({ ...input, userId })
+    .values(input)
+    .onConflictDoNothing()
     .returning();
+
+  return result[0];
 }
 
 export async function updateTagMutation(
@@ -36,9 +38,8 @@ export async function updateTagMutation(
 export async function deleteTagMutation(
   client: DBClient,
   input: z.infer<typeof deleteTagSchema>,
-  userId: string,
 ) {
   return await client
     .delete(tag_table)
-    .where(and(eq(tag_table.id, input.id), eq(tag_table.userId, userId)));
+    .where(and(eq(tag_table.id, input.id), eq(tag_table.userId, input.userId)));
 }

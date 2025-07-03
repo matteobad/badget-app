@@ -31,7 +31,7 @@ export const createTransactionSchema = createInsertSchema(transaction_table, {
   });
 
 export const updateTransactionSchema = createUpdateSchema(transaction_table, {
-  id: z.cuid2(),
+  id: z.string().min(1),
   note: z.string().nullable().optional(),
 })
   .extend({

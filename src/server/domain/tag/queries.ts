@@ -1,10 +1,11 @@
 "server-only";
 
+import type { DBClient } from "~/server/db";
 import type { getTagsSchema } from "~/shared/validators/tag.schema";
 import type z from "zod/v4";
 import { db } from "~/server/db";
 import { tag_table } from "~/server/db/schema/transactions";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export async function getTagsQuery(
   _params: z.infer<typeof getTagsSchema>,
@@ -22,4 +23,18 @@ export async function getTagsQuery(
     .orderBy(tag_table.text);
 
   return results;
+}
+
+export async function getTagByTextQuery(
+  client: DBClient,
+  params: { text: string; userId: string },
+) {
+  const results = await client
+    .select()
+    .from(tag_table)
+    .where(
+      and(eq(tag_table.text, params.text), eq(tag_table.userId, params.userId)),
+    );
+
+  return results[0];
 }

@@ -9,9 +9,9 @@ import {
 } from "~/components/ui/sheet";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 
-import UpdateTransactionForm from "../forms/update-transaction-form";
+import { TransactionDetails } from "../transaction-details";
 
-export default function UpdateTransactionSheet() {
+export default function TransactionSheet() {
   const { params, setParams } = useTransactionParams();
 
   const isOpen = !!params.transactionId;
@@ -31,7 +31,7 @@ export default function UpdateTransactionSheet() {
             </SheetDescription>
           </SheetHeader>
 
-          <UpdateTransactionForm />
+          <TransactionDetails />
         </div>
       </SheetContent>
     </Sheet>

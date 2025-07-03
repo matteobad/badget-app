@@ -135,3 +135,8 @@ export const transaction_to_tag_table = pgTable(
   },
   (t) => [unique().on(t.transactionId, t.tagId)],
 );
+
+export type DB_TransactionToTagType =
+  typeof transaction_to_tag_table.$inferSelect;
+export type DB_TransactionToTagInsertType =
+  typeof transaction_to_tag_table.$inferInsert;

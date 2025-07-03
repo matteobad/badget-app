@@ -1,11 +1,10 @@
+import { Button } from "~/components/ui/button";
+import { Skeleton } from "~/components/ui/skeleton";
 import { formatAccountName } from "~/shared/helpers/format";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { formatDateRange } from "little-date";
 import { XIcon } from "lucide-react";
-
-import { Button } from "../ui/button";
-import { Skeleton } from "../ui/skeleton";
 
 const listVariant = {
   hidden: { y: 10, opacity: 0 },

@@ -20,7 +20,11 @@ type Props = {
   hideLoading?: boolean;
 };
 
-export function SelectCategory({ selected, onChange, hideLoading }: Props) {
+export function TransactionCategoryFilter({
+  selected,
+  onChange,
+  hideLoading,
+}: Props) {
   const trpc = useTRPC();
 
   const { data: categories, isLoading } = useQuery(
