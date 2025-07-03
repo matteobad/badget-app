@@ -7,96 +7,18 @@ import { authActionClient } from "~/lib/safe-action";
 import { db, withTransaction } from "~/server/db";
 import { transaction_table } from "~/server/db/schema/transactions";
 import { utapi } from "~/server/uploadthing";
-import {
-  categorizeTransactions,
-  updateOrCreateRule,
-} from "~/utils/categorization";
-import { and, eq } from "drizzle-orm";
+import { importTransactionSchema } from "~/shared/validators/transaction.schema";
+import { categorizeTransactions } from "~/utils/categorization";
 
 import type { CSVRow, CSVRowParsed } from "../utils/schemas";
 import { transformCSV } from "../utils";
 import {
   AttachmentDeleteSchema,
   TransactionDeleteSchema,
-  TransactionImportSchema,
-  TransactionUpdateBulkSchema,
-  TransactionUpdateSchema,
 } from "../utils/schemas";
-import {
-  deleteTransaction,
-  deleteTransactionAttachment,
-  updateTransaction,
-} from "./queries";
+import { deleteTransaction, deleteTransactionAttachment } from "./queries";
 
 // transaction
-export const updateTransactionAction = authActionClient
-  .inputSchema(TransactionUpdateSchema)
-  .metadata({ actionName: "update-transaction" })
-  .action(async ({ parsedInput, ctx }) => {
-    // Prepare data
-    const userId = ctx.userId;
-    const transactionId = parsedInput.id;
-    const categoryId = parsedInput.categoryId;
-
-    // Mutate data
-    await withTransaction(async (tx) => {
-      // update transaction
-      await updateTransaction({ ...parsedInput, userId }, tx);
-
-      // update transaction attachements
-      for (const id of parsedInput.attachment_ids) {
-        const updatedAttachment = { id, userId, transactionId };
-        await updateTransactionAttachment(updatedAttachment, tx);
-      }
-
-      // update transaction tags
-      const tags = parsedInput.tags.map((t) => t.text);
-      await updateTransactionTags(tags, transactionId, userId, tx);
-
-      // TODO: only id category has changed
-      // update category rule relevance
-      const description = parsedInput.description;
-      await updateOrCreateRule(userId, description, categoryId);
-    });
-
-    // Invalidate cache
-    revalidateTag(`transaction_${ctx.userId}`);
-    revalidateTag(`attachment_${ctx.userId}`);
-
-    // Return success message
-    return { message: "update-transaction-success-message" };
-  });
-
-export const updateTransactionBulkAction = authActionClient
-  .inputSchema(TransactionUpdateBulkSchema)
-  .metadata({ actionName: "update-transaction-bulk" })
-  .action(async ({ parsedInput, ctx }) => {
-    // Prepare data
-    const userId = ctx.userId;
-    const { categoryId } = parsedInput;
-
-    // Mutate data
-    await withTransaction(async (tx) => {
-      // update transaction
-      for (const id of parsedInput.ids) {
-        await tx
-          .update(transaction_table)
-          .set({ categoryId })
-          .where(
-            and(
-              eq(transaction_table.id, id),
-              eq(transaction_table.userId, userId),
-            ),
-          );
-      }
-    });
-
-    // Invalidate cache
-    revalidateTag(`transaction_${ctx.userId}`);
-
-    // Return success message
-    return { message: "update-transaction-success-message" };
-  });
 
 export const deleteTransactionAction = authActionClient
   .inputSchema(TransactionDeleteSchema)
@@ -157,7 +79,7 @@ export async function parseCsv(file: File, maxRows = 9999) {
 }
 
 export const importTransactionAction = authActionClient
-  .schema(TransactionImportSchema)
+  .inputSchema(importTransactionSchema)
   .metadata({ actionName: "import-transaction" })
   .action(async ({ parsedInput, ctx }) => {
     // Mutate data

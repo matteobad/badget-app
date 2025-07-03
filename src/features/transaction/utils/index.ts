@@ -1,13 +1,17 @@
+import type { importTransactionSchema } from "~/shared/validators/transaction.schema";
+import type { z } from "zod/v4";
 import { createTransactionSchema } from "~/shared/validators/transaction.schema";
 
-import type { CSVRow, CSVRowParsed, TransactionImportSchema } from "./schemas";
+import type { CSVRow, CSVRowParsed } from "./schemas";
+
+type ImportTransactionType = z.infer<typeof importTransactionSchema>;
 
 export function transformCSV(
   row: CSVRow,
   options: {
-    fieldMapping: TransactionImportSchema["fieldMapping"];
-    extraFields: TransactionImportSchema["extraFields"];
-    settings: TransactionImportSchema["settings"];
+    fieldMapping: ImportTransactionType["fieldMapping"];
+    extraFields: ImportTransactionType["extraFields"];
+    settings: ImportTransactionType["settings"];
   },
 ) {
   console.info("Raw row", { row });

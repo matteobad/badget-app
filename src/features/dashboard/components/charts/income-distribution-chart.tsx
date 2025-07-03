@@ -1,6 +1,8 @@
 "use client";
 
 import type { ChartConfig } from "~/components/ui/chart";
+import type { DB_CategoryType } from "~/server/db/schema/categories";
+import type { DB_TransactionType } from "~/server/db/schema/transactions";
 import * as React from "react";
 import {
   Card,
@@ -14,8 +16,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "~/components/ui/chart";
-import { type getCategories_CACHED } from "~/features/category/server/cached-queries";
-import { type getTransactions_CACHED } from "~/features/transaction/server/cached-queries";
 import { formatAmount } from "~/utils/format";
 import { isWithinInterval } from "date-fns";
 import { type DateRange } from "react-day-picker";
@@ -41,19 +41,14 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-type TransactionType = Awaited<
-  ReturnType<typeof getTransactions_CACHED>
->["data"][number];
-type CategoryType = Awaited<ReturnType<typeof getCategories_CACHED>>[number];
-
 export function IncomeDistributionChart({
   dateRange,
   transactions,
   categories,
 }: {
   dateRange: DateRange | undefined;
-  transactions: TransactionType[];
-  categories: CategoryType[];
+  transactions: DB_TransactionType[];
+  categories: DB_CategoryType[];
 }) {
   const incomeid = categories.find((c) => c.slug === "income")!.id;
   const incomeIds = getChildCategoryIds(categories, incomeid);
@@ -74,19 +69,19 @@ export function IncomeDistributionChart({
       .filter(({ date }) => isWithinInterval(date, currentPeriod))
       .filter(({ categoryId }) => incomeIds.includes(categoryId ?? ""))
       .map(({ amount }) => amount)
-      .reduce((tot, value) => (tot += parseFloat(value)), 0);
+      .reduce((tot, value) => (tot += value), 0);
 
     const expense = transactions
       .filter(({ date }) => isWithinInterval(date, currentPeriod))
       .filter(({ categoryId }) => expenseIds.includes(categoryId ?? ""))
       .map(({ amount }) => amount)
-      .reduce((tot, value) => (tot += parseFloat(value)), 0);
+      .reduce((tot, value) => (tot += value), 0);
 
     const savings = transactions
       .filter(({ date }) => isWithinInterval(date, currentPeriod))
       .filter(({ categoryId }) => savingsIds.includes(categoryId ?? ""))
       .map(({ amount }) => amount)
-      .reduce((tot, value) => (tot += parseFloat(value)), 0);
+      .reduce((tot, value) => (tot += value), 0);
 
     return [
       { category: "expense", amount: expense, fill: "var(--color-expense)" },

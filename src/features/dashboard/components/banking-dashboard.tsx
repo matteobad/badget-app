@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -19,8 +19,6 @@ import {
 } from "~/components/ui/popover";
 import { Progress } from "~/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { type getCategories_CACHED } from "~/features/category/server/cached-queries";
-import { type getTransactions_CACHED } from "~/features/transaction/server/cached-queries";
 import { cn } from "~/lib/utils";
 // import { AreaChart, BarChart, PieChart } from "~/components/ui/chart";
 import { endOfMonth, format, startOfMonth } from "date-fns";
@@ -43,17 +41,8 @@ import { ExpenseCard } from "./expense-card";
 import { IncomeCard } from "./income-card";
 import { SavingsCard } from "./savings-card";
 
-export function BankingDashboard({
-  promises,
-}: {
-  promises: Promise<
-    [
-      Awaited<ReturnType<typeof getTransactions_CACHED>>,
-      Awaited<ReturnType<typeof getCategories_CACHED>>,
-    ]
-  >;
-}) {
-  const [transactions, categories] = use(promises);
+export function BankingDashboard() {
+  // const [transactions, categories] = use(promises);
 
   const [, setView] = useState("overview");
   const [date, setDate] = useState<DateRange | undefined>({
@@ -121,35 +110,23 @@ export function BankingDashboard({
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
-            <IncomeCard
-              dateRange={date}
-              transactions={transactions.data}
-              categories={categories}
-            />
+            <IncomeCard dateRange={date} transactions={[]} categories={[]} />
 
-            <ExpenseCard
-              dateRange={date}
-              transactions={transactions.data}
-              categories={categories}
-            />
+            <ExpenseCard dateRange={date} transactions={[]} categories={[]} />
 
-            <SavingsCard
-              dateRange={date}
-              transactions={transactions.data}
-              categories={categories}
-            />
+            <SavingsCard dateRange={date} transactions={[]} categories={[]} />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
             <IncomeDistributionChart
               dateRange={date}
-              transactions={transactions.data}
-              categories={categories}
+              transactions={[]}
+              categories={[]}
             />
             <ExpensesDistributionChart
               dateRange={date}
-              transactions={transactions.data}
-              categories={categories}
+              transactions={[]}
+              categories={[]}
             />
           </div>
 

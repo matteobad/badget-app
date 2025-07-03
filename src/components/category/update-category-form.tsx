@@ -34,7 +34,7 @@ export default function UpdateCategoryForm({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data: categories, isLoading: isLoadingCategories } = useQuery(
+  const { data: categories } = useQuery(
     trpc.category.get.queryOptions({ type: category.type }),
   );
 
@@ -161,10 +161,7 @@ export default function UpdateCategoryForm({
               <FormItem className="grid gap-3">
                 <FormLabel>Categoria Padre</FormLabel>
                 <CategorySelect
-                  disabledOptions={[category.id]}
                   value={field.value ?? undefined}
-                  options={categories ?? []}
-                  isLoading={isLoadingCategories}
                   onValueChange={(value) => {
                     const parent = categories?.find((c) => c.id === value);
                     if (!parent) return console.error("Invalid parent");

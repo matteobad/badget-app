@@ -2,16 +2,11 @@ import type {
   createTagSchema,
   deleteTagSchema,
   getTagsSchema,
-  updateTagSchema,
 } from "~/shared/validators/tag.schema";
 import type z from "zod/v4";
 
 import { db } from "../db";
-import {
-  createTagMutation,
-  deleteTagMutation,
-  updateTagMutation,
-} from "../domain/tag/mutations";
+import { createTagMutation, deleteTagMutation } from "../domain/tag/mutations";
 import { getTagsQuery } from "../domain/tag/queries";
 
 export async function createTag(

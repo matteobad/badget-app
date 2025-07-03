@@ -162,7 +162,6 @@ export default function CreateCategoryForm({
                 <FormLabel>Categoria Padre</FormLabel>
                 <CategorySelect
                   {...field}
-                  disabledOptions={[]}
                   onValueChange={(value) => {
                     const parent = categories?.find((c) => c.id === value);
                     if (!parent) return console.error("Invalid parent");

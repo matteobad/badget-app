@@ -3,7 +3,6 @@ import {
   createTagSchema,
   deleteTagSchema,
   getTagsSchema,
-  updateTagSchema,
 } from "~/shared/validators/tag.schema";
 
 import { createTRPCRouter, protectedProcedure } from "../init";

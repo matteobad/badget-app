@@ -11,7 +11,7 @@ import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { FilePlus, FileSpreadsheet, Landmark, Plus } from "lucide-react";
 
 export function AddTransactionButton({ label }: { label?: string }) {
-  const { params, setParams } = useTransactionParams();
+  const { setParams } = useTransactionParams();
 
   return (
     <DropdownMenu>

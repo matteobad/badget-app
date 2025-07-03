@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { AccountPicker } from "~/components/forms/account-picker";
 import {
@@ -34,6 +34,7 @@ import {
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/shared/helpers/trpc/server";
+import { importTransactionSchema } from "~/shared/validators/transaction.schema";
 import { UploadDropzone } from "~/utils/uploadthing";
 import { ArrowRight, Info } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
@@ -45,13 +46,10 @@ import {
   importTransactionAction,
   parseCsv,
 } from "../../../features/transaction/server/actions";
-import { TransactionImportSchema } from "../../../features/transaction/utils/schemas";
 
-const CSV_REQUIRED_FIELDS: (keyof TransactionImportSchema["fieldMapping"])[] = [
-  "date",
-  "description",
-  "amount",
-]; // Example predefined fields
+const CSV_REQUIRED_FIELDS: (keyof z.infer<
+  typeof importTransactionSchema
+>["fieldMapping"])[] = ["date", "description", "amount"]; // Example predefined fields
 
 export default function ImportTransactionForm({
   className,
@@ -71,8 +69,8 @@ export default function ImportTransactionForm({
     },
   });
 
-  const form = useForm<z.infer<typeof TransactionImportSchema>>({
-    resolver: standardSchemaResolver(TransactionImportSchema),
+  const form = useForm<z.infer<typeof importTransactionSchema>>({
+    resolver: zodResolver(importTransactionSchema),
     defaultValues: {
       settings: { inverted: false },
     },
@@ -224,7 +222,7 @@ export default function ImportTransactionForm({
                   <FormItem className="flex items-center justify-between gap-4 space-y-0">
                     <FormLabel>Conto</FormLabel>
                     <AccountPicker
-                      options={accounts}
+                      options={accounts ?? []}
                       value={field.value ?? undefined}
                       onValueChange={field.onChange}
                     />

@@ -99,6 +99,7 @@ export const mapAccountsResponse = (
     // enrollment_id: null,
     logoUrl: institutionData.logo,
     enabled: true,
+    manual: false,
   } satisfies GetAccountsResponse[number];
 };
 
@@ -214,7 +215,7 @@ export const mapTransactionsResponse = (transaction: GC_Transaction) => {
     rawId: transaction.internalTransactionId ?? transaction.transactionId,
     date: parseISO(transaction.bookingDateTime ?? transaction.bookingDate),
     // method,
-    amount: transaction.transactionAmount.amount,
+    amount: parseFloat(transaction.transactionAmount.amount),
     currency: transaction.transactionAmount.currency,
     // category: mapTransactionCategory(transaction),
     // currency_rate: currencyExchange?.rate ?? null,

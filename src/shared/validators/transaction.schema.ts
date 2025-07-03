@@ -70,6 +70,20 @@ export const categorizeTransactionSchema = z.object({
   id: z.cuid2(),
 });
 
+export const importTransactionSchema = z.object({
+  file: z.instanceof(File).refine((file) => ["text/csv"].includes(file.type), {
+    message: "Invalid document file type",
+  }),
+  fieldMapping: z.object({
+    date: z.string({ message: "Missing date mapping" }),
+    description: z.string({ message: "Missing description mapping" }),
+    amount: z.string({ message: "Missing amount mapping" }),
+    currency: z.string().default("EUR"),
+  }),
+  extraFields: z.object({ accountId: z.string() }),
+  settings: z.object({ inverted: z.boolean().default(false) }),
+});
+
 // Query filter schema
 export const getTransactionsSchema = z.object({
   cursor: z.string().nullable().optional(),

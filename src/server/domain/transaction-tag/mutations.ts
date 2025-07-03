@@ -2,8 +2,6 @@
 
 import type { DBClient } from "~/server/db";
 import type { DB_TransactionToTagInsertType } from "~/server/db/schema/transactions";
-import type { deleteTransactionTagSchema } from "~/shared/validators/transaction-tag.schema";
-import type z from "zod/v4";
 import { transaction_to_tag_table } from "~/server/db/schema/transactions";
 import { and, eq } from "drizzle-orm";
 

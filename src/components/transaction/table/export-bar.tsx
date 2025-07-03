@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import NumberFlow from "@number-flow/react";
 import { SubmitButton } from "~/components/submit-button";
 import { Button } from "~/components/ui/button";
-import { useExportStore } from "~/lib/stores/export";
 import { useTransactionsStore } from "~/lib/stores/transaction";
 import { AnimatePresence, motion } from "framer-motion";
 import { DownloadIcon } from "lucide-react";
@@ -10,7 +9,7 @@ import { DownloadIcon } from "lucide-react";
 // import { exportTransactionsAction } from "@/actions/export-transactions-action";
 
 export function ExportBar() {
-  const { setExportData } = useExportStore();
+  // const { setExportData } = useExportStore();
   const { rowSelection, setRowSelection } = useTransactionsStore();
   const [isOpen, setOpen] = useState(false);
 

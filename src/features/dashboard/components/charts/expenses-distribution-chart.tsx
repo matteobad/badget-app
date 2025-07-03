@@ -1,6 +1,8 @@
 "use client";
 
 import type { ChartConfig } from "~/components/ui/chart";
+import type { DB_CategoryType } from "~/server/db/schema/categories";
+import type { DB_TransactionType } from "~/server/db/schema/transactions";
 import React from "react";
 import {
   Card,
@@ -14,8 +16,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "~/components/ui/chart";
-import { type getCategories_CACHED } from "~/features/category/server/cached-queries";
-import { type getTransactions_CACHED } from "~/features/transaction/server/cached-queries";
 import { isWithinInterval } from "date-fns";
 import { type DateRange } from "react-day-picker";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";
@@ -29,19 +29,14 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-type TransactionType = Awaited<
-  ReturnType<typeof getTransactions_CACHED>
->["data"][number];
-type CategoryType = Awaited<ReturnType<typeof getCategories_CACHED>>[number];
-
 export function ExpensesDistributionChart({
   dateRange,
   transactions,
   categories,
 }: {
   dateRange: DateRange | undefined;
-  transactions: TransactionType[];
-  categories: CategoryType[];
+  transactions: DB_TransactionType[];
+  categories: DB_CategoryType[];
 }) {
   const expenseId = categories.find((c) => c.slug === "expense")!.id;
   const expenseIds = getChildCategoryIds(categories, expenseId);
@@ -62,7 +57,7 @@ export function ExpensesDistributionChart({
           const category =
             categories.find((c) => c.id === transaction.categoryId)?.name ??
             "Other";
-          const amount = parseFloat(transaction.amount);
+          const amount = transaction.amount;
           acc[category] = (acc[category] ?? 0) + amount;
           return acc;
         },

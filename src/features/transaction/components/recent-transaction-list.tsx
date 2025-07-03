@@ -78,14 +78,14 @@ export default function RecentTransactionList({
                   <span
                     className={cn(
                       "text-xs font-medium",
-                      parseFloat(transaction.amount) > 0
+                      transaction.amount > 0
                         ? "text-emerald-600 dark:text-emerald-400"
                         : "text-red-600 dark:text-red-400",
                     )}
                   >
-                    {formatAmount({ amount: parseFloat(transaction.amount) })}
+                    {formatAmount({ amount: transaction.amount })}
                   </span>
-                  {parseFloat(transaction.amount) > 0 ? (
+                  {transaction.amount > 0 ? (
                     <ArrowDownLeft className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                   ) : (
                     <ArrowUpRight className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />

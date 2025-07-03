@@ -1,7 +1,7 @@
+import type { DB_CategoryType } from "~/server/db/schema/categories";
+import type { DB_TransactionType } from "~/server/db/schema/transactions";
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { type getCategories_CACHED } from "~/features/category/server/cached-queries";
-import { type getTransactions_CACHED } from "~/features/transaction/server/cached-queries";
 import { formatAmount } from "~/utils/format";
 import { isWithinInterval, subMonths } from "date-fns";
 import {
@@ -14,19 +14,14 @@ import { type DateRange } from "react-day-picker";
 
 import { getChildCategoryIds } from "../utils";
 
-type TransactionType = Awaited<
-  ReturnType<typeof getTransactions_CACHED>
->["data"][number];
-type CategoryType = Awaited<ReturnType<typeof getCategories_CACHED>>[number];
-
 export function ExpenseCard({
   dateRange,
   transactions,
   categories,
 }: {
   dateRange: DateRange | undefined;
-  transactions: TransactionType[];
-  categories: CategoryType[];
+  transactions: DB_TransactionType[];
+  categories: DB_CategoryType[];
 }) {
   const categoryId = categories.find((c) => c.slug === "expense")!.id;
   const categoryIds = getChildCategoryIds(categories, categoryId);
@@ -52,14 +47,14 @@ export function ExpenseCard({
       .filter(({ date }) => isWithinInterval(date, currentPeriod))
       .filter(({ categoryId }) => categoryIds.includes(categoryId ?? ""))
       .map(({ amount }) => amount)
-      .reduce((tot, value) => (tot += parseFloat(value)), 0);
+      .reduce((tot, value) => (tot += value), 0);
 
     const prevPeriodIncome = transactions
       .filter(({ date }) => isWithinInterval(date, prevPeriod))
       .filter(({ categoryId }) => categoryIds.includes(categoryId ?? ""))
 
       .map(({ amount }) => amount)
-      .reduce((tot, value) => (tot += parseFloat(value)), 0);
+      .reduce((tot, value) => (tot += value), 0);
 
     return {
       total: currentPeriodIncome,
