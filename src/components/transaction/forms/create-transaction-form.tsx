@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
 import { type DB_AttachmentType } from "~/server/db/schema/transactions";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -59,6 +60,8 @@ export default function CreateTransactionForm({
   const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
+
+  const { params, setParams } = useTransactionParams();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -89,6 +92,7 @@ export default function CreateTransactionForm({
           queryKey: trpc.transaction.getAmountRange.queryKey(),
         });
         form.reset();
+        void setParams({ createTransaction: null });
       },
     }),
   );
