@@ -54,7 +54,7 @@ export async function getTransactionsQuery(
     end,
     recurring: filterRecurring,
     amount: filterAmount,
-    amountRange: filterAmountRange,
+    amount_range: filterAmountRange,
   } = params;
 
   // Always start with userId filter
@@ -159,12 +159,8 @@ export async function getTransactionsQuery(
     typeof filterAmountRange[0] === "number" &&
     typeof filterAmountRange[1] === "number"
   ) {
-    whereConditions.push(
-      gte(transaction_table.amount, Number(filterAmountRange[0])),
-    );
-    whereConditions.push(
-      lte(transaction_table.amount, Number(filterAmountRange[1])),
-    );
+    whereConditions.push(gte(transaction_table.amount, filterAmountRange[0]));
+    whereConditions.push(lte(transaction_table.amount, filterAmountRange[1]));
   }
 
   // Specific amount filter (gte/lte)

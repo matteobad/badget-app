@@ -85,7 +85,7 @@ export const getTransactionsSchema = z.object({
   statuses: z.array(z.string()).nullable().optional(),
   recurring: z.array(z.string()).nullable().optional(),
   attachments: z.enum(["include", "exclude"]).nullable().optional(),
-  amountRange: z.array(z.coerce.number()).nullable().optional(),
+  amount_range: z.array(z.coerce.number()).nullable().optional(),
   amount: z.array(z.string()).nullable().optional(),
   type: z.enum(["income", "expense"]).nullable().optional(),
 });
@@ -99,6 +99,7 @@ export const transactionFilterParamsSchema = {
   ]),
   date: parseAsArrayOf(parseAsString).withDefault([]),
   description: parseAsString.withDefault(""),
+  amount_range: parseAsArrayOf(parseAsInteger).withDefault([]),
   amount: parseAsArrayOf(parseAsString).withDefault([]),
   categoryId: parseAsArrayOf(parseAsString).withDefault([]),
   tags: parseAsArrayOf(parseAsString).withDefault([]),

@@ -70,7 +70,7 @@ export function BottomBar() {
 
   return (
     <motion.div
-      className="pointer-events-none fixed right-0 bottom-4 left-0 flex h-12 justify-center"
+      className="pointer-events-none fixed right-0 bottom-4 left-0 z-10 flex h-12 justify-center"
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}

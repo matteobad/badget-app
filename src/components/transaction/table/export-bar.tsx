@@ -60,7 +60,7 @@ export function ExportBar() {
               <span>Deselect all</span>
             </Button>
             <SubmitButton
-              isSubmitting={status === "executing"}
+              isSubmitting={false}
               // onClick={() =>
               //   execute({
               //     transactionIds: ids,
