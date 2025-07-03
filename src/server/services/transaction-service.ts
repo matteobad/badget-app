@@ -1,18 +1,22 @@
 import type {
   categorizeTransactionSchema,
   createTransactionSchema,
+  deleteManyTransactionsSchema,
   deleteTransactionSchema,
   getTransactionsSchema,
+  updateManyTransactionsSchema,
   updateTransactionSchema,
 } from "~/shared/validators/transaction.schema";
 import type z from "zod/v4";
 import { updateOrCreateRule } from "~/utils/categorization";
 
-import { withTransaction } from "../db";
+import { db, withTransaction } from "../db";
 import { updateAttachmentMutation } from "../domain/attachment/mutations";
 import {
   createTransactionMutation,
+  deleteManyTransactionsMutation,
   deleteTransactionMutation,
+  updateManyTransactionsMutation,
   updateTransactionMutation,
   updateTransactionTagsMutation,
 } from "../domain/transaction/mutations";
@@ -84,9 +88,22 @@ export async function updateTransaction(
   userId: string,
 ) {
   const transaction = await updateTransactionMutation(input, userId);
-  if (input.description) {
+  if (input.categoryId && input.description) {
     await updateOrCreateRule(userId, input.description, input.categoryId);
   }
+
+  return transaction;
+}
+
+export async function updateManyTransactions(
+  input: z.infer<typeof updateManyTransactionsSchema>,
+  userId: string,
+) {
+  const transaction = await updateManyTransactionsMutation(db, {
+    ...input,
+    userId,
+  });
+  // TODO: update category rules
 
   return transaction;
 }
@@ -96,6 +113,16 @@ export async function deleteTransaction(
   userId: string,
 ) {
   return await deleteTransactionMutation(input, userId);
+}
+
+export async function deleteManyTransactions(
+  input: z.infer<typeof deleteManyTransactionsSchema>,
+  userId: string,
+) {
+  return await deleteManyTransactionsMutation(db, {
+    ...input,
+    userId,
+  });
 }
 
 export async function categorizeTransaction(

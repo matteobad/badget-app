@@ -61,7 +61,7 @@ export default function CreateTransactionForm({
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
-  const { params, setParams } = useTransactionParams();
+  const { setParams } = useTransactionParams();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -118,6 +118,7 @@ export default function CreateTransactionForm({
       accountId: accounts ? accounts[0]?.id : undefined,
       attachment_ids: [],
       tags: tags,
+      manual: true,
     },
   });
 

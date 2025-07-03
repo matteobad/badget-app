@@ -1,5 +1,6 @@
 import {
   createTransaction,
+  deleteManyTransactions,
   deleteTransaction,
   getTransactionAccountCounts,
   getTransactionAmountRange,
@@ -7,12 +8,15 @@ import {
   getTransactionCategoryCounts,
   getTransactions,
   getTransactionTagsCounts,
+  updateManyTransactions,
   updateTransaction,
 } from "~/server/services/transaction-service";
 import {
   createTransactionSchema,
+  deleteManyTransactionsSchema,
   deleteTransactionSchema,
   getTransactionsSchema,
+  updateManyTransactionsSchema,
   updateTransactionSchema,
 } from "~/shared/validators/transaction.schema";
 import { categorizeUserTransaction } from "~/utils/categorization";
@@ -69,11 +73,25 @@ export const transactionRouter = createTRPCRouter({
       return await updateTransaction(input, userId);
     }),
 
+  updateMany: protectedProcedure
+    .input(updateManyTransactionsSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.userId!;
+      return await updateManyTransactions(input, userId);
+    }),
+
   delete: protectedProcedure
     .input(deleteTransactionSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.userId!;
       return await deleteTransaction(input, userId);
+    }),
+
+  deleteMany: protectedProcedure
+    .input(deleteManyTransactionsSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.userId!;
+      return await deleteManyTransactions(input, userId);
     }),
 
   categorize: protectedProcedure

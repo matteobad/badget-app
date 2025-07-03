@@ -6,8 +6,6 @@ import { useTransactionsStore } from "~/lib/stores/transaction";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { DeleteIcon, Loader2 } from "lucide-react";
 
-// import { AddTransactions } from "@/components/add-transactions";
-// import { BulkActions } from "@/components/bulk-actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +18,7 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
+import { BulkActions } from "./transaction-bulk-actions";
 import { TransactionsColumnVisibility } from "./transactions-column-visibility";
 
 export function TransactionsActions() {
@@ -28,7 +27,7 @@ export function TransactionsActions() {
   const queryClient = useQueryClient();
 
   const deleteTransactionsMutation = useMutation(
-    trpc.transaction.delete.mutationOptions({
+    trpc.transaction.deleteMany.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries({
           queryKey: trpc.transaction.get.infiniteQueryKey(),
@@ -46,11 +45,13 @@ export function TransactionsActions() {
       <AlertDialog>
         <div className="ml-auto">
           <div className="flex items-center">
-            <span className="w-full text-sm text-[#606060]">Bulk edit</span>
+            <span className="w-full text-sm whitespace-nowrap text-[#606060]">
+              Bulk edit
+            </span>
             <div className="mr-4 ml-4 h-8 w-[1px] bg-border" />
 
             <div className="flex space-x-2">
-              {/* <BulkActions ids={transactionIds} /> */}
+              <BulkActions ids={transactionIds} />
 
               <div>
                 {canDelete && (
@@ -82,7 +83,7 @@ export function TransactionsActions() {
             <AlertDialogAction
               onClick={() => {
                 console.log("TODO delete");
-                // deleteTransactionsMutation.mutate(transactionIds);
+                deleteTransactionsMutation.mutate({ ids: transactionIds });
               }}
             >
               {deleteTransactionsMutation.isPending ? (

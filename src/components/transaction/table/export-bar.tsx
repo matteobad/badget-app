@@ -1,43 +1,39 @@
 import { useEffect, useState } from "react";
-import { SubmitButton } from "@midday/ui/submit-button";
 import NumberFlow from "@number-flow/react";
+import { SubmitButton } from "~/components/submit-button";
 import { Button } from "~/components/ui/button";
+import { useExportStore } from "~/lib/stores/export";
 import { useTransactionsStore } from "~/lib/stores/transaction";
 import { AnimatePresence, motion } from "framer-motion";
 import { DownloadIcon } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
 
-import { exportTransactionsAction } from "@/actions/export-transactions-action";
-import { useUserQuery } from "@/hooks/use-user";
-import { useExportStore } from "@/store/export";
+// import { exportTransactionsAction } from "@/actions/export-transactions-action";
 
 export function ExportBar() {
   const { setExportData } = useExportStore();
   const { rowSelection, setRowSelection } = useTransactionsStore();
   const [isOpen, setOpen] = useState(false);
-  const { data: user } = useUserQuery();
 
   const ids = Object.keys(rowSelection);
   const totalSelected = ids.length;
 
-  const { execute, status } = useAction(exportTransactionsAction, {
-    onSuccess: ({ data }) => {
-      if (data?.id && data?.publicAccessToken) {
-        setExportData({
-          runId: data.id,
-          accessToken: data.publicAccessToken,
-        });
+  // const { execute, status } = useAction(exportTransactionsAction, {
+  //   onSuccess: ({ data }) => {
+  //     if (data?.id && data?.publicAccessToken) {
+  //       setExportData({
+  //         runId: data.id,
+  //         accessToken: data.publicAccessToken,
+  //       });
 
-        setRowSelection(() => ({}));
-      }
+  //       setRowSelection(() => ({}));
+  //     }
 
-      setOpen(false);
-    },
-    onError: () => {
-      toast.error("Something went wrong please try again.");
-    },
-  });
+  //     setOpen(false);
+  //   },
+  //   onError: () => {
+  //     toast.error("Something went wrong please try again.");
+  //   },
+  // });
 
   useEffect(() => {
     if (totalSelected) {
@@ -50,7 +46,7 @@ export function ExportBar() {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed bottom-2 left-[50%] -ml-[200px] h-12 w-[400px]"
+        className="fixed bottom-4 left-[50%] z-10 -ml-[200px] h-12 w-[400px]"
         animate={{ y: isOpen ? 0 : 100 }}
         initial={{ y: 100 }}
       >
@@ -65,13 +61,13 @@ export function ExportBar() {
             </Button>
             <SubmitButton
               isSubmitting={status === "executing"}
-              onClick={() =>
-                execute({
-                  transactionIds: ids,
-                  dateFormat: user?.dateFormat ?? undefined,
-                  locale: user?.locale ?? undefined,
-                })
-              }
+              // onClick={() =>
+              //   execute({
+              //     transactionIds: ids,
+              //     dateFormat: user?.dateFormat ?? undefined,
+              //     locale: user?.locale ?? undefined,
+              //   })
+              // }
             >
               <div className="flex items-center space-x-2">
                 <span>Export</span>

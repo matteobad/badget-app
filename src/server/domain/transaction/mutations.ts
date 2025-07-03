@@ -1,6 +1,7 @@
 "server-only";
 
 import type { DBClient, TXType } from "~/server/db";
+import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
 import type {
   createTransactionSchema,
   deleteTransactionSchema,
@@ -38,6 +39,23 @@ export async function updateTransactionMutation(
     .where(
       and(eq(transaction_table.id, id), eq(transaction_table.userId, userId)),
     );
+}
+
+export async function updateManyTransactionsMutation(
+  client: DBClient,
+  input: Partial<DB_TransactionInsertType> & { ids: string[]; userId: string },
+) {
+  const { ids, ...rest } = input;
+  return await client
+    .update(transaction_table)
+    .set(rest)
+    .where(
+      and(
+        inArray(transaction_table.id, ids),
+        eq(transaction_table.userId, input.userId),
+      ),
+    )
+    .returning();
 }
 
 export async function updateTransactionTagsMutation(
@@ -143,4 +161,18 @@ export async function deleteTransactionMutation(
     .returning({
       id: transaction_table.id,
     });
+}
+
+export async function deleteManyTransactionsMutation(
+  client: DBClient,
+  input: { ids: string[]; userId: string },
+) {
+  return await client
+    .delete(transaction_table)
+    .where(
+      and(
+        inArray(transaction_table.id, input.ids),
+        eq(transaction_table.userId, input.userId),
+      ),
+    );
 }

@@ -44,6 +44,15 @@ export const updateTransactionSchema = createUpdateSchema(transaction_table, {
     userId: true,
   });
 
+export const updateManyTransactionsSchema = z.object({
+  ids: z.array(z.string().min(1)),
+  categoryId: z.string().nullable().optional(),
+  note: z.string().nullable().optional(),
+  // tagId?: string | null;
+  // recurring?: boolean;
+  // frequency?: "weekly" | "monthly" | "annually" | "irregular" | null;
+});
+
 export const updateTransactionTagsSchema = z.object({
   transactionId: z.cuid2(),
   tags: z.array(z.string()),
@@ -51,6 +60,10 @@ export const updateTransactionTagsSchema = z.object({
 
 export const deleteTransactionSchema = z.object({
   id: z.cuid2(),
+});
+
+export const deleteManyTransactionsSchema = z.object({
+  ids: z.array(z.string().min(1)),
 });
 
 export const categorizeTransactionSchema = z.object({

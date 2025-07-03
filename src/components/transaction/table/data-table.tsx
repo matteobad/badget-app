@@ -30,6 +30,7 @@ import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
 import { NoResults, NoTransactions } from "./empty-states";
+import { ExportBar } from "./export-bar";
 import { Loading } from "./loading";
 
 type Props = {
@@ -294,7 +295,7 @@ export function DataTable({
         </Tooltip>
       </TooltipProvider>
 
-      {/* <ExportBar /> */}
+      <ExportBar />
 
       <AnimatePresence>{showBottomBar && <BottomBar />}</AnimatePresence>
     </div>
