@@ -1,6 +1,7 @@
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { ColorKey } from "~/shared/constants/colors";
 import type { IconKey } from "~/shared/constants/icons";
+import type { dynamicIconImports } from "lucide-react/dynamic";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CategorySelect } from "~/components/category/forms/category-select";
@@ -212,8 +213,11 @@ function CreateBudgetConfirm({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col justify-center gap-2">
-        <DynamicIcon name="circle-dashed" />
+      <div className="flex flex-col items-center justify-center gap-2">
+        <DynamicIcon
+          name={category.icon as keyof typeof dynamicIconImports}
+          size={32}
+        />
         <span className="text-lg font-semibold">{category.name}</span>
         <p className="mt-2 text-muted-foreground">
           La categoria è stata creata con successo. Vuoi creare anche un budget?

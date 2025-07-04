@@ -15,6 +15,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
+import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -34,42 +35,11 @@ type Category = RouterOutput["category"]["getFlatTree"][number];
 
 const indent = 24;
 
-const doubleClickExpandFeature: FeatureImplementation = {
-  itemInstance: {
-    getProps: ({ tree, item, prev }) => ({
-      ...prev?.(),
-      onDoubleClick: (_e: React.MouseEvent) => {
-        item.primaryAction();
-
-        if (!item.isFolder()) {
-          return;
-        }
-
-        if (item.isExpanded()) {
-          item.collapse();
-        } else {
-          item.expand();
-        }
-      },
-      onClick: (e: React.MouseEvent) => {
-        if (e.shiftKey) {
-          item.selectUpTo(e.ctrlKey || e.metaKey);
-        } else if (e.ctrlKey || e.metaKey) {
-          item.toggleSelect();
-        } else {
-          tree.setSelectedItems([item.getItemMeta().itemId]);
-        }
-
-        item.setFocused();
-      },
-    }),
-  },
-};
-
 export function CategoryTree() {
   const t = useI18n();
   const tScoped = useScopedI18n("categories.budget");
 
+  const { params, setParams } = useCategoryParams();
   const { filter: categoryFilters } = useCategoryFilterParams();
   const { filter: budgetFilters } = useBudgetFilterParams();
 
@@ -89,19 +59,51 @@ export function CategoryTree() {
     }),
   );
 
+  const doubleClickExpandFeature: FeatureImplementation = {
+    itemInstance: {
+      getProps: ({ tree, item, prev }) => ({
+        ...prev?.(),
+        onDoubleClick: (_e: React.MouseEvent) => {
+          item.primaryAction();
+
+          if (!item.isFolder()) {
+            return;
+          }
+
+          if (item.isExpanded()) {
+            item.collapse();
+          } else {
+            item.expand();
+          }
+        },
+        onClick: (e: React.MouseEvent) => {
+          if (e.shiftKey) {
+            item.selectUpTo(e.ctrlKey || e.metaKey);
+          } else if (e.ctrlKey || e.metaKey) {
+            item.toggleSelect();
+          } else {
+            tree.setSelectedItems([item.getItemMeta().itemId]);
+          }
+
+          item.setFocused();
+          void setParams({ categoryId: item.getItemMeta().itemId });
+        },
+      }),
+    },
+  };
+
   // Store the initial expanded items to reset when search is cleared
   const initialExpandedItems = Object.values(items)
     .filter((item) => item.children)
     .map((item) => item.id);
   const [state, setState] = useState<Partial<TreeState<Category>>>({});
 
-  console.log(items);
-
   const tree = useTree<Category>({
     state,
     setState,
     initialState: {
       expandedItems: initialExpandedItems,
+      selectedItems: params.categoryId ? [params.categoryId] : [],
     },
     indent,
     rootItemId: "root_id",
@@ -122,7 +124,7 @@ export function CategoryTree() {
   });
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 p-4">
       <div className="flex h-full flex-col gap-2 *:nth-2:grow">
         <div className="relative mb-2 flex gap-4">
           <Input
@@ -211,9 +213,9 @@ export function CategoryTree() {
                     {item.getItemName()}
                   </span>
                   <div className="flex flex-1 items-center justify-end">
-                    {item.getItemData().parentId !== null && (
+                    {/* {item.getItemData().parentId !== null && (
                       <CategoryActions category={item.getItemData()} />
-                    )}
+                    )} */}
 
                     <CategoryBudgets
                       category={item.getItemData()}

@@ -1,6 +1,6 @@
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
-import { CategoryBudgets } from "~/components/category/category-budgets";
+import { CategoryBudgets } from "~/components/category/category-details";
 import { CategoryTree } from "~/components/category/category-tree";
 import {
   ResizableHandle,
@@ -50,23 +50,11 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
 
   return (
     <HydrateClient>
-      <ResizablePanelGroup direction="horizontal" className="md:min-w-[450px]">
-        <ResizablePanel className="p-4" defaultSize={70} minSize={50}>
-          <ErrorBoundary fallback={<div>Something went wrong</div>}>
-            <Suspense fallback={<div>Loading...</div>}>
-              <CategoryTree />
-            </Suspense>
-          </ErrorBoundary>
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={30} minSize={30}>
-          <ErrorBoundary fallback={<div>Something went wrong</div>}>
-            <Suspense fallback={<div>Loading...</div>}>
-              <CategoryBudgets />
-            </Suspense>
-          </ErrorBoundary>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+      <ErrorBoundary fallback={<div>Something went wrong</div>}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <CategoryTree />
+        </Suspense>
+      </ErrorBoundary>
 
       {/* <CreateCategoryDrawerSheet categories={categories} />
       <UpdateCategoryDrawerSheet categories={categories} /> */}
