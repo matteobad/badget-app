@@ -12,6 +12,7 @@ import { updateOrCreateRule } from "~/utils/categorization";
 
 import { db, withTransaction } from "../db";
 import { updateAttachmentMutation } from "../domain/attachment/mutations";
+import { createTransactionToTagMutation } from "../domain/transaction-tag/mutations";
 import {
   createTransactionMutation,
   deleteManyTransactionsMutation,
@@ -99,13 +100,30 @@ export async function updateManyTransactions(
   input: z.infer<typeof updateManyTransactionsSchema>,
   userId: string,
 ) {
-  const transaction = await updateManyTransactionsMutation(db, {
-    ...input,
-    userId,
-  });
-  // TODO: update category rules
+  const { tagId, ...rest } = input;
 
-  return transaction;
+  await withTransaction(async (tx) => {
+    const transaction = await updateManyTransactionsMutation(tx, {
+      ...rest,
+      userId,
+    });
+
+    // update category rules
+    if (input.categoryId) {
+      for (const { description } of transaction) {
+        await updateOrCreateRule(userId, description, input.categoryId);
+      }
+    }
+
+    // update transactionTag
+    if (tagId) {
+      for (const transactionId of input.ids) {
+        await createTransactionToTagMutation(tx, { transactionId, tagId });
+      }
+    }
+
+    return transaction;
+  });
 }
 
 export async function deleteTransaction(

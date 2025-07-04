@@ -47,8 +47,8 @@ export const updateTransactionSchema = createUpdateSchema(transaction_table, {
 export const updateManyTransactionsSchema = z.object({
   ids: z.array(z.string().min(1)),
   categoryId: z.string().nullable().optional(),
+  tagId: z.string().nullable().optional(),
   note: z.string().nullable().optional(),
-  // tagId?: string | null;
   // recurring?: boolean;
   // frequency?: "weekly" | "monthly" | "annually" | "irregular" | null;
 });

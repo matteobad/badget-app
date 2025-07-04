@@ -1,15 +1,17 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { dynamicIconImports } from "lucide-react/dynamic";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTransactionsStore } from "~/lib/stores/transaction";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { ChevronDownIcon, ShapesIcon } from "lucide-react";
+import { ChevronDownIcon, ShapesIcon, TagsIcon } from "lucide-react";
+import { DynamicIcon } from "lucide-react/dynamic";
 import { toast } from "sonner";
 
-import { CategorySelect } from "../category/forms/category-select";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuPortal,
@@ -48,10 +50,15 @@ export function BulkActions({ ids }: Props) {
     }),
   );
 
-  //   const { data: tags } = useQuery({
-  //     ...trpc.tag.get.queryOptions({}),
-  //     enabled: ids.length > 0,
-  //   });
+  const { data: categories } = useQuery({
+    ...trpc.category.get.queryOptions({}),
+    enabled: ids.length > 0,
+  });
+
+  const { data: tags } = useQuery({
+    ...trpc.tag.get.queryOptions({}),
+    enabled: ids.length > 0,
+  });
 
   return (
     <DropdownMenu>
@@ -71,32 +78,49 @@ export function BulkActions({ ids }: Props) {
             <DropdownMenuPortal>
               <DropdownMenuSubContent
                 sideOffset={14}
-                className="h-[270px] w-[250px] p-0"
+                className="max-h-[200px] w-[220px] overflow-y-auto py-1"
               >
-                <CategorySelect
-                  onValueChange={(selected) => {
-                    updateTransactionsMutation.mutate({
-                      ids,
-                      categoryId: selected,
-                    });
-                  }}
-                />
+                {categories && categories.length > 0 ? (
+                  categories.map((category) => (
+                    <DropdownMenuCheckboxItem
+                      key={category.id}
+                      // checked={ids.includes(tag.id)}
+                      onCheckedChange={() => {
+                        updateTransactionsMutation.mutate({
+                          ids,
+                          categoryId: category.id,
+                        });
+                      }}
+                    >
+                      <DynamicIcon
+                        name={category.icon as keyof typeof dynamicIconImports}
+                        size={16}
+                        aria-hidden="true"
+                      />
+                      {category.name}
+                    </DropdownMenuCheckboxItem>
+                  ))
+                ) : (
+                  <p className="px-2 text-sm text-[#878787]">
+                    No categories found
+                  </p>
+                )}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
         </DropdownMenuGroup>
 
-        {/* <DropdownMenuGroup>
+        <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Status className="mr-2 h-4 w-4" />
+              <TagsIcon className="mr-2 h-4 w-4" />
               <span>Tags</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent
                 sideOffset={14}
                 alignOffset={-4}
-                className="max-h-[200px] max-w-[220px] overflow-y-auto py-2"
+                className="max-h-[200px] w-[220px] overflow-y-auto py-1"
               >
                 {tags && tags.length > 0 ? (
                   tags.map((tag) => (
@@ -119,7 +143,7 @@ export function BulkActions({ ids }: Props) {
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
-        </DropdownMenuGroup> */}
+        </DropdownMenuGroup>
 
         {/* <DropdownMenuGroup>
           <DropdownMenuSub>

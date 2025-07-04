@@ -12,6 +12,7 @@ export async function createTransactionToTagMutation(
   return await client
     .insert(transaction_to_tag_table)
     .values({ ...input })
+    .onConflictDoNothing()
     .returning();
 }
 
