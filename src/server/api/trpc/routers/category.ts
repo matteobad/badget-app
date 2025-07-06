@@ -61,7 +61,7 @@ export const categoryRouter = createTRPCRouter({
       return await createCategory(input, userId);
     }),
 
-  updateCategory: protectedProcedure
+  update: protectedProcedure
     .input(updateCategorySchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.userId!;

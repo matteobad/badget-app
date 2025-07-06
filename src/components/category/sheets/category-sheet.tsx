@@ -22,7 +22,7 @@ export default function CategorySheet() {
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="p-4">
+      <SheetContent className="p-4 [&>button]:hidden">
         <div className="flex h-full flex-col">
           <SheetHeader className="sr-only">
             <SheetTitle>Modifica spesa o entrate</SheetTitle>

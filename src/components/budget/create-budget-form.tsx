@@ -19,8 +19,8 @@ import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
 import { ChevronDownIcon, Loader2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
 
+import { CurrencyInput } from "../custom/currency-input";
 import { Calendar } from "../ui/calendar";
-import { Label } from "../ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Switch } from "../ui/switch";
 
@@ -55,10 +55,8 @@ export default function CreateBudgetForm({
     resolver: standardSchemaResolver(createBudgetSchema),
     defaultValues: {
       period: BUDGET_PERIOD.MONTHLY,
-      dateRange: {
-        from: startOfMonth(new Date()),
-        to: startOfDay(endOfMonth(new Date())),
-      },
+      from: startOfMonth(new Date()),
+      to: startOfDay(endOfMonth(new Date())),
       repeat: false,
       amount: 0,
     },
@@ -82,66 +80,120 @@ export default function CreateBudgetForm({
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
         </pre> */}
 
-        <div className="grid gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="dateRange"
+            name="from"
             render={({ field }) => (
               <FormItem className="grid gap-3">
-                <FormLabel>Periodo</FormLabel>
+                <FormLabel>From</FormLabel>
                 <FormControl>
-                  <div className="flex flex-col gap-3">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          id="dates"
-                          className="w-full justify-between font-normal"
-                        >
-                          {field.value?.from && field.value?.to
-                            ? `${field.value.from.toLocaleDateString()} - ${field.value.to.toLocaleDateString()}`
-                            : "Select date"}
-                          <ChevronDownIcon />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent
-                        className="flex w-auto overflow-hidden p-0"
-                        align="end"
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        id="date-from"
+                        className="w-full justify-between font-normal ring-inset"
                       >
-                        <div className="p-1">
-                          <Calendar
-                            mode="range"
-                            selected={field.value}
-                            captionLayout="dropdown"
-                            onSelect={(range) => {
-                              field.onChange(range);
-                            }}
-                          />
-                        </div>
+                        {field.value
+                          ? field.value.toLocaleDateString("en-US", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "Select date"}
+                        <ChevronDownIcon />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto overflow-hidden p-0"
+                      align="start"
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        captionLayout="dropdown"
+                        onSelect={(date) => {
+                          field.onChange(date);
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="to"
+            render={({ field }) => (
+              <FormItem className="grid gap-3">
+                <FormLabel>To</FormLabel>
+                <FormControl>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        id="date-from"
+                        className="w-full justify-between font-normal ring-inset"
+                      >
+                        {field.value
+                          ? field.value.toLocaleDateString("en-US", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "Select date"}
+                        <ChevronDownIcon />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto overflow-hidden p-0"
+                      align="start"
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        captionLayout="dropdown"
+                        onSelect={(date) => {
+                          field.onChange(date);
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-                        <div className="no-scrollbar inset-y-0 right-0 flex max-h-72 w-full scroll-pb-6 flex-col gap-4 overflow-y-auto border-t p-4 md:max-h-none md:w-48 md:border-t-0 md:border-l">
-                          <div className="grid gap-2">
-                            {/* <Label className="">Time frame</Label> */}
-                            {Object.values(BUDGET_PERIOD).map((period) => (
-                              <Button
-                                key={period}
-                                size="sm"
-                                variant="outline"
-                                onClick={() => field.onChange(period)}
-                                className="w-full capitalize shadow-none"
-                              >
-                                {period}
-                              </Button>
-                            ))}
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <Label>Recurring</Label>
-                            <Switch />
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem className="grid gap-3">
+                <FormLabel>Amount</FormLabel>
+                <FormControl>
+                  <CurrencyInput {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="repeat"
+            render={({ field }) => (
+              <FormItem className="grid gap-3">
+                <FormLabel>Repeat</FormLabel>
+                <FormControl>
+                  <Switch
+                    onCheckedChange={field.onChange}
+                    checked={field.value}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -150,16 +202,6 @@ export default function CreateBudgetForm({
         </div>
 
         <div className="flex items-center justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              // close modal
-              void setParams(null);
-            }}
-          >
-            Annulla
-          </Button>
           <Button type="submit" disabled={createMutation.isPending}>
             {createMutation.isPending ? (
               <>

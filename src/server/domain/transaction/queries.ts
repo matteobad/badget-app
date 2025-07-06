@@ -386,6 +386,7 @@ export async function getTransactionByIdQuery(id: string, userId: string) {
       status: transaction_table.status,
       note: transaction_table.note,
       manual: transaction_table.manual,
+      exclude: transaction_table.exclude,
       recurring: transaction_table.recurring,
       counterpartyName: transaction_table.counterpartyName,
       frequency: transaction_table.frequency,

@@ -1,5 +1,6 @@
 "use client";
 
+import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -31,9 +32,9 @@ export default function CreateTransactionSheet() {
             </SheetDescription>
           </SheetHeader>
 
-          {/* <ScrollArea className="h-full p-0"> */}
-          <CreateTransactionForm />
-          {/* </ScrollArea> */}
+          <ScrollArea className="h-full p-0 pb-[100px]" hideScrollbar>
+            <CreateTransactionForm />
+          </ScrollArea>
         </div>
       </SheetContent>
     </Sheet>

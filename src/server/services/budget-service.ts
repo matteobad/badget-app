@@ -1,16 +1,17 @@
 import type {
   budgetFilterSchema,
   createBudgetSchema,
+  getBudgetSchema,
 } from "~/shared/validators/budget.schema";
 import type z from "zod/v4";
 
-import type { getBudgetsQuery } from "../domain/budget/queries";
 import type { getCategoriesQuery } from "../domain/category/queries";
 import {
   buildBudgetInsert,
   getBudgetForPeriod,
 } from "../domain/budget/helpers";
 import { createBudgetMutation } from "../domain/budget/mutations";
+import { getBudgetsQuery } from "../domain/budget/queries";
 
 export type CategoryType = Awaited<
   ReturnType<typeof getCategoriesQuery>
@@ -88,6 +89,13 @@ export function findBudgetWarnings(
   }
 
   return warnings;
+}
+
+export async function getBudgets(
+  input: z.infer<typeof getBudgetSchema>,
+  userId: string,
+) {
+  return await getBudgetsQuery({ ...input, userId });
 }
 
 export async function createBudget(

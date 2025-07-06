@@ -15,6 +15,10 @@ import { dateRangeSchema } from "./common.schema";
 
 export const selectBudgetSchema = createSelectSchema(budget_table);
 
+export const getBudgetSchema = z.object({
+  categoryId: z.string().min(1),
+});
+
 export const createBudgetSchema = createInsertSchema(budget_table, {
   period: z.enum(BUDGET_PERIOD),
 })
@@ -27,7 +31,9 @@ export const createBudgetSchema = createInsertSchema(budget_table, {
     userId: true,
   })
   .extend({
-    dateRange: dateRangeSchema,
+    from: z.date(),
+    to: z.date(),
+    // dateRange: dateRangeSchema,
     repeat: z.boolean(),
   });
 

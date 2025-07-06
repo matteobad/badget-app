@@ -1,7 +1,6 @@
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { ColorKey } from "~/shared/constants/colors";
-import type { IconKey } from "~/shared/constants/icons";
-import type { dynamicIconImports } from "lucide-react/dynamic";
+import type { dynamicIconImports, IconName } from "lucide-react/dynamic";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CategorySelect } from "~/components/category/forms/category-select";
@@ -26,7 +25,7 @@ import { useForm } from "react-hook-form";
 import { type z } from "zod/v4";
 
 import { ColorPicker } from "../forms/color-picker";
-import { IconPicker } from "../forms/icon-picker";
+import { IconPicker } from "../ui/icon-picker";
 
 export default function CreateCategoryForm({
   className,
@@ -106,8 +105,8 @@ export default function CreateCategoryForm({
                 <FormItem className="absolute top-9 left-12 grid gap-3 pr-2.5">
                   <FormControl>
                     <IconPicker
-                      value={field.value as IconKey}
-                      onChange={field.onChange}
+                      value={field.value as IconName}
+                      onValueChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />

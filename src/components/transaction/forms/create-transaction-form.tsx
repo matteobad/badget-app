@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CategorySelect } from "~/components/category/forms/category-select";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { AccountPicker } from "~/components/forms/account-picker";
+import { SubmitButton } from "~/components/submit-button";
 import { TagsSelect } from "~/components/tag/tags-select";
 import {
   Accordion,
@@ -24,6 +25,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -36,6 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
@@ -46,7 +49,7 @@ import { formatSize } from "~/utils/format";
 import { UploadDropzone } from "~/utils/uploadthing";
 import { format } from "date-fns";
 import { type Tag } from "emblor";
-import { CalendarIcon, Loader2Icon, X } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -54,9 +57,7 @@ import { type z } from "zod/v4";
 
 import { deleteTransactionAttachmentAction } from "../../../features/transaction/server/actions";
 
-export default function CreateTransactionForm({
-  className,
-}: {} & React.ComponentProps<"form">) {
+export default function CreateTransactionForm() {
   const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
@@ -112,15 +113,16 @@ export default function CreateTransactionForm({
     resolver: standardSchemaResolver(createTransactionSchema),
     defaultValues: {
       date: new Date(),
-      description: "",
-      amount: 0,
+      description: undefined,
       currency: "EUR",
-      accountId: accounts ? accounts[0]?.id : undefined,
+      accountId: accounts?.at(0)?.id,
       attachment_ids: [],
       tags: tags,
       manual: true,
     },
   });
+
+  const bankAccountId = form.watch("accountId");
 
   const handleSubmit = (data: z.infer<typeof createTransactionSchema>) => {
     const formattedData = {
@@ -130,91 +132,57 @@ export default function CreateTransactionForm({
     createTransactionMutation.mutate(formattedData);
   };
 
+  useEffect(() => {
+    if (!bankAccountId && accounts?.length) {
+      const firstAccountId = accounts.at(0)?.id;
+      if (firstAccountId) {
+        form.setValue("accountId", firstAccountId);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accounts, bankAccountId]);
+
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className={cn("flex h-full flex-col gap-6", className)}
-      >
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {/* <pre>
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
         </pre> */}
 
-        <div className="grid w-full grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className="col-span-2 flex flex-col">
-                <FormLabel>Data</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "dd MMMM yyyy")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-auto overflow-hidden p-0"
-                    align="start"
-                  >
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) => date < new Date("1900-01-01")}
-                      captionLayout="dropdown"
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem className="col-span-2 flex flex-col">
-                <FormLabel>Descrizione</FormLabel>
-                <FormControl>
-                  <Input
-                    className="bg-background"
-                    placeholder=""
-                    autoComplete="off"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck="false"
-                    {...field}
-                    onBlur={(event) => {
-                      if (event.target.value.length < 3) return;
-                      categorizeTransactionMutation.mutate({
-                        description: event.target.value,
-                      });
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  className="bg-background"
+                  onBlur={(event) => {
+                    if (event.target.value.length < 3) return;
+                    categorizeTransactionMutation.mutate({
+                      description: event.target.value,
+                    });
+                  }}
+                />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="mt-4 flex space-x-4">
           <FormField
             control={form.control}
             name="amount"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="w-full">
                 <FormLabel>Importo</FormLabel>
                 <FormControl>
                   <CurrencyInput
@@ -241,7 +209,7 @@ export default function CreateTransactionForm({
             control={form.control}
             name="currency"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="w-full">
                 <FormLabel>Valuta</FormLabel>
                 <Select
                   onValueChange={field.onChange}
@@ -260,11 +228,14 @@ export default function CreateTransactionForm({
               </FormItem>
             )}
           />
+        </div>
+
+        <div className="mt-4 flex space-x-4">
           <FormField
             control={form.control}
             name="accountId"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="w-full">
                 <FormLabel>Conto</FormLabel>
                 <AccountPicker
                   options={accounts ?? []}
@@ -277,9 +248,55 @@ export default function CreateTransactionForm({
           />
           <FormField
             control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Data</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full pl-3 text-left font-normal ring-inset",
+                          !field.value && "text-muted-foreground",
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd MMMM yyyy")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-auto overflow-hidden p-0"
+                    align="start"
+                  >
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date < new Date("1900-01-01")}
+                      captionLayout="dropdown"
+                      required // allow selecting same date
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="mt-4 flex space-x-4">
+          <FormField
+            control={form.control}
             name="categoryId"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="w-full">
                 <FormLabel>Categoria</FormLabel>
                 <CategorySelect
                   value={field.value ?? undefined}
@@ -296,7 +313,7 @@ export default function CreateTransactionForm({
             control={form.control}
             name="tags"
             render={({ field }) => (
-              <FormItem className="col-span-2 flex flex-col">
+              <FormItem className="w-full">
                 <FormLabel>Tags</FormLabel>
                 <TagsSelect
                   {...field}
@@ -379,6 +396,43 @@ export default function CreateTransactionForm({
               </ul>
             </AccordionContent>
           </AccordionItem>
+
+          {/* <AccordionItem value="general">
+            <AccordionTrigger>General</AccordionTrigger>
+            <AccordionContent className="select-text"> */}
+          <div className="mt-6 mb-4">
+            <Label
+              htmlFor="settings"
+              className="mb-2 block text-sm font-medium"
+            >
+              Exclude from analytics
+            </Label>
+            <div className="flex flex-row items-center justify-between">
+              <div className="space-y-0.5 pr-4">
+                <p className="text-xs text-muted-foreground">
+                  Exclude this transaction from analytics like profit, expense
+                  and revenue. This is useful for internal transfers between
+                  accounts to avoid double-counting.
+                </p>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="exclude"
+                render={({ field }) => (
+                  <Switch
+                    checked={field.value ?? false}
+                    onCheckedChange={(checked) => {
+                      field.onChange(checked);
+                    }}
+                  />
+                )}
+              />
+            </div>
+          </div>
+          {/* </AccordionContent>
+          </AccordionItem> */}
+
           <AccordionItem value="note">
             <AccordionTrigger>Note</AccordionTrigger>
             <AccordionContent>
@@ -402,22 +456,13 @@ export default function CreateTransactionForm({
           </AccordionItem>
         </Accordion>
 
-        <div className="grow"></div>
-        <div className="flex items-center gap-4">
-          <Button
+        <div className="fixed right-8 bottom-8 w-full sm:max-w-[455px]">
+          <SubmitButton
+            isSubmitting={createTransactionMutation.isPending}
             className="w-full"
-            type="submit"
-            disabled={createTransactionMutation.isPending}
           >
-            {createTransactionMutation.isPending ? (
-              <>
-                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                Creo transazione...
-              </>
-            ) : (
-              "Aggiungi transazione"
-            )}
-          </Button>
+            Create
+          </SubmitButton>
         </div>
       </form>
     </Form>

@@ -30,7 +30,7 @@ export const createCategorySchema = createInsertSchema(category_table, {
 
 export const updateCategorySchema = createUpdateSchema(category_table, {
   id: z.string().min(1), // TODO: change to cuid2
-  type: z.enum(CATEGORY_TYPE),
+  type: z.enum(CATEGORY_TYPE).optional(),
 }).omit({
   createdAt: true,
   updatedAt: true,

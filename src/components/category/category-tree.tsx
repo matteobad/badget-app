@@ -1,7 +1,7 @@
 "use client";
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import type { dynamicIconImports } from "lucide-react/dynamic";
+import type { dynamicIconImports, IconName } from "lucide-react/dynamic";
 import { useState } from "react";
 import {
   expandAllFeature,
@@ -12,7 +12,6 @@ import {
 } from "@headless-tree/core";
 import { useTree } from "@headless-tree/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Button } from "~/components/ui/button";
 import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
 import { useCategoryParams } from "~/hooks/use-category-params";
@@ -21,15 +20,14 @@ import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useI18n, useScopedI18n } from "~/shared/locales/client";
 import { formatPerc } from "~/utils/format";
-import { DotIcon, PlusIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
+import { DotIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { FeatureImplementation, TreeState } from "@headless-tree/core";
 import { Tree, TreeItem, TreeItemLabel } from "../tree";
+import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
 import { CategoryFilters } from "./category-filters";
-import { DeleteCategoryDialog } from "./delete-category-dialog";
-import UpdateCategoryDialog from "./update-category-dialog";
 
 type Category = RouterOutput["category"]["getFlatTree"][number];
 
@@ -176,7 +174,6 @@ export function CategoryTree() {
           </span>
 
           <div className="flex items-center justify-end px-2 text-right">
-            <span className="w-full">Budget</span>
             <span className="w-[120px] shrink-0">Totale</span>
             <span className="w-[50px] shrink-0">%</span>
           </div>
@@ -203,24 +200,19 @@ export function CategoryTree() {
 
                     <DynamicIcon
                       name={
-                        item.getItemData()
-                          .icon as keyof typeof dynamicIconImports
+                        (item.getItemData()?.icon as IconName) ??
+                        "circle-dashed"
                       }
                       className={cn(
                         "pointer-events-none size-4 text-muted-foreground",
                       )}
                     />
-                    {item.getItemName()}
+                    <span className="text-base">{item.getItemName()}</span>
+                    {!item.getItemData().parentId && (
+                      <Badge variant="tag-rounded">System</Badge>
+                    )}
                   </span>
                   <div className="flex flex-1 items-center justify-end">
-                    {/* {item.getItemData().parentId !== null && (
-                      <CategoryActions category={item.getItemData()} />
-                    )} */}
-
-                    <CategoryBudgets
-                      category={item.getItemData()}
-                      warnings={warnings}
-                    />
                     <CategoryTotal category={item.getItemData()} />
                     <CategoryPercentage category={item.getItemData()} />
                   </div>
@@ -230,46 +222,6 @@ export function CategoryTree() {
           })}
         </Tree>
       </div>
-    </div>
-  );
-}
-
-function CategoryBudgets({
-  category,
-  warnings,
-}: {
-  category: Category;
-  warnings: RouterOutput["budget"]["getBudgetWarnings"];
-}) {
-  const t = useI18n();
-  const budget = category.budgets[0];
-  const warning = warnings.find((w) => w.parentId === category.id);
-
-  if (!budget) {
-    return (
-      <Button variant={"ghost"} className="-mr-[3px] size-6 text-neutral-300">
-        <PlusIcon className="size-4 text-neutral-300" />
-      </Button>
-    );
-  }
-
-  return (
-    <div className="flex grow items-center justify-end gap-2 font-mono text-neutral-300">
-      {warning && (
-        <span className="mr-2 truncate text-xs">
-          {t("categories.budget.warning.node")}
-        </span>
-      )}
-      <span className="">
-        {formatAmount({
-          amount: budget.amount,
-          currency: "eur",
-          maximumFractionDigits: 0,
-        })}
-      </span>
-      <span className="flex size-4 items-center justify-center rounded border border-neutral-300 text-[10px] uppercase">
-        {budget.period.charAt(0)}
-      </span>
     </div>
   );
 }
@@ -292,15 +244,6 @@ function CategoryPercentage({ category }: { category: Category }) {
   return (
     <div className="flex w-[50px] items-center justify-end gap-1 font-mono text-neutral-300">
       <span className="text-xs">{formatPerc(category.perc)}</span>
-    </div>
-  );
-}
-
-function CategoryActions({ category }: { category: Category }) {
-  return (
-    <div className="ml-4 hidden justify-end gap-3 text-primary group-hover:flex">
-      <UpdateCategoryDialog categoryId={category.id} />
-      <DeleteCategoryDialog categoryId={category.id} />
     </div>
   );
 }

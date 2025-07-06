@@ -1,20 +1,26 @@
 "server-only";
 
-import type { budgetFilterSchema } from "~/shared/validators/budget.schema";
-import type z from "zod/v4";
 import { db } from "~/server/db";
 import { budget_table } from "~/server/db/schema/budgets";
 import { and, eq, isNull, sql } from "drizzle-orm";
 
-export const getBudgetsQuery = (
-  filters: z.infer<typeof budgetFilterSchema>,
-  userId: string,
-) => {
-  const where = [eq(budget_table.userId, userId)];
+type GetBudgetsQueryRequest = {
+  userId: string;
+  categoryId?: string;
+  from?: Date;
+  to?: Date;
+};
 
-  if (filters?.from && filters.to) {
+export const getBudgetsQuery = (params: GetBudgetsQueryRequest) => {
+  const where = [eq(budget_table.userId, params.userId)];
+
+  if (params?.categoryId) {
+    where.push(eq(budget_table.categoryId, params.categoryId));
+  }
+
+  if (params?.from && params.to) {
     where.push(
-      sql`${budget_table.sysPeriod} && tstzrange(${filters.from.toISOString()}, ${filters.to.toISOString()}, '[]')`,
+      sql`${budget_table.sysPeriod} && tstzrange(${params.from.toISOString()}, ${params.to.toISOString()}, '[]')`,
     );
   }
 

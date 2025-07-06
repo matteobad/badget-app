@@ -412,11 +412,11 @@ export function TransactionDetails() {
                 </div>
 
                 <Switch
-                  checked={data?.status === "excluded"}
+                  checked={data?.exclude}
                   onCheckedChange={(checked) => {
                     updateTransactionMutation.mutate({
                       id: data?.id,
-                      status: checked ? "excluded" : "booked",
+                      exclude: checked,
                     });
                   }}
                 />

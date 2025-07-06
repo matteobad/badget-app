@@ -52,12 +52,17 @@ export async function getCategoryByIdQuery(params: {
       icon: category_table.icon,
       description: category_table.description,
       parentId: category_table.parentId,
+      // budgets: sql<
+      //   Array<{ id: string; amount: number }>
+      // >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${budget_table.id}, 'amount', ${budget_table.amount})) FILTER (WHERE ${budget_table.id} IS NOT NULL), '[]'::json)`.as(
+      //   "budgets",
+      // ),
     })
     .from(category_table)
     .where(
       and(
         eq(category_table.id, params.id),
-        // eq(category_table.userId, params.userId),
+        eq(category_table.userId, params.userId),
       ),
     );
 

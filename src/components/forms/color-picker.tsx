@@ -1,57 +1,40 @@
-import type { ColorKey } from "~/shared/constants/colors";
-import { Button } from "~/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
-import { AVAILABLE_COLORS } from "~/shared/constants/colors";
+import { HexColorPicker } from "react-colorful";
 
-interface ColorPickerProps {
-  value: ColorKey;
-  onChange: (color: ColorKey) => void;
-  disabled?: boolean;
-}
+import { Button } from "../ui/button";
 
-export function ColorPicker({ value, onChange, disabled }: ColorPickerProps) {
-  const selectedColor = AVAILABLE_COLORS[value];
+type Props = {
+  value: string;
+  onSelect: (value: string) => void;
+  className: string;
+};
 
+export function ColorPicker({ value, onSelect, className }: Props) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          size="sm"
-          disabled={disabled}
-          className="size-4 rounded-full border-2 p-0 transition-transform hover:scale-105"
-          style={{ backgroundColor: selectedColor.hex }}
-          aria-label={`Selected color: ${selectedColor.name}`}
-        >
-          <span className="sr-only">Pick a color</span>
-        </Button>
+          variant="ghost"
+          type="button"
+          className={cn("absolute left-0 transition-colors", className)}
+          style={{
+            backgroundColor: value,
+          }}
+        />
       </PopoverTrigger>
-      <PopoverContent className="mt-2 -ml-3 w-94 p-4" align="start">
-        <div className="space-y-3">
-          <h4 className="text-sm font-medium">Choose a color</h4>
-          <div className="grid grid-cols-7 gap-2">
-            {Object.entries(AVAILABLE_COLORS).map(([key, color]) => (
-              <Button
-                key={key}
-                variant="outline"
-                size="sm"
-                className={cn(
-                  "h-8 w-8 rounded-full border-2 p-0 transition-all hover:scale-110",
-                  value === key && "ring-2 ring-primary ring-offset-2",
-                )}
-                style={{ backgroundColor: color.hex }}
-                onClick={() => onChange(key as ColorKey)}
-                aria-label={color.name}
-                title={color.name}
-              />
-            ))}
-          </div>
-        </div>
+      <PopoverContent className="w-auto p-0" sideOffset={14}>
+        <HexColorPicker
+          className="color-picker"
+          color={value}
+          onChange={(c) => {
+            onSelect(c);
+          }}
+        />
       </PopoverContent>
     </Popover>
   );

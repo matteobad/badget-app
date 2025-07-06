@@ -3,10 +3,12 @@ import { getCategoriesQuery } from "~/server/domain/category/queries";
 import {
   createBudget,
   findBudgetWarnings,
+  getBudgets,
 } from "~/server/services/budget-service";
 import {
   budgetFilterSchema,
   createBudgetSchema,
+  getBudgetSchema,
 } from "~/shared/validators/budget.schema";
 import { getCategoriesSchema } from "~/shared/validators/category.schema";
 import { z } from "zod/v4";
@@ -26,8 +28,15 @@ export const budgetRouter = createTRPCRouter({
       const { categoryFilters, budgetFilters } = input;
 
       const categories = await getCategoriesQuery(categoryFilters, userId);
-      const budgets = await getBudgetsQuery(budgetFilters, userId);
+      const budgets = await getBudgetsQuery({ ...budgetFilters, userId });
       return findBudgetWarnings(categories, budgets, budgetFilters);
+    }),
+
+  get: protectedProcedure
+    .input(getBudgetSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.userId!;
+      return await getBudgets(input, userId);
     }),
 
   createBudget: protectedProcedure
