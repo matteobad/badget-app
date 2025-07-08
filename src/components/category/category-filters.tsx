@@ -7,7 +7,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { useCategoryParams } from "~/hooks/use-category-params";
 import {
   endOfMonth,
   endOfWeek,
@@ -19,14 +18,13 @@ import {
   startOfWeek,
   startOfYear,
 } from "date-fns";
-import { ChevronDownIcon, PlusIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, InfoIcon } from "lucide-react";
 import { useQueryStates } from "nuqs";
 import { type DateRange } from "react-day-picker";
 
 import { categoriesFiltersParsers } from "../../features/category/utils/search-params";
 
 export const CategoryFilters = () => {
-  const { setParams } = useCategoryParams();
   const [filters, setFilters] = useQueryStates(categoriesFiltersParsers, {
     shallow: false,
   });
@@ -77,16 +75,19 @@ export const CategoryFilters = () => {
   };
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-2">
+      <Button size="icon" variant="ghost" className="size-8">
+        <InfoIcon className="size-4" />
+      </Button>
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             id="dates"
-            className="w-56 justify-between font-normal"
+            className="w-40 justify-center text-sm font-normal"
+            size="sm"
           >
             {getDisplayText(filters)}
-            <ChevronDownIcon />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto overflow-hidden p-0" align="start">
@@ -98,9 +99,11 @@ export const CategoryFilters = () => {
           />
         </PopoverContent>
       </Popover>
-      <Button onClick={() => void setParams({ createCategory: true })}>
-        <PlusIcon className="size-4" />
-        Crea
+      <Button size="icon" variant="ghost" className="size-8">
+        <ChevronLeftIcon />
+      </Button>
+      <Button size="icon" variant="ghost" className="size-8">
+        <ChevronRightIcon />
       </Button>
     </div>
   );

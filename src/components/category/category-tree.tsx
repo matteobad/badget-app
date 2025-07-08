@@ -1,7 +1,7 @@
 "use client";
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import type { dynamicIconImports, IconName } from "lucide-react/dynamic";
+import type { IconName } from "lucide-react/dynamic";
 import { useState } from "react";
 import {
   expandAllFeature,
@@ -18,15 +18,18 @@ import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { useI18n, useScopedI18n } from "~/shared/locales/client";
+import { useI18n } from "~/shared/locales/client";
 import { formatPerc } from "~/utils/format";
-import { DotIcon, SearchIcon, TriangleAlertIcon } from "lucide-react";
+import { DotIcon, PlusIcon, RepeatIcon, SearchIcon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { FeatureImplementation, TreeState } from "@headless-tree/core";
+import { CurrencyInput } from "../custom/currency-input";
 import { Tree, TreeItem, TreeItemLabel } from "../tree";
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { CategoryActions } from "./category-actions";
 import { CategoryFilters } from "./category-filters";
 
 type Category = RouterOutput["category"]["getFlatTree"][number];
@@ -35,7 +38,6 @@ const indent = 24;
 
 export function CategoryTree() {
   const t = useI18n();
-  const tScoped = useScopedI18n("categories.budget");
 
   const { params, setParams } = useCategoryParams();
   const { filter: categoryFilters } = useCategoryFilterParams();
@@ -84,7 +86,8 @@ export function CategoryTree() {
           }
 
           item.setFocused();
-          void setParams({ categoryId: item.getItemMeta().itemId });
+          console.log(e.target);
+          // void setParams({ categoryId: item.getItemMeta().itemId });
         },
       }),
     },
@@ -123,7 +126,7 @@ export function CategoryTree() {
 
   return (
     <div className="flex flex-col gap-2 p-4">
-      <div className="flex h-full flex-col gap-2 *:nth-2:grow">
+      <div className="flex justify-between">
         <div className="relative mb-2 flex gap-4">
           <Input
             className="peer ps-9"
@@ -162,38 +165,38 @@ export function CategoryTree() {
           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
             <SearchIcon className="size-4" aria-hidden="true" />
           </div>
-          <CategoryFilters />
         </div>
-        <div className="mb-2 flex w-full items-center justify-center gap-2 rounded border border-yellow-600 bg-yellow-50 px-4 py-2 text-yellow-600">
-          {tScoped("warning", { count: warnings.length })}
-          {warnings.length > 0 && <TriangleAlertIcon className="size-4" />}
-        </div>
-        <div className="flex items-center justify-between px-1 text-sm text-muted-foreground">
-          <span className="flex flex-1 items-center gap-2">
-            {t("categories", { count: Object.entries(items).length })}
-          </span>
 
-          <div className="flex items-center justify-end px-2 text-right">
-            <span className="w-[120px] shrink-0">Totale</span>
-            <span className="w-[50px] shrink-0">%</span>
-          </div>
-        </div>
-        <Tree
-          className="relative -ml-1 before:absolute before:inset-0 before:-ms-1 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]"
-          indent={indent}
-          tree={tree}
-        >
-          {/* <AssistiveTreeDescription tree={tree} /> */}
-          {tree.getItems().map((item) => {
-            // Merge styles
-            const mergedStyle = {
-              color: `${item.getItemData().color}`,
-            } as React.CSSProperties;
+        <CategoryActions />
+      </div>
 
-            return (
-              <TreeItem key={item.getId()} item={item}>
-                <TreeItemLabel className="group relative gap-2 not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background">
-                  <span className="line-clamp-1 flex max-w-[100px] items-center gap-2 text-ellipsis md:max-w-none">
+      <div className="flex items-center text-sm text-muted-foreground">
+        <span className="flex flex-1 items-center gap-2">
+          {t("categories", { count: Object.entries(items).length })}
+        </span>
+        <CategoryFilters />
+        <span className="w-[170px] text-right">{t("category.budget")}</span>
+      </div>
+
+      <Tree
+        className="relative -ml-1 before:absolute before:inset-0 before:-ms-1 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]"
+        indent={indent}
+        tree={tree}
+      >
+        {/* <AssistiveTreeDescription tree={tree} /> */}
+        {tree.getItems().map((item) => {
+          // Merge styles
+          const mergedStyle = {
+            color: `${item.getItemData().color}`,
+          } as React.CSSProperties;
+
+          const {} = item;
+
+          return (
+            <TreeItem key={item.getId()} item={item} asChild>
+              <div className="flex w-full justify-between">
+                <TreeItemLabel className="group relative w-full gap-2 not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background">
+                  <span className="line-clamp-1 flex flex-1 items-center gap-2 text-ellipsis md:max-w-none">
                     {!item.isFolder() && (
                       <DotIcon style={mergedStyle} className={cn("size-4")} />
                     )}
@@ -212,23 +215,74 @@ export function CategoryTree() {
                       <Badge variant="tag-rounded">System</Badge>
                     )}
                   </span>
-                  <div className="flex flex-1 items-center justify-end">
-                    <CategoryTotal category={item.getItemData()} />
-                    <CategoryPercentage category={item.getItemData()} />
-                  </div>
                 </TreeItemLabel>
-              </TreeItem>
-            );
-          })}
-        </Tree>
-      </div>
+                <div
+                  className={cn(
+                    "relative flex h-full min-w-[248px] items-center justify-end bg-background px-2",
+                    "before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background",
+                  )}
+                >
+                  <CategoryBudget category={item.getItemData()} />
+                </div>
+
+                <div
+                  className={cn(
+                    "relative flex h-full min-w-[170px] items-center justify-end bg-background",
+                    "before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background",
+                    "after:absolute after:left-0 after:z-10 after:h-10 after:w-[1px] after:bg-muted",
+                  )}
+                >
+                  <CategoryTotal category={item.getItemData()} />
+                  <CategoryPercentage category={item.getItemData()} />
+                </div>
+              </div>
+            </TreeItem>
+          );
+        })}
+      </Tree>
+    </div>
+  );
+}
+
+function CategoryBudget({ category }: { category: Category }) {
+  const budget = category.budgets[0];
+
+  if (!budget) {
+    return (
+      <Button size="icon" variant="ghost" className="mr-18 size-8">
+        <PlusIcon className="text-muted-foreground" />
+      </Button>
+    );
+  }
+
+  return (
+    <div className="group relative flex w-[280px] items-center justify-start gap-3 font-mono text-muted-foreground">
+      <CurrencyInput
+        decimalScale={0}
+        className="h-9 w-40 border text-right text-sm font-normal transition-all not-group-hover:border-background not-group-hover:shadow-none"
+        value={budget.amount}
+        onBlur={() => console.log("mutate budget")}
+      />
+      <Badge
+        variant="tag"
+        className="absolute top-1.5 left-2 aspect-square size-6 rounded capitalize"
+      >
+        {budget.period.charAt(0)}
+      </Badge>
+      <Badge
+        variant="tag"
+        className="absolute top-1.5 left-9 size-6 rounded capitalize"
+      >
+        <RepeatIcon className="size-4" />
+      </Badge>
+      <Badge variant="tag">{category.budgets.length}</Badge>
     </div>
   );
 }
 
 function CategoryTotal({ category }: { category: Category }) {
   return (
-    <div className="flex w-[120px] items-center justify-end gap-1 font-mono text-muted-foreground">
+    <div className="flex w-[120px] items-center justify-end gap-1 font-mono text-sm text-muted-foreground">
       <span>
         {formatAmount({
           amount: category.categoryBudget ?? category.childrenBudget,

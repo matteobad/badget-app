@@ -116,7 +116,7 @@ export async function getCategoriesWithBudgets(
   userId: string,
 ) {
   const categories = await getCategoriesQuery(categoryFilters, userId);
-  const budgets = await getBudgetsQuery(budgetFilters, userId);
+  const budgets = await getBudgetsQuery({ ...budgetFilters, userId });
 
   const mappedData = mapCategoriesWithBudgets(categories, budgets);
   const enrichedData = enrichCategories(mappedData, budgetFilters);

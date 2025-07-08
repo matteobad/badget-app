@@ -32,6 +32,10 @@ export default {
     },
   },
 
+  category: {
+    budget: "Accrual-based budget",
+  },
+
   categories: "You have {count} categories",
   "categories.budget.warning#zero": "There are no problem with your budget",
   "categories.budget.warning#one": "We found one problem with your budget",
