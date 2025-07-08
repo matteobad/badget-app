@@ -14,14 +14,14 @@ export const getCategoryListColors = (type: CategoryType) => {
 export const getBudgetTotalColor = (type: CategoryType, root: boolean) => {
   return {
     "text-green-700": type === CATEGORY_TYPE.INCOME && root,
-    "text-green-500": type === CATEGORY_TYPE.INCOME && !root,
+    "text-green-600": type === CATEGORY_TYPE.INCOME && !root,
     "text-red-700": type === CATEGORY_TYPE.EXPENSE && root,
-    "text-red-500": type === CATEGORY_TYPE.EXPENSE && !root,
+    "text-red-600": type === CATEGORY_TYPE.EXPENSE && !root,
     "text-violet-700": type === CATEGORY_TYPE.SAVINGS && root,
-    "text-violet-500": type === CATEGORY_TYPE.SAVINGS && !root,
+    "text-violet-600": type === CATEGORY_TYPE.SAVINGS && !root,
     "text-blue-700": type === CATEGORY_TYPE.INVESTMENTS && root,
-    "text-blue-500": type === CATEGORY_TYPE.INVESTMENTS && !root,
+    "text-blue-600": type === CATEGORY_TYPE.INVESTMENTS && !root,
     "text-neutral-700": type === CATEGORY_TYPE.TRANSFER && root,
-    "text-neutral-500": type === CATEGORY_TYPE.TRANSFER && !root,
+    "text-neutral-600": type === CATEGORY_TYPE.TRANSFER && !root,
   };
 };

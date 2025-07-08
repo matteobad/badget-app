@@ -1,7 +1,7 @@
 import {
   AlertCircle,
-  BanknoteArrowDown,
-  BanknoteArrowUp,
+  BanknoteArrowDownIcon,
+  BanknoteArrowUpIcon,
   Calendar,
   Camera,
   Check,
@@ -69,10 +69,13 @@ export const AVAILABLE_ICONS = {
   key: { name: "Key", component: Key },
   database: { name: "Database", component: Database },
   "hand-coins": { name: "HandCoins", component: HandCoinsIcon },
-  "banknote-arrow-up": { name: "BanknoteArrowUp", component: BanknoteArrowUp },
+  "banknote-arrow-up": {
+    name: "BanknoteArrowUp",
+    component: BanknoteArrowUpIcon,
+  },
   "banknote-arrow-down": {
     name: "BanknoteArrowDown",
-    component: BanknoteArrowDown,
+    component: BanknoteArrowDownIcon,
   },
 } as const;
 

@@ -12,6 +12,7 @@ import {
 } from "@headless-tree/core";
 import { useTree } from "@headless-tree/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { getBudgetTotalColor } from "~/features/category/utils";
 import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
 import { useCategoryParams } from "~/hooks/use-category-params";
@@ -20,7 +21,14 @@ import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useI18n } from "~/shared/locales/client";
 import { formatPerc } from "~/utils/format";
-import { DotIcon, PlusIcon, RepeatIcon, SearchIcon } from "lucide-react";
+import {
+  DotIcon,
+  EuroIcon,
+  InfoIcon,
+  PlusIcon,
+  RepeatIcon,
+  SearchIcon,
+} from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { FeatureImplementation, TreeState } from "@headless-tree/core";
@@ -35,6 +43,7 @@ import { CategoryFilters } from "./category-filters";
 type Category = RouterOutput["category"]["getFlatTree"][number];
 
 const indent = 24;
+const cancelToken = { current: false };
 
 export function CategoryTree() {
   const t = useI18n();
@@ -165,6 +174,12 @@ export function CategoryTree() {
           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
             <SearchIcon className="size-4" aria-hidden="true" />
           </div>
+          {/* <Button variant="outline" onClick={() => tree.expandAll(cancelToken)}>
+            Expand all
+          </Button>
+          <Button variant="outline" onClick={tree.collapseAll}>
+            Collapse all
+          </Button> */}
         </div>
 
         <CategoryActions />
@@ -174,8 +189,11 @@ export function CategoryTree() {
         <span className="flex flex-1 items-center gap-2">
           {t("categories", { count: Object.entries(items).length })}
         </span>
+        <Button size="icon" variant="ghost" className="size-8">
+          <InfoIcon className="size-4" />
+        </Button>
         <CategoryFilters />
-        <span className="w-[170px] text-right">{t("category.budget")}</span>
+        <span className="w-40 text-right">{t("category.budget")}</span>
       </div>
 
       <Tree
@@ -187,7 +205,7 @@ export function CategoryTree() {
         {tree.getItems().map((item) => {
           // Merge styles
           const mergedStyle = {
-            color: `${item.getItemData().color}`,
+            backgroundColor: `${item.getItemData().color}`,
           } as React.CSSProperties;
 
           const {} = item;
@@ -197,8 +215,13 @@ export function CategoryTree() {
               <div className="flex w-full justify-between">
                 <TreeItemLabel className="group relative w-full gap-2 not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background">
                   <span className="line-clamp-1 flex flex-1 items-center gap-2 text-ellipsis md:max-w-none">
-                    {!item.isFolder() && (
-                      <DotIcon style={mergedStyle} className={cn("size-4")} />
+                    {item.getItemData().parentId !== null && (
+                      <div className="flex size-4 items-center justify-center">
+                        <div
+                          style={mergedStyle}
+                          className="size-3 rounded-xs"
+                        ></div>
+                      </div>
                     )}
 
                     <DynamicIcon
@@ -212,13 +235,13 @@ export function CategoryTree() {
                     />
                     <span className="text-base">{item.getItemName()}</span>
                     {!item.getItemData().parentId && (
-                      <Badge variant="tag-rounded">System</Badge>
+                      <Badge variant="tag-rounded">system</Badge>
                     )}
                   </span>
                 </TreeItemLabel>
                 <div
                   className={cn(
-                    "relative flex h-full min-w-[248px] items-center justify-end bg-background px-2",
+                    "relative flex h-full min-w-[266px] items-center justify-end bg-background px-4",
                     "before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background",
                   )}
                 >
@@ -227,7 +250,7 @@ export function CategoryTree() {
 
                 <div
                   className={cn(
-                    "relative flex h-full min-w-[170px] items-center justify-end bg-background",
+                    "relative flex h-full min-w-40 items-center justify-end bg-background",
                     "before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background",
                     "after:absolute after:left-0 after:z-10 after:h-10 after:w-[1px] after:bg-muted",
                   )}
@@ -256,33 +279,49 @@ function CategoryBudget({ category }: { category: Category }) {
   }
 
   return (
-    <div className="group relative flex w-[280px] items-center justify-start gap-3 font-mono text-muted-foreground">
-      <CurrencyInput
-        decimalScale={0}
-        className="h-9 w-40 border text-right text-sm font-normal transition-all not-group-hover:border-background not-group-hover:shadow-none"
-        value={budget.amount}
-        onBlur={() => console.log("mutate budget")}
-      />
+    <div className="group relative flex w-[280px] items-center justify-start gap-2 font-mono text-muted-foreground">
       <Badge
-        variant="tag"
-        className="absolute top-1.5 left-2 aspect-square size-6 rounded capitalize"
+        variant="outline"
+        className="absolute top-2 left-2 size-5 rounded font-normal text-muted-foreground capitalize not-hover:text-muted-foreground/50"
       >
         {budget.period.charAt(0)}
       </Badge>
       <Badge
-        variant="tag"
-        className="absolute top-1.5 left-9 size-6 rounded capitalize"
+        variant="outline"
+        className="absolute top-2 left-9 size-5 rounded p-0 text-muted-foreground capitalize not-hover:text-muted-foreground/50"
       >
         <RepeatIcon className="size-4" />
       </Badge>
-      <Badge variant="tag">{category.budgets.length}</Badge>
+      <CurrencyInput
+        decimalScale={0}
+        className="h-9 w-50 border pr-8 text-right text-sm font-normal transition-all not-group-hover:border-background not-group-hover:shadow-none"
+        value={budget.amount}
+        onBlur={() => console.log("mutate budget")}
+      />
+      <span className="absolute top-[9px] right-12 text-sm">€</span>
+
+      {category.budgets.length > 1 && (
+        <Badge
+          key={budget.id}
+          variant="tag-rounded"
+          className="aspect-square size-6 rounded-full text-xs"
+        >
+          {category.budgets.length}
+        </Badge>
+      )}
     </div>
   );
 }
 
 function CategoryTotal({ category }: { category: Category }) {
+  const styles = getBudgetTotalColor(category.type, !category.parentId);
   return (
-    <div className="flex w-[120px] items-center justify-end gap-1 font-mono text-sm text-muted-foreground">
+    <div
+      className={cn(
+        "flex w-[120px] items-center justify-end gap-1 font-mono text-sm text-muted-foreground",
+        styles,
+      )}
+    >
       <span>
         {formatAmount({
           amount: category.categoryBudget ?? category.childrenBudget,

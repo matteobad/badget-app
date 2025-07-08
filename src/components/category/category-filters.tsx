@@ -23,6 +23,7 @@ import { useQueryStates } from "nuqs";
 import { type DateRange } from "react-day-picker";
 
 import { categoriesFiltersParsers } from "../../features/category/utils/search-params";
+import { DateRangePicker } from "../custom/date-range-picker";
 
 export const CategoryFilters = () => {
   const [filters, setFilters] = useQueryStates(categoriesFiltersParsers, {
@@ -75,11 +76,9 @@ export const CategoryFilters = () => {
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Button size="icon" variant="ghost" className="size-8">
-        <InfoIcon className="size-4" />
-      </Button>
-      <Popover>
+    <div className="flex items-center gap-2 px-4">
+      <DateRangePicker />
+      {/* <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
@@ -98,13 +97,7 @@ export const CategoryFilters = () => {
             onSelect={handleDateRangeChange}
           />
         </PopoverContent>
-      </Popover>
-      <Button size="icon" variant="ghost" className="size-8">
-        <ChevronLeftIcon />
-      </Button>
-      <Button size="icon" variant="ghost" className="size-8">
-        <ChevronRightIcon />
-      </Button>
+      </Popover> */}
     </div>
   );
 };
