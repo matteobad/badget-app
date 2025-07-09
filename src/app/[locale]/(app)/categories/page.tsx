@@ -1,18 +1,12 @@
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
-import { CategoryBudgets } from "~/components/category/category-details";
 import { CategoryTree } from "~/components/category/category-tree";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "~/components/ui/resizable";
 import {
   getQueryClient,
   HydrateClient,
   trpc,
 } from "~/shared/helpers/trpc/server";
-import { BudgetFilterParamsSchema } from "~/shared/validators/budget.schema";
+import { budgetFilterParamsSchema } from "~/shared/validators/budget.schema";
 import { categoryFilterParamsSchema } from "~/shared/validators/category.schema";
 import { createLoader } from "nuqs/server";
 import { ErrorBoundary } from "react-error-boundary";
@@ -25,7 +19,7 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
   // Load search parameters
   const searchParams = await props.searchParams;
   const loadCategoryFilterParams = createLoader(categoryFilterParamsSchema);
-  const loadBudgetFilterParams = createLoader(BudgetFilterParamsSchema);
+  const loadBudgetFilterParams = createLoader(budgetFilterParamsSchema);
   const categoryFilters = loadCategoryFilterParams(searchParams);
   const budgetFilters = loadBudgetFilterParams(searchParams);
 

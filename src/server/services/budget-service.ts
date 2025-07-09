@@ -1,17 +1,27 @@
 import type {
   budgetFilterSchema,
   createBudgetSchema,
+  deleteBudgetSchema,
   getBudgetSchema,
+  updateBudgetSchema,
 } from "~/shared/validators/budget.schema";
 import type z from "zod/v4";
 
 import type { getCategoriesQuery } from "../domain/category/queries";
+import { db } from "../db";
 import {
-  buildBudgetInsert,
+  diffBudgetUpdate,
   getBudgetForPeriod,
+  getNextCycleStart,
+  hasFutureBudget,
+  toBudgetDBInput,
 } from "../domain/budget/helpers";
-import { createBudgetMutation } from "../domain/budget/mutations";
-import { getBudgetsQuery } from "../domain/budget/queries";
+import {
+  createBudgetMutation,
+  deleteBudgetMutation,
+  updateBudgetMutation,
+} from "../domain/budget/mutations";
+import { getBudgetByIdQuery, getBudgetsQuery } from "../domain/budget/queries";
 
 export type CategoryType = Awaited<
   ReturnType<typeof getCategoriesQuery>
@@ -99,9 +109,123 @@ export async function getBudgets(
 }
 
 export async function createBudget(
-  input: z.infer<typeof createBudgetSchema>,
+  params: z.infer<typeof createBudgetSchema>,
   userId: string,
 ) {
-  const value = buildBudgetInsert(input, userId);
-  return await createBudgetMutation(value);
+  const input = toBudgetDBInput(params);
+  return await createBudgetMutation(db, { ...input, userId });
+}
+
+export async function updateBudget(
+  params: z.infer<typeof updateBudgetSchema>,
+  userId: string,
+) {
+  const { id, ...rest } = params;
+
+  // currently active budget
+  const existing = await getBudgetByIdQuery({ id });
+  if (!existing) throw new Error("Budget not found");
+
+  // Fetch all budgets for this category and user (for future budget check)
+  const allBudgets = await getBudgetsQuery({
+    categoryId: existing.categoryId,
+    userId,
+  });
+
+  // Compute what changed
+  const diff = diffBudgetUpdate(existing, {
+    amount: rest.amount,
+    period: rest.frequency,
+    from: rest.from,
+    to: rest.repeat ? null : getNextCycleStart(rest.from, rest.frequency),
+  });
+
+  // --- Only amount changed, and current period ---
+  if (
+    diff.amountChanged &&
+    !diff.frequencyChanged &&
+    !diff.repetitionChanged &&
+    !diff.startDateChanged
+  ) {
+    // In-place update
+    const input = toBudgetDBInput({
+      categoryId: rest.categoryId,
+      amount: rest.amount,
+      frequency: rest.frequency,
+      from: rest.from,
+      repeat: rest.repeat,
+    });
+    return await updateBudgetMutation(db, { ...input, id, userId });
+  }
+
+  // --- Only repetition changed ---
+  if (
+    !diff.amountChanged &&
+    !diff.frequencyChanged &&
+    diff.repetitionChanged &&
+    !diff.startDateChanged
+  ) {
+    // If making recurring, check for future budgets
+    const makingRecurring = rest.repeat;
+    if (makingRecurring) {
+      const hasFuture = hasFutureBudget(
+        allBudgets,
+        existing.categoryId,
+        existing.to ?? new Date(),
+      );
+      if (hasFuture) {
+        throw new Error(
+          "Cannot make this budget recurring: a future budget exists for this category. Please delete or update the future budget first.",
+        );
+      }
+    }
+    // Just update the range (open or close)
+    const input = toBudgetDBInput({
+      categoryId: rest.categoryId,
+      amount: rest.amount,
+      frequency: rest.frequency,
+      from: rest.from,
+      repeat: rest.repeat,
+    });
+    return await updateBudgetMutation(db, { ...input, id, userId });
+  }
+
+  // --- Any other change (frequency, startDate, or amount for future period, or multiple changes) ---
+  // Close current at end of its cycle, create new with new params
+  // 1. Close current
+  const closeInput = toBudgetDBInput({
+    categoryId: existing.categoryId,
+    amount: existing.amount,
+    frequency: existing.period,
+    from: existing.from,
+    repeat: false,
+  });
+  await updateBudgetMutation(db, { ...closeInput, id, userId });
+
+  // 2. Create new budget
+  // Determine new start date: next cycle or as specified
+  const newFrom =
+    rest.from ??
+    getNextCycleStart(
+      existing.to ?? new Date(),
+      rest.frequency ?? existing.period,
+    );
+  const newBudgetInput = toBudgetDBInput({
+    categoryId: rest.categoryId,
+    amount: rest.amount,
+    frequency: rest.frequency,
+    from: newFrom,
+    repeat: rest.repeat,
+  });
+  return await createBudgetMutation(db, {
+    ...newBudgetInput,
+    userId,
+  });
+}
+
+export async function deleteBudget(
+  params: z.infer<typeof deleteBudgetSchema>,
+  userId: string,
+) {
+  return await deleteBudgetMutation(db, { ...params, userId });
 }

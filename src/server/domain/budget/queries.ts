@@ -32,20 +32,20 @@ export const getBudgetsQuery = (params: GetBudgetsQueryRequest) => {
       categoryId: budget_table.categoryId,
       amount: budget_table.amount,
       period: budget_table.period,
-      startDate: sql<Date>`lower(${budget_table.sysPeriod})`
+      from: sql<Date>`lower(${budget_table.sysPeriod})`
         .mapWith({
           mapFromDriverValue: (value: string) => {
             return new Date(value);
           },
         })
-        .as("startDate"),
-      endDate: sql<Date | null>`upper(${budget_table.sysPeriod})`
+        .as("from"),
+      to: sql<Date | null>`upper(${budget_table.sysPeriod})`
         .mapWith({
           mapFromDriverValue: (value: string | null) => {
             return value ? new Date(value) : null;
           },
         })
-        .as("endDate"),
+        .as("to"),
     })
     .from(budget_table)
     .where(and(...where));
@@ -53,7 +53,26 @@ export const getBudgetsQuery = (params: GetBudgetsQueryRequest) => {
 
 export async function getBudgetByIdQuery(params: { id: string }) {
   const result = await db
-    .select()
+    .select({
+      id: budget_table.id,
+      categoryId: budget_table.categoryId,
+      amount: budget_table.amount,
+      period: budget_table.period,
+      from: sql<Date>`lower(${budget_table.sysPeriod})`
+        .mapWith({
+          mapFromDriverValue: (value: string) => {
+            return new Date(value);
+          },
+        })
+        .as("from"),
+      to: sql<Date | null>`upper(${budget_table.sysPeriod})`
+        .mapWith({
+          mapFromDriverValue: (value: string | null) => {
+            return value ? new Date(value) : null;
+          },
+        })
+        .as("to"),
+    })
     .from(budget_table)
     .where(eq(budget_table.id, params.id));
 

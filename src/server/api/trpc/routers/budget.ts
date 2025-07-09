@@ -2,13 +2,17 @@ import { getBudgetsQuery } from "~/server/domain/budget/queries";
 import { getCategoriesQuery } from "~/server/domain/category/queries";
 import {
   createBudget,
+  deleteBudget,
   findBudgetWarnings,
   getBudgets,
+  updateBudget,
 } from "~/server/services/budget-service";
 import {
   budgetFilterSchema,
   createBudgetSchema,
+  deleteBudgetSchema,
   getBudgetSchema,
+  updateBudgetSchema,
 } from "~/shared/validators/budget.schema";
 import { getCategoriesSchema } from "~/shared/validators/category.schema";
 import { z } from "zod/v4";
@@ -39,10 +43,24 @@ export const budgetRouter = createTRPCRouter({
       return await getBudgets(input, userId);
     }),
 
-  createBudget: protectedProcedure
+  create: protectedProcedure
     .input(createBudgetSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.userId!;
       return await createBudget(input, userId);
+    }),
+
+  update: protectedProcedure
+    .input(updateBudgetSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.userId!;
+      return await updateBudget(input, userId);
+    }),
+
+  delete: protectedProcedure
+    .input(deleteBudgetSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.userId!;
+      return await deleteBudget(input, userId);
     }),
 });

@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import {
   addMonths,
   addQuarters,
@@ -327,6 +328,8 @@ export function DateRangePicker() {
     return { from: startOfMonth(now), to: endOfMonth(now) };
   });
 
+  const { filter, setFilter } = useBudgetFilterParams();
+
   // State for picker navigation
   const [currentYear, setCurrentYear] = React.useState(() =>
     new Date().getFullYear(),
@@ -344,6 +347,7 @@ export function DateRangePicker() {
   const handleNavigation = (direction: "prev" | "next") => {
     const newRange = navigateRange(dateRange, mode, direction);
     setDateRange(newRange);
+    void setFilter({ from: newRange.from, to: newRange.to });
   };
 
   const handleModeChange = (newMode: PickerMode) => {
@@ -353,6 +357,7 @@ export function DateRangePicker() {
     switch (newMode) {
       case "month":
         setDateRange({ from: startOfMonth(now), to: endOfMonth(now) });
+        void setFilter({ from: startOfMonth(now), to: endOfMonth(now) });
         break;
       case "week":
         setDateRange({ from: startOfWeek(now), to: endOfWeek(now) });

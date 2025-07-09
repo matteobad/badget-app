@@ -1,17 +1,17 @@
 id,type,name,slug,color,icon,description,parentId,depth,userId
-income_id,income,Income,income,neutral,banknote-arrow-up,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-salary_id,income,Salary,salary,neutral,hand-coins,,income_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-extra_income_id,income,Extra Income,extra-income,neutral,briefcase,,income_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-expense_id,expense,Expense,expense,neutral,banknote-arrow-down,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-housing_id,expense,Housing,housing,neutral,house,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-transportation_id,expense,Transportation,transportation,neutral,car,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-food_id,expense,Food,food,neutral,utensils-crossed,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-groceries_id,expense,Groceries,groceries,neutral,shopping-basket,,food_id,2,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-restaurant_id,expense,Restaurant,restaurant,neutral,chef-hat,,food_id,2,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-healthcare_id,expense,Healthcare,healthcare,neutral,ambulance,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-entertainment_id,expense,Entertainment,entertainment,neutral,gamepad-2,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-savings_id,savings,Savings,savings,neutral,piggy-bank,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-emergency_fund_id,savings,Emergency Fund,emergency-fund,neutral,sprout,,savings_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-major_purchase_id,savings,Major Purchases,major-purchase,neutral,circle-check-big,,savings_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-investments_id,investments,Investments,investments,neutral,chart-candlestick,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-transfer_id,transfer,Transfer,transfer,neutral,arrow-left-right,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+income_id,income,Income,income,#fafafa,banknote-arrow-up,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+salary_id,income,Salary,salary,#fafafa,hand-coins,,income_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+extra_income_id,income,Extra Income,extra-income,#fafafa,briefcase,,income_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+expense_id,expense,Expense,expense,#fafafa,banknote-arrow-down,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+housing_id,expense,Housing,housing,#fafafa,house,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+transportation_id,expense,Transportation,transportation,#fafafa,car,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+food_id,expense,Food,food,#fafafa,utensils-crossed,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+groceries_id,expense,Groceries,groceries,#fafafa,shopping-basket,,food_id,2,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+restaurant_id,expense,Restaurant,restaurant,#fafafa,chef-hat,,food_id,2,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+healthcare_id,expense,Healthcare,healthcare,#fafafa,ambulance,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+entertainment_id,expense,Entertainment,entertainment,#fafafa,gamepad-2,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+savings_id,savings,Savings,savings,#fafafa,piggy-bank,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+emergency_fund_id,savings,Emergency Fund,emergency-fund,#fafafa,sprout,,savings_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+major_purchase_id,savings,Major Purchases,major-purchase,#fafafa,circle-check-big,,savings_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+investments_id,investments,Investments,investments,#fafafa,chart-candlestick,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+transfer_id,transfer,Transfer,transfer,#fafafa,arrow-left-right,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD

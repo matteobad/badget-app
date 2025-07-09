@@ -4,7 +4,9 @@ import type {
   createBudgetSchema,
 } from "~/shared/validators/budget.schema";
 import type z from "zod/v4";
+import { BUDGET_PERIOD } from "~/server/db/schema/enum";
 import { TimezoneRange } from "~/server/db/utils";
+import { addMonths, addWeeks, addYears } from "date-fns";
 import { Range, RANGE_LB_INC } from "postgres-range";
 
 import type { getBudgetsQuery } from "./queries";
@@ -29,7 +31,7 @@ function calculateWeeklyBudget(
   rangeEnd: Date,
   startOfWeek: number,
 ) {
-  const { startDate: from, endDate: to, amount } = budget;
+  const { from, to, amount } = budget;
 
   const effectiveStart = new Date(
     Math.max(from.getTime(), rangeStart.getTime()),
@@ -95,7 +97,7 @@ function calculateMonthlyBudget(budget: BudgetType, start: Date, end: Date) {
 }
 
 function calculateCustomBudget(budget: BudgetType, start: Date, end: Date) {
-  const { startDate: from, endDate: to, amount } = budget;
+  const { from, to, amount } = budget;
 
   const effectiveEnd = to ?? end;
   const fullDuration =
@@ -132,20 +134,77 @@ export function getBudgetForPeriod(
   }, 0);
 }
 
-export function buildBudgetInsert(
-  input: z.infer<typeof createBudgetSchema>,
-  userId: string,
-) {
-  const { dateRange, repeat, ...rest } = input;
-  const range = new Range<Date>(
-    dateRange.from,
-    repeat ? null : dateRange.to,
-    RANGE_LB_INC,
-  );
+export function toBudgetDBInput(input: z.infer<typeof createBudgetSchema>) {
+  const { from, frequency, repeat } = input;
+
+  let to: Date;
+  switch (frequency) {
+    case BUDGET_PERIOD.YEARLY:
+      to = addYears(from, 1);
+    case BUDGET_PERIOD.MONTHLY:
+      to = addMonths(from, 1);
+    case BUDGET_PERIOD.WEEKLY:
+      to = addWeeks(from, 1);
+    default:
+      to = addMonths(from, 1);
+    // TODO: add QUARTER and CUSTOM
+  }
+  const range = new Range<Date>(from, repeat ? null : to, RANGE_LB_INC);
 
   return {
-    userId,
-    ...rest,
+    categoryId: input.categoryId,
+    amount: input.amount,
+    period: frequency,
     sysPeriod: new TimezoneRange(range),
   } satisfies DB_BudgetInsertType;
+}
+
+// --- Budget Update Helpers ---
+
+export interface BudgetUpdateDiff {
+  amountChanged: boolean;
+  frequencyChanged: boolean;
+  repetitionChanged: boolean;
+  startDateChanged: boolean;
+  // Add more fields as needed
+}
+
+export function diffBudgetUpdate(
+  existing: BudgetType,
+  update: Partial<BudgetType>,
+): BudgetUpdateDiff {
+  return {
+    amountChanged:
+      update.amount !== undefined && update.amount !== existing.amount,
+    frequencyChanged:
+      update.period !== undefined && update.period !== existing.period,
+    repetitionChanged: (update.to === null) !== (existing.to === null),
+    startDateChanged:
+      update.from !== undefined &&
+      update.from.getTime() !== existing.from.getTime(),
+  };
+}
+
+export function getNextCycleStart(currentEnd: Date, frequency: string): Date {
+  switch (frequency) {
+    case "week":
+      return addWeeks(currentEnd, 1);
+    case "month":
+      return addMonths(currentEnd, 1);
+    case "year":
+      return addYears(currentEnd, 1);
+    default:
+      return addMonths(currentEnd, 1); // fallback
+  }
+}
+
+export function hasFutureBudget(
+  budgets: BudgetType[],
+  categoryId: string,
+  afterDate: Date,
+): boolean {
+  return budgets.some(
+    (b) =>
+      b.categoryId === categoryId && b.from.getTime() > afterDate.getTime(),
+  );
 }

@@ -1,31 +1,39 @@
 "server-only";
 
+import type { DBClient } from "~/server/db";
 import type { DB_BudgetInsertType } from "~/server/db/schema/budgets";
-import type {
-  deleteBudgetSchema,
-  updateBudgetSchema,
-} from "~/shared/validators/budget.schema";
-import type z from "zod/v4";
-import { db } from "~/server/db";
 import { budget_table } from "~/server/db/schema/budgets";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
-export async function createBudgetMutation(value: DB_BudgetInsertType) {
-  return await db.insert(budget_table).values(value).returning();
+export async function createBudgetMutation(
+  client: DBClient,
+  value: DB_BudgetInsertType,
+) {
+  return await client
+    .insert(budget_table)
+    .values(value)
+    .onConflictDoNothing()
+    .returning();
 }
 
 export async function updateBudgetMutation(
-  params: z.infer<typeof updateBudgetSchema>,
+  client: DBClient,
+  params: Partial<DB_BudgetInsertType> & { id: string; userId: string },
 ) {
-  const { id, ...rest } = params;
-  await db.update(budget_table).set(rest).where(eq(budget_table.id, id));
+  const { id, userId, ...rest } = params;
+  return await client
+    .update(budget_table)
+    .set(rest)
+    .where(and(eq(budget_table.userId, userId), eq(budget_table.id, id)))
+    .returning();
 }
 
-export async function deleteTodoMutation(
-  params: z.infer<typeof deleteBudgetSchema>,
+export async function deleteBudgetMutation(
+  client: DBClient,
+  params: { id: string; userId: string },
 ) {
-  await db
-    .update(budget_table)
-    .set({ deletedAt: new Date() }) // soft delete
-    .where(eq(budget_table.id, params.id));
+  const { id, userId } = params;
+  return await client
+    .delete(budget_table)
+    .where(and(eq(budget_table.userId, userId), eq(budget_table.id, id)));
 }

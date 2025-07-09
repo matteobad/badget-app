@@ -1,17 +1,9 @@
 import { budget_table } from "~/server/db/schema/budgets";
 import { BUDGET_PERIOD } from "~/server/db/schema/enum";
-import { TimezoneRange } from "~/server/db/utils";
 import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
-import {
-  createInsertSchema,
-  createSelectSchema,
-  createUpdateSchema,
-} from "drizzle-zod";
+import { createSelectSchema } from "drizzle-zod";
 import { parseAsBoolean, parseAsIsoDate, parseAsString } from "nuqs/server";
-import { Range, RANGE_LB_INC } from "postgres-range";
 import z from "zod/v4";
-
-import { dateRangeSchema } from "./common.schema";
 
 export const selectBudgetSchema = createSelectSchema(budget_table);
 
@@ -19,46 +11,26 @@ export const getBudgetSchema = z.object({
   categoryId: z.string().min(1),
 });
 
-export const createBudgetSchema = createInsertSchema(budget_table, {
-  period: z.enum(BUDGET_PERIOD),
-})
-  .omit({
-    id: true,
-    sysPeriod: true,
-    createdAt: true,
-    updatedAt: true,
-    deletedAt: true,
-    userId: true,
-  })
-  .extend({
-    from: z.date(),
-    to: z.date(),
-    // dateRange: dateRangeSchema,
-    repeat: z.boolean(),
-  });
+// export const createBudgetSchema = createInsertSchema(budget_table, {
+//   period: z.enum(BUDGET_PERIOD).default(BUDGET_PERIOD.MONTHLY),
+// });
 
-export const updateBudgetSchema = createUpdateSchema(budget_table, {
+export const createBudgetSchema = z.object({
+  categoryId: z.cuid2(),
+  amount: z.number().min(0),
+  frequency: z.enum(BUDGET_PERIOD).default(BUDGET_PERIOD.MONTHLY),
+  from: z.date().default(new Date()),
+  repeat: z.boolean().default(true),
+});
+
+export const updateBudgetSchema = z.object({
   id: z.cuid2(),
-  period: z.enum(Object.values(BUDGET_PERIOD)),
-})
-  .omit({
-    createdAt: true,
-    updatedAt: true,
-  })
-  .extend({
-    from: z.date().nullable(),
-    to: z.date().nullable(),
-  })
-  .transform((budget) => {
-    const range = new Range<Date>(budget.from, budget.to, RANGE_LB_INC);
-
-    return {
-      id: budget.id,
-      amount: budget.amount,
-      period: budget.period,
-      sys_period: new TimezoneRange(range),
-    };
-  });
+  categoryId: z.cuid2(),
+  amount: z.number().min(0),
+  frequency: z.enum(BUDGET_PERIOD).default(BUDGET_PERIOD.MONTHLY),
+  from: z.date().default(new Date()),
+  repeat: z.boolean().default(true),
+});
 
 export const deleteBudgetSchema = z.object({ id: z.cuid2() });
 
@@ -70,10 +42,9 @@ export const budgetFilterSchema = z.object({
 });
 
 // Search params filter schema
-export const BudgetFilterParamsSchema = {
+export const budgetFilterParamsSchema = {
   from: parseAsIsoDate.withDefault(startOfMonth(new Date())),
   to: parseAsIsoDate.withDefault(startOfDay(endOfMonth(new Date()))),
-  deleted: parseAsBoolean.withDefault(false),
 };
 
 // Search params for sheets

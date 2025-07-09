@@ -1,8 +1,8 @@
-import { BudgetFilterParamsSchema } from "~/shared/validators/budget.schema";
+import { budgetFilterParamsSchema } from "~/shared/validators/budget.schema";
 import { useQueryStates } from "nuqs";
 
 export function useBudgetFilterParams() {
-  const [filter, setFilter] = useQueryStates(BudgetFilterParamsSchema);
+  const [filter, setFilter] = useQueryStates(budgetFilterParamsSchema);
 
   return {
     filter,

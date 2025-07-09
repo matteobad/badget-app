@@ -11,7 +11,7 @@ import {
   syncDataLoaderFeature,
 } from "@headless-tree/core";
 import { useTree } from "@headless-tree/react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { getBudgetTotalColor } from "~/features/category/utils";
 import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
@@ -21,15 +21,9 @@ import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useI18n } from "~/shared/locales/client";
 import { formatPerc } from "~/utils/format";
-import {
-  DotIcon,
-  EuroIcon,
-  InfoIcon,
-  PlusIcon,
-  RepeatIcon,
-  SearchIcon,
-} from "lucide-react";
+import { InfoIcon, PlusIcon, RepeatIcon, SearchIcon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
+import { toast } from "sonner";
 
 import type { FeatureImplementation, TreeState } from "@headless-tree/core";
 import { CurrencyInput } from "../custom/currency-input";
@@ -43,7 +37,7 @@ import { CategoryFilters } from "./category-filters";
 type Category = RouterOutput["category"]["getFlatTree"][number];
 
 const indent = 24;
-const cancelToken = { current: false };
+// const cancelToken = { current: false };
 
 export function CategoryTree() {
   const t = useI18n();
@@ -136,9 +130,13 @@ export function CategoryTree() {
   return (
     <div className="flex flex-col gap-2 p-4">
       <div className="flex justify-between">
-        <div className="relative mb-2 flex gap-4">
+        <CategoryActions />
+      </div>
+
+      <div className="flex items-center text-sm text-muted-foreground">
+        <div className="relative flex flex-1 items-center gap-2">
           <Input
-            className="peer ps-9"
+            className="peer h-8 ps-9"
             {...{
               ...tree.getSearchInputElementProps(),
               onChange: (e) => {
@@ -174,21 +172,7 @@ export function CategoryTree() {
           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
             <SearchIcon className="size-4" aria-hidden="true" />
           </div>
-          {/* <Button variant="outline" onClick={() => tree.expandAll(cancelToken)}>
-            Expand all
-          </Button>
-          <Button variant="outline" onClick={tree.collapseAll}>
-            Collapse all
-          </Button> */}
         </div>
-
-        <CategoryActions />
-      </div>
-
-      <div className="flex items-center text-sm text-muted-foreground">
-        <span className="flex flex-1 items-center gap-2">
-          {t("categories", { count: Object.entries(items).length })}
-        </span>
         <Button size="icon" variant="ghost" className="size-8">
           <InfoIcon className="size-4" />
         </Button>
@@ -213,7 +197,12 @@ export function CategoryTree() {
           return (
             <TreeItem key={item.getId()} item={item} asChild>
               <div className="flex w-full justify-between">
-                <TreeItemLabel className="group relative w-full gap-2 not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background">
+                <TreeItemLabel
+                  onClick={() => {
+                    void setParams({ categoryId: item.getItemMeta().itemId });
+                  }}
+                  className="group relative w-full gap-2 not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background"
+                >
                   <span className="line-clamp-1 flex flex-1 items-center gap-2 text-ellipsis md:max-w-none">
                     {item.getItemData().parentId !== null && (
                       <div className="flex size-4 items-center justify-center">
@@ -268,6 +257,17 @@ export function CategoryTree() {
 }
 
 function CategoryBudget({ category }: { category: Category }) {
+  const [amount, setAmount] = useState(category.budgets[0]?.amount);
+
+  const trpc = useTRPC();
+  const updateBudgetMutation = useMutation(
+    trpc.budget.update.mutationOptions({
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    }),
+  );
+
   const budget = category.budgets[0];
 
   if (!budget) {
@@ -295,8 +295,15 @@ function CategoryBudget({ category }: { category: Category }) {
       <CurrencyInput
         decimalScale={0}
         className="h-9 w-50 border pr-8 text-right text-sm font-normal transition-all not-group-hover:border-background not-group-hover:shadow-none"
-        value={budget.amount}
-        onBlur={() => console.log("mutate budget")}
+        value={amount}
+        onValueChange={(value) => setAmount(value.floatValue)}
+        onBlur={() => {
+          updateBudgetMutation.mutate({
+            id: budget.id,
+            categoryId: budget.categoryId,
+            amount: budget.amount,
+          });
+        }}
       />
       <span className="absolute top-[9px] right-12 text-sm">€</span>
 
