@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm";
 import { text, varchar } from "drizzle-orm/pg-core";
 
+import { pgTable } from "../schema/_table";
 import { timestamps } from "../utils";
-import { pgTable } from "./_table";
 import { usersToGroups } from "./users-to-groups";
 import { workspaceToAccounts } from "./workspace-to-accounts";
 

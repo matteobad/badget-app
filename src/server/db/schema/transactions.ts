@@ -7,6 +7,7 @@ import {
   text,
   timestamp,
   unique,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -44,7 +45,7 @@ export const transaction_table = pgTable(
     accountId: varchar({ length: 128 })
       .notNull()
       .references(() => account_table.id),
-    categoryId: varchar({ length: 128 }).references(() => category_table.id),
+    categoryId: uuid().references(() => category_table.id),
 
     rawId: text().unique(),
     amount: numericCasted({ precision: 10, scale: 2 }).notNull(),

@@ -1,17 +1,17 @@
 id,type,name,slug,color,icon,description,parentId,depth,userId
-income_id,income,Income,income,#fafafa,banknote-arrow-up,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-salary_id,income,Salary,salary,#fafafa,hand-coins,,income_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-extra_income_id,income,Extra Income,extra-income,#fafafa,briefcase,,income_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-expense_id,expense,Expense,expense,#fafafa,banknote-arrow-down,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-housing_id,expense,Housing,housing,#fafafa,house,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-transportation_id,expense,Transportation,transportation,#fafafa,car,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-food_id,expense,Food,food,#fafafa,utensils-crossed,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-groceries_id,expense,Groceries,groceries,#fafafa,shopping-basket,,food_id,2,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-restaurant_id,expense,Restaurant,restaurant,#fafafa,chef-hat,,food_id,2,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-healthcare_id,expense,Healthcare,healthcare,#fafafa,ambulance,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-entertainment_id,expense,Entertainment,entertainment,#fafafa,gamepad-2,,expense_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-savings_id,savings,Savings,savings,#fafafa,piggy-bank,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-emergency_fund_id,savings,Emergency Fund,emergency-fund,#fafafa,sprout,,savings_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-major_purchase_id,savings,Major Purchases,major-purchase,#fafafa,circle-check-big,,savings_id,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-investments_id,investments,Investments,investments,#fafafa,chart-candlestick,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
-transfer_id,transfer,Transfer,transfer,#fafafa,arrow-left-right,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+4a8f75f7-e16a-4eeb-9d50-163124a4c957,income,Income,income,#fafafa,banknote-arrow-up,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+e0d056ec-1a0a-4c3a-b6ec-2629fae7976e,income,Salary,salary,#fafafa,hand-coins,,4a8f75f7-e16a-4eeb-9d50-163124a4c957,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+72e05306-c43a-40e0-9725-652a2c0d079e,income,Extra Income,extra-income,#fafafa,briefcase,,4a8f75f7-e16a-4eeb-9d50-163124a4c957,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+e886cd52-5ffd-4693-a356-8a5b8b32c3c4,expense,Expense,expense,#fafafa,banknote-arrow-down,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+d7c66ffd-3f8a-4786-8f43-c9a2381183be,expense,Housing,housing,#fafafa,house,,e886cd52-5ffd-4693-a356-8a5b8b32c3c4,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+f4621760-f97e-406c-b52f-13047ff94d6d,expense,Transportation,transportation,#fafafa,car,,e886cd52-5ffd-4693-a356-8a5b8b32c3c4,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+0bad0b84-38ee-46b2-9ba7-625356275294,expense,Food,food,#fafafa,utensils-crossed,,e886cd52-5ffd-4693-a356-8a5b8b32c3c4,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+6bf78c80-b3c7-405a-8f6c-19ce9e152f33,expense,Groceries,groceries,#fafafa,shopping-basket,,0bad0b84-38ee-46b2-9ba7-625356275294,2,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+d255f2d6-dbfb-4063-b636-46a98c55a65d,expense,Restaurant,restaurant,#fafafa,chef-hat,,0bad0b84-38ee-46b2-9ba7-625356275294,2,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+49fdc846-3cf4-4546-a178-801b66e07606,expense,Healthcare,healthcare,#fafafa,ambulance,,e886cd52-5ffd-4693-a356-8a5b8b32c3c4,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+5e878be0-1b5e-4c21-b395-d6c278a3cb95,expense,Entertainment,entertainment,#fafafa,gamepad-2,,e886cd52-5ffd-4693-a356-8a5b8b32c3c4,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+597d68d1-ed95-443b-9b8c-3d2c0c633dc9,savings,Savings,savings,#fafafa,piggy-bank,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+7854b939-58bf-4708-b06b-4ab766991ea4,savings,Emergency Fund,emergency-fund,#fafafa,sprout,,597d68d1-ed95-443b-9b8c-3d2c0c633dc9,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+ab765e2b-0dbf-4b95-bf9e-3666ce4abe4e,savings,Major Purchases,major-purchase,#fafafa,circle-check-big,,597d68d1-ed95-443b-9b8c-3d2c0c633dc9,1,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+c84e2ece-323b-4a1c-a3e1-d9fd809e737e,investments,Investments,investments,#fafafa,chart-candlestick,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD
+cf66887a-7e42-45de-b28f-769d8d72f19f,transfer,Transfer,transfer,#fafafa,arrow-left-right,,,0,user_2jnV56cv1CJrRNLFsUdm6XAf7GD

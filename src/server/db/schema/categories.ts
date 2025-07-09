@@ -9,19 +9,13 @@ import { type CategoryType } from "./enum";
 export const category_table = pgTable(
   "category_table",
   (d) => ({
-    id: d
-      .varchar({ length: 128 })
-      .primaryKey()
-      .$defaultFn(() => createId())
-      .notNull(),
+    id: d.uuid().primaryKey().defaultRandom(),
 
     // FK
     userId: d.varchar({ length: 32 }),
-    parentId: d
-      .varchar({ length: 128 })
-      .references((): AnyPgColumn => category_table.id, {
-        onDelete: "set null",
-      }),
+    parentId: d.uuid().references((): AnyPgColumn => category_table.id, {
+      onDelete: "set null",
+    }),
 
     type: d.text().$type<CategoryType>().notNull(),
     name: d.varchar({ length: 64 }).notNull(),
@@ -50,7 +44,7 @@ export const rule_table = pgTable(
     // FK
     userId: d.varchar({ length: 32 }).notNull(),
     categoryId: d
-      .varchar({ length: 128 })
+      .uuid()
       .notNull()
       .references(() => category_table.id),
 

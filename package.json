@@ -11,7 +11,7 @@
     "build": "next build",
     "clean": "git clean -xdf node_modules .next",
     "db:generate": "drizzle-kit generate",
-    "db:generate:custom": "drizzle-kit generate --custom --name=no_overlapping_budget_ranges",
+    "db:generate:custom": "drizzle-kit generate --custom --name=create_materialized_view",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",

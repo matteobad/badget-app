@@ -1,6 +1,12 @@
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { pgEnum } from "drizzle-orm/pg-core";
+import {
+  date,
+  integer,
+  pgEnum,
+  pgMaterializedView,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 import { timestamps, timezoneRange } from "../utils";
 import { pgTable } from "./_table";
@@ -13,7 +19,7 @@ export const budget_table = pgTable("budget_table", (d) => ({
   id: d.uuid().primaryKey().defaultRandom(),
 
   categoryId: d
-    .varchar({ length: 128 })
+    .uuid()
     .references(() => category_table.id, {
       onDelete: "cascade",
     })
@@ -43,6 +49,17 @@ export const budgetsRelations = relations(budget_table, ({ one }) => ({
     references: [budget_table.id],
   }),
 }));
+
+// Solo perché serve la struttura, la query è già nel DB.
+// In Drizzle usiamo `.select()` direttamente.
+export const budget_instances = pgMaterializedView("budget_instance", {
+  id: uuid("id").notNull(),
+  originalBudgetId: uuid("original_budget_id"),
+  categoryId: uuid("category_id").notNull(),
+  amount: integer("amount").notNull(),
+  instanceFrom: date("instance_from").notNull(),
+  instanceTo: date("instance_to").notNull(),
+}).existing();
 
 export type DB_BudgetType = typeof budget_table.$inferSelect;
 export type DB_BudgetInsertType = typeof budget_table.$inferInsert;

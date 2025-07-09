@@ -6,17 +6,12 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 
 type GetBudgetsQueryRequest = {
   userId: string;
-  categoryId?: string;
   from?: Date;
   to?: Date;
 };
 
 export const getBudgetsQuery = (params: GetBudgetsQueryRequest) => {
   const where = [eq(budget_table.userId, params.userId)];
-
-  if (params?.categoryId) {
-    where.push(eq(budget_table.categoryId, params.categoryId));
-  }
 
   if (params?.from && params.to) {
     where.push(

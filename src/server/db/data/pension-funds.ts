@@ -10,8 +10,8 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
+import { pgTable } from "../schema/_table";
 import { timestamps } from "../utils";
-import { pgTable } from "./_table";
 
 export const PensionFundType = {
   FPN: "Fondo negoziale",

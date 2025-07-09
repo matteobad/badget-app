@@ -1,9 +1,9 @@
 import { isNotNull, or, relations } from "drizzle-orm";
 import { check, primaryKey, varchar } from "drizzle-orm/pg-core";
 
+import { pgTable } from "../schema/_table";
+import { account_table } from "../schema/accounts";
 import { timestamps } from "../utils";
-import { pgTable } from "./_table";
-import { account_table } from "./accounts";
 import { groups } from "./groups";
 import { users } from "./users";
 
