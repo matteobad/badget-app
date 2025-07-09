@@ -20,7 +20,7 @@ export const getBudgetsQuery = (params: GetBudgetsQueryRequest) => {
 
   if (params?.from && params.to) {
     where.push(
-      sql`${budget_table.sysPeriod} && tstzrange(${params.from.toISOString()}, ${params.to.toISOString()}, '[]')`,
+      sql`${budget_table.validity} && tstzrange(${params.from.toISOString()}, ${params.to.toISOString()}, '[]')`,
     );
   }
 
@@ -31,15 +31,15 @@ export const getBudgetsQuery = (params: GetBudgetsQueryRequest) => {
       id: budget_table.id,
       categoryId: budget_table.categoryId,
       amount: budget_table.amount,
-      period: budget_table.period,
-      from: sql<Date>`lower(${budget_table.sysPeriod})`
+      recurrence: budget_table.recurrence,
+      from: sql<Date>`lower(${budget_table.validity})`
         .mapWith({
           mapFromDriverValue: (value: string) => {
             return new Date(value);
           },
         })
         .as("from"),
-      to: sql<Date | null>`upper(${budget_table.sysPeriod})`
+      to: sql<Date | null>`upper(${budget_table.validity})`
         .mapWith({
           mapFromDriverValue: (value: string | null) => {
             return value ? new Date(value) : null;
@@ -57,15 +57,15 @@ export async function getBudgetByIdQuery(params: { id: string }) {
       id: budget_table.id,
       categoryId: budget_table.categoryId,
       amount: budget_table.amount,
-      period: budget_table.period,
-      from: sql<Date>`lower(${budget_table.sysPeriod})`
+      recurrence: budget_table.recurrence,
+      from: sql<Date>`lower(${budget_table.validity})`
         .mapWith({
           mapFromDriverValue: (value: string) => {
             return new Date(value);
           },
         })
         .as("from"),
-      to: sql<Date | null>`upper(${budget_table.sysPeriod})`
+      to: sql<Date | null>`upper(${budget_table.validity})`
         .mapWith({
           mapFromDriverValue: (value: string | null) => {
             return value ? new Date(value) : null;

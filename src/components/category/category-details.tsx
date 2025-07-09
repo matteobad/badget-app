@@ -3,17 +3,7 @@
 import type { IconName } from "lucide-react/dynamic";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCategoryParams } from "~/hooks/use-category-params";
-import { formatAmount, formatDate } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import {
-  AlertCircleIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  MoreHorizontalIcon,
-  PlayIcon,
-  TrendingDownIcon,
-  TrendingUpIcon,
-} from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 import { Area, AreaChart } from "recharts";
 
@@ -25,11 +15,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../ui/chart";
 import { Label } from "../ui/label";
-import { Progress } from "../ui/progress";
 import { Skeleton } from "../ui/skeleton";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
@@ -65,109 +52,6 @@ interface BudgetPeriod {
   status: "planned" | "active" | "completed" | "expired";
   periodicity: "weekly" | "monthly" | "quarterly" | "yearly";
   category: string;
-}
-
-const budgetPeriods: BudgetPeriod[] = [
-  {
-    id: "budget-6",
-    name: "Q1 2025 Marketing",
-    startDate: "2025-01-01",
-    endDate: "2025-03-31",
-    amount: 15000,
-    spent: 0,
-    status: "planned",
-    periodicity: "quarterly",
-    category: "Marketing",
-  },
-  {
-    id: "budget-5",
-    name: "December 2024",
-    startDate: "2024-12-01",
-    endDate: "2024-12-31",
-    amount: 5000,
-    spent: 0,
-    status: "planned",
-    periodicity: "monthly",
-    category: "Marketing",
-  },
-  {
-    id: "budget-4",
-    name: "November 2024",
-    startDate: "2024-11-01",
-    endDate: "2024-11-30",
-    amount: 4500,
-    spent: 3200,
-    status: "active",
-    periodicity: "monthly",
-    category: "Marketing",
-  },
-  {
-    id: "budget-3",
-    name: "October 2024",
-    startDate: "2024-10-01",
-    endDate: "2024-10-31",
-    amount: 4000,
-    spent: 3800,
-    status: "completed",
-    periodicity: "monthly",
-    category: "Marketing",
-  },
-  {
-    id: "budget-2",
-    name: "Q3 2024 Marketing",
-    startDate: "2024-07-01",
-    endDate: "2024-09-30",
-    amount: 12000,
-    spent: 11200,
-    status: "completed",
-    periodicity: "quarterly",
-    category: "Marketing",
-  },
-  {
-    id: "budget-1",
-    name: "June 2024",
-    startDate: "2024-06-01",
-    endDate: "2024-06-30",
-    amount: 3500,
-    spent: 4100,
-    status: "expired",
-    periodicity: "monthly",
-    category: "Marketing",
-  },
-];
-
-function getStatusIcon(status: string) {
-  switch (status) {
-    case "planned":
-      return <ClockIcon className="h-4 w-4" />;
-    case "active":
-      return <PlayIcon className="h-4 w-4" />;
-    case "completed":
-      return <CheckCircleIcon className="h-4 w-4" />;
-    case "expired":
-      return <AlertCircleIcon className="h-4 w-4" />;
-    default:
-      return <ClockIcon className="h-4 w-4" />;
-  }
-}
-
-function getStatusColor(status: string) {
-  switch (status) {
-    case "planned":
-      return "bg-slate-100 text-slate-700";
-    case "active":
-      return "bg-orange-100 text-orange-700";
-    case "completed":
-      return "bg-green-100 text-green-700";
-    case "expired":
-      return "bg-red-100 text-red-700";
-    default:
-      return "bg-slate-100 text-slate-700";
-  }
-}
-
-function getSpendingPercentage(spent: number, amount: number) {
-  return Math.round((spent / amount) * 100);
 }
 
 export function CategoryDetails() {

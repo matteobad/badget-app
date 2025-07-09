@@ -4,7 +4,7 @@ import type {
   createBudgetSchema,
 } from "~/shared/validators/budget.schema";
 import type z from "zod/v4";
-import { BUDGET_PERIOD } from "~/server/db/schema/enum";
+import { BUDGET_RECURRENCE } from "~/server/db/schema/enum";
 import { TimezoneRange } from "~/server/db/utils";
 import { addMonths, addWeeks, addYears } from "date-fns";
 import { Range, RANGE_LB_INC } from "postgres-range";
@@ -121,10 +121,10 @@ export function getBudgetForPeriod(
   const { startOfWeek = 1 } = options ?? {};
 
   return budgets.reduce((total, budget) => {
-    switch (budget.period) {
-      case "week":
+    switch (budget.recurrence) {
+      case "weekly":
         return total + calculateWeeklyBudget(budget, from, to, startOfWeek);
-      case "month":
+      case "monthly":
         return total + calculateMonthlyBudget(budget, from, to);
       case "custom":
         return total + calculateCustomBudget(budget, from, to);
@@ -135,15 +135,15 @@ export function getBudgetForPeriod(
 }
 
 export function toBudgetDBInput(input: z.infer<typeof createBudgetSchema>) {
-  const { from, frequency, repeat } = input;
+  const { from, recurrence, repeat } = input;
 
   let to: Date;
-  switch (frequency) {
-    case BUDGET_PERIOD.YEARLY:
+  switch (recurrence) {
+    case BUDGET_RECURRENCE.YEARLY:
       to = addYears(from, 1);
-    case BUDGET_PERIOD.MONTHLY:
+    case BUDGET_RECURRENCE.MONTHLY:
       to = addMonths(from, 1);
-    case BUDGET_PERIOD.WEEKLY:
+    case BUDGET_RECURRENCE.WEEKLY:
       to = addWeeks(from, 1);
     default:
       to = addMonths(from, 1);
@@ -154,8 +154,8 @@ export function toBudgetDBInput(input: z.infer<typeof createBudgetSchema>) {
   return {
     categoryId: input.categoryId,
     amount: input.amount,
-    period: frequency,
-    sysPeriod: new TimezoneRange(range),
+    recurrence: recurrence,
+    validity: new TimezoneRange(range),
   } satisfies DB_BudgetInsertType;
 }
 
@@ -177,7 +177,8 @@ export function diffBudgetUpdate(
     amountChanged:
       update.amount !== undefined && update.amount !== existing.amount,
     frequencyChanged:
-      update.period !== undefined && update.period !== existing.period,
+      update.recurrence !== undefined &&
+      update.recurrence !== existing.recurrence,
     repetitionChanged: (update.to === null) !== (existing.to === null),
     startDateChanged:
       update.from !== undefined &&

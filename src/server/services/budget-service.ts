@@ -135,9 +135,9 @@ export async function updateBudget(
   // Compute what changed
   const diff = diffBudgetUpdate(existing, {
     amount: rest.amount,
-    period: rest.frequency,
+    recurrence: rest.recurrence,
     from: rest.from,
-    to: rest.repeat ? null : getNextCycleStart(rest.from, rest.frequency),
+    to: rest.repeat ? null : getNextCycleStart(rest.from, rest.recurrence),
   });
 
   // --- Only amount changed, and current period ---
@@ -151,7 +151,7 @@ export async function updateBudget(
     const input = toBudgetDBInput({
       categoryId: rest.categoryId,
       amount: rest.amount,
-      frequency: rest.frequency,
+      recurrence: rest.recurrence,
       from: rest.from,
       repeat: rest.repeat,
     });
@@ -183,7 +183,7 @@ export async function updateBudget(
     const input = toBudgetDBInput({
       categoryId: rest.categoryId,
       amount: rest.amount,
-      frequency: rest.frequency,
+      recurrence: rest.recurrence,
       from: rest.from,
       repeat: rest.repeat,
     });
@@ -196,7 +196,7 @@ export async function updateBudget(
   const closeInput = toBudgetDBInput({
     categoryId: existing.categoryId,
     amount: existing.amount,
-    frequency: existing.period,
+    recurrence: existing.recurrence,
     from: existing.from,
     repeat: false,
   });
@@ -208,12 +208,12 @@ export async function updateBudget(
     rest.from ??
     getNextCycleStart(
       existing.to ?? new Date(),
-      rest.frequency ?? existing.period,
+      rest.recurrence ?? existing.recurrence,
     );
   const newBudgetInput = toBudgetDBInput({
     categoryId: rest.categoryId,
     amount: rest.amount,
-    frequency: rest.frequency,
+    recurrence: rest.recurrence,
     from: newFrom,
     repeat: rest.repeat,
   });

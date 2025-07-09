@@ -284,7 +284,7 @@ function CategoryBudget({ category }: { category: Category }) {
         variant="outline"
         className="absolute top-2 left-2 size-5 rounded font-normal text-muted-foreground capitalize not-hover:text-muted-foreground/50"
       >
-        {budget.period.charAt(0)}
+        {budget.recurrence?.charAt(0)}
       </Badge>
       <Badge
         variant="outline"

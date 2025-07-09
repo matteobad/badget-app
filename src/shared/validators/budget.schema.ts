@@ -1,5 +1,5 @@
 import { budget_table } from "~/server/db/schema/budgets";
-import { BUDGET_PERIOD } from "~/server/db/schema/enum";
+import { BUDGET_RECURRENCE } from "~/server/db/schema/enum";
 import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
 import { createSelectSchema } from "drizzle-zod";
 import { parseAsBoolean, parseAsIsoDate, parseAsString } from "nuqs/server";
@@ -18,7 +18,7 @@ export const getBudgetSchema = z.object({
 export const createBudgetSchema = z.object({
   categoryId: z.cuid2(),
   amount: z.number().min(0),
-  frequency: z.enum(BUDGET_PERIOD).default(BUDGET_PERIOD.MONTHLY),
+  recurrence: z.enum(BUDGET_RECURRENCE).nullable(),
   from: z.date().default(new Date()),
   repeat: z.boolean().default(true),
 });
@@ -27,7 +27,7 @@ export const updateBudgetSchema = z.object({
   id: z.cuid2(),
   categoryId: z.cuid2(),
   amount: z.number().min(0),
-  frequency: z.enum(BUDGET_PERIOD).default(BUDGET_PERIOD.MONTHLY),
+  recurrence: z.enum(BUDGET_RECURRENCE).default(BUDGET_RECURRENCE.MONTHLY),
   from: z.date().default(new Date()),
   repeat: z.boolean().default(true),
 });

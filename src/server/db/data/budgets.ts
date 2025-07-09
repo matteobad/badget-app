@@ -3,7 +3,7 @@ import Papa from "papaparse";
 import { Range, RANGE_LB_INC } from "postgres-range";
 
 import { type DB_BudgetInsertType } from "../schema/budgets";
-import { type BudgetPeriod } from "../schema/enum";
+import { type BudgetRecurrenceType } from "../schema/enum";
 import { TimezoneRange } from "../utils";
 
 // Expected Type
@@ -11,9 +11,11 @@ type CSV_BudgetType = {
   id: string;
   categoryId: string;
   amount: string;
-  period: BudgetPeriod;
+  recurrence: BudgetRecurrenceType;
+  recurrence_end: string;
   startDate: string;
   endDate: string | null;
+  override_for_budget_id: string | null;
   userId: string;
 };
 
@@ -24,8 +26,8 @@ const mapParsedRow = (row: CSV_BudgetType) => {
 
   return {
     ...rest,
-    amount: parseFloat(amount),
-    sysPeriod: new TimezoneRange(new Range<Date>(start, end, RANGE_LB_INC)),
+    amount: parseInt(amount, 10),
+    validity: new TimezoneRange(new Range<Date>(start, end, RANGE_LB_INC)),
   } satisfies DB_BudgetInsertType;
 };
 

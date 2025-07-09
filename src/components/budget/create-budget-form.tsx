@@ -12,7 +12,7 @@ import {
 } from "~/components/ui/form";
 import { useBudgetParams } from "~/hooks/use-budget-params";
 import { cn } from "~/lib/utils";
-import { BUDGET_PERIOD } from "~/server/db/schema/enum";
+import { BUDGET_PERIOD, BUDGET_RECURRENCE } from "~/server/db/schema/enum";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createBudgetSchema } from "~/shared/validators/budget.schema";
 import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
@@ -33,7 +33,7 @@ export default function CreateBudgetForm({
   const queryClient = useQueryClient();
 
   const createMutation = useMutation(
-    trpc.budget.createBudget.mutationOptions({
+    trpc.budget.create.mutationOptions({
       onSuccess: (_data) => {
         void queryClient.invalidateQueries({
           queryKey: trpc.budget.getBudgetWarnings.queryKey(),
@@ -54,9 +54,8 @@ export default function CreateBudgetForm({
   const form = useForm<z.infer<typeof createBudgetSchema>>({
     resolver: standardSchemaResolver(createBudgetSchema),
     defaultValues: {
-      period: BUDGET_PERIOD.MONTHLY,
+      recurrence: BUDGET_RECURRENCE.MONTHLY,
       from: startOfMonth(new Date()),
-      to: startOfDay(endOfMonth(new Date())),
       repeat: false,
       amount: 0,
     },
