@@ -10,6 +10,7 @@ RETURNS TABLE (
   id UUID,
   original_budget_id UUID,
   category_id UUID,
+  user_id VARCHAR(32),
   amount INTEGER,
   instance_from DATE,
   instance_to DATE
@@ -23,6 +24,7 @@ BEGIN
     gen_random_uuid() AS id,
     b.id AS original_budget_id,
     b.category_id,
+    b.user_id,
     b.amount,
     gs::date AS instance_from,
     (gs + (upper(b.validity) - lower(b.validity)))::date AS instance_to
@@ -56,6 +58,7 @@ BEGIN
     gen_random_uuid() AS id,
     b.override_for_budget_id AS original_budget_id,
     b.category_id,
+    b.user_id,
     b.amount,
     lower(b.validity)::date AS instance_from,
     upper(b.validity)::date AS instance_to

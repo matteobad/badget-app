@@ -1,4 +1,5 @@
 import type { DB_BudgetInsertType } from "~/server/db/schema/budgets";
+import type { BudgetRecurrenceType } from "~/server/db/schema/enum";
 import type {
   budgetFilterSchema,
   createBudgetSchema,
@@ -6,7 +7,15 @@ import type {
 import type z from "zod/v4";
 import { BUDGET_RECURRENCE } from "~/server/db/schema/enum";
 import { TimezoneRange } from "~/server/db/utils";
-import { addMonths, addWeeks, addYears } from "date-fns";
+import {
+  addMonths,
+  addWeeks,
+  addYears,
+  subMonths,
+  subQuarters,
+  subWeeks,
+  subYears,
+} from "date-fns";
 import { Range, RANGE_LB_INC } from "postgres-range";
 
 import type { getBudgetsQuery } from "./queries";
@@ -135,28 +144,22 @@ export function getBudgetForPeriod(
 }
 
 export function toBudgetDBInput(input: z.infer<typeof createBudgetSchema>) {
-  const { from, recurrence, repeat } = input;
+  const { from, to, recurrence, recurrenceEnd, ...rest } = input;
 
-  let to: Date;
-  switch (recurrence) {
-    case BUDGET_RECURRENCE.YEARLY:
-      to = addYears(from, 1);
-    case BUDGET_RECURRENCE.MONTHLY:
-      to = addMonths(from, 1);
-    case BUDGET_RECURRENCE.WEEKLY:
-      to = addWeeks(from, 1);
-    default:
-      to = addMonths(from, 1);
-    // TODO: add QUARTER and CUSTOM
-  }
-  const range = new Range<Date>(from, repeat ? null : to, RANGE_LB_INC);
+  const range = new Range<Date>(from, to, RANGE_LB_INC);
 
   return {
-    categoryId: input.categoryId,
-    amount: input.amount,
-    recurrence: recurrence,
+    ...rest,
     validity: new TimezoneRange(range),
+    recurrence: recurrence,
+    recurrenceEnd,
+    userId: "placeholder",
   } satisfies DB_BudgetInsertType;
+}
+
+export function buildValidity(from: Date, to: Date) {
+  const range = new Range<Date>(from, to, RANGE_LB_INC);
+  return new TimezoneRange(range);
 }
 
 // --- Budget Update Helpers ---
@@ -196,6 +199,24 @@ export function getNextCycleStart(currentEnd: Date, frequency: string): Date {
       return addYears(currentEnd, 1);
     default:
       return addMonths(currentEnd, 1); // fallback
+  }
+}
+
+export function getPrevCycleEnd(
+  currentEnd: Date,
+  recurrence: BudgetRecurrenceType | null,
+): Date {
+  switch (recurrence) {
+    case BUDGET_RECURRENCE.WEEKLY:
+      return subWeeks(currentEnd, 1);
+    case BUDGET_RECURRENCE.MONTHLY:
+      return subMonths(currentEnd, 1);
+    case BUDGET_RECURRENCE.QUATERLY:
+      return subQuarters(currentEnd, 1);
+    case BUDGET_RECURRENCE.YEARLY:
+      return subYears(currentEnd, 1);
+    default:
+      return subMonths(currentEnd, 1); // fallback
   }
 }
 

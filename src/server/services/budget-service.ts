@@ -2,23 +2,23 @@ import type {
   budgetFilterSchema,
   createBudgetSchema,
   deleteBudgetSchema,
-  getBudgetSchema,
+  getBudgetsSchema,
   updateBudgetSchema,
 } from "~/shared/validators/budget.schema";
 import type z from "zod/v4";
 
 import type { getCategoriesQuery } from "../domain/category/queries";
-import { db } from "../db";
+import { db, withTransaction } from "../db";
 import {
-  diffBudgetUpdate,
+  buildValidity,
   getBudgetForPeriod,
-  getNextCycleStart,
-  hasFutureBudget,
+  getPrevCycleEnd,
   toBudgetDBInput,
 } from "../domain/budget/helpers";
 import {
   createBudgetMutation,
   deleteBudgetMutation,
+  refreshBudgetInstances,
   updateBudgetMutation,
 } from "../domain/budget/mutations";
 import { getBudgetByIdQuery, getBudgetsQuery } from "../domain/budget/queries";
@@ -102,7 +102,7 @@ export function findBudgetWarnings(
 }
 
 export async function getBudgets(
-  input: z.infer<typeof getBudgetSchema>,
+  input: z.infer<typeof getBudgetsSchema>,
   userId: string,
 ) {
   return await getBudgetsQuery({ ...input, userId });
@@ -113,113 +113,74 @@ export async function createBudget(
   userId: string,
 ) {
   const input = toBudgetDBInput(params);
-  return await createBudgetMutation(db, { ...input, userId });
+
+  return await withTransaction(async (tx) => {
+    const result = await createBudgetMutation(tx, { ...input, userId });
+    // refresh materialized view
+    await refreshBudgetInstances(tx);
+
+    return result;
+  });
 }
 
 export async function updateBudget(
   params: z.infer<typeof updateBudgetSchema>,
   userId: string,
 ) {
-  const { id, ...rest } = params;
+  const { id, categoryId, from, to, amount } = params;
 
   // currently active budget
-  const existing = await getBudgetByIdQuery({ id });
-  if (!existing) throw new Error("Budget not found");
+  const existingBudget = await getBudgetByIdQuery({ id });
+  if (!existingBudget) throw new Error("Budget not found");
 
-  // Fetch all budgets for this category and user (for future budget check)
-  const allBudgets = await getBudgetsQuery({
-    categoryId: existing.categoryId,
-    userId,
-  });
+  // planned category budgets
+  const plannedBudgets = await getBudgets({ from, to, categoryId }, userId);
+  console.log(`found ${plannedBudgets.length} planned budgets on category`);
 
-  // Compute what changed
-  const diff = diffBudgetUpdate(existing, {
-    amount: rest.amount,
-    recurrence: rest.recurrence,
-    from: rest.from,
-    to: rest.repeat ? null : getNextCycleStart(rest.from, rest.recurrence),
-  });
+  // prepare data for updating budgets
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { from: _, to: __, ...oldBudget } = existingBudget;
+  const currentEnd = oldBudget.recurrenceEnd ?? params.to;
+  const prevEnd = getPrevCycleEnd(currentEnd, oldBudget.recurrence);
+  const validity = buildValidity(from, to);
 
-  // --- Only amount changed, and current period ---
-  if (
-    diff.amountChanged &&
-    !diff.frequencyChanged &&
-    !diff.repetitionChanged &&
-    !diff.startDateChanged
-  ) {
-    // In-place update
-    const input = toBudgetDBInput({
-      categoryId: rest.categoryId,
-      amount: rest.amount,
-      recurrence: rest.recurrence,
-      from: rest.from,
-      repeat: rest.repeat,
+  return await withTransaction(async (tx) => {
+    // close current budget on previous cycle
+    await updateBudgetMutation(tx, {
+      ...oldBudget,
+      recurrenceEnd: prevEnd,
     });
-    return await updateBudgetMutation(db, { ...input, id, userId });
-  }
 
-  // --- Only repetition changed ---
-  if (
-    !diff.amountChanged &&
-    !diff.frequencyChanged &&
-    diff.repetitionChanged &&
-    !diff.startDateChanged
-  ) {
-    // If making recurring, check for future budgets
-    const makingRecurring = rest.repeat;
-    if (makingRecurring) {
-      const hasFuture = hasFutureBudget(
-        allBudgets,
-        existing.categoryId,
-        existing.to ?? new Date(),
-      );
-      if (hasFuture) {
-        throw new Error(
-          "Cannot make this budget recurring: a future budget exists for this category. Please delete or update the future budget first.",
-        );
-      }
+    // open new budget from current cycle
+    const newBudget = await createBudgetMutation(tx, {
+      ...oldBudget,
+      validity,
+      id: undefined,
+      recurrenceEnd: null,
+      userId,
+    });
+
+    if (!newBudget?.id) return tx.rollback();
+    const { id: overrideForBudgetId } = newBudget;
+
+    // create override budget on current cycle
+    const overrideBudget = await createBudgetMutation(tx, {
+      categoryId,
+      validity,
+      amount,
+      overrideForBudgetId,
+      userId,
+    });
+
+    // delete planned category budget to avoid overlaps
+    for (const { id } of plannedBudgets) {
+      await deleteBudgetMutation(tx, { id, userId });
     }
-    // Just update the range (open or close)
-    const input = toBudgetDBInput({
-      categoryId: rest.categoryId,
-      amount: rest.amount,
-      recurrence: rest.recurrence,
-      from: rest.from,
-      repeat: rest.repeat,
-    });
-    return await updateBudgetMutation(db, { ...input, id, userId });
-  }
 
-  // --- Any other change (frequency, startDate, or amount for future period, or multiple changes) ---
-  // Close current at end of its cycle, create new with new params
-  // 1. Close current
-  const closeInput = toBudgetDBInput({
-    categoryId: existing.categoryId,
-    amount: existing.amount,
-    recurrence: existing.recurrence,
-    from: existing.from,
-    repeat: false,
-  });
-  await updateBudgetMutation(db, { ...closeInput, id, userId });
+    // refresh materialized view
+    await refreshBudgetInstances(tx);
 
-  // 2. Create new budget
-  // Determine new start date: next cycle or as specified
-  const newFrom =
-    rest.from ??
-    getNextCycleStart(
-      existing.to ?? new Date(),
-      rest.recurrence ?? existing.recurrence,
-    );
-  const newBudgetInput = toBudgetDBInput({
-    categoryId: rest.categoryId,
-    amount: rest.amount,
-    recurrence: rest.recurrence,
-    from: newFrom,
-    repeat: rest.repeat,
-  });
-  return await createBudgetMutation(db, {
-    ...newBudgetInput,
-    userId,
+    return overrideBudget;
   });
 }
 

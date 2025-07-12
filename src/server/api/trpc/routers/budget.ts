@@ -11,7 +11,7 @@ import {
   budgetFilterSchema,
   createBudgetSchema,
   deleteBudgetSchema,
-  getBudgetSchema,
+  getBudgetsSchema,
   updateBudgetSchema,
 } from "~/shared/validators/budget.schema";
 import { getCategoriesSchema } from "~/shared/validators/category.schema";
@@ -31,13 +31,16 @@ export const budgetRouter = createTRPCRouter({
       const userId = ctx.session.userId!;
       const { categoryFilters, budgetFilters } = input;
 
-      const categories = await getCategoriesQuery(categoryFilters, userId);
+      const categories = await getCategoriesQuery({
+        ...categoryFilters,
+        userId,
+      });
       const budgets = await getBudgetsQuery({ ...budgetFilters, userId });
       return findBudgetWarnings(categories, budgets, budgetFilters);
     }),
 
   get: protectedProcedure
-    .input(getBudgetSchema)
+    .input(getBudgetsSchema)
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.userId!;
       return await getBudgets(input, userId);

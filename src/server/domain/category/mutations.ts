@@ -1,41 +1,39 @@
 "server-only";
 
-import type {
-  createCategorySchema,
-  deleteCategorySchema,
-  updateCategorySchema,
-} from "~/shared/validators/category.schema";
-import type z from "zod/v4";
-import { db } from "~/server/db";
+import type { DBClient } from "~/server/db";
+import type { DB_CategoryInsertType } from "~/server/db/schema/categories";
 import { category_table } from "~/server/db/schema/categories";
 import { and, eq } from "drizzle-orm";
 
 export async function createCategoryMutation(
-  params: z.infer<typeof createCategorySchema>,
-  userId: string,
+  client: DBClient,
+  params: DB_CategoryInsertType,
 ) {
-  return await db
+  return await client
     .insert(category_table)
-    .values({ ...params, userId })
+    .values({ ...params })
+    .onConflictDoNothing()
     .returning();
 }
 
 export async function updateCategoryMutation(
-  params: z.infer<typeof updateCategorySchema>,
-  userId: string,
+  client: DBClient,
+  params: Partial<DB_CategoryInsertType>,
 ) {
-  const { id, ...rest } = params;
-  await db
+  const { id, userId, ...rest } = params;
+  return await client
     .update(category_table)
     .set(rest)
-    .where(and(eq(category_table.id, id), eq(category_table.userId, userId)));
+    .where(and(eq(category_table.id, id!), eq(category_table.userId, userId!)))
+    .returning();
 }
 
 export async function deleteCategoryMutation(
-  params: z.infer<typeof deleteCategorySchema>,
+  client: DBClient,
+  params: { id: string; userId: string },
 ) {
   const { id, userId } = params;
-  await db
+  return await client
     .update(category_table)
     .set({ deletedAt: new Date() }) // soft delete
     .where(and(eq(category_table.id, id), eq(category_table.userId, userId)));

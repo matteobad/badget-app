@@ -1,16 +1,18 @@
 "server-only";
 
-import type { getCategoriesSchema } from "~/shared/validators/category.schema";
-import type z from "zod/v4";
+import type { CategoryType } from "~/server/db/schema/enum";
 import { db } from "~/server/db";
 import { category_table } from "~/server/db/schema/categories";
 import { and, asc, desc, eq } from "drizzle-orm";
 
-export async function getCategoriesQuery(
-  params: z.infer<typeof getCategoriesSchema>,
-  userId: string,
-) {
-  const { type, limit = 1000 } = params;
+type getCategoriesQueryRequest = {
+  userId: string;
+  type?: CategoryType;
+  limit?: number;
+};
+
+export async function getCategoriesQuery(params: getCategoriesQueryRequest) {
+  const { userId, type, limit = 1000 } = params;
 
   const where = [eq(category_table.userId, userId)];
 

@@ -9,24 +9,28 @@ import { TimezoneRange } from "../utils";
 // Expected Type
 type CSV_BudgetType = {
   id: string;
-  categoryId: string;
+  category_id: string;
   amount: string;
   recurrence: BudgetRecurrenceType;
-  recurrence_end: string;
-  startDate: string;
-  endDate: string | null;
+  recurrence_end: string | null;
+  start_date: string;
+  end_date: string;
   override_for_budget_id: string | null;
   userId: string;
 };
 
 const mapParsedRow = (row: CSV_BudgetType) => {
-  const { startDate, endDate, amount, ...rest } = row;
-  const start = new Date(startDate);
-  const end = endDate ? new Date(endDate) : null;
+  const { start_date, end_date } = row;
+  const start = new Date(start_date);
+  const end = end_date ? new Date(end_date) : null;
 
   return {
-    ...rest,
-    amount: parseInt(amount, 10),
+    userId: row.userId,
+    categoryId: row.category_id,
+    overrideForBudgetId: row.override_for_budget_id,
+    recurrenceEnd: row.recurrence_end ? new Date(row.recurrence_end) : null,
+    recurrence: row.recurrence,
+    amount: parseInt(row.amount, 10),
     validity: new TimezoneRange(new Range<Date>(start, end, RANGE_LB_INC)),
   } satisfies DB_BudgetInsertType;
 };

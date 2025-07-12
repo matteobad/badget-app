@@ -28,9 +28,9 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
   // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
   // prefetch(trpc.todo.getAll.queryOptions());
   await queryClient.fetchQuery(
-    trpc.category.getFlatTree.queryOptions({
-      categoryFilters,
-      budgetFilters,
+    trpc.category.getWithBudgets.queryOptions({
+      ...categoryFilters,
+      ...budgetFilters,
     }),
   );
 

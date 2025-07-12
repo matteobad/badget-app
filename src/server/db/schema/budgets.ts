@@ -6,6 +6,7 @@ import {
   pgEnum,
   pgMaterializedView,
   uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 import { timestamps, timezoneRange } from "../utils";
@@ -24,7 +25,7 @@ export const budget_table = pgTable("budget_table", (d) => ({
       onDelete: "cascade",
     })
     .notNull(),
-  userId: d.varchar({ length: 32 }),
+  userId: d.varchar({ length: 32 }).notNull(),
 
   // tsrange — validità della singola istanza (o prima ricorrenza)
   validity: timezoneRange({ notNull: true, default: true }),
@@ -52,14 +53,18 @@ export const budgetsRelations = relations(budget_table, ({ one }) => ({
 
 // Solo perché serve la struttura, la query è già nel DB.
 // In Drizzle usiamo `.select()` direttamente.
-export const budget_instances = pgMaterializedView("budget_instance", {
-  id: uuid("id").notNull(),
-  originalBudgetId: uuid("original_budget_id"),
-  categoryId: uuid("category_id").notNull(),
-  amount: integer("amount").notNull(),
-  instanceFrom: date("instance_from").notNull(),
-  instanceTo: date("instance_to").notNull(),
-}).existing();
+export const budget_instances = pgMaterializedView(
+  "badget_budget_instances_mview",
+  {
+    id: uuid().notNull(),
+    originalBudgetId: uuid(),
+    categoryId: uuid().notNull(),
+    amount: integer().notNull(),
+    instanceFrom: date().$type<Date>().notNull(),
+    instanceTo: date().$type<Date>().notNull(),
+    userId: varchar({ length: 32 }).notNull(),
+  },
+).existing();
 
 export type DB_BudgetType = typeof budget_table.$inferSelect;
 export type DB_BudgetInsertType = typeof budget_table.$inferInsert;

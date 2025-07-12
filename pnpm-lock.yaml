@@ -30,8 +30,8 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0(@headless-tree/core@1.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@hono/zod-openapi':
-        specifier: ^0.19.8
-        version: 0.19.8(hono@4.7.11)(zod@3.25.55)
+        specifier: ^1.0.0-beta.1
+        version: 1.0.0-beta.1(hono@4.7.11)(zod@3.25.55)
       '@hookform/resolvers':
         specifier: ^5.1.1
         version: 5.1.1(react-hook-form@7.58.0(react@19.1.0))
@@ -398,10 +398,10 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@asteasolutions/zod-to-openapi@7.3.4':
-    resolution: {integrity: sha512-/2rThQ5zPi9OzVwes6U7lK1+Yvug0iXu25olp7S0XsYmOqnyMfxH7gdSQjn/+DSOHRg7wnotwGJSyL+fBKdnEA==}
+  '@asteasolutions/zod-to-openapi@8.0.0-beta.4':
+    resolution: {integrity: sha512-om7KH4B6/Rd/jjrxUjV3yC7vUwKKQcM1m7R8jd12uZyBqYd4ihqa1mMHp9MG3Hau8M/ha6teNJLouDUvwZXpNg==}
     peerDependencies:
-      zod: ^3.20.2
+      zod: ~3.25.1
 
   '@babel/code-frame@7.26.2':
     resolution: {integrity: sha512-RJlIHRueQgwWitWgF8OdFYGZX328Ax5BCemNGlqHfplnRT9ESi8JkFlvaVYbS+UubVY6dpv87Fs2u5M29iNFVQ==}
@@ -876,12 +876,12 @@ packages:
       react: '*'
       react-dom: '*'
 
-  '@hono/zod-openapi@0.19.8':
-    resolution: {integrity: sha512-CHUSW0K+bDGUYXovxQSbVjZffzoPeTsGu6wevPoGSmBdPuUw5yZqDeomnvyAAAAvEjhLQPlAsUyASc1Zi35exQ==}
+  '@hono/zod-openapi@1.0.0-beta.1':
+    resolution: {integrity: sha512-4GYMrB1+Ni0kCCBLUOPlVEGA5XcYzBShKheoXoxJjpitcxgZPwwoinunhgNqGCOF/VY0oLw5GXOiKtK0tkpOhA==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       hono: '>=4.3.6'
-      zod: 3.*
+      zod: ^3.25.0
 
   '@hono/zod-validator@0.7.0':
     resolution: {integrity: sha512-qe2ZE6sHFE98dcUrbYMtS3bAV8hqcCOflykvZga2S7XhmNSZzT+dIz4OuMILsjLHkJw9JMn912/dB7dQOmuPvg==}
@@ -5347,7 +5347,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@asteasolutions/zod-to-openapi@7.3.4(zod@3.25.55)':
+  '@asteasolutions/zod-to-openapi@8.0.0-beta.4(zod@3.25.55)':
     dependencies:
       openapi3-ts: 4.4.0
       zod: 3.25.55
@@ -5735,9 +5735,9 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@hono/zod-openapi@0.19.8(hono@4.7.11)(zod@3.25.55)':
+  '@hono/zod-openapi@1.0.0-beta.1(hono@4.7.11)(zod@3.25.55)':
     dependencies:
-      '@asteasolutions/zod-to-openapi': 7.3.4(zod@3.25.55)
+      '@asteasolutions/zod-to-openapi': 8.0.0-beta.4(zod@3.25.55)
       '@hono/zod-validator': 0.7.0(hono@4.7.11)(zod@3.25.55)
       hono: 4.7.11
       zod: 3.25.55

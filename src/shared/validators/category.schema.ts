@@ -1,3 +1,4 @@
+import { z } from "@hono/zod-openapi"; // Extended Zod instance
 import { category_table } from "~/server/db/schema/categories";
 import { CATEGORY_TYPE } from "~/server/db/schema/enum";
 import {
@@ -10,11 +11,17 @@ import {
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
-import z from "zod/v4";
+
+import { getBudgetsSchema } from "./budget.schema";
 
 export const getCategoriesSchema = z.object({
-  type: z.enum(CATEGORY_TYPE).optional(),
+  type: z.enum(CATEGORY_TYPE).nullable().optional(),
   limit: z.number().default(1000),
+});
+
+export const getCategoriesWithBudgetsSchema = z.object({
+  ...getCategoriesSchema.shape,
+  ...getBudgetsSchema.shape,
 });
 
 export const selectCategorySchema = createSelectSchema(category_table);
@@ -29,7 +36,7 @@ export const createCategorySchema = createInsertSchema(category_table, {
 });
 
 export const updateCategorySchema = createUpdateSchema(category_table, {
-  id: z.string().min(1), // TODO: change to cuid2
+  id: z.uuid(),
   type: z.enum(CATEGORY_TYPE).optional(),
 }).omit({
   createdAt: true,
@@ -37,8 +44,7 @@ export const updateCategorySchema = createUpdateSchema(category_table, {
 });
 
 export const deleteCategorySchema = z.object({
-  id: z.string().min(1), // TODO: change to cuid2
-  userId: z.string(),
+  id: z.uuid(),
 });
 
 // Query filter schema

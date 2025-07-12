@@ -1,18 +1,16 @@
-import { buildTreeData } from "~/server/domain/category/helpers";
-import { deleteCategoryMutation } from "~/server/domain/category/mutations";
 import { getCategoryByIdQuery } from "~/server/domain/category/queries";
 import {
   createCategory,
+  deleteCategory,
   getCategories,
   getCategoriesWithBudgets,
   updateCategory,
 } from "~/server/services/category-service";
-import { budgetFilterSchema } from "~/shared/validators/budget.schema";
 import {
-  categoryFilterSchema,
   createCategorySchema,
   deleteCategorySchema,
   getCategoriesSchema,
+  getCategoriesWithBudgetsSchema,
   updateCategorySchema,
 } from "~/shared/validators/category.schema";
 import { z } from "zod/v4";
@@ -27,28 +25,35 @@ export const categoryRouter = createTRPCRouter({
       return await getCategories(input, userId);
     }),
 
-  getFlatTree: protectedProcedure
-    .input(
-      z.object({
-        categoryFilters: categoryFilterSchema,
-        budgetFilters: budgetFilterSchema,
-      }),
-    )
+  getWithBudgets: protectedProcedure
+    .input(getCategoriesWithBudgetsSchema)
     .query(async ({ ctx, input }) => {
-      const { budgetFilters } = input;
-
-      const categoriesWithBudgets = await getCategoriesWithBudgets(
-        { limit: 100 },
-        budgetFilters,
-        ctx.session.userId!,
-      );
-
-      const flatTreeData = buildTreeData(categoriesWithBudgets);
-      return flatTreeData;
+      const userId = ctx.session.userId!;
+      return await getCategoriesWithBudgets(input, userId);
     }),
 
+  // getFlatTree: protectedProcedure
+  //   .input(
+  //     z.object({
+  //       categoryFilters: categoryFilterSchema,
+  //       budgetFilters: budgetFilterSchema,
+  //     }),
+  //   )
+  //   .query(async ({ ctx, input }) => {
+  //     const { budgetFilters } = input;
+
+  //     const categoriesWithBudgets = await getCategoriesWithBudgets(
+  //       { limit: 100 },
+  //       budgetFilters,
+  //       ctx.session.userId!,
+  //     );
+
+  //     const flatTreeData = buildTreeData(categoriesWithBudgets);
+  //     return flatTreeData;
+  //   }),
+
   getById: protectedProcedure
-    .input(z.object({ id: z.string().min(1) })) // TODO: change to cuid2
+    .input(z.object({ id: z.uuid() }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.userId!;
       return await getCategoryByIdQuery({ ...input, userId });
@@ -68,10 +73,10 @@ export const categoryRouter = createTRPCRouter({
       return await updateCategory(input, userId);
     }),
 
-  deleteCategory: protectedProcedure
+  delete: protectedProcedure
     .input(deleteCategorySchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.userId!;
-      return await deleteCategoryMutation({ ...input, userId });
+      return await deleteCategory(input, userId);
     }),
 });

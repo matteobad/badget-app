@@ -9,21 +9,8 @@ import { ACCOUNT_TYPE, CONNECTION_STATUS, Provider } from "./schema/enum";
 
 async function main() {
   /* eslint-disable */
-  const {
-    category_table,
-    budget_table,
-    rule_table,
-    token_table,
-    groups,
-    groupsRelations,
-    users,
-    usersToGroupsRelations,
-    usersRelations,
-    usersToGroups,
-    workspaceToAccounts,
-    workspaceToAccountsRelations,
-    ...rest
-  } = schema;
+  const { category_table, budget_table, rule_table, token_table, ...rest } =
+    schema;
   /* eslint-enable */
 
   await reset(db, rest);

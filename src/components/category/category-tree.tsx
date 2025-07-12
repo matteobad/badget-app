@@ -34,7 +34,7 @@ import { Input } from "../ui/input";
 import { CategoryActions } from "./category-actions";
 import { CategoryFilters } from "./category-filters";
 
-type Category = RouterOutput["category"]["getFlatTree"][number];
+type Category = RouterOutput["category"]["getWithBudgets"][number];
 
 const indent = 24;
 // const cancelToken = { current: false };
@@ -49,9 +49,9 @@ export function CategoryTree() {
   const trpc = useTRPC();
 
   const { data: items } = useSuspenseQuery(
-    trpc.category.getFlatTree.queryOptions({
-      categoryFilters,
-      budgetFilters,
+    trpc.category.getWithBudgets.queryOptions({
+      ...categoryFilters,
+      ...budgetFilters,
     }),
   );
 
