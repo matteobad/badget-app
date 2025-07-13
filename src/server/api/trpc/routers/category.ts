@@ -32,26 +32,6 @@ export const categoryRouter = createTRPCRouter({
       return await getCategoriesWithBudgets(input, userId);
     }),
 
-  // getFlatTree: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       categoryFilters: categoryFilterSchema,
-  //       budgetFilters: budgetFilterSchema,
-  //     }),
-  //   )
-  //   .query(async ({ ctx, input }) => {
-  //     const { budgetFilters } = input;
-
-  //     const categoriesWithBudgets = await getCategoriesWithBudgets(
-  //       { limit: 100 },
-  //       budgetFilters,
-  //       ctx.session.userId!,
-  //     );
-
-  //     const flatTreeData = buildTreeData(categoriesWithBudgets);
-  //     return flatTreeData;
-  //   }),
-
   getById: protectedProcedure
     .input(z.object({ id: z.uuid() }))
     .query(async ({ ctx, input }) => {

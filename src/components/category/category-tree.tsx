@@ -34,7 +34,7 @@ import { Input } from "../ui/input";
 import { CategoryActions } from "./category-actions";
 import { CategoryFilters } from "./category-filters";
 
-type Category = RouterOutput["category"]["getWithBudgets"][number];
+type CategoryWithAccrual = RouterOutput["category"]["getWithBudgets"][number];
 
 const indent = 24;
 // const cancelToken = { current: false };
@@ -55,12 +55,12 @@ export function CategoryTree() {
     }),
   );
 
-  const { data: warnings } = useSuspenseQuery(
-    trpc.budget.getBudgetWarnings.queryOptions({
-      categoryFilters: {},
-      budgetFilters,
-    }),
-  );
+  // const { data: warnings } = useSuspenseQuery(
+  //   trpc.budget.getBudgetWarnings.queryOptions({
+  //     categoryFilters: {},
+  //     budgetFilters,
+  //   }),
+  // );
 
   const doubleClickExpandFeature: FeatureImplementation = {
     itemInstance: {
@@ -97,12 +97,14 @@ export function CategoryTree() {
   };
 
   // Store the initial expanded items to reset when search is cleared
-  const initialExpandedItems = Object.values(items)
-    .filter((item) => item.children)
-    .map((item) => item.id);
-  const [state, setState] = useState<Partial<TreeState<Category>>>({});
+  const initialExpandedItems = Object.values(items).map(
+    (item) => item.category.id,
+  );
+  const [state, setState] = useState<Partial<TreeState<CategoryWithAccrual>>>(
+    {},
+  );
 
-  const tree = useTree<Category>({
+  const tree = useTree<CategoryWithAccrual>({
     state,
     setState,
     initialState: {
@@ -111,11 +113,17 @@ export function CategoryTree() {
     },
     indent,
     rootItemId: "root_id",
-    getItemName: (item) => item.getItemData().name,
-    isItemFolder: (item) => (item.getItemData()?.children?.length ?? 0) > 0,
+    getItemName: (item) => item.getItemData().category.name,
+    isItemFolder: (item) =>
+      items.some(
+        (data) => data.category.parentId === item.getItemData().category.id,
+      ),
     dataLoader: {
-      getItem: (itemId) => items[itemId]!,
-      getChildren: (itemId) => items[itemId]?.children ?? [],
+      getItem: (itemId) => items.find((item) => item.category.id === itemId)!,
+      getChildren: (itemId) =>
+        items
+          .filter((item) => item.category.parentId === itemId)
+          .map((item) => item.category.id),
     },
     features: [
       syncDataLoaderFeature,
@@ -189,7 +197,7 @@ export function CategoryTree() {
         {tree.getItems().map((item) => {
           // Merge styles
           const mergedStyle = {
-            backgroundColor: `${item.getItemData().color}`,
+            backgroundColor: `${item.getItemData().category.color}`,
           } as React.CSSProperties;
 
           const {} = item;
@@ -204,7 +212,7 @@ export function CategoryTree() {
                   className="group relative w-full gap-2 not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background"
                 >
                   <span className="line-clamp-1 flex flex-1 items-center gap-2 text-ellipsis md:max-w-none">
-                    {item.getItemData().parentId !== null && (
+                    {item.getItemData().category.parentId !== null && (
                       <div className="flex size-4 items-center justify-center">
                         <div
                           style={mergedStyle}
@@ -215,7 +223,7 @@ export function CategoryTree() {
 
                     <DynamicIcon
                       name={
-                        (item.getItemData()?.icon as IconName) ??
+                        (item.getItemData().category?.icon as IconName) ??
                         "circle-dashed"
                       }
                       className={cn(
@@ -223,7 +231,7 @@ export function CategoryTree() {
                       )}
                     />
                     <span className="text-base">{item.getItemName()}</span>
-                    {!item.getItemData().parentId && (
+                    {!item.getItemData().category.parentId && (
                       <Badge variant="tag-rounded">system</Badge>
                     )}
                   </span>
@@ -234,7 +242,7 @@ export function CategoryTree() {
                     "before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background",
                   )}
                 >
-                  <CategoryBudget category={item.getItemData()} />
+                  <CategoryBudget data={item.getItemData()} />
                 </div>
 
                 <div
@@ -244,8 +252,8 @@ export function CategoryTree() {
                     "after:absolute after:left-0 after:z-10 after:h-10 after:w-[1px] after:bg-muted",
                   )}
                 >
-                  <CategoryTotal category={item.getItemData()} />
-                  <CategoryPercentage category={item.getItemData()} />
+                  <CategoryTotal data={item.getItemData()} />
+                  <CategoryPercentage data={item.getItemData()} />
                 </div>
               </div>
             </TreeItem>
@@ -256,8 +264,8 @@ export function CategoryTree() {
   );
 }
 
-function CategoryBudget({ category }: { category: Category }) {
-  const [amount, setAmount] = useState(category.budgets[0]?.amount);
+function CategoryBudget({ data }: { data: CategoryWithAccrual }) {
+  const [amount, setAmount] = useState(data.budgetInstances[0]?.amount);
 
   const trpc = useTRPC();
   const updateBudgetMutation = useMutation(
@@ -268,7 +276,7 @@ function CategoryBudget({ category }: { category: Category }) {
     }),
   );
 
-  const budget = category.budgets[0];
+  const budget = data.budgetInstances[0];
 
   if (!budget) {
     return (
@@ -299,29 +307,35 @@ function CategoryBudget({ category }: { category: Category }) {
         onValueChange={(value) => setAmount(value.floatValue)}
         onBlur={() => {
           updateBudgetMutation.mutate({
-            id: budget.id,
+            id: "TODO_ID",
             categoryId: budget.categoryId,
             amount: budget.amount,
+            from: "from",
+            to: "to",
+            recurrence: "monthly",
           });
         }}
       />
       <span className="absolute top-[9px] right-12 text-sm">€</span>
 
-      {category.budgets.length > 1 && (
+      {data.budgetInstances.length > 1 && (
         <Badge
-          key={budget.id}
+          // key={budget.id}
           variant="tag-rounded"
           className="aspect-square size-6 rounded-full text-xs"
         >
-          {category.budgets.length}
+          {data.budgetInstances.length}
         </Badge>
       )}
     </div>
   );
 }
 
-function CategoryTotal({ category }: { category: Category }) {
-  const styles = getBudgetTotalColor(category.type, !category.parentId);
+function CategoryTotal({ data }: { data: CategoryWithAccrual }) {
+  const styles = getBudgetTotalColor(
+    data.category.type,
+    !data.category.parentId,
+  );
   return (
     <div
       className={cn(
@@ -331,7 +345,7 @@ function CategoryTotal({ category }: { category: Category }) {
     >
       <span>
         {formatAmount({
-          amount: category.categoryBudget ?? category.childrenBudget,
+          amount: data.accrualAmount ?? data.childrenAccrualAmount,
           currency: "eur",
           maximumFractionDigits: 0,
         })}
@@ -340,10 +354,10 @@ function CategoryTotal({ category }: { category: Category }) {
   );
 }
 
-function CategoryPercentage({ category }: { category: Category }) {
+function CategoryPercentage({ data }: { data: CategoryWithAccrual }) {
   return (
     <div className="flex w-[50px] items-center justify-end gap-1 font-mono text-neutral-300">
-      <span className="text-xs">{formatPerc(category.perc)}</span>
+      <span className="text-xs">{formatPerc(data.incomePercentage)}</span>
     </div>
   );
 }

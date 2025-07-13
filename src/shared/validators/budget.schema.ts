@@ -1,7 +1,7 @@
 import { z } from "@hono/zod-openapi"; // Extended Zod instance
 import { BUDGET_RECURRENCE } from "~/server/db/schema/enum";
-import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
-import { parseAsBoolean, parseAsIsoDate, parseAsString } from "nuqs/server";
+import { endOfMonth, format, startOfMonth } from "date-fns";
+import { parseAsBoolean, parseAsString } from "nuqs/server";
 
 // ref: https://orm.drizzle.team/docs/zod#factory-functions
 // const { createSelectSchema } = createSchemaFactory({
@@ -87,8 +87,10 @@ export const budgetFilterSchema = z.object({
 
 // Search params filter schema
 export const budgetFilterParamsSchema = {
-  from: parseAsIsoDate.withDefault(startOfMonth(new Date())),
-  to: parseAsIsoDate.withDefault(startOfDay(endOfMonth(new Date()))),
+  from: parseAsString.withDefault(
+    format(startOfMonth(new Date()), "yyyy-MM-dd"),
+  ),
+  to: parseAsString.withDefault(format(endOfMonth(new Date()), "yyyy-MM-dd")),
 };
 
 // Search params for sheets

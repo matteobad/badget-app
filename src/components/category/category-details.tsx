@@ -42,18 +42,6 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-interface BudgetPeriod {
-  id: string;
-  name: string;
-  startDate: string;
-  endDate: string;
-  amount: number;
-  spent: number;
-  status: "planned" | "active" | "completed" | "expired";
-  periodicity: "weekly" | "monthly" | "quarterly" | "yearly";
-  category: string;
-}
-
 export function CategoryDetails() {
   const { params } = useCategoryParams();
   const categoryId = params.categoryId!;
@@ -77,11 +65,6 @@ export function CategoryDetails() {
         });
       },
     }),
-  });
-
-  const { data: budgets, isLoading: isLoadingBudgets } = useQuery({
-    ...trpc.budget.get.queryOptions({ categoryId: categoryId }),
-    enabled: !!categoryId,
   });
 
   const defaultValue = ["general"];

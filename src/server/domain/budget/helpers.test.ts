@@ -14,7 +14,7 @@ describe("getBudgetForPeriod", () => {
       {
         id: "id",
         categoryId: "categoryId",
-        period: "week",
+        recurrence: "weekly",
         from: new Date("2025-01-01"),
         to: null,
         amount: 100,
@@ -35,7 +35,7 @@ describe("getBudgetForPeriod", () => {
       {
         id: "id",
         categoryId: "categoryId",
-        period: "month",
+        recurrence: "monthly",
         from: new Date("2025-01-01"),
         to: null,
         amount: 300,
@@ -55,7 +55,7 @@ describe("getBudgetForPeriod", () => {
       {
         id: "id",
         categoryId: "categoryId",
-        period: "custom",
+        recurrence: "custom",
         from: new Date("2025-06-01"),
         to: new Date("2025-06-11"), // 10 giorni totali
         amount: 100,
@@ -75,7 +75,7 @@ describe("getBudgetForPeriod", () => {
       {
         id: "id",
         categoryId: "categoryId",
-        period: "week",
+        recurrence: "weekly",
         from: new Date("2025-06-01"),
         to: null,
         amount: 140,
@@ -99,7 +99,7 @@ describe("diffBudgetUpdate", () => {
   const base: BudgetType = {
     id: "id",
     categoryId: "cat",
-    period: "month",
+    recurrence: "monthly",
     from: new Date("2025-01-01"),
     to: null,
     amount: 100,
@@ -116,7 +116,7 @@ describe("diffBudgetUpdate", () => {
   });
 
   it("detects only frequency change", () => {
-    const diff = diffBudgetUpdate(base, { period: "week" });
+    const diff = diffBudgetUpdate(base, { recurrence: "weekly" });
     expect(diff.frequencyChanged).toBe(true);
   });
 
@@ -159,7 +159,7 @@ describe("hasFutureBudget", () => {
   const base: BudgetType = {
     id: "id",
     categoryId: "cat",
-    period: "month",
+    recurrence: "monthly",
     from: new Date("2025-01-01"),
     to: null,
     amount: 100,

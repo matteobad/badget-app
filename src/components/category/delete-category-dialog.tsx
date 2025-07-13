@@ -21,11 +21,14 @@ export function DeleteCategoryDialog({ categoryId }: { categoryId: string }) {
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation(
-    trpc.category.deleteCategory.mutationOptions({
+    trpc.category.delete.mutationOptions({
       onSuccess: () => {
         setOpen(false);
         void queryClient.invalidateQueries({
-          queryKey: trpc.category.getFlatTree.queryKey(),
+          queryKey: trpc.category.get.queryKey(),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: trpc.category.getWithBudgets.queryKey(),
         });
       },
     }),
@@ -68,7 +71,6 @@ export function DeleteCategoryDialog({ categoryId }: { categoryId: string }) {
             onClick={() => {
               void deleteMutation.mutate({
                 id: categoryId,
-                userId: "",
               });
             }}
           >

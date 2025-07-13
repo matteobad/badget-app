@@ -29,12 +29,9 @@ export const budgetRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.userId!;
-      const { categoryFilters, budgetFilters } = input;
+      const { budgetFilters } = input;
 
-      const categories = await getCategoriesQuery({
-        ...categoryFilters,
-        userId,
-      });
+      const categories = await getCategoriesQuery({ userId });
       const budgets = await getBudgetsQuery({ ...budgetFilters, userId });
       return findBudgetWarnings(categories, budgets, budgetFilters);
     }),

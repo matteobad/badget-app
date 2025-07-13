@@ -34,14 +34,6 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
     }),
   );
 
-  // prefetch warnings
-  await queryClient.fetchQuery(
-    trpc.budget.getBudgetWarnings.queryOptions({
-      categoryFilters: {},
-      budgetFilters,
-    }),
-  );
-
   return (
     <HydrateClient>
       <ErrorBoundary fallback={<div>Something went wrong</div>}>
