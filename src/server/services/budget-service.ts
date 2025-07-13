@@ -7,6 +7,7 @@ import type {
 } from "~/shared/validators/budget.schema";
 import type z from "zod/v4";
 
+import type { getBudgetsQuery } from "../domain/budget/queries";
 import type { getCategoriesQuery } from "../domain/category/queries";
 import { db, withTransaction } from "../db";
 import {
@@ -21,7 +22,10 @@ import {
   refreshBudgetInstances,
   updateBudgetMutation,
 } from "../domain/budget/mutations";
-import { getBudgetByIdQuery, getBudgetsQuery } from "../domain/budget/queries";
+import {
+  getBudgetByIdQuery,
+  getMaterializedBudgetsQuery,
+} from "../domain/budget/queries";
 
 export type CategoryType = Awaited<
   ReturnType<typeof getCategoriesQuery>
@@ -105,7 +109,7 @@ export async function getBudgets(
   input: z.infer<typeof getBudgetsSchema>,
   userId: string,
 ) {
-  return await getBudgetsQuery({ ...input, userId });
+  return await getMaterializedBudgetsQuery({ ...input, userId });
 }
 
 export async function createBudget(

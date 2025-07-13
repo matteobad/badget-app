@@ -2,16 +2,21 @@
 
 import { db } from "~/server/db";
 import { budget_instances, budget_table } from "~/server/db/schema/budgets";
-import { and, eq, gte, isNull, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, lte, sql } from "drizzle-orm";
 
 type GetBudgetsQueryRequest = {
   userId: string;
+  categoryId?: string;
   from?: Date;
   to?: Date;
 };
 
 export const getMaterializedBudgetsQuery = (params: GetBudgetsQueryRequest) => {
   const where = [eq(budget_instances.userId, params.userId)];
+
+  if (params.categoryId) {
+    where.push(eq(budget_instances.categoryId, params.categoryId));
+  }
 
   if (params.from && params.to) {
     // Intersect if instanceTo >= from AND instanceFrom <= to
@@ -32,10 +37,11 @@ export const getMaterializedBudgetsQuery = (params: GetBudgetsQueryRequest) => {
       amount: budget_instances.amount,
       from: budget_instances.instanceFrom,
       to: budget_instances.instanceTo,
-      originalBudgetId: budget_instances.originalBudgetId,
+      // originalBudgetId: budget_instances.originalBudgetId,
     })
     .from(budget_instances)
-    .where(and(...where));
+    .where(and(...where))
+    .orderBy(desc(budget_instances.instanceFrom));
 };
 
 export const getBudgetsQuery = (params: GetBudgetsQueryRequest) => {

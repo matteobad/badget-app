@@ -22,7 +22,12 @@ export async function updateBudgetMutation(
   client: DBClient,
   value: Partial<DB_BudgetInsertType>,
 ) {
-  const [result] = await client.update(budget_table).set(value).returning();
+  const { id, userId, ...rest } = value;
+  const [result] = await client
+    .update(budget_table)
+    .set(rest)
+    .where(and(eq(budget_table.userId, userId!), eq(budget_table.id, id!)))
+    .returning();
 
   return result;
 }

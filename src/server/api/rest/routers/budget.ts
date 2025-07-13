@@ -1,15 +1,54 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { createBudget, updateBudget } from "~/server/services/budget-service";
+import {
+  createBudget,
+  getBudgets,
+  updateBudget,
+} from "~/server/services/budget-service";
 import { validateResponse } from "~/server/services/validation-service";
 import {
   budgetResponseSchema,
+  budgetsResponseSchema,
   createBudgetSchema,
+  getBudgetsSchema,
   updateBudgetSchema,
 } from "~/shared/validators/budget.schema";
 
 import type { Context } from "../init";
 
 const app = new OpenAPIHono<Context>();
+
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/",
+    summary: "List all budgets",
+    operationId: "listBudgets",
+    description: "Retrieve a list of budgets.",
+    tags: ["Budgets"],
+    request: {
+      query: getBudgetsSchema,
+    },
+    responses: {
+      200: {
+        description: "Retrieve a list of budgets.",
+        content: {
+          "application/json": {
+            schema: budgetsResponseSchema,
+          },
+        },
+      },
+    },
+    // middleware: [withRequiredScope("tags.read")],
+  }),
+  async (c) => {
+    const filters = c.req.valid("query");
+    const userId = "user_2jnV56cv1CJrRNLFsUdm6XAf7GD";
+
+    const result = await getBudgets(filters, userId);
+
+    return c.json(validateResponse({ data: result }, budgetsResponseSchema));
+  },
+);
 
 app.openapi(
   createRoute({
@@ -63,7 +102,7 @@ app.openapi(
       body: {
         content: {
           "application/json": {
-            schema: updateBudgetSchema,
+            schema: updateBudgetSchema.omit({ id: true }),
           },
         },
       },
@@ -85,7 +124,7 @@ app.openapi(
     const body = c.req.valid("json");
     const userId = "user_2jnV56cv1CJrRNLFsUdm6XAf7GD";
 
-    const result = await updateBudget(body, userId);
+    const result = await updateBudget({ ...body, id }, userId);
 
     return c.json(validateResponse(result, budgetResponseSchema));
   },

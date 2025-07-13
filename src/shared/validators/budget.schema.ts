@@ -1,18 +1,25 @@
 import { z } from "@hono/zod-openapi"; // Extended Zod instance
-import { budget_table } from "~/server/db/schema/budgets";
 import { BUDGET_RECURRENCE } from "~/server/db/schema/enum";
 import { endOfMonth, startOfDay, startOfMonth } from "date-fns";
-import { createSchemaFactory } from "drizzle-zod";
 import { parseAsBoolean, parseAsIsoDate, parseAsString } from "nuqs/server";
 
 // ref: https://orm.drizzle.team/docs/zod#factory-functions
-const { createSelectSchema } = createSchemaFactory({
-  zodInstance: z,
-});
+// const { createSelectSchema } = createSchemaFactory({
+//   zodInstance: z,
+// });
 
-export const budgetResponseSchema = createSelectSchema(budget_table).omit({
-  userId: true,
-  deletedAt: true,
+export const budgetResponseSchema = z
+  .object({
+    id: z.uuid(),
+    categoryId: z.uuid(),
+    amount: z.number().positive(),
+    from: z.iso.date().transform((data) => new Date(data)),
+    to: z.iso.date().transform((data) => new Date(data)),
+  })
+  .openapi("Budget");
+
+export const budgetsResponseSchema = z.object({
+  data: z.array(budgetResponseSchema).nullable(),
 });
 
 export const getBudgetsSchema = z.object({
