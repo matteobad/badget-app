@@ -22,7 +22,7 @@ import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useI18n } from "~/shared/locales/client";
 import { formatPerc } from "~/utils/format";
 import {
-  ChevronDownIcon,
+  DotIcon,
   InfoIcon,
   PlusIcon,
   RepeatIcon,
@@ -31,9 +31,9 @@ import {
 import { DynamicIcon } from "lucide-react/dynamic";
 import { toast } from "sonner";
 
-import type { FeatureImplementation, TreeState } from "@headless-tree/core";
+import type { TreeState } from "@headless-tree/core";
 import { CurrencyInput } from "../custom/currency-input";
-import { Tree, TreeItem, TreeItemLabel } from "../tree";
+import { Tree, TreeItem, TreeItemChevron, TreeItemLabel } from "../tree";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -42,7 +42,7 @@ import { CategoryFilters } from "./category-filters";
 
 type CategoryWithAccrual = RouterOutput["category"]["getWithBudgets"][number];
 
-const indent = 24;
+const indent = 36;
 // const cancelToken = { current: false };
 
 export function CategoryTree() {
@@ -85,9 +85,7 @@ export function CategoryTree() {
     },
     indent,
     rootItemId: "root",
-    onPrimaryAction(item) {
-      void setParams({ categoryId: item.getId() });
-    },
+
     getItemName: (item) => item.getItemData().category.name,
     isItemFolder: (item) =>
       items.some(
@@ -155,7 +153,7 @@ export function CategoryTree() {
             <SearchIcon className="size-4" aria-hidden="true" />
           </div>
         </div>
-        <Button size="icon" variant="ghost" className="size-8">
+        <Button size="icon" variant="ghost" className="ml-2 size-8">
           <InfoIcon className="size-4" />
         </Button>
         <CategoryFilters />
@@ -163,7 +161,7 @@ export function CategoryTree() {
       </div>
 
       <Tree
-        className="relative -ml-1 before:absolute before:inset-0 before:-ms-1 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]"
+        className="relative -ml-1 before:absolute before:inset-0 before:-ms-4.5 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]"
         indent={indent}
         tree={tree}
       >
@@ -174,44 +172,31 @@ export function CategoryTree() {
           } as React.CSSProperties;
 
           const isFolder = item.isFolder();
-          const isExpanded = item.isExpanded();
-          const hasChildren = item.getChildren().length > 0;
 
           return (
             <TreeItem key={item.getId()} item={item} asChild>
               <div className="flex w-full justify-between">
-                <TreeItemLabel className="group relative w-full gap-2 not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background">
-                  {/* Chevron button for expand/collapse */}
-                  {isFolder && (
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      aria-label={isExpanded ? "Collapse" : "Expand"}
-                      className={cn(
-                        "flex size-4 items-center justify-center transition-transform",
-                        isExpanded ? "rotate-0" : "-rotate-90",
-                        !hasChildren && "pointer-events-none opacity-50",
-                      )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (isExpanded) {
-                          item.collapse();
-                        } else {
-                          item.expand();
-                        }
-                      }}
-                    >
-                      <ChevronDownIcon
-                        className={cn("size-4 text-muted-foreground", {
-                          "text-muted-foreground/50":
-                            item.getChildren().length === 0,
-                        })}
-                      />
-                    </button>
-                  )}
-                  <span className="line-clamp-1 flex flex-1 items-center gap-2 text-ellipsis md:max-w-none">
+                {/* Chevron button for expand/collapse */}
+                {isFolder || item.getItemData().category.parentId === "root" ? (
+                  <TreeItemChevron />
+                ) : (
+                  <div className="relative flex size-9 shrink-0 items-center justify-center bg-background">
+                    <DotIcon className="size-4" />
+                    {/* <div className="absolute right-0 bottom-4.5 w-1/2 border-b"></div> */}
+                  </div>
+                )}
+                {/* Category color, icon and name  */}
+                <TreeItemLabel
+                  className="group relative w-full px-1.5! not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    void setParams({ categoryId: item.getId() });
+                  }}
+                >
+                  <span className="line-clamp-1 flex flex-1 items-center gap-1 text-ellipsis md:max-w-none">
                     {item.getItemData().category.parentId !== null && (
-                      <div className="flex size-4 items-center justify-center">
+                      <div className="flex size-6 shrink-0 items-center justify-center">
                         <div
                           style={mergedStyle}
                           className="size-3 rounded-xs"
@@ -219,21 +204,24 @@ export function CategoryTree() {
                       </div>
                     )}
 
-                    <DynamicIcon
-                      name={
-                        (item.getItemData().category?.icon as IconName) ??
-                        "circle-dashed"
-                      }
-                      className={cn(
-                        "pointer-events-none size-4 text-muted-foreground",
-                      )}
-                    />
-                    <span className="text-base">{item.getItemName()}</span>
+                    <div className="flex size-6 shrink-0 items-center justify-center">
+                      <DynamicIcon
+                        name={
+                          (item.getItemData().category?.icon as IconName) ??
+                          "circle-dashed"
+                        }
+                        className={cn(
+                          "pointer-events-none size-4 text-muted-foreground",
+                        )}
+                      />
+                    </div>
+                    <span className="">{item.getItemName()}</span>
                     {!item.getItemData().category.parentId && (
                       <Badge variant="tag-rounded">system</Badge>
                     )}
                   </span>
                 </TreeItemLabel>
+                {/* Category budget edits  */}
                 <div
                   className={cn(
                     "relative flex h-full min-w-[266px] items-center justify-end bg-background px-4",
@@ -242,7 +230,7 @@ export function CategoryTree() {
                 >
                   <CategoryBudget data={item.getItemData()} />
                 </div>
-
+                {/* Category budget details and recap  */}
                 <div
                   className={cn(
                     "relative flex h-full min-w-40 items-center justify-end bg-background",

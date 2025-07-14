@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
@@ -40,7 +39,7 @@ import {
 } from "date-fns";
 import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 
-type PickerMode = "month" | "week" | "quarter" | "year" | "custom";
+type PickerMode = "month" | "week" | "quarter" | "year";
 
 interface DateRange {
   from: Date;
@@ -284,11 +283,6 @@ function formatDateRange(range: DateRange | undefined, mode: PickerMode) {
       return `Q${quarter} ${format(from, "yyyy")}`;
     case "year":
       return format(from, "yyyy");
-    case "custom":
-      if (from.getTime() === to.getTime()) {
-        return format(from, "MMM d, yyyy");
-      }
-      return `${format(from, "MMM d, yyyy")} - ${format(to, "MMM d, yyyy")}`;
     default:
       return `${format(from, "MMM d, yyyy")} - ${format(to, "MMM d, yyyy")}`;
   }
@@ -347,6 +341,7 @@ export function DateRangePicker() {
   const handleNavigation = (direction: "prev" | "next") => {
     const newRange = navigateRange(dateRange, mode, direction);
     setDateRange(newRange);
+
     void setFilter({ from: newRange.from, to: newRange.to });
   };
 
@@ -367,9 +362,6 @@ export function DateRangePicker() {
         break;
       case "year":
         setDateRange({ from: startOfYear(now), to: endOfYear(now) });
-        break;
-      case "custom":
-        setDateRange({ from: now, to: now });
         break;
     }
   };
@@ -399,9 +391,6 @@ export function DateRangePicker() {
           from: startOfYear(selectedDate),
           to: endOfYear(selectedDate),
         });
-        break;
-      case "custom":
-        setDateRange({ from: selectedDate, to: selectedDate });
         break;
     }
     setOpen(false);
@@ -464,17 +453,6 @@ export function DateRangePicker() {
             currentMonth={currentMonth}
             onMonthChange={setCurrentMonth}
           />
-        );
-      case "custom":
-        return (
-          <div className="p-0">
-            <Calendar
-              mode="single"
-              selected={dateRange.from}
-              captionLayout="dropdown"
-              onSelect={(date) => date && handlePickerSelect(date)}
-            />
-          </div>
         );
       default:
         return null;
@@ -549,14 +527,8 @@ export function DateRangePicker() {
                       <SelectItem value="week">Week</SelectItem>
                       <SelectItem value="quarter">Quarter</SelectItem>
                       <SelectItem value="year">Year</SelectItem>
-                      <SelectItem value="custom">Custom Range</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {mode === "custom"
-                    ? "Select any date for custom range"
-                    : `Select a ${mode} from the options below`}
                 </div>
               </div>
               {renderPicker()}

@@ -6,6 +6,8 @@ import { cn } from "~/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
 import { Slot } from "radix-ui";
 
+import { Button } from "./ui/button";
+
 interface TreeContextValue<T = any> {
   indent: number;
   currentItem?: ItemInstance<T>;
@@ -55,14 +57,13 @@ function Tree({ indent = 20, tree, className, ...props }: TreeProps) {
   );
 }
 
-interface TreeItemProps<T = any>
-  extends React.HTMLAttributes<HTMLButtonElement> {
+interface TreeItemProps<T> extends React.HTMLAttributes<HTMLButtonElement> {
   item: ItemInstance<T>;
   indent?: number;
   asChild?: boolean;
 }
 
-function TreeItem<T = any>({
+function TreeItem<T>({
   item,
   className,
   asChild,
@@ -80,7 +81,7 @@ function TreeItem<T = any>({
   // Merge styles
   const mergedStyle = {
     ...propStyle,
-    "--tree-padding": `${item.getItemMeta().level * indent + 4}px`,
+    "--tree-padding": `${item.getItemMeta().level * indent + 0}px`,
   } as React.CSSProperties;
 
   const Comp = asChild ? Slot.Root : "button";
@@ -128,12 +129,64 @@ function TreeItem<T = any>({
   );
 }
 
-interface TreeItemLabelProps<T = any>
+interface TreeItemChevronProps<T>
   extends React.HTMLAttributes<HTMLSpanElement> {
   item?: ItemInstance<T>;
 }
 
-function TreeItemLabel<T = any>({
+function TreeItemChevron<T>({
+  item: propItem,
+  children,
+  className,
+  ...props
+}: TreeItemChevronProps<T>) {
+  const { currentItem } = useTreeContext<T>();
+  const item = propItem ?? currentItem;
+
+  if (!item) {
+    console.warn("TreeItemChevron: No item provided via props or context");
+    return null;
+  }
+
+  const isExpanded = item.isExpanded();
+  const hasChildren = item.getChildren().length > 0;
+
+  return (
+    <div className="flex size-9 shrink-0 items-center justify-center bg-background">
+      <Button
+        variant="ghost"
+        type="button"
+        tabIndex={-1}
+        aria-label={isExpanded ? "Collapse" : "Expand"}
+        className={cn(
+          "flex size-6 items-center justify-center bg-background p-0! transition-transform",
+          isExpanded ? "rotate-0" : "-rotate-90",
+          !hasChildren && "pointer-events-none opacity-50",
+        )}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (isExpanded) {
+            item.collapse();
+          } else {
+            item.expand();
+          }
+        }}
+      >
+        <ChevronDownIcon
+          className={cn("size-4 text-muted-foreground", {
+            "text-muted-foreground/50": item.getChildren().length === 0,
+          })}
+        />
+      </Button>
+    </div>
+  );
+}
+
+interface TreeItemLabelProps<T> extends React.HTMLAttributes<HTMLSpanElement> {
+  item?: ItemInstance<T>;
+}
+
+function TreeItemLabel<T>({
   item: propItem,
   children,
   className,
@@ -156,14 +209,6 @@ function TreeItemLabel<T = any>({
       )}
       {...props}
     >
-      {/* {(item.isFolder() || item.getParent()?.getId() === "root_id") && (
-        <ChevronDownIcon
-          className={cn(
-            "size-4 text-muted-foreground in-aria-[expanded=false]:-rotate-90",
-            { "text-muted-foreground/50": item.getChildren().length === 0 },
-          )}
-        />
-      )} */}
       {children ??
         (typeof item.getItemName === "function" ? item.getItemName() : null)}
     </span>
@@ -196,4 +241,4 @@ function TreeDragLine({
   );
 }
 
-export { Tree, TreeItem, TreeItemLabel, TreeDragLine };
+export { Tree, TreeItem, TreeItemChevron, TreeItemLabel, TreeDragLine };
