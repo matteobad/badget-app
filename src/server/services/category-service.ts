@@ -9,7 +9,7 @@ import type z from "zod/v4";
 
 import { db } from "../db";
 import { getMaterializedBudgetsQuery } from "../domain/budget/queries";
-import { buildCategoryAccrualTree } from "../domain/category/helpers";
+import { buildCategoryAccrual } from "../domain/category/helpers";
 import {
   createCategoryMutation,
   deleteCategoryMutation,
@@ -44,10 +44,14 @@ export async function getCategoriesWithBudgets(
   userId: string,
 ) {
   const { from, to } = filters;
+  // get all user categories
   const categories = await getCategoriesQuery({ userId });
+  // get all user materialized budgets instances for requested period
   const budgets = await getMaterializedBudgetsQuery({ from, to, userId });
-
-  return buildCategoryAccrualTree(categories, budgets, { from, to });
+  // map categories with respective budgets instances
+  // enriched data with accruals of category and childrens
+  // enriched data with budget income percentage
+  return buildCategoryAccrual(categories, budgets, { from, to });
 }
 
 export async function createCategory(

@@ -1,32 +1,18 @@
 "use client";
 
-import { useBudgetParams } from "~/hooks/use-budget-params";
 import { useCategoryParams } from "~/hooks/use-category-params";
 
-import CreateBudgetForm from "../budget/create-budget-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import CreateCategoryForm from "./create-category-form";
 
 export default function CreateCategoryDialog() {
   const { params: categoryParams, setParams: setCategoryParams } =
     useCategoryParams();
-  const { params: budgetParams, setParams: setbudgetParams } =
-    useBudgetParams();
 
-  const isOpen = !!categoryParams.createCategory || !!budgetParams.createBudget;
+  const isOpen = !!categoryParams.createCategory;
 
   const onOpenChange = () => {
     void setCategoryParams(null);
-    void setbudgetParams(null);
-  };
-
-  const CreateForm = () => {
-    return (
-      <>
-        {categoryParams.createCategory && <CreateCategoryForm />}
-        {budgetParams.createBudget && <CreateBudgetForm />}
-      </>
-    );
   };
 
   return (
@@ -37,7 +23,7 @@ export default function CreateCategoryDialog() {
             <DialogTitle>Nuova categoria</DialogTitle>
           </DialogHeader>
 
-          <CreateForm />
+          <CreateCategoryForm />
         </div>
       </DialogContent>
     </Dialog>

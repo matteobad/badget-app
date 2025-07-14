@@ -1,59 +1,24 @@
-import type { CategoryType } from "~/server/db/schema/enum";
-import type { TreeNode, WithIdAndParentId } from "~/shared/types";
+import type {
+  BudgetRecurrenceType,
+  CategoryType,
+} from "~/server/db/schema/enum";
 import { CATEGORY_TYPE } from "~/server/db/schema/enum";
 import { differenceInCalendarDays, max, min } from "date-fns";
 
-export const buildCategoryTree = <T extends WithIdAndParentId>(data: T[]) => {
-  const lookup = new Map<string, TreeNode<T>>();
-  const roots: TreeNode<T>[] = [];
-
-  for (const item of data) {
-    const node = lookup.get(item.id) ?? [item, []];
-    node[0] = item; // aggiorna con l'oggetto completo
-    lookup.set(item.id, node);
-
-    if (item.parentId === null) {
-      roots.push(node);
-    } else {
-      const parent = lookup.get(item.parentId) ?? [
-        { ...({ id: item.parentId, parentId: null } as T) },
-        [],
-      ];
-      lookup.set(item.parentId, parent);
-      parent[1].push(node);
-    }
-  }
-
-  // TODO: move to method for single responsability and test
-  const typeOrder: Record<CategoryType, number> = {
-    [CATEGORY_TYPE.INCOME]: 0,
-    [CATEGORY_TYPE.EXPENSE]: 1,
-    [CATEGORY_TYPE.SAVINGS]: 2,
-    [CATEGORY_TYPE.INVESTMENTS]: 3,
-    [CATEGORY_TYPE.TRANSFER]: 4,
-  };
-
-  function getTypeOrder(node: TreeNode<T>) {
-    // @ts-expect-error: type property expected on T
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-    return typeOrder[node[0]?.type] ?? 99;
-  }
-
-  roots.sort((a, b) => getTypeOrder(a) - getTypeOrder(b));
-  return roots;
-};
-
 export type BudgetInstance = {
+  originalBudgetId: string;
   categoryId: string;
   amount: number;
   from: Date;
   to: Date;
+  recurrence: BudgetRecurrenceType | null;
 };
 
 export type Category = {
   id: string;
   parentId: string | null;
   name: string;
+  color: string | null;
   icon: string | null;
   type: CategoryType;
 };
@@ -68,7 +33,7 @@ export type CategoryWithAccrual = {
   budgetInstances: BudgetInstance[];
   accrualAmount: number;
   childrenAccrualAmount: number;
-  incomePercentage: number; // Optional to be filled later
+  incomePercentage?: number; // Optional to be filled later
 };
 
 // Computes prorated amount of budget in period
@@ -86,7 +51,7 @@ function computeAccrual(instance: BudgetInstance, period: Period): number {
 }
 
 // Builds tree and accumulates accrual amounts recursively
-export function buildCategoryAccrualTree(
+export function buildCategoryAccrual(
   categories: Category[],
   budgetInstances: BudgetInstance[],
   period: Period,
@@ -156,9 +121,76 @@ export function buildCategoryAccrualTree(
   );
 
   // Second pass: fill incomePercentage
-  return nodes.map((n) => ({
+  const enrichedNodes = nodes.map((n) => ({
     ...n,
-    incomePercentage:
-      totalIncome > 0 ? (n.accrualAmount / totalIncome) * 100 : 0,
+    incomePercentage: totalIncome > 0 ? n.accrualAmount / totalIncome : 0,
   }));
+
+  // Third pass: fill root category and not allocated budget
+  const tree = enrichedNodes.map((node) => {
+    return node.category.parentId
+      ? node
+      : {
+          ...node,
+          category: {
+            ...node.category,
+            parentId: "root",
+          },
+        };
+  });
+
+  const roots = tree.filter(
+    (n) =>
+      n.category.parentId === "root" &&
+      n.category.type !== CATEGORY_TYPE.INCOME,
+  );
+  const notAllocated =
+    totalIncome -
+    roots.reduce(
+      (tot, value) =>
+        (tot += Math.max(value.accrualAmount, value.childrenAccrualAmount)),
+      0,
+    );
+
+  // TODO: add root category for tree view render and remaining
+
+  // Sort order for category types
+  const CATEGORY_SORT_ORDER = [
+    CATEGORY_TYPE.INCOME,
+    CATEGORY_TYPE.EXPENSE,
+    CATEGORY_TYPE.SAVINGS,
+    CATEGORY_TYPE.INVESTMENTS,
+    CATEGORY_TYPE.TRANSFER,
+  ];
+
+  function getCategorySortIndex(type: CategoryType) {
+    const idx = CATEGORY_SORT_ORDER.indexOf(type);
+    return idx === -1 ? CATEGORY_SORT_ORDER.length : idx;
+  }
+
+  // Sort the tree before returning
+  const sortedTree = [
+    ...tree,
+    {
+      category: {
+        id: "root",
+        name: "root",
+        parentId: null,
+        color: null,
+        icon: null,
+        type: CATEGORY_TYPE.TRANSFER,
+      },
+      budgetInstances: [],
+      accrualAmount: notAllocated,
+      childrenAccrualAmount: notAllocated,
+      incomePercentage:
+        totalIncome > 0 ? (notAllocated / totalIncome) * 100 : 0,
+    },
+  ].sort(
+    (a, b) =>
+      getCategorySortIndex(a.category.type) -
+      getCategorySortIndex(b.category.type),
+  );
+
+  return sortedTree;
 }

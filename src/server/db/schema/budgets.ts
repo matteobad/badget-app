@@ -57,7 +57,7 @@ export const budget_instances = pgMaterializedView(
   "badget_budget_instances_mview",
   {
     id: uuid().notNull(),
-    originalBudgetId: uuid(),
+    originalBudgetId: uuid().notNull(),
     categoryId: uuid().notNull(),
     amount: integer().notNull(),
     instanceFrom: date().$type<Date>().notNull(),

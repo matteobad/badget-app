@@ -37,9 +37,14 @@ export const getMaterializedBudgetsQuery = (params: GetBudgetsQueryRequest) => {
       amount: budget_instances.amount,
       from: budget_instances.instanceFrom,
       to: budget_instances.instanceTo,
-      // originalBudgetId: budget_instances.originalBudgetId,
+      originalBudgetId: budget_instances.originalBudgetId,
+      recurrence: budget_table.recurrence,
     })
     .from(budget_instances)
+    .leftJoin(
+      budget_table,
+      eq(budget_instances.originalBudgetId, budget_table.id),
+    )
     .where(and(...where))
     .orderBy(desc(budget_instances.instanceFrom));
 };

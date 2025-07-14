@@ -24,8 +24,20 @@ export const budgetsResponseSchema = z.object({
 
 export const getBudgetsSchema = z.object({
   categoryId: z.uuid().optional(),
-  from: z.iso.date().transform((data) => new Date(data)),
-  to: z.iso.date().transform((data) => new Date(data)),
+  from: z.iso
+    .date()
+    .transform((data) => new Date(data))
+    .openapi({
+      example: "2025-01-01",
+      description: "Start date of the budget period in ISO 8601 format.",
+    }),
+  to: z.iso
+    .date()
+    .transform((data) => new Date(data))
+    .openapi({
+      example: "2025-01-31",
+      description: "End date of the budget period in ISO 8601 format.",
+    }),
 });
 
 export const createBudgetSchema = z.object({

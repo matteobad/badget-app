@@ -112,7 +112,7 @@ export function CategoryTree() {
       selectedItems: params.categoryId ? [params.categoryId] : [],
     },
     indent,
-    rootItemId: "root_id",
+    rootItemId: "root",
     getItemName: (item) => item.getItemData().category.name,
     isItemFolder: (item) =>
       items.some(
@@ -357,7 +357,7 @@ function CategoryTotal({ data }: { data: CategoryWithAccrual }) {
 function CategoryPercentage({ data }: { data: CategoryWithAccrual }) {
   return (
     <div className="flex w-[50px] items-center justify-end gap-1 font-mono text-neutral-300">
-      <span className="text-xs">{formatPerc(data.incomePercentage)}</span>
+      <span className="text-xs">{formatPerc(data.incomePercentage ?? 0)}</span>
     </div>
   );
 }
