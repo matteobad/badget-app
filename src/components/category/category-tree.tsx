@@ -21,18 +21,12 @@ import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useI18n } from "~/shared/locales/client";
 import { formatPerc } from "~/utils/format";
-import {
-  DotIcon,
-  InfoIcon,
-  PlusIcon,
-  RepeatIcon,
-  SearchIcon,
-} from "lucide-react";
+import { DotIcon, InfoIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 import { toast } from "sonner";
 
 import type { TreeState } from "@headless-tree/core";
-import { CurrencyInput } from "../custom/currency-input";
+import BudgetInput from "../budget/forms/budget-input";
 import { Tree, TreeItem, TreeItemChevron, TreeItemLabel } from "../tree";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -274,45 +268,16 @@ function CategoryBudget({ data }: { data: CategoryWithAccrual }) {
 
   return (
     <div className="group relative flex w-[280px] items-center justify-start gap-2 font-mono text-muted-foreground">
-      <Badge
-        variant="outline"
-        className="absolute top-2 left-2 size-5 rounded font-normal text-muted-foreground capitalize not-hover:text-muted-foreground/50"
-      >
-        {budget.recurrence?.charAt(0)}
-      </Badge>
-      <Badge
-        variant="outline"
-        className="absolute top-2 left-9 size-5 rounded p-0 text-muted-foreground capitalize not-hover:text-muted-foreground/50"
-      >
-        <RepeatIcon className="size-4" />
-      </Badge>
-      <CurrencyInput
-        decimalScale={0}
-        className="h-9 w-50 border pr-8 text-right text-sm font-normal transition-all not-group-hover:border-background not-group-hover:shadow-none"
-        value={amount}
-        onValueChange={(value) => setAmount(value.floatValue)}
-        onBlur={() => {
-          updateBudgetMutation.mutate({
-            id: "TODO_ID",
-            categoryId: budget.categoryId,
-            amount: budget.amount,
-            from: "from",
-            to: "to",
-            recurrence: "monthly",
-          });
-        }}
+      <BudgetInput
+        key={budget.originalBudgetId}
+        value={budget.amount}
+        recurrence={budget.recurrence}
+        isRecurring={!!budget.recurrence}
+        onValueChange={console.log}
+        onOverride={console.log}
+        onPermanentChange={console.log}
+        className="w-full"
       />
-      <span className="absolute top-[9px] right-12 text-sm">€</span>
-
-      {data.budgetInstances.length > 1 && (
-        <Badge
-          // key={budget.id}
-          variant="tag-rounded"
-          className="aspect-square size-6 rounded-full text-xs"
-        >
-          {data.budgetInstances.length}
-        </Badge>
-      )}
     </div>
   );
 }
