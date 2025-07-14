@@ -21,7 +21,13 @@ import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useI18n } from "~/shared/locales/client";
 import { formatPerc } from "~/utils/format";
-import { InfoIcon, PlusIcon, RepeatIcon, SearchIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  InfoIcon,
+  PlusIcon,
+  RepeatIcon,
+  SearchIcon,
+} from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 import { toast } from "sonner";
 
@@ -62,40 +68,6 @@ export function CategoryTree() {
   //   }),
   // );
 
-  const doubleClickExpandFeature: FeatureImplementation = {
-    itemInstance: {
-      getProps: ({ tree, item, prev }) => ({
-        ...prev?.(),
-        onDoubleClick: (_e: React.MouseEvent) => {
-          item.primaryAction();
-
-          if (!item.isFolder()) {
-            return;
-          }
-
-          if (item.isExpanded()) {
-            item.collapse();
-          } else {
-            item.expand();
-          }
-        },
-        onClick: (e: React.MouseEvent) => {
-          if (e.shiftKey) {
-            item.selectUpTo(e.ctrlKey || e.metaKey);
-          } else if (e.ctrlKey || e.metaKey) {
-            item.toggleSelect();
-          } else {
-            tree.setSelectedItems([item.getItemMeta().itemId]);
-          }
-
-          item.setFocused();
-          console.log(e.target);
-          // void setParams({ categoryId: item.getItemMeta().itemId });
-        },
-      }),
-    },
-  };
-
   // Store the initial expanded items to reset when search is cleared
   const initialExpandedItems = Object.values(items).map(
     (item) => item.category.id,
@@ -113,6 +85,9 @@ export function CategoryTree() {
     },
     indent,
     rootItemId: "root",
+    onPrimaryAction(item) {
+      void setParams({ categoryId: item.getId() });
+    },
     getItemName: (item) => item.getItemData().category.name,
     isItemFolder: (item) =>
       items.some(
@@ -131,7 +106,6 @@ export function CategoryTree() {
       selectionFeature,
       searchFeature,
       expandAllFeature,
-      doubleClickExpandFeature,
     ],
   });
 
@@ -193,24 +167,48 @@ export function CategoryTree() {
         indent={indent}
         tree={tree}
       >
-        {/* <AssistiveTreeDescription tree={tree} /> */}
         {tree.getItems().map((item) => {
           // Merge styles
           const mergedStyle = {
             backgroundColor: `${item.getItemData().category.color}`,
           } as React.CSSProperties;
 
-          const {} = item;
+          const isFolder = item.isFolder();
+          const isExpanded = item.isExpanded();
+          const hasChildren = item.getChildren().length > 0;
 
           return (
             <TreeItem key={item.getId()} item={item} asChild>
               <div className="flex w-full justify-between">
-                <TreeItemLabel
-                  onClick={() => {
-                    void setParams({ categoryId: item.getItemMeta().itemId });
-                  }}
-                  className="group relative w-full gap-2 not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background"
-                >
+                <TreeItemLabel className="group relative w-full gap-2 not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background">
+                  {/* Chevron button for expand/collapse */}
+                  {isFolder && (
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      aria-label={isExpanded ? "Collapse" : "Expand"}
+                      className={cn(
+                        "flex size-4 items-center justify-center transition-transform",
+                        isExpanded ? "rotate-0" : "-rotate-90",
+                        !hasChildren && "pointer-events-none opacity-50",
+                      )}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isExpanded) {
+                          item.collapse();
+                        } else {
+                          item.expand();
+                        }
+                      }}
+                    >
+                      <ChevronDownIcon
+                        className={cn("size-4 text-muted-foreground", {
+                          "text-muted-foreground/50":
+                            item.getChildren().length === 0,
+                        })}
+                      />
+                    </button>
+                  )}
                   <span className="line-clamp-1 flex flex-1 items-center gap-2 text-ellipsis md:max-w-none">
                     {item.getItemData().category.parentId !== null && (
                       <div className="flex size-4 items-center justify-center">
