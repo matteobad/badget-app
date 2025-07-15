@@ -54,7 +54,7 @@ export function CategorySearchFilter() {
 
       <Input
         placeholder="Search categories..."
-        className="w-full pr-8 pl-9 sm:w-[350px]"
+        className="w-full pr-8 pl-9 sm:w-[250px]"
         value={prompt}
         onChange={handleSearch}
         autoComplete="off"

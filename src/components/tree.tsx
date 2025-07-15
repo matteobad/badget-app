@@ -3,10 +3,8 @@
 import * as React from "react";
 import { type ItemInstance } from "@headless-tree/core";
 import { cn } from "~/lib/utils";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, DotIcon } from "lucide-react";
 import { Slot } from "radix-ui";
-
-import { Button } from "./ui/button";
 
 interface TreeContextValue<T = any> {
   indent: number;
@@ -129,59 +127,6 @@ function TreeItem<T>({
   );
 }
 
-interface TreeItemChevronProps<T>
-  extends React.HTMLAttributes<HTMLSpanElement> {
-  item?: ItemInstance<T>;
-}
-
-function TreeItemChevron<T>({
-  item: propItem,
-  children,
-  className,
-  ...props
-}: TreeItemChevronProps<T>) {
-  const { currentItem } = useTreeContext<T>();
-  const item = propItem ?? currentItem;
-
-  if (!item) {
-    console.warn("TreeItemChevron: No item provided via props or context");
-    return null;
-  }
-
-  const isExpanded = item.isExpanded();
-  const hasChildren = item.getChildren().length > 0;
-
-  return (
-    <div className="flex size-10 shrink-0 items-center justify-center bg-background">
-      <Button
-        variant="ghost"
-        type="button"
-        tabIndex={-1}
-        aria-label={isExpanded ? "Collapse" : "Expand"}
-        className={cn(
-          "flex size-8 items-center justify-center bg-background p-0! transition-transform",
-          isExpanded ? "rotate-0" : "-rotate-90",
-          !hasChildren && "pointer-events-none opacity-50",
-        )}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (isExpanded) {
-            item.collapse();
-          } else {
-            item.expand();
-          }
-        }}
-      >
-        <ChevronDownIcon
-          className={cn("size-4 text-muted-foreground", {
-            "text-muted-foreground/50": item.getChildren().length === 0,
-          })}
-        />
-      </Button>
-    </div>
-  );
-}
-
 interface TreeItemLabelProps<T> extends React.HTMLAttributes<HTMLSpanElement> {
   item?: ItemInstance<T>;
 }
@@ -204,11 +149,26 @@ function TreeItemLabel<T>({
     <span
       data-slot="tree-item-label"
       className={cn(
-        "flex h-10 items-center gap-1 rounded-sm bg-background px-2 py-1.5 text-base transition-colors not-in-data-[folder=true]:ps-7 hover:bg-accent in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 in-data-[drag-target=true]:bg-accent in-data-[search-match=true]:bg-blue-50! in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "flex h-10 items-center gap-3 rounded-md bg-background px-2 py-1.5 text-base transition-colors not-in-data-[folder=true]:ps-7 hover:bg-accent in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 in-data-[drag-target=true]:bg-accent in-data-[search-match=true]:bg-blue-50! in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className,
       )}
       {...props}
     >
+      {item.isFolder() || item.getParent()?.getId() === "root" ? (
+        <div className="flex size-6 shrink-0 items-center justify-center">
+          <ChevronDownIcon
+            className={cn(
+              "size-5 shrink-0 text-muted-foreground in-aria-[expanded=false]:-rotate-90",
+              { "text-muted-foreground/50": item.getChildren().length === 0 },
+            )}
+          />
+        </div>
+      ) : (
+        <div className="flex size-6 shrink-0 items-center justify-center">
+          <DotIcon className="size-5 text-muted-foreground" />
+          {/* <div className="absolute right-0 bottom-4.5 w-1/2 border-b"></div> */}
+        </div>
+      )}
       {children ??
         (typeof item.getItemName === "function" ? item.getItemName() : null)}
     </span>
@@ -241,4 +201,4 @@ function TreeDragLine({
   );
 }
 
-export { Tree, TreeItem, TreeItemChevron, TreeItemLabel, TreeDragLine };
+export { Tree, TreeItem, TreeItemLabel, TreeDragLine };

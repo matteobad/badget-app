@@ -1,8 +1,8 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import type { RouterInput, RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { IconName } from "lucide-react/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   expandAllFeature,
   hotkeysCoreFeature,
@@ -17,19 +17,19 @@ import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
 import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
+import { BUDGET_RECURRENCE } from "~/server/db/schema/enum";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { formatPerc } from "~/utils/format";
-import { DotIcon, PlusIcon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 import { toast } from "sonner";
 
-import type { TreeState } from "@headless-tree/core";
+import type { FeatureImplementation, TreeState } from "@headless-tree/core";
 import BudgetInput from "../budget/forms/budget-input";
-import { Tree, TreeItem, TreeItemChevron, TreeItemLabel } from "../tree";
+import { CreateCategoryBudget } from "../budget/forms/create-category-budget";
+import { UpdateCategoryBudget } from "../budget/forms/update-category-budget";
+import { Tree, TreeItem, TreeItemLabel } from "../tree";
 import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 
 type CategoryWithAccrual = RouterOutput["category"]["getWithBudgets"][number];
 
@@ -65,6 +65,50 @@ export function CategoryTree() {
     {},
   );
 
+  let clickTimeout: NodeJS.Timeout | null = null;
+
+  const customClickBehavior: FeatureImplementation = {
+    itemInstance: {
+      getProps: ({ tree, item, prev }) => ({
+        ...prev?.(),
+        onDoubleClick: (_e: MouseEvent) => {
+          if (clickTimeout) {
+            clearTimeout(clickTimeout);
+            clickTimeout = null;
+          }
+          item.primaryAction();
+
+          if (!item.isFolder()) {
+            return;
+          }
+
+          if (item.isExpanded()) {
+            item.collapse();
+          } else {
+            item.expand();
+          }
+        },
+        onClick: (e: MouseEvent) => {
+          if (clickTimeout) clearTimeout(clickTimeout);
+
+          clickTimeout = setTimeout(() => {
+            if (e.shiftKey) {
+              item.selectUpTo(e.ctrlKey || e.metaKey);
+            } else if (e.ctrlKey || e.metaKey) {
+              item.toggleSelect();
+            } else {
+              tree.setSelectedItems([item.getItemMeta().itemId]);
+            }
+
+            item.setFocused();
+            void setParams({ categoryId: item.getId() });
+            clickTimeout = null;
+          }, 250); // Ritardo che distingue un click da un double click
+        },
+      }),
+    },
+  };
+
   const tree = useTree<CategoryWithAccrual>({
     state,
     setState,
@@ -93,6 +137,7 @@ export function CategoryTree() {
       selectionFeature,
       searchFeature,
       expandAllFeature,
+      customClickBehavior,
     ],
   });
 
@@ -115,30 +160,11 @@ export function CategoryTree() {
               backgroundColor: `${item.getItemData().category.color}`,
             } as React.CSSProperties;
 
-            const isFolder = item.isFolder();
-
             return (
               <TreeItem key={item.getId()} item={item} asChild>
-                <div className="flex w-full justify-between">
-                  {/* Chevron button for expand/collapse */}
-                  {isFolder ||
-                  item.getItemData().category.parentId === "root" ? (
-                    <TreeItemChevron />
-                  ) : (
-                    <div className="relative flex size-10 shrink-0 items-center justify-center bg-background">
-                      <DotIcon className="size-5" />
-                      {/* <div className="absolute right-0 bottom-4.5 w-1/2 border-b"></div> */}
-                    </div>
-                  )}
+                <div className="flex w-full items-center justify-between">
                   {/* Category color, icon and name  */}
-                  <TreeItemLabel
-                    className="group relative w-full px-1.5! not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      void setParams({ categoryId: item.getId() });
-                    }}
-                  >
+                  <TreeItemLabel className="group relative w-full not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background">
                     <span className="line-clamp-1 flex flex-1 items-center gap-2 text-ellipsis md:max-w-none">
                       {item.getItemData().category.parentId !== null && (
                         <div className="flex size-6 shrink-0 items-center justify-center">
@@ -168,15 +194,27 @@ export function CategoryTree() {
                   </TreeItemLabel>
                   {/* Category budget edits  */}
                   <div
+                    onClick={(e) => e.stopPropagation()}
+                    onDoubleClick={(e) => e.stopPropagation()}
                     className={cn(
                       "relative flex h-full min-w-[266px] items-center justify-end bg-background px-4",
                       "before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background",
                     )}
                   >
-                    <CategoryBudget data={item.getItemData()} />
+                    {item.getItemData().budgetInstances.length === 0 ? (
+                      <CreateCategoryBudget
+                        categoryId={item.getItemData().category.id}
+                      />
+                    ) : (
+                      <UpdateCategoryBudget
+                        budget={item.getItemData().budgetInstances[0]!}
+                      />
+                    )}
                   </div>
                   {/* Category budget details and recap  */}
                   <div
+                    onClick={(e) => e.stopPropagation()}
+                    onDoubleClick={(e) => e.stopPropagation()}
                     className={cn(
                       "relative flex h-full min-w-40 items-center justify-end bg-background",
                       "before:absolute before:inset-x-0 before:-z-10 before:h-12 before:bg-background",
@@ -192,44 +230,6 @@ export function CategoryTree() {
           })}
         </Tree>
       </div>
-    </div>
-  );
-}
-
-function CategoryBudget({ data }: { data: CategoryWithAccrual }) {
-  const [amount, setAmount] = useState(data.budgetInstances[0]?.amount);
-
-  const trpc = useTRPC();
-  const updateBudgetMutation = useMutation(
-    trpc.budget.update.mutationOptions({
-      onError: (error) => {
-        toast.error(error.message);
-      },
-    }),
-  );
-
-  const budget = data.budgetInstances[0];
-
-  if (!budget) {
-    return (
-      <Button size="icon" variant="ghost" className="mr-18 size-8">
-        <PlusIcon className="text-muted-foreground" />
-      </Button>
-    );
-  }
-
-  return (
-    <div className="group relative flex w-[240px] shrink-0 items-center justify-start gap-2 font-mono text-muted-foreground">
-      <BudgetInput
-        key={budget.originalBudgetId}
-        value={budget.amount}
-        recurrence={budget.recurrence}
-        isRecurring={!!budget.recurrence}
-        onValueChange={console.log}
-        onOverride={console.log}
-        onPermanentChange={console.log}
-        className="w-full"
-      />
     </div>
   );
 }

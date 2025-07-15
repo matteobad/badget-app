@@ -14,12 +14,13 @@ import {
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Calendar, Check, Clock, RotateCcw, Settings } from "lucide-react";
+import { Calendar, Clock, RotateCcw, Settings } from "lucide-react";
 
 interface BudgetInputProps {
   value: number;
   recurrence: BudgetRecurrenceType | null;
   isRecurring: boolean;
+  defaultAction: "once" | "always";
   onValueChange?: (value: number) => void;
   onOverride?: (value: number) => void;
   onPermanentChange?: (value: number) => void;
@@ -30,6 +31,7 @@ export default function BudgetInput({
   value,
   recurrence,
   isRecurring,
+  defaultAction,
   onValueChange,
   onOverride,
   onPermanentChange,
@@ -109,43 +111,49 @@ export default function BudgetInput({
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       >
         {/* Left Icons - Fixed position, fade out on focus */}
-        <div className="pointer-events-none absolute left-3 flex items-center gap-2">
-          <motion.div
-            className="flex h-6 w-6 items-center justify-center"
-            animate={{
-              opacity: isFocused ? 0 : 1,
-              scale: isFocused ? 0.9 : 1,
-            }}
-            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-          >
-            <Badge
-              variant="tag-rounded"
-              className="size-full text-xs font-medium text-muted-foreground"
+        {value !== 0 && (
+          <div className="pointer-events-none absolute left-3 flex items-center gap-2">
+            <motion.div
+              className="flex h-6 w-6 items-center justify-center"
+              animate={{
+                opacity: isFocused ? 0 : 1,
+                scale: isFocused ? 0.9 : 1,
+              }}
+              transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
             >
-              {recurrence?.charAt(0) ?? "M"}
-            </Badge>
-          </motion.div>
+              <Badge
+                variant="tag-rounded"
+                className="size-full text-xs font-medium text-muted-foreground"
+              >
+                {recurrence?.charAt(0) ?? "M"}
+              </Badge>
+            </motion.div>
 
-          <motion.div
-            className="flex h-6 w-6 items-center justify-center"
-            animate={{
-              opacity: isFocused ? 0 : 1,
-              scale: isFocused ? 0.9 : 1,
-            }}
-            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1], delay: 0.05 }}
-          >
-            <Badge
-              variant="tag-rounded"
-              className="size-full p-0 text-xs font-medium text-muted-foreground"
+            <motion.div
+              className="flex h-6 w-6 items-center justify-center"
+              animate={{
+                opacity: isFocused ? 0 : 1,
+                scale: isFocused ? 0.9 : 1,
+              }}
+              transition={{
+                duration: 0.25,
+                ease: [0.4, 0, 0.2, 1],
+                delay: 0.05,
+              }}
             >
-              {isRecurring ? (
-                <RotateCcw className="h-3 w-3 text-muted-foreground" />
-              ) : (
-                <Calendar className="h-3 w-3 text-muted-foreground" />
-              )}
-            </Badge>
-          </motion.div>
-        </div>
+              <Badge
+                variant="tag-rounded"
+                className="size-full p-0 text-xs font-medium text-muted-foreground"
+              >
+                {isRecurring ? (
+                  <RotateCcw className="h-3 w-3 text-muted-foreground" />
+                ) : (
+                  <Calendar className="h-3 w-3 text-muted-foreground" />
+                )}
+              </Badge>
+            </motion.div>
+          </div>
+        )}
 
         {/* Input Field with smooth text transition */}
         <div className="relative flex-1">
@@ -163,7 +171,13 @@ export default function BudgetInput({
             >
               <Input
                 ref={inputRef}
-                value={isFocused ? inputValue : `${value.toLocaleString()} €`}
+                value={
+                  isFocused
+                    ? inputValue
+                    : value !== 0
+                      ? `${value.toLocaleString()} €`
+                      : undefined
+                }
                 onChange={(e) => setInputValue(e.target.value)}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
@@ -211,9 +225,9 @@ export default function BudgetInput({
                 >
                   <Button
                     size="sm"
-                    variant="ghost"
+                    variant={defaultAction === "always" ? "default" : "ghost"}
                     onClick={handlePermanentChange}
-                    className="h-7 px-2 text-xs hover:bg-muted/80"
+                    className="h-7 px-2 text-xs"
                     title="Change budget from now on"
                   >
                     <RotateCcw className="mr-1 h-3 w-3" />
@@ -233,7 +247,7 @@ export default function BudgetInput({
                 >
                   <Button
                     size="sm"
-                    variant="default"
+                    variant={defaultAction === "once" ? "default" : "ghost"}
                     onClick={handleOverride}
                     className="h-7 px-2 text-xs"
                     title="Override for this period only"
