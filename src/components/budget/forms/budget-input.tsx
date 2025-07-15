@@ -3,6 +3,7 @@
 import type { BudgetRecurrenceType } from "~/server/db/schema/enum";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -110,31 +111,39 @@ export default function BudgetInput({
         {/* Left Icons - Fixed position, fade out on focus */}
         <div className="pointer-events-none absolute left-3 flex items-center gap-2">
           <motion.div
-            className="flex h-6 w-6 items-center justify-center border border-muted-foreground/30 bg-muted/30"
+            className="flex h-6 w-6 items-center justify-center"
             animate={{
               opacity: isFocused ? 0 : 1,
               scale: isFocused ? 0.9 : 1,
             }}
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
           >
-            <span className="text-xs font-medium text-muted-foreground">
-              {recurrence}
-            </span>
+            <Badge
+              variant="tag-rounded"
+              className="size-full text-xs font-medium text-muted-foreground"
+            >
+              {recurrence?.charAt(0) ?? "M"}
+            </Badge>
           </motion.div>
 
           <motion.div
-            className="flex h-6 w-6 items-center justify-center border border-muted-foreground/30 bg-muted/30"
+            className="flex h-6 w-6 items-center justify-center"
             animate={{
               opacity: isFocused ? 0 : 1,
               scale: isFocused ? 0.9 : 1,
             }}
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1], delay: 0.05 }}
           >
-            {isRecurring ? (
-              <RotateCcw className="h-3 w-3 text-muted-foreground" />
-            ) : (
-              <Calendar className="h-3 w-3 text-muted-foreground" />
-            )}
+            <Badge
+              variant="tag-rounded"
+              className="size-full p-0 text-xs font-medium text-muted-foreground"
+            >
+              {isRecurring ? (
+                <RotateCcw className="h-3 w-3 text-muted-foreground" />
+              ) : (
+                <Calendar className="h-3 w-3 text-muted-foreground" />
+              )}
+            </Badge>
           </motion.div>
         </div>
 
@@ -162,7 +171,7 @@ export default function BudgetInput({
                 onDoubleClick={handleDoubleClick}
                 className={cn(
                   "border-none bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
-                  "h-8 px-1 transition-all duration-300 ease-out",
+                  "h-9.5 px-1 transition-all duration-300 ease-out",
                   isFocused ? "text-left" : "text-right",
                 )}
                 placeholder="Enter amount"

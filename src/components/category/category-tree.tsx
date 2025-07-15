@@ -102,15 +102,11 @@ export function CategoryTree() {
   });
 
   return (
-    <div className="flex flex-col gap-2 p-4">
-      <div className="flex justify-between">
-        <CategoryActions />
-      </div>
-
+    <div className="flex flex-col gap-3 p-4">
       <div className="flex items-center text-sm text-muted-foreground">
-        <div className="relative flex flex-1 items-center gap-2">
+        <div className="relative flex flex-1 items-center gap-4">
           <Input
-            className="peer h-8 ps-9"
+            className="peer ps-9"
             {...{
               ...tree.getSearchInputElementProps(),
               onChange: (e) => {
@@ -146,16 +142,14 @@ export function CategoryTree() {
           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
             <SearchIcon className="size-4" aria-hidden="true" />
           </div>
+          <CategoryActions />
         </div>
-        <Button size="icon" variant="ghost" className="ml-2 size-8">
-          <InfoIcon className="size-4" />
-        </Button>
         <CategoryFilters />
         <span className="w-40 text-right">{t("category.budget")}</span>
       </div>
 
       <Tree
-        className="relative -ml-1 before:absolute before:inset-0 before:-ms-4.5 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]"
+        className="relative -ml-1 before:absolute before:inset-0 before:-ms-4 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]"
         indent={indent}
         tree={tree}
       >
@@ -174,8 +168,8 @@ export function CategoryTree() {
                 {isFolder || item.getItemData().category.parentId === "root" ? (
                   <TreeItemChevron />
                 ) : (
-                  <div className="relative flex size-9 shrink-0 items-center justify-center bg-background">
-                    <DotIcon className="size-4" />
+                  <div className="relative flex size-10 shrink-0 items-center justify-center bg-background">
+                    <DotIcon className="size-5" />
                     {/* <div className="absolute right-0 bottom-4.5 w-1/2 border-b"></div> */}
                   </div>
                 )}
@@ -188,12 +182,12 @@ export function CategoryTree() {
                     void setParams({ categoryId: item.getId() });
                   }}
                 >
-                  <span className="line-clamp-1 flex flex-1 items-center gap-1 text-ellipsis md:max-w-none">
+                  <span className="line-clamp-1 flex flex-1 items-center gap-2 text-ellipsis md:max-w-none">
                     {item.getItemData().category.parentId !== null && (
                       <div className="flex size-6 shrink-0 items-center justify-center">
                         <div
                           style={mergedStyle}
-                          className="size-3 rounded-xs"
+                          className="size-4 rounded-xs"
                         ></div>
                       </div>
                     )}
@@ -205,7 +199,7 @@ export function CategoryTree() {
                           "circle-dashed"
                         }
                         className={cn(
-                          "pointer-events-none size-4 text-muted-foreground",
+                          "pointer-events-none size-5 text-muted-foreground",
                         )}
                       />
                     </div>
@@ -228,8 +222,8 @@ export function CategoryTree() {
                 <div
                   className={cn(
                     "relative flex h-full min-w-40 items-center justify-end bg-background",
-                    "before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background",
-                    "after:absolute after:left-0 after:z-10 after:h-10 after:w-[1px] after:bg-muted",
+                    "before:absolute before:inset-x-0 before:-z-10 before:h-12 before:bg-background",
+                    "after:absolute after:left-0 after:z-10 after:h-12 after:w-[1px] after:bg-muted",
                   )}
                 >
                   <CategoryTotal data={item.getItemData()} />
@@ -267,7 +261,7 @@ function CategoryBudget({ data }: { data: CategoryWithAccrual }) {
   }
 
   return (
-    <div className="group relative flex w-[280px] items-center justify-start gap-2 font-mono text-muted-foreground">
+    <div className="group relative flex w-[240px] shrink-0 items-center justify-start gap-2 font-mono text-muted-foreground">
       <BudgetInput
         key={budget.originalBudgetId}
         value={budget.amount}

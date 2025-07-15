@@ -152,14 +152,14 @@ function TreeItemChevron<T>({
   const hasChildren = item.getChildren().length > 0;
 
   return (
-    <div className="flex size-9 shrink-0 items-center justify-center bg-background">
+    <div className="flex size-10 shrink-0 items-center justify-center bg-background">
       <Button
         variant="ghost"
         type="button"
         tabIndex={-1}
         aria-label={isExpanded ? "Collapse" : "Expand"}
         className={cn(
-          "flex size-6 items-center justify-center bg-background p-0! transition-transform",
+          "flex size-8 items-center justify-center bg-background p-0! transition-transform",
           isExpanded ? "rotate-0" : "-rotate-90",
           !hasChildren && "pointer-events-none opacity-50",
         )}
@@ -204,7 +204,7 @@ function TreeItemLabel<T>({
     <span
       data-slot="tree-item-label"
       className={cn(
-        "flex items-center gap-1 rounded-sm bg-background px-2 py-1.5 text-sm transition-colors not-in-data-[folder=true]:ps-7 hover:bg-accent in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 in-data-[drag-target=true]:bg-accent in-data-[search-match=true]:bg-blue-50! in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "flex h-10 items-center gap-1 rounded-sm bg-background px-2 py-1.5 text-base transition-colors not-in-data-[folder=true]:ps-7 hover:bg-accent in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 in-data-[drag-target=true]:bg-accent in-data-[search-match=true]:bg-blue-50! in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className,
       )}
       {...props}

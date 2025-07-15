@@ -242,7 +242,6 @@ function WeekPicker({
         </Button>
       </div>
       <div className="space-y-2">
-        <div className="mb-2 text-sm text-muted-foreground">Select a week:</div>
         {weeks.map((weekStart, index) => {
           const weekEnd = endOfWeek(weekStart);
           const isSelected = isSameWeek(selectedDate, weekStart);
@@ -336,13 +335,18 @@ export function DateRangePicker() {
 
   React.useEffect(() => {
     setValue(formatDateRange(dateRange, mode));
-  }, [dateRange, mode]);
+    const from = format(dateRange.from, "yyyy-MM-dd");
+    const to = format(dateRange.to, "yyyy-MM-dd");
+    void setFilter({ from, to });
+  }, [dateRange, mode, setFilter]);
 
   const handleNavigation = (direction: "prev" | "next") => {
     const newRange = navigateRange(dateRange, mode, direction);
     setDateRange(newRange);
 
-    void setFilter({ from: newRange.from, to: newRange.to });
+    const from = format(newRange.from, "yyyy-MM-dd");
+    const to = format(newRange.to, "yyyy-MM-dd");
+    void setFilter({ from, to });
   };
 
   const handleModeChange = (newMode: PickerMode) => {
@@ -352,7 +356,6 @@ export function DateRangePicker() {
     switch (newMode) {
       case "month":
         setDateRange({ from: startOfMonth(now), to: endOfMonth(now) });
-        void setFilter({ from: startOfMonth(now), to: endOfMonth(now) });
         break;
       case "week":
         setDateRange({ from: startOfWeek(now), to: endOfWeek(now) });
@@ -469,7 +472,7 @@ export function DateRangePicker() {
           id="date"
           value={value}
           placeholder="July, current week, or tomorrow"
-          className="h-8 bg-background pr-16 text-sm"
+          className="w-[240px] bg-background pr-16 text-sm"
           onChange={(e) => console.log(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
@@ -483,20 +486,20 @@ export function DateRangePicker() {
           <Button
             variant="ghost"
             size="sm"
-            className="size-6 p-0"
+            className="size-7 p-0"
             onClick={() => handleNavigation("prev")}
           >
-            <ChevronLeft className="size-3" />
+            <ChevronLeft className="size-4" />
             <span className="sr-only">Previous range</span>
           </Button>
 
           <Button
             variant="ghost"
             size="sm"
-            className="size-6 p-0"
+            className="size-7 p-0"
             onClick={() => handleNavigation("next")}
           >
-            <ChevronRight className="size-3" />
+            <ChevronRight className="size-4" />
             <span className="sr-only">Next range</span>
           </Button>
 
@@ -506,18 +509,21 @@ export function DateRangePicker() {
                 id="date-picker"
                 variant="ghost"
                 size="sm"
-                className="size-6 p-0"
+                className="size-7 p-0"
               >
-                <CalendarIcon className="size-3" />
+                <CalendarIcon className="size-4" />
                 <span className="sr-only">Select date</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto overflow-hidden p-0" align="end">
+            <PopoverContent
+              className="w-[240px] overflow-hidden p-0"
+              align="end"
+              alignOffset={-8}
+              sideOffset={8}
+            >
               <div className="border-b bg-muted/30 p-3">
-                <div className="mb-2 flex items-center justify-between">
-                  <div className="text-sm font-medium">
-                    {mode.charAt(0).toUpperCase() + mode.slice(1)} Picker
-                  </div>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-medium">Picker</div>
                   <Select value={mode} onValueChange={handleModeChange}>
                     <SelectTrigger className="h-7 w-32 text-xs">
                       <SelectValue />
