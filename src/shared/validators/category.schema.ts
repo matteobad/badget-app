@@ -59,6 +59,7 @@ export const categoryFilterSchema = z
 
 // Search params filter schema
 export const categoryFilterParamsSchema = {
+  q: parseAsString,
   name: parseAsString,
   slug: parseAsString,
   type: parseAsStringLiteral(Object.values(CATEGORY_TYPE)),

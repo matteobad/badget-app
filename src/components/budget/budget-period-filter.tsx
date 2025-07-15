@@ -312,7 +312,7 @@ function navigateRange(
   }
 }
 
-export function DateRangePicker() {
+export function BudgetPeriodFilter() {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
   const [mode, setMode] = React.useState<PickerMode>("month");
