@@ -194,3 +194,78 @@ export function buildCategoryAccrual(
 
   return sortedTree;
 }
+
+/**
+ * Input for an optimistic budget update.
+ */
+export interface OptimisticBudgetUpdateInput {
+  id: string; // originalBudgetId
+  amount: number;
+  categoryId: string;
+  recurrence: BudgetInstance["recurrence"];
+  from: Date;
+  to: Date;
+}
+
+/**
+ * Returns a new array of BudgetInstances with the updated instance applied.
+ */
+function updateBudgetInstances(
+  instances: BudgetInstance[],
+  update: OptimisticBudgetUpdateInput,
+): BudgetInstance[] {
+  let found = false;
+  const updated = instances.map((bi) => {
+    if (bi.originalBudgetId === update.id) {
+      found = true;
+      return {
+        ...bi,
+        amount: update.amount,
+        recurrence: update.recurrence,
+        from: update.from,
+        to: update.to,
+      };
+    }
+    return bi;
+  });
+  // If not found, add as new
+  if (!found) {
+    updated.push({
+      originalBudgetId: update.id,
+      categoryId: update.categoryId,
+      amount: update.amount,
+      recurrence: update.recurrence,
+      from: update.from,
+      to: update.to,
+    });
+  }
+  return updated;
+}
+
+/**
+ * Given the current category tree and a budget update, returns a new tree with all aggregates updated.
+ * This is a pure function suitable for optimistic updates.
+ */
+export function optimisticallyUpdateCategoryWithBudgets(
+  tree: CategoryWithAccrual[],
+  update: OptimisticBudgetUpdateInput,
+  period: Period,
+): CategoryWithAccrual[] {
+  // 1. Flatten categories and budgetInstances from the tree
+  const categories: Category[] = tree.map((n) => n.category);
+  let budgetInstances: BudgetInstance[] = [];
+  for (const n of tree)
+    budgetInstances = budgetInstances.concat(n.budgetInstances);
+
+  // 2. Update the relevant budget instance
+  budgetInstances = updateBudgetInstances(budgetInstances, update);
+
+  // 3. Rebuild the tree using the same logic as buildCategoryAccrual
+  //    (imported from server/domain/category/helpers)
+  //    This ensures all aggregates are recalculated correctly.
+  //    (If you want to avoid importing, you can inline the logic here.)
+  //
+  //    Note: If the tree contains the special 'root' node, filter it out before rebuilding.
+  const filteredCategories = categories.filter((c) => c.id !== "root");
+  return buildCategoryAccrual(filteredCategories, budgetInstances, period);
+}

@@ -52,9 +52,24 @@ export const getMaterializedBudgetsQuery = (params: GetBudgetsQueryRequest) => {
 export const getBudgetsQuery = (params: GetBudgetsQueryRequest) => {
   const where = [eq(budget_table.userId, params.userId)];
 
-  if (params?.from && params.to) {
+  if (params.categoryId) {
+    where.push(eq(budget_table.categoryId, params.categoryId));
+  }
+
+  if (params.from && params.to) {
+    // Only include budgets whose validity (from lower(validity) to COALESCE(recurrence_end, 'infinity')) overlaps with [params.from, params.to]
     where.push(
-      sql`${budget_table.validity} && tstzrange(${params.from.toISOString()}, ${params.to.toISOString()}, '[]')`,
+      sql`tstzrange(lower(${budget_table.validity}), COALESCE(${budget_table.recurrenceEnd}, 'infinity'), '[]') && tstzrange(${params.from.toISOString()}, ${params.to.toISOString()}, '[]')`,
+    );
+  } else if (params.from) {
+    // Overlaps with [params.from, infinity]
+    where.push(
+      sql`COALESCE(${budget_table.recurrenceEnd}, 'infinity') >= ${params.from.toISOString()}`,
+    );
+  } else if (params.to) {
+    // Overlaps with [-infinity, params.to]
+    where.push(
+      sql`lower(${budget_table.validity}) <= ${params.to.toISOString()}`,
     );
   }
 
@@ -66,6 +81,7 @@ export const getBudgetsQuery = (params: GetBudgetsQueryRequest) => {
       categoryId: budget_table.categoryId,
       amount: budget_table.amount,
       recurrence: budget_table.recurrence,
+      recurrenceEnd: budget_table.recurrenceEnd,
       from: sql<Date>`lower(${budget_table.validity})`
         .mapWith({
           mapFromDriverValue: (value: string) => {
@@ -73,10 +89,10 @@ export const getBudgetsQuery = (params: GetBudgetsQueryRequest) => {
           },
         })
         .as("from"),
-      to: sql<Date | null>`upper(${budget_table.validity})`
+      to: sql<Date>`upper(${budget_table.validity})`
         .mapWith({
-          mapFromDriverValue: (value: string | null) => {
-            return value ? new Date(value) : null;
+          mapFromDriverValue: (value: string) => {
+            return new Date(value);
           },
         })
         .as("to"),

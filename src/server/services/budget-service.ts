@@ -6,8 +6,8 @@ import type {
   updateBudgetSchema,
 } from "~/shared/validators/budget.schema";
 import type z from "zod/v4";
+import { addDays, format } from "date-fns";
 
-import type { getBudgetsQuery } from "../domain/budget/queries";
 import type { getCategoriesQuery } from "../domain/category/queries";
 import { db, withTransaction } from "../db";
 import {
@@ -24,6 +24,7 @@ import {
 } from "../domain/budget/mutations";
 import {
   getBudgetByIdQuery,
+  getBudgetsQuery,
   getMaterializedBudgetsQuery,
 } from "../domain/budget/queries";
 
@@ -109,6 +110,13 @@ export async function getBudgets(
   input: z.infer<typeof getBudgetsSchema>,
   userId: string,
 ) {
+  return await getBudgetsQuery({ ...input, userId });
+}
+
+export async function getBudgetInstances(
+  input: z.infer<typeof getBudgetsSchema>,
+  userId: string,
+) {
   return await getMaterializedBudgetsQuery({ ...input, userId });
 }
 
@@ -131,60 +139,70 @@ export async function updateBudget(
   params: z.infer<typeof updateBudgetSchema>,
   userId: string,
 ) {
-  const { id, categoryId, from, to, amount } = params;
+  const { id, from, to, amount } = params;
 
   // currently active budget
   const existingBudget = await getBudgetByIdQuery({ id });
   if (!existingBudget) throw new Error("Budget not found");
+  console.log(`found budget ${id} for category: ${existingBudget.categoryId}`);
 
   // planned category budgets
-  const plannedBudgets = await getBudgets({ from, to, categoryId }, userId);
-  console.log(`found ${plannedBudgets.length} planned budgets on category`);
+  const categoryId = existingBudget.categoryId;
+  const next = addDays(existingBudget.recurrenceEnd ?? existingBudget.to, 1);
+  const planned = await getBudgetsQuery({ from: next, categoryId, userId });
+  console.log(`found ${planned.length} planned budgets on category`);
 
   // prepare data for updating budgets
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { from: _, to: __, ...oldBudget } = existingBudget;
-  const currentEnd = oldBudget.recurrenceEnd ?? params.to;
-  const prevEnd = getPrevCycleEnd(currentEnd, oldBudget.recurrence);
+  const prevEnd = getPrevCycleEnd(params.to, existingBudget.recurrence);
   const validity = buildValidity(from, to);
 
   return await withTransaction(async (tx) => {
     // close current budget on previous cycle
-    await updateBudgetMutation(tx, {
-      ...oldBudget,
+    const updated = await updateBudgetMutation(tx, {
+      id,
+      userId,
       recurrenceEnd: prevEnd,
     });
 
+    if (!updated?.id) return tx.rollback();
+    console.log(`close ${updated.id} on ${format(prevEnd, "yyyy-MM-dd")}`);
+
     // open new budget from current cycle
     const newBudget = await createBudgetMutation(tx, {
-      ...oldBudget,
+      amount: existingBudget.amount,
+      recurrence: existingBudget.recurrence,
+      recurrenceEnd: existingBudget.recurrenceEnd,
       validity,
-      id: undefined,
-      recurrenceEnd: null,
+      categoryId,
       userId,
     });
 
     if (!newBudget?.id) return tx.rollback();
-    const { id: overrideForBudgetId } = newBudget;
+    console.log(`open new budget ${newBudget.id}`);
 
     // create override budget on current cycle
     const overrideBudget = await createBudgetMutation(tx, {
+      overrideForBudgetId: newBudget.id,
       categoryId,
       validity,
+      recurrenceEnd: to,
       amount,
-      overrideForBudgetId,
       userId,
     });
 
+    if (!overrideBudget?.id) return tx.rollback();
+    console.log(`override budget ${newBudget.id} with ${overrideBudget.id}`);
+
     // delete planned category budget to avoid overlaps
-    for (const { id } of plannedBudgets) {
+    for (const { id } of planned) {
       await deleteBudgetMutation(tx, { id, userId });
+      console.log(`deleted planned budget ${id}`);
     }
 
     // refresh materialized view
     await refreshBudgetInstances(tx);
 
-    return overrideBudget;
+    return await getBudgetByIdQuery({ id: overrideBudget.id });
   });
 }
 

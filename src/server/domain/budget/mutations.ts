@@ -25,7 +25,10 @@ export async function updateBudgetMutation(
   const { id, userId, ...rest } = value;
   const [result] = await client
     .update(budget_table)
-    .set(rest)
+    .set({
+      amount: rest.amount,
+      recurrenceEnd: rest.recurrenceEnd,
+    })
     .where(and(eq(budget_table.userId, userId!), eq(budget_table.id, id!)))
     .returning();
 
@@ -49,6 +52,7 @@ export async function refreshBudgetInstances(tx: TXType) {
   // Usa CONCURRENTLY solo se hai un indice unico sulla view
   try {
     await tx.refreshMaterializedView(budget_instances);
+    console.info(`refreshed badget_budget_instances_mview`);
   } catch (err) {
     console.error(err);
     return tx.rollback();

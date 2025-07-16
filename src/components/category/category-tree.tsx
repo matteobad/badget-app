@@ -1,6 +1,6 @@
 "use client";
 
-import type { RouterInput, RouterOutput } from "~/server/api/trpc/routers/_app";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { IconName } from "lucide-react/dynamic";
 import { useEffect, useState } from "react";
 import {
@@ -11,23 +11,19 @@ import {
   syncDataLoaderFeature,
 } from "@headless-tree/core";
 import { useTree } from "@headless-tree/react";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { getBudgetTotalColor } from "~/features/category/utils";
 import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
 import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
-import { BUDGET_RECURRENCE } from "~/server/db/schema/enum";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { formatPerc } from "~/utils/format";
 import { DynamicIcon } from "lucide-react/dynamic";
-import { toast } from "sonner";
 
 import type { FeatureImplementation, TreeState } from "@headless-tree/core";
-import BudgetInput from "../budget/forms/budget-input";
-import { CreateCategoryBudget } from "../budget/forms/create-category-budget";
-import { UpdateCategoryBudget } from "../budget/forms/update-category-budget";
+import { CategoryBudget } from "../budget/forms/category-budget";
 import { Tree, TreeItem, TreeItemLabel } from "../tree";
 import { Badge } from "../ui/badge";
 
@@ -118,7 +114,6 @@ export function CategoryTree() {
     },
     indent,
     rootItemId: "root",
-
     getItemName: (item) => item.getItemData().category.name,
     isItemFolder: (item) =>
       items.some(
@@ -201,15 +196,9 @@ export function CategoryTree() {
                       "before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background",
                     )}
                   >
-                    {item.getItemData().budgetInstances.length === 0 ? (
-                      <CreateCategoryBudget
-                        categoryId={item.getItemData().category.id}
-                      />
-                    ) : (
-                      <UpdateCategoryBudget
-                        budget={item.getItemData().budgetInstances[0]!}
-                      />
-                    )}
+                    <CategoryBudget
+                      categoryId={item.getItemData().category.id}
+                    />
                   </div>
                   {/* Category budget details and recap  */}
                   <div
@@ -218,7 +207,7 @@ export function CategoryTree() {
                     className={cn(
                       "relative flex h-full min-w-40 items-center justify-end bg-background",
                       "before:absolute before:inset-x-0 before:-z-10 before:h-12 before:bg-background",
-                      "after:absolute after:left-0 after:z-10 after:h-12 after:w-[1px] after:bg-muted",
+                      "after:absolute after:left-0 after:z-10 after:h-18 after:w-[1px] after:bg-muted",
                     )}
                   >
                     <CategoryTotal data={item.getItemData()} />

@@ -13,8 +13,10 @@ export const budgetResponseSchema = z
     id: z.uuid(),
     categoryId: z.uuid(),
     amount: z.number().positive(),
-    from: z.iso.date().transform((data) => new Date(data)),
-    to: z.iso.date().transform((data) => new Date(data)),
+    from: z.date(),
+    to: z.date(),
+    recurrence: z.enum(BUDGET_RECURRENCE).nullable(),
+    recurrenceEnd: z.date().nullable(),
   })
   .openapi("Budget");
 
@@ -26,14 +28,16 @@ export const getBudgetsSchema = z.object({
   categoryId: z.uuid().optional(),
   from: z.iso
     .date()
-    .transform((data) => new Date(data))
+    .optional()
+    .transform((data) => (data ? new Date(data) : undefined))
     .openapi({
       example: "2025-01-01",
       description: "Start date of the budget period in ISO 8601 format.",
     }),
   to: z.iso
     .date()
-    .transform((data) => new Date(data))
+    .optional()
+    .transform((data) => (data ? new Date(data) : undefined))
     .openapi({
       example: "2025-01-31",
       description: "End date of the budget period in ISO 8601 format.",
@@ -64,7 +68,7 @@ export const createBudgetSchema = z.object({
       example: "2026-01-31",
       description: "End date of the budget period in ISO 8601 format.",
     }),
-  recurrence: z.enum(BUDGET_RECURRENCE).nullable().openapi({
+  recurrence: z.enum(BUDGET_RECURRENCE).optional().openapi({
     example: "monthly",
     description:
       "Recurrence pattern for the budget (e.g., monthly, yearly). Null for one-time budgets.",
@@ -85,7 +89,7 @@ export const updateBudgetSchema = z.object({
     example: "f1a05084-73f6-4d62-b83f-d3a02fcbe617", // transportation
     description: "The UUID of the category this budget belongs to.",
   }),
-  ...createBudgetSchema.shape,
+  ...createBudgetSchema.omit({ categoryId: true }).shape,
 });
 
 export const deleteBudgetSchema = z.object({ id: z.cuid2() });
