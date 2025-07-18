@@ -90,8 +90,9 @@ export default function CreateCategoryForm({
                 <FormItem className="absolute top-9 left-3 grid gap-3 pr-2.5">
                   <FormControl>
                     <ColorPicker
+                      className=""
                       value={field.value as ColorKey}
-                      onChange={field.onChange}
+                      onSelect={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />

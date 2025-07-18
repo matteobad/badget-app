@@ -12,18 +12,14 @@ import {
 } from "@headless-tree/core";
 import { useTree } from "@headless-tree/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { getBudgetTotalColor } from "~/features/category/utils";
 import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
 import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
-import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { formatPerc } from "~/utils/format";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { FeatureImplementation, TreeState } from "@headless-tree/core";
-import { CategoryBudget } from "../budget/forms/category-budget";
 import { Tree, TreeItem, TreeItemLabel } from "../tree";
 import { Badge } from "../ui/badge";
 
@@ -188,7 +184,7 @@ export function CategoryTree() {
                     </span>
                   </TreeItemLabel>
                   {/* Category budget edits  */}
-                  <div
+                  {/* <div
                     onClick={(e) => e.stopPropagation()}
                     onDoubleClick={(e) => e.stopPropagation()}
                     className={cn(
@@ -199,9 +195,9 @@ export function CategoryTree() {
                     <CategoryBudget
                       categoryId={item.getItemData().category.id}
                     />
-                  </div>
+                  </div> */}
                   {/* Category budget details and recap  */}
-                  <div
+                  {/* <div
                     onClick={(e) => e.stopPropagation()}
                     onDoubleClick={(e) => e.stopPropagation()}
                     className={cn(
@@ -212,7 +208,7 @@ export function CategoryTree() {
                   >
                     <CategoryTotal data={item.getItemData()} />
                     <CategoryPercentage data={item.getItemData()} />
-                  </div>
+                  </div> */}
                 </div>
               </TreeItem>
             );
@@ -223,33 +219,33 @@ export function CategoryTree() {
   );
 }
 
-function CategoryTotal({ data }: { data: CategoryWithAccrual }) {
-  const styles = getBudgetTotalColor(
-    data.category.type,
-    !data.category.parentId,
-  );
-  return (
-    <div
-      className={cn(
-        "flex w-[120px] items-center justify-end gap-1 font-mono text-sm text-muted-foreground",
-        styles,
-      )}
-    >
-      <span>
-        {formatAmount({
-          amount: data.accrualAmount ?? data.childrenAccrualAmount,
-          currency: "eur",
-          maximumFractionDigits: 0,
-        })}
-      </span>
-    </div>
-  );
-}
+// function CategoryTotal({ data }: { data: CategoryWithAccrual }) {
+//   const styles = getBudgetTotalColor(
+//     data.category.type,
+//     !data.category.parentId,
+//   );
+//   return (
+//     <div
+//       className={cn(
+//         "flex w-[120px] items-center justify-end gap-1 font-mono text-sm text-muted-foreground",
+//         styles,
+//       )}
+//     >
+//       <span>
+//         {formatAmount({
+//           amount: data.accrualAmount ?? data.childrenAccrualAmount,
+//           currency: "eur",
+//           maximumFractionDigits: 0,
+//         })}
+//       </span>
+//     </div>
+//   );
+// }
 
-function CategoryPercentage({ data }: { data: CategoryWithAccrual }) {
-  return (
-    <div className="flex w-[50px] items-center justify-end gap-1 font-mono text-neutral-300">
-      <span className="text-xs">{formatPerc(data.incomePercentage ?? 0)}</span>
-    </div>
-  );
-}
+// function CategoryPercentage({ data }: { data: CategoryWithAccrual }) {
+//   return (
+//     <div className="flex w-[50px] items-center justify-end gap-1 font-mono text-neutral-300">
+//       <span className="text-xs">{formatPerc(data.incomePercentage ?? 0)}</span>
+//     </div>
+//   );
+// }

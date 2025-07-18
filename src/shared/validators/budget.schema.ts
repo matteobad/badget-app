@@ -28,16 +28,14 @@ export const getBudgetsSchema = z.object({
   categoryId: z.uuid().optional(),
   from: z.iso
     .date()
-    .optional()
-    .transform((data) => (data ? new Date(data) : undefined))
+    .transform((data) => new Date(data))
     .openapi({
       example: "2025-01-01",
       description: "Start date of the budget period in ISO 8601 format.",
     }),
   to: z.iso
     .date()
-    .optional()
-    .transform((data) => (data ? new Date(data) : undefined))
+    .transform((data) => new Date(data))
     .openapi({
       example: "2025-01-31",
       description: "End date of the budget period in ISO 8601 format.",
@@ -68,13 +66,14 @@ export const createBudgetSchema = z.object({
       example: "2026-01-31",
       description: "End date of the budget period in ISO 8601 format.",
     }),
-  recurrence: z.enum(BUDGET_RECURRENCE).optional().openapi({
+  recurrence: z.enum(BUDGET_RECURRENCE).nullable().optional().openapi({
     example: "monthly",
     description:
       "Recurrence pattern for the budget (e.g., monthly, yearly). Null for one-time budgets.",
   }),
   recurrenceEnd: z.iso
     .date()
+    .nullable()
     .optional()
     .transform((data) => (data ? new Date(data) : undefined))
     .openapi({
@@ -84,13 +83,72 @@ export const createBudgetSchema = z.object({
     }),
 });
 
-export const updateBudgetSchema = z.object({
-  id: z.uuid().openapi({
-    example: "f1a05084-73f6-4d62-b83f-d3a02fcbe617", // transportation
-    description: "The UUID of the category this budget belongs to.",
-  }),
-  ...createBudgetSchema.omit({ categoryId: true }).shape,
-});
+export const updateBudgetSchema = createBudgetSchema
+  .omit({ categoryId: true })
+  .extend({
+    id: z.uuid().openapi({
+      example: "f1a05084-73f6-4d62-b83f-d3a02fcbe617", // transportation
+      description: "The UUID of the category this budget belongs to.",
+    }),
+    isOverride: z.boolean().default(true),
+  })
+  .check(({ value, issues }) => {
+    const now = new Date();
+
+    // 1. When recurrence is defined, recurrenceEnd must be defined
+    if (value.recurrence && !value.recurrenceEnd)
+      issues.push({
+        code: "custom",
+        input: value.recurrenceEnd,
+        message: "recurrenceEnd is required when recurrence is set.",
+      });
+
+    // 2. Recurrence type should match with from-to distance
+    if (value.recurrence && value.from && value.to) {
+      const from =
+        value.from instanceof Date ? value.from : new Date(value.from);
+      const to = value.to instanceof Date ? value.to : new Date(value.to);
+      const diffDays = Math.round(
+        (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      const recurrenceMap: Record<string, (days: number) => boolean> = {
+        monthly: (days) => days >= 27 && days <= 31,
+        yearly: (days) => days >= 364 && days <= 366,
+        weekly: (days) => days >= 6 && days <= 7,
+      };
+      const checkRecurrence = recurrenceMap[value.recurrence];
+      if (checkRecurrence && !checkRecurrence(diffDays)) {
+        issues.push({
+          code: "custom",
+          input: [value.from, value.to],
+          message: `The period between 'from' and 'to' does not match the expected duration for '${value.recurrence}' recurrence.`,
+        });
+      }
+    }
+
+    // 3. Cannot update closed budget
+    // A budget is closed if:
+    //   - recurrenceEnd is in the past (if recurrence)
+    //   - or, if no recurrence, to is in the past
+    if (value.recurrence) {
+      if (value.recurrenceEnd && new Date(value.recurrenceEnd) < now) {
+        issues.push({
+          code: "custom",
+          input: value.recurrenceEnd,
+          message:
+            "Cannot update a closed budget (recurrenceEnd is in the past).",
+        });
+      }
+    } else {
+      if (value.to && new Date(value.to) < now) {
+        issues.push({
+          code: "custom",
+          input: value.to,
+          message: "Cannot update a closed budget (to date is in the past).",
+        });
+      }
+    }
+  });
 
 export const deleteBudgetSchema = z.object({ id: z.cuid2() });
 

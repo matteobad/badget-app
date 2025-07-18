@@ -96,8 +96,8 @@ export function CategoryBudget({ categoryId }: { categoryId: string }) {
               {
                 id: variables.id,
                 amount: variables.amount,
-                categoryId: variables.categoryId,
-                recurrence: variables.recurrence,
+                categoryId: categoryId,
+                recurrence: variables.recurrence ?? null,
                 from: new Date(variables.from),
                 to: new Date(variables.to),
               },
@@ -133,6 +133,16 @@ export function CategoryBudget({ categoryId }: { categoryId: string }) {
     }),
   );
 
+  const updateBudget = (id: string, amount: number, isOverride: boolean) => {
+    updateBudgetMutation.mutate({
+      id,
+      amount,
+      isOverride,
+      from: budgetFilters.from,
+      to: budgetFilters.to,
+    });
+  };
+
   if (isLoading || !data?.[0]) {
     return null;
   }
@@ -146,24 +156,10 @@ export function CategoryBudget({ categoryId }: { categoryId: string }) {
         isRecurring={data[0].recurrence !== null}
         defaultAction="once"
         onOverride={(value) => {
-          updateBudgetMutation.mutate({
-            id: data[0]!.id,
-            amount: value,
-            categoryId: data[0]!.categoryId,
-            recurrence: data[0]!.recurrence, // TODO: recurrence of filter period
-            from: budgetFilters.from,
-            to: budgetFilters.to,
-          });
+          updateBudget(data[0]!.id, value, true);
         }}
         onPermanentChange={(value) => {
-          updateBudgetMutation.mutate({
-            id: data[0]!.id,
-            amount: value,
-            categoryId: data[0]!.categoryId,
-            recurrence: data[0]!.recurrence, // TODO: recurrence of filter period
-            from: budgetFilters.from,
-            to: budgetFilters.to,
-          });
+          updateBudget(data[0]!.id, value, false);
         }}
         className="w-full"
       />

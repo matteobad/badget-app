@@ -139,7 +139,7 @@ export async function updateBudget(
   params: z.infer<typeof updateBudgetSchema>,
   userId: string,
 ) {
-  const { id, from, to, amount } = params;
+  const { id, isOverride, ...input } = params;
 
   // currently active budget
   const existingBudget = await getBudgetByIdQuery({ id });
@@ -154,7 +154,7 @@ export async function updateBudget(
 
   // prepare data for updating budgets
   const prevEnd = getPrevCycleEnd(params.to, existingBudget.recurrence);
-  const validity = buildValidity(from, to);
+  const validity = buildValidity(input.from, input.to);
 
   return await withTransaction(async (tx) => {
     // close current budget on previous cycle
@@ -169,29 +169,29 @@ export async function updateBudget(
 
     // open new budget from current cycle
     const newBudget = await createBudgetMutation(tx, {
-      amount: existingBudget.amount,
-      recurrence: existingBudget.recurrence,
-      recurrenceEnd: existingBudget.recurrenceEnd,
+      ...(isOverride ? existingBudget : input),
       validity,
       categoryId,
       userId,
+      id: undefined, // necessary to override existingBudget
     });
 
     if (!newBudget?.id) return tx.rollback();
     console.log(`open new budget ${newBudget.id}`);
 
-    // create override budget on current cycle
-    const overrideBudget = await createBudgetMutation(tx, {
-      overrideForBudgetId: newBudget.id,
-      categoryId,
-      validity,
-      recurrenceEnd: to,
-      amount,
-      userId,
-    });
+    if (isOverride) {
+      // create override budget on current cycle
+      const overrideBudget = await createBudgetMutation(tx, {
+        overrideForBudgetId: newBudget.id,
+        amount: input.amount,
+        validity,
+        categoryId,
+        userId,
+      });
 
-    if (!overrideBudget?.id) return tx.rollback();
-    console.log(`override budget ${newBudget.id} with ${overrideBudget.id}`);
+      if (!overrideBudget?.id) return tx.rollback();
+      console.log(`override budget ${newBudget.id} with ${overrideBudget.id}`);
+    }
 
     // delete planned category budget to avoid overlaps
     for (const { id } of planned) {
@@ -202,7 +202,7 @@ export async function updateBudget(
     // refresh materialized view
     await refreshBudgetInstances(tx);
 
-    return await getBudgetByIdQuery({ id: overrideBudget.id });
+    return await getBudgetByIdQuery({ id: updated.id });
   });
 }
 

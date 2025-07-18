@@ -78,10 +78,10 @@ export const importTransactionSchema = z.object({
     date: z.string({ message: "Missing date mapping" }),
     description: z.string({ message: "Missing description mapping" }),
     amount: z.string({ message: "Missing amount mapping" }),
-    currency: z.string().default("EUR"),
+    currency: z.string(),
   }),
   extraFields: z.object({ accountId: z.string() }),
-  settings: z.object({ inverted: z.boolean().default(false) }),
+  settings: z.object({ inverted: z.boolean() }),
 });
 
 // Query filter schema

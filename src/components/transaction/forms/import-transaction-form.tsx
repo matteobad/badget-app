@@ -72,6 +72,7 @@ export default function ImportTransactionForm({
   const form = useForm<z.infer<typeof importTransactionSchema>>({
     resolver: zodResolver(importTransactionSchema),
     defaultValues: {
+      fieldMapping: { currency: "EUR" },
       settings: { inverted: false },
     },
   });
