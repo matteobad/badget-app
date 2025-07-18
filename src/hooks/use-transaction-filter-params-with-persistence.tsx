@@ -16,11 +16,13 @@ export function useTransactionFilterParamsWithPersistence(): FilterHookReturn<Tr
     storageKey: "transaction-filters",
     emptyState: EMPTY_FILTER_STATE,
     currentFilters: filter,
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setFilters: setFilter,
   });
 
   return {
     filter,
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setFilter,
     hasFilters,
     clearAllFilters,

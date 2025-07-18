@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Type for transaction filters based on the schema
 export type TransactionFilters = {
   q?: string | null;
@@ -97,6 +98,7 @@ export function createEmptyFilterState<T extends Record<string, any>>(
   keys: (keyof T)[],
 ): T {
   return keys.reduce((acc, key) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (acc as any)[key] = null;
     return acc;
   }, {} as T);

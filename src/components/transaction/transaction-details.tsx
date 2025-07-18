@@ -102,7 +102,8 @@ export function TransactionDetails() {
         // Optimistically update details view
         queryClient.setQueryData(
           trpc.transaction.getById.queryKey({ id: transactionId }),
-          (old: any) => {
+          // @ts-expect-error update payload can have undefined fields
+          (old) => {
             if (variables.categorySlug) {
               const categories = queryClient.getQueryData(
                 trpc.category.get.queryKey(),
@@ -135,9 +136,9 @@ export function TransactionDetails() {
 
             return {
               ...old,
-              pages: old.pages.map((page: any) => ({
+              pages: old.pages.map((page) => ({
                 ...page,
-                data: page.data.map((transaction: any) =>
+                data: page.data.map((transaction) =>
                   transaction.id === transactionId
                     ? {
                         ...transaction,
@@ -350,7 +351,7 @@ export function TransactionDetails() {
                   const uploaded = JSON.parse(
                     serverData,
                   ) as DB_AttachmentType[];
-                  const attachmentIds = uploaded.map((_) => _.id);
+                  // const attachmentIds = uploaded.map((_) => _.id);
                   setAttachments(uploaded);
                   toast.info("Attachment caricati");
                 }}

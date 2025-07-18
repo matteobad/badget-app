@@ -321,7 +321,7 @@ export function BudgetPeriodFilter() {
     return { from: startOfMonth(now), to: endOfMonth(now) };
   });
 
-  const { filter, setFilter } = useBudgetFilterParams();
+  const { setFilter } = useBudgetFilterParams();
 
   // State for picker navigation
   const [currentYear, setCurrentYear] = React.useState(() =>

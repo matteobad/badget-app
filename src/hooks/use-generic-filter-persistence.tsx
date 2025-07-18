@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useEffect } from "react";
 import {
   cleanFilters,
@@ -19,7 +17,7 @@ type UseFilterPersistenceOptions<T> = {
  * Generic hook for persisting any kind of filters to localStorage
  * Can be reused for transactions, invoices, customers, etc.
  */
-export function useGenericFilterPersistence<T extends Record<string, any>>({
+export function useGenericFilterPersistence<T extends Record<string, unknown>>({
   storageKey,
   emptyState,
   currentFilters,

@@ -1,6 +1,5 @@
 import { type PropsWithChildren } from "react";
 import { AppSidebar } from "~/components/app-sidebar";
-import { CategoryDetails } from "~/components/category/category-details";
 import CreateCategoryDialog from "~/components/category/create-category-dialog";
 import CategorySheet from "~/components/category/sheets/category-sheet";
 import { FeedbackDialog } from "~/components/feedback-dialog";

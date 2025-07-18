@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
@@ -19,6 +17,7 @@ export function useLocalStorage<T>(
       // Get from local storage by key
       const item = window.localStorage.getItem(key);
       // Parse stored json or if none return initialValue
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
       console.warn(`Error reading localStorage key "${key}":`, error);
@@ -50,6 +49,7 @@ export function useLocalStorage<T>(
     // Handle storage changes in other tabs/windows
     function handleStorageChange(event: StorageEvent) {
       if (event.key === key && event.newValue) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         setLocalState(JSON.parse(event.newValue));
       }
     }
@@ -86,7 +86,6 @@ type UseFilterLocalStorageOptions<T> = {
  */
 export function useFilterLocalStorage<T>({
   key,
-  defaultValue,
   debounceMs = 500,
   serialize = JSON.stringify,
   deserialize = JSON.parse,
