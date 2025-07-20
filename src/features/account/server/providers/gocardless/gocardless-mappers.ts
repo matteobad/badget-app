@@ -1,8 +1,9 @@
-import { CONNECTION_STATUS, Provider } from "~/server/db/schema/enum";
+import { BANK_PROVIDER, CONNECTION_STATUS } from "~/server/db/schema/enum";
 import { capitalCase } from "change-case";
 import { addDays, formatISO, parseISO, subDays } from "date-fns";
 
 import type {
+  ConnectionStatus,
   GetAccountsRequest,
   GetAccountsResponse,
   GetInstitutionsRequest,
@@ -18,6 +19,7 @@ import type {
   GC_GetInstitutionByIdResponse,
   GC_GetInstitutionsRequest,
   GC_GetInstitutionsResponse,
+  GC_GetRequisitionByIdResponse,
 } from "./gocardless-types";
 import { type GetTransactionsRequest, type GetTransactionsResponse } from "..";
 import {
@@ -38,7 +40,7 @@ export const mapInstitutionsResponse = (
     originalId: data.id,
     logo: data.logo,
     name: data.name,
-    provider: Provider.GOCARDLESS,
+    provider: BANK_PROVIDER.GOCARDLESS,
     countries: data.countries,
     availableHistory: data.transaction_total_days,
   } satisfies GetInstitutionsResponse[number];
@@ -54,11 +56,10 @@ export const mapRequisitionStatus = (
     case "UA": // UNDERGOING_AUTHENTICATION
     case "SA": // SELECTING_ACCOUNTS
     case "GA": // GRANTING_ACCESS
-      return CONNECTION_STATUS.PENDING;
+    case "EX": // EXPIRED
+      return CONNECTION_STATUS.DISCONNECTED;
     case "LN":
-      return CONNECTION_STATUS.LINKED;
-    case "EX":
-      return CONNECTION_STATUS.EXPIRED;
+      return CONNECTION_STATUS.CONNECTED;
     default:
       return CONNECTION_STATUS.UNKNOWN;
   }
@@ -225,4 +226,19 @@ export const mapTransactionsResponse = (transaction: GC_Transaction) => {
     note: description,
     // status: "posted",
   } satisfies GetTransactionsResponse[number];
+};
+
+export const transformConnectionStatus = (
+  requisition?: GC_GetRequisitionByIdResponse,
+): ConnectionStatus => {
+  // Expired or Rejected
+  if (requisition?.status === "EX" || requisition?.status === "RJ") {
+    return {
+      status: "disconnected",
+    };
+  }
+
+  return {
+    status: "connected",
+  };
 };

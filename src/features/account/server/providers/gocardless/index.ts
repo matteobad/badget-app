@@ -2,6 +2,8 @@ import type {
   BankAccountProvider,
   GetAccountsRequest,
   GetAccountsResponse,
+  GetConnectionStatusRequest,
+  GetConnectionStatusResponse,
 } from "..";
 import { type GetTransactionsRequest } from "..";
 import { gocardlessClient } from "./gocardless-api";
@@ -12,6 +14,7 @@ import {
   mapInstitutionsResponse,
   mapTransactionsRequest,
   mapTransactionsResponse,
+  transformConnectionStatus,
 } from "./gocardless-mappers";
 
 export const GoCardlessProvider: BankAccountProvider = {
@@ -59,5 +62,17 @@ export const GoCardlessProvider: BankAccountProvider = {
     const params = mapTransactionsRequest(request);
     const response = await gocardlessClient.getAccountTransactions(params);
     return response.transactions.booked.map(mapTransactionsResponse);
+  },
+
+  async getConnectionStatus({
+    id,
+  }: GetConnectionStatusRequest): Promise<GetConnectionStatusResponse> {
+    if (!id) {
+      throw Error("Missing params");
+    }
+
+    const response = await gocardlessClient.getRequisitionById({ id });
+
+    return transformConnectionStatus(response);
   },
 };

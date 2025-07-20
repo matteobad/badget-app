@@ -7,5 +7,5 @@ export async function getBankAccounts(
   input: z.infer<typeof getBankAccountsSchema>,
   userId: string,
 ) {
-  return await getBankAccountsQuery(input, userId);
+  return await getBankAccountsQuery({ ...input, userId });
 }

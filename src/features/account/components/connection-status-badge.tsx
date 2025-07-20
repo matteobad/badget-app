@@ -15,15 +15,12 @@ export default function ConnectionStatusBadge({
 
   return (
     <>
-      {status === CONNECTION_STATUS.PENDING && (
-        <Badge variant="secondary">{label}</Badge>
-      )}
-      {status === CONNECTION_STATUS.LINKED && (
+      {status === CONNECTION_STATUS.CONNECTED && (
         <Badge className="bg-green-700 text-primary-foreground [a&]:hover:bg-green-700/90">
           {label}
         </Badge>
       )}
-      {status === CONNECTION_STATUS.EXPIRED && (
+      {status === CONNECTION_STATUS.DISCONNECTED && (
         <Badge variant="destructive">{label}</Badge>
       )}
       {status === CONNECTION_STATUS.UNKNOWN && (

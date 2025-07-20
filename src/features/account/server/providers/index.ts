@@ -6,6 +6,9 @@ import { GoCardlessProvider } from "./gocardless";
 
 export type Providers = "gocardless" | "teller" | "plaid";
 
+export type ConnectionStatus = { status: "connected" | "disconnected" };
+export type GetConnectionStatusResponse = ConnectionStatus;
+
 export interface BankAccountProvider {
   // health check
   getHealthCheck: () => Promise<boolean>;
@@ -23,9 +26,10 @@ export interface BankAccountProvider {
   getInstitutions: (
     params: GetInstitutionsRequest,
   ) => Promise<DB_InstitutionInsertType[]>;
-  // getConnectionStatus: (
-  //   params: GetConnectionStatusRequest,
-  // ) => Promise<GetConnectionStatusResponse>;
+
+  getConnectionStatus: (
+    params: GetConnectionStatusRequest,
+  ) => Promise<GetConnectionStatusResponse>;
   // deleteConnection: (params: DeleteConnectionRequest) => void;
 }
 
@@ -47,6 +51,8 @@ type Account = Omit<
   | "userId"
   | "institutionId"
   | "connectionId"
+  | "errorDetails"
+  | "errorRetries"
   | "createdAt"
   | "updatedAt"
   | "deletedAt"

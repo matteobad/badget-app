@@ -1,11 +1,20 @@
-export const Provider = {
+export const BANK_PROVIDER = {
+  ENABLEBANKING: "enablebanking",
   GOCARDLESS: "GOCARDLESS",
   PLAID: "PLAID",
   TELLER: "TELLER",
 } as const;
-export type Provider = (typeof Provider)[keyof typeof Provider];
+export type BankProviderType =
+  (typeof BANK_PROVIDER)[keyof typeof BANK_PROVIDER];
 
 export const ACCOUNT_TYPE = {
+  // midday
+  // DEPOSITORY: "depository",
+  // CREDIT: "credit",
+  // OTHER_ASSET: "other_asset",
+  // LOAN: "loan",
+  // OTHER_LIABILITY: "other_liability",
+  //custom
   CHECKING: "checking",
   SAVINGS: "savings",
   INVESTMENTS: "investment",
@@ -21,11 +30,9 @@ export const SAVING_TYPE = {
 } as const;
 export type SavingType = (typeof SAVING_TYPE)[keyof typeof SAVING_TYPE];
 
-// TODO: reduce possible status
 export const CONNECTION_STATUS = {
-  PENDING: "pending",
-  LINKED: "linked",
-  EXPIRED: "expired",
+  CONNECTED: "connected",
+  DISCONNECTED: "disconnected",
   UNKNOWN: "unknown",
 } as const;
 export type ConnectionStatusType =

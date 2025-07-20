@@ -1,24 +1,25 @@
-import { createId } from "@paralleldrive/cuid2";
-import { addDays } from "date-fns";
 import { relations, sql } from "drizzle-orm";
-import { integer, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { integer, pgEnum, text, varchar } from "drizzle-orm/pg-core";
 
-import type { ConnectionStatusType, Provider } from "./enum";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { account_table } from "./accounts";
-import { CONNECTION_STATUS } from "./enum";
+import { BANK_PROVIDER, CONNECTION_STATUS } from "./enum";
 
-export const institution_table = pgTable("institution_table", {
-  id: varchar({ length: 128 })
-    .primaryKey()
-    .$defaultFn(() => createId())
-    .notNull(),
+export const bankProviderEnum = pgEnum("bank_provider", BANK_PROVIDER);
+
+export const connectionStatusEnum = pgEnum(
+  "connection_status",
+  CONNECTION_STATUS,
+);
+
+export const institution_table = pgTable("institution_table", (d) => ({
+  id: d.uuid().defaultRandom().primaryKey().notNull(),
 
   originalId: varchar({ length: 128 }).unique().notNull(),
   name: varchar({ length: 256 }).notNull(),
   logo: varchar({ length: 2048 }),
-  provider: text().$type<Provider>().notNull(),
+  provider: bankProviderEnum().notNull(),
   availableHistory: integer(),
   popularity: integer().default(0),
   countries: text()
@@ -26,34 +27,32 @@ export const institution_table = pgTable("institution_table", {
     .default(sql`ARRAY[]::text[]`),
 
   ...timestamps,
-});
+}));
 
 export type DB_InstitutionType = typeof institution_table.$inferSelect;
 export type DB_InstitutionInsertType = typeof institution_table.$inferInsert;
 
-export const connection_table = pgTable("connection_table", {
-  id: varchar({ length: 128 })
-    .primaryKey()
-    .$defaultFn(() => createId())
-    .notNull(),
+export const connection_table = pgTable("connection_table", (d) => ({
+  id: d.uuid().defaultRandom().primaryKey().notNull(),
 
   // FK
-  userId: varchar({ length: 32 }).notNull(),
-  institutionId: varchar({ length: 128 })
+  userId: d.varchar({ length: 32 }).notNull(),
+  institutionId: d
+    .uuid()
     .notNull()
     .references(() => institution_table.id),
 
-  referenceId: varchar().unique(),
-  provider: text().$type<Provider>().notNull(),
-  status: text()
-    .$type<ConnectionStatusType>()
-    .default(CONNECTION_STATUS.UNKNOWN),
-  validUntil: timestamp({ withTimezone: true }).$defaultFn(() =>
-    addDays(new Date(), 90),
-  ),
+  name: d.text().notNull(),
+  logoUrl: d.text(),
+  provider: bankProviderEnum().notNull(),
+  referenceId: d.varchar().unique(),
+  status: connectionStatusEnum().default("connected"),
+  errorDetails: d.text(),
+  errorRetries: d.smallint().default(sql`'0'`),
+  expiresAt: d.timestamp({ withTimezone: true, mode: "string" }),
 
   ...timestamps,
-});
+}));
 
 export const connection_relations = relations(
   connection_table,

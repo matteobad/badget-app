@@ -25,9 +25,8 @@ export default {
 
   connection: {
     status: {
-      linked: "Connesso",
-      pending: "In corso",
-      expired: "Scaduto",
+      connected: "Connesso",
+      disconnected: "Scaduto",
       unknown: "Non connesso",
     },
   },

@@ -1,5 +1,5 @@
 import { account_table } from "~/server/db/schema/accounts";
-import { ACCOUNT_TYPE, Provider } from "~/server/db/schema/enum";
+import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/server/db/schema/enum";
 import { connection_table } from "~/server/db/schema/open-banking";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -7,7 +7,7 @@ import { z } from "zod/v4";
 export const ConnectGocardlessSchema = z.object({
   institutionId: z.string(),
   countryCode: z.string(),
-  provider: z.enum(Provider),
+  provider: z.enum(BANK_PROVIDER),
   redirectBase: z.url(),
 });
 
@@ -23,7 +23,7 @@ export const ConnectedAccountSchema = createInsertSchema(account_table, {
 
 export const ConnectionUpdateSchema = createInsertSchema(connection_table, {
   id: z.string(),
-  provider: z.enum(Provider),
+  provider: z.enum(BANK_PROVIDER),
 })
   .omit({
     userId: true,
@@ -69,5 +69,5 @@ export const AccountDeleteSchema = z.object({
 
 export const ConnectionDeleteSchema = z.object({
   id: z.string(),
-  provider: z.enum(Provider).default("GOCARDLESS"),
+  provider: z.enum(BANK_PROVIDER).default("GOCARDLESS"),
 });

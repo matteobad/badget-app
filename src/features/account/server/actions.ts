@@ -65,14 +65,15 @@ export const connectGocardlessAction = authActionClient
 
     await db.insert(connection_table).values({
       institutionId: upsertedId[0]!.id,
+      name: "",
       provider: provider,
       userId: ctx.userId,
       referenceId: requisition.id,
       status: mapRequisitionStatus(requisition.status),
-      validUntil: mapRequisitionValidity(
+      expiresAt: mapRequisitionValidity(
         requisition.created,
         agreement.access_valid_for_days,
-      ),
+      ).toISOString(),
     });
 
     return redirect(requisition.link);

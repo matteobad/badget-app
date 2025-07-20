@@ -16,9 +16,13 @@ export type DrizzleWhere<T> =
   | undefined;
 
 export const timestamps = {
-  createdAt: timestamp().defaultNow().notNull(),
-  updatedAt: timestamp().$onUpdate(() => new Date()),
-  deletedAt: timestamp(),
+  createdAt: timestamp({ withTimezone: true, mode: "string" })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp({ withTimezone: true, mode: "string" }).$onUpdate(() =>
+    new Date().toISOString(),
+  ),
+  deletedAt: timestamp({ withTimezone: true, mode: "string" }),
 };
 
 export const buildConflictUpdateColumns = <

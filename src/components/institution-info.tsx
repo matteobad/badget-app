@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { Provider } from "~/server/db/schema/enum";
+import { BANK_PROVIDER } from "~/server/db/schema/enum";
 
 export function InstitutionInfo({
   provider,
@@ -16,11 +16,11 @@ export function InstitutionInfo({
 }) {
   const getDescription = () => {
     switch (provider) {
-      case Provider.GOCARDLESS:
+      case BANK_PROVIDER.GOCARDLESS:
         return "With GoCardLess we can connect to more than 2,500 banks in 31 countries across the UK and Europe.";
-      case Provider.PLAID:
+      case BANK_PROVIDER.PLAID:
         return `With Plaid we can connect to 12,000+ financial institutions across the US, Canada, UK, and Europe are covered by Plaid's network`;
-      case Provider.TELLER:
+      case BANK_PROVIDER.TELLER:
         return "With Teller we can connect instantly to more than 5,000 financial institutions in the US.";
       default:
         break;

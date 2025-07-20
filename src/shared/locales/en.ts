@@ -25,9 +25,8 @@ export default {
 
   connection: {
     status: {
-      linked: "Connected",
-      pending: "Ongoing",
-      expired: "Expired",
+      connected: "Connected",
+      disconnected: "Expired",
       unknown: "Disconnected",
     },
   },

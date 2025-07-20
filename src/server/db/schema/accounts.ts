@@ -1,11 +1,13 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
-import { unique } from "drizzle-orm/pg-core";
+import { pgEnum, unique } from "drizzle-orm/pg-core";
 
-import type { AccountType } from "./enum";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
+import { ACCOUNT_TYPE } from "./enum";
 import { connection_table, institution_table } from "./open-banking";
+
+export const accountTypeEnum = pgEnum("account_type", ACCOUNT_TYPE);
 
 export const account_table = pgTable(
   "account_table",
@@ -27,12 +29,14 @@ export const account_table = pgTable(
     rawId: d.text().unique(),
     name: d.varchar({ length: 64 }).notNull(),
     description: d.text(),
-    type: d.text().$type<AccountType>().default("checking").notNull(),
+    type: accountTypeEnum().notNull(),
     logoUrl: d.varchar({ length: 2048 }),
     balance: d.numeric({ precision: 10, scale: 2 }).notNull(),
     currency: d.char({ length: 3 }).notNull(),
     enabled: d.boolean().notNull().default(true),
     manual: d.boolean().notNull().default(false),
+    errorDetails: d.text(),
+    errorRetries: d.smallint(),
 
     ...timestamps,
   }),

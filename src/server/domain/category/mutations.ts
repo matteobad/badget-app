@@ -35,6 +35,6 @@ export async function deleteCategoryMutation(
   const { id, userId } = params;
   return await client
     .update(category_table)
-    .set({ deletedAt: new Date() }) // soft delete
+    .set({ deletedAt: new Date().toISOString() }) // soft delete
     .where(and(eq(category_table.id, id), eq(category_table.userId, userId)));
 }

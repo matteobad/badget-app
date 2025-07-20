@@ -5,7 +5,7 @@ import { reset, seed } from "drizzle-seed";
 import { db, schema } from ".";
 import { budgetList } from "./data/budgets";
 import { categoriesIds, categoriesMap } from "./data/categories";
-import { ACCOUNT_TYPE, CONNECTION_STATUS, Provider } from "./schema/enum";
+import { ACCOUNT_TYPE, BANK_PROVIDER, CONNECTION_STATUS } from "./schema/enum";
 
 async function main() {
   /* eslint-disable */
@@ -32,7 +32,7 @@ async function main() {
         name: f.companyName({ isUnique: true }),
         originalId: f.uuid(),
         provider: f.valuesFromArray({
-          values: Object.values(Provider),
+          values: Object.values(BANK_PROVIDER),
         }),
         countries: f.default({ defaultValue: ["IT"] }),
         updatedAt: f.default({ defaultValue: null }),
@@ -43,7 +43,7 @@ async function main() {
     connection_table: {
       columns: {
         provider: f.valuesFromArray({
-          values: Object.values(Provider),
+          values: Object.values(BANK_PROVIDER),
         }),
         status: f.valuesFromArray({
           values: Object.values(CONNECTION_STATUS),
