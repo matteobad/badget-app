@@ -146,14 +146,14 @@ importers:
         specifier: ^16.5.0
         version: 16.5.0
       drizzle-orm:
-        specifier: ^0.44.2
-        version: 0.44.2(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7)
+        specifier: ^0.44.3
+        version: 0.44.3(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7)
       drizzle-seed:
         specifier: ^0.3.1
-        version: 0.3.1(drizzle-orm@0.44.2(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7))
+        version: 0.3.1(drizzle-orm@0.44.3(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7))
       drizzle-zod:
         specifier: ^0.8.2
-        version: 0.8.2(drizzle-orm@0.44.2(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7))(zod@3.25.55)
+        version: 0.8.2(drizzle-orm@0.44.3(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7))(zod@3.25.55)
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@19.1.0)
@@ -325,8 +325,8 @@ importers:
         specifier: ^8.18.1
         version: 8.18.1
       drizzle-kit:
-        specifier: ^0.31.1
-        version: 0.31.1
+        specifier: ^0.31.4
+        version: 0.31.4
       eslint:
         specifier: 9.28.0
         version: 9.28.0(jiti@2.4.2)
@@ -4586,17 +4586,17 @@ packages:
       }
     engines: { node: ">=12" }
 
-  drizzle-kit@0.31.1:
+  drizzle-kit@0.31.4:
     resolution:
       {
-        integrity: sha512-PUjYKWtzOzPtdtQlTHQG3qfv4Y0XT8+Eas6UbxCmxTj7qgMf+39dDujf1BP1I+qqZtw9uzwTh8jYtkMuCq+B0Q==,
+        integrity: sha512-tCPWVZWZqWVx2XUsVpJRnH9Mx0ClVOf5YUHerZ5so1OKSlqww4zy1R5ksEdGRcO3tM3zj0PYN6V48TbQCL1RfA==,
       }
     hasBin: true
 
-  drizzle-orm@0.44.2:
+  drizzle-orm@0.44.3:
     resolution:
       {
-        integrity: sha512-zGAqBzWWkVSFjZpwPOrmCrgO++1kZ5H/rZ4qTGeGOe18iXGVJWf3WPfHOVwFIbmi8kHjfJstC6rJomzGx8g/dQ==,
+        integrity: sha512-8nIiYQxOpgUicEL04YFojJmvC4DNO4KoyXsEIqN44+g6gNBr6hmVpWk3uyAt4CaTiRGDwoU+alfqNNeonLAFOQ==,
       }
     peerDependencies:
       "@aws-sdk/client-rds-data": ">=3"
@@ -10797,7 +10797,7 @@ snapshots:
 
   dotenv@16.5.0: {}
 
-  drizzle-kit@0.31.1:
+  drizzle-kit@0.31.4:
     dependencies:
       "@drizzle-team/brocli": 0.10.2
       "@esbuild-kit/esm-loader": 2.6.5
@@ -10806,7 +10806,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.2(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7):
+  drizzle-orm@0.44.3(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7):
     optionalDependencies:
       "@electric-sql/pglite": 0.3.5
       "@neondatabase/serverless": 1.0.1
@@ -10817,15 +10817,15 @@ snapshots:
       pg: 8.13.3
       postgres: 3.4.7
 
-  drizzle-seed@0.3.1(drizzle-orm@0.44.2(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7)):
+  drizzle-seed@0.3.1(drizzle-orm@0.44.3(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7)):
     dependencies:
       pure-rand: 6.1.0
     optionalDependencies:
-      drizzle-orm: 0.44.2(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7)
+      drizzle-orm: 0.44.3(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7)
 
-  drizzle-zod@0.8.2(drizzle-orm@0.44.2(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7))(zod@3.25.55):
+  drizzle-zod@0.8.2(drizzle-orm@0.44.3(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7))(zod@3.25.55):
     dependencies:
-      drizzle-orm: 0.44.2(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7)
+      drizzle-orm: 0.44.3(@electric-sql/pglite@0.3.5)(@neondatabase/serverless@1.0.1)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@upstash/redis@1.35.0)(bun-types@1.2.16)(pg@8.13.3)(postgres@3.4.7)
       zod: 3.25.55
 
   dunder-proto@1.0.1:

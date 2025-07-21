@@ -26,7 +26,7 @@ export const category_table = pgTable(
 
     ...timestamps,
   }),
-  (t) => [unique().on(t.slug, t.userId)],
+  (t) => [unique("unique_user_slug").on(t.slug, t.userId)],
 );
 
 export type DB_CategoryType = typeof category_table.$inferSelect;

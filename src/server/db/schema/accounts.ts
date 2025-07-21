@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import { pgEnum, unique } from "drizzle-orm/pg-core";
 
 import { numericCasted, timestamps } from "../utils";
@@ -34,18 +33,17 @@ export const account_table = pgTable(
   (t) => [unique().on(t.userId, t.rawId)],
 );
 
-export const accountsRelations = relations(account_table, ({ one }) => ({
-  // transactions: many(transaction_table),
-  // workspaceToAccounts: many(workspaceToAccounts),
-  institution: one(institution_table, {
-    fields: [account_table.institutionId],
-    references: [institution_table.id],
-  }),
-  connection: one(connection_table, {
-    fields: [account_table.connectionId],
-    references: [connection_table.id],
-  }),
-}));
+// export const accountsRelations = relations(account_table, ({ one, many }) => ({
+//   transactions: many(transaction_table),
+//   institution: one(institution_table, {
+//     fields: [account_table.institutionId],
+//     references: [institution_table.id],
+//   }),
+//   connection: one(connection_table, {
+//     fields: [account_table.connectionId],
+//     references: [connection_table.id],
+//   }),
+// }));
 
 export type DB_AccountType = typeof account_table.$inferSelect;
 export type DB_AccountInsertType = typeof account_table.$inferInsert;

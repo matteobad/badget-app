@@ -1,9 +1,8 @@
-import { relations, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { integer, pgEnum, text, varchar } from "drizzle-orm/pg-core";
 
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
-import { account_table } from "./accounts";
 import { BANK_PROVIDER, CONNECTION_STATUS } from "./enum";
 
 export const bankProviderEnum = pgEnum("bank_provider", BANK_PROVIDER);
@@ -54,16 +53,16 @@ export const connection_table = pgTable("connection_table", (d) => ({
   ...timestamps,
 }));
 
-export const connection_relations = relations(
-  connection_table,
-  ({ many, one }) => ({
-    accounts: many(account_table),
-    institution: one(institution_table, {
-      fields: [connection_table.institutionId],
-      references: [institution_table.id],
-    }),
-  }),
-);
+// export const connection_relations = relations(
+//   connection_table,
+//   ({ many, one }) => ({
+//     accounts: many(account_table),
+//     institution: one(institution_table, {
+//       fields: [connection_table.institutionId],
+//       references: [institution_table.id],
+//     }),
+//   }),
+// );
 
 export type DB_ConnectionType = typeof connection_table.$inferSelect;
 export type DB_ConnectionInsertType = typeof connection_table.$inferInsert;

@@ -1,6 +1,7 @@
 import type { DB_TransactionType } from "~/server/db/schema/transactions";
 import { getSortingStateParser } from "~/lib/validators";
 import {
+  TRANSACTION_FREQUENCY,
   TRANSACTION_METHOD,
   TRANSACTION_STATUS,
 } from "~/server/db/schema/enum";
@@ -24,6 +25,7 @@ export const createTransactionSchema = createInsertSchema(transaction_table, {
   note: z.string().optional(),
   method: z.enum(TRANSACTION_METHOD),
   status: z.enum(TRANSACTION_STATUS),
+  frequency: z.enum(TRANSACTION_FREQUENCY).optional(),
 })
   .extend({
     attachment_ids: z.array(z.string()).optional(),
@@ -40,6 +42,7 @@ export const updateTransactionSchema = createUpdateSchema(transaction_table, {
   id: z.string().min(1),
   method: z.enum(TRANSACTION_METHOD).optional(),
   status: z.enum(TRANSACTION_STATUS).optional(),
+  frequency: z.enum(TRANSACTION_FREQUENCY).optional(),
   note: z.string().nullable().optional(),
 })
   .extend({

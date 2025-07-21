@@ -5,7 +5,14 @@ import { reset, seed } from "drizzle-seed";
 import { db, schema } from ".";
 import { budgetList } from "./data/budgets";
 import { categoriesIds, categoriesMap } from "./data/categories";
-import { ACCOUNT_TYPE, BANK_PROVIDER, CONNECTION_STATUS } from "./schema/enum";
+import {
+  ACCOUNT_TYPE,
+  BANK_PROVIDER,
+  CONNECTION_STATUS,
+  TRANSACTION_FREQUENCY,
+  TRANSACTION_METHOD,
+  TRANSACTION_STATUS,
+} from "./schema/enum";
 
 async function main() {
   /* eslint-disable */
@@ -83,8 +90,17 @@ async function main() {
         id: f.uuid(),
         amount: f.int({ minValue: -1230, maxValue: 2500 }),
         categoryId: f.valuesFromArray({ values: categoriesIds }),
+        status: f.valuesFromArray({
+          values: Object.values(TRANSACTION_STATUS),
+        }),
+        method: f.valuesFromArray({
+          values: Object.values(TRANSACTION_METHOD),
+        }),
+        frequency: f.valuesFromArray({
+          values: Object.values(TRANSACTION_FREQUENCY),
+        }),
         currency: f.default({ defaultValue: "EUR" }),
-        description: f.loremIpsum({ sentencesCount: 1 }),
+        name: f.loremIpsum({ sentencesCount: 1 }),
         note: f.loremIpsum({ sentencesCount: 2 }),
         rawId: f.uuid(),
         userId: f.default({ defaultValue: "user_2jnV56cv1CJrRNLFsUdm6XAf7GD" }),

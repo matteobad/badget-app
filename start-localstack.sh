@@ -7,8 +7,8 @@ set +a
 docker-compose up -d --wait
 
 # db
-#pnpm db:push
-pnpm db:migrate
+pnpm db:push
+# pnpm db:migrate
 pnpm db:seed
 
 # run

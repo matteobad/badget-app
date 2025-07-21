@@ -50,6 +50,18 @@ export const TRANSACTION_METHOD = {
 export type TransactionMethodType =
   (typeof TRANSACTION_METHOD)[keyof typeof TRANSACTION_METHOD];
 
+export const TRANSACTION_FREQUENCY = {
+  WEEKLY: "weekly",
+  BIWEEKLY: "biweekly",
+  MONTHLY: "monthly",
+  SEMI_MONTHLY: "semi_monthly",
+  ANNUALLY: "annually",
+  IRREGULAR: "irregular",
+  UNKNOWN: "unknown",
+} as const;
+export type TransactionFrequencyType =
+  (typeof TRANSACTION_FREQUENCY)[keyof typeof TRANSACTION_FREQUENCY];
+
 export const SAVING_TYPE = {
   PENSION: "pension",
   EMERGENCY: "emergency",

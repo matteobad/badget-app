@@ -1,6 +1,6 @@
 "server-only";
 
-import type { transactionFrequencyEnum } from "~/server/db/schema/transactions";
+import type { TransactionFrequencyType } from "~/server/db/schema/enum";
 import type { getTransactionTagsSchema } from "~/shared/validators/tag.schema";
 import type { getTransactionsSchema } from "~/shared/validators/transaction.schema";
 import type { SQL } from "drizzle-orm";
@@ -31,10 +31,6 @@ import {
   or,
   sql,
 } from "drizzle-orm";
-
-// Helper type from schema if not already exported
-type TransactionFrequency =
-  (typeof transactionFrequencyEnum.enumValues)[number];
 
 export async function getTransactionsQuery(
   params: z.infer<typeof getTransactionsSchema>,
@@ -125,7 +121,7 @@ export async function getTransactionsQuery(
     } else {
       const validFrequencies = filterRecurring.filter(
         (f) => f !== "all",
-      ) as TransactionFrequency[];
+      ) as TransactionFrequencyType[];
       if (validFrequencies.length > 0) {
         whereConditions.push(
           inArray(transaction_table.frequency, validFrequencies),
