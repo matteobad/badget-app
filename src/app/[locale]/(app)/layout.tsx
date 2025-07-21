@@ -1,20 +1,21 @@
-import { type PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
+import { Suspense } from "react";
 import { AppSidebar } from "~/components/app-sidebar";
-import CreateCategoryDialog from "~/components/category/create-category-dialog";
-import CategorySheet from "~/components/category/sheets/category-sheet";
 import { FeedbackDialog } from "~/components/feedback-dialog";
+import { GlobalSheets } from "~/components/global-sheets";
 import { DynamicBreadcrumb } from "~/components/layouts/dynamic-breadcrumb";
 import { NavUser } from "~/components/nav-user";
-import CreateTransactionSheet from "~/components/transaction/sheets/create-transaction-sheet";
-import TransactionSheet from "~/components/transaction/sheets/transaction-sheet";
 import { Separator } from "~/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "~/components/ui/sidebar";
+import { getCountryCode } from "~/server/services/location-service";
 
 export default function AppLayout(props: PropsWithChildren) {
+  const countryCodePromise = getCountryCode();
+
   return (
     <>
       <SidebarProvider>
@@ -33,12 +34,10 @@ export default function AppLayout(props: PropsWithChildren) {
         </SidebarInset>
       </SidebarProvider>
 
-      {/* Global Sheets here */}
-      <CreateCategoryDialog />
-      <CreateTransactionSheet />
-      <TransactionSheet />
-      <CategorySheet />
-      {/* <ImportTransactionDrawerDialog /> */}
+      <Suspense>
+        {/* Global Sheets here */}
+        <GlobalSheets countryCodePromise={countryCodePromise} />
+      </Suspense>
     </>
   );
 }

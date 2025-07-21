@@ -12,7 +12,7 @@ import {
 
 import { createTRPCRouter, protectedProcedure } from "../init";
 
-export const bankConnectionsRouter = createTRPCRouter({
+export const bankConnectionRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getBankConnectionsSchema)
     .query(async ({ input, ctx: { session } }) => {

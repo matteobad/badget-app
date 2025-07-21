@@ -1,4 +1,6 @@
 import { z } from "@hono/zod-openapi";
+import { BANK_PROVIDER } from "~/server/db/schema/enum";
+import { parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 export const getBankConnectionsSchema = z
   .object({ enabled: z.boolean().optional() })
@@ -33,3 +35,22 @@ export const createBankConnectionSchema = z.object({
 });
 
 export const deleteBankConnectionSchema = z.object({ id: z.string() });
+
+export const createGocardlessLinkSchema = z.object({
+  institutionId: z.string(),
+  step: z.string().optional(),
+  availableHistory: z.number(),
+  redirectBase: z.string(),
+});
+
+// Search params for sheets
+export const connectParamsSchema = (initialCountryCode?: string) => ({
+  step: parseAsStringLiteral(["connect", "account"]),
+  countryCode: parseAsString.withDefault(initialCountryCode ?? ""),
+  provider: parseAsStringLiteral(Object.values(BANK_PROVIDER)),
+  institution_id: parseAsString,
+  search: parseAsString.withDefault("").withOptions({ clearOnDefault: true }),
+  error: parseAsString,
+  ref: parseAsString,
+  details: parseAsString,
+});

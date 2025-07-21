@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, pgEnum, text, varchar } from "drizzle-orm/pg-core";
+import { pgEnum } from "drizzle-orm/pg-core";
 
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
@@ -15,13 +15,14 @@ export const connectionStatusEnum = pgEnum(
 export const institution_table = pgTable("institution_table", (d) => ({
   id: d.uuid().defaultRandom().primaryKey().notNull(),
 
-  originalId: varchar({ length: 128 }).unique().notNull(),
-  name: varchar({ length: 256 }).notNull(),
-  logo: varchar({ length: 2048 }),
+  originalId: d.varchar({ length: 128 }).unique().notNull(),
+  name: d.varchar({ length: 256 }).notNull(),
+  logo: d.varchar({ length: 2048 }),
   provider: bankProviderEnum().notNull(),
-  availableHistory: integer(),
-  popularity: integer().default(0),
-  countries: text()
+  availableHistory: d.integer(),
+  popularity: d.integer().default(0),
+  countries: d
+    .text()
     .array()
     .default(sql`ARRAY[]::text[]`),
 
