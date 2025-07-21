@@ -1,8 +1,8 @@
 export const BANK_PROVIDER = {
   ENABLEBANKING: "enablebanking",
-  GOCARDLESS: "GOCARDLESS",
-  PLAID: "PLAID",
-  TELLER: "TELLER",
+  GOCARDLESS: "gocardless",
+  PLAID: "plaid",
+  TELLER: "teller",
 } as const;
 export type BankProviderType =
   (typeof BANK_PROVIDER)[keyof typeof BANK_PROVIDER];

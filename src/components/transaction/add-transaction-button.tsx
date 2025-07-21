@@ -22,7 +22,14 @@ export function AddTransactionButton({ label }: { label?: string }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-[180px]" align="end">
-        <DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() =>
+            void setParams({
+              createTransaction: null,
+              importTransaction: null,
+            })
+          }
+        >
           <Landmark />
           Collega un conto
         </DropdownMenuItem>

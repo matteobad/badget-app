@@ -69,5 +69,5 @@ export const AccountDeleteSchema = z.object({
 
 export const ConnectionDeleteSchema = z.object({
   id: z.string(),
-  provider: z.enum(BANK_PROVIDER).default("GOCARDLESS"),
+  provider: z.enum(BANK_PROVIDER).default("gocardless"),
 });

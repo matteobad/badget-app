@@ -55,7 +55,7 @@ export default function LinkInstitutionForm({
   const form = useForm<z.infer<typeof ConnectGocardlessSchema>>({
     resolver: standardSchemaResolver(ConnectGocardlessSchema),
     defaultValues: {
-      provider: "GOCARDLESS",
+      provider: "gocardless",
       redirectBase: window.location.origin,
     },
   });
