@@ -40,7 +40,7 @@ export const SyncConnectionSchema = z.object({
 });
 
 export const AccountInsertSchema = createInsertSchema(account_table, {
-  balance: z.string(),
+  balance: z.number(),
   type: z.enum(ACCOUNT_TYPE),
   description: z.string().optional(),
 }).omit({
@@ -53,7 +53,7 @@ export const AccountInsertSchema = createInsertSchema(account_table, {
 
 export const AccountUpdateSchema = createInsertSchema(account_table, {
   id: z.string(),
-  balance: z.string(),
+  balance: z.number(),
   type: z.enum(ACCOUNT_TYPE),
   description: z.string().optional(),
 }).omit({

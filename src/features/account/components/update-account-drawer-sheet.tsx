@@ -55,7 +55,7 @@ export default function UpdateAccountDrawerSheet({
       <div className="mb-8 flex flex-col gap-2">
         <h2>Saldo</h2>
         <span className="font-mono text-4xl">
-          {formatAmount({ amount: parseFloat(account.balance) })}
+          {formatAmount({ amount: account.balance })}
         </span>
       </div>
 

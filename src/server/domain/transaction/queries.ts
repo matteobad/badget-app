@@ -65,12 +65,12 @@ export async function getTransactionsQuery(
   // Date range filter
   if (start) {
     const startDate = new Date(start);
-    whereConditions.push(gte(transaction_table.date, startDate));
+    whereConditions.push(gte(transaction_table.date, startDate.toISOString()));
   }
   if (end) {
     const endDate = new Date(end);
     endDate.setDate(endDate.getDate() + 1);
-    whereConditions.push(lte(transaction_table.date, endDate));
+    whereConditions.push(lte(transaction_table.date, endDate.toISOString()));
   }
 
   // Search query filter (name, description, or amount)
@@ -188,6 +188,7 @@ export async function getTransactionsQuery(
       recurring: transaction_table.recurring,
       counterpartyName: transaction_table.counterpartyName,
       frequency: transaction_table.frequency,
+      name: transaction_table.name,
       description: transaction_table.description,
       createdAt: transaction_table.createdAt,
       attachments: sql<
@@ -268,6 +269,7 @@ export async function getTransactionsQuery(
       transaction_table.manual,
       transaction_table.recurring,
       transaction_table.frequency,
+      transaction_table.name,
       transaction_table.description,
       transaction_table.createdAt,
       category_table.id,
@@ -386,10 +388,11 @@ export async function getTransactionByIdQuery(id: string, userId: string) {
       status: transaction_table.status,
       note: transaction_table.note,
       manual: transaction_table.manual,
-      exclude: transaction_table.exclude,
+      internal: transaction_table.internal,
       recurring: transaction_table.recurring,
       counterpartyName: transaction_table.counterpartyName,
       frequency: transaction_table.frequency,
+      name: transaction_table.name,
       description: transaction_table.description,
       createdAt: transaction_table.createdAt,
       attachments: sql<

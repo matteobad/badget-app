@@ -278,7 +278,7 @@ export const columns: ColumnDef<Transaction>[] = [
     },
     cell: ({ row, table }) => (
       <DateCell
-        date={row.original.date.toISOString()}
+        date={row.original.date}
         // @ts-expect-error - TODO: fix this
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         format={table.options.meta?.dateFormat}
@@ -296,8 +296,8 @@ export const columns: ColumnDef<Transaction>[] = [
     },
     cell: ({ row }) => (
       <DescriptionCell
-        name={row.original.description}
-        description={row.original.note ?? undefined}
+        name={row.original.name}
+        description={row.original.description ?? undefined}
         status={row.original.status ?? undefined}
         categorySlug={row.original?.category?.slug}
       />

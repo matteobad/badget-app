@@ -9,7 +9,7 @@ const userId = "test-user";
 const generateMockTransactions = (count: number) =>
   Array.from({ length: count }, (_, i) => ({
     id: `tx-${i}`,
-    description: `Payment for invoice ${i} at Starbucks`, // Simulating a real-world transaction
+    name: `Payment for invoice ${i} at Starbucks`, // Simulating a real-world transaction
   }));
 
 const benchmarkCategorization = async (num: number) => {

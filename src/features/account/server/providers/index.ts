@@ -16,9 +16,9 @@ export interface BankAccountProvider {
   // account informations
   getAccounts(params: GetAccountsRequest): Promise<GetAccountsResponse>;
   // deleteAccounts: (params: DeleteAccountsRequest) => void;
-  // getAccountBalance: (
-  //   params: GetAccountBalanceRequest,
-  // ) => Promise<GetAccountBalanceResponse>;
+  getAccountBalance: (
+    params: GetAccountBalanceRequest,
+  ) => Promise<GetAccountBalanceResponse>;
   getTransactions(
     params: GetTransactionsRequest,
   ): Promise<GetTransactionsResponse>;
@@ -76,6 +76,16 @@ export type GetAccountsRequest = {
 };
 
 export type GetAccountsResponse = Account[];
+
+export type GetAccountBalanceRequest = {
+  accountId: string;
+  accessToken?: string; // Teller & Plaid
+};
+
+export type GetAccountBalanceResponse = {
+  currency: string;
+  amount: number;
+};
 
 export type GetTransactionsRequest = {
   accountId: string;

@@ -20,9 +20,9 @@ export function transformCSV(
   // column mapping
   let column: string;
 
-  let date: Date;
+  let date: string;
   column = fieldMapping.date;
-  if (column in row) date = new Date(row[column]!);
+  if (column in row) date = new Date(row[column]!).toISOString();
   else throw new Error(`Col ${column} is not present in the CSV`);
 
   let description: string;

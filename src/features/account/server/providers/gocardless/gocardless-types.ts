@@ -119,7 +119,7 @@ export type GC_DeleteRequisitionByIdResponse = {
   detail: string;
 };
 
-// accounts
+// transactions
 export type GC_Transaction = {
   transactionAmount: { amount: string; currency: string };
   currencyExchange?: {
@@ -151,6 +151,19 @@ export type GC_Transaction = {
   };
 };
 
+export type GC_GetTransactionsRequest = GC_GetAccountRequest & {
+  date_from?: string;
+  date_to?: string;
+};
+
+export type GC_GetTransactionsResponse = {
+  transactions: {
+    booked: GC_Transaction[];
+    posted: GC_Transaction[];
+  };
+};
+
+// accounts
 export type GC_GetAccountRequest = {
   id: string;
 };
@@ -179,27 +192,36 @@ export type GC_GetAccountDetailsResponse = {
   };
 };
 
-export type GC_GetAccountBalancesResponse = {
-  balances: [
-    {
-      balanceAmount: {
-        amount: string;
-        currency: string;
-      };
-      balanceType: string;
-      referenceDate: string;
-    },
-  ];
+// balances
+export type GC_GetBalanceRequest = {
+  amount: string;
+  currency: string;
 };
 
-export type GC_GetTransactionsRequest = GC_GetAccountRequest & {
-  date_from?: string;
-  date_to?: string;
-};
-
-export type GC_GetTransactionsResponse = {
-  transactions: {
-    booked: GC_Transaction[];
-    posted: GC_Transaction[];
+export type GC_AccountBalances = {
+  balanceAmount: {
+    amount: string;
+    currency: string;
   };
+  balanceType:
+    | "interimAvailable"
+    | "interimBooked"
+    | "expected"
+    | "closingAvailable"
+    | "closingBooked"
+    | "closingCleared"
+    | "forwardAvailable"
+    | "interimCleared"
+    | "information"
+    | "nonInvoiced"
+    | "openingBooked"
+    | "openingAvailable"
+    | "openingCleared"
+    | "previouslyClosedBooked";
+  creditLimitIncluded: boolean;
+  referenceDate: string;
+};
+
+export type GC_GetAccountBalancesResponse = {
+  balances: GC_AccountBalances[];
 };

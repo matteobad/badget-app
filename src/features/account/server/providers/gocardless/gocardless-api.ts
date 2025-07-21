@@ -141,6 +141,7 @@ export const gocardlessClient = {
     );
     return data;
   },
+
   getInstitutionById: async (params: { id: string }) => {
     const url = `/api/v2/institutions/${params.id}`;
     return await fetchWithAuth<GC_GetInstitutionByIdResponse>(url);

@@ -29,7 +29,7 @@ export default function AccountCardGrid({
     <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-4">
       {Object.entries(accounts).map(([key, value]) => {
         const total = value.reduce((acc, item) => {
-          return (acc += parseFloat(item.balance));
+          return (acc += item.balance);
         }, 0);
 
         return (

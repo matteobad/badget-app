@@ -7,7 +7,7 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 import { eng, ita, removeStopwords } from "stopword";
 
 // Tipi per le transazioni e le categorie
-type Transaction = Partial<DB_TransactionType> & { description: string };
+type Transaction = Partial<DB_TransactionType> & { name: string };
 
 type RuleWithTokens = DB_RuleType & { tokens: DB_TokenType[] };
 
@@ -134,7 +134,7 @@ export const categorizeUserTransaction = async (
   transaction: Transaction,
 ): Promise<string | null> => {
   const rules = await fetchRulesFromDB(userId);
-  const tokens = new Set(extractTokens(transaction.description));
+  const tokens = new Set(extractTokens(transaction.name));
 
   let bestMatch: { categoryId: string; relevance: number } | null = null;
 

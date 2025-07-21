@@ -1,12 +1,12 @@
-import { parseAPIError } from "@jobs/utils/parse-error";
-import { getClassification } from "@jobs/utils/transform";
-import { client } from "@midday/engine-client";
-import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
-import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/server/db/schema/enum";
-import { z } from "zod/v4";
+import { getBankAccountProvider } from "~/features/account/server/providers";
+import { db } from "~/server/db";
+import { account_table } from "~/server/db/schema/accounts";
+import { syncAccountSchema } from "~/shared/validators/tasks.schema";
+import { eq } from "drizzle-orm";
 
-import { upsertTransactions } from "../transactions/upsert";
+import { parseAPIError } from "../utils/parse-error";
+import { upsertTransactions } from "./upsert-transactions";
 
 const BATCH_SIZE = 500;
 
@@ -16,67 +16,42 @@ export const syncAccount = schemaTask({
   retry: {
     maxAttempts: 2,
   },
-  schema: z.object({
-    id: z.uuid(),
-    teamId: z.string(),
-    accountId: z.string(),
-    accessToken: z.string().optional(),
-    errorRetries: z.number().optional(),
-    provider: z.enum(BANK_PROVIDER),
-    manualSync: z.boolean().optional(),
-    accountType: z.enum(ACCOUNT_TYPE),
-  }),
+  schema: syncAccountSchema,
   run: async ({
     id,
-    teamId,
+    userId,
     accountId,
-    accountType,
-    accessToken,
     errorRetries,
     provider,
     manualSync,
   }) => {
-    const supabase = createClient();
-    const classification = getClassification(accountType);
+    const bankProvider = getBankAccountProvider(provider);
 
     // Get the balance
     try {
-      const balanceResponse = await client.accounts.balance.$get({
-        query: {
-          provider,
-          id: accountId,
-          accessToken,
-        },
+      const balanceData = await bankProvider.getAccountBalance({
+        accountId,
       });
 
-      if (!balanceResponse.ok) {
+      if (!balanceData) {
         throw new Error("Failed to get balance");
       }
-
-      const { data: balanceData } = await balanceResponse.json();
 
       // Only update the balance if it's greater than 0
       const balance = balanceData?.amount ?? 0;
 
       if (balance > 0) {
         // Reset error details and retries if we successfully got the balance
-        await supabase
-          .from("bank_accounts")
-          .update({
-            balance,
-            error_details: null,
-            error_retries: null,
-          })
-          .eq("id", id);
+        await db
+          .update(account_table)
+          .set({ balance, errorDetails: null, errorRetries: null })
+          .where(eq(account_table.id, id));
       } else {
         // Reset error details and retries if we successfully got the balance
-        await supabase
-          .from("bank_accounts")
-          .update({
-            error_details: null,
-            error_retries: null,
-          })
-          .eq("id", id);
+        await db
+          .update(account_table)
+          .set({ errorDetails: null, errorRetries: null })
+          .where(eq(account_table.id, id));
       }
     } catch (error) {
       const parsedError = parseAPIError(error);
@@ -87,13 +62,10 @@ export const syncAccount = schemaTask({
         const retries = errorRetries ? errorRetries + 1 : 1;
 
         // Update the account with the error details and retries
-        await supabase
-          .from("bank_accounts")
-          .update({
-            error_details: parsedError.message,
-            error_retries: retries,
-          })
-          .eq("id", id);
+        await db
+          .update(account_table)
+          .set({ errorDetails: parsedError.message, errorRetries: retries })
+          .where(eq(account_table.id, id));
 
         throw error;
       }
@@ -101,33 +73,24 @@ export const syncAccount = schemaTask({
 
     // Get the transactions
     try {
-      const transactionsResponse = await client.transactions.$get({
-        query: {
-          provider,
-          accountId,
-          accountType: classification,
-          accessToken,
-          // If the transactions are being synced manually, we want to get all transactions
-          latest: manualSync ? "false" : "true",
-        },
+      const transactionsData = await bankProvider.getTransactions({
+        accountId,
+        // accountType: classification,
+        // If the transactions are being synced manually, we want to get all transactions
+        latest: manualSync ? false : true,
       });
 
-      if (!transactionsResponse.ok) {
+      if (!transactionsData) {
         throw new Error("Failed to get transactions");
       }
 
       // Reset error details and retries if we successfully got the transactions
-      await supabase
-        .from("bank_accounts")
-        .update({
-          error_details: null,
-          error_retries: null,
-        })
-        .eq("id", id);
+      await db
+        .update(account_table)
+        .set({ errorDetails: null, errorRetries: null })
+        .where(eq(account_table.id, id));
 
-      const { data: transactionsData } = await transactionsResponse.json();
-
-      if (!transactionsData) {
+      if (transactionsData.length === 0) {
         logger.info(`No transactions to upsert for account ${accountId}`);
         return;
       }
@@ -138,7 +101,7 @@ export const syncAccount = schemaTask({
         const transactionBatch = transactionsData.slice(i, i + BATCH_SIZE);
         await upsertTransactions.triggerAndWait({
           transactions: transactionBatch,
-          teamId,
+          userId,
           bankAccountId: id,
           manualSync,
         });

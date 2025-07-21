@@ -1,5 +1,6 @@
 import type {
   BankAccountProvider,
+  GetAccountBalanceRequest,
   GetAccountsRequest,
   GetAccountsResponse,
   GetConnectionStatusRequest,
@@ -14,6 +15,7 @@ import {
   mapInstitutionsResponse,
   mapTransactionsRequest,
   mapTransactionsResponse,
+  transformAccountBalance,
   transformConnectionStatus,
 } from "./gocardless-mappers";
 
@@ -56,6 +58,32 @@ export const GoCardlessProvider: BankAccountProvider = {
       response.push(mappedAccount);
     }
     return response;
+  },
+
+  async getAccountBalance({ accountId }: GetAccountBalanceRequest) {
+    if (!accountId) {
+      throw Error("Missing params");
+    }
+
+    const response = await gocardlessClient.getAccountBalances({
+      id: accountId,
+    });
+
+    const foundInterimAvailable = response.balances?.find(
+      (account) =>
+        account.balanceType === "interimAvailable" ||
+        account.balanceType === "interimBooked",
+    );
+
+    // For some accounts, the interimAvailable balance is 0, so we need to use the expected balance
+    const foundExpectedAvailable = response.balances?.find(
+      (account) => account.balanceType === "expected",
+    );
+
+    return transformAccountBalance(
+      foundInterimAvailable?.balanceAmount ??
+        foundExpectedAvailable?.balanceAmount,
+    );
   },
 
   async getTransactions(request: GetTransactionsRequest) {

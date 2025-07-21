@@ -112,7 +112,7 @@ export default function CreateTransactionForm() {
   const form = useForm<z.infer<typeof createTransactionSchema>>({
     resolver: standardSchemaResolver(createTransactionSchema),
     defaultValues: {
-      date: new Date(),
+      date: new Date().toISOString(),
       description: undefined,
       currency: "EUR",
       accountId: accounts?.at(0)?.id,
@@ -151,7 +151,7 @@ export default function CreateTransactionForm() {
 
         <FormField
           control={form.control}
-          name="description"
+          name="name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Description</FormLabel>
@@ -166,7 +166,7 @@ export default function CreateTransactionForm() {
                   onBlur={(event) => {
                     if (event.target.value.length < 3) return;
                     categorizeTransactionMutation.mutate({
-                      description: event.target.value,
+                      name: event.target.value,
                     });
                   }}
                 />
@@ -277,7 +277,7 @@ export default function CreateTransactionForm() {
                   >
                     <Calendar
                       mode="single"
-                      selected={field.value}
+                      selected={new Date(field.value)}
                       onSelect={field.onChange}
                       disabled={(date) => date < new Date("1900-01-01")}
                       captionLayout="dropdown"
@@ -418,7 +418,7 @@ export default function CreateTransactionForm() {
 
               <FormField
                 control={form.control}
-                name="exclude"
+                name="internal"
                 render={({ field }) => (
                   <Switch
                     checked={field.value ?? false}

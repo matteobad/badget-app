@@ -1,8 +1,7 @@
-import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import { pgEnum, unique } from "drizzle-orm/pg-core";
 
-import { timestamps } from "../utils";
+import { numericCasted, timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { ACCOUNT_TYPE } from "./enum";
 import { connection_table, institution_table } from "./open-banking";
@@ -12,26 +11,18 @@ export const accountTypeEnum = pgEnum("account_type", ACCOUNT_TYPE);
 export const account_table = pgTable(
   "account_table",
   (d) => ({
-    id: d
-      .varchar({ length: 128 })
-      .primaryKey()
-      .$defaultFn(() => createId())
-      .notNull(),
+    id: d.uuid().defaultRandom().primaryKey().notNull(),
 
     userId: d.varchar({ length: 32 }).notNull(),
-    institutionId: d
-      .varchar({ length: 128 })
-      .references(() => institution_table.id),
-    connectionId: d
-      .varchar({ length: 128 })
-      .references(() => connection_table.id),
+    institutionId: d.uuid().references(() => institution_table.id),
+    connectionId: d.uuid().references(() => connection_table.id),
 
     rawId: d.text().unique(),
     name: d.varchar({ length: 64 }).notNull(),
     description: d.text(),
     type: accountTypeEnum().notNull(),
     logoUrl: d.varchar({ length: 2048 }),
-    balance: d.numeric({ precision: 10, scale: 2 }).notNull(),
+    balance: numericCasted({ precision: 10, scale: 2 }).notNull(),
     currency: d.char({ length: 3 }).notNull(),
     enabled: d.boolean().notNull().default(true),
     manual: d.boolean().notNull().default(false),

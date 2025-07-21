@@ -55,7 +55,7 @@ export default function AccountList({ accounts }: { accounts: AccountType[] }) {
           <div className="text-right">
             <span className="font-medium">
               {formatAmount({
-                amount: parseFloat(account.balance),
+                amount: account.balance,
               })}
             </span>
           </div>

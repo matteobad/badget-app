@@ -95,7 +95,7 @@ export const transactionRouter = createTRPCRouter({
     }),
 
   categorize: protectedProcedure
-    .input(z.object({ description: z.string().min(1) }))
+    .input(z.object({ name: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.userId!;
       return await categorizeUserTransaction(userId, input);

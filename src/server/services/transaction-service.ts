@@ -80,8 +80,7 @@ export async function createTransaction(
   });
 
   // update category rule relevance
-  const description = input.description;
-  await updateOrCreateRule(userId, description, input.categoryId);
+  await updateOrCreateRule(userId, input.name, input.categoryId);
 }
 
 export async function updateTransaction(
@@ -110,8 +109,8 @@ export async function updateManyTransactions(
 
     // update category rules
     if (input.categoryId) {
-      for (const { description } of transaction) {
-        await updateOrCreateRule(userId, description, input.categoryId);
+      for (const { name } of transaction) {
+        await updateOrCreateRule(userId, name, input.categoryId);
       }
     }
 

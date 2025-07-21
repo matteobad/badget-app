@@ -24,6 +24,32 @@ export const ACCOUNT_TYPE = {
 } as const;
 export type AccountType = (typeof ACCOUNT_TYPE)[keyof typeof ACCOUNT_TYPE];
 
+export const TRANSACTION_STATUS = {
+  POSTED: "posted",
+  PENDING: "pending",
+  EXCLUDED: "excluded",
+  COMPLETED: "completed",
+  ARCHIVED: "archived",
+} as const;
+export type TransactionStatusType =
+  (typeof TRANSACTION_STATUS)[keyof typeof TRANSACTION_STATUS];
+
+export const TRANSACTION_METHOD = {
+  PAYMENT: "payment",
+  CARD_PURCHASE: "card_purchase",
+  CARD_ATM: "card_atm",
+  TRANSFER: "transfer",
+  OTHER: "other",
+  UNKNOWN: "unknown",
+  ACH: "ach",
+  INTEREST: "interest",
+  DEPOSIT: "deposit",
+  WIRE: "wire",
+  FEE: "fee",
+} as const;
+export type TransactionMethodType =
+  (typeof TRANSACTION_METHOD)[keyof typeof TRANSACTION_METHOD];
+
 export const SAVING_TYPE = {
   PENSION: "pension",
   EMERGENCY: "emergency",

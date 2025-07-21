@@ -16,6 +16,7 @@ import type {
   GC_GetAccountDetailsResponse,
   GC_GetAccountMetadataResponse,
   GC_GetAccountRequest,
+  GC_GetBalanceRequest,
   GC_GetInstitutionByIdResponse,
   GC_GetInstitutionsRequest,
   GC_GetInstitutionsResponse,
@@ -92,7 +93,9 @@ export const mapAccountsResponse = (
       detailsData.account.product ??
       institutionData.name ??
       "No name",
-    balance: balancesData.balances[0].balanceAmount.amount,
+    balance: balancesData.balances[0]
+      ? parseFloat(balancesData.balances[0].balanceAmount.amount)
+      : 0,
     currency: detailsData.account.currency,
     type: "checking",
     description: "",
@@ -115,36 +118,25 @@ export const mapTransactionsRequest = (params: GetTransactionsRequest) => {
   } satisfies GC_GetTransactionsRequest;
 };
 
-const transformDescription = ({
-  transaction,
-  name,
-}: {
-  transaction: GC_Transaction;
-  name: string;
-}) => {
-  if (transaction?.remittanceInformationUnstructuredArray?.length) {
-    const text = transaction?.remittanceInformationUnstructuredArray.join(" ");
-    const description = capitalCase(text);
-
-    // NOTE: Sometimes the description is the same as name
-    // Let's skip that and just save if they are not the same
-    if (description !== name) {
-      return description;
-    }
+export const mapTransactionMethod = (type?: string) => {
+  switch (type) {
+    case "Payment":
+    case "Bankgiro payment":
+    case "Incoming foreign payment":
+      return "payment";
+    case "Card purchase":
+    case "Card foreign purchase":
+      return "card_purchase";
+    case "Card ATM":
+      return "card_atm";
+    case "Transfer":
+      return "transfer";
+    default:
+      return "other";
   }
-
-  const additionalInformation =
-    transaction.additionalInformation &&
-    capitalCase(transaction.additionalInformation);
-
-  if (additionalInformation !== name) {
-    return additionalInformation;
-  }
-
-  return null;
 };
 
-const transformTransactionName = (transaction: GC_Transaction) => {
+export const transformTransactionName = (transaction: GC_Transaction) => {
   if (transaction?.creditorName) {
     return capitalCase(transaction.creditorName);
   }
@@ -182,10 +174,51 @@ const transformTransactionName = (transaction: GC_Transaction) => {
   return "No information";
 };
 
+const transformDescription = ({
+  transaction,
+  name,
+}: {
+  transaction: GC_Transaction;
+  name: string;
+}) => {
+  if (transaction?.remittanceInformationUnstructuredArray?.length) {
+    const text = transaction?.remittanceInformationUnstructuredArray.join(" ");
+    const description = capitalCase(text);
+
+    // NOTE: Sometimes the description is the same as name
+    // Let's skip that and just save if they are not the same
+    if (description !== name) {
+      return description;
+    }
+  }
+
+  const additionalInformation =
+    transaction.additionalInformation &&
+    capitalCase(transaction.additionalInformation);
+
+  if (additionalInformation !== name) {
+    return additionalInformation;
+  }
+
+  return null;
+};
+
+const transformCounterpartyName = (transaction: GC_Transaction) => {
+  if (transaction?.debtorName) {
+    return capitalCase(transaction.debtorName);
+  }
+
+  if (transaction?.creditorName) {
+    return capitalCase(transaction.creditorName);
+  }
+
+  return null;
+};
+
 export const mapTransactionsResponse = (transaction: GC_Transaction) => {
-  // const method = mapTransactionMethod(
-  //   transaction?.proprietaryBankTransactionCode,
-  // );
+  const method = mapTransactionMethod(
+    transaction?.proprietaryBankTransactionCode,
+  );
 
   // let currencyExchange: { rate: number; currency: string } | undefined;
 
@@ -214,19 +247,25 @@ export const mapTransactionsResponse = (transaction: GC_Transaction) => {
 
   return {
     rawId: transaction.internalTransactionId ?? transaction.transactionId,
-    date: parseISO(transaction.bookingDateTime ?? transaction.bookingDate),
-    // method,
+    date: transaction.bookingDateTime ?? transaction.bookingDate,
+    method,
     amount: parseFloat(transaction.transactionAmount.amount),
     currency: transaction.transactionAmount.currency,
     // category: mapTransactionCategory(transaction),
     // currency_rate: currencyExchange?.rate ?? null,
     // currency_source: currencyExchange?.currency?.toUpperCase() ?? null,
     // balance,
-    description: name,
-    note: description,
-    // status: "posted",
+    counterpartyName: transformCounterpartyName(transaction),
+    name,
+    description,
+    status: "posted",
   } satisfies GetTransactionsResponse[number];
 };
+
+export const transformAccountBalance = (account?: GC_GetBalanceRequest) => ({
+  currency: account?.currency.toUpperCase() ?? "EUR",
+  amount: +(account?.amount ?? 0),
+});
 
 export const transformConnectionStatus = (
   requisition?: GC_GetRequisitionByIdResponse,

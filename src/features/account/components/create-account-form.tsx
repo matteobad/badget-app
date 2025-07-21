@@ -58,7 +58,7 @@ export default function CreateAccountForm({
     resolver: standardSchemaResolver(AccountInsertSchema),
     defaultValues: {
       name: "",
-      balance: "0",
+      balance: 0,
       currency: "EUR",
     },
   });

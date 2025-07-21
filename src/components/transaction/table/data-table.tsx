@@ -1,5 +1,6 @@
 "use client";
 
+import type { TransactionStatusType } from "~/server/db/schema/enum";
 import { use, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import {
@@ -129,7 +130,7 @@ export function DataTable({
       updateTransaction: (data: { id: string; status: string }) => {
         updateTransactionMutation.mutate({
           id: data.id,
-          status: data.status as "pending" | "archived" | "booked" | "excluded",
+          status: data.status as TransactionStatusType,
         });
       },
       onDeleteTransaction: (id: string) => {

@@ -1,27 +1,21 @@
 import { createId } from "@paralleldrive/cuid2";
-import {
-  boolean,
-  char,
-  integer,
-  pgEnum,
-  text,
-  timestamp,
-  unique,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { integer, pgEnum, text, unique, varchar } from "drizzle-orm/pg-core";
 
 import { numericCasted, timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { account_table } from "./accounts";
 import { category_table } from "./categories";
+import { TRANSACTION_METHOD, TRANSACTION_STATUS } from "./enum";
 
-export const transactionStatusEnum = pgEnum("transaction_status", [
-  "booked",
-  "pending",
-  "excluded",
-  "archived",
-]);
+export const transactionMethodEnum = pgEnum(
+  "transaction_method",
+  TRANSACTION_METHOD,
+);
+
+export const transactionStatusEnum = pgEnum(
+  "transaction_status",
+  TRANSACTION_STATUS,
+);
 
 export const transactionFrequencyEnum = pgEnum("transaction_frequency", [
   "weekly",
@@ -35,34 +29,35 @@ export const transactionFrequencyEnum = pgEnum("transaction_frequency", [
 
 export const transaction_table = pgTable(
   "transaction_table",
-  {
-    id: varchar({ length: 128 })
-      .primaryKey()
-      .$defaultFn(() => createId())
-      .notNull(),
+  (d) => ({
+    id: d.uuid().defaultRandom().primaryKey().notNull(),
 
-    userId: varchar({ length: 32 }).notNull(),
-    accountId: varchar({ length: 128 })
+    userId: d.varchar({ length: 32 }).notNull(),
+    accountId: d
+      .uuid()
       .notNull()
       .references(() => account_table.id),
-    categoryId: uuid().references(() => category_table.id),
+    categoryId: d.uuid().references(() => category_table.id),
 
-    rawId: text().unique(),
+    rawId: d.text().unique(),
     amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
-    currency: char({ length: 3 }).notNull(),
-    date: timestamp({ withTimezone: true }).notNull(),
-    description: text().notNull(),
-    manual: boolean().default(false),
-    categorySlug: text(),
-    counterpartyName: text(),
-    exclude: boolean().notNull().default(false),
-    recurring: boolean().notNull().default(false),
+    currency: d.char({ length: 3 }).notNull(),
+    date: d.timestamp({ withTimezone: true, mode: "string" }).notNull(),
+    name: d.text().notNull(),
+    description: d.text(),
+    manual: d.boolean().default(false),
+    notified: d.boolean().default(false),
+    internal: d.boolean().default(false),
+    categorySlug: d.text(),
+    counterpartyName: d.text(),
+    method: transactionMethodEnum().notNull(),
+    recurring: d.boolean().notNull().default(false),
     frequency: transactionFrequencyEnum(),
-    status: transactionStatusEnum().default("booked"),
-    note: text(),
+    status: transactionStatusEnum().default("posted").notNull(),
+    note: d.text(),
 
     ...timestamps,
-  },
+  }),
   (t) => [unique().on(t.userId, t.rawId)],
 );
 
