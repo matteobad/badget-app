@@ -5,6 +5,7 @@ import { account_table } from "~/server/db/schema/accounts";
 export type CreateBankAccountPayload = {
   name: string;
   accountId: string;
+  institutionId?: string;
   connectionId?: string;
   balance: number;
   currency: string;
@@ -23,13 +24,25 @@ export const createBankAccountMutation = async (
     .values({
       rawId: payload.accountId,
       connectionId: payload.connectionId,
+      institutionId: payload.institutionId,
       userId: payload.userId,
       name: payload.name,
       currency: payload.currency,
       manual: payload.manual,
       enabled: payload.enabled,
-      type: "checking",
+      type: payload.type ?? "checking",
       balance: payload.balance,
+    })
+    .onConflictDoUpdate({
+      target: [account_table.rawId, account_table.userId],
+      set: {
+        connectionId: payload.connectionId,
+        name: payload.name,
+        currency: payload.currency,
+        enabled: payload.enabled,
+        balance: payload.balance,
+        //lastAccessed: new Date().toISOString(),
+      },
     })
     .returning();
 

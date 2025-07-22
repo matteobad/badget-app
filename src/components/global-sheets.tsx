@@ -3,6 +3,7 @@
 import { use } from "react";
 
 import { ConnectBankDialog } from "./bank-connection/connect-bank-dialog";
+import { SelectBankAccountsModal } from "./bank-connection/select-bank-accounts";
 import CreateCategoryDialog from "./category/create-category-dialog";
 import CategorySheet from "./category/sheets/category-sheet";
 import CreateTransactionSheet from "./transaction/sheets/create-transaction-sheet";
@@ -20,6 +21,7 @@ export function GlobalSheets({ countryCodePromise }: Props) {
   return (
     <>
       <ConnectBankDialog countryCode={countryCode} />
+      <SelectBankAccountsModal />
 
       <CreateCategoryDialog />
       <CategorySheet />

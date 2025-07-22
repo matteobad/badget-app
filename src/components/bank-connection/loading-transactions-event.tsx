@@ -21,6 +21,7 @@ type Props = {
 };
 
 export function LoadingTransactionsEvent({
+  accessToken,
   runId,
   setRunId,
   onClose,
@@ -33,6 +34,7 @@ export function LoadingTransactionsEvent({
 
   const { status } = useInitialConnectionStatus({
     runId,
+    accessToken,
   });
 
   useEffect(() => {

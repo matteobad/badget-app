@@ -1,5 +1,6 @@
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
+import { getBankAccountProvider } from "~/features/account/server/providers";
 import { type initialBankSetup } from "~/server/jobs/tasks/initial-bank-setup";
 import {
   createBankConnection,
@@ -8,6 +9,7 @@ import {
 import {
   createBankConnectionSchema,
   getBankConnectionsSchema,
+  getOpenBankingAccountsSchema,
 } from "~/shared/validators/bank-connection.schema";
 
 import { createTRPCRouter, protectedProcedure } from "../init";
@@ -17,6 +19,13 @@ export const bankConnectionRouter = createTRPCRouter({
     .input(getBankConnectionsSchema)
     .query(async ({ input, ctx: { session } }) => {
       return getBankConnections(input, session.userId!);
+    }),
+
+  getAccounts: protectedProcedure
+    .input(getOpenBankingAccountsSchema)
+    .query(async ({ input }) => {
+      const provider = getBankAccountProvider("gocardless");
+      return await provider.getAccounts({ id: input.id });
     }),
 
   create: protectedProcedure

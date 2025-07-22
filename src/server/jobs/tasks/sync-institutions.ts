@@ -17,7 +17,7 @@ export const syncInstitutions = schedules.task({
   },
   run: async () => {
     try {
-      const provider = getBankAccountProvider("GOCARDLESS");
+      const provider = getBankAccountProvider("gocardless");
       const data = await provider.getInstitutions({
         countryCode: "IT",
       });

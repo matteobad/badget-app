@@ -1,5 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import { AppSidebar } from "~/components/app-sidebar";
 import { FeedbackDialog } from "~/components/feedback-dialog";
 import { GlobalSheets } from "~/components/global-sheets";
@@ -13,8 +15,12 @@ import {
 } from "~/components/ui/sidebar";
 import { getCountryCode } from "~/server/services/location-service";
 
-export default function AppLayout(props: PropsWithChildren) {
+export default async function AppLayout(props: PropsWithChildren) {
   const countryCodePromise = getCountryCode();
+
+  const session = await auth();
+
+  if (!session.userId) redirect("/sign-in");
 
   return (
     <>

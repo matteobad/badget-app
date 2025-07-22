@@ -1,5 +1,5 @@
 import type { DBClient } from "~/server/db";
-import type { BankProviderType } from "~/server/db/schema/enum";
+import type { AccountType, BankProviderType } from "~/server/db/schema/enum";
 import type { DB_ConnectionInsertType } from "~/server/db/schema/open-banking";
 import { connection_table } from "~/server/db/schema/open-banking";
 import { and, eq } from "drizzle-orm";
@@ -14,7 +14,7 @@ export type CreateBankConnectionPayload = {
     currency: string;
     enabled: boolean;
     balance?: number;
-    type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
+    type: AccountType;
     accountReference?: string | null;
     expiresAt?: string | null;
   }[];

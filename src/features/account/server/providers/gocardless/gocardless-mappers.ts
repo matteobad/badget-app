@@ -101,6 +101,7 @@ export const mapAccountsResponse = (
     description: "",
     // resource_id: detailsData.account.resourceId,
     // enrollment_id: null,
+    // institutionId: institutionData.id,
     logoUrl: institutionData.logo,
     enabled: true,
     manual: false,

@@ -1,37 +1,38 @@
 import { z } from "@hono/zod-openapi";
-import { BANK_PROVIDER } from "~/server/db/schema/enum";
+import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/server/db/schema/enum";
 import { parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 export const getBankConnectionsSchema = z
   .object({ enabled: z.boolean().optional() })
   .optional();
 
+export const getOpenBankingAccountsSchema = z.object({
+  id: z.string(),
+  provider: z.enum(BANK_PROVIDER).optional(),
+});
+
 export const createBankConnectionSchema = z.object({
-  accessToken: z.string().nullable().optional(), // Teller
-  enrollmentId: z.string().nullable().optional(), // Teller
-  referenceId: z.string().nullable().optional(), // GoCardLess
-  provider: z.enum(["gocardless", "teller", "plaid", "enablebanking"]),
-  accounts: z.array(
-    z.object({
-      accountId: z.string(),
-      institutionId: z.string(),
-      logoUrl: z.string().nullable().optional(),
-      name: z.string(),
-      bankName: z.string(),
-      currency: z.string(),
-      enabled: z.boolean(),
-      balance: z.number().optional(),
-      type: z.enum([
-        "credit",
-        "depository",
-        "other_asset",
-        "loan",
-        "other_liability",
-      ]),
-      accountReference: z.string().nullable().optional(), // EnableBanking & GoCardLess
-      expiresAt: z.string().nullable().optional(), // EnableBanking & GoCardLess
+  referenceId: z.string(), // GoCardLess
+  provider: z.enum(BANK_PROVIDER),
+  accounts: z
+    .array(
+      z.object({
+        accountId: z.string(),
+        institutionId: z.string().optional(),
+        logoUrl: z.string().nullable().optional(),
+        name: z.string(),
+        bankName: z.string(),
+        currency: z.string(),
+        enabled: z.boolean(),
+        balance: z.number().optional(),
+        type: z.enum(ACCOUNT_TYPE),
+        accountReference: z.string().nullable().optional(), // EnableBanking & GoCardLess
+        expiresAt: z.string().nullable().optional(), // EnableBanking & GoCardLess
+      }),
+    )
+    .refine((accounts) => accounts.some((account) => account.enabled), {
+      message: "At least one account must be selected.", // You might want a more specific message depending on UI context
     }),
-  ),
 });
 
 export const deleteBankConnectionSchema = z.object({ id: z.string() });

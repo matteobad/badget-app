@@ -9,7 +9,7 @@ docker-compose up -d --wait
 # db
 pnpm db:push
 # pnpm db:migrate
-pnpm db:seed
+# pnpm db:seed
 
 # run
 #pnpm run dev

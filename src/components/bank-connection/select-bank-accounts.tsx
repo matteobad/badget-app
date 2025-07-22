@@ -8,6 +8,7 @@ import { useConnectParams } from "~/hooks/use-connect-params";
 import { getInitials } from "~/lib/utils";
 import { sendSupportAction } from "~/server/domain/bank-connection/actions";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { createBankConnectionSchema } from "~/shared/validators/bank-connection.schema";
 import { ArrowLeftIcon, Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
@@ -124,60 +125,27 @@ function SupportForm() {
   );
 }
 
-const formSchema = z.object({
-  referenceId: z.string().nullable().optional(), // GoCardLess
-  accessToken: z.string().nullable().optional(), // Teller
-  enrollmentId: z.string().nullable().optional(), // Teller
-  provider: z.enum(["gocardless", "plaid", "teller", "enablebanking"]),
-  accounts: z
-    .array(
-      z.object({
-        accountId: z.string(),
-        bankName: z.string(),
-        balance: z.number().optional(),
-        currency: z.string(),
-        name: z.string(),
-        institutionId: z.string(),
-        accountReference: z.string().nullable().optional(), // EnableBanking & GoCardLess
-        enabled: z.boolean(),
-        logoUrl: z.string().nullable().optional(),
-        expiresAt: z.string().nullable().optional(), // EnableBanking & GoCardLess
-        type: z.enum([
-          "credit",
-          "depository",
-          "other_asset",
-          "loan",
-          "other_liability",
-        ]),
-      }),
-    )
-    .refine((accounts) => accounts.some((account) => account.enabled), {
-      message: "At least one account must be selected.", // You might want a more specific message depending on UI context
-    }),
-});
-
 export function SelectBankAccountsModal() {
   const trpc = useTRPC();
 
   const [runId, setRunId] = useState<string>();
+  const [accessToken, setAccessToken] = useState<string>();
   const [activeTab, setActiveTab] = useState<
     "select-accounts" | "loading" | "support"
   >("select-accounts");
 
-  const { step, error, setParams, provider, ref, institution_id } =
-    useConnectParams();
+  const { step, error, setParams, provider, ref } = useConnectParams();
 
   const isOpen = step === "account";
 
   const { data, isLoading } = useQuery(
-    trpc.bankAccount.get.queryOptions(
+    trpc.bankConnection.getAccounts.queryOptions(
       {
-        id: ref ?? undefined,
-        institutionId: institution_id ?? undefined,
+        id: ref!,
         provider: provider!,
       },
       {
-        enabled: isOpen,
+        enabled: isOpen && ref !== null,
       },
     ),
   );
@@ -190,6 +158,7 @@ export function SelectBankAccountsModal() {
       onSuccess: (data) => {
         if (data?.id) {
           setRunId(data.id);
+          setAccessToken(data.publicAccessToken);
           setActiveTab("loading");
         }
       },
@@ -212,10 +181,10 @@ export function SelectBankAccountsModal() {
     void setParams(null);
   };
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: standardSchemaResolver(formSchema),
+  const form = useForm<z.infer<typeof createBankConnectionSchema>>({
+    resolver: standardSchemaResolver(createBankConnectionSchema),
     defaultValues: {
-      referenceId: ref ?? undefined,
+      referenceId: ref!,
       provider: provider!,
       accounts: [],
     },
@@ -223,27 +192,26 @@ export function SelectBankAccountsModal() {
 
   useEffect(() => {
     form.reset({
+      referenceId: ref!,
       provider: provider!,
-      // GoCardLess Requestion ID or Plaid Item ID
-      referenceId: ref ?? undefined,
       accounts: data?.map((account) => ({
-        institutionId: account.institutionId!,
         accountId: account.rawId!,
-        name: account.name,
+        // institutionId: account.  .!,
         logoUrl: account.logoUrl,
-        accountReference: ref ?? undefined,
+        name: account.name,
         bankName: account.name,
-        currency: account.currency,
         balance: account.balance,
+        currency: account.currency,
         enabled: true,
-        // type: account.type,
+        type: account.type,
+        accountReference: ref!,
         // expiresAt: account.expires_at,
       })),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, ref]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof createBankConnectionSchema>) {
     connectBankConnectionMutation.mutate(values);
   }
 
@@ -275,13 +243,13 @@ export function SelectBankAccountsModal() {
 
                     {data?.map((account) => (
                       <FormField
-                        key={account.id}
+                        key={account.rawId}
                         control={form.control}
                         name="accounts"
                         render={({ field }) => {
                           return (
                             <FormItem
-                              key={account.id}
+                              key={account.rawId}
                               className="flex justify-between"
                             >
                               <FormLabel className="mr-8 flex w-full items-center space-x-4">
@@ -317,13 +285,15 @@ export function SelectBankAccountsModal() {
                                     checked={
                                       field.value?.find(
                                         (value) =>
-                                          value.accountId === account.id,
+                                          value.accountId === account.rawId,
                                       )?.enabled
                                     }
                                     onCheckedChange={(checked) => {
                                       return field.onChange(
                                         field.value.map((value) => {
-                                          if (value.accountId === account.id) {
+                                          if (
+                                            value.accountId === account.rawId
+                                          ) {
                                             return {
                                               ...value,
                                               enabled: checked,
@@ -373,6 +343,7 @@ export function SelectBankAccountsModal() {
 
             <TabsContent value="loading">
               <LoadingTransactionsEvent
+                accessToken={accessToken}
                 runId={runId}
                 setRunId={setRunId}
                 onClose={onClose}

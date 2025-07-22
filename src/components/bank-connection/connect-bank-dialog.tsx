@@ -201,7 +201,7 @@ export function ConnectBankDialog({
                   return (
                     <SearchResult
                       key={institution.id}
-                      id={institution.id}
+                      id={institution.originalId}
                       name={institution.name}
                       logo={institution.logo}
                       provider={institution.provider}

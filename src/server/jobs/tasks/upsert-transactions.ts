@@ -10,6 +10,7 @@ import { categorizeTransactions } from "~/utils/categorization";
 import { z } from "zod/v4";
 
 const transactionSchema = z.object({
+  rawId: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   method: z.enum(TRANSACTION_METHOD),
   date: z.string(),
@@ -27,7 +28,7 @@ export const upsertTransactions = schemaTask({
     concurrencyLimit: 10,
   },
   schema: z.object({
-    userId: z.uuid(),
+    userId: z.string(),
     bankAccountId: z.uuid(),
     manualSync: z.boolean().optional(),
     transactions: z.array(transactionSchema),
@@ -58,6 +59,7 @@ export const upsertTransactions = schemaTask({
             "date",
             "name",
             "description",
+            "note",
           ]),
         });
     } catch (error) {
