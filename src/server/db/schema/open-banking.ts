@@ -3,6 +3,7 @@ import { pgEnum, unique } from "drizzle-orm/pg-core";
 
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
+import { user as user_table } from "./auth";
 import { BANK_PROVIDER, CONNECTION_STATUS } from "./enum";
 
 export const bankProviderEnum = pgEnum("bank_provider", BANK_PROVIDER);
@@ -38,7 +39,10 @@ export const connection_table = pgTable(
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
     // FK
-    userId: d.varchar({ length: 32 }).notNull(),
+    userId: d
+      .text()
+      .notNull()
+      .references(() => user_table.id, { onDelete: "cascade" }),
     institutionId: d
       .uuid()
       .notNull()

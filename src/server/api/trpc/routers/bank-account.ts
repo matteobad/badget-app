@@ -7,7 +7,7 @@ export const bankAccountRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getBankAccountsSchema)
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
+      const userId = ctx.session!.userId;
       return await getBankAccounts(input, userId);
     }),
 });

@@ -28,7 +28,7 @@ export const budgetRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
+      const userId = ctx.session!.userId;
       const { budgetFilters } = input;
 
       const categories = await getCategoriesQuery({ userId });
@@ -39,28 +39,28 @@ export const budgetRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getBudgetsSchema)
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
+      const userId = ctx.session!.userId;
       return await getBudgets(input, userId);
     }),
 
   create: protectedProcedure
     .input(createBudgetSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
+      const userId = ctx.session!.userId;
       return await createBudget(input, userId);
     }),
 
   update: protectedProcedure
     .input(updateBudgetSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
+      const userId = ctx.session!.userId;
       return await updateBudget(input, userId);
     }),
 
   delete: protectedProcedure
     .input(deleteBudgetSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
+      const userId = ctx.session!.userId;
       return await deleteBudget(input, userId);
     }),
 });

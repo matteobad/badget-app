@@ -11,19 +11,19 @@ export const tagRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createTagSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
+      const userId = ctx.session!.userId;
       return await createTag(input, userId);
     }),
 
   delete: protectedProcedure
     .input(deleteTagSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
+      const userId = ctx.session!.userId;
       return await deleteTag(input, userId);
     }),
 
   get: protectedProcedure.input(getTagsSchema).query(async ({ ctx, input }) => {
-    const userId = ctx.session.userId!;
+    const userId = ctx.session!.userId;
     return await getTags(input, userId);
   }),
 });

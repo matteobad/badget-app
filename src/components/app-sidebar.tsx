@@ -25,7 +25,6 @@ import {
 
 import { NavPillars } from "./nav-pillars";
 import { NavWealth } from "./nav-wealth";
-import { TeamSwitcher } from "./team-switcher";
 
 const data = {
   navMain: [
@@ -101,9 +100,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar variant="inset" {...props}>
-      <SidebarHeader>
-        <TeamSwitcher />
-      </SidebarHeader>
+      <SidebarHeader>{/* <TeamSwitcher /> */}</SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavPillars items={data.navPillars} />

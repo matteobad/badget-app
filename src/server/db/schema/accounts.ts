@@ -2,6 +2,7 @@ import { pgEnum, unique } from "drizzle-orm/pg-core";
 
 import { numericCasted, timestamps } from "../utils";
 import { pgTable } from "./_table";
+import { user as user_table } from "./auth";
 import { ACCOUNT_TYPE } from "./enum";
 import { connection_table, institution_table } from "./open-banking";
 
@@ -12,7 +13,10 @@ export const account_table = pgTable(
   (d) => ({
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
-    userId: d.varchar({ length: 32 }).notNull(),
+    userId: d
+      .text()
+      .notNull()
+      .references(() => user_table.id, { onDelete: "cascade" }),
     institutionId: d.uuid().references(() => institution_table.id),
     connectionId: d.uuid().references(() => connection_table.id),
 

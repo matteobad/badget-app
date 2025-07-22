@@ -1,4 +1,5 @@
-import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
+import { auth } from "~/server/auth/auth";
 import {
   createSafeActionClient,
   DEFAULT_SERVER_ERROR_MESSAGE,
@@ -46,17 +47,19 @@ export const authActionClient = actionClient
     return result;
   })
   .use(async ({ next }) => {
-    const session = await auth();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
     // If the session is not valid, we throw an error and stop execution here.
-    if (!session.userId) {
+    if (!session) {
       throw new Error("Session is not valid!");
     }
 
     // Here we return the context object for the next middleware in the chain/server code function.
     return next({
       ctx: {
-        userId: session.userId,
+        userId: session.user.id,
       },
     });
   });

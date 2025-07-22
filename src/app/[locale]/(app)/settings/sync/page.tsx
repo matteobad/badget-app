@@ -1,23 +1,28 @@
-import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import SyncConnection from "~/features/account/components/sync-connection";
 import {
   getConnectionByKey,
   getInstitutionById,
 } from "~/features/account/server/queries";
+import { auth } from "~/server/auth/auth";
 
 export default async function SyncPage({
   searchParams,
 }: {
   searchParams: Promise<{ ref: string; provider: string }>;
 }) {
-  const session = await auth();
-  if (!session.userId) throw new Error("User not found");
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) redirect("/sign-in");
 
   const params = await searchParams;
   const conn = await getConnectionByKey(params.ref);
   if (!conn) throw new Error("Connection not found");
-  if (conn.userId !== session.userId) throw new Error("User not authorized");
+  if (conn.userId !== session.user.id) throw new Error("User not authorized");
 
   const institution = await getInstitutionById(conn.institutionId);
 

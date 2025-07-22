@@ -20,7 +20,7 @@ export const transactionTagRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createTransactionTagSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
+      const userId = ctx.session!.userId;
       const inputTag = { ...input.tag, userId };
 
       return await withTransaction(async (tx) => {
@@ -41,7 +41,7 @@ export const transactionTagRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(deleteTransactionTagSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
+      const userId = ctx.session!.userId;
 
       return withTransaction(async (tx) => {
         await deleteTransactionToTagMutation(tx, input);

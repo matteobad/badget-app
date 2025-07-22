@@ -1,6 +1,5 @@
 import type { db } from "~/server/db";
 import type { MiddlewareHandler } from "hono";
-import { type auth } from "@clerk/nextjs/server";
 
 // import { withAuth } from "./middleware/auth";
 import { withDatabase } from "./middleware/db";
@@ -8,7 +7,7 @@ import { withDatabase } from "./middleware/db";
 export type Context = {
   Variables: {
     db: typeof db;
-    session: Awaited<ReturnType<typeof auth>>;
+    // session: Awaited<ReturnType<typeof auth>>;
   };
 };
 

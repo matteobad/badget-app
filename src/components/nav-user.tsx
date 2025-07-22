@@ -1,6 +1,5 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   DropdownMenu,
@@ -11,14 +10,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { useSession } from "~/shared/helpers/better-auth/auth-client";
 import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from "lucide-react";
 
 import { Skeleton } from "./ui/skeleton";
 
 export function NavUser() {
-  const { user, isLoaded } = useUser();
+  const { data, isPending } = useSession();
 
-  if (!user || !isLoaded) {
+  if (!data?.user || isPending) {
     return <Skeleton className="size-8 rounded-full" />;
   }
 
@@ -26,7 +26,10 @@ export function NavUser() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="w-auto">
         <Avatar className="h-8 w-8 rounded-full">
-          <AvatarImage src={user.imageUrl} alt={`avatar of ${user.fullName}`} />
+          <AvatarImage
+            src={data.user.image ?? ""}
+            alt={`avatar of ${data.user.name}`}
+          />
           <AvatarFallback className="rounded-full">CN</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -40,16 +43,14 @@ export function NavUser() {
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="h-8 w-8 rounded-lg">
               <AvatarImage
-                src={user.imageUrl}
-                alt={`avatar of ${user.fullName}`}
+                src={data.user.image ?? ""}
+                alt={`avatar of ${data.user.name}`}
               />
               <AvatarFallback className="rounded-lg">CN</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">{user.firstName}</span>
-              <span className="truncate text-xs">
-                {user.primaryEmailAddress?.emailAddress}
-              </span>
+              <span className="truncate font-semibold">{data.user.name}</span>
+              <span className="truncate text-xs">{data.user.email}</span>
             </div>
           </div>
         </DropdownMenuLabel>

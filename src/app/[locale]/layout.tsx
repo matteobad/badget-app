@@ -1,7 +1,6 @@
 import "~/globals.css";
 
 import { type ReactElement } from "react";
-import { ClerkProvider } from "@clerk/nextjs";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -33,39 +32,33 @@ export default async function RootLayout({
   const { locale } = await params;
 
   return (
-    <ClerkProvider afterSignOutUrl={"/sign-in"} dynamic>
-      <html
-        lang="en"
-        className={`${GeistSans.variable} ${GeistMono.variable}`}
-        suppressHydrationWarning
-      >
-        <body>
-          <TRPCReactProvider>
-            <I18nProviderClient locale={locale}>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-              >
-                <NuqsAdapter>{children}</NuqsAdapter>
-                <TailwindIndicator />
-              </ThemeProvider>
-            </I18nProviderClient>
-          </TRPCReactProvider>
-          <Toaster />
-          <Analytics />
-          <SpeedInsights />
-          <NextSSRPlugin
-            /**
-             * The `extractRouterConfig` will extract **only** the route configs
-             * from the router to prevent additional information from being
-             * leaked to the client. The data passed to the client is the same
-             * as if you were to fetch `/api/uploadthing` directly.
-             */
-            routerConfig={extractRouterConfig(ourFileRouter)}
-          />
-        </body>
-      </html>
-    </ClerkProvider>
+    <html
+      lang="en"
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <body>
+        <TRPCReactProvider>
+          <I18nProviderClient locale={locale}>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              <NuqsAdapter>{children}</NuqsAdapter>
+              <TailwindIndicator />
+            </ThemeProvider>
+          </I18nProviderClient>
+        </TRPCReactProvider>
+        <Toaster />
+        <Analytics />
+        <SpeedInsights />
+        <NextSSRPlugin
+          /**
+           * The `extractRouterConfig` will extract **only** the route configs
+           * from the router to prevent additional information from being
+           * leaked to the client. The data passed to the client is the same
+           * as if you were to fetch `/api/uploadthing` directly.
+           */
+          routerConfig={extractRouterConfig(ourFileRouter)}
+        />
+      </body>
+    </html>
   );
 }

@@ -1,5 +1,6 @@
 import type { FileRouter } from "uploadthing/next";
-import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
+import { auth } from "~/server/auth/auth";
 import { db } from "~/server/db";
 import { attachment_table } from "~/server/db/schema/transactions";
 import { createUploadthing } from "uploadthing/next";
@@ -11,14 +12,16 @@ export const ourFileRouter = {
   attachmentUploader: f(["image", "pdf"])
     .middleware(async () => {
       // This code runs on your server before upload
-      const user = await auth();
+      const session = await auth.api.getSession({
+        headers: await headers(),
+      });
 
       // If you throw, the user will not be able to upload
       // eslint-disable-next-line @typescript-eslint/only-throw-error
-      if (!user.userId) throw new UploadThingError("Unauthorized");
+      if (!session) throw new UploadThingError("Unauthorized");
 
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: user.userId };
+      return { userId: session.user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
@@ -43,14 +46,16 @@ export const ourFileRouter = {
   csvUploader: f({ "text/csv": { maxFileSize: "4MB" } })
     .middleware(async () => {
       // This code runs on your server before upload
-      const user = await auth();
+      const session = await auth.api.getSession({
+        headers: await headers(),
+      });
 
       // If you throw, the user will not be able to upload
       // eslint-disable-next-line @typescript-eslint/only-throw-error
-      if (!user.userId) throw new UploadThingError("Unauthorized");
+      if (!session) throw new UploadThingError("Unauthorized");
 
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: user.userId };
+      return { userId: session.user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload

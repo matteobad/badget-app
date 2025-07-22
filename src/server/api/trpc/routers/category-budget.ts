@@ -7,7 +7,7 @@ export const categoryBudgetRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getCategoriesSchema)
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session.userId!;
+      const userId = ctx.session!.userId;
       return await getCategories(input, userId);
     }),
 });

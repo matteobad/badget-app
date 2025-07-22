@@ -1,6 +1,4 @@
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import { useOrganizationList } from "@clerk/nextjs";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Button } from "~/components/ui/button";
 import {
@@ -37,8 +35,8 @@ export function CreateTeamModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const router = useRouter();
-  const { createOrganization } = useOrganizationList();
+  // const router = useRouter();
+  // const { createOrganization } = useOrganizationList();
   const [isCreating, setIsCreating] = React.useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -48,12 +46,12 @@ export function CreateTeamModal({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(_values: z.infer<typeof formSchema>) {
     setIsCreating(true);
     try {
-      const organization = await createOrganization!({ name: values.name });
+      // const organization = await createOrganization!({ name: values.name });
       onOpenChange(false);
-      router.push(`/${organization.id}`);
+      // router.push(`/${organization.id}`);
     } catch (error) {
       console.error("Failed to create organization:", error);
       // Here you would typically show an error message to the user

@@ -1,6 +1,7 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
 import { Button } from "~/components/ui/button";
+import { auth } from "~/server/auth/auth";
 
 export default function HomePage() {
   return (
@@ -15,9 +16,11 @@ export default function HomePage() {
         action={async () => {
           "use server";
 
-          const session = await auth();
+          const session = await auth.api.getSession({
+            headers: await headers(),
+          });
 
-          if (!session.userId) {
+          if (!session) {
             return redirect("/sign-in");
           }
 

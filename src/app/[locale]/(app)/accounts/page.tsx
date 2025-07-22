@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Skeleton } from "~/components/ui/skeleton";
 import AccountCardGrid from "~/features/account/components/account-card-grid";
 import { AddAccountButton } from "~/features/account/components/add-account-button";
@@ -13,6 +14,7 @@ import {
 } from "~/features/account/server/cached-queries";
 import { getInstitutionsForCountry } from "~/features/account/server/queries";
 import { accountsSearchParamsCache } from "~/features/account/utils/search-params";
+import { auth } from "~/server/auth/auth";
 import { type SearchParams } from "nuqs/server";
 
 type BankingAccountsPageProps = {
@@ -26,12 +28,15 @@ export default async function AccountsPage({
   // You can access type-safe values from the returned object:
   const {} = await accountsSearchParamsCache.parse(searchParams);
 
-  const session = await auth();
-  if (!session.userId) throw new Error("User not found");
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) redirect("/sign-in");
 
   const institutions = await getInstitutionsForCountry("IT");
-  const promise = Promise.all([getConnectionsForUser_CACHED(session.userId)]);
-  const promises = Promise.all([getAccountsForUser_CACHED(session.userId)]);
+  const promise = Promise.all([getConnectionsForUser_CACHED(session.user.id)]);
+  const promises = Promise.all([getAccountsForUser_CACHED(session.user.id)]);
 
   return (
     <>

@@ -1,14 +1,16 @@
 import type { MiddlewareHandler } from "hono";
-import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
+import { auth } from "~/server/auth/auth";
 
 /**
  * Database middleware that connects to the database and sets it on context
  */
 export const withAuth: MiddlewareHandler = async (c, next) => {
-  const session = await auth();
-  console.log(session);
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (!session?.userId) {
+  if (!session) {
     throw new Error("UNAUTHORIZED");
   }
 

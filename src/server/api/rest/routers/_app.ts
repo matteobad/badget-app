@@ -10,7 +10,7 @@ import { categoryRouter } from "./category";
 const routers = new OpenAPIHono();
 
 routers.use(secureHeaders());
-// routers.use("*", clerkMiddleware());
+// routers.use("*", authMiddleware());
 routers.use(...protectedMiddleware);
 
 routers.doc("/openapi", {

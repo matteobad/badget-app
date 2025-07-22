@@ -4,6 +4,7 @@ import { pgEnum, unique } from "drizzle-orm/pg-core";
 import { numericCasted, timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { account_table } from "./accounts";
+import { user as user_table } from "./auth";
 import { category_table } from "./categories";
 import {
   TRANSACTION_FREQUENCY,
@@ -31,7 +32,10 @@ export const transaction_table = pgTable(
   (d) => ({
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
-    userId: d.varchar({ length: 32 }).notNull(),
+    userId: d
+      .text()
+      .notNull()
+      .references(() => user_table.id, { onDelete: "cascade" }),
     accountId: d
       .uuid()
       .notNull()
@@ -71,7 +75,10 @@ export const attachment_table = pgTable("attachment_table", (d) => ({
     .$defaultFn(() => createId())
     .notNull(),
 
-  userId: d.varchar({ length: 32 }).notNull(),
+  userId: d
+    .text()
+    .notNull()
+    .references(() => user_table.id, { onDelete: "cascade" }),
   transactionId: d
     .uuid()
     .references(() => transaction_table.id, { onDelete: "cascade" }),
@@ -98,7 +105,10 @@ export const tag_table = pgTable(
       .$defaultFn(() => createId())
       .notNull(),
 
-    userId: d.varchar({ length: 32 }).notNull(),
+    userId: d
+      .text()
+      .notNull()
+      .references(() => user_table.id, { onDelete: "cascade" }),
     text: d.text().notNull(),
 
     ...timestamps,

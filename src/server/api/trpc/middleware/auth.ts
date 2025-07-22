@@ -16,13 +16,13 @@ export const authMiddleware = async <TReturn>(opts: {
 }) => {
   const { session } = opts.ctx;
 
-  if (!session.userId) {
+  if (!session) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
   return opts.next({
     ctx: {
-      session,
+      session: session,
     },
   });
 };

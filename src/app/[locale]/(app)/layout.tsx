@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { Suspense } from "react";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
 import { AppSidebar } from "~/components/app-sidebar";
 import { FeedbackDialog } from "~/components/feedback-dialog";
 import { GlobalSheets } from "~/components/global-sheets";
@@ -13,14 +13,17 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "~/components/ui/sidebar";
+import { auth } from "~/server/auth/auth";
 import { getCountryCode } from "~/server/services/location-service";
 
 export default async function AppLayout(props: PropsWithChildren) {
   const countryCodePromise = getCountryCode();
 
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (!session.userId) redirect("/sign-in");
+  if (!session) redirect("/sign-in");
 
   return (
     <>

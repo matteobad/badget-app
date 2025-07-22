@@ -1,4 +1,5 @@
-import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -9,19 +10,23 @@ import {
 import { CashflowChart } from "~/features/dashboard/components/charts/cashflow-chart";
 import { getBankingKPI_CACHED } from "~/features/dashboard/server/cached-queries";
 import { getRecentTransactions_CACHED } from "~/features/transaction/server/cached-queries";
+import { auth } from "~/server/auth/auth";
 import { CreditCard, Package } from "lucide-react";
 
 import PillarOverview from "../../../../features/dashboard/components/pillar-overview";
 import RecentTransactionList from "../../../../features/transaction/components/recent-transaction-list";
 
 export default async function DashboardPage() {
-  const session = await auth();
-  if (!session.userId) throw new Error("User not found");
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  const promises = Promise.all([getBankingKPI_CACHED(session.userId)]);
+  if (!session) redirect("/sign-in");
+
+  const promises = Promise.all([getBankingKPI_CACHED(session.user.id)]);
 
   const transactionPromise = Promise.all([
-    getRecentTransactions_CACHED(session.userId),
+    getRecentTransactions_CACHED(session.user.id),
   ]);
 
   return (

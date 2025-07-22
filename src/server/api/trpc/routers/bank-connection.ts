@@ -18,7 +18,7 @@ export const bankConnectionRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getBankConnectionsSchema)
     .query(async ({ input, ctx: { session } }) => {
-      return getBankConnections(input, session.userId!);
+      return getBankConnections(input, session!.userId);
     }),
 
   getAccounts: protectedProcedure
@@ -31,7 +31,7 @@ export const bankConnectionRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createBankConnectionSchema)
     .mutation(async ({ input, ctx: { session } }) => {
-      const data = await createBankConnection(input, session.userId!);
+      const data = await createBankConnection(input, session!.userId);
 
       if (!data) {
         throw new TRPCError({
@@ -44,7 +44,7 @@ export const bankConnectionRouter = createTRPCRouter({
         "initial-bank-setup",
         {
           connectionId: data.id,
-          userId: session.userId!,
+          userId: session!.userId,
         },
       );
 
