@@ -27,20 +27,29 @@ function AccordionItem({
 function AccordionTrigger({
   className,
   children,
+  chevronBefore,
   ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
+}: React.ComponentProps<typeof AccordionPrimitive.Trigger> & {
+  chevronBefore?: boolean;
+}) {
   return (
     <AccordionPrimitive.Header className="flex">
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180",
+          "flex flex-1 items-center justify-between py-4 font-medium transition-all [&[data-state=open]>svg]:rotate-180",
+          chevronBefore && "[&[data-state=open]>svg]:rotate-0",
           className,
         )}
         {...props}
       >
+        {chevronBefore && (
+          <ChevronDownIcon className="h-4 w-4 shrink-0 -rotate-90 transition-transform duration-200" />
+        )}
         {children}
-        <ChevronDownIcon className="pointer-events-none size-4 shrink-0 translate-y-0.5 text-muted-foreground transition-transform duration-200" />
+        {!chevronBefore && (
+          <ChevronDownIcon className="h-4 w-4 shrink-0 transition-transform duration-200" />
+        )}{" "}
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   );

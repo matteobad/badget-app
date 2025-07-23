@@ -44,6 +44,22 @@ export const createGocardlessLinkSchema = z.object({
   redirectBase: z.string(),
 });
 
+export const manualSyncConnectionSchema = z.object({
+  connectionId: z.string(),
+});
+
+export const reconnectConnectionSchema = z.object({
+  userId: z.string(),
+  connectionId: z.string(),
+  provider: z.string(),
+});
+
+export const reconnectGocardlessLinkSchema = z.object({
+  id: z.string(),
+  institutionId: z.string(),
+  redirectTo: z.string(),
+});
+
 // Search params for sheets
 export const connectParamsSchema = (initialCountryCode?: string) => ({
   step: parseAsStringLiteral(["connect", "account"]),

@@ -1,5 +1,6 @@
 import type {
   createBankConnectionSchema,
+  deleteBankConnectionSchema,
   getBankConnectionsSchema,
 } from "~/shared/validators/bank-connection.schema";
 import type z from "zod/v4";
@@ -7,15 +8,18 @@ import { gocardlessClient } from "~/features/account/server/providers/gocardless
 
 import { db, withTransaction } from "../db";
 import { createBankAccountMutation } from "../domain/bank-account/mutations";
-import { getBankAccountsQuery } from "../domain/bank-account/queries";
-import { createBankConnectionMutation } from "../domain/bank-connection/mutations";
+import {
+  createBankConnectionMutation,
+  deleteBankConnectionMutation,
+} from "../domain/bank-connection/mutations";
+import { getBankConnectionsQuery } from "../domain/bank-connection/queries";
 import { getInstitutionsQuery } from "../domain/institution/queries";
 
 export async function getBankConnections(
   input: z.infer<typeof getBankConnectionsSchema>,
   userId: string,
 ) {
-  return await getBankAccountsQuery({ ...input, userId });
+  return await getBankConnectionsQuery(db, { ...input, userId });
 }
 
 export async function createBankConnection(
@@ -65,4 +69,11 @@ export async function createBankConnection(
 
     return bankConnection;
   });
+}
+
+export async function deleteBankConnection(
+  input: z.infer<typeof deleteBankConnectionSchema>,
+  userId: string,
+) {
+  return await deleteBankConnectionMutation(db, { ...input, userId });
 }

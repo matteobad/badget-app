@@ -6,14 +6,10 @@ export const initialBankSetupSchema = z.object({
   connectionId: z.uuid(),
 });
 
-export type InitialBankSetupPayload = z.infer<typeof initialBankSetupSchema>;
-
 export const syncConnectionSchema = z.object({
   connectionId: z.uuid(),
   manualSync: z.boolean().optional(),
 });
-
-export type SyncConnectionPayload = z.infer<typeof syncConnectionSchema>;
 
 export const syncAccountSchema = z.object({
   id: z.uuid(),
@@ -25,4 +21,7 @@ export const syncAccountSchema = z.object({
   accountType: z.enum(ACCOUNT_TYPE),
 });
 
-export type SyncAccountPayload = z.infer<typeof syncAccountSchema>;
+export const deleteConnectionSchema = z.object({
+  referenceId: z.string(),
+  provider: z.enum(BANK_PROVIDER),
+});

@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { BANK_PROVIDER } from "~/server/db/schema/enum";
+import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/server/db/schema/enum";
 
 export const getBankAccountsSchema = z.object({
   id: z
@@ -33,3 +33,63 @@ export const getBankAccountsSchema = z.object({
   enabled: z.boolean().optional(),
   manual: z.boolean().optional(),
 });
+
+export const deleteBankAccountSchema = z.object({
+  id: z.uuid().openapi({
+    description: "The unique identifier of the bank account.",
+    example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
+    param: {
+      in: "path",
+      name: "id",
+    },
+  }),
+});
+
+export const getBankAccountByIdSchema = z.object({
+  id: z.uuid().openapi({
+    description: "The unique identifier of the bank account.",
+    example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
+    param: {
+      in: "path",
+      name: "id",
+    },
+  }),
+});
+
+export const updateBankAccountSchema = z
+  .object({
+    id: z.uuid().openapi({
+      description: "The unique identifier of the bank account.",
+      example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
+    }),
+    name: z.string().optional().openapi({
+      description: "The name of the bank account.",
+      example: "Checking Account",
+    }),
+    enabled: z.boolean().optional().openapi({
+      description: "Whether the bank account is enabled.",
+      example: true,
+    }),
+    balance: z.number().optional().openapi({
+      description: "Current balance of the bank account.",
+      example: 1500.75,
+    }),
+    currency: z.string().optional().openapi({
+      description: "The currency code for the bank account (ISO 4217).",
+      example: "USD",
+    }),
+    type: z.enum(ACCOUNT_TYPE).optional().openapi({
+      description: "Type of the bank account.",
+      example: "depository",
+    }),
+  })
+  .openapi({
+    description: "Schema for updating a bank account.",
+    example: {
+      id: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
+      name: "Checking Account",
+      enabled: true,
+      balance: 1500.75,
+      type: "depository",
+    },
+  });

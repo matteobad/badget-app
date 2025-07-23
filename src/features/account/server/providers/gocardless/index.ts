@@ -48,6 +48,7 @@ export const GoCardlessProvider: BankAccountProvider = {
       ]);
 
       const mappedAccount = mapAccountsResponse(
+        requisition.id,
         accountId,
         metadataData,
         detailsData,

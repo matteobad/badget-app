@@ -1,13 +1,16 @@
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import { getBankAccountProvider } from "~/features/account/server/providers";
+import { type deleteConnection } from "~/server/jobs/tasks/delete-connection";
 import { type initialBankSetup } from "~/server/jobs/tasks/initial-bank-setup";
 import {
   createBankConnection,
+  deleteBankConnection,
   getBankConnections,
 } from "~/server/services/bank-connection-service";
 import {
   createBankConnectionSchema,
+  deleteBankConnectionSchema,
   getBankConnectionsSchema,
   getOpenBankingAccountsSchema,
 } from "~/shared/validators/bank-connection.schema";
@@ -51,24 +54,21 @@ export const bankConnectionRouter = createTRPCRouter({
       return event;
     }),
 
-  //   delete: protectedProcedure
-  //     .input(deleteBankConnectionSchema)
-  //     .mutation(async ({ input, ctx: { db, teamId } }) => {
-  //       const data = await deleteBankConnection(db, {
-  //         id: input.id,
-  //         teamId: teamId!,
-  //       });
+  delete: protectedProcedure
+    .input(deleteBankConnectionSchema)
+    .mutation(async ({ input, ctx: { session } }) => {
+      const userId = session!.userId;
+      const data = await deleteBankConnection(input, userId);
 
-  //       if (!data) {
-  //         throw new Error("Bank connection not found");
-  //       }
+      if (!data) {
+        throw new Error("Bank connection not found");
+      }
 
-  //       await tasks.trigger("delete-connection", {
-  //         referenceId: data.referenceId,
-  //         provider: data.provider!,
-  //         accessToken: data.accessToken,
-  //       });
+      await tasks.trigger<typeof deleteConnection>("delete-connection", {
+        referenceId: data.referenceId!,
+        provider: data.provider,
+      });
 
-  //       return data;
-  //     }),
+      return data;
+    }),
 });

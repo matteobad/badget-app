@@ -31,6 +31,7 @@ export const account_table = pgTable(
     manual: d.boolean().notNull().default(false),
     errorDetails: d.text(),
     errorRetries: d.smallint(),
+    accountReference: d.text(),
 
     ...timestamps,
   }),

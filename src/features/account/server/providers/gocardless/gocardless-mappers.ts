@@ -80,6 +80,7 @@ export const mapAccountsRequest = (params: GetAccountsRequest) => {
 };
 
 export const mapAccountsResponse = (
+  requisitionId: string,
   accountId: string,
   metadataData: GC_GetAccountMetadataResponse,
   detailsData: GC_GetAccountDetailsResponse,
@@ -105,6 +106,7 @@ export const mapAccountsResponse = (
     logoUrl: institutionData.logo,
     enabled: true,
     manual: false,
+    accountReference: requisitionId,
   } satisfies GetAccountsResponse[number];
 };
 

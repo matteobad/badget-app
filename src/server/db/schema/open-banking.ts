@@ -56,6 +56,7 @@ export const connection_table = pgTable(
     errorDetails: d.text(),
     errorRetries: d.smallint().default(sql`'0'`),
     expiresAt: d.timestamp({ withTimezone: true, mode: "string" }),
+    lastAccessed: d.timestamp({ withTimezone: true, mode: "string" }),
 
     ...timestamps,
   }),

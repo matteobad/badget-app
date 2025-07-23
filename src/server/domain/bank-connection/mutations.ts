@@ -79,3 +79,27 @@ export async function updateBankConnectionMutation(
 
   return result;
 }
+
+type DeleteBankConnectionParams = {
+  id: string;
+  userId: string;
+};
+
+export const deleteBankConnectionMutation = async (
+  db: DBClient,
+  params: DeleteBankConnectionParams,
+) => {
+  const { id, userId } = params;
+
+  const [result] = await db
+    .delete(connection_table)
+    .where(
+      and(eq(connection_table.id, id), eq(connection_table.userId, userId)),
+    )
+    .returning({
+      referenceId: connection_table.referenceId,
+      provider: connection_table.provider,
+    });
+
+  return result;
+};

@@ -1,5 +1,6 @@
 import "~/globals.css";
 
+import type { Metadata } from "next";
 import { type ReactElement } from "react";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { Analytics } from "@vercel/analytics/next";
@@ -16,7 +17,7 @@ import { TailwindIndicator } from "../../components/tailwind-indicator";
 import { ThemeProvider } from "../../components/theme-provider";
 import { ourFileRouter } from "../api/uploadthing/core";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Badget.",
   description: "Personal finance for everyone",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
