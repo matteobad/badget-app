@@ -43,6 +43,8 @@ jobs:
 
       - name: 🔄 Deploy Background Jobs
         env:
+          VERCEL_ACCESS_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
         run: pnpm run trigger:deploy
         shell: bash
