@@ -2,10 +2,8 @@ import type { PropsWithChildren } from "react";
 import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { FeedbackDialog } from "~/components/feedback-dialog";
 import { GlobalSheets } from "~/components/global-sheets";
-import { DynamicBreadcrumb } from "~/components/layouts/dynamic-breadcrumb";
-import { NavUser } from "~/components/nav-user";
+import { Header } from "~/components/layouts/header";
 import { Sidebar } from "~/components/sidebar/sidebar";
 import { auth } from "~/server/auth/auth";
 import { getCountryCode } from "~/server/services/location-service";
@@ -26,11 +24,8 @@ export default async function AppLayout(props: PropsWithChildren) {
         <Sidebar />
 
         <div className="pb-8 md:ml-[70px]">
-          <header className="desktop:sticky desktop:top-0 desktop:bg-background bg-opacity-70 desktop:rounded-t-[10px] sticky top-0 z-50 flex h-[70px] items-center justify-between bg-[#fff] px-6 backdrop-blur-xl backdrop-filter md:static md:m-0 md:border-b md:backdrop-blur-none md:backdrop-filter dark:bg-[#121212]">
-            <DynamicBreadcrumb />
-            <FeedbackDialog />
-            <NavUser />
-          </header>
+          <Header />
+
           {props.children}
         </div>
 

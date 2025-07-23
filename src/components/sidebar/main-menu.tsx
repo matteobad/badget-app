@@ -7,12 +7,16 @@ import {
   LayoutDashboardIcon,
   ReceiptIcon,
   Settings2Icon,
+  SpoolIcon,
+  WalletIcon,
 } from "lucide-react";
 
 const icons = {
   "/dashboard": () => <LayoutDashboardIcon size={20} />,
   "/transactions": () => <ReceiptIcon size={20} />,
   "/budgeting": () => <GoalIcon size={20} />,
+  "/pillars": () => <SpoolIcon size={20} />,
+  "/wealth": () => <WalletIcon size={20} />,
   "/settings": () => <Settings2Icon size={20} />,
 } as const;
 
@@ -25,10 +29,6 @@ const items = [
     path: "/transactions",
     name: "Transactions",
     children: [
-      {
-        path: "/transactions/categories",
-        name: "Categories",
-      },
       {
         path: "/transactions?step=connect",
         name: "Connect bank",
@@ -44,11 +44,26 @@ const items = [
     path: "/budgeting",
     name: "Budgeting",
     children: [
-      { path: "/invoices?statuses=paid", name: "Paid" },
-      { path: "/invoices?statuses=unpaid", name: "Unpaid" },
-      { path: "/invoices?statuses=overdue", name: "Overdue" },
-      { path: "/invoices?statuses=draft", name: "Draft" },
-      { path: "/invoices?type=create", name: "Create new" },
+      { path: "/budgeting/categories", name: "Categories" },
+      { path: "/budgeting/goals", name: "Obiettivi" },
+    ],
+  },
+  {
+    path: "/pillars",
+    name: "Pilastri",
+    children: [
+      { path: "/pillars/banking", name: "Liquidità" },
+      { path: "/pillars/emergency-fund", name: "Fondo di Emergenza" },
+      { path: "/pillars/short-term", name: "Obiettivi a breve" },
+      { path: "/pillars/investments", name: "Investimenti" },
+    ],
+  },
+  {
+    path: "/wealth",
+    name: "Wealth",
+    children: [
+      { path: "/wealth/assets", name: "Beni patrimoniali" },
+      { path: "/wealth/liabilities", name: "Passività" },
     ],
   },
   {
@@ -58,9 +73,7 @@ const items = [
       { path: "/settings", name: "General" },
       { path: "/settings/billing", name: "Billing" },
       { path: "/settings/accounts", name: "Bank Connections" },
-      { path: "/settings/members", name: "Members" },
       { path: "/settings/notifications", name: "Notifications" },
-      { path: "/settings/developer", name: "Developer" },
     ],
   },
 ];

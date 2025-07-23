@@ -11,7 +11,7 @@ export default async function Page() {
   prefetch(trpc.bankAccount.get.queryOptions({ manual: true }));
 
   return (
-    <div className="space-y-12 p-4">
+    <div className="space-y-12">
       <ConnectedAccounts />
       {/* <BaseCurrency /> */}
     </div>
