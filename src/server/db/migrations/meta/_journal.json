@@ -6,28 +6,7 @@
       "idx": 0,
       "version": "7",
       "when": 1752089042794,
-      "tag": "0000_messy_the_stranger",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1752089042795,
-      "tag": "0001_no_overlapping_budget_ranges",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1752089452754,
-      "tag": "0002_create_budget_instances_view",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1752089557880,
-      "tag": "0003_create_materialized_view",
+      "tag": "0000_flaky_doctor_octopus",
       "breakpoints": true
     }
   ]

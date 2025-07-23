@@ -1,6 +1,6 @@
 {
-  "id": "2b34a5d8-556c-4649-8b2f-ed588669c6f3",
-  "prevId": "00000000-0000-0000-0000-00000000000",
+  "id": "1a7c8f7f-7a25-490a-b65b-ca9af396aa63",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -10,25 +10,26 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(128)",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar(32)",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "institution_id": {
           "name": "institution_id",
-          "type": "varchar(128)",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
         "connection_id": {
           "name": "connection_id",
-          "type": "varchar(128)",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -52,10 +53,9 @@
         },
         "type": {
           "name": "type",
-          "type": "text",
+          "type": "account_type",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'checking'"
+          "notNull": true
         },
         "logo_url": {
           "name": "logo_url",
@@ -89,34 +89,69 @@
           "notNull": true,
           "default": false
         },
+        "error_details": {
+          "name": "error_details",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error_retries": {
+          "name": "error_retries",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "account_reference": {
+          "name": "account_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {
+        "badget_account_table_user_id_badget_user_id_fk": {
+          "name": "badget_account_table_user_id_badget_user_id_fk",
+          "tableFrom": "badget_account_table",
+          "tableTo": "badget_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "badget_account_table_institution_id_badget_institution_table_id_fk": {
           "name": "badget_account_table_institution_id_badget_institution_table_id_fk",
           "tableFrom": "badget_account_table",
           "tableTo": "badget_institution_table",
-          "columnsFrom": ["institution_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "institution_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -124,8 +159,12 @@
           "name": "badget_account_table_connection_id_badget_connection_table_id_fk",
           "tableFrom": "badget_account_table",
           "tableTo": "badget_connection_table",
-          "columnsFrom": ["connection_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "connection_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -135,14 +174,444 @@
         "badget_account_table_rawId_unique": {
           "name": "badget_account_table_rawId_unique",
           "nullsNotDistinct": false,
-          "columns": ["raw_id"]
+          "columns": [
+            "raw_id"
+          ]
         },
         "badget_account_table_userId_rawId_unique": {
           "name": "badget_account_table_userId_rawId_unique",
           "nullsNotDistinct": false,
-          "columns": ["user_id", "raw_id"]
+          "columns": [
+            "user_id",
+            "raw_id"
+          ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.badget_account": {
+      "name": "badget_account",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider_id": {
+          "name": "provider_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_token": {
+          "name": "id_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "access_token_expires_at": {
+          "name": "access_token_expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refresh_token_expires_at": {
+          "name": "refresh_token_expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "badget_account_user_id_badget_user_id_fk": {
+          "name": "badget_account_user_id_badget_user_id_fk",
+          "tableFrom": "badget_account",
+          "tableTo": "badget_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.badget_session": {
+      "name": "badget_session",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "impersonated_by": {
+          "name": "impersonated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "badget_session_user_id_badget_user_id_fk": {
+          "name": "badget_session_user_id_badget_user_id_fk",
+          "tableFrom": "badget_session",
+          "tableTo": "badget_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "badget_session_token_unique": {
+          "name": "badget_session_token_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.badget_two_factor": {
+      "name": "badget_two_factor",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "secret": {
+          "name": "secret",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "backup_codes": {
+          "name": "backup_codes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "badget_two_factor_user_id_badget_user_id_fk": {
+          "name": "badget_two_factor_user_id_badget_user_id_fk",
+          "tableFrom": "badget_two_factor",
+          "tableTo": "badget_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.badget_user": {
+      "name": "badget_user",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_verified": {
+          "name": "email_verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "banned": {
+          "name": "banned",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ban_reason": {
+          "name": "ban_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ban_expires": {
+          "name": "ban_expires",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "two_factor_enabled": {
+          "name": "two_factor_enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone_number_verified": {
+          "name": "phone_number_verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "username": {
+          "name": "username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "display_username": {
+          "name": "display_username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "badget_user_email_unique": {
+          "name": "badget_user_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        },
+        "badget_user_phone_number_unique": {
+          "name": "badget_user_phone_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "phone_number"
+          ]
+        },
+        "badget_user_username_unique": {
+          "name": "badget_user_username_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "username"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.badget_verification": {
+      "name": "badget_verification",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "identifier": {
+          "name": "identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -160,7 +629,7 @@
         },
         "category_id": {
           "name": "category_id",
-          "type": "varchar(128)",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -168,7 +637,7 @@
           "name": "user_id",
           "type": "varchar(32)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "validity": {
           "name": "validity",
@@ -202,20 +671,20 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
@@ -226,8 +695,12 @@
           "name": "badget_budget_table_category_id_badget_category_table_id_fk",
           "tableFrom": "badget_budget_table",
           "tableTo": "badget_category_table",
-          "columnsFrom": ["category_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -235,8 +708,12 @@
           "name": "badget_budget_table_override_for_budget_id_badget_budget_table_id_fk",
           "tableFrom": "badget_budget_table",
           "tableTo": "badget_budget_table",
-          "columnsFrom": ["override_for_budget_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "override_for_budget_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -308,20 +785,20 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
@@ -332,18 +809,25 @@
           "name": "badget_category_table_parent_id_badget_category_table_id_fk",
           "tableFrom": "badget_category_table",
           "tableTo": "badget_category_table",
-          "columnsFrom": ["parent_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "badget_category_table_slug_userId_unique": {
-          "name": "badget_category_table_slug_userId_unique",
+        "unique_user_slug": {
+          "name": "unique_user_slug",
           "nullsNotDistinct": false,
-          "columns": ["slug", "user_id"]
+          "columns": [
+            "slug",
+            "user_id"
+          ]
         }
       },
       "policies": {},
@@ -374,20 +858,20 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
@@ -414,8 +898,12 @@
           "name": "badget_rule_table_category_id_badget_category_table_id_fk",
           "tableFrom": "badget_rule_table",
           "tableTo": "badget_category_table",
-          "columnsFrom": ["category_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -457,20 +945,20 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
@@ -503,8 +991,12 @@
           "name": "badget_token_table_rule_id_badget_rule_table_id_fk",
           "tableFrom": "badget_token_table",
           "tableTo": "badget_rule_table",
-          "columnsFrom": ["rule_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "rule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -521,19 +1013,38 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(128)",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar(32)",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "institution_id": {
           "name": "institution_id",
-          "type": "varchar(128)",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "logo_url": {
+          "name": "logo_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provider": {
+          "name": "provider",
+          "type": "bank_provider",
           "primaryKey": false,
           "notNull": true
         },
@@ -543,53 +1054,83 @@
           "primaryKey": false,
           "notNull": false
         },
-        "provider": {
-          "name": "provider",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "status": {
           "name": "status",
-          "type": "text",
+          "type": "connection_status",
           "primaryKey": false,
           "notNull": false,
-          "default": "'unknown'"
+          "default": "'connected'"
         },
-        "valid_until": {
-          "name": "valid_until",
+        "error_details": {
+          "name": "error_details",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error_retries": {
+          "name": "error_retries",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_accessed": {
+          "name": "last_accessed",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {
+        "badget_connection_table_user_id_badget_user_id_fk": {
+          "name": "badget_connection_table_user_id_badget_user_id_fk",
+          "tableFrom": "badget_connection_table",
+          "tableTo": "badget_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "badget_connection_table_institution_id_badget_institution_table_id_fk": {
           "name": "badget_connection_table_institution_id_badget_institution_table_id_fk",
           "tableFrom": "badget_connection_table",
           "tableTo": "badget_institution_table",
-          "columnsFrom": ["institution_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "institution_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -599,7 +1140,17 @@
         "badget_connection_table_referenceId_unique": {
           "name": "badget_connection_table_referenceId_unique",
           "nullsNotDistinct": false,
-          "columns": ["reference_id"]
+          "columns": [
+            "reference_id"
+          ]
+        },
+        "unique_bank_connections": {
+          "name": "unique_bank_connections",
+          "nullsNotDistinct": false,
+          "columns": [
+            "institution_id",
+            "user_id"
+          ]
         }
       },
       "policies": {},
@@ -612,9 +1163,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(128)",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "original_id": {
           "name": "original_id",
@@ -636,7 +1188,7 @@
         },
         "provider": {
           "name": "provider",
-          "type": "text",
+          "type": "bank_provider",
           "primaryKey": false,
           "notNull": true
         },
@@ -662,20 +1214,20 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
@@ -687,7 +1239,9 @@
         "badget_institution_table_originalId_unique": {
           "name": "badget_institution_table_originalId_unique",
           "nullsNotDistinct": false,
-          "columns": ["original_id"]
+          "columns": [
+            "original_id"
+          ]
         }
       },
       "policies": {},
@@ -706,13 +1260,13 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar(32)",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "transaction_id": {
           "name": "transaction_id",
-          "type": "varchar(128)",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -748,32 +1302,49 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {
+        "badget_attachment_table_user_id_badget_user_id_fk": {
+          "name": "badget_attachment_table_user_id_badget_user_id_fk",
+          "tableFrom": "badget_attachment_table",
+          "tableTo": "badget_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "badget_attachment_table_transaction_id_badget_transaction_table_id_fk": {
           "name": "badget_attachment_table_transaction_id_badget_transaction_table_id_fk",
           "tableFrom": "badget_attachment_table",
           "tableTo": "badget_transaction_table",
-          "columnsFrom": ["transaction_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -796,7 +1367,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar(32)",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -808,32 +1379,49 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "badget_tag_table_user_id_badget_user_id_fk": {
+          "name": "badget_tag_table_user_id_badget_user_id_fk",
+          "tableFrom": "badget_tag_table",
+          "tableTo": "badget_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "badget_tag_table_userId_text_unique": {
           "name": "badget_tag_table_userId_text_unique",
           "nullsNotDistinct": false,
-          "columns": ["user_id", "text"]
+          "columns": [
+            "user_id",
+            "text"
+          ]
         }
       },
       "policies": {},
@@ -846,19 +1434,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(128)",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar(32)",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "account_id": {
           "name": "account_id",
-          "type": "varchar(128)",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -892,14 +1481,34 @@
           "primaryKey": false,
           "notNull": true
         },
-        "description": {
-          "name": "description",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "manual": {
           "name": "manual",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "notified": {
+          "name": "notified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "internal": {
+          "name": "internal",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
@@ -917,12 +1526,11 @@
           "primaryKey": false,
           "notNull": false
         },
-        "exclude": {
-          "name": "exclude",
-          "type": "boolean",
+        "method": {
+          "name": "method",
+          "type": "transaction_method",
           "primaryKey": false,
-          "notNull": true,
-          "default": false
+          "notNull": true
         },
         "recurring": {
           "name": "recurring",
@@ -934,17 +1542,15 @@
         "frequency": {
           "name": "frequency",
           "type": "transaction_frequency",
-          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
         "status": {
           "name": "status",
           "type": "transaction_status",
-          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false,
-          "default": "'booked'"
+          "notNull": true,
+          "default": "'posted'"
         },
         "note": {
           "name": "note",
@@ -954,32 +1560,49 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {
+        "badget_transaction_table_user_id_badget_user_id_fk": {
+          "name": "badget_transaction_table_user_id_badget_user_id_fk",
+          "tableFrom": "badget_transaction_table",
+          "tableTo": "badget_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "badget_transaction_table_account_id_badget_account_table_id_fk": {
           "name": "badget_transaction_table_account_id_badget_account_table_id_fk",
           "tableFrom": "badget_transaction_table",
           "tableTo": "badget_account_table",
-          "columnsFrom": ["account_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -987,8 +1610,12 @@
           "name": "badget_transaction_table_category_id_badget_category_table_id_fk",
           "tableFrom": "badget_transaction_table",
           "tableTo": "badget_category_table",
-          "columnsFrom": ["category_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -998,12 +1625,17 @@
         "badget_transaction_table_rawId_unique": {
           "name": "badget_transaction_table_rawId_unique",
           "nullsNotDistinct": false,
-          "columns": ["raw_id"]
+          "columns": [
+            "raw_id"
+          ]
         },
         "badget_transaction_table_userId_rawId_unique": {
           "name": "badget_transaction_table_userId_rawId_unique",
           "nullsNotDistinct": false,
-          "columns": ["user_id", "raw_id"]
+          "columns": [
+            "user_id",
+            "raw_id"
+          ]
         }
       },
       "policies": {},
@@ -1022,7 +1654,7 @@
         },
         "transaction_id": {
           "name": "transaction_id",
-          "type": "varchar(128)",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -1034,20 +1666,20 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
@@ -1058,8 +1690,12 @@
           "name": "badget_transaction_to_tag_table_transaction_id_badget_transaction_table_id_fk",
           "tableFrom": "badget_transaction_to_tag_table",
           "tableTo": "badget_transaction_table",
-          "columnsFrom": ["transaction_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1067,8 +1703,12 @@
           "name": "badget_transaction_to_tag_table_tag_id_badget_tag_table_id_fk",
           "tableFrom": "badget_transaction_to_tag_table",
           "tableTo": "badget_tag_table",
-          "columnsFrom": ["tag_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "tag_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1078,7 +1718,10 @@
         "badget_transaction_to_tag_table_transactionId_tagId_unique": {
           "name": "badget_transaction_to_tag_table_transactionId_tagId_unique",
           "nullsNotDistinct": false,
-          "columns": ["transaction_id", "tag_id"]
+          "columns": [
+            "transaction_id",
+            "tag_id"
+          ]
         }
       },
       "policies": {},
@@ -1087,10 +1730,48 @@
     }
   },
   "enums": {
+    "public.account_type": {
+      "name": "account_type",
+      "schema": "public",
+      "values": [
+        "checking",
+        "savings",
+        "investment",
+        "debt",
+        "cash",
+        "other"
+      ]
+    },
     "public.recurrence": {
       "name": "recurrence",
       "schema": "public",
-      "values": ["daily", "weekly", "monthly", "quarterly", "yearly", "custom"]
+      "values": [
+        "daily",
+        "weekly",
+        "monthly",
+        "quarterly",
+        "yearly",
+        "custom"
+      ]
+    },
+    "public.bank_provider": {
+      "name": "bank_provider",
+      "schema": "public",
+      "values": [
+        "enablebanking",
+        "gocardless",
+        "plaid",
+        "teller"
+      ]
+    },
+    "public.connection_status": {
+      "name": "connection_status",
+      "schema": "public",
+      "values": [
+        "connected",
+        "disconnected",
+        "unknown"
+      ]
     },
     "public.transaction_frequency": {
       "name": "transaction_frequency",
@@ -1105,10 +1786,33 @@
         "unknown"
       ]
     },
+    "public.transaction_method": {
+      "name": "transaction_method",
+      "schema": "public",
+      "values": [
+        "payment",
+        "card_purchase",
+        "card_atm",
+        "transfer",
+        "other",
+        "unknown",
+        "ach",
+        "interest",
+        "deposit",
+        "wire",
+        "fee"
+      ]
+    },
     "public.transaction_status": {
       "name": "transaction_status",
       "schema": "public",
-      "values": ["booked", "pending", "excluded", "archived"]
+      "values": [
+        "posted",
+        "pending",
+        "excluded",
+        "completed",
+        "archived"
+      ]
     }
   },
   "schemas": {},
@@ -1116,7 +1820,7 @@
   "roles": {},
   "policies": {},
   "views": {
-    "public.budget_instance": {
+    "public.badget_budget_instances_mview": {
       "columns": {
         "id": {
           "name": "id",
@@ -1124,14 +1828,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "original_budget_id": {
-          "name": "original_budget_id",
+        "originalBudgetId": {
+          "name": "originalBudgetId",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "category_id": {
-          "name": "category_id",
+        "categoryId": {
+          "name": "categoryId",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -1142,20 +1846,26 @@
           "primaryKey": false,
           "notNull": true
         },
-        "instance_from": {
-          "name": "instance_from",
+        "instanceFrom": {
+          "name": "instanceFrom",
           "type": "date",
           "primaryKey": false,
           "notNull": true
         },
-        "instance_to": {
-          "name": "instance_to",
+        "instanceTo": {
+          "name": "instanceTo",
           "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "varchar(32)",
           "primaryKey": false,
           "notNull": true
         }
       },
-      "name": "budget_instance",
+      "name": "badget_budget_instances_mview",
       "schema": "public",
       "isExisting": true,
       "materialized": true
