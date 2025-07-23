@@ -1,20 +1,20 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4";
+import { vercel, neonVercel, upstashRedis, uploadthing } from "@t3-oss/env-nextjs/presets-zod";
 
 export const env = createEnv({
+  extends: [vercel(), neonVercel(), upstashRedis(), uploadthing()],
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app
    * isn't built with invalid env vars.
    */
   server: {
     CRON_SECRET: z.string(),
-    DATABASE_URL: z.string().min(1),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
     BETTER_AUTH_SECRET: z.string().min(1),
     BETTER_AUTH_URL: z.url().optional(), // TODO: find better solution
-    UPLOADTHING_TOKEN: z.string().min(1),
     KV_REST_API_URL: z.string().url(),
     KV_REST_API_TOKEN: z.string().min(1),
     TRIGGER_SECRET_KEY: z.string().min(1),
@@ -35,11 +35,9 @@ export const env = createEnv({
    */
   runtimeEnv: {
     CRON_SECRET: process.env.CRON_SECRET,
-    DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
-    UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     KV_REST_API_URL: process.env.KV_REST_API_URL,
     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
     TRIGGER_SECRET_KEY: process.env.TRIGGER_SECRET_KEY,

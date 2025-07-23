@@ -21,6 +21,16 @@ export default defineConfig({
   },
   dirs: ["./src/server/jobs/tasks"],
   build: {
-    extensions: [syncVercelEnvVars()],
+    extensions: [
+      syncVercelEnvVars({
+        // A personal access token created in your Vercel account settings
+        // Used to authenticate API requests to Vercel
+        // Generate at: https://vercel.com/account/tokens
+        vercelAccessToken: process.env.VERCEL_ACCESS_TOKEN,
+        // The unique identifier of your Vercel project
+        // Found in Project Settings > General > Project ID
+        projectId: process.env.VERCEL_PROJECT_ID,
+      }),
+    ],
   },
 });

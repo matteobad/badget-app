@@ -1,0 +1,49 @@
+name: Deploy Production
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  deploy_production:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    environment: "Production"
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies & tooling
+        uses: ./.github/workflows/setup
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+        shell: bash
+
+      - name: 📤 Pull Vercel Environment Information
+        run: vercel pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        shell: bash
+
+      - name: 🏗 Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        shell: bash
+
+      - name: 🐘 Apply Migrations
+        run: pnpm run db:migrate
+        shell: bash
+
+      - name: 🔄 Deploy Background Jobs
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: pnpm run trigger:deploy
+        shell: bash
+
+      - name: 🚀 Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        shell: bash

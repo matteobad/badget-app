@@ -1,0 +1,77 @@
+name: Deploy Preview
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  deploy_preview:
+    name: Deploy Preview
+    environment: "Preview"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies & tooling
+        uses: ./.github/workflows/setup
+
+      - name: Get branch name
+        id: branch_name
+        uses: tj-actions/branch-names@v8
+
+      - name: Create Neon Branch
+        id: create_branch
+        uses: neondatabase/create-branch-action@v5
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          # parent: main # optional (defaults to your primary branch)
+          branch_name: preview/pr-${{ github.event.number }}-${{ steps.branch_name.outputs.current_branch }}
+          database: neondb
+          username: neondb_owner
+          api_key: ${{ secrets.NEON_API_KEY }}
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+        shell: bash
+
+      - name: 📤 Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        shell: bash
+
+      - name: 🏗 Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        shell: bash
+
+      - name: 🚀 Deploy Preview to Vercel
+        id: deploy
+        run: echo preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}) >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: 🐘 Apply Migrations
+        env:
+          SKIP_ENV_VALIDATION: 1
+          DATABASE_URL: ${{ steps.create_branch.outputs.db_url_with_pooler }}
+        run: pnpm run db:migrate
+
+      - name: 🔄 Deploy Background Jobs
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: pnpm run trigger:deploy
+
+      - name: Comment on Pull Request
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            Vercel Preview URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+            Neon branch :elephant: : https://console.neon.tech/app/projects/${{ vars.NEON_PROJECT_ID }}/branches/${{ steps.create_branch.outputs.branch_id }}

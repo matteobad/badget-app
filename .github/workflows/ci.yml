@@ -1,11 +1,7 @@
 name: CI
 
 on:
-  pull_request:
-    branches: ["*"]
-  push:
-    branches: ["main"]
-  merge_group:
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -31,11 +27,11 @@ jobs:
 
       - run: cp .env.example .env
 
-      - name: Lint
+      - name: 🔦 Lint
         run: pnpm run lint
 
-      - name: Typecheck
+      - name: 🪐 Typecheck
         run: pnpm run typecheck
 
-      - name: Format
+      - name: 💼 Format
         run: pnpm run format:check
