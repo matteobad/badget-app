@@ -1,4 +1,4 @@
-import type { AccountType } from "~/server/db/schema/enum";
+import type { AccountType } from "~/shared/constants/enum";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {

@@ -3,8 +3,6 @@ import "dotenv/config";
 import { reset, seed } from "drizzle-seed";
 
 import { db, schema } from ".";
-import { budgetList } from "./data/budgets";
-import { categoriesIds, categoriesMap } from "./data/categories";
 import {
   ACCOUNT_TYPE,
   BANK_PROVIDER,
@@ -12,7 +10,9 @@ import {
   TRANSACTION_FREQUENCY,
   TRANSACTION_METHOD,
   TRANSACTION_STATUS,
-} from "./schema/enum";
+} from "../../shared/constants/enum";
+import { budgetList } from "./data/budgets";
+import { categoriesIds, categoriesMap } from "./data/categories";
 
 async function main() {
   /* eslint-disable */

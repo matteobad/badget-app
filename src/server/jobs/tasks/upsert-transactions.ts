@@ -1,11 +1,11 @@
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { db } from "~/server/db";
+import { transaction_table } from "~/server/db/schema/transactions";
+import { buildConflictUpdateColumns } from "~/server/db/utils";
 import {
   TRANSACTION_METHOD,
   TRANSACTION_STATUS,
-} from "~/server/db/schema/enum";
-import { transaction_table } from "~/server/db/schema/transactions";
-import { buildConflictUpdateColumns } from "~/server/db/utils";
+} from "~/shared/constants/enum";
 import { categorizeTransactions } from "~/utils/categorization";
 import { z } from "zod/v4";
 

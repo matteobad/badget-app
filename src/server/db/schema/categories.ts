@@ -2,9 +2,9 @@ import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
 import { index, unique, uniqueIndex } from "drizzle-orm/pg-core";
 
+import { type CategoryType } from "../../../shared/constants/enum";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
-import { type CategoryType } from "./enum";
 
 export const category_table = pgTable(
   "category_table",

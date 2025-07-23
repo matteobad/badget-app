@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/server/db/schema/enum";
+import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/shared/constants/enum";
 
 export const getBankAccountsSchema = z.object({
   id: z

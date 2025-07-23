@@ -1,11 +1,11 @@
 import type { DB_TransactionType } from "~/server/db/schema/transactions";
 import { getSortingStateParser } from "~/lib/validators";
+import { transaction_table } from "~/server/db/schema/transactions";
 import {
   TRANSACTION_FREQUENCY,
   TRANSACTION_METHOD,
   TRANSACTION_STATUS,
-} from "~/server/db/schema/enum";
-import { transaction_table } from "~/server/db/schema/transactions";
+} from "~/shared/constants/enum";
 import {
   createInsertSchema,
   createSelectSchema,

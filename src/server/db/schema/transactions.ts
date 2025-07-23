@@ -1,16 +1,16 @@
 import { createId } from "@paralleldrive/cuid2";
 import { pgEnum, unique } from "drizzle-orm/pg-core";
 
+import {
+  TRANSACTION_FREQUENCY,
+  TRANSACTION_METHOD,
+  TRANSACTION_STATUS,
+} from "../../../shared/constants/enum";
 import { numericCasted, timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { account_table } from "./accounts";
 import { user as user_table } from "./auth";
 import { category_table } from "./categories";
-import {
-  TRANSACTION_FREQUENCY,
-  TRANSACTION_METHOD,
-  TRANSACTION_STATUS,
-} from "./enum";
 
 export const transactionMethodEnum = pgEnum(
   "transaction_method",

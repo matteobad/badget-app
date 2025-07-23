@@ -1,6 +1,6 @@
 "server-only";
 
-import type { TransactionFrequencyType } from "~/server/db/schema/enum";
+import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import type { getTransactionTagsSchema } from "~/shared/validators/tag.schema";
 import type { getTransactionsSchema } from "~/shared/validators/transaction.schema";
 import type { SQL } from "drizzle-orm";

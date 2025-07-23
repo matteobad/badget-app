@@ -1,6 +1,6 @@
 "server-only";
 
-import type { CategoryType } from "~/server/db/schema/enum";
+import type { CategoryType } from "~/shared/constants/enum";
 import { db } from "~/server/db";
 import { category_table } from "~/server/db/schema/categories";
 import { and, asc, desc, eq } from "drizzle-orm";

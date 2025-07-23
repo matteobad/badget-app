@@ -2,8 +2,8 @@ import fs from "node:fs";
 import Papa from "papaparse";
 import { Range, RANGE_LB_INC } from "postgres-range";
 
+import { type BudgetRecurrenceType } from "../../../shared/constants/enum";
 import { type DB_BudgetInsertType } from "../schema/budgets";
-import { type BudgetRecurrenceType } from "../schema/enum";
 import { TimezoneRange } from "../utils";
 
 // Expected Type

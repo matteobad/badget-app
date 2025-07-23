@@ -1,6 +1,6 @@
 import type { ExtendedSortingState, Filter } from "~/utils/data-table";
-import { SAVING_TYPE } from "~/server/db/schema/enum";
 import { tag_table } from "~/server/db/schema/transactions";
+import { SAVING_TYPE } from "~/shared/constants/enum";
 import { dataTableConfig } from "~/utils/data-table";
 import { createInsertSchema } from "drizzle-zod";
 import { createParser } from "nuqs/server";

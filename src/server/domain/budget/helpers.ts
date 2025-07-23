@@ -1,12 +1,12 @@
 import type { DB_BudgetInsertType } from "~/server/db/schema/budgets";
-import type { BudgetRecurrenceType } from "~/server/db/schema/enum";
+import type { BudgetRecurrenceType } from "~/shared/constants/enum";
 import type {
   budgetFilterSchema,
   createBudgetSchema,
 } from "~/shared/validators/budget.schema";
 import type z from "zod/v4";
-import { BUDGET_RECURRENCE } from "~/server/db/schema/enum";
 import { TimezoneRange } from "~/server/db/utils";
+import { BUDGET_RECURRENCE } from "~/shared/constants/enum";
 import {
   addMonths,
   addWeeks,

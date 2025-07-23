@@ -1,6 +1,6 @@
 "use client";
 
-import type { BudgetRecurrenceType } from "~/server/db/schema/enum";
+import type { BudgetRecurrenceType } from "~/shared/constants/enum";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "~/components/ui/badge";

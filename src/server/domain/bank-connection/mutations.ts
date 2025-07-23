@@ -1,6 +1,6 @@
 import type { DBClient } from "~/server/db";
-import type { AccountType, BankProviderType } from "~/server/db/schema/enum";
 import type { DB_ConnectionInsertType } from "~/server/db/schema/open-banking";
+import type { AccountType, BankProviderType } from "~/shared/constants/enum";
 import { connection_table } from "~/server/db/schema/open-banking";
 import { and, eq } from "drizzle-orm";
 

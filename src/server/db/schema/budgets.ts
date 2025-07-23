@@ -9,10 +9,10 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
+import { BUDGET_RECURRENCE } from "../../../shared/constants/enum";
 import { timestamps, timezoneRange } from "../utils";
 import { pgTable } from "./_table";
 import { category_table } from "./categories";
-import { BUDGET_RECURRENCE } from "./enum";
 
 export const recurrenceEnum = pgEnum("recurrence", BUDGET_RECURRENCE);
 

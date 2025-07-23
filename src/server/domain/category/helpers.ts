@@ -1,8 +1,8 @@
 import type {
   BudgetRecurrenceType,
   CategoryType,
-} from "~/server/db/schema/enum";
-import { CATEGORY_TYPE } from "~/server/db/schema/enum";
+} from "~/shared/constants/enum";
+import { CATEGORY_TYPE } from "~/shared/constants/enum";
 import { differenceInCalendarDays, max, min } from "date-fns";
 
 export type BudgetInstance = {

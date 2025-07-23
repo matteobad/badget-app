@@ -1,6 +1,7 @@
 import { z } from "@hono/zod-openapi"; // Extended Zod instance
+
 import { category_table } from "~/server/db/schema/categories";
-import { CATEGORY_TYPE } from "~/server/db/schema/enum";
+import { CATEGORY_TYPE } from "~/shared/constants/enum";
 import {
   createInsertSchema,
   createSelectSchema,

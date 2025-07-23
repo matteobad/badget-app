@@ -1,6 +1,6 @@
 import { account_table } from "~/server/db/schema/accounts";
-import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/server/db/schema/enum";
 import { connection_table } from "~/server/db/schema/open-banking";
+import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/shared/constants/enum";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 

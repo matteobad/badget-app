@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/server/db/schema/enum";
+import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/shared/constants/enum";
 import { parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 export const getBankConnectionsSchema = z

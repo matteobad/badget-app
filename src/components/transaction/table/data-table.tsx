@@ -1,6 +1,6 @@
 "use client";
 
-import type { TransactionStatusType } from "~/server/db/schema/enum";
+import type { TransactionStatusType } from "~/shared/constants/enum";
 import { use, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import {

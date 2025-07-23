@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { type dynamicIconImports } from "lucide-react/dynamic";
 import Papa from "papaparse";
 
-import type { CategoryType } from "../schema/enum";
+import type { CategoryType } from "../../../shared/constants/enum";
 import { type DB_CategoryInsertType } from "../schema/categories";
 
 // Expected Type

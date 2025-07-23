@@ -1,9 +1,9 @@
 import { pgEnum, unique } from "drizzle-orm/pg-core";
 
+import { ACCOUNT_TYPE } from "../../../shared/constants/enum";
 import { numericCasted, timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { user as user_table } from "./auth";
-import { ACCOUNT_TYPE } from "./enum";
 import { connection_table, institution_table } from "./open-banking";
 
 export const accountTypeEnum = pgEnum("account_type", ACCOUNT_TYPE);

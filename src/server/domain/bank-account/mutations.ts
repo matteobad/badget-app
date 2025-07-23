@@ -1,5 +1,5 @@
 import type { DBClient } from "~/server/db";
-import type { AccountType } from "~/server/db/schema/enum";
+import type { AccountType } from "~/shared/constants/enum";
 import { account_table } from "~/server/db/schema/accounts";
 import { and, eq } from "drizzle-orm";
 

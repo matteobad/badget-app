@@ -1,4 +1,4 @@
-import { BANK_PROVIDER, CONNECTION_STATUS } from "~/server/db/schema/enum";
+import { BANK_PROVIDER, CONNECTION_STATUS } from "~/shared/constants/enum";
 import { capitalCase } from "change-case";
 import { addDays, formatISO, parseISO, subDays } from "date-fns";
 

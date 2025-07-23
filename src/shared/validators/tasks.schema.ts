@@ -1,4 +1,4 @@
-import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/server/db/schema/enum";
+import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/shared/constants/enum";
 import z from "zod/v4";
 
 export const initialBankSetupSchema = z.object({

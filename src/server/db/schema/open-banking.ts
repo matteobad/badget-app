@@ -1,10 +1,13 @@
 import { sql } from "drizzle-orm";
 import { pgEnum, unique } from "drizzle-orm/pg-core";
 
+import {
+  BANK_PROVIDER,
+  CONNECTION_STATUS,
+} from "../../../shared/constants/enum";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { user as user_table } from "./auth";
-import { BANK_PROVIDER, CONNECTION_STATUS } from "./enum";
 
 export const bankProviderEnum = pgEnum("bank_provider", BANK_PROVIDER);
 

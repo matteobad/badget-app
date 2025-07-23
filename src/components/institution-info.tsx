@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { BANK_PROVIDER } from "~/server/db/schema/enum";
+import { BANK_PROVIDER } from "~/shared/constants/enum";
 
 export function InstitutionInfo({
   provider,

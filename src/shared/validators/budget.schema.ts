@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi"; // Extended Zod instance
-import { BUDGET_RECURRENCE } from "~/server/db/schema/enum";
+import { BUDGET_RECURRENCE } from "~/shared/constants/enum";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import { parseAsBoolean, parseAsString } from "nuqs/server";
 
