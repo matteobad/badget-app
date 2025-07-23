@@ -23,7 +23,7 @@ jobs:
         uses: ./.github/workflows/setup
 
       - name: 📤 Pull Vercel Environment Information
-        run: pnpm dlx vercel pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: pnpm dlx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 📤 Pull Vercel Environment Information
         run: pnpm dlx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
