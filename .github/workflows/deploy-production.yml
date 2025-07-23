@@ -27,7 +27,7 @@ jobs:
         shell: bash
 
       - name: 📤 Pull Vercel Environment Information
-        run: vercel pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
         shell: bash
 
       - name: 🏗 Build Project Artifacts

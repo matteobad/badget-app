@@ -1,6 +1,10 @@
 import { createEnv } from "@t3-oss/env-nextjs";
+import {
+  neonVercel,
+  uploadthing,
+  vercel,
+} from "@t3-oss/env-nextjs/presets-zod";
 import { z } from "zod/v4";
-import { vercel, neonVercel, uploadthing } from "@t3-oss/env-nextjs/presets-zod";
 
 export const env = createEnv({
   extends: [vercel(), neonVercel(), uploadthing()],
