@@ -42,3 +42,21 @@ export async function getBankAccountsQuery(params: GetBankAccountsQuery) {
 
   return results;
 }
+
+type GetBankAccountByIdParams = {
+  id: string;
+  userId: string;
+};
+
+export async function getBankAccountByIdQuery(
+  params: GetBankAccountByIdParams,
+) {
+  const { id, userId } = params;
+
+  const [result] = await db
+    .select()
+    .from(account_table)
+    .where(and(eq(account_table.id, id), eq(account_table.userId, userId)));
+
+  return result;
+}

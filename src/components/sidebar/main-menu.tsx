@@ -3,19 +3,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "~/lib/utils";
 import {
+  CandlestickChartIcon,
   GoalIcon,
+  LandmarkIcon,
   LayoutDashboardIcon,
+  LeafIcon,
   ReceiptIcon,
   Settings2Icon,
-  SpoolIcon,
   WalletIcon,
 } from "lucide-react";
 
 const icons = {
   "/dashboard": () => <LayoutDashboardIcon size={20} />,
+  "/accounts": () => <LandmarkIcon size={20} />,
   "/transactions": () => <ReceiptIcon size={20} />,
   "/budgeting": () => <GoalIcon size={20} />,
-  "/pillars": () => <SpoolIcon size={20} />,
+  "/pension": () => <LeafIcon size={20} />,
+  "/investments": () => <CandlestickChartIcon size={20} />,
   "/wealth": () => <WalletIcon size={20} />,
   "/settings": () => <Settings2Icon size={20} />,
 } as const;
@@ -26,18 +30,31 @@ const items = [
     name: "Overview",
   },
   {
+    path: "/accounts",
+    name: "Accounts",
+    children: [
+      {
+        path: "/accounts?step=connect",
+        name: "Connect",
+      },
+      {
+        path: "/accounts?createBankAccount=true",
+        name: "Create new",
+      },
+    ],
+  },
+  {
     path: "/transactions",
     name: "Transactions",
     children: [
       {
-        path: "/transactions?step=connect",
-        name: "Connect bank",
-      },
-      {
         path: "/transactions?step=import&hide=true",
         name: "Import",
       },
-      { path: "/transactions?createTransaction=true", name: "Create new" },
+      {
+        path: "/transactions?createTransaction=true",
+        name: "Create new",
+      },
     ],
   },
   {
@@ -49,22 +66,28 @@ const items = [
     ],
   },
   {
-    path: "/pillars",
-    name: "Pilastri",
+    path: "/pension",
+    name: "Pension",
     children: [
-      { path: "/pillars/banking", name: "Liquidità" },
-      { path: "/pillars/emergency-fund", name: "Fondo di Emergenza" },
-      { path: "/pillars/short-term", name: "Obiettivi a breve" },
-      { path: "/pillars/investments", name: "Investimenti" },
+      { path: "/pension?createPensionFund=true", name: "Create new" },
+      { path: "/pension?addContribution=true", name: "Add contribution" },
     ],
+  },
+  {
+    path: "/investments",
+    name: "Investments",
+    // children: [
+    //   { path: "/investments/stocks", name: "Stocks" },
+    //   { path: "/investments/crypto", name: "Crypto" },
+    // ],
   },
   {
     path: "/wealth",
     name: "Wealth",
-    children: [
-      { path: "/wealth/assets", name: "Beni patrimoniali" },
-      { path: "/wealth/liabilities", name: "Passività" },
-    ],
+    // children: [
+    //   { path: "/wealth/assets", name: "Beni patrimoniali" },
+    //   { path: "/wealth/liabilities", name: "Passività" },
+    // ],
   },
   {
     path: "/settings",

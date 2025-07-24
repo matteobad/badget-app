@@ -4,6 +4,7 @@ import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { dynamicIconImports } from "lucide-react/dynamic";
 import { memo, useCallback } from "react";
 import { FormatAmount } from "~/components/format-amount";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -21,11 +22,10 @@ import {
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { formatDate } from "~/shared/helpers/format";
-import { CircleDashedIcon, MoreHorizontalIcon } from "lucide-react";
+import { CircleDashedIcon, MoreHorizontalIcon, RepeatIcon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { TransactionBankAccount } from "../transaction-bank-account";
 
 type Transaction = RouterOutput["transaction"]["get"]["data"][number];
 
@@ -59,30 +59,45 @@ const DescriptionCell = memo(
   ({
     name,
     description,
+    counterpartyLogo,
+    recurring,
     status,
-    categorySlug,
   }: {
     name: string;
     description?: string;
     status?: string;
-    categorySlug?: string | null;
+    counterpartyLogo?: string;
+    recurring?: boolean | null;
   }) => (
     <div className="flex items-center space-x-2">
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className={cn(categorySlug === "income" && "text-[#00C969]")}>
-            <div className="flex items-center space-x-2">
-              <span className="line-clamp-1 max-w-[100px] text-ellipsis md:max-w-none">
-                {name}
-              </span>
+          <div className="flex w-full items-center justify-between space-x-2">
+            <Avatar className="size-8">
+              <AvatarImage
+                src={counterpartyLogo ?? ""}
+                className="object-contain"
+              />
+              <AvatarFallback className="rounded-full">
+                {name?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="line-clamp-1 max-w-[100px] text-ellipsis md:max-w-none">
+              {name}
+            </span>
+            {recurring && (
+              <RepeatIcon className="size-3.5 text-muted-foreground" />
+            )}
 
-              {status === "pending" && (
+            <span className="flex-1"></span>
+            {status === "pending" && (
+              <>
                 <div className="flex h-[22px] items-center space-x-1 rounded-md border px-2 py-1 text-[10px] text-[#878787]">
                   <span>Pending</span>
                 </div>
-              )}
-            </div>
-          </span>
+              </>
+            )}
+          </div>
         </TooltipTrigger>
 
         {description && (
@@ -102,20 +117,12 @@ const DescriptionCell = memo(
 DescriptionCell.displayName = "DescriptionCell";
 
 const AmountCell = memo(
-  ({
-    amount,
-    currency,
-    categorySlug,
-  }: {
-    amount: number;
-    currency: string;
-    categorySlug?: string | null;
-  }) => (
-    <span
-      className={cn("text-sm", categorySlug === "income" && "text-[#00C969]")}
-    >
-      <FormatAmount amount={amount} currency={currency} />
-    </span>
+  ({ amount, currency }: { amount: number; currency: string }) => (
+    <div className="w-full text-right">
+      <span className={cn("text-sm", amount > 0 && "text-green-600")}>
+        <FormatAmount amount={amount} currency={currency} />
+      </span>
+    </div>
   ),
 );
 
@@ -135,9 +142,9 @@ const CategoryCell = memo(
   }) => {
     if (!category) {
       return (
-        <div className="flex w-fit items-center space-x-2 rounded-md border px-2 py-1">
-          <CircleDashedIcon className="size-4" />
-          <span>Uncategorized</span>
+        <div className="flex h-6 w-fit items-center gap-2 rounded-full border border-neutral-700/5 bg-neutral-700/4 px-1.5 py-1">
+          <CircleDashedIcon className="size-3.5" />
+          <span className="text-sm text-neutral-700">Uncategorized</span>
         </div>
       );
     }
@@ -176,6 +183,29 @@ const TagsCell = memo(
 );
 
 TagsCell.displayName = "TagsCell";
+
+const AccountCell = memo(
+  ({
+    bankAccount,
+  }: {
+    bankAccount: { id?: string; name?: string; logoUrl?: string | null };
+  }) => (
+    <div className="relative flex w-full items-center gap-2">
+      <Avatar className="size-6">
+        <AvatarImage
+          src={bankAccount?.logoUrl ?? ""}
+          className="object-contain"
+        />
+        <AvatarFallback className="rounded-full">
+          {bankAccount?.name?.charAt(0)}
+        </AvatarFallback>
+      </Avatar>
+      <span className="truncate">{bankAccount?.name}</span>
+    </div>
+  ),
+);
+
+AccountCell.displayName = "AccountCell";
 
 const ActionsCell = memo(
   ({
@@ -299,27 +329,16 @@ export const columns: ColumnDef<Transaction>[] = [
         name={row.original.name}
         description={row.original.description ?? undefined}
         status={row.original.status ?? undefined}
-        categorySlug={row.original?.category?.slug}
-      />
-    ),
-  },
-  {
-    accessorKey: "amount",
-    header: "Amount",
-    meta: {
-      className: "border-l border-border",
-    },
-    cell: ({ row }) => (
-      <AmountCell
-        amount={row.original.amount}
-        currency={row.original.currency}
-        categorySlug={row.original?.category?.slug}
+        recurring={row.original.recurring ?? undefined}
       />
     ),
   },
   {
     accessorKey: "category",
     header: "Category",
+    meta: {
+      className: "border-l border-border",
+    },
     cell: ({ row }) => <CategoryCell category={row.original.category!} />,
   },
   {
@@ -333,10 +352,15 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "bank_account",
     header: "Account",
+    cell: ({ row }) => <AccountCell bankAccount={row.original.account} />,
+  },
+  {
+    accessorKey: "amount",
+    header: "Amount",
     cell: ({ row }) => (
-      <TransactionBankAccount
-        name={row.original?.account?.name ?? undefined}
-        logoUrl={row.original?.account?.logoUrl ?? undefined}
+      <AmountCell
+        amount={row.original.amount}
+        currency={row.original.currency}
       />
     ),
   },

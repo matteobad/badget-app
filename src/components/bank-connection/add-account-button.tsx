@@ -7,12 +7,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { actionsParsers } from "~/utils/search-params";
+import { useBankAccountParams } from "~/hooks/use-bank-account-params";
+import { useConnectParams } from "~/hooks/use-connect-params";
+import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { FilePlus, Landmark } from "lucide-react";
-import { useQueryStates } from "nuqs";
 
 export function AddAccountButton() {
-  const [, setState] = useQueryStates(actionsParsers, { shallow: false });
+  const { setParams: setTransactionParams } = useTransactionParams();
+  const { setParams: setBankAccountParams } = useBankAccountParams();
+  const { setParams: setBankConnectParams } = useConnectParams();
 
   return (
     <DropdownMenu>
@@ -21,13 +24,36 @@ export function AddAccountButton() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-[180px]">
         <DropdownMenuItem
-          onClick={() => void setState({ action: "link-institution" })}
+          onClick={() => {
+            void setTransactionParams({
+              transactionId: null,
+              createTransaction: null,
+              importTransaction: null,
+            });
+            void setBankAccountParams({
+              bankAccountId: null,
+              createBankAccount: null,
+            });
+            void setBankConnectParams({
+              step: "connect",
+            });
+          }}
         >
           <Landmark />
           Collega un conto
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => void setState({ action: "create-account" })}
+          onClick={() => {
+            void setTransactionParams({
+              transactionId: null,
+              createTransaction: null,
+              importTransaction: null,
+            });
+            void setBankAccountParams({
+              bankAccountId: null,
+              createBankAccount: true,
+            });
+          }}
         >
           <FilePlus /> Crea manualmente
         </DropdownMenuItem>

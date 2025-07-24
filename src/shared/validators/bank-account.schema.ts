@@ -1,5 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/shared/constants/enum";
+import { parseAsBoolean, parseAsString } from "nuqs/server";
 
 export const getBankAccountsSchema = z.object({
   id: z
@@ -66,6 +67,10 @@ export const updateBankAccountSchema = z
       description: "The name of the bank account.",
       example: "Checking Account",
     }),
+    description: z.string().optional().openapi({
+      description: "The description of the bank account.",
+      example: "Revolut space for annual expeses.",
+    }),
     enabled: z.boolean().optional().openapi({
       description: "Whether the bank account is enabled.",
       example: true,
@@ -93,3 +98,9 @@ export const updateBankAccountSchema = z
       type: "depository",
     },
   });
+
+// Search params for sheets
+export const bankAccountParamsSchema = {
+  bankAccountId: parseAsString,
+  createBankAccount: parseAsBoolean,
+};

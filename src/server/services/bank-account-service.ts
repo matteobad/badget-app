@@ -1,5 +1,6 @@
 import type {
   deleteBankAccountSchema,
+  getBankAccountByIdSchema,
   getBankAccountsSchema,
   updateBankAccountSchema,
 } from "~/shared/validators/bank-account.schema";
@@ -10,13 +11,23 @@ import {
   deleteBankAccountMutation,
   updateBankAccountMutation,
 } from "../domain/bank-account/mutations";
-import { getBankAccountsQuery } from "../domain/bank-account/queries";
+import {
+  getBankAccountByIdQuery,
+  getBankAccountsQuery,
+} from "../domain/bank-account/queries";
 
 export async function getBankAccounts(
   input: z.infer<typeof getBankAccountsSchema>,
   userId: string,
 ) {
   return await getBankAccountsQuery({ ...input, userId });
+}
+
+export async function getBankAccountById(
+  input: z.infer<typeof getBankAccountByIdSchema>,
+  userId: string,
+) {
+  return await getBankAccountByIdQuery({ ...input, userId });
 }
 
 export async function updateBankAccount(

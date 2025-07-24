@@ -63,6 +63,8 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
     loading,
   });
 
+  console.log(tableScroll?.isScrollable);
+
   return (
     <TableHeader className="border-r-0 border-l-0">
       <TableRow className="h-[45px] hover:bg-transparent">
@@ -109,7 +111,7 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
         {isVisible("description") && (
           <TableHead
             className={cn(
-              "z-10 w-[320px] min-w-[320px] border-r border-border bg-background px-3 py-2 md:sticky md:left-[var(--stick-left)] md:px-4",
+              "z-10 min-w-[320px] border-r border-border bg-background px-3 py-2 md:sticky md:left-[var(--stick-left)] md:px-4",
               "before:absolute before:top-0 before:right-0 before:bottom-0 before:w-px before:bg-border",
               "after:absolute after:top-0 after:right-[-24px] after:bottom-0 after:z-[-1] after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background",
             )}
@@ -140,24 +142,8 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
           </TableHead>
         )}
 
-        {isVisible("amount") && (
-          <TableHead className="w-[170px] min-w-[170px] border-l border-border px-3 py-2 md:px-4">
-            <Button
-              className="space-x-2 p-0 hover:bg-transparent"
-              variant="ghost"
-              onClick={() => createSortQuery("amount")}
-            >
-              <span>Amount</span>
-              {"amount" === column && value === "asc" && (
-                <ArrowDown size={16} />
-              )}
-              {"amount" === column && value === "desc" && <ArrowUp size={16} />}
-            </Button>
-          </TableHead>
-        )}
-
         {isVisible("category") && (
-          <TableHead className="w-[250px] min-w-[250px] px-3 py-2 md:px-4">
+          <TableHead className="w-[250px] min-w-[250px] border-l border-border px-3 py-2 md:px-4">
             <Button
               className="space-x-2 p-0 hover:bg-transparent"
               variant="ghost"
@@ -222,10 +208,26 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
           </TableHead>
         )}
 
+        {isVisible("amount") && (
+          <TableHead className="w-[170px] min-w-[170px] px-3 py-2 text-right md:px-4">
+            <Button
+              className="space-x-2 p-0 hover:bg-transparent"
+              variant="ghost"
+              onClick={() => createSortQuery("amount")}
+            >
+              <span>Amount</span>
+              {"amount" === column && value === "asc" && (
+                <ArrowDown size={16} />
+              )}
+              {"amount" === column && value === "desc" && <ArrowUp size={16} />}
+            </Button>
+          </TableHead>
+        )}
+
         {isVisible("actions") && (
           <TableHead
             className={cn(
-              "z-10 w-[64px] bg-background md:sticky md:right-0",
+              "z-10 w-[64px] grow-0 bg-background md:sticky md:right-0",
               "before:absolute before:top-0 before:bottom-0 before:left-0 before:w-px before:bg-border",
               "after:absolute after:top-0 after:bottom-0 after:left-[-24px] after:z-[-1] after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background",
             )}

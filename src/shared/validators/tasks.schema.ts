@@ -19,6 +19,7 @@ export const syncAccountSchema = z.object({
   provider: z.enum(BANK_PROVIDER),
   manualSync: z.boolean().optional(),
   accountType: z.enum(ACCOUNT_TYPE),
+  logoUrl: z.url().optional(),
 });
 
 export const deleteConnectionSchema = z.object({

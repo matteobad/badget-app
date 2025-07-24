@@ -3,6 +3,7 @@
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 import { cn } from "~/lib/utils";
 import { getInitials } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -32,7 +33,6 @@ import {
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
-import { UpdateBankAccountDialog } from "./update-bank-account-dialog";
 
 type Props = {
   data: NonNullable<
@@ -44,8 +44,8 @@ export function BankAccount({ data }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [value, setValue] = useState("");
-  const [isOpen, setOpen] = useState(false);
 
+  const { setParams: setBankAccountParams } = useBankAccountParams();
   const [, setParams] = useQueryStates({
     step: parseAsString,
     accountId: parseAsString,
@@ -66,7 +66,7 @@ export function BankAccount({ data }: Props) {
           queryKey: trpc.bankConnection.get.queryKey(),
         });
 
-        setOpen(false);
+        void setBankAccountParams({ bankAccountId: null });
       },
     }),
   );
@@ -119,7 +119,11 @@ export function BankAccount({ data }: Props) {
               <MoreHorizontal size={20} />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48">
-              <DropdownMenuItem onClick={() => setOpen(true)}>
+              <DropdownMenuItem
+                onClick={() => {
+                  void setBankAccountParams({ bankAccountId: data.id });
+                }}
+              >
                 Edit
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -190,15 +194,6 @@ export function BankAccount({ data }: Props) {
           />
         )}
       </div>
-
-      <UpdateBankAccountDialog
-        id={id}
-        onOpenChange={setOpen}
-        isOpen={isOpen}
-        defaultName={name}
-        defaultType={type}
-        defaultBalance={balance}
-      />
     </div>
   );
 }

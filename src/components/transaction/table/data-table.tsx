@@ -255,7 +255,7 @@ export function DataTable({
                                 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                                 cell.column.columnDef.meta?.className,
                               ),
-                              "py-4",
+                              "py-3",
                             )}
                             style={getStickyStyle(cell.column.id)}
                             onClick={() => {

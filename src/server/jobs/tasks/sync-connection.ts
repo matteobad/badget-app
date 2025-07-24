@@ -79,6 +79,7 @@ export const syncConnection = schemaTask({
           connectionId: connectionId,
           userId: account.userId,
           accountType: account.type ?? "depository",
+          logoUrl: data.logoUrl,
           manualSync,
         }));
 

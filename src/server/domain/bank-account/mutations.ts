@@ -14,6 +14,8 @@ export type CreateBankAccountPayload = {
   manual?: boolean;
   enabled?: boolean;
   type?: AccountType;
+  logoUrl?: string;
+  accountReference?: string;
 };
 
 export const createBankAccountMutation = async (
@@ -32,7 +34,9 @@ export const createBankAccountMutation = async (
       manual: payload.manual,
       enabled: payload.enabled,
       type: payload.type ?? "checking",
+      logoUrl: payload.logoUrl,
       balance: payload.balance,
+      accountReference: payload.accountReference,
     })
     .onConflictDoUpdate({
       target: [account_table.rawId, account_table.userId],
@@ -42,6 +46,7 @@ export const createBankAccountMutation = async (
         currency: payload.currency,
         enabled: payload.enabled,
         balance: payload.balance,
+        logoUrl: payload.logoUrl,
         //lastAccessed: new Date().toISOString(),
       },
     })
@@ -73,6 +78,7 @@ export type UpdateBankAccountParams = {
   id: string;
   userId: string;
   name?: string;
+  description?: string;
   type?: AccountType;
   balance?: number;
   enabled?: boolean;
