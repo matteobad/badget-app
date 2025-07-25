@@ -57,6 +57,36 @@ export const getBankAccountByIdSchema = z.object({
   }),
 });
 
+export const createBankAccountSchema = z
+  .object({
+    name: z.string().openapi({
+      description: "The name of the bank account.",
+      example: "Checking Account",
+    }),
+    balance: z.number().openapi({
+      description: "Current balance of the bank account.",
+      example: 1500.75,
+    }),
+    currency: z.string().openapi({
+      description: "The currency code for the bank account (ISO 4217).",
+      example: "USD",
+    }),
+    type: z.enum(ACCOUNT_TYPE).optional().openapi({
+      description: "Type of the bank account.",
+      example: "depository",
+    }),
+  })
+  .openapi({
+    description: "Schema for updating a bank account.",
+    example: {
+      id: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
+      name: "Checking Account",
+      enabled: true,
+      balance: 1500.75,
+      type: "depository",
+    },
+  });
+
 export const updateBankAccountSchema = z
   .object({
     id: z.uuid().openapi({

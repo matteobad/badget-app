@@ -1,10 +1,12 @@
 import {
+  createBankAccount,
   deleteBankAccount,
   getBankAccountById,
   getBankAccounts,
   updateBankAccount,
 } from "~/server/services/bank-account-service";
 import {
+  createBankAccountSchema,
   deleteBankAccountSchema,
   getBankAccountByIdSchema,
   getBankAccountsSchema,
@@ -26,6 +28,13 @@ export const bankAccountRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session!.userId;
       return await getBankAccountById(input, userId);
+    }),
+
+  create: protectedProcedure
+    .input(createBankAccountSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session!.userId;
+      return createBankAccount(input, userId);
     }),
 
   update: protectedProcedure

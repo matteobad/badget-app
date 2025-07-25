@@ -1,4 +1,5 @@
 import type {
+  createBankAccountSchema,
   deleteBankAccountSchema,
   getBankAccountByIdSchema,
   getBankAccountsSchema,
@@ -8,6 +9,7 @@ import type z from "zod/v4";
 
 import { db } from "../db";
 import {
+  createBankAccountMutation,
   deleteBankAccountMutation,
   updateBankAccountMutation,
 } from "../domain/bank-account/mutations";
@@ -28,6 +30,13 @@ export async function getBankAccountById(
   userId: string,
 ) {
   return await getBankAccountByIdQuery({ ...input, userId });
+}
+
+export async function createBankAccount(
+  input: z.infer<typeof createBankAccountSchema>,
+  userId: string,
+) {
+  return await createBankAccountMutation(db, { ...input, userId });
 }
 
 export async function updateBankAccount(

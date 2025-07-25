@@ -1,17 +1,17 @@
 "use client";
 
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "~/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 
-// import CreateAccountForm from "./create-account-form";
+import CreateBankAccountForm from "../forms/create-bank-account-form";
 
-export default function CreateBankAccountSheet() {
+export default function CreateBankAccountDialog() {
   const { params, setParams } = useBankAccountParams();
 
   const isOpen = !!params.createBankAccount;
@@ -21,18 +21,19 @@ export default function CreateBankAccountSheet() {
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={handleClose}>
-      <SheetContent className="p-4">
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="p-4">
         <div className="flex h-full flex-col">
-          <SheetHeader className="mb-6">
-            <SheetTitle>Un nuovo conto, un nuovo inizio.</SheetTitle>
-            <SheetDescription>
+          <DialogHeader className="mb-6">
+            <DialogTitle>Un nuovo conto, un nuovo inizio.</DialogTitle>
+            <DialogDescription>
               Scegli il tipo, aggiungi i dettagli e sei pronto!
-            </SheetDescription>
-          </SheetHeader>
-          {/* <CreateAccountForm onComplete={handleClose} /> */}
+            </DialogDescription>
+          </DialogHeader>
+
+          <CreateBankAccountForm />
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

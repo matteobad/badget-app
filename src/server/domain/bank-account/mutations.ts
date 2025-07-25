@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 
 export type CreateBankAccountPayload = {
   name: string;
-  accountId: string;
+  accountId?: string;
   institutionId?: string;
   connectionId?: string;
   balance: number;
