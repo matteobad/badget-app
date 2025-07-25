@@ -28,10 +28,8 @@ export async function getBankAccountsQuery(params: GetBankAccountsQuery) {
     where.push(eq(account_table.manual, manual));
   }
 
-  if (enabled) {
+  if (typeof enabled === "boolean") {
     where.push(eq(account_table.enabled, enabled));
-  } else {
-    where.push(eq(account_table.enabled, false));
   }
 
   const results = await db

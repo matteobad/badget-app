@@ -8,18 +8,32 @@ export type BankProviderType =
   (typeof BANK_PROVIDER)[keyof typeof BANK_PROVIDER];
 
 export const ACCOUNT_TYPE = {
-  // midday
-  // DEPOSITORY: "depository",
-  // CREDIT: "credit",
-  // OTHER_ASSET: "other_asset",
-  // LOAN: "loan",
-  // OTHER_LIABILITY: "other_liability",
-  //custom
+  // Liquidità
   CHECKING: "checking",
   SAVINGS: "savings",
-  INVESTMENTS: "investment",
-  DEBT: "debt",
   CASH: "cash",
+  EWALLET: "ewallet",
+
+  // Debiti
+  CREDIT_CARD: "credit_card",
+  LOAN: "loan",
+  MORTGAGE: "mortgage",
+  OTHER_DEBT: "other_debt",
+
+  // Investimenti
+  ETF: "etf",
+  STOCK: "stock",
+  BOND: "bond",
+  BROKERAGE: "brokerage",
+  PENSION: "pension",
+  CRYPTO: "crypto",
+
+  // Beni patrimoniali
+  REAL_ESTATE: "real_estate",
+  VEHICLE: "vehicle",
+  OTHER_ASSET: "other_asset",
+
+  // Altro
   OTHER: "other",
 } as const;
 export type AccountType = (typeof ACCOUNT_TYPE)[keyof typeof ACCOUNT_TYPE];
