@@ -1,10 +1,9 @@
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { ColorKey } from "~/shared/constants/colors";
-import type { dynamicIconImports, IconName } from "lucide-react/dynamic";
+import type { IconName } from "lucide-react/dynamic";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CategorySelect } from "~/components/category/forms/category-select";
-import { Button } from "~/components/ui/button";
+import { SubmitButton } from "~/components/submit-button";
 import {
   Form,
   FormControl,
@@ -14,18 +13,16 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { useBudgetParams } from "~/hooks/use-budget-params";
 import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createCategorySchema } from "~/shared/validators/category.schema";
-import { Loader2Icon } from "lucide-react";
-import { DynamicIcon } from "lucide-react/dynamic";
 import { useForm } from "react-hook-form";
 import { type z } from "zod/v4";
 
-import { ColorPicker } from "../forms/color-picker";
-import { IconPicker } from "../ui/icon-picker";
+import { ColorPicker } from "../../forms/color-picker";
+import { IconPicker } from "../../ui/icon-picker";
+import { CategoryTypeSelect } from "./category-type-select";
 
 export default function CreateCategoryForm({
   className,
@@ -44,6 +41,8 @@ export default function CreateCategoryForm({
           queryKey: trpc.category.get.queryKey(),
         });
 
+        void setParams({ createCategory: null });
+
         // reset form
         form.reset();
       },
@@ -54,8 +53,6 @@ export default function CreateCategoryForm({
     resolver: standardSchemaResolver(createCategorySchema),
     defaultValues: {
       name: "",
-      color: "neutral",
-      icon: "star",
     },
   });
 
@@ -66,10 +63,6 @@ export default function CreateCategoryForm({
 
     createMutation.mutate(formattedData);
   };
-
-  if (createMutation.isSuccess) {
-    return <CreateBudgetConfirm category={createMutation.data!} />;
-  }
 
   return (
     <Form {...form}>
@@ -82,38 +75,23 @@ export default function CreateCategoryForm({
         </pre> */}
 
         <div className="grid gap-4">
-          <div className="relative flex w-full items-center gap-2 divide-x">
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem className="absolute top-9 left-3 grid gap-3 pr-2.5">
-                  <FormControl>
-                    <ColorPicker
-                      className=""
-                      value={field.value as ColorKey}
-                      onSelect={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="icon"
-              render={({ field }) => (
-                <FormItem className="absolute top-9 left-12 grid gap-3 pr-2.5">
-                  <FormControl>
-                    <IconPicker
-                      value={field.value as IconName}
-                      onValueChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem className="grid w-full gap-3">
+                <FormLabel>Classification</FormLabel>
+                <FormControl>
+                  <CategoryTypeSelect
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex w-full items-end gap-2">
             <FormField
               control={form.control}
               name="name"
@@ -123,8 +101,7 @@ export default function CreateCategoryForm({
                   <FormControl>
                     <Input
                       {...field}
-                      className="pl-23"
-                      placeholder=""
+                      placeholder="Category name"
                       autoComplete="off"
                       autoCapitalize="none"
                       autoCorrect="off"
@@ -154,13 +131,44 @@ export default function CreateCategoryForm({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="color"
+              render={({ field }) => (
+                <FormItem className="grid size-9 gap-3">
+                  <FormControl>
+                    <ColorPicker
+                      className="border"
+                      value={field.value as ColorKey}
+                      onSelect={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="icon"
+              render={({ field }) => (
+                <FormItem className="grid h-9 gap-3">
+                  <FormControl>
+                    <IconPicker
+                      value={field.value as IconName}
+                      onValueChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           <FormField
             control={form.control}
             name="parentId"
             render={({ field }) => (
-              <FormItem className="grid gap-3">
-                <FormLabel>Categoria Padre</FormLabel>
+              <FormItem className="grid w-full gap-3">
+                <FormLabel>Parent category (optional)</FormLabel>
                 <CategorySelect
                   {...field}
                   onValueChange={(value) => {
@@ -176,76 +184,15 @@ export default function CreateCategoryForm({
           />
         </div>
 
-        <div className="flex items-center justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              // close modal
-              void setParams(null);
-            }}
+        <div className="w-full">
+          <SubmitButton
+            isSubmitting={createMutation.isPending}
+            className="w-full"
           >
-            Annulla
-          </Button>
-          <Button type="submit" disabled={createMutation.isPending}>
-            {createMutation.isPending ? (
-              <>
-                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                Creo categoria...
-              </>
-            ) : (
-              "Salva"
-            )}
-          </Button>
+            Create Category
+          </SubmitButton>
         </div>
       </form>
     </Form>
-  );
-}
-
-function CreateBudgetConfirm({
-  category,
-}: {
-  category: NonNullable<RouterOutput["category"]["create"]>;
-}) {
-  const { setParams: setCategoryParams } = useCategoryParams();
-  const { setParams: setBudgetParams } = useBudgetParams();
-
-  return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col items-center justify-center gap-2">
-        <DynamicIcon
-          name={category.icon as keyof typeof dynamicIconImports}
-          size={32}
-        />
-        <span className="text-lg font-semibold">{category.name}</span>
-        <p className="mt-2 text-muted-foreground">
-          La categoria è stata creata con successo. Vuoi creare anche un budget?
-        </p>
-      </div>
-      <div className="flex items-center justify-center gap-3">
-        <Button
-          className="flex-1"
-          variant="outline"
-          onClick={() => {
-            // close modal
-            void setCategoryParams(null);
-            void setBudgetParams(null);
-          }}
-        >
-          Non ora
-        </Button>
-        <Button
-          className="flex-1"
-          onClick={() => {
-            // create budget form
-            void setCategoryParams(null);
-            void setBudgetParams({ createBudget: true });
-          }}
-        >
-          Crea budget
-        </Button>
-      </div>
-    </div>
   );
 }

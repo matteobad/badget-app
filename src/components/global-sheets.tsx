@@ -6,8 +6,8 @@ import { BankAccountSheet } from "./bank-account/sheets/bank-account-sheet";
 import CreateBankAccountSheet from "./bank-account/sheets/create-bank-account-dialog";
 import { ConnectBankDialog } from "./bank-connection/connect-bank-dialog";
 import { SelectBankAccountsModal } from "./bank-connection/select-bank-accounts";
-import CreateCategoryDialog from "./category/create-category-dialog";
 import CategorySheet from "./category/sheets/category-sheet";
+import CreateCategoryDialog from "./category/sheets/create-category-dialog";
 import CreateTransactionSheet from "./transaction/sheets/create-transaction-sheet";
 import TransactionSheet from "./transaction/sheets/transaction-sheet";
 

@@ -3,7 +3,7 @@ import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 import { CategoryActions } from "~/components/category/category-actions";
 import { CategorySearchFilter } from "~/components/category/category-search-filter";
-import { DataTable } from "~/components/category/table/data-table";
+import { DataList } from "~/components/category/data-list";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   getQueryClient,
@@ -48,7 +48,7 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
         <CardContent>
           <ErrorBoundary fallback={<div>Something went wrong</div>}>
             <Suspense fallback={<div>Loading...</div>}>
-              <DataTable />
+              <DataList />
             </Suspense>
           </ErrorBoundary>
         </CardContent>

@@ -2,8 +2,13 @@
 
 import { useCategoryParams } from "~/hooks/use-category-params";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import CreateCategoryForm from "./create-category-form";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../ui/dialog";
+import CreateCategoryForm from "../forms/create-category-form";
 
 export default function CreateCategoryDialog() {
   const { params: categoryParams, setParams: setCategoryParams } =

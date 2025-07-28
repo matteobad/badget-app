@@ -21,7 +21,7 @@ export function ColorPicker({ value, onSelect, className }: Props) {
         <Button
           variant="ghost"
           type="button"
-          className={cn("absolute left-0 transition-colors", className)}
+          className={cn("transition-colors", className)}
           style={{
             backgroundColor: value,
           }}

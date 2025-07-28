@@ -5,31 +5,55 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
-import { CategoryListEmpty } from "./category-list-empty";
 import { CategoryTree } from "./category-tree";
+import { CategoryListEmpty } from "./data-list.empty";
 
 type Category = RouterOutput["category"]["get"][number];
+
+const CATEGORY_TYPE_ORDER = [
+  "income",
+  "expense",
+  "savings",
+  "investments",
+  "transfer",
+];
 
 const groupCategoriesByTypeGroup = (categories: Category[]) => {
   const groups: Record<string, Category[]> = {};
 
   categories.forEach((category) => {
-    // Use ACCOUNT_TYPE_GROUP to get the group key for the account type
     const groupKey = category.type;
     groups[groupKey] ??= [];
     groups[groupKey].push(category);
   });
 
-  return groups;
+  // Sort the groups by the specified order
+  const sortedGroups: Record<string, Category[]> = {};
+  CATEGORY_TYPE_ORDER.forEach((type) => {
+    if (groups[type]) {
+      sortedGroups[type] = groups[type];
+    }
+  });
+
+  // Add any remaining types not in the order at the end
+  Object.keys(groups).forEach((type) => {
+    if (!CATEGORY_TYPE_ORDER.includes(type)) {
+      sortedGroups[type] = groups[type]!;
+    }
+  });
+
+  return sortedGroups;
 };
 
-export function DataTable() {
+export function DataList() {
   const trpc = useTRPC();
   const { data } = useQuery(trpc.category.get.queryOptions({}));
 
   const groupedCategories = groupCategoriesByTypeGroup(data ?? []);
 
-  if (!data || data?.length === 0) {
+  if (!data) return;
+
+  if (data?.length === 0) {
     return <CategoryListEmpty />;
   }
 

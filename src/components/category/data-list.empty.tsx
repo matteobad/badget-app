@@ -3,7 +3,7 @@ import { Button } from "~/components/ui/button";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { toast } from "sonner";
 
-import { CreateCategoryButton } from "../create-category-button";
+import { CreateCategoryButton } from "./create-category-button";
 
 export function CategoryListEmpty() {
   const trpc = useTRPC();

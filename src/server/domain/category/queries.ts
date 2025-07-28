@@ -3,7 +3,7 @@
 import type { CategoryType } from "~/shared/constants/enum";
 import { db } from "~/server/db";
 import { category_table } from "~/server/db/schema/categories";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, isNull } from "drizzle-orm";
 
 type getCategoriesQueryRequest = {
   userId: string;
@@ -14,7 +14,10 @@ type getCategoriesQueryRequest = {
 export async function getCategoriesQuery(params: getCategoriesQueryRequest) {
   const { userId, type, limit = 1000 } = params;
 
-  const where = [eq(category_table.userId, userId)];
+  const where = [
+    eq(category_table.userId, userId),
+    isNull(category_table.deletedAt),
+  ];
 
   if (type) {
     where.push(eq(category_table.type, type));

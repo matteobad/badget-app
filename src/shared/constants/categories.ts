@@ -160,7 +160,7 @@ export const DEFAULT_CATEGORIES: DB_CategoryInsertType[] = [
     name: "Bonds",
     type: "investments",
     color: "#cfd8dc",
-    icon: "file-certificate",
+    icon: "badge-percent",
     description: "Investments in bonds.",
     parentId: CATEGORY_UUIDS.investments,
   },
