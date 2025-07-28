@@ -1,13 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import * as React from "react";
 import { type ItemInstance } from "@headless-tree/core";
 import { cn } from "~/lib/utils";
-import { ChevronDownIcon, DotIcon } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 import { Slot } from "radix-ui";
 
 interface TreeContextValue<T = any> {
@@ -33,8 +31,10 @@ interface TreeProps extends React.HTMLAttributes<HTMLDivElement> {
 
 function Tree({ indent = 20, tree, className, ...props }: TreeProps) {
   const containerProps =
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     tree && typeof tree.getContainerProps === "function"
-      ? tree.getContainerProps()
+      ? // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        tree.getContainerProps()
       : {};
   const mergedProps = { ...props, ...containerProps };
 
@@ -59,13 +59,14 @@ function Tree({ indent = 20, tree, className, ...props }: TreeProps) {
   );
 }
 
-interface TreeItemProps<T> extends React.HTMLAttributes<HTMLButtonElement> {
+interface TreeItemProps<T = any>
+  extends React.HTMLAttributes<HTMLButtonElement> {
   item: ItemInstance<T>;
   indent?: number;
   asChild?: boolean;
 }
 
-function TreeItem<T>({
+function TreeItem<T = any>({
   item,
   className,
   asChild,
@@ -83,7 +84,7 @@ function TreeItem<T>({
   // Merge styles
   const mergedStyle = {
     ...propStyle,
-    "--tree-padding": `${item.getItemMeta().level * indent + 0}px`,
+    "--tree-padding": `${item.getItemMeta().level * indent}px`,
   } as React.CSSProperties;
 
   const Comp = asChild ? Slot.Root : "button";
@@ -131,11 +132,12 @@ function TreeItem<T>({
   );
 }
 
-interface TreeItemLabelProps<T> extends React.HTMLAttributes<HTMLSpanElement> {
+interface TreeItemLabelProps<T = any>
+  extends React.HTMLAttributes<HTMLSpanElement> {
   item?: ItemInstance<T>;
 }
 
-function TreeItemLabel<T>({
+function TreeItemLabel<T = any>({
   item: propItem,
   children,
   className,
@@ -153,25 +155,13 @@ function TreeItemLabel<T>({
     <span
       data-slot="tree-item-label"
       className={cn(
-        "flex h-10 items-center gap-3 rounded-md bg-background px-2 py-1.5 text-base transition-colors not-in-data-[folder=true]:ps-7 hover:bg-accent in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 in-data-[drag-target=true]:bg-accent in-data-[search-match=true]:bg-blue-50! in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "flex items-center gap-1 rounded-sm bg-background px-2 py-1.5 text-sm transition-colors not-in-data-[folder=true]:ps-7 hover:bg-accent in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 in-data-[drag-target=true]:bg-accent in-data-[search-match=true]:bg-blue-400/20! in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className,
       )}
       {...props}
     >
-      {item.isFolder() || item.getParent()?.getId() === "root" ? (
-        <div className="flex size-6 shrink-0 items-center justify-center">
-          <ChevronDownIcon
-            className={cn(
-              "size-5 shrink-0 text-muted-foreground in-aria-[expanded=false]:-rotate-90",
-              { "text-muted-foreground/50": item.getChildren().length === 0 },
-            )}
-          />
-        </div>
-      ) : (
-        <div className="flex size-6 shrink-0 items-center justify-center">
-          <DotIcon className="size-5 text-muted-foreground" />
-          {/* <div className="absolute right-0 bottom-4.5 w-1/2 border-b"></div> */}
-        </div>
+      {item.isFolder() && (
+        <ChevronDownIcon className="size-4 text-muted-foreground in-aria-[expanded=false]:-rotate-90" />
       )}
       {children ??
         (typeof item.getItemName === "function" ? item.getItemName() : null)}
@@ -185,6 +175,7 @@ function TreeDragLine({
 }: React.HTMLAttributes<HTMLDivElement>) {
   const { tree } = useTreeContext();
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (!tree || typeof tree.getDragLineStyle !== "function") {
     console.warn(
       "TreeDragLine: No tree provided via context or tree does not have getDragLineStyle method",
@@ -192,6 +183,7 @@ function TreeDragLine({
     return null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   const dragLine = tree.getDragLineStyle();
   return (
     <div

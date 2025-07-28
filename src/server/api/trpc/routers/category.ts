@@ -1,6 +1,7 @@
 import { getCategoryByIdQuery } from "~/server/domain/category/queries";
 import {
   createCategory,
+  createDefaultCategories,
   deleteCategory,
   getCategories,
   getCategoriesWithBudgets,
@@ -45,6 +46,11 @@ export const categoryRouter = createTRPCRouter({
       const userId = ctx.session!.userId;
       return await createCategory(input, userId);
     }),
+
+  createDefaults: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session!.userId;
+    return await createDefaultCategories(userId);
+  }),
 
   update: protectedProcedure
     .input(updateCategorySchema)

@@ -20,8 +20,8 @@ import { useTRPC } from "~/shared/helpers/trpc/client";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { FeatureImplementation, TreeState } from "@headless-tree/core";
-import { Tree, TreeItem, TreeItemLabel } from "../tree";
 import { Badge } from "../ui/badge";
+import { Tree, TreeItem, TreeItemLabel } from "../ui/tree";
 
 type CategoryWithAccrual = RouterOutput["category"]["getWithBudgets"][number];
 

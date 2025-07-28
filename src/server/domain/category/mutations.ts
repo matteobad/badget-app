@@ -16,6 +16,17 @@ export async function createCategoryMutation(
     .returning();
 }
 
+export async function createManyCategoryMutation(
+  client: DBClient,
+  params: DB_CategoryInsertType[],
+) {
+  return await client
+    .insert(category_table)
+    .values([...params])
+    .onConflictDoNothing()
+    .returning();
+}
+
 export async function updateCategoryMutation(
   client: DBClient,
   params: Partial<DB_CategoryInsertType>,
