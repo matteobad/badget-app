@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Input } from "~/components/ui/input";
-import { useTransactionFilterParamsWithPersistence } from "~/hooks/use-transaction-filter-params-with-persistence";
+import { useBankAccountFilterParams } from "~/hooks/use-bank-account-filter-params";
 import { SearchIcon } from "lucide-react";
 import { useHotkeys } from "react-hotkeys-hook";
 
@@ -14,15 +14,14 @@ const defaultSearch = {
 export function AccountsSearchFilter() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
-  const { filter = defaultSearch, setFilter } =
-    useTransactionFilterParamsWithPersistence();
+  const { filter = defaultSearch, setFilter } = useBankAccountFilterParams();
   const [prompt, setPrompt] = useState(filter.q ?? "");
 
   useHotkeys(
     "esc",
     () => {
       setPrompt("");
-      setFilter(defaultSearch);
+      void setFilter(defaultSearch);
     },
     {
       enableOnFormTags: true,
@@ -40,14 +39,14 @@ export function AccountsSearchFilter() {
     if (value) {
       setPrompt(value);
     } else {
-      setFilter(defaultSearch);
+      void setFilter(defaultSearch);
       setPrompt("");
     }
   };
 
   const handleSubmit = async () => {
     // TODO: add AI filtering @ref: midday
-    setFilter({ q: prompt.length > 0 ? prompt : null });
+    void setFilter({ q: prompt.length > 0 ? prompt : null });
   };
 
   return (

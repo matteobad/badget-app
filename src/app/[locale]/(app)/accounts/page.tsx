@@ -21,7 +21,7 @@ type PageProps = {
   searchParams: Promise<SearchParams>;
 };
 
-export default async function TransactionsPage(_props: PageProps) {
+export default async function AccountsPage(_props: PageProps) {
   const queryClient = getQueryClient();
 
   // const columnVisibility = getInitialTransactionsColumnVisibility();

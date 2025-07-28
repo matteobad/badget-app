@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 import { cn } from "~/lib/utils";
 // Group transactions by date
 import { ACCOUNT_TYPE_GROUP } from "~/shared/constants/acconts";
@@ -45,6 +46,8 @@ const groupAccountsByTypeGroup = (accounts: BankAccount[]) => {
 export function DataTable() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
+
+  const { setParams } = useBankAccountParams();
 
   const trpc = useTRPC();
   const { data } = useQuery(trpc.bankAccount.get.queryOptions({}));
@@ -143,6 +146,11 @@ export function DataTable() {
                         className={cn(
                           "border-border bg-transparent not-last:border-b hover:!bg-neutral-50",
                         )}
+                        onClick={() => {
+                          void setParams({
+                            bankAccountId: row.original.id,
+                          });
+                        }}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell

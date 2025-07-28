@@ -1,6 +1,4 @@
-import type { DB_AttachmentType } from "~/server/db/schema/transactions";
 import type { AccountType } from "~/shared/constants/enum";
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormatAmount } from "~/components/format-amount";
 import {
@@ -16,16 +14,21 @@ import { Textarea } from "~/components/ui/textarea";
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { UploadDropzone } from "~/utils/uploadthing";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
 import { BankLogo } from "../bank-logo";
-import { CategorySelect } from "../category/forms/category-select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { AccountTypeSelect } from "./forms/account-type-select";
 
 export function BankAccountDetails() {
-  const [, setAttachments] = useState<DB_AttachmentType[]>([]);
-
   const { params } = useBankAccountParams();
   const bankAccountId = params.bankAccountId!;
 
@@ -160,7 +163,12 @@ export function BankAccountDetails() {
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              {data.logoUrl && <BankLogo src={data.logoUrl} alt={data.name} />}
+              <div className="mt-1 flex items-center space-x-2">
+                {data.logoUrl && (
+                  <BankLogo src={data.logoUrl} alt={data.name} size={24} />
+                )}
+                <span className="line-clamp-1 text-sm">{data.name}</span>
+              </div>
               <span className="text-xs text-[#606060] select-text">
                 {data.updatedAt && format(new Date(data.updatedAt), "MMM d, y")}
               </span>
@@ -190,13 +198,13 @@ export function BankAccountDetails() {
         </div>
       )}
 
-      <div className="mt-6 mb-2 grid grid-cols-2 gap-4">
+      <div className="mt-6 mb-2 grid grid-cols-1 gap-4">
         <div>
           <Label htmlFor="category" className="mb-2 block">
             Type
           </Label>
 
-          <CategorySelect
+          <AccountTypeSelect
             value={data.type}
             onValueChange={(value) => {
               updateBankAccountMutation.mutate({
@@ -209,81 +217,58 @@ export function BankAccountDetails() {
       </div>
 
       <Accordion type="multiple" defaultValue={defaultValue}>
-        <AccordionItem value="attachment">
-          <AccordionTrigger>Attachments</AccordionTrigger>
-          <AccordionContent className="select-text">
-            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden">
-              <UploadDropzone
-                content={{
-                  uploadIcon: <></>,
-                }}
-                className="mt-0 h-[200px]"
-                endpoint="attachmentUploader"
-                onClientUploadComplete={(res) => {
-                  // Do something with the response
-                  console.log("Files: ", res);
-                  const serverData = res[0]?.serverData.attachments ?? "[]";
-                  const uploaded = JSON.parse(
-                    serverData,
-                  ) as DB_AttachmentType[];
-                  // const attachmentIds = uploaded.map((_) => _.id);
-                  setAttachments(uploaded);
-                  toast.info("Attachment caricati");
-                }}
-                onUploadError={(error: Error) => {
-                  // Do something with the error.
-                  console.error(error.message);
-                  toast.error(error.message);
-                }}
-              />
-            </div>
-            {/* <ul className="mt-4 space-y-4">
-              {data.attachments.map((file) => (
-                <div
-                  className="flex items-center justify-between"
-                  key={file.id}
-                >
-                  <div className="flex w-80 flex-col space-y-0.5">
-                    <span className="truncate">{file.filename}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {file.size && formatSize(file.size)}
-                    </span>
-                  </div>
-
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    type="button"
-                    className="flex w-auto hover:bg-transparent"
-                    // disabled={deleteAttachment.isExecuting}
-                    // onClick={() =>
-                    //   deleteAttachment.execute({
-                    //     id: file.id,
-                    //     fileKey: file.fileKey,
-                    //   })
-                    // }
-                  >
-                    <XIcon size={14} />
-                  </Button>
-                </div>
-              ))}
-            </ul> */}
-          </AccordionContent>
-        </AccordionItem>
-
         <AccordionItem value="general">
           <AccordionTrigger>General</AccordionTrigger>
           <AccordionContent className="select-text">
             <div className="mb-4 border-b pb-4">
+              <Label className="text-md mb-2 block font-medium">Currency</Label>
+              <div className="flex flex-row items-center justify-between">
+                <div className="flex-1 space-y-0.5 pr-4">
+                  <p className="text-xs text-muted-foreground">
+                    Currency of the account. Only accounts that are{" "}
+                    <b>not connected</b> to a bank can change currency.
+                  </p>
+                </div>
+                <Select
+                  disabled={!!data.connectionId}
+                  value={data.currency}
+                  onValueChange={async (value) => {
+                    updateBankAccountMutation.mutate({
+                      id: bankAccountId,
+                      currency: value,
+                    });
+                  }}
+                >
+                  <SelectTrigger className="min-w-[80px] flex-0">
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent align="end">
+                    <SelectGroup>
+                      {[
+                        { id: "EUR", name: "EUR" },
+                        { id: "USD", name: "USD" },
+                      ].map(({ id, name }) => (
+                        <SelectItem key={id} value={id}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="">
               <Label className="text-md mb-2 block font-medium">
-                Exclude from analytics
+                Enable bank account
               </Label>
               <div className="flex flex-row items-center justify-between">
                 <div className="space-y-0.5 pr-4">
                   <p className="text-xs text-muted-foreground">
-                    Exclude this bank account from analytics like profit,
-                    expense and revenue. This is useful for internal transfers
-                    between accounts to avoid double-counting.
+                    Enable or disable this bank account. When enabled, the
+                    account will be included in your dashboard and available for
+                    transaction updates if connected. Disabling the account will
+                    exclude it from the dashboard and prevent it from being
+                    updated with new transactions.
                   </p>
                 </div>
 

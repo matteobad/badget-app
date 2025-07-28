@@ -48,6 +48,14 @@ const items = [
     name: "Transactions",
     children: [
       {
+        path: "/transactions/categories",
+        name: "Categories",
+      },
+      {
+        path: "/transactions/tags",
+        name: "Tags",
+      },
+      {
         path: "/transactions?step=import&hide=true",
         name: "Import",
       },
@@ -60,35 +68,31 @@ const items = [
   {
     path: "/budgeting",
     name: "Budgeting",
-    children: [
-      { path: "/budgeting/categories", name: "Categories" },
-      { path: "/budgeting/goals", name: "Obiettivi" },
-    ],
   },
-  {
-    path: "/pension",
-    name: "Pension",
-    children: [
-      { path: "/pension?createPensionFund=true", name: "Create new" },
-      { path: "/pension?addContribution=true", name: "Add contribution" },
-    ],
-  },
-  {
-    path: "/investments",
-    name: "Investments",
-    // children: [
-    //   { path: "/investments/stocks", name: "Stocks" },
-    //   { path: "/investments/crypto", name: "Crypto" },
-    // ],
-  },
-  {
-    path: "/wealth",
-    name: "Wealth",
-    // children: [
-    //   { path: "/wealth/assets", name: "Beni patrimoniali" },
-    //   { path: "/wealth/liabilities", name: "Passività" },
-    // ],
-  },
+  // {
+  //   path: "/pension",
+  //   name: "Pension",
+  //   children: [
+  //     { path: "/pension?createPensionFund=true", name: "Create new" },
+  //     { path: "/pension?addContribution=true", name: "Add contribution" },
+  //   ],
+  // },
+  // {
+  //   path: "/investments",
+  //   name: "Investments",
+  //   // children: [
+  //   //   { path: "/investments/stocks", name: "Stocks" },
+  //   //   { path: "/investments/crypto", name: "Crypto" },
+  //   // ],
+  // },
+  // {
+  //   path: "/wealth",
+  //   name: "Wealth",
+  //   // children: [
+  //   //   { path: "/wealth/assets", name: "Beni patrimoniali" },
+  //   //   { path: "/wealth/liabilities", name: "Passività" },
+  //   // ],
+  // },
   {
     path: "/settings",
     name: "Settings",
