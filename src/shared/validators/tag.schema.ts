@@ -9,11 +9,11 @@ export const updateTagSchema = createUpdateSchema(tag_table, {
 });
 
 export const deleteTagSchema = z.object({
-  id: z.cuid2(),
+  id: z.uuid(),
   userId: z.string().min(1),
 });
 
-export const getTagsSchema = z.object({});
+export const getTagsSchema = z.object().optional();
 
 export const getTransactionTagsSchema = z.object({
   transactionId: z.cuid2(),

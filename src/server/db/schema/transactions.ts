@@ -99,11 +99,7 @@ export type DB_AttachmentInsertType = typeof attachment_table.$inferInsert;
 export const tag_table = pgTable(
   "tag_table",
   (d) => ({
-    id: d
-      .varchar({ length: 128 })
-      .primaryKey()
-      .$defaultFn(() => createId())
-      .notNull(),
+    id: d.uuid().defaultRandom().primaryKey().notNull(),
 
     userId: d
       .text()
@@ -134,7 +130,7 @@ export const transaction_to_tag_table = pgTable(
       .notNull()
       .references(() => transaction_table.id, { onDelete: "cascade" }),
     tagId: d
-      .varchar({ length: 128 })
+      .uuid()
       .notNull()
       .references(() => tag_table.id, {
         onDelete: "cascade",

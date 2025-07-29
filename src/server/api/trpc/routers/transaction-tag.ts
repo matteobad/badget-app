@@ -9,6 +9,8 @@ import {
   deleteTransactionToTagMutation,
 } from "~/server/domain/transaction-tag/mutations";
 import { existsTransactionToTagQuery } from "~/server/domain/transaction-tag/queries";
+import { getTags } from "~/server/services/tag-service";
+import { getTagsSchema } from "~/shared/validators/tag.schema";
 import {
   createTransactionTagSchema,
   deleteTransactionTagSchema,
@@ -17,6 +19,11 @@ import {
 import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const transactionTagRouter = createTRPCRouter({
+  get: protectedProcedure.input(getTagsSchema).query(async ({ ctx, input }) => {
+    const userId = ctx.session!.userId;
+    return await getTags(input, userId);
+  }),
+
   create: protectedProcedure
     .input(createTransactionTagSchema)
     .mutation(async ({ ctx, input }) => {
