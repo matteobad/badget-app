@@ -227,13 +227,13 @@ export function DataTable({
   }
 
   return (
-    <div className="relative">
+    <div className="relative px-6">
       <TooltipProvider delayDuration={20}>
         <Tooltip>
           <div className="w-full">
             <div
               ref={tableScroll.containerRef}
-              className="scrollbar-hide overflow-x-auto overscroll-x-none border-y border-border"
+              className="scrollbar-hide overflow-x-auto overscroll-x-none border-border md:border"
             >
               <Table>
                 <DataTableHeader table={table} tableScroll={tableScroll} />

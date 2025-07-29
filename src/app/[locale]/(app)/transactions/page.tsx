@@ -44,7 +44,7 @@ export default async function TransactionsPage(props: PageProps) {
 
   return (
     <HydrateClient>
-      <div className="flex justify-between p-4">
+      <div className="flex justify-between p-6 pb-4">
         <TransactionsSearchFilter />
         <TransactionsActions />
       </div>

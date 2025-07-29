@@ -1,7 +1,6 @@
 "use client";
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import type { IconName } from "lucide-react/dynamic";
 import React, { useEffect } from "react";
 import {
   hotkeysCoreFeature,
@@ -25,7 +24,8 @@ import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { MoreVerticalIcon } from "lucide-react";
-import { DynamicIcon } from "lucide-react/dynamic";
+
+import { CategoryBadge } from "./category-badge";
 
 type Category = RouterOutput["category"]["get"][number];
 
@@ -61,11 +61,11 @@ export function CategoryTree(props: CategoryTreeProps) {
     },
     indent,
     rootItemId: rootId,
-    onPrimaryAction(item) {
-      void setParams({
-        categoryId: item.getItemMeta().itemId,
-      });
-    },
+    // onPrimaryAction(item) {
+    //   void setParams({
+    //     categoryId: item.getItemMeta().itemId,
+    //   });
+    // },
     getItemName: (item) => item.getItemData().name,
     isItemFolder: (item) =>
       items.some((c) => c.parentId === item.getItemData().id),
@@ -96,11 +96,6 @@ export function CategoryTree(props: CategoryTreeProps) {
           tree={tree}
         >
           {tree.getItems().map((item) => {
-            // Merge styles
-            const mergedStyle = {
-              backgroundColor: `${item.getItemData().color}`,
-            } as React.CSSProperties;
-
             return (
               <div
                 key={item.getId()}
@@ -110,24 +105,9 @@ export function CategoryTree(props: CategoryTreeProps) {
                   item={item}
                   className="flex flex-1 items-center not-last:pb-0"
                 >
-                  <TreeItemLabel className="relative min-w-[250px] py-3 !pl-4 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background">
+                  <TreeItemLabel className="relative min-w-[250px] py-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background hover:bg-transparent in-data-[selected=true]:bg-transparent">
                     <span className="flex items-center gap-3">
-                      <div className="flex size-4 shrink-0 items-center justify-center">
-                        <div
-                          style={mergedStyle}
-                          className="size-4 rounded-xs"
-                        ></div>
-                      </div>
-                      <DynamicIcon
-                        name={
-                          (item.getItemData()?.icon as IconName) ??
-                          "circle-dashed"
-                        }
-                        className={cn(
-                          "pointer-events-none size-4 text-muted-foreground",
-                        )}
-                      />
-                      <span>{item.getItemName()}</span>
+                      <CategoryBadge category={item.getItemData()} />
                     </span>
                   </TreeItemLabel>
                   <div
@@ -136,7 +116,7 @@ export function CategoryTree(props: CategoryTreeProps) {
                       "before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background",
                     )}
                   >
-                    <span className="line-clamp-1 flex-1 text-left text-xs text-muted-foreground">
+                    <span className="line-clamp-1 flex-1 text-left text-sm text-muted-foreground">
                       {item.getItemData().description}
                     </span>
                     <DropdownMenu>

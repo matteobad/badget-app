@@ -17,6 +17,8 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-destructive-foreground shadow-sm [a&]:hover:bg-destructive/90",
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        category:
+          "[&>svg]:size-4 font-mono h-7 rounded-full font-normal px-2 py-0.5 flex gap-1.5 text-sm items-center",
         tag: "font-mono text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D] border-none font-normal rounded-none",
         "tag-rounded":
           "font-mono text-[#878787] bg-[#F2F1EF] text-[12px] dark:bg-[#1D1D1D] font-normal px-3 py-0.5 border-none",

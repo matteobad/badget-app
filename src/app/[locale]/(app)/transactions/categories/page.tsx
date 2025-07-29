@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { CategoryActions } from "~/components/category/category-actions";
 import { CategorySearchFilter } from "~/components/category/category-search-filter";
 import { DataList } from "~/components/category/data-list";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   getQueryClient,
   HydrateClient,
@@ -38,21 +37,18 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
 
   return (
     <HydrateClient>
-      <Card className="mx-6 mt-6">
-        <CardHeader className="flex-row">
-          <CardTitle className="sr-only">Categories</CardTitle>
-          <CategorySearchFilter />
-          <span className="flex-1"></span>
-          <CategoryActions />
-        </CardHeader>
-        <CardContent>
-          <ErrorBoundary fallback={<div>Something went wrong</div>}>
-            <Suspense fallback={<div>Loading...</div>}>
-              <DataList />
-            </Suspense>
-          </ErrorBoundary>
-        </CardContent>
-      </Card>
+      <header className="flex flex-row p-6">
+        <h1 className="sr-only">Categories</h1>
+        <CategorySearchFilter />
+        <span className="flex-1"></span>
+        <CategoryActions />
+      </header>
+
+      <ErrorBoundary fallback={<div>Something went wrong</div>}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <DataList />
+        </Suspense>
+      </ErrorBoundary>
 
       {/* <CreateCategoryDrawerSheet categories={categories} />
       <UpdateCategoryDrawerSheet categories={categories} /> */}

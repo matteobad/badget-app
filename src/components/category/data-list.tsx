@@ -58,7 +58,7 @@ export function DataList() {
   }
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 px-6">
       {/* Single Sticky Header */}
       <div className="sticky top-0 z-50 mb-4 flex items-center gap-4 rounded-lg bg-neutral-50 px-6 py-3 text-sm font-normal text-muted-foreground">
         <div className="min-w-[250px] text-left">CATEGORY</div>
