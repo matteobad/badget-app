@@ -3,6 +3,11 @@ export default {
   "hello.world": "Hello world!",
   welcome: "Hello {name}!",
 
+  chart_type: {
+    net_worth: "Net Worth",
+    expense: "Expenses",
+  },
+
   registry: "Registry",
 
   breadcrumb: {

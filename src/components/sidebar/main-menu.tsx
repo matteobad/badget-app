@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 const icons = {
-  "/dashboard": () => <LayoutDashboardIcon size={20} />,
+  "/overview": () => <LayoutDashboardIcon size={20} />,
   "/accounts": () => <LandmarkIcon size={20} />,
   "/transactions": () => <ReceiptIcon size={20} />,
   "/budgeting": () => <GoalIcon size={20} />,
@@ -26,7 +26,7 @@ const icons = {
 
 const items = [
   {
-    path: "/dashboard",
+    path: "/overview",
     name: "Overview",
   },
   {
