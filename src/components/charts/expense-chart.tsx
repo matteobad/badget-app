@@ -48,22 +48,20 @@ export function ExpenseChart({ disabled }: Props) {
           />
         </h1>
 
-        <div className="flex items-center space-x-2 text-sm text-[#606060]">
-          <p className="text-sm text-[#606060]">Average expenses</p>
+        <div className="flex items-center space-x-2 text-sm">
+          <p className="text-sm">Average expenses</p>
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <InfoIcon className="mt-1 h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent
-                className="max-w-[240px] p-4 text-xs text-[#878787]"
+                className="max-w-[240px] p-4 text-xs"
                 side="bottom"
                 sideOffset={10}
               >
                 <div className="space-y-2">
-                  <h3 className="font-medium text-primary">
-                    Expenses Overview
-                  </h3>
+                  <h3 className="font-medium">Expenses Overview</h3>
                   <p>
                     Expenses include all outgoing transactions, including
                     recurring ones. The chart shows total expenses and recurring
@@ -72,10 +70,7 @@ export function ExpenseChart({ disabled }: Props) {
                   </p>
                   <p>
                     All amounts are converted into your{" "}
-                    <Link
-                      href="/settings/accounts"
-                      className="text-primary underline"
-                    >
+                    <Link href="/settings/accounts" className="underline">
                       base currency
                     </Link>
                     .

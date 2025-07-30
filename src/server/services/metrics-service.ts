@@ -1,4 +1,3 @@
-import { endOfMonth, parseISO, startOfMonth } from "date-fns";
 import { sql } from "drizzle-orm";
 
 import type { DBClient } from "../db";
@@ -21,7 +20,7 @@ export async function getExpenses(db: DBClient, params: GetExpensesParams) {
   const { userId, from, to, currency: inputCurrency } = params;
 
   const result = await db.execute(
-    sql`SELECT * FROM ${sql.raw("get_expenses")}(${userId}, ${startOfMonth(parseISO(from)).toISOString()}, ${endOfMonth(parseISO(to)).toISOString()}, ${inputCurrency ?? null})`,
+    sql`SELECT * FROM ${sql.raw("get_expenses")}(${userId}, ${from}, ${to}, ${inputCurrency ?? null})`,
   );
 
   const rawData = result.rows as unknown as ExpensesResultItem[];
@@ -40,7 +39,7 @@ export async function getExpenses(db: DBClient, params: GetExpensesParams) {
 
   return {
     summary: {
-      averageExpense,
+      averageExpense: Math.abs(averageExpense),
       currency: rawData?.at(0)?.currency ?? inputCurrency,
     },
     meta: {
