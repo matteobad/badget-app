@@ -67,3 +67,59 @@ export async function getExpenses(db: DBClient, params: GetExpensesParams) {
     }),
   };
 }
+
+type GetNetWorthParams = {
+  userId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+type NetWorthResultItem = {
+  date: string;
+  value: string;
+  currency: string;
+};
+
+export async function getNetWorth(db: DBClient, params: GetNetWorthParams) {
+  const { userId, from, to, currency: inputCurrency } = params;
+
+  const result = await db.execute(
+    sql`SELECT * FROM ${sql.raw("get_net_worth")}(${userId}, ${from}, ${to})`,
+  );
+
+  const rawData = result.rows as unknown as NetWorthResultItem[];
+
+  const averageNetWorth =
+    rawData && rawData.length > 0
+      ? Number(
+          (
+            rawData.reduce(
+              (sum, item) => sum + Number.parseFloat(item.value),
+              0,
+            ) / rawData.length
+          ).toFixed(2),
+        )
+      : 0;
+
+  return {
+    summary: {
+      averageNetWorth: Math.abs(averageNetWorth),
+      currency: rawData?.at(0)?.currency ?? inputCurrency,
+    },
+    meta: {
+      type: "net_worth",
+      currency: rawData?.at(0)?.currency ?? inputCurrency,
+    },
+    result: rawData?.map((item) => {
+      const value = Number.parseFloat(
+        Number.parseFloat(item.value || "0").toFixed(2),
+      );
+      return {
+        date: item.date,
+        value: value,
+        currency: item.currency,
+      };
+    }),
+  };
+}

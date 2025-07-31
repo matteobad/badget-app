@@ -1,9 +1,103 @@
 {
-  "id": "1a7c8f7f-7a25-490a-b65b-ca9af396aa63",
+  "id": "08e2c0ca-f355-4ffb-8d5e-5caf28fd39e4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.badget_account_balance_table": {
+      "name": "badget_account_balance_table",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "balance": {
+          "name": "balance",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "badget_account_balance_table_user_id_badget_user_id_fk": {
+          "name": "badget_account_balance_table_user_id_badget_user_id_fk",
+          "tableFrom": "badget_account_balance_table",
+          "tableTo": "badget_user",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "badget_account_balance_table_account_id_badget_account_table_id_fk": {
+          "name": "badget_account_balance_table_account_id_badget_account_table_id_fk",
+          "tableFrom": "badget_account_balance_table",
+          "tableTo": "badget_account_table",
+          "columnsFrom": ["account_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "badget_account_balance_table_accountId_date_unique": {
+          "name": "badget_account_balance_table_accountId_date_unique",
+          "nullsNotDistinct": false,
+          "columns": ["account_id", "date"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.badget_account_table": {
       "name": "badget_account_table",
       "schema": "",
@@ -1278,9 +1372,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(128)",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",
@@ -1553,7 +1648,7 @@
         },
         "tag_id": {
           "name": "tag_id",
-          "type": "varchar(128)",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -1615,7 +1710,26 @@
     "public.account_type": {
       "name": "account_type",
       "schema": "public",
-      "values": ["checking", "savings", "investment", "debt", "cash", "other"]
+      "values": [
+        "checking",
+        "savings",
+        "cash",
+        "ewallet",
+        "credit_card",
+        "loan",
+        "mortgage",
+        "other_debt",
+        "etf",
+        "stock",
+        "bond",
+        "brokerage",
+        "pension",
+        "crypto",
+        "real_estate",
+        "vehicle",
+        "other_asset",
+        "other"
+      ]
     },
     "public.recurrence": {
       "name": "recurrence",

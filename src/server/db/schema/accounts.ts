@@ -38,6 +38,33 @@ export const account_table = pgTable(
   (t) => [unique().on(t.userId, t.rawId)],
 );
 
+export type DB_AccountType = typeof account_table.$inferSelect;
+export type DB_AccountInsertType = typeof account_table.$inferInsert;
+
+export const account_balance_table = pgTable(
+  "account_balance_table",
+  (d) => ({
+    id: d.uuid().defaultRandom().primaryKey().notNull(),
+
+    userId: d
+      .text()
+      .notNull()
+      .references(() => user_table.id, { onDelete: "cascade" }),
+    accountId: d.uuid().references(() => account_table.id),
+
+    date: d.date({ mode: "string" }).notNull(),
+    balance: numericCasted({ precision: 10, scale: 2 }).notNull(),
+    currency: d.char({ length: 3 }).notNull(),
+
+    ...timestamps,
+  }),
+  (t) => [unique().on(t.accountId, t.date)],
+);
+
+export type DB_AccountBalanceType = typeof account_balance_table.$inferSelect;
+export type DB_AccountBalanceInsertType =
+  typeof account_balance_table.$inferInsert;
+
 // export const accountsRelations = relations(account_table, ({ one, many }) => ({
 //   transactions: many(transaction_table),
 //   institution: one(institution_table, {
@@ -49,6 +76,3 @@ export const account_table = pgTable(
 //     references: [connection_table.id],
 //   }),
 // }));
-
-export type DB_AccountType = typeof account_table.$inferSelect;
-export type DB_AccountInsertType = typeof account_table.$inferInsert;

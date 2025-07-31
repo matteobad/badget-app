@@ -6,6 +6,7 @@ import { syncAccountSchema } from "~/shared/validators/tasks.schema";
 import { eq } from "drizzle-orm";
 
 import { parseAPIError } from "../utils/parse-error";
+import { upsertBalances } from "./upsert-balances";
 import { upsertTransactions } from "./upsert-transactions";
 
 const BATCH_SIZE = 500;
@@ -106,6 +107,14 @@ export const syncAccount = schemaTask({
           manualSync,
         });
       }
+
+      // Upsert balances
+      await upsertBalances.triggerAndWait({
+        transactions: transactionsData,
+        userId,
+        accountId: id,
+        manualSync,
+      });
     } catch (error) {
       logger.error("Failed to sync transactions", { error });
 

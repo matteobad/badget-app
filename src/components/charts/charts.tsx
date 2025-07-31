@@ -6,6 +6,7 @@ import { useTRPC } from "~/shared/helpers/trpc/client";
 
 // import { BurnRateChart } from "./burn-rate-chart";
 import { ExpenseChart } from "./expense-chart";
+import { NetWorthChart } from "./net-worth-chart";
 
 // import { ProfitChart } from "./profit-chart";
 // import { RevenueChart } from "./revenue-chart";
@@ -24,8 +25,8 @@ export function Charts() {
   const disabled = !accounts?.length;
 
   switch (params.chart) {
-    // case "net_worth":
-    //   return <RevenueChart disabled={disabled} />;
+    case "net_worth":
+      return <NetWorthChart disabled={disabled} />;
     case "expense":
       return <ExpenseChart disabled={disabled} />;
     default:
