@@ -14,7 +14,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "desktop:overflow-hidden desktop:rounded-tl-[10px] desktop:rounded-bl-[10px] fixed top-0 z-50 hidden h-screen flex-shrink-0 flex-col items-center justify-between pb-4 transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] md:flex",
+        "desktop:overflow-hidden desktop:rounded-tl-[10px] desktop:rounded-bl-[10px] fixed top-0 z-50 hidden h-screen flex-shrink-0 flex-col items-center justify-between bg-sidebar pb-4 transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] md:flex",
         "border-r border-border bg-background",
         isExpanded ? "w-[240px]" : "w-[70px]",
       )}

@@ -18,7 +18,7 @@ export function Transactions({ disabled }: Props) {
   const [type, setType] = useState<TransactionType>("all");
 
   return (
-    <div className="relative aspect-square overflow-hidden border p-4 md:p-8">
+    <div className="relative aspect-square overflow-hidden rounded-xl border p-4 md:p-8">
       <TransactionsPeriod type={type} setType={setType} disabled={disabled} />
 
       <div className="mt-4">

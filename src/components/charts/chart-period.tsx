@@ -19,7 +19,6 @@ import {
 import { useMetricsParams } from "~/hooks/use-metrics-params";
 import { chartPeriodOptions } from "~/shared/validators/metrics.schema";
 import { formatISO } from "date-fns";
-import { formatDateRange } from "little-date";
 import { ChevronDownIcon } from "lucide-react";
 
 type Props = {
@@ -51,19 +50,26 @@ export function ChartPeriod({ disabled }: Props) {
     handleChangePeriod(selectedRange);
   };
 
+  const formatter = new Intl.DateTimeFormat("it-IT", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
   return (
     <div className="flex space-x-4">
       <Popover>
         <PopoverTrigger asChild disabled={Boolean(disabled)}>
           <Button
             variant="outline"
-            className="justify-start space-x-2 text-left font-medium"
+            className="h-10 justify-start space-x-2 text-left font-medium shadow-none"
           >
             <span className="line-clamp-1 text-ellipsis">
               {params.from && params.to
-                ? formatDateRange(new Date(params.from), new Date(params.to), {
-                    includeTime: false,
-                  })
+                ? formatter.formatRange(
+                    new Date(params.from),
+                    new Date(params.to),
+                  )
                 : "Select date range"}
             </span>
             <ChevronDownIcon />
@@ -111,8 +117,8 @@ export function ChartPeriod({ disabled }: Props) {
                 ? new Date(params.from)
                 : new Date(new Date().setMonth(new Date().getMonth() - 1))
             }
-            initialFocus
-            toDate={new Date()}
+            autoFocus
+            hidden={{ after: new Date() }}
             onSelect={handleCalendarSelect}
             weekStartsOn={1}
           />

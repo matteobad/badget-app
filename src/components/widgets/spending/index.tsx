@@ -16,7 +16,7 @@ export function Spending({}: Props) {
   const [period, setPeriod] = useState("last_30d");
 
   return (
-    <div className="relative aspect-square overflow-hidden border">
+    <div className="relative aspect-square overflow-hidden rounded-xl border">
       <div className="flex-col p-4 md:p-8">
         <SpendingPeriod period={period} onChange={setPeriod} />
 
