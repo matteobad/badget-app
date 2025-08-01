@@ -8,6 +8,24 @@ export default {
     expense: "Uscite",
   },
 
+  spending_period: {
+    last_30d: "Last 30 days",
+    this_month: "This month",
+    last_month: "Last month",
+    this_year: "This year",
+    last_year: "Last year",
+  },
+  transactions_period: {
+    all: "All",
+    income: "Entrate",
+    expense: "Uscite",
+  },
+  transaction_frequency: {
+    weekly: "Weekly recurring",
+    monthly: "Monthly recurring",
+    annually: "Annually recurring",
+  },
+
   registry: "Anagrafica",
 
   breadcrumb: {

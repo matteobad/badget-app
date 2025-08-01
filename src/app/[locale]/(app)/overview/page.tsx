@@ -3,6 +3,7 @@ import type { SearchParams } from "nuqs";
 import { ChartSelectors } from "~/components/charts/chart-selector";
 import { Charts } from "~/components/charts/charts";
 import { EmptyState } from "~/components/charts/empty-state";
+import { Widgets } from "~/components/widgets/widgets";
 import {
   batchPrefetch,
   getQueryClient,
@@ -53,8 +54,8 @@ export default async function Overview(props: Props) {
 
   return (
     <HydrateClient>
-      <div>
-        <div className="mb-4 h-[530px] px-6">
+      <div className="px-6">
+        <div className="mb-4 h-[530px]">
           <ChartSelectors />
 
           <div className="relative mt-8">
@@ -63,7 +64,7 @@ export default async function Overview(props: Props) {
           </div>
         </div>
 
-        {/* <Widgets /> */}
+        <Widgets />
       </div>
     </HydrateClient>
   );

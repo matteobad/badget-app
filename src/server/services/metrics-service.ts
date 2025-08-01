@@ -123,3 +123,39 @@ export async function getNetWorth(db: DBClient, params: GetNetWorthParams) {
     }),
   };
 }
+
+export type GetSpendingParams = {
+  userId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+interface SpendingResultItem {
+  name: string;
+  slug: string;
+  amount: number;
+  currency: string;
+  color: string;
+  icon: string | null;
+  percentage: number;
+}
+
+export async function getSpending(
+  db: DBClient,
+  params: GetSpendingParams,
+): Promise<SpendingResultItem[]> {
+  const { userId, from, to, currency: inputCurrency } = params;
+
+  const rawData = (await db.execute(
+    sql`SELECT * FROM ${sql.raw("get_spending")}(${userId}, ${from}, ${to}, ${inputCurrency ?? null})`,
+  )) as unknown as SpendingResultItem[];
+
+  return Array.isArray(rawData)
+    ? rawData.map((item) => ({
+        ...item,
+        amount: Number.parseFloat(Number(item.amount).toFixed(2)),
+        percentage: Number.parseFloat(Number(item.percentage).toFixed(2)),
+      }))
+    : [];
+}
