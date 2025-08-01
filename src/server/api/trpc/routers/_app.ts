@@ -10,7 +10,6 @@ import { bankAccountRouter } from "./bank-account";
 import { bankConnectionRouter } from "./bank-connection";
 import { budgetRouter } from "./budget";
 import { categoryRouter } from "./category";
-import { dashboardRouter } from "./dashboard";
 import { institutionRouter } from "./institution";
 import { metricsRouter } from "./metrics";
 import { tagRouter } from "./tag";
@@ -24,7 +23,6 @@ import { transactionTagRouter } from "./transaction-tag";
  */
 export const appRouter = createTRPCRouter({
   metrics: metricsRouter,
-  dashboard: dashboardRouter,
   institution: institutionRouter,
   bankConnection: bankConnectionRouter,
   bankAccount: bankAccountRouter,
