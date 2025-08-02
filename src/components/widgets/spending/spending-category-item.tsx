@@ -1,6 +1,6 @@
 "use client";
 
-import { formatAmount } from "~/utils/format";
+import { formatAmount } from "~/shared/helpers/format";
 
 type Props = {
   amount: number;
