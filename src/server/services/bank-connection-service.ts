@@ -4,7 +4,6 @@ import type {
   getBankConnectionsSchema,
 } from "~/shared/validators/bank-connection.schema";
 import type z from "zod/v4";
-import { gocardlessClient } from "~/features/account/server/providers/gocardless/gocardless-api";
 
 import { db, withTransaction } from "../db";
 import { createBankAccountMutation } from "../domain/bank-account/mutations";
@@ -14,6 +13,7 @@ import {
 } from "../domain/bank-connection/mutations";
 import { getBankConnectionsQuery } from "../domain/bank-connection/queries";
 import { getInstitutionsQuery } from "../domain/institution/queries";
+import { gocardlessClient } from "../integrations/open-banking/gocardless/gocardless-api";
 
 export async function getBankConnections(
   input: z.infer<typeof getBankConnectionsSchema>,

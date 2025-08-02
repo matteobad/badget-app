@@ -1,8 +1,8 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3";
-import { getBankAccountProvider } from "~/features/account/server/providers";
 import { db } from "~/server/db";
 import { institution_table } from "~/server/db/schema/open-banking";
 import { buildConflictUpdateColumns } from "~/server/db/utils";
+import { getBankAccountProvider } from "~/server/integrations/open-banking";
 
 const BATCH_SIZE = 500;
 

@@ -8,3 +8,8 @@ export const updateAttachmentSchema = createUpdateSchema(attachment_table, {
   createdAt: true,
   updatedAt: true,
 });
+
+export const attachmentDeleteSchema = z.object({
+  id: z.string(),
+  fileKey: z.string(),
+});

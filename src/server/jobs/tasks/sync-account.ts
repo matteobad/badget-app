@@ -1,7 +1,7 @@
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
-import { getBankAccountProvider } from "~/features/account/server/providers";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
+import { getBankAccountProvider } from "~/server/integrations/open-banking";
 import { syncAccountSchema } from "~/shared/validators/tasks.schema";
 import { eq } from "drizzle-orm";
 

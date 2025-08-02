@@ -43,6 +43,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
 import { type DB_AttachmentType } from "~/server/db/schema/transactions";
+import { deleteTransactionAttachmentAction } from "~/server/domain/transaction/actions";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createTransactionSchema } from "~/shared/validators/transaction.schema";
 import { formatSize } from "~/utils/format";
@@ -54,8 +55,6 @@ import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod/v4";
-
-import { deleteTransactionAttachmentAction } from "../../../features/transaction/server/actions";
 
 export default function CreateTransactionForm() {
   const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
