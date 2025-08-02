@@ -22,47 +22,47 @@ export const categoryRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getCategoriesSchema)
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await getCategories(input, userId);
+      const orgId = ctx.orgId!;
+      return await getCategories(input, orgId);
     }),
 
   getWithBudgets: protectedProcedure
     .input(getCategoriesWithBudgetsSchema)
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await getCategoriesWithBudgets(input, userId);
+      const orgId = ctx.orgId!;
+      return await getCategoriesWithBudgets(input, orgId);
     }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await getCategoryByIdQuery({ ...input, userId });
+      const orgId = ctx.orgId!;
+      return await getCategoryByIdQuery({ ...input, orgId });
     }),
 
   create: protectedProcedure
     .input(createCategorySchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await createCategory(input, userId);
+      const orgId = ctx.orgId!;
+      return await createCategory(input, orgId);
     }),
 
   createDefaults: protectedProcedure.mutation(async ({ ctx }) => {
-    const userId = ctx.session!.userId;
-    return await createDefaultCategories(userId);
+    const orgId = ctx.orgId!;
+    return await createDefaultCategories(orgId);
   }),
 
   update: protectedProcedure
     .input(updateCategorySchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await updateCategory(input, userId);
+      const orgId = ctx.orgId!;
+      return await updateCategory(input, orgId);
     }),
 
   delete: protectedProcedure
     .input(deleteCategorySchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await deleteCategory(input, userId);
+      const orgId = ctx.orgId!;
+      return await deleteCategory(input, orgId);
     }),
 });

@@ -11,7 +11,7 @@ export const TransactionUpdateSchema = createInsertSchema(transaction_table, {
   note: z.string().optional(),
 })
   .omit({
-    userId: true,
+    organizationId: true,
     createdAt: true,
     updatedAt: true,
     deletedAt: true,

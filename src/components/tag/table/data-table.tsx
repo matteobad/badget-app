@@ -55,7 +55,7 @@ export function DataTable() {
     getFilteredRowModel: getFilteredRowModel(),
     meta: {
       deleteCategory: (id: string) => {
-        deleteCategoryMutation.mutate({ id, userId: "placeholder" });
+        deleteCategoryMutation.mutate({ id, orgId: "placeholder" });
       },
       expandedCategories,
       setExpandedCategories,

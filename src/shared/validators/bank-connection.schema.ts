@@ -49,7 +49,7 @@ export const manualSyncConnectionSchema = z.object({
 });
 
 export const reconnectConnectionSchema = z.object({
-  userId: z.string(),
+  orgId: z.string(),
   connectionId: z.string(),
   provider: z.string(),
 });

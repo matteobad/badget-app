@@ -18,6 +18,14 @@ export default async function AppLayout(props: PropsWithChildren) {
 
   if (!session) redirect("/sign-in");
 
+  // if (!session.user.username) {
+  //   redirect("/setup");
+  // }
+
+  if (!session.session.activeOrganizationId) {
+    redirect("/spaces");
+  }
+
   return (
     <HydrateClient>
       <div className="relative">

@@ -8,6 +8,7 @@ import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useDebounceValue } from "usehooks-ts";
 
 import { BankLogo } from "../bank-logo";
+import { CountrySelector } from "../country-selector";
 import { InstitutionInfo } from "../institution-info";
 import { Button } from "../ui/button";
 import {
@@ -20,7 +21,6 @@ import {
 import { Input } from "../ui/input";
 import { Skeleton } from "../ui/skeleton";
 import { ConnectBankProvider } from "./connect-bank-provider";
-import { CountrySelector } from "./country-selector";
 
 function SearchSkeleton() {
   return (

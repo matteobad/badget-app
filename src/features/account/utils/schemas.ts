@@ -15,7 +15,7 @@ export const ConnectedAccountSchema = createInsertSchema(account_table, {
   id: z.cuid2(),
   type: z.enum(ACCOUNT_TYPE),
 }).omit({
-  userId: true,
+  organizationId: true,
   createdAt: true,
   updatedAt: true,
   deletedAt: true,
@@ -26,7 +26,7 @@ export const ConnectionUpdateSchema = createInsertSchema(connection_table, {
   provider: z.enum(BANK_PROVIDER),
 })
   .omit({
-    userId: true,
+    organizationId: true,
     createdAt: true,
     updatedAt: true,
     deletedAt: true,
@@ -45,7 +45,7 @@ export const AccountInsertSchema = createInsertSchema(account_table, {
   description: z.string().optional(),
 }).omit({
   id: true,
-  userId: true,
+  organizationId: true,
   createdAt: true,
   updatedAt: true,
   deletedAt: true,
@@ -57,7 +57,7 @@ export const AccountUpdateSchema = createInsertSchema(account_table, {
   type: z.enum(ACCOUNT_TYPE),
   description: z.string().optional(),
 }).omit({
-  userId: true,
+  organizationId: true,
   createdAt: true,
   updatedAt: true,
   deletedAt: true,

@@ -24,7 +24,7 @@ export default function HomePage() {
             return redirect("/sign-in");
           }
 
-          return redirect("/onboard");
+          return redirect("/overview");
         }}
       >
         <Button

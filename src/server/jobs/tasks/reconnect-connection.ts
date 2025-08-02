@@ -15,7 +15,7 @@ export const reconnectConnection = schemaTask({
     maxAttempts: 2,
   },
   schema: reconnectConnectionSchema,
-  run: async ({ userId, connectionId, provider }) => {
+  run: async ({ orgId, connectionId, provider }) => {
     if (provider === "gocardless") {
       // We need to update the reference of the connection
       const [connection] = await db
@@ -24,7 +24,7 @@ export const reconnectConnection = schemaTask({
         .where(
           and(
             eq(connection_table.id, connectionId),
-            eq(connection_table.userId, userId),
+            eq(connection_table.organizationId, orgId),
           ),
         );
 

@@ -34,7 +34,7 @@ import {
 
 export async function getTransactionsQuery(
   params: z.infer<typeof getTransactionsSchema>,
-  userId: string,
+  orgId: string,
 ) {
   // Always limit by teamId
   const {
@@ -53,9 +53,9 @@ export async function getTransactionsQuery(
     amount_range: filterAmountRange,
   } = params;
 
-  // Always start with userId filter
+  // Always start with orgId filter
   const whereConditions: (SQL | undefined)[] = [
-    eq(transaction_table.userId, userId),
+    eq(transaction_table.organizationId, orgId),
   ];
 
   // Date range filter
@@ -107,7 +107,7 @@ export async function getTransactionsQuery(
       .where(
         and(
           eq(transaction_to_tag_table.transactionId, transaction_table.id), // Correlate with the outer transaction
-          // eq(transactionTags.userId, userId), // Ensure transactionTags are for the correct user
+          // eq(transactionTags.organizationId, orgId), // Ensure transactionTags are for the correct user
           inArray(tag_table.id, filterTags), // Filter by the provided tag IDs
         ),
       );
@@ -143,7 +143,7 @@ export async function getTransactionsQuery(
     whereConditions.push(
       and(
         inArray(transaction_table.accountId, filterAccounts),
-        sql`EXISTS (SELECT 1 FROM ${account_table} WHERE ${eq(account_table.id, transaction_table.accountId)} AND ${eq(account_table.userId, userId)})`,
+        sql`EXISTS (SELECT 1 FROM ${account_table} WHERE ${eq(account_table.id, transaction_table.accountId)} AND ${eq(account_table.organizationId, orgId)})`,
       ),
     );
   }
@@ -222,14 +222,14 @@ export async function getTransactionsQuery(
       category_table,
       and(
         eq(transaction_table.categoryId, category_table.id),
-        eq(category_table.userId, userId),
+        eq(category_table.organizationId, orgId),
       ),
     )
     .leftJoin(
       account_table,
       and(
         eq(transaction_table.accountId, account_table.id),
-        eq(account_table.userId, userId),
+        eq(account_table.organizationId, orgId),
       ),
     )
     .leftJoin(
@@ -244,14 +244,14 @@ export async function getTransactionsQuery(
       tag_table,
       and(
         eq(tag_table.id, transaction_to_tag_table.tagId),
-        eq(tag_table.userId, userId),
+        eq(tag_table.organizationId, orgId),
       ),
     )
     .leftJoin(
       attachment_table,
       and(
         eq(attachment_table.transactionId, transaction_table.id),
-        eq(attachment_table.userId, userId),
+        eq(attachment_table.organizationId, orgId),
       ),
     )
     .where(and(...finalWhereConditions))
@@ -289,7 +289,7 @@ export async function getTransactionsQuery(
     if (column === "attachment") {
       query = query.orderBy(
         order(
-          sql`(EXISTS (SELECT 1 FROM ${attachment_table} WHERE ${eq(attachment_table.transactionId, transaction_table.id)} AND ${eq(attachment_table.userId, userId)}) OR ${transaction_table.status} = 'completed')`,
+          sql`(EXISTS (SELECT 1 FROM ${attachment_table} WHERE ${eq(attachment_table.transactionId, transaction_table.id)} AND ${eq(attachment_table.organizationId, orgId)}) OR ${transaction_table.status} = 'completed')`,
         ),
         order(transaction_table.id),
       );
@@ -374,7 +374,7 @@ export async function getTransactionsQuery(
   };
 }
 
-export async function getTransactionByIdQuery(id: string, userId: string) {
+export async function getTransactionByIdQuery(id: string, orgId: string) {
   const result = await db
     .select({
       id: transaction_table.id,
@@ -426,14 +426,14 @@ export async function getTransactionByIdQuery(id: string, userId: string) {
       category_table,
       and(
         eq(transaction_table.categoryId, category_table.id),
-        eq(category_table.userId, userId),
+        eq(category_table.organizationId, orgId),
       ),
     )
     .leftJoin(
       account_table,
       and(
         eq(transaction_table.accountId, account_table.id),
-        eq(account_table.userId, userId),
+        eq(account_table.organizationId, orgId),
       ),
     )
     .leftJoin(
@@ -448,18 +448,21 @@ export async function getTransactionByIdQuery(id: string, userId: string) {
       tag_table,
       and(
         eq(tag_table.id, transaction_to_tag_table.tagId),
-        eq(tag_table.userId, userId),
+        eq(tag_table.organizationId, orgId),
       ),
     )
     .leftJoin(
       attachment_table,
       and(
         eq(attachment_table.transactionId, transaction_table.id),
-        eq(attachment_table.userId, userId),
+        eq(attachment_table.organizationId, orgId),
       ),
     )
     .where(
-      and(eq(transaction_table.id, id), eq(transaction_table.userId, userId)),
+      and(
+        eq(transaction_table.id, id),
+        eq(transaction_table.organizationId, orgId),
+      ),
     )
     .groupBy(
       transaction_table.id,
@@ -488,7 +491,7 @@ export async function getTransactionByIdQuery(id: string, userId: string) {
 
 export async function getTransactionTagsQuery(
   params: z.infer<typeof getTransactionTagsSchema>,
-  _userId: string,
+  _orgId: string,
 ) {
   return await db
     .select({
@@ -500,16 +503,16 @@ export async function getTransactionTagsQuery(
     .where(eq(transaction_to_tag_table.transactionId, params.transactionId));
 }
 
-export async function getTransactionAmountRangeQuery(userId: string) {
+export async function getTransactionAmountRangeQuery(orgId: string) {
   return await db
     .select({
       amount: transaction_table.amount,
     })
     .from(transaction_table)
-    .where(eq(transaction_table.userId, userId));
+    .where(eq(transaction_table.organizationId, orgId));
 }
 
-export async function getTransactionCategoryCountsQuery(userId: string) {
+export async function getTransactionCategoryCountsQuery(orgId: string) {
   try {
     return await db
       .select({
@@ -517,7 +520,7 @@ export async function getTransactionCategoryCountsQuery(userId: string) {
         count: count(),
       })
       .from(transaction_table)
-      .where(eq(transaction_table.userId, userId))
+      .where(eq(transaction_table.organizationId, orgId))
       .groupBy(transaction_table.categoryId)
       .having(gt(count(), 0))
       .then((res) =>
@@ -535,7 +538,7 @@ export async function getTransactionCategoryCountsQuery(userId: string) {
   }
 }
 
-export async function getTransactionAccountCountsQuery(userId: string) {
+export async function getTransactionAccountCountsQuery(orgId: string) {
   try {
     return await db
       .select({
@@ -543,7 +546,7 @@ export async function getTransactionAccountCountsQuery(userId: string) {
         count: count(),
       })
       .from(transaction_table)
-      .where(eq(transaction_table.userId, userId))
+      .where(eq(transaction_table.organizationId, orgId))
       .groupBy(transaction_table.accountId)
       .having(gt(count(), 0))
       .then((res) =>
@@ -561,7 +564,7 @@ export async function getTransactionAccountCountsQuery(userId: string) {
   }
 }
 
-export async function getTransactionTagCountsQuery(userId: string) {
+export async function getTransactionTagCountsQuery(orgId: string) {
   try {
     return await db
       .select({
@@ -573,7 +576,7 @@ export async function getTransactionTagCountsQuery(userId: string) {
         transaction_to_tag_table,
         eq(transaction_to_tag_table.transactionId, transaction_table.id),
       )
-      .where(eq(transaction_table.userId, userId))
+      .where(eq(transaction_table.organizationId, orgId))
       .groupBy(transaction_to_tag_table.tagId)
       .having(gt(count(), 0))
       .then((res) =>

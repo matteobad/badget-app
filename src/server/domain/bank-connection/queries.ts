@@ -16,7 +16,7 @@ export async function getBankConnectionByIdQuery(id: string) {
 }
 
 export type GetBankConnectionsParams = {
-  userId: string;
+  orgId: string;
   enabled?: boolean;
 };
 
@@ -24,9 +24,9 @@ export async function getBankConnectionsQuery(
   db: DBClient,
   params: GetBankConnectionsParams,
 ) {
-  const { userId, enabled } = params;
+  const { orgId, enabled } = params;
 
-  const where = [eq(connection_table.userId, userId)];
+  const where = [eq(connection_table.organizationId, orgId)];
 
   if (enabled !== undefined) {
     where.push(eq(account_table.enabled, enabled));

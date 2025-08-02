@@ -18,14 +18,7 @@ export const syncAccount = schemaTask({
     maxAttempts: 2,
   },
   schema: syncAccountSchema,
-  run: async ({
-    id,
-    userId,
-    accountId,
-    errorRetries,
-    provider,
-    manualSync,
-  }) => {
+  run: async ({ id, orgId, accountId, errorRetries, provider, manualSync }) => {
     const bankProvider = getBankAccountProvider(provider);
 
     // Get the balance
@@ -102,7 +95,7 @@ export const syncAccount = schemaTask({
         const transactionBatch = transactionsData.slice(i, i + BATCH_SIZE);
         await upsertTransactions.triggerAndWait({
           transactions: transactionBatch,
-          userId,
+          orgId,
           bankAccountId: id,
           manualSync,
         });
@@ -111,7 +104,7 @@ export const syncAccount = schemaTask({
       // Upsert balances
       await upsertBalances.triggerAndWait({
         transactions: transactionsData,
-        userId,
+        orgId,
         accountId: id,
         manualSync,
       });

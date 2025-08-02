@@ -9,17 +9,17 @@ import { and, eq } from "drizzle-orm";
 
 export async function getTagsQuery(
   _params: z.infer<typeof getTagsSchema>,
-  userId: string,
+  orgId: string,
 ) {
   const results = await db
     .select({
       id: tag_table.id,
       text: tag_table.text,
-      userId: tag_table.userId,
+      organizationId: tag_table.organizationId,
       createdAt: tag_table.createdAt,
     })
     .from(tag_table)
-    .where(eq(tag_table.userId, userId))
+    .where(eq(tag_table.organizationId, orgId))
     .orderBy(tag_table.text);
 
   return results;
@@ -27,13 +27,16 @@ export async function getTagsQuery(
 
 export async function getTagByTextQuery(
   client: DBClient,
-  params: { text: string; userId: string },
+  params: { text: string; organizationId: string },
 ) {
   const results = await client
     .select()
     .from(tag_table)
     .where(
-      and(eq(tag_table.text, params.text), eq(tag_table.userId, params.userId)),
+      and(
+        eq(tag_table.text, params.text),
+        eq(tag_table.organizationId, params.organizationId),
+      ),
     );
 
   return results[0];

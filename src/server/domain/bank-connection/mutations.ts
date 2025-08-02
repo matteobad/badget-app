@@ -19,7 +19,7 @@ export type CreateBankConnectionPayload = {
     expiresAt?: string | null;
   }[];
   referenceId?: string | null;
-  userId: string;
+  orgId: string;
   provider: BankProviderType;
 };
 
@@ -27,7 +27,7 @@ export const createBankConnectionMutation = async (
   db: DBClient,
   payload: CreateBankConnectionPayload,
 ) => {
-  const { accounts, referenceId, userId, provider } = payload;
+  const { accounts, referenceId, orgId, provider } = payload;
 
   // Get first account to create a bank connection
   const account = accounts?.at(0);
@@ -46,11 +46,11 @@ export const createBankConnectionMutation = async (
       provider,
       referenceId,
       expiresAt: account.expiresAt,
-      userId,
+      organizationId: orgId,
       //lastAccessed: new Date().toISOString(),
     })
     .onConflictDoUpdate({
-      target: [connection_table.institutionId, connection_table.userId],
+      target: [connection_table.institutionId, connection_table.organizationId],
       set: {
         name: account.bankName,
         logoUrl: account.logoUrl,
@@ -82,19 +82,22 @@ export async function updateBankConnectionMutation(
 
 type DeleteBankConnectionParams = {
   id: string;
-  userId: string;
+  orgId: string;
 };
 
 export const deleteBankConnectionMutation = async (
   db: DBClient,
   params: DeleteBankConnectionParams,
 ) => {
-  const { id, userId } = params;
+  const { id, orgId } = params;
 
   const [result] = await db
     .delete(connection_table)
     .where(
-      and(eq(connection_table.id, id), eq(connection_table.userId, userId)),
+      and(
+        eq(connection_table.id, id),
+        eq(connection_table.organizationId, orgId),
+      ),
     )
     .returning({
       referenceId: connection_table.referenceId,

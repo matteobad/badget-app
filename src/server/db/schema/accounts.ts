@@ -3,7 +3,7 @@ import { pgEnum, unique } from "drizzle-orm/pg-core";
 import { ACCOUNT_TYPE } from "../../../shared/constants/enum";
 import { numericCasted, timestamps } from "../utils";
 import { pgTable } from "./_table";
-import { user as user_table } from "./auth";
+import { organization as organization_table } from "./auth";
 import { connection_table, institution_table } from "./open-banking";
 
 export const accountTypeEnum = pgEnum("account_type", ACCOUNT_TYPE);
@@ -13,10 +13,10 @@ export const account_table = pgTable(
   (d) => ({
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
-    userId: d
+    organizationId: d
       .text()
-      .notNull()
-      .references(() => user_table.id, { onDelete: "cascade" }),
+      .references(() => organization_table.id, { onDelete: "cascade" })
+      .notNull(),
     institutionId: d.uuid().references(() => institution_table.id),
     connectionId: d.uuid().references(() => connection_table.id),
 
@@ -35,7 +35,7 @@ export const account_table = pgTable(
 
     ...timestamps,
   }),
-  (t) => [unique().on(t.userId, t.rawId)],
+  (t) => [unique().on(t.organizationId, t.rawId)],
 );
 
 export type DB_AccountType = typeof account_table.$inferSelect;
@@ -46,10 +46,10 @@ export const account_balance_table = pgTable(
   (d) => ({
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
-    userId: d
+    organizationId: d
       .text()
-      .notNull()
-      .references(() => user_table.id, { onDelete: "cascade" }),
+      .references(() => organization_table.id, { onDelete: "cascade" })
+      .notNull(),
     accountId: d.uuid().references(() => account_table.id),
 
     date: d.date({ mode: "string" }).notNull(),
@@ -64,15 +64,3 @@ export const account_balance_table = pgTable(
 export type DB_AccountBalanceType = typeof account_balance_table.$inferSelect;
 export type DB_AccountBalanceInsertType =
   typeof account_balance_table.$inferInsert;
-
-// export const accountsRelations = relations(account_table, ({ one, many }) => ({
-//   transactions: many(transaction_table),
-//   institution: one(institution_table, {
-//     fields: [account_table.institutionId],
-//     references: [institution_table.id],
-//   }),
-//   connection: one(connection_table, {
-//     fields: [account_table.connectionId],
-//     references: [connection_table.id],
-//   }),
-// }));

@@ -31,21 +31,28 @@ export async function updateCategoryMutation(
   client: DBClient,
   params: Partial<DB_CategoryInsertType>,
 ) {
-  const { id, userId, ...rest } = params;
+  const { id, organizationId, ...rest } = params;
   return await client
     .update(category_table)
     .set(rest)
-    .where(and(eq(category_table.id, id!), eq(category_table.userId, userId!)))
+    .where(
+      and(
+        eq(category_table.id, id!),
+        eq(category_table.organizationId, organizationId!),
+      ),
+    )
     .returning();
 }
 
 export async function deleteCategoryMutation(
   client: DBClient,
-  params: { id: string; userId: string },
+  params: { id: string; orgId: string },
 ) {
-  const { id, userId } = params;
+  const { id, orgId } = params;
   return await client
     .update(category_table)
     .set({ deletedAt: new Date().toISOString() }) // soft delete
-    .where(and(eq(category_table.id, id), eq(category_table.userId, userId)));
+    .where(
+      and(eq(category_table.id, id), eq(category_table.organizationId, orgId)),
+    );
 }

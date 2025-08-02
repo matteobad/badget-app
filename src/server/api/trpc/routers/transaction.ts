@@ -28,76 +28,76 @@ export const transactionRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getTransactionsSchema)
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await getTransactions(input, userId);
+      const orgId = ctx.orgId!;
+      return await getTransactions(input, orgId);
     }),
 
   getById: protectedProcedure
-    .input(z.object({ id: z.string().min(1) })) // TODO: change to cuid2
+    .input(z.object({ id: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await getTransactionById(input.id, userId);
+      const orgId = ctx.orgId!;
+      return await getTransactionById(input.id, orgId);
     }),
 
   getAmountRange: protectedProcedure.query(async ({ ctx }) => {
-    const userId = ctx.session!.userId;
-    return await getTransactionAmountRange(userId);
+    const orgId = ctx.orgId!;
+    return await getTransactionAmountRange(orgId);
   }),
 
   getCategoryCounts: protectedProcedure.query(async ({ ctx }) => {
-    const userId = ctx.session!.userId;
-    return await getTransactionCategoryCounts(userId);
+    const orgId = ctx.orgId!;
+    return await getTransactionCategoryCounts(orgId);
   }),
 
   getTagsCounts: protectedProcedure.query(async ({ ctx }) => {
-    const userId = ctx.session!.userId;
-    return await getTransactionTagsCounts(userId);
+    const orgId = ctx.orgId!;
+    return await getTransactionTagsCounts(orgId);
   }),
 
   getAccountCounts: protectedProcedure.query(async ({ ctx }) => {
-    const userId = ctx.session!.userId;
-    return await getTransactionAccountCounts(userId);
+    const orgId = ctx.orgId!;
+    return await getTransactionAccountCounts(orgId);
   }),
 
   create: protectedProcedure
     .input(createTransactionSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await createTransaction(input, userId);
+      const orgId = ctx.orgId!;
+      return await createTransaction(input, orgId);
     }),
 
   update: protectedProcedure
     .input(updateTransactionSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await updateTransaction(input, userId);
+      const orgId = ctx.orgId!;
+      return await updateTransaction(input, orgId);
     }),
 
   updateMany: protectedProcedure
     .input(updateManyTransactionsSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await updateManyTransactions(input, userId);
+      const orgId = ctx.orgId!;
+      return await updateManyTransactions(input, orgId);
     }),
 
   delete: protectedProcedure
     .input(deleteTransactionSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await deleteTransaction(input, userId);
+      const orgId = ctx.orgId!;
+      return await deleteTransaction(input, orgId);
     }),
 
   deleteMany: protectedProcedure
     .input(deleteManyTransactionsSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await deleteManyTransactions(input, userId);
+      const orgId = ctx.orgId!;
+      return await deleteManyTransactions(input, orgId);
     }),
 
   categorize: protectedProcedure
     .input(z.object({ name: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await categorizeUserTransaction(userId, input);
+      const orgId = ctx.orgId!;
+      return await categorizeUserTransaction(orgId, input);
     }),
 });

@@ -9,7 +9,7 @@ import { and, eq } from "drizzle-orm";
 export async function updateAttachmentMutation(
   tx: TXType,
   input: z.infer<typeof updateAttachmentSchema>,
-  userId: string,
+  orgId: string,
 ) {
   if (!input.id || !input.transactionId) throw new Error("invalid attachment");
 
@@ -19,7 +19,7 @@ export async function updateAttachmentMutation(
     .where(
       and(
         eq(attachment_table.id, input.id),
-        eq(attachment_table.userId, userId),
+        eq(attachment_table.organizationId, orgId),
       ),
     );
 }

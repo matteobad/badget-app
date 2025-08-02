@@ -16,7 +16,7 @@ type CSV_CategoryType = {
   description: string;
   parentId: string;
   depth: number;
-  userId: string;
+  organizationId: string;
 };
 
 const mapParsedRow = (row: CSV_CategoryType) => {

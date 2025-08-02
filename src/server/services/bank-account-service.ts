@@ -20,35 +20,35 @@ import {
 
 export async function getBankAccounts(
   input: z.infer<typeof getBankAccountsSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await getBankAccountsQuery({ ...input, userId });
+  return await getBankAccountsQuery({ ...input, orgId });
 }
 
 export async function getBankAccountById(
   input: z.infer<typeof getBankAccountByIdSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await getBankAccountByIdQuery({ ...input, userId });
+  return await getBankAccountByIdQuery({ ...input, orgId });
 }
 
 export async function createBankAccount(
   input: z.infer<typeof createBankAccountSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await createBankAccountMutation(db, { ...input, userId });
+  return await createBankAccountMutation(db, { ...input, orgId });
 }
 
 export async function updateBankAccount(
   input: z.infer<typeof updateBankAccountSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await updateBankAccountMutation(db, { ...input, userId });
+  return await updateBankAccountMutation(db, { ...input, orgId });
 }
 
 export async function deleteBankAccount(
   input: z.infer<typeof deleteBankAccountSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await deleteBankAccountMutation(db, { ...input, userId });
+  return await deleteBankAccountMutation(db, { ...input, orgId });
 }

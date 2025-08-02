@@ -9,7 +9,7 @@ import {
 import { numericCasted, timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { account_table } from "./accounts";
-import { user as user_table } from "./auth";
+import { organization as organization_table } from "./auth";
 import { category_table } from "./categories";
 
 export const transactionMethodEnum = pgEnum(
@@ -32,10 +32,10 @@ export const transaction_table = pgTable(
   (d) => ({
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
-    userId: d
+    organizationId: d
       .text()
-      .notNull()
-      .references(() => user_table.id, { onDelete: "cascade" }),
+      .references(() => organization_table.id, { onDelete: "cascade" })
+      .notNull(),
     accountId: d
       .uuid()
       .notNull()
@@ -61,7 +61,7 @@ export const transaction_table = pgTable(
 
     ...timestamps,
   }),
-  (t) => [unique().on(t.userId, t.rawId)],
+  (t) => [unique().on(t.organizationId, t.rawId)],
 );
 
 export type DB_TransactionType = typeof transaction_table.$inferSelect;
@@ -75,10 +75,10 @@ export const attachment_table = pgTable("attachment_table", (d) => ({
     .$defaultFn(() => createId())
     .notNull(),
 
-  userId: d
+  organizationId: d
     .text()
-    .notNull()
-    .references(() => user_table.id, { onDelete: "cascade" }),
+    .references(() => organization_table.id, { onDelete: "cascade" })
+    .notNull(),
   transactionId: d
     .uuid()
     .references(() => transaction_table.id, { onDelete: "cascade" }),
@@ -101,15 +101,15 @@ export const tag_table = pgTable(
   (d) => ({
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
-    userId: d
+    organizationId: d
       .text()
-      .notNull()
-      .references(() => user_table.id, { onDelete: "cascade" }),
+      .references(() => organization_table.id, { onDelete: "cascade" })
+      .notNull(),
     text: d.text().notNull(),
 
     ...timestamps,
   }),
-  (t) => [unique().on(t.userId, t.text)],
+  (t) => [unique().on(t.organizationId, t.text)],
 );
 
 export type DB_TagType = typeof tag_table.$inferSelect;

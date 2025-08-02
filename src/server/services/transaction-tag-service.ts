@@ -12,14 +12,14 @@ import {
 
 export async function createTransactionTag(
   input: z.infer<typeof createTransactionToTagSchema>,
-  _userId: string,
+  _orgId: string,
 ) {
   return await createTransactionToTagMutation(db, input);
 }
 
 export async function deleteTransactionTag(
   input: z.infer<typeof deleteTransactionTagSchema>,
-  _userId: string,
+  _orgId: string,
 ) {
   return await deleteTransactionToTagMutation(db, input);
 }

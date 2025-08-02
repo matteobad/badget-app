@@ -49,7 +49,7 @@ export const syncConnection = schemaTask({
           .select({
             id: account_table.id,
             accountId: account_table.rawId,
-            userId: account_table.userId,
+            organizationId: account_table.organizationId,
             type: account_table.type,
           })
           .from(account_table)
@@ -77,7 +77,7 @@ export const syncConnection = schemaTask({
           accountId: account.accountId,
           provider: data.provider,
           connectionId: connectionId,
-          userId: account.userId,
+          organizationId: account.organizationId,
           accountType: account.type ?? "depository",
           logoUrl: data.logoUrl,
           manualSync,

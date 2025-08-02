@@ -56,10 +56,15 @@ export const authActionClient = actionClient
       throw new Error("Session is not valid!");
     }
 
+    if (!session.session.activeOrganizationId) {
+      throw new Error("Session is not valid!");
+    }
+
     // Here we return the context object for the next middleware in the chain/server code function.
     return next({
       ctx: {
         userId: session.user.id,
+        orgId: session.session.activeOrganizationId,
       },
     });
   });

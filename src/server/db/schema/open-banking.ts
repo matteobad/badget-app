@@ -7,7 +7,7 @@ import {
 } from "../../../shared/constants/enum";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
-import { user as user_table } from "./auth";
+import { organization as organization_table } from "./auth";
 
 export const bankProviderEnum = pgEnum("bank_provider", BANK_PROVIDER);
 
@@ -42,10 +42,10 @@ export const connection_table = pgTable(
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
     // FK
-    userId: d
+    organizationId: d
       .text()
-      .notNull()
-      .references(() => user_table.id, { onDelete: "cascade" }),
+      .references(() => organization_table.id, { onDelete: "cascade" })
+      .notNull(),
     institutionId: d
       .uuid()
       .notNull()
@@ -63,19 +63,10 @@ export const connection_table = pgTable(
 
     ...timestamps,
   }),
-  (t) => [unique("unique_bank_connections").on(t.institutionId, t.userId)],
+  (t) => [
+    unique("unique_bank_connections").on(t.institutionId, t.organizationId),
+  ],
 );
-
-// export const connection_relations = relations(
-//   connection_table,
-//   ({ many, one }) => ({
-//     accounts: many(account_table),
-//     institution: one(institution_table, {
-//       fields: [connection_table.institutionId],
-//       references: [institution_table.id],
-//     }),
-//   }),
-// );
 
 export type DB_ConnectionType = typeof connection_table.$inferSelect;
 export type DB_ConnectionInsertType = typeof connection_table.$inferInsert;

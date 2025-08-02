@@ -5,14 +5,14 @@ import { budget_instances, budget_table } from "~/server/db/schema/budgets";
 import { and, desc, eq, gte, isNull, lte, sql } from "drizzle-orm";
 
 type GetBudgetsQueryRequest = {
-  userId: string;
+  orgId: string;
   categoryId?: string;
   from?: Date;
   to?: Date;
 };
 
 export const getMaterializedBudgetsQuery = (params: GetBudgetsQueryRequest) => {
-  const where = [eq(budget_instances.userId, params.userId)];
+  const where = [eq(budget_instances.userId, params.orgId)];
 
   if (params.categoryId) {
     where.push(eq(budget_instances.categoryId, params.categoryId));
@@ -50,7 +50,7 @@ export const getMaterializedBudgetsQuery = (params: GetBudgetsQueryRequest) => {
 };
 
 export const getBudgetsQuery = (params: GetBudgetsQueryRequest) => {
-  const where = [eq(budget_table.userId, params.userId)];
+  const where = [eq(budget_table.userId, params.orgId)];
 
   if (params.categoryId) {
     where.push(eq(budget_table.categoryId, params.categoryId));

@@ -1,34 +1,29 @@
-import { text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, integer, text, timestamp } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./_table";
 
-export const user = pgTable("user", (d) => ({
-  id: d.text("id").primaryKey(),
-  name: d.text("name").notNull(),
-  email: d.text("email").notNull().unique(),
-  emailVerified: d
-    .boolean("email_verified")
+export const user = pgTable("user", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified")
     .$defaultFn(() => false)
     .notNull(),
-  image: d.text("image"),
-  createdAt: d
-    .timestamp("created_at")
+  image: text("image"),
+  createdAt: timestamp("created_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
-  updatedAt: d
-    .timestamp("updated_at")
+  updatedAt: timestamp("updated_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
-  role: d.text("role"),
-  banned: d.boolean("banned"),
-  banReason: d.text("ban_reason"),
-  banExpires: d.timestamp("ban_expires"),
-  twoFactorEnabled: d.boolean("two_factor_enabled"),
-  phoneNumber: d.text("phone_number").unique(),
-  phoneNumberVerified: d.boolean("phone_number_verified"),
-  username: d.text("username").unique(),
-  displayUsername: d.text("display_username"),
-}));
+  role: text("role"),
+  banned: boolean("banned"),
+  banReason: text("ban_reason"),
+  banExpires: timestamp("ban_expires"),
+  twoFactorEnabled: boolean("two_factor_enabled"),
+  username: text("username").unique(),
+  displayUsername: text("display_username"),
+});
 
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
@@ -42,6 +37,7 @@ export const session = pgTable("session", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   impersonatedBy: text("impersonated_by"),
+  activeOrganizationId: text("active_organization_id"),
 });
 
 export const account = pgTable("account", {
@@ -75,11 +71,62 @@ export const verification = pgTable("verification", {
   ),
 });
 
+export const passkey = pgTable("passkey", {
+  id: text("id").primaryKey(),
+  name: text("name"),
+  publicKey: text("public_key").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  credentialID: text("credential_i_d").notNull(),
+  counter: integer("counter").notNull(),
+  deviceType: text("device_type").notNull(),
+  backedUp: boolean("backed_up").notNull(),
+  transports: text("transports"),
+  createdAt: timestamp("created_at"),
+  aaguid: text("aaguid"),
+});
+
 export const twoFactor = pgTable("two_factor", {
   id: text("id").primaryKey(),
   secret: text("secret").notNull(),
   backupCodes: text("backup_codes").notNull(),
   userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+});
+
+export const organization = pgTable("organization", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").unique(),
+  logo: text("logo"),
+  createdAt: timestamp("created_at").notNull(),
+  metadata: text("metadata"),
+});
+
+export const member = pgTable("member", {
+  id: text("id").primaryKey(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  role: text("role").default("member").notNull(),
+  createdAt: timestamp("created_at").notNull(),
+});
+
+export const invitation = pgTable("invitation", {
+  id: text("id").primaryKey(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organization.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
+  role: text("role"),
+  status: text("status").default("pending").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  inviterId: text("inviter_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
 });

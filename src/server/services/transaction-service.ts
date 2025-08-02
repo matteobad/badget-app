@@ -32,64 +32,64 @@ import {
 
 export async function getTransactions(
   filters: z.infer<typeof getTransactionsSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await getTransactionsQuery(filters, userId);
+  return await getTransactionsQuery(filters, orgId);
 }
 
-export async function getTransactionById(id: string, userId: string) {
-  return await getTransactionByIdQuery(id, userId);
+export async function getTransactionById(id: string, orgId: string) {
+  return await getTransactionByIdQuery(id, orgId);
 }
 
-export async function getTransactionAmountRange(userId: string) {
-  return await getTransactionAmountRangeQuery(userId);
+export async function getTransactionAmountRange(orgId: string) {
+  return await getTransactionAmountRangeQuery(orgId);
 }
 
-export async function getTransactionCategoryCounts(userId: string) {
-  return await getTransactionCategoryCountsQuery(userId);
+export async function getTransactionCategoryCounts(orgId: string) {
+  return await getTransactionCategoryCountsQuery(orgId);
 }
 
-export async function getTransactionTagsCounts(userId: string) {
-  return await getTransactionTagCountsQuery(userId);
+export async function getTransactionTagsCounts(orgId: string) {
+  return await getTransactionTagCountsQuery(orgId);
 }
 
-export async function getTransactionAccountCounts(userId: string) {
-  return await getTransactionAccountCountsQuery(userId);
+export async function getTransactionAccountCounts(orgId: string) {
+  return await getTransactionAccountCountsQuery(orgId);
 }
 
 export async function createTransaction(
   input: z.infer<typeof createTransactionSchema>,
-  userId: string,
+  orgId: string,
 ) {
   await withTransaction(async (tx) => {
     // insert transaction
-    const inserted = await createTransactionMutation(tx, input, userId);
+    const inserted = await createTransactionMutation(tx, input, orgId);
 
     if (!inserted[0]?.id) return tx.rollback();
     const transactionId = inserted[0].id;
 
     // update transaction attachments
     for (const id of input?.attachment_ids ?? []) {
-      const updatedAttachment = { id, userId, transactionId };
-      await updateAttachmentMutation(tx, updatedAttachment, userId);
+      const updatedAttachment = { id, orgId, transactionId };
+      await updateAttachmentMutation(tx, updatedAttachment, orgId);
     }
 
     // update transaction tags
     const tags = input?.tags?.map((t) => t.text) ?? [];
-    await updateTransactionTagsMutation(tx, { tags, transactionId }, userId);
+    await updateTransactionTagsMutation(tx, { tags, transactionId }, orgId);
   });
 
   // update category rule relevance
-  await updateOrCreateRule(userId, input.name, input.categoryId);
+  await updateOrCreateRule(orgId, input.name, input.categoryId);
 }
 
 export async function updateTransaction(
   input: z.infer<typeof updateTransactionSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  const transaction = await updateTransactionMutation(input, userId);
+  const transaction = await updateTransactionMutation(input, orgId);
   if (input.categoryId && input.description) {
-    await updateOrCreateRule(userId, input.description, input.categoryId);
+    await updateOrCreateRule(orgId, input.description, input.categoryId);
   }
 
   return transaction;
@@ -97,20 +97,20 @@ export async function updateTransaction(
 
 export async function updateManyTransactions(
   input: z.infer<typeof updateManyTransactionsSchema>,
-  userId: string,
+  orgId: string,
 ) {
   const { tagId, ...rest } = input;
 
   await withTransaction(async (tx) => {
     const transaction = await updateManyTransactionsMutation(tx, {
       ...rest,
-      userId,
+      orgId,
     });
 
     // update category rules
     if (input.categoryId) {
       for (const { name } of transaction) {
-        await updateOrCreateRule(userId, name, input.categoryId);
+        await updateOrCreateRule(orgId, name, input.categoryId);
       }
     }
 
@@ -127,24 +127,24 @@ export async function updateManyTransactions(
 
 export async function deleteTransaction(
   input: z.infer<typeof deleteTransactionSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await deleteTransactionMutation(input, userId);
+  return await deleteTransactionMutation(input, orgId);
 }
 
 export async function deleteManyTransactions(
   input: z.infer<typeof deleteManyTransactionsSchema>,
-  userId: string,
+  orgId: string,
 ) {
   return await deleteManyTransactionsMutation(db, {
     ...input,
-    userId,
+    orgId,
   });
 }
 
 export async function categorizeTransaction(
   input: z.infer<typeof categorizeTransactionSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await categorizeTransaction(input, userId);
+  return await categorizeTransaction(input, orgId);
 }

@@ -114,7 +114,7 @@ export const TagInsertSchema = createInsertSchema(tag_table, {
   id: z.string(),
   text: z.string(),
 }).omit({
-  userId: true,
+  organizationId: true,
   createdAt: true,
   updatedAt: true,
   deletedAt: true,
@@ -132,7 +132,7 @@ export const ToggleAccountSchema = z.object({
   enabled: z.boolean(),
 });
 export type ToggleAccountType = z.infer<typeof ToggleAccountSchema> & {
-  userId: string;
+  orgId: string;
 };
 
 // Define the feedback schema

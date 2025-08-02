@@ -231,7 +231,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
       const promise = reconnectConnection.executeAsync({
         connectionId: params.id,
         provider: connection.provider,
-        userId: "placeholder", // populated on backend
+        orgId: "placeholder", // populated on backend
       });
 
       toast.promise(promise, {

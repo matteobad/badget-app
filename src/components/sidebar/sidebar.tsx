@@ -5,6 +5,7 @@ import Link from "next/link";
 import { cn } from "~/lib/utils";
 import { RocketIcon } from "lucide-react";
 
+import { OrganizationSwitcher } from "../organization/org-switcher";
 // import { TeamDropdown } from "./team-dropdown";
 import { MainMenu } from "./main-menu";
 
@@ -36,7 +37,7 @@ export function Sidebar() {
         <MainMenu isExpanded={isExpanded} />
       </div>
 
-      {/* <TeamDropdown isExpanded={isExpanded} /> */}
+      <OrganizationSwitcher isExpanded={isExpanded} />
     </aside>
   );
 }

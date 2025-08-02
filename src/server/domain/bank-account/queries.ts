@@ -8,16 +8,16 @@ type GetBankAccountsQuery = {
   connectionId?: string;
   enabled?: boolean;
   manual?: boolean;
-  userId?: string;
+  orgId?: string;
 };
 
 export async function getBankAccountsQuery(params: GetBankAccountsQuery) {
-  const { userId, connectionId, enabled, manual } = params;
+  const { orgId, connectionId, enabled, manual } = params;
 
   const where = [];
 
-  if (userId) {
-    where.push(eq(account_table.userId, userId));
+  if (orgId) {
+    where.push(eq(account_table.organizationId, orgId));
   }
 
   if (connectionId) {
@@ -43,18 +43,20 @@ export async function getBankAccountsQuery(params: GetBankAccountsQuery) {
 
 type GetBankAccountByIdParams = {
   id: string;
-  userId: string;
+  orgId: string;
 };
 
 export async function getBankAccountByIdQuery(
   params: GetBankAccountByIdParams,
 ) {
-  const { id, userId } = params;
+  const { id, orgId } = params;
 
   const [result] = await db
     .select()
     .from(account_table)
-    .where(and(eq(account_table.id, id), eq(account_table.userId, userId)));
+    .where(
+      and(eq(account_table.id, id), eq(account_table.organizationId, orgId)),
+    );
 
   return result;
 }

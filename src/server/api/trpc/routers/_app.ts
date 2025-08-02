@@ -12,9 +12,11 @@ import { budgetRouter } from "./budget";
 import { categoryRouter } from "./category";
 import { institutionRouter } from "./institution";
 import { metricsRouter } from "./metrics";
+import { organizationRouter } from "./organization";
 import { tagRouter } from "./tag";
 import { transactionRouter } from "./transaction";
 import { transactionTagRouter } from "./transaction-tag";
+import { userRouter } from "./user";
 
 /**
  * This is the primary router for your server.
@@ -22,6 +24,8 @@ import { transactionTagRouter } from "./transaction-tag";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+  user: userRouter,
+  organization: organizationRouter,
   metrics: metricsRouter,
   institution: institutionRouter,
   bankConnection: bankConnectionRouter,

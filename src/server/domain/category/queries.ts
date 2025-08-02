@@ -6,16 +6,16 @@ import { category_table } from "~/server/db/schema/categories";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 
 type getCategoriesQueryRequest = {
-  userId: string;
+  orgId: string;
   type?: CategoryType;
   limit?: number;
 };
 
 export async function getCategoriesQuery(params: getCategoriesQueryRequest) {
-  const { userId, type, limit = 1000 } = params;
+  const { orgId, type, limit = 1000 } = params;
 
   const where = [
-    eq(category_table.userId, userId),
+    eq(category_table.organizationId, orgId),
     isNull(category_table.deletedAt),
   ];
 
@@ -45,7 +45,7 @@ export async function getCategoriesQuery(params: getCategoriesQueryRequest) {
 
 export async function getCategoryByIdQuery(params: {
   id: string;
-  userId: string;
+  orgId: string;
 }) {
   const result = await db
     .select({
@@ -67,7 +67,7 @@ export async function getCategoryByIdQuery(params: {
     .where(
       and(
         eq(category_table.id, params.id),
-        eq(category_table.userId, params.userId),
+        eq(category_table.organizationId, params.orgId),
       ),
     );
 

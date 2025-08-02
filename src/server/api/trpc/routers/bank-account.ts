@@ -19,35 +19,35 @@ export const bankAccountRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getBankAccountsSchema)
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await getBankAccounts(input, userId);
+      const orgId = ctx.orgId!;
+      return await getBankAccounts(input, orgId);
     }),
 
   getById: protectedProcedure
     .input(getBankAccountByIdSchema)
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await getBankAccountById(input, userId);
+      const orgId = ctx.orgId!;
+      return await getBankAccountById(input, orgId);
     }),
 
   create: protectedProcedure
     .input(createBankAccountSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return createBankAccount(input, userId);
+      const orgId = ctx.orgId!;
+      return createBankAccount(input, orgId);
     }),
 
   update: protectedProcedure
     .input(updateBankAccountSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return updateBankAccount(input, userId);
+      const orgId = ctx.orgId!;
+      return updateBankAccount(input, orgId);
     }),
 
   delete: protectedProcedure
     .input(deleteBankAccountSchema)
     .mutation(async ({ input, ctx }) => {
-      const userId = ctx.session!.userId;
-      return deleteBankAccount(input, userId);
+      const orgId = ctx.orgId!;
+      return deleteBankAccount(input, orgId);
     }),
 });

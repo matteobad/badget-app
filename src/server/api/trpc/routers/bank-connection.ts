@@ -20,8 +20,9 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 export const bankConnectionRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getBankConnectionsSchema)
-    .query(async ({ input, ctx: { session } }) => {
-      return getBankConnections(input, session!.userId);
+    .query(async ({ input, ctx }) => {
+      const orgId = ctx.orgId!;
+      return getBankConnections(input, orgId);
     }),
 
   getAccounts: protectedProcedure
@@ -33,8 +34,9 @@ export const bankConnectionRouter = createTRPCRouter({
 
   create: protectedProcedure
     .input(createBankConnectionSchema)
-    .mutation(async ({ input, ctx: { session } }) => {
-      const data = await createBankConnection(input, session!.userId);
+    .mutation(async ({ input, ctx }) => {
+      const orgId = ctx.orgId!;
+      const data = await createBankConnection(input, orgId);
 
       if (!data) {
         throw new TRPCError({
@@ -47,7 +49,7 @@ export const bankConnectionRouter = createTRPCRouter({
         "initial-bank-setup",
         {
           connectionId: data.id,
-          userId: session!.userId,
+          orgId: orgId,
         },
       );
 
@@ -56,9 +58,9 @@ export const bankConnectionRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteBankConnectionSchema)
-    .mutation(async ({ input, ctx: { session } }) => {
-      const userId = session!.userId;
-      const data = await deleteBankConnection(input, userId);
+    .mutation(async ({ input, ctx }) => {
+      const orgId = ctx.orgId!;
+      const data = await deleteBankConnection(input, orgId);
 
       if (!data) {
         throw new Error("Bank connection not found");

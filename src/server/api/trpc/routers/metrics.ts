@@ -14,9 +14,9 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 export const metricsRouter = createTRPCRouter({
   expense: protectedProcedure
     .input(getExpensesSchema)
-    .query(async ({ ctx: { db, session }, input }) => {
+    .query(async ({ ctx: { db, orgId }, input }) => {
       return getExpenses(db, {
-        userId: session!.userId,
+        orgId: orgId!,
         from: input.from,
         to: input.to,
         currency: input.currency,
@@ -25,9 +25,9 @@ export const metricsRouter = createTRPCRouter({
 
   netWorth: protectedProcedure
     .input(getNetWorthSchema)
-    .query(async ({ ctx: { db, session }, input }) => {
+    .query(async ({ ctx: { db, orgId }, input }) => {
       return getNetWorth(db, {
-        userId: session!.userId,
+        orgId: orgId!,
         from: input.from,
         to: input.to,
         currency: input.currency,
@@ -36,9 +36,9 @@ export const metricsRouter = createTRPCRouter({
 
   spending: protectedProcedure
     .input(getSpendingSchema)
-    .query(async ({ ctx: { db, session }, input }) => {
+    .query(async ({ ctx: { db, orgId }, input }) => {
       return getSpending(db, {
-        userId: session!.userId,
+        orgId: orgId!,
         from: input.from,
         to: input.to,
         currency: input.currency,

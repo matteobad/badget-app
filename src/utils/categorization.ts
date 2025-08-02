@@ -49,13 +49,13 @@ const extractTokens = (description: string): string[] => {
 };
 
 // Fetch rules with caching
-const fetchRulesFromDB = async (userId: string): Promise<RuleWithTokens[]> => {
-  if (ruleCache.has(userId)) return ruleCache.get(userId)!;
+const fetchRulesFromDB = async (orgId: string): Promise<RuleWithTokens[]> => {
+  if (ruleCache.has(orgId)) return ruleCache.get(orgId)!;
 
   const rules = await db
     .select()
     .from(rule_table)
-    .where(eq(rule_table.userId, userId));
+    .where(eq(rule_table.organizationId, orgId));
   if (!rules.length) return [];
 
   const ruleIds = rules.map((r) => r.id);
@@ -71,13 +71,13 @@ const fetchRulesFromDB = async (userId: string): Promise<RuleWithTokens[]> => {
     tokens: tokens.filter((t) => t.ruleId === rule.id),
   }));
 
-  ruleCache.set(userId, rulesWithTokens);
+  ruleCache.set(orgId, rulesWithTokens);
   return rulesWithTokens;
 };
 
 // Funzione per creare o aggiornare una regola basata su una categorizzazione manuale
 export const updateOrCreateRule = async (
-  userId: string,
+  orgId: string,
   description: string,
   categoryId?: string | null,
 ) => {
@@ -88,7 +88,10 @@ export const updateOrCreateRule = async (
     .select({ id: rule_table.id })
     .from(rule_table)
     .where(
-      and(eq(rule_table.userId, userId), eq(rule_table.categoryId, categoryId)),
+      and(
+        eq(rule_table.organizationId, orgId),
+        eq(rule_table.categoryId, categoryId),
+      ),
     )
     .then((res) => res[0]);
 
@@ -96,7 +99,7 @@ export const updateOrCreateRule = async (
     // Crea una nuova regola se non esiste
     [rule] = await db
       .insert(rule_table)
-      .values({ userId, categoryId })
+      .values({ organizationId: orgId, categoryId })
       .returning({ id: rule_table.id });
   }
 
@@ -130,10 +133,10 @@ export const updateOrCreateRule = async (
 
 // Categorize transaction
 export const categorizeUserTransaction = async (
-  userId: string,
+  orgId: string,
   transaction: Transaction,
 ): Promise<string | null> => {
-  const rules = await fetchRulesFromDB(userId);
+  const rules = await fetchRulesFromDB(orgId);
   const tokens = new Set(extractTokens(transaction.name));
 
   let bestMatch: { categoryId: string; relevance: number } | null = null;
@@ -154,13 +157,13 @@ export const categorizeUserTransaction = async (
 
 // Batch categorize transactions
 export const categorizeTransactions = async (
-  userId: string,
+  orgId: string,
   transactions: Transaction[],
 ) => {
   return Promise.all(
     transactions.map(async (tx) => ({
       ...tx,
-      categoryId: await categorizeUserTransaction(userId, tx),
+      categoryId: await categorizeUserTransaction(orgId, tx),
     })),
   );
 };

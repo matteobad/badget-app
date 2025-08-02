@@ -28,39 +28,39 @@ export const budgetRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
+      const orgId = ctx.orgId!;
       const { budgetFilters } = input;
 
-      const categories = await getCategoriesQuery({ userId });
-      const budgets = await getBudgetsQuery({ ...budgetFilters, userId });
+      const categories = await getCategoriesQuery({ orgId });
+      const budgets = await getBudgetsQuery({ ...budgetFilters, orgId });
       return findBudgetWarnings(categories, budgets, budgetFilters);
     }),
 
   get: protectedProcedure
     .input(getBudgetsSchema)
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await getBudgets(input, userId);
+      const orgId = ctx.orgId!;
+      return await getBudgets(input, orgId);
     }),
 
   create: protectedProcedure
     .input(createBudgetSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await createBudget(input, userId);
+      const orgId = ctx.orgId!;
+      return await createBudget(input, orgId);
     }),
 
   update: protectedProcedure
     .input(updateBudgetSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await updateBudget(input, userId);
+      const orgId = ctx.orgId!;
+      return await updateBudget(input, orgId);
     }),
 
   delete: protectedProcedure
     .input(deleteBudgetSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      return await deleteBudget(input, userId);
+      const orgId = ctx.orgId!;
+      return await deleteBudget(input, orgId);
     }),
 });

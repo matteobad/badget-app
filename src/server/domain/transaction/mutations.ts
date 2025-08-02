@@ -20,30 +20,33 @@ import { and, eq, inArray } from "drizzle-orm";
 export async function createTransactionMutation(
   tx: TXType,
   input: z.infer<typeof createTransactionSchema>,
-  userId: string,
+  orgId: string,
 ) {
   return await tx
     .insert(transaction_table)
-    .values({ ...input, userId })
+    .values({ ...input, organizationId: orgId })
     .returning();
 }
 
 export async function updateTransactionMutation(
   input: z.infer<typeof updateTransactionSchema>,
-  userId: string,
+  orgId: string,
 ) {
   const { id, ...rest } = input;
   await db
     .update(transaction_table)
     .set(rest)
     .where(
-      and(eq(transaction_table.id, id), eq(transaction_table.userId, userId)),
+      and(
+        eq(transaction_table.id, id),
+        eq(transaction_table.organizationId, orgId),
+      ),
     );
 }
 
 export async function updateManyTransactionsMutation(
   client: DBClient,
-  input: Partial<DB_TransactionInsertType> & { ids: string[]; userId: string },
+  input: Partial<DB_TransactionInsertType> & { ids: string[]; orgId: string },
 ) {
   const { ids, ...rest } = input;
   return await client
@@ -52,7 +55,7 @@ export async function updateManyTransactionsMutation(
     .where(
       and(
         inArray(transaction_table.id, ids),
-        eq(transaction_table.userId, input.userId),
+        eq(transaction_table.organizationId, input.orgId),
       ),
     )
     .returning();
@@ -61,7 +64,7 @@ export async function updateManyTransactionsMutation(
 export async function updateTransactionTagsMutation(
   tx: DBClient,
   input: z.infer<typeof updateTransactionTagsSchema>,
-  userId: string,
+  orgId: string,
 ) {
   const { transactionId, tags } = input;
 
@@ -97,7 +100,7 @@ export async function updateTransactionTagsMutation(
     if (tagsToInsert.length > 0) {
       const insertedTags = await tx
         .insert(tag_table)
-        .values(tagsToInsert.map((text) => ({ text, userId })))
+        .values(tagsToInsert.map((text) => ({ text, organizationId: orgId })))
         .returning({ id: tag_table.id, text: tag_table.text });
 
       insertedTags.forEach(({ id, text }) => existingTagMap.set(text, id));
@@ -147,7 +150,7 @@ export async function updateTransactionTagsMutation(
 
 export async function deleteTransactionMutation(
   input: z.infer<typeof deleteTransactionSchema>,
-  userId: string,
+  orgId: string,
 ) {
   return db
     .delete(transaction_table)
@@ -155,7 +158,7 @@ export async function deleteTransactionMutation(
       and(
         eq(transaction_table.id, input.id),
         eq(transaction_table.manual, true),
-        eq(transaction_table.userId, userId),
+        eq(transaction_table.organizationId, orgId),
       ),
     )
     .returning({
@@ -165,14 +168,14 @@ export async function deleteTransactionMutation(
 
 export async function deleteManyTransactionsMutation(
   client: DBClient,
-  input: { ids: string[]; userId: string },
+  input: { ids: string[]; orgId: string },
 ) {
   return await client
     .delete(transaction_table)
     .where(
       and(
         inArray(transaction_table.id, input.ids),
-        eq(transaction_table.userId, input.userId),
+        eq(transaction_table.organizationId, input.orgId),
       ),
     );
 }

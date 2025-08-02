@@ -48,7 +48,7 @@ type Institution = Omit<
 type Account = Omit<
   DB_AccountType,
   | "id"
-  | "userId"
+  | "organizationId"
   | "institutionId"
   | "connectionId"
   | "errorDetails"
@@ -61,7 +61,7 @@ type Account = Omit<
 type Transaction = Omit<
   DB_TransactionInsertType,
   | "id"
-  | "userId"
+  | "organizationId"
   | "accountId"
   | "categoryId"
   | "createdAt"

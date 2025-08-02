@@ -35,7 +35,7 @@ export const createTransactionSchema = createInsertSchema(transaction_table, {
     id: true,
     createdAt: true,
     updatedAt: true,
-    userId: true,
+    organizationId: true,
   });
 
 export const updateTransactionSchema = createUpdateSchema(transaction_table, {
@@ -52,7 +52,7 @@ export const updateTransactionSchema = createUpdateSchema(transaction_table, {
   .omit({
     createdAt: true,
     updatedAt: true,
-    userId: true,
+    organizationId: true,
   });
 
 export const updateManyTransactionsSchema = z.object({

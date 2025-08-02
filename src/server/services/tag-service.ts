@@ -11,21 +11,21 @@ import { getTagsQuery } from "../domain/tag/queries";
 
 export async function createTag(
   input: z.infer<typeof createTagSchema>,
-  userId: string,
+  organizationId: string,
 ) {
-  return await createTagMutation(db, { ...input, userId });
+  return await createTagMutation(db, { ...input, organizationId });
 }
 
 export async function deleteTag(
   input: z.infer<typeof deleteTagSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await deleteTagMutation(db, { ...input, userId });
+  return await deleteTagMutation(db, { ...input, orgId });
 }
 
 export async function getTags(
   input: z.infer<typeof getTagsSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await getTagsQuery(input, userId);
+  return await getTagsQuery(input, orgId);
 }

@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm";
 import type { DBClient } from "../db";
 
 export type GetExpensesParams = {
-  userId: string;
+  orgId: string;
   from: string;
   to: string;
   currency?: string;
@@ -17,10 +17,10 @@ interface ExpensesResultItem {
 }
 
 export async function getExpenses(db: DBClient, params: GetExpensesParams) {
-  const { userId, from, to, currency: inputCurrency } = params;
+  const { orgId, from, to, currency: inputCurrency } = params;
 
   const result = await db.execute(
-    sql`SELECT * FROM ${sql.raw("get_expenses")}(${userId}, ${from}, ${to}, ${inputCurrency ?? null})`,
+    sql`SELECT * FROM ${sql.raw("get_expenses")}(${orgId}, ${from}, ${to}, ${inputCurrency ?? null})`,
   );
 
   const rawData = result.rows as unknown as ExpensesResultItem[];
@@ -69,7 +69,7 @@ export async function getExpenses(db: DBClient, params: GetExpensesParams) {
 }
 
 type GetNetWorthParams = {
-  userId: string;
+  orgId: string;
   from: string;
   to: string;
   currency?: string;
@@ -82,10 +82,10 @@ type NetWorthResultItem = {
 };
 
 export async function getNetWorth(db: DBClient, params: GetNetWorthParams) {
-  const { userId, from, to, currency: inputCurrency } = params;
+  const { orgId, from, to, currency: inputCurrency } = params;
 
   const result = await db.execute(
-    sql`SELECT * FROM ${sql.raw("get_net_worth")}(${userId}, ${from}, ${to})`,
+    sql`SELECT * FROM ${sql.raw("get_net_worth")}(${orgId}, ${from}, ${to})`,
   );
 
   const rawData = result.rows as unknown as NetWorthResultItem[];
@@ -125,7 +125,7 @@ export async function getNetWorth(db: DBClient, params: GetNetWorthParams) {
 }
 
 export type GetSpendingParams = {
-  userId: string;
+  orgId: string;
   from: string;
   to: string;
   currency?: string;
@@ -145,10 +145,10 @@ export async function getSpending(
   db: DBClient,
   params: GetSpendingParams,
 ): Promise<SpendingResultItem[]> {
-  const { userId, from, to, currency: inputCurrency } = params;
+  const { orgId, from, to, currency: inputCurrency } = params;
 
   const rawData = (await db.execute(
-    sql`SELECT * FROM ${sql.raw("get_spending")}(${userId}, ${from}, ${to}, ${inputCurrency ?? null})`,
+    sql`SELECT * FROM ${sql.raw("get_spending")}(${orgId}, ${from}, ${to}, ${inputCurrency ?? null})`,
   )) as unknown as SpendingResultItem[];
 
   return Array.isArray(rawData)

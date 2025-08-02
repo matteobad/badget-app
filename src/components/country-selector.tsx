@@ -11,9 +11,9 @@ import {
 } from "cmdk";
 import { ArrowUpDownIcon, CheckIcon } from "lucide-react";
 
-import { Button } from "../ui/button";
-import { Command } from "../ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Button } from "./ui/button";
+import { Command } from "./ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 type Props = {
   defaultValue: string;

@@ -15,17 +15,17 @@ export const initialBankSetup = schemaTask({
     concurrencyLimit: 50,
   },
   run: async (payload) => {
-    const { userId, connectionId } = payload;
+    const { orgId, connectionId } = payload;
 
     // Schedule the bank sync task to run daily at a random time to distribute load
     // Use a deduplication key to prevent duplicate schedules for the same team
     // Add teamId as externalId to use it in the bankSyncScheduler task
     await schedules.create({
       task: bankSyncScheduler.id,
-      cron: generateCronTag(userId),
+      cron: generateCronTag(orgId),
       timezone: "UTC",
-      externalId: userId,
-      deduplicationKey: `${userId}-${bankSyncScheduler.id}`,
+      externalId: orgId,
+      deduplicationKey: `${orgId}-${bankSyncScheduler.id}`,
     });
 
     // Run initial sync for transactions and balance for the connection

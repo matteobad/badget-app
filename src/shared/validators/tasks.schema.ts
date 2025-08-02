@@ -2,7 +2,7 @@ import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/shared/constants/enum";
 import z from "zod/v4";
 
 export const initialBankSetupSchema = z.object({
-  userId: z.string(),
+  orgId: z.string(),
   connectionId: z.uuid(),
 });
 
@@ -13,7 +13,7 @@ export const syncConnectionSchema = z.object({
 
 export const syncAccountSchema = z.object({
   id: z.uuid(),
-  userId: z.string(),
+  orgId: z.string(),
   accountId: z.string(),
   errorRetries: z.number().optional(),
   provider: z.enum(BANK_PROVIDER),

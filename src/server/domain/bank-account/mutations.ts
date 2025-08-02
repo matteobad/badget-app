@@ -10,7 +10,7 @@ export type CreateBankAccountPayload = {
   connectionId?: string;
   balance: number;
   currency: string;
-  userId: string;
+  orgId: string;
   manual?: boolean;
   enabled?: boolean;
   type?: AccountType;
@@ -28,7 +28,7 @@ export const createBankAccountMutation = async (
       rawId: payload.accountId,
       connectionId: payload.connectionId,
       institutionId: payload.institutionId,
-      userId: payload.userId,
+      organizationId: payload.orgId,
       name: payload.name,
       currency: payload.currency,
       manual: payload.manual,
@@ -39,7 +39,7 @@ export const createBankAccountMutation = async (
       accountReference: payload.accountReference,
     })
     .onConflictDoUpdate({
-      target: [account_table.rawId, account_table.userId],
+      target: [account_table.rawId, account_table.organizationId],
       set: {
         connectionId: payload.connectionId,
         name: payload.name,
@@ -57,18 +57,20 @@ export const createBankAccountMutation = async (
 
 type DeleteBankAccountParams = {
   id: string;
-  userId: string;
+  orgId: string;
 };
 
 export async function deleteBankAccountMutation(
   db: DBClient,
   params: DeleteBankAccountParams,
 ) {
-  const { id, userId } = params;
+  const { id, orgId } = params;
 
   const [result] = await db
     .delete(account_table)
-    .where(and(eq(account_table.id, id), eq(account_table.userId, userId)))
+    .where(
+      and(eq(account_table.id, id), eq(account_table.organizationId, orgId)),
+    )
     .returning();
 
   return result;
@@ -76,7 +78,7 @@ export async function deleteBankAccountMutation(
 
 export type UpdateBankAccountParams = {
   id: string;
-  userId: string;
+  orgId: string;
   name?: string;
   description?: string;
   type?: AccountType;
@@ -89,12 +91,14 @@ export async function updateBankAccountMutation(
   db: DBClient,
   params: UpdateBankAccountParams,
 ) {
-  const { id, userId, ...data } = params;
+  const { id, orgId, ...data } = params;
 
   const [result] = await db
     .update(account_table)
     .set(data)
-    .where(and(eq(account_table.id, id), eq(account_table.userId, userId)))
+    .where(
+      and(eq(account_table.id, id), eq(account_table.organizationId, orgId)),
+    )
     .returning();
 
   return result;

@@ -17,14 +17,14 @@ import { getInstitutionsQuery } from "../domain/institution/queries";
 
 export async function getBankConnections(
   input: z.infer<typeof getBankConnectionsSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await getBankConnectionsQuery(db, { ...input, userId });
+  return await getBankConnectionsQuery(db, { ...input, orgId });
 }
 
 export async function createBankConnection(
   input: z.infer<typeof createBankConnectionSchema>,
-  userId: string,
+  orgId: string,
 ) {
   const requisition = await gocardlessClient.getRequisitionById({
     id: input.referenceId,
@@ -46,7 +46,7 @@ export async function createBankConnection(
         ...account,
         institutionId,
       })),
-      userId,
+      orgId,
     });
 
     if (!bankConnection) return tx.rollback();
@@ -64,7 +64,7 @@ export async function createBankConnection(
         accountReference: account.accountReference ?? undefined,
         balance: account.balance ?? 0,
         manual: false,
-        userId,
+        orgId,
       });
     }
 
@@ -74,7 +74,7 @@ export async function createBankConnection(
 
 export async function deleteBankConnection(
   input: z.infer<typeof deleteBankConnectionSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await deleteBankConnectionMutation(db, { ...input, userId });
+  return await deleteBankConnectionMutation(db, { ...input, orgId });
 }

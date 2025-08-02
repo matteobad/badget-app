@@ -26,12 +26,12 @@ export async function createTagMutation(
 export async function updateTagMutation(
   client: DBClient,
   input: z.infer<typeof updateTagSchema>,
-  userId: string,
+  orgId: string,
 ) {
   return await client
     .update(tag_table)
     .set(input)
-    .where(and(eq(tag_table.id, input.id), eq(tag_table.userId, userId)))
+    .where(and(eq(tag_table.id, input.id), eq(tag_table.organizationId, orgId)))
     .returning();
 }
 
@@ -41,5 +41,10 @@ export async function deleteTagMutation(
 ) {
   return await client
     .delete(tag_table)
-    .where(and(eq(tag_table.id, input.id), eq(tag_table.userId, input.userId)));
+    .where(
+      and(
+        eq(tag_table.id, input.id),
+        eq(tag_table.organizationId, input.orgId),
+      ),
+    );
 }

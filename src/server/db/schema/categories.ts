@@ -5,6 +5,7 @@ import { index, unique, uniqueIndex } from "drizzle-orm/pg-core";
 import { type CategoryType } from "../../../shared/constants/enum";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
+import { organization as organization_table } from "./auth";
 
 export const category_table = pgTable(
   "category_table",
@@ -12,7 +13,10 @@ export const category_table = pgTable(
     id: d.uuid().primaryKey().defaultRandom(),
 
     // FK
-    userId: d.varchar({ length: 32 }),
+    organizationId: d
+      .text()
+      .references(() => organization_table.id, { onDelete: "cascade" })
+      .notNull(),
     parentId: d.uuid().references((): AnyPgColumn => category_table.id, {
       onDelete: "set null",
     }),
@@ -26,7 +30,7 @@ export const category_table = pgTable(
 
     ...timestamps,
   }),
-  (t) => [unique("unique_user_slug").on(t.slug, t.userId)],
+  (t) => [unique("unique_organization_slug").on(t.slug, t.organizationId)],
 );
 
 export type DB_CategoryType = typeof category_table.$inferSelect;
@@ -42,7 +46,10 @@ export const rule_table = pgTable(
       .notNull(),
 
     // FK
-    userId: d.varchar({ length: 32 }).notNull(),
+    organizationId: d
+      .text()
+      .references(() => organization_table.id, { onDelete: "cascade" })
+      .notNull(),
     categoryId: d
       .uuid()
       .notNull()
@@ -50,7 +57,7 @@ export const rule_table = pgTable(
 
     ...timestamps,
   }),
-  (t) => [index().on(t.userId)],
+  (t) => [index().on(t.organizationId)],
 );
 
 export type DB_RuleType = typeof rule_table.$inferSelect;

@@ -3,7 +3,7 @@ import { db } from "~/server/db";
 
 import { categorizeTransactions } from "./categorization"; // Import the optimized function
 
-const userId = "test-user";
+const orgId = "test-user";
 
 // Generate mock transactions
 const generateMockTransactions = (count: number) =>
@@ -16,10 +16,10 @@ const benchmarkCategorization = async (num: number) => {
   const transactions = generateMockTransactions(num);
 
   // Warm-up: Preload rules into cache
-  await categorizeTransactions(userId, transactions.slice(0, 10));
+  await categorizeTransactions(orgId, transactions.slice(0, 10));
 
   const start = performance.now();
-  await categorizeTransactions(userId, transactions);
+  await categorizeTransactions(orgId, transactions);
   const end = performance.now();
 
   console.log(`Processed ${num} transactions in ${(end - start).toFixed(2)}ms`);

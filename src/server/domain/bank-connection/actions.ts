@@ -76,11 +76,11 @@ export const reconnectConnectionAction = authActionClient
   .inputSchema(reconnectConnectionSchema)
   .metadata({ actionName: "reconnect-connection" })
   .action(
-    async ({ parsedInput: { connectionId, provider }, ctx: { userId } }) => {
+    async ({ parsedInput: { connectionId, provider }, ctx: { orgId } }) => {
       const event = await tasks.trigger<typeof reconnectConnection>(
         "reconnect-connection",
         {
-          userId,
+          orgId,
           connectionId,
           provider,
         },
@@ -96,9 +96,9 @@ export const reconnectGocardlessLinkAction = authActionClient
   .action(
     async ({
       parsedInput: { id, institutionId, redirectTo },
-      ctx: { userId },
+      ctx: { orgId },
     }) => {
-      const reference = `${userId}:${createId()}`;
+      const reference = `${orgId}:${createId()}`;
 
       const link = new URL(redirectTo);
       link.searchParams.append("id", id);

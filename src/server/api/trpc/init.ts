@@ -30,9 +30,11 @@ import { timingMiddleware } from "./middleware/timing";
  */
 export const createTRPCContext = cache(async (opts: { headers: Headers }) => {
   const session = await auth.api.getSession({ headers: opts.headers });
+
   return {
     db,
     session: session?.session,
+    orgId: session?.session.activeOrganizationId ?? undefined,
     ...opts,
   };
 });

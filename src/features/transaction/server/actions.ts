@@ -4,7 +4,7 @@ import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
 import { revalidateTag } from "next/cache";
 import { parse } from "@fast-csv/parse";
 import { authActionClient } from "~/lib/safe-action";
-import { db, withTransaction } from "~/server/db";
+import { db } from "~/server/db";
 import { transaction_table } from "~/server/db/schema/transactions";
 import { utapi } from "~/server/uploadthing";
 import { importTransactionSchema } from "~/shared/validators/transaction.schema";
@@ -12,31 +12,10 @@ import { categorizeTransactions } from "~/utils/categorization";
 
 import type { CSVRow, CSVRowParsed } from "../utils/schemas";
 import { transformCSV } from "../utils";
-import {
-  AttachmentDeleteSchema,
-  TransactionDeleteSchema,
-} from "../utils/schemas";
-import { deleteTransaction, deleteTransactionAttachment } from "./queries";
+import { AttachmentDeleteSchema } from "../utils/schemas";
+import { deleteTransactionAttachment } from "./queries";
 
 // transaction
-
-export const deleteTransactionAction = authActionClient
-  .inputSchema(TransactionDeleteSchema)
-  .metadata({ actionName: "delete-transaction" })
-  .action(async ({ parsedInput, ctx }) => {
-    // Mutate data
-    await withTransaction(async (tx) => {
-      for (const id of parsedInput.ids) {
-        await deleteTransaction(id, ctx.userId, tx);
-      }
-    });
-
-    // Invalidate cache
-    revalidateTag(`transaction_${ctx.userId}`);
-
-    // Return success message
-    return { message: "delete-transaction-success-message" };
-  });
 
 export const deleteTransactionAttachmentAction = authActionClient
   .inputSchema(AttachmentDeleteSchema)
@@ -45,11 +24,11 @@ export const deleteTransactionAttachmentAction = authActionClient
     // Mutate data
     // TODO: attachment can be associated to multiple transactions
     // remove it only if it's not associated with anything
-    await deleteTransactionAttachment(parsedInput.id, ctx.userId);
+    await deleteTransactionAttachment(parsedInput.id, ctx.orgId);
     await utapi.deleteFiles(parsedInput.fileKey);
 
     // Invalidate cache
-    revalidateTag(`attachment_${ctx.userId}`);
+    revalidateTag(`attachment_${ctx.orgId}`);
 
     // Return success message
     return { message: "delete-attachment-success-message" };
@@ -83,7 +62,7 @@ export const importTransactionAction = authActionClient
   .metadata({ actionName: "import-transaction" })
   .action(async ({ parsedInput, ctx }) => {
     // Mutate data
-    const userId = ctx.userId;
+    const orgId = ctx.orgId;
     const { file, ...options } = parsedInput;
 
     // upload file and create attachment
@@ -117,10 +96,10 @@ export const importTransactionAction = authActionClient
     //   fileUrl: uploadedFile.url,
     //   fileType: uploadedFile.type,
     //   fileSize: uploadedFile.size,
-    //   userId: ctx.userId,
+    //   organizationId: ctx.orgId,
     // });
-    const categorizedData = await categorizeTransactions(userId, data);
-    const parsedTransactions = categorizedData.map((t) => ({ ...t, userId }));
+    const categorizedData = await categorizeTransactions(orgId, data);
+    const parsedTransactions = categorizedData.map((t) => ({ ...t, orgId }));
 
     await db
       .insert(transaction_table)
@@ -128,8 +107,8 @@ export const importTransactionAction = authActionClient
       .values(parsedTransactions);
 
     // Invalidate cache
-    revalidateTag(`transaction_${ctx.userId}`);
-    revalidateTag(`attachment_${ctx.userId}`);
+    revalidateTag(`transaction_${ctx.orgId}`);
+    revalidateTag(`attachment_${ctx.orgId}`);
 
     // Return success message
     return { message: "import-transaction-success-message" };

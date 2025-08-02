@@ -108,26 +108,26 @@ export function findBudgetWarnings(
 
 export async function getBudgets(
   input: z.infer<typeof getBudgetsSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await getBudgetsQuery({ ...input, userId });
+  return await getBudgetsQuery({ ...input, orgId });
 }
 
 export async function getBudgetInstances(
   input: z.infer<typeof getBudgetsSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await getMaterializedBudgetsQuery({ ...input, userId });
+  return await getMaterializedBudgetsQuery({ ...input, orgId });
 }
 
 export async function createBudget(
   params: z.infer<typeof createBudgetSchema>,
-  userId: string,
+  orgId: string,
 ) {
   const input = toBudgetDBInput(params);
 
   return await withTransaction(async (tx) => {
-    const result = await createBudgetMutation(tx, { ...input, userId });
+    const result = await createBudgetMutation(tx, { ...input, userId: orgId });
     // refresh materialized view
     await refreshBudgetInstances(tx);
 
@@ -137,7 +137,7 @@ export async function createBudget(
 
 export async function updateBudget(
   params: z.infer<typeof updateBudgetSchema>,
-  userId: string,
+  orgId: string,
 ) {
   const { id, isOverride, ...input } = params;
 
@@ -149,7 +149,7 @@ export async function updateBudget(
   // planned category budgets
   const categoryId = existingBudget.categoryId;
   const next = addDays(existingBudget.recurrenceEnd ?? existingBudget.to, 1);
-  const planned = await getBudgetsQuery({ from: next, categoryId, userId });
+  const planned = await getBudgetsQuery({ from: next, categoryId, orgId });
   console.log(`found ${planned.length} planned budgets on category`);
 
   // prepare data for updating budgets
@@ -160,7 +160,7 @@ export async function updateBudget(
     // close current budget on previous cycle
     const updated = await updateBudgetMutation(tx, {
       id,
-      userId,
+      userId: orgId,
       recurrenceEnd: prevEnd,
     });
 
@@ -172,7 +172,7 @@ export async function updateBudget(
       ...(isOverride ? existingBudget : input),
       validity,
       categoryId,
-      userId,
+      userId: orgId,
       id: undefined, // necessary to override existingBudget
     });
 
@@ -186,7 +186,7 @@ export async function updateBudget(
         amount: input.amount,
         validity,
         categoryId,
-        userId,
+        userId: orgId,
       });
 
       if (!overrideBudget?.id) return tx.rollback();
@@ -195,7 +195,7 @@ export async function updateBudget(
 
     // delete planned category budget to avoid overlaps
     for (const { id } of planned) {
-      await deleteBudgetMutation(tx, { id, userId });
+      await deleteBudgetMutation(tx, { id, userId: orgId });
       console.log(`deleted planned budget ${id}`);
     }
 
@@ -208,7 +208,7 @@ export async function updateBudget(
 
 export async function deleteBudget(
   params: z.infer<typeof deleteBudgetSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await deleteBudgetMutation(db, { ...params, userId });
+  return await deleteBudgetMutation(db, { ...params, userId: orgId });
 }

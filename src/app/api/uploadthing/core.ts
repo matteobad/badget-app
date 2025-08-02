@@ -20,12 +20,17 @@ export const ourFileRouter = {
       // eslint-disable-next-line @typescript-eslint/only-throw-error
       if (!session) throw new UploadThingError("Unauthorized");
 
+      // If you throw, the user will not be able to upload
+      if (!session.session.activeOrganizationId)
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
+        throw new UploadThingError("Unauthorized");
+
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: session.user.id };
+      return { orgId: session.session.activeOrganizationId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
-      console.log("Upload complete for userId:", metadata.userId);
+      console.log("Upload complete for orgId:", metadata.orgId);
       console.log("file url", file.url);
 
       const inserted = await db
@@ -36,7 +41,7 @@ export const ourFileRouter = {
           fileUrl: file.ufsUrl,
           fileType: file.type,
           fileSize: file.size,
-          userId: metadata.userId,
+          organizationId: metadata.orgId,
         })
         .returning();
 
@@ -54,12 +59,18 @@ export const ourFileRouter = {
       // eslint-disable-next-line @typescript-eslint/only-throw-error
       if (!session) throw new UploadThingError("Unauthorized");
 
+      // If you throw, the user will not be able to upload
+
+      if (!session.session.activeOrganizationId)
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
+        throw new UploadThingError("Unauthorized");
+
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: session.user.id };
+      return { orgId: session.session.activeOrganizationId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
-      console.log("Upload complete for userId:", metadata.userId);
+      console.log("Upload complete for orgId:", metadata.orgId);
       console.log("file url", file.ufsUrl);
 
       await db.insert(attachment_table).values({
@@ -68,7 +79,7 @@ export const ourFileRouter = {
         fileUrl: file.ufsUrl,
         fileType: file.type,
         fileSize: file.size,
-        userId: metadata.userId,
+        organizationId: metadata.orgId,
       });
 
       return;

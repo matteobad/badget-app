@@ -1,33 +1,16 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { authActionClient } from "~/lib/safe-action";
 import { sendToTelegram } from "~/lib/telegram";
-import { FeedbackSchema, ToggleAccountSchema } from "~/lib/validators";
-import { MUTATIONS } from "~/server/db/queries";
+import { FeedbackSchema } from "~/lib/validators";
 import { addYears } from "date-fns";
 
 import type { VisibilityState } from "@tanstack/react-table";
 
-export const toggleAccountAction = authActionClient
-  .schema(ToggleAccountSchema)
-  .metadata({ actionName: "toggle-account" })
-  .action(async ({ parsedInput, ctx }) => {
-    // Mutate data
-    await MUTATIONS.toggleAccount({ ...parsedInput, userId: ctx.userId });
-
-    // Invalidate cache
-    revalidateTag(`connection_${ctx.userId}`);
-    revalidateTag(`account_${ctx.userId}`);
-
-    // Return success message
-    return { message: "Account toggled" };
-  });
-
 // Server action to submit feedback
 export const submitFeedbackAction = authActionClient
-  .schema(FeedbackSchema)
+  .inputSchema(FeedbackSchema)
   .metadata({ actionName: "submit-feedback" })
   .action(async ({ parsedInput, ctx }) => {
     try {

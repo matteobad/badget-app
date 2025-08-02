@@ -28,17 +28,14 @@ export const upsertTransactions = schemaTask({
     concurrencyLimit: 10,
   },
   schema: z.object({
-    userId: z.string(),
+    orgId: z.string(),
     bankAccountId: z.uuid(),
     manualSync: z.boolean().optional(),
     transactions: z.array(transactionSchema),
   }),
-  run: async ({ transactions, userId, bankAccountId }) => {
+  run: async ({ transactions, orgId, bankAccountId }) => {
     try {
-      const categorizedData = await categorizeTransactions(
-        userId,
-        transactions,
-      );
+      const categorizedData = await categorizeTransactions(orgId, transactions);
 
       // Upsert transactions into the transactions table, skipping duplicates based on internal_id
       await db
@@ -48,11 +45,11 @@ export const upsertTransactions = schemaTask({
           categorizedData.map((transaction) => ({
             ...transaction,
             accountId: bankAccountId,
-            userId: userId,
+            organizationId: orgId,
           })),
         )
         .onConflictDoUpdate({
-          target: [transaction_table.userId, transaction_table.rawId],
+          target: [transaction_table.organizationId, transaction_table.rawId],
           set: buildConflictUpdateColumns(transaction_table, [
             "amount",
             "currency",

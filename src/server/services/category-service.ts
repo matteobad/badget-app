@@ -36,20 +36,20 @@ export const mapCategoriesWithBudgets = (
 
 export async function getCategories(
   filters: z.infer<typeof getCategoriesSchema>,
-  userId: string,
+  orgId: string,
 ) {
-  return await getCategoriesQuery({ userId });
+  return await getCategoriesQuery({ orgId });
 }
 
 export async function getCategoriesWithBudgets(
   filters: z.infer<typeof getCategoriesWithBudgetsSchema>,
-  userId: string,
+  orgId: string,
 ) {
   const { from, to } = filters;
   // get all user categories
-  const categories = await getCategoriesQuery({ userId });
+  const categories = await getCategoriesQuery({ orgId });
   // get all user materialized budgets instances for requested period
-  const budgets = await getMaterializedBudgetsQuery({ from, to, userId });
+  const budgets = await getMaterializedBudgetsQuery({ from, to, orgId });
   // map categories with respective budgets instances
   // enriched data with accruals of category and childrens
   // enriched data with budget income percentage
@@ -58,32 +58,38 @@ export async function getCategoriesWithBudgets(
 
 export async function createCategory(
   params: z.infer<typeof createCategorySchema>,
-  userId: string,
+  organizationId: string,
 ) {
-  const [result] = await createCategoryMutation(db, { ...params, userId });
+  const [result] = await createCategoryMutation(db, {
+    ...params,
+    organizationId,
+  });
   return result;
 }
 
-export async function createDefaultCategories(userId: string) {
+export async function createDefaultCategories(orgId: string) {
   const results = await createManyCategoryMutation(
     db,
-    DEFAULT_CATEGORIES.map((c) => ({ ...c, userId })),
+    DEFAULT_CATEGORIES.map((c) => ({ ...c, organizationId: orgId })),
   );
   return results;
 }
 
 export async function updateCategory(
   params: z.infer<typeof updateCategorySchema>,
-  userId: string,
+  organizationId: string,
 ) {
-  const [result] = await updateCategoryMutation(db, { ...params, userId });
+  const [result] = await updateCategoryMutation(db, {
+    ...params,
+    organizationId,
+  });
   return result;
 }
 
 export async function deleteCategory(
   params: z.infer<typeof deleteCategorySchema>,
-  userId: string,
+  orgId: string,
 ) {
-  const result = await deleteCategoryMutation(db, { ...params, userId });
+  const result = await deleteCategoryMutation(db, { ...params, orgId });
   return result;
 }

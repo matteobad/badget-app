@@ -11,7 +11,10 @@ const CATEGORY_UUIDS: Record<CategoryType, string> = {
   transfer: randomUUID(),
 };
 
-export const DEFAULT_CATEGORIES: DB_CategoryInsertType[] = [
+export const DEFAULT_CATEGORIES: Omit<
+  DB_CategoryInsertType,
+  "organizationId"
+>[] = [
   {
     id: CATEGORY_UUIDS.income,
     slug: "income",

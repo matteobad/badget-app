@@ -20,15 +20,15 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const transactionTagRouter = createTRPCRouter({
   get: protectedProcedure.input(getTagsSchema).query(async ({ ctx, input }) => {
-    const userId = ctx.session!.userId;
-    return await getTags(input, userId);
+    const orgId = ctx.orgId!;
+    return await getTags(input, orgId);
   }),
 
   create: protectedProcedure
     .input(createTransactionTagSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
-      const inputTag = { ...input.tag, userId };
+      const orgId = ctx.orgId!;
+      const inputTag = { ...input.tag, organizationId: orgId };
 
       return await withTransaction(async (tx) => {
         let tag = await getTagByTextQuery(tx, inputTag);
@@ -48,7 +48,7 @@ export const transactionTagRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(deleteTransactionTagSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session!.userId;
+      const orgId = ctx.orgId!;
 
       return withTransaction(async (tx) => {
         await deleteTransactionToTagMutation(tx, input);
@@ -56,7 +56,7 @@ export const transactionTagRouter = createTRPCRouter({
           tagId: input.tagId,
         });
         if (!tagHasMoreTransactions) {
-          await deleteTagMutation(tx, { id: input.tagId, userId });
+          await deleteTagMutation(tx, { id: input.tagId, orgId });
         }
       });
     }),

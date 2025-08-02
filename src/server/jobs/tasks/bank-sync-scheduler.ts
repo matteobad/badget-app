@@ -14,23 +14,23 @@ export const bankSyncScheduler = schedules.task({
     // Only run in production (Set in Trigger.dev)
     if (process.env.TRIGGER_ENVIRONMENT !== "production") return;
 
-    const userId = payload.externalId;
+    const orgId = payload.externalId;
 
-    if (!userId) {
-      throw new Error("userId is required");
+    if (!orgId) {
+      throw new Error("orgId is required");
     }
 
     try {
       const bankConnections = await db
         .select()
         .from(connection_table)
-        .where(eq(connection_table.userId, userId));
+        .where(eq(connection_table.organizationId, orgId));
 
       const formattedConnections = bankConnections?.map((connection) => ({
         payload: {
           connectionId: connection.id,
         },
-        tags: ["user_id", userId],
+        tags: ["organization_id", orgId],
       }));
 
       // If there are no bank connections to sync, return
