@@ -1,5 +1,6 @@
 import { tag_table } from "~/server/db/schema/transactions";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
+import { parseAsBoolean, parseAsString } from "nuqs/server";
 import z from "zod/v4";
 
 export const createTagSchema = createInsertSchema(tag_table);
@@ -18,3 +19,9 @@ export const getTagsSchema = z.object().optional();
 export const getTransactionTagsSchema = z.object({
   transactionId: z.cuid2(),
 });
+
+// Search params for sheets
+export const tagParamsSchema = {
+  tagId: parseAsString,
+  createTag: parseAsBoolean,
+};

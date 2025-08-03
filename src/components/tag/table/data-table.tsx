@@ -25,6 +25,8 @@ import {
   TableRow,
 } from "../../ui/table";
 import { columns } from "./columns";
+import { DataTableSkeleton } from "./data-table-skeleton";
+import { NoTags } from "./empty-states";
 
 export function DataTable() {
   const [isOpen, onOpenChange] = React.useState(false);
@@ -37,7 +39,7 @@ export function DataTable() {
 
   const { data } = useSuspenseQuery(trpc.transactionTag.get.queryOptions());
 
-  const deleteCategoryMutation = useMutation(
+  const deleteTagMutation = useMutation(
     trpc.tag.delete.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries({
@@ -54,23 +56,32 @@ export function DataTable() {
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     meta: {
-      deleteCategory: (id: string) => {
-        deleteCategoryMutation.mutate({ id, orgId: "placeholder" });
+      deleteTag: (id: string) => {
+        deleteTagMutation.mutate({ id, orgId: "placeholder" });
       },
       expandedCategories,
       setExpandedCategories,
     },
   });
 
+  if (!data.length) {
+    return (
+      <div className="relative h-[calc(100vh-200px)] overflow-hidden">
+        <NoTags />
+        <DataTableSkeleton isEmpty />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
-      <Table>
+      <Table className="border">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="px-4">
                     {header.isPlaceholder
                       ? null
                       : flexRender(

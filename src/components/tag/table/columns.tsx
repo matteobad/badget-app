@@ -29,7 +29,6 @@ export const columns: ColumnDef<Tag>[] = [
     cell: ({ row }) => {
       return (
         <div className={cn("flex items-center space-x-2")}>
-          <div className="size-3" />
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>

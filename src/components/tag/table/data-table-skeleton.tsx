@@ -7,38 +7,46 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { cn } from "~/lib/utils";
 
-export function TagsSkeleton() {
+export function DataTableSkeleton({ isEmpty }: { isEmpty?: boolean }) {
   return (
     <div className="w-full">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>VAT</TableHead>
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
-          {[...Array(15)].map((_, index) => (
-            <TableRow
-              key={index.toString()}
-              className="h-[49px] hover:bg-transparent"
-            >
-              <TableCell className="w-[50px]">
-                <Skeleton className="size-4 rounded-md" />
-              </TableCell>
-              <TableCell>
-                <Skeleton className="h-2 w-[20%]" />
-              </TableCell>
-              <TableCell className="w-[65px]">
-                <Skeleton className="h-1 w-5" />
-              </TableCell>
+      <div
+        className={cn("overflow-x-auto", !isEmpty && "border-t border-border")}
+      >
+        <Table
+          className={cn(
+            "min-w-[1600px]",
+            isEmpty && "pointer-events-none opacity-20 blur-[7px]",
+          )}
+        >
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+
+          <TableBody>
+            {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
+            {[...Array(15)].map((_, index) => (
+              <TableRow
+                key={index.toString()}
+                className="h-[49px] hover:bg-transparent"
+              >
+                <TableCell className="w-full">
+                  <Skeleton
+                    className={cn(
+                      "size-4 rounded-b-md",
+                      isEmpty && "animate-none",
+                    )}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
