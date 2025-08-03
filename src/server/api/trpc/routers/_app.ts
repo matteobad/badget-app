@@ -15,6 +15,7 @@ import { metricsRouter } from "./metrics";
 import { organizationRouter } from "./organization";
 import { tagRouter } from "./tag";
 import { transactionRouter } from "./transaction";
+import { transactionCategoryRouter } from "./transaction-category";
 import { transactionTagRouter } from "./transaction-tag";
 import { userRouter } from "./user";
 
@@ -34,6 +35,7 @@ export const appRouter = createTRPCRouter({
   category: categoryRouter,
   budget: budgetRouter,
   transaction: transactionRouter,
+  transactionCategory: transactionCategoryRouter,
   transactionTag: transactionTagRouter,
   health: publicProcedure.query(async () => {
     try {

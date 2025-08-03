@@ -18,7 +18,7 @@ const badgeVariants = cva(
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         category:
-          "[&>svg]:size-4 font-mono h-7 rounded-full font-normal px-2 py-0.5 flex gap-1.5 text-sm items-center",
+          "[&>svg]:size-4  h-7 rounded-full px-1.5 py-1 flex gap-1 text-sm font-medium border truncate items-center focus-visible:outline-none focus-visible:ring-0",
         tag: "font-mono text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D] border-none font-normal rounded-none",
         "tag-rounded":
           "font-mono text-[#878787] bg-[#F2F1EF] text-[12px] dark:bg-[#1D1D1D] font-normal px-3 py-0.5 border-none",
