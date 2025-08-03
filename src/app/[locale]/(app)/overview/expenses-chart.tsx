@@ -13,7 +13,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "~/components/ui/chart";
-import { formatAmount } from "~/utils/format";
+import { formatAmount } from "~/shared/helpers/format";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 const chartData = [
@@ -36,7 +36,7 @@ export function ExpensesChart() {
   return (
     <Card className="flex h-full flex-col shadow-none">
       <CardHeader>
-        <CardTitle>{formatAmount({ amount: 1000 })}</CardTitle>
+        <CardTitle>{formatAmount({ amount: 1000, currency: "EUR" })}</CardTitle>
         <CardDescription className="font-light">
           Media uscite mensili
         </CardDescription>

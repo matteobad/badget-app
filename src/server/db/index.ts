@@ -15,6 +15,9 @@ import * as transactions from "./schema/transactions";
 
 let connectionString = env.DATABASE_URL;
 
+// necessary on trigger.dev env
+neonConfig.webSocketConstructor = ws;
+
 // Configuring Neon for local development
 // https://neon.tech/guides/local-development-with-neon#local-postgresql
 if (env.NODE_ENV === "development") {

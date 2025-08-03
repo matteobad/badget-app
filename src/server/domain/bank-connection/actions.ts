@@ -3,8 +3,8 @@
 import { redirect } from "next/navigation";
 import { createId } from "@paralleldrive/cuid2";
 import { tasks } from "@trigger.dev/sdk/v3";
-import { gocardlessClient } from "~/features/account/server/providers/gocardless/gocardless-api";
 import { authActionClient } from "~/lib/safe-action";
+import { gocardlessClient } from "~/server/integrations/open-banking/gocardless/gocardless-api";
 import { type reconnectConnection } from "~/server/jobs/tasks/reconnect-connection";
 import { type syncConnection } from "~/server/jobs/tasks/sync-connection";
 import {

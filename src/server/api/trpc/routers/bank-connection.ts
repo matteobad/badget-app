@@ -1,6 +1,6 @@
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
-import { getBankAccountProvider } from "~/features/account/server/providers";
+import { getBankAccountProvider } from "~/server/integrations/open-banking";
 import { type deleteConnection } from "~/server/jobs/tasks/delete-connection";
 import { type initialBankSetup } from "~/server/jobs/tasks/initial-bank-setup";
 import {

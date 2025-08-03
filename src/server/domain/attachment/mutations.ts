@@ -1,6 +1,6 @@
 "server-only";
 
-import type { TXType } from "~/server/db";
+import type { DBClient, TXType } from "~/server/db";
 import type { updateAttachmentSchema } from "~/shared/validators/attachment.schema";
 import type z from "zod/v4";
 import { attachment_table } from "~/server/db/schema/transactions";
@@ -19,6 +19,21 @@ export async function updateAttachmentMutation(
     .where(
       and(
         eq(attachment_table.id, input.id),
+        eq(attachment_table.organizationId, orgId),
+      ),
+    );
+}
+
+export async function deleteAttachmentMutation(
+  tx: DBClient,
+  id: string,
+  orgId: string,
+) {
+  return tx
+    .delete(attachment_table)
+    .where(
+      and(
+        eq(attachment_table.id, id),
         eq(attachment_table.organizationId, orgId),
       ),
     );

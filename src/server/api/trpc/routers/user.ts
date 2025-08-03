@@ -1,4 +1,3 @@
-import { auth } from "~/server/auth/auth";
 import { getUserById } from "~/server/services/user-service";
 
 import { createTRPCRouter, protectedProcedure } from "../init";

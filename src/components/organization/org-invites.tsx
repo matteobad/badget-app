@@ -3,7 +3,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
-import { TeamInvite } from "./team-invite";
+// import { TeamInvite } from "./team-invite";
 
 export function OrganizationInvites() {
   const trpc = useTRPC();

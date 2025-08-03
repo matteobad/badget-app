@@ -14,7 +14,7 @@ import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import type { ColumnFiltersState } from "@tanstack/react-table";
-import { columns } from "./columns";
+// import { columns } from "./columns";
 import { DataTableHeader } from "./table-header";
 
 export function DataTable() {
@@ -24,7 +24,7 @@ export function DataTable() {
 
   const table = useReactTable({
     data,
-    columns,
+    columns: [],
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnFiltersChange: setColumnFilters,
@@ -62,7 +62,7 @@ export function DataTable() {
             ))
           ) : (
             <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell colSpan={1} className="h-24 text-center">
                 No results.
               </TableCell>
             </TableRow>

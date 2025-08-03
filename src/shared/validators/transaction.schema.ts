@@ -1,4 +1,7 @@
-import type { DB_TransactionType } from "~/server/db/schema/transactions";
+import type {
+  DB_TransactionInsertType,
+  DB_TransactionType,
+} from "~/server/db/schema/transactions";
 import { getSortingStateParser } from "~/lib/validators";
 import { transaction_table } from "~/server/db/schema/transactions";
 import {
@@ -94,6 +97,15 @@ export const importTransactionSchema = z.object({
   extraFields: z.object({ accountId: z.string() }),
   settings: z.object({ inverted: z.boolean() }),
 });
+
+export const CSV_SCHEMA = z
+  .instanceof(File)
+  .refine((file) => ["text/csv"].includes(file.type), {
+    message: "Invalid document file type",
+  });
+
+export type CSVRow = Record<string, string | null>;
+export type CSVRowParsed = Partial<DB_TransactionInsertType>;
 
 // Query filter schema
 export const getTransactionsSchema = z.object({
