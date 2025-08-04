@@ -144,7 +144,7 @@ export function ConnectBankDialog({
   return (
     <Dialog open={isOpen} onOpenChange={handleOnClose}>
       <DialogContent>
-        <div className="p-4">
+        <div className="">
           <DialogHeader>
             <DialogTitle>Connect bank account</DialogTitle>
 
@@ -167,7 +167,7 @@ export function ConnectBankDialog({
             <div className="pt-4">
               <div className="relative flex space-x-2">
                 <Input
-                  placeholder="Search bank..."
+                  placeholder="Search your bank or financial institution..."
                   type="search"
                   onChange={(evt) =>
                     void setConnectParams({ search: evt.target.value || null })

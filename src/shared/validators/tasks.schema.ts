@@ -13,7 +13,7 @@ export const syncConnectionSchema = z.object({
 
 export const syncAccountSchema = z.object({
   id: z.uuid(),
-  orgId: z.string(),
+  organizationId: z.string(),
   accountId: z.string(),
   errorRetries: z.number().optional(),
   provider: z.enum(BANK_PROVIDER),

@@ -33,12 +33,12 @@ export const upsertBalances = schemaTask({
     concurrencyLimit: 10,
   },
   schema: z.object({
-    orgId: z.string(),
+    organizationId: z.string(),
     accountId: z.uuid(),
     manualSync: z.boolean().optional(),
     transactions: z.array(transactionSchema),
   }),
-  run: async ({ transactions, orgId, accountId }) => {
+  run: async ({ transactions, organizationId, accountId }) => {
     try {
       const [account] = await db
         .select()
@@ -79,7 +79,7 @@ export const upsertBalances = schemaTask({
 
       allSnapshots.push(
         ...balances.map((b) => ({
-          organizationId: orgId,
+          organizationId: organizationId,
           accountId: account.id,
           date: b.date,
           balance: b.balance,

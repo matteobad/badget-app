@@ -17,7 +17,7 @@ import z from "zod/v4";
 
 import { FormatAmount } from "../format-amount";
 import { SubmitButton } from "../submit-button";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -250,11 +250,15 @@ export function SelectBankAccountsModal() {
                           return (
                             <FormItem
                               key={account.rawId}
-                              className="flex justify-between"
+                              className="flex items-center justify-between"
                             >
                               <FormLabel className="mr-8 flex w-full items-center space-x-4">
                                 <Avatar className="size-[34px]">
-                                  <AvatarFallback className="text-[11px]">
+                                  <AvatarImage
+                                    src={account.logoUrl ?? ""}
+                                    alt={`${account.name} logo`}
+                                  />
+                                  <AvatarFallback className="text-xs">
                                     {getInitials(account.name)}
                                   </AvatarFallback>
                                 </Avatar>
@@ -279,7 +283,7 @@ export function SelectBankAccountsModal() {
                                 </div>
                               </FormLabel>
 
-                              <div>
+                              <div className="flex h-[34px] items-center">
                                 <FormControl>
                                   <Switch
                                     checked={
@@ -313,7 +317,7 @@ export function SelectBankAccountsModal() {
                       />
                     ))}
 
-                    <div className="fixed right-0 bottom-0 left-0 z-10 bg-background px-6 pt-4 pb-6">
+                    <div className="fixed right-0 bottom-0 left-0 z-10 rounded-b-lg bg-background px-6 pt-4 pb-6">
                       <SubmitButton
                         className="w-full"
                         type="submit"

@@ -3,11 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { AddAccountButton } from "~/components/bank-connection/add-account-button";
 import { FormatAmount } from "~/components/format-amount";
 import { cn } from "~/lib/utils";
 import { formatAccountName } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { LandmarkIcon } from "lucide-react";
 
 export function AccountBalance() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -22,14 +22,11 @@ export function AccountBalance() {
 
   if (!activeAccount) {
     return (
-      <div className="flex h-full flex-col items-center justify-center">
-        <h2 className="mb-1 font-medium">No accounts connected</h2>
-        <p className="mb-8 text-center text-sm text-[#606060]">
-          Get your balance in real-time by connecting <br />
-          your bank account.
+      <div className="flex h-full flex-col items-center justify-center gap-2">
+        <LandmarkIcon className="text-muted-foreground" />
+        <p className="w-[50%] text-center text-sm text-[#606060]">
+          No accounts have been connected or created.
         </p>
-
-        <AddAccountButton />
       </div>
     );
   }
