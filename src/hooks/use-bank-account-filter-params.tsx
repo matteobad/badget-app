@@ -1,19 +1,31 @@
+import { useCallback } from "react";
 import { useQueryStates } from "nuqs";
 import { parseAsString } from "nuqs/server";
+
+// Default empty filter state
+export const EMPTY_FILTER_STATE = {
+  q: null,
+};
 
 export const bankAccountFilterParamsSchema = {
   q: parseAsString,
 };
 
 export function useBankAccountFilterParams() {
-  const [filter, setFilter] = useQueryStates(bankAccountFilterParamsSchema, {
+  const [filters, setFilters] = useQueryStates(bankAccountFilterParamsSchema, {
     // Clear URL when values are null/default
     clearOnDefault: true,
   });
 
+  // Clear all filters helper
+  const clearAllFilters = useCallback(() => {
+    void setFilters(EMPTY_FILTER_STATE);
+  }, [setFilters]);
+
   return {
-    filter,
-    setFilter,
-    hasFilters: Object.values(filter).some((value) => value !== null),
+    filters,
+    setFilters,
+    hasFilters: Object.values(filters).some((value) => value !== null),
+    clearAllFilters,
   };
 }

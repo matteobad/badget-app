@@ -1,7 +1,14 @@
 "use client";
 
 import { Skeleton } from "~/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 
 // import { DataTableHeader } from "./data-table-header";
@@ -21,7 +28,14 @@ export function Loading({ isEmpty }: { isEmpty?: boolean }) {
             isEmpty && "pointer-events-none opacity-20 blur-[7px]",
           )}
         >
-          {/* <DataTableHeader loading /> */}
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Account</TableHead>
+              <TableHead>Balance</TableHead>
+            </TableRow>
+          </TableHeader>
 
           <TableBody className="border-t-0 border-r-0 border-b-0 border-l-0">
             {data?.map((row) => (

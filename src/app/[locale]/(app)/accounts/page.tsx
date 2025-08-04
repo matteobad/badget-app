@@ -5,7 +5,7 @@ import { AccountsSearchFilter } from "~/components/bank-account/accounts-search-
 import { DataTable } from "~/components/bank-account/table/data-table";
 import { Loading } from "~/components/bank-account/table/loading";
 import { AddAccountButton } from "~/components/bank-connection/add-account-button";
-import { Card, CardContent, CardHeader } from "~/components/ui/card";
+import { ErrorFallback } from "~/components/error-fallback";
 import {
   getQueryClient,
   HydrateClient,
@@ -31,19 +31,15 @@ export default async function AccountsPage(_props: PageProps) {
 
   return (
     <HydrateClient>
-      <Card className="mx-6 mt-6">
-        <CardHeader className="flex flex-row justify-between gap-4 p-4">
-          <AccountsSearchFilter />
-          <AddAccountButton />
-        </CardHeader>
-        <CardContent className="p-4 pt-0">
-          <ErrorBoundary fallback={<div>Something went wrong</div>}>
-            <Suspense fallback={<Loading />}>
-              <DataTable />
-            </Suspense>
-          </ErrorBoundary>
-        </CardContent>
-      </Card>
+      <div className="flex justify-between p-6 pb-4">
+        <AccountsSearchFilter />
+        <AddAccountButton />
+      </div>
+      <ErrorBoundary fallback={<ErrorFallback />}>
+        <Suspense fallback={<Loading />}>
+          <DataTable />
+        </Suspense>
+      </ErrorBoundary>
     </HydrateClient>
   );
 }

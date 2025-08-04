@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { useBankAccountFilterParams } from "~/hooks/use-bank-account-filter-params";
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 import { cn } from "~/lib/utils";
 // Group transactions by date
@@ -26,6 +27,8 @@ import { ACCOUNT_TYPE_GROUP } from "~/shared/constants/acconts";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import { columns } from "./columns";
+import { NoAccounts, NoResults } from "./empty-states";
+import { Loading } from "./loading";
 
 // Mock data types
 type BankAccount = RouterOutput["bankAccount"]["get"][number];
@@ -48,6 +51,7 @@ export function DataTable() {
   const [rowSelection, setRowSelection] = useState({});
 
   const { setParams } = useBankAccountParams();
+  const { hasFilters } = useBankAccountFilterParams();
 
   const trpc = useTRPC();
   const { data } = useQuery(trpc.bankAccount.get.queryOptions({}));
@@ -70,8 +74,26 @@ export function DataTable() {
     table.getFilteredRowModel().rows.map((row) => row.original),
   );
 
+  if (!data?.length && !hasFilters) {
+    return (
+      <div className="relative h-[calc(100vh-200px)] overflow-hidden px-6">
+        <NoAccounts />
+        <Loading isEmpty />
+      </div>
+    );
+  }
+
+  if (!data?.length && hasFilters) {
+    return (
+      <div className="relative h-[calc(100vh-200px)] overflow-hidden px-6">
+        <NoResults />
+        <Loading isEmpty />
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 px-6">
       {/* Table Groups as Cards */}
       {/* Single Sticky Header */}
       <div className="sticky top-0 z-10 mb-4 rounded-lg bg-neutral-50">

@@ -14,14 +14,14 @@ const defaultSearch = {
 export function AccountsSearchFilter() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
-  const { filter = defaultSearch, setFilter } = useBankAccountFilterParams();
-  const [prompt, setPrompt] = useState(filter.q ?? "");
+  const { filters = defaultSearch, setFilters } = useBankAccountFilterParams();
+  const [prompt, setPrompt] = useState(filters.q ?? "");
 
   useHotkeys(
     "esc",
     () => {
       setPrompt("");
-      void setFilter(defaultSearch);
+      void setFilters(defaultSearch);
     },
     {
       enableOnFormTags: true,
@@ -39,18 +39,18 @@ export function AccountsSearchFilter() {
     if (value) {
       setPrompt(value);
     } else {
-      void setFilter(defaultSearch);
+      void setFilters(defaultSearch);
       setPrompt("");
     }
   };
 
   const handleSubmit = async () => {
     // TODO: add AI filtering @ref: midday
-    void setFilter({ q: prompt.length > 0 ? prompt : null });
+    void setFilters({ q: prompt.length > 0 ? prompt : null });
   };
 
   return (
-    <div className="flex w-full flex-col items-stretch space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
+    <div className="flex min-w-[250px] flex-col items-stretch space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
       <form
         className="relative flex-1"
         onSubmit={(e) => {

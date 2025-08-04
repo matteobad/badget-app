@@ -210,7 +210,7 @@ export function DataTable({
 
   if (!tableData.length && !hasFilters) {
     return (
-      <div className="relative h-[calc(100vh-200px)] overflow-hidden">
+      <div className="relative h-[calc(100vh-200px)] overflow-hidden px-6">
         <NoTransactions />
         <Loading isEmpty />
       </div>
@@ -219,7 +219,7 @@ export function DataTable({
 
   if (!tableData.length && hasFilters) {
     return (
-      <div className="relative h-[calc(100vh-200px)] overflow-hidden">
+      <div className="relative h-[calc(100vh-200px)] overflow-hidden px-6">
         <NoResults />
         <Loading isEmpty />
       </div>
