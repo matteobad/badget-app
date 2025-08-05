@@ -70,26 +70,18 @@
         "badget_account_balance_table_organization_id_badget_organization_id_fk": {
           "name": "badget_account_balance_table_organization_id_badget_organization_id_fk",
           "tableFrom": "badget_account_balance_table",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "badget_organization",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "badget_account_balance_table_account_id_badget_account_table_id_fk": {
           "name": "badget_account_balance_table_account_id_badget_account_table_id_fk",
           "tableFrom": "badget_account_balance_table",
-          "columnsFrom": [
-            "account_id"
-          ],
+          "columnsFrom": ["account_id"],
           "tableTo": "badget_account_table",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -98,10 +90,7 @@
       "uniqueConstraints": {
         "badget_account_balance_table_accountId_date_unique": {
           "name": "badget_account_balance_table_accountId_date_unique",
-          "columns": [
-            "account_id",
-            "date"
-          ],
+          "columns": ["account_id", "date"],
           "nullsNotDistinct": false
         }
       },
@@ -237,39 +226,27 @@
         "badget_account_table_organization_id_badget_organization_id_fk": {
           "name": "badget_account_table_organization_id_badget_organization_id_fk",
           "tableFrom": "badget_account_table",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "badget_organization",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "badget_account_table_institution_id_badget_institution_table_id_fk": {
           "name": "badget_account_table_institution_id_badget_institution_table_id_fk",
           "tableFrom": "badget_account_table",
-          "columnsFrom": [
-            "institution_id"
-          ],
+          "columnsFrom": ["institution_id"],
           "tableTo": "badget_institution_table",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "badget_account_table_connection_id_badget_connection_table_id_fk": {
           "name": "badget_account_table_connection_id_badget_connection_table_id_fk",
           "tableFrom": "badget_account_table",
-          "columnsFrom": [
-            "connection_id"
-          ],
+          "columnsFrom": ["connection_id"],
           "tableTo": "badget_connection_table",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -278,17 +255,12 @@
       "uniqueConstraints": {
         "badget_account_table_rawId_unique": {
           "name": "badget_account_table_rawId_unique",
-          "columns": [
-            "raw_id"
-          ],
+          "columns": ["raw_id"],
           "nullsNotDistinct": false
         },
         "badget_account_table_organizationId_rawId_unique": {
           "name": "badget_account_table_organizationId_rawId_unique",
-          "columns": [
-            "organization_id",
-            "raw_id"
-          ],
+          "columns": ["organization_id", "raw_id"],
           "nullsNotDistinct": false
         }
       },
@@ -384,13 +356,9 @@
         "badget_account_user_id_badget_user_id_fk": {
           "name": "badget_account_user_id_badget_user_id_fk",
           "tableFrom": "badget_account",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "badget_user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -454,26 +422,18 @@
         "badget_invitation_organization_id_badget_organization_id_fk": {
           "name": "badget_invitation_organization_id_badget_organization_id_fk",
           "tableFrom": "badget_invitation",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "badget_organization",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "badget_invitation_inviter_id_badget_user_id_fk": {
           "name": "badget_invitation_inviter_id_badget_user_id_fk",
           "tableFrom": "badget_invitation",
-          "columnsFrom": [
-            "inviter_id"
-          ],
+          "columnsFrom": ["inviter_id"],
           "tableTo": "badget_user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -525,26 +485,18 @@
         "badget_member_organization_id_badget_organization_id_fk": {
           "name": "badget_member_organization_id_badget_organization_id_fk",
           "tableFrom": "badget_member",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "badget_organization",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "badget_member_user_id_badget_user_id_fk": {
           "name": "badget_member_user_id_badget_user_id_fk",
           "tableFrom": "badget_member",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "badget_user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -602,9 +554,7 @@
       "uniqueConstraints": {
         "badget_organization_slug_unique": {
           "name": "badget_organization_slug_unique",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "nullsNotDistinct": false
         }
       },
@@ -688,13 +638,9 @@
         "badget_passkey_user_id_badget_user_id_fk": {
           "name": "badget_passkey_user_id_badget_user_id_fk",
           "tableFrom": "badget_passkey",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "badget_user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -775,13 +721,9 @@
         "badget_session_user_id_badget_user_id_fk": {
           "name": "badget_session_user_id_badget_user_id_fk",
           "tableFrom": "badget_session",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "badget_user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -790,9 +732,7 @@
       "uniqueConstraints": {
         "badget_session_token_unique": {
           "name": "badget_session_token_unique",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "nullsNotDistinct": false
         }
       },
@@ -834,13 +774,9 @@
         "badget_two_factor_user_id_badget_user_id_fk": {
           "name": "badget_two_factor_user_id_badget_user_id_fk",
           "tableFrom": "badget_two_factor",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "badget_user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -946,16 +882,12 @@
       "uniqueConstraints": {
         "badget_user_email_unique": {
           "name": "badget_user_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "nullsNotDistinct": false
         },
         "badget_user_username_unique": {
           "name": "badget_user_username_unique",
-          "columns": [
-            "username"
-          ],
+          "columns": ["username"],
           "nullsNotDistinct": false
         }
       },
@@ -1096,26 +1028,18 @@
         "badget_category_table_organization_id_badget_organization_id_fk": {
           "name": "badget_category_table_organization_id_badget_organization_id_fk",
           "tableFrom": "badget_category_table",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "badget_organization",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "badget_category_table_parent_id_badget_category_table_id_fk": {
           "name": "badget_category_table_parent_id_badget_category_table_id_fk",
           "tableFrom": "badget_category_table",
-          "columnsFrom": [
-            "parent_id"
-          ],
+          "columnsFrom": ["parent_id"],
           "tableTo": "badget_category_table",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -1124,10 +1048,7 @@
       "uniqueConstraints": {
         "unique_organization_slug": {
           "name": "unique_organization_slug",
-          "columns": [
-            "slug",
-            "organization_id"
-          ],
+          "columns": ["slug", "organization_id"],
           "nullsNotDistinct": false
         }
       },
@@ -1198,26 +1119,18 @@
         "badget_rule_table_organization_id_badget_organization_id_fk": {
           "name": "badget_rule_table_organization_id_badget_organization_id_fk",
           "tableFrom": "badget_rule_table",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "badget_organization",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "badget_rule_table_category_id_badget_category_table_id_fk": {
           "name": "badget_rule_table_category_id_badget_category_table_id_fk",
           "tableFrom": "badget_rule_table",
-          "columnsFrom": [
-            "category_id"
-          ],
+          "columnsFrom": ["category_id"],
           "tableTo": "badget_category_table",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1304,13 +1217,9 @@
         "badget_token_table_rule_id_badget_rule_table_id_fk": {
           "name": "badget_token_table_rule_id_badget_rule_table_id_fk",
           "tableFrom": "badget_token_table",
-          "columnsFrom": [
-            "rule_id"
-          ],
+          "columnsFrom": ["rule_id"],
           "tableTo": "badget_rule_table",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1425,26 +1334,18 @@
         "badget_connection_table_organization_id_badget_organization_id_fk": {
           "name": "badget_connection_table_organization_id_badget_organization_id_fk",
           "tableFrom": "badget_connection_table",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "badget_organization",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "badget_connection_table_institution_id_badget_institution_table_id_fk": {
           "name": "badget_connection_table_institution_id_badget_institution_table_id_fk",
           "tableFrom": "badget_connection_table",
-          "columnsFrom": [
-            "institution_id"
-          ],
+          "columnsFrom": ["institution_id"],
           "tableTo": "badget_institution_table",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1453,17 +1354,12 @@
       "uniqueConstraints": {
         "badget_connection_table_referenceId_unique": {
           "name": "badget_connection_table_referenceId_unique",
-          "columns": [
-            "reference_id"
-          ],
+          "columns": ["reference_id"],
           "nullsNotDistinct": false
         },
         "unique_bank_connections": {
           "name": "unique_bank_connections",
-          "columns": [
-            "institution_id",
-            "organization_id"
-          ],
+          "columns": ["institution_id", "organization_id"],
           "nullsNotDistinct": false
         }
       },
@@ -1552,9 +1448,7 @@
       "uniqueConstraints": {
         "badget_institution_table_originalId_unique": {
           "name": "badget_institution_table_originalId_unique",
-          "columns": [
-            "original_id"
-          ],
+          "columns": ["original_id"],
           "nullsNotDistinct": false
         }
       },
@@ -1639,26 +1533,18 @@
         "badget_attachment_table_organization_id_badget_organization_id_fk": {
           "name": "badget_attachment_table_organization_id_badget_organization_id_fk",
           "tableFrom": "badget_attachment_table",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "badget_organization",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "badget_attachment_table_transaction_id_badget_transaction_table_id_fk": {
           "name": "badget_attachment_table_transaction_id_badget_transaction_table_id_fk",
           "tableFrom": "badget_attachment_table",
-          "columnsFrom": [
-            "transaction_id"
-          ],
+          "columnsFrom": ["transaction_id"],
           "tableTo": "badget_transaction_table",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -1717,13 +1603,9 @@
         "badget_tag_table_organization_id_badget_organization_id_fk": {
           "name": "badget_tag_table_organization_id_badget_organization_id_fk",
           "tableFrom": "badget_tag_table",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "badget_organization",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -1732,10 +1614,7 @@
       "uniqueConstraints": {
         "badget_tag_table_organizationId_text_unique": {
           "name": "badget_tag_table_organizationId_text_unique",
-          "columns": [
-            "organization_id",
-            "text"
-          ],
+          "columns": ["organization_id", "text"],
           "nullsNotDistinct": false
         }
       },
@@ -1898,39 +1777,27 @@
         "badget_transaction_table_organization_id_badget_organization_id_fk": {
           "name": "badget_transaction_table_organization_id_badget_organization_id_fk",
           "tableFrom": "badget_transaction_table",
-          "columnsFrom": [
-            "organization_id"
-          ],
+          "columnsFrom": ["organization_id"],
           "tableTo": "badget_organization",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "badget_transaction_table_account_id_badget_account_table_id_fk": {
           "name": "badget_transaction_table_account_id_badget_account_table_id_fk",
           "tableFrom": "badget_transaction_table",
-          "columnsFrom": [
-            "account_id"
-          ],
+          "columnsFrom": ["account_id"],
           "tableTo": "badget_account_table",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "badget_transaction_table_category_id_badget_category_table_id_fk": {
           "name": "badget_transaction_table_category_id_badget_category_table_id_fk",
           "tableFrom": "badget_transaction_table",
-          "columnsFrom": [
-            "category_id"
-          ],
+          "columnsFrom": ["category_id"],
           "tableTo": "badget_category_table",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1939,17 +1806,12 @@
       "uniqueConstraints": {
         "badget_transaction_table_rawId_unique": {
           "name": "badget_transaction_table_rawId_unique",
-          "columns": [
-            "raw_id"
-          ],
+          "columns": ["raw_id"],
           "nullsNotDistinct": false
         },
         "badget_transaction_table_organizationId_rawId_unique": {
           "name": "badget_transaction_table_organizationId_rawId_unique",
-          "columns": [
-            "organization_id",
-            "raw_id"
-          ],
+          "columns": ["organization_id", "raw_id"],
           "nullsNotDistinct": false
         }
       },
@@ -2004,26 +1866,18 @@
         "badget_transaction_to_tag_table_transaction_id_badget_transaction_table_id_fk": {
           "name": "badget_transaction_to_tag_table_transaction_id_badget_transaction_table_id_fk",
           "tableFrom": "badget_transaction_to_tag_table",
-          "columnsFrom": [
-            "transaction_id"
-          ],
+          "columnsFrom": ["transaction_id"],
           "tableTo": "badget_transaction_table",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "badget_transaction_to_tag_table_tag_id_badget_tag_table_id_fk": {
           "name": "badget_transaction_to_tag_table_tag_id_badget_tag_table_id_fk",
           "tableFrom": "badget_transaction_to_tag_table",
-          "columnsFrom": [
-            "tag_id"
-          ],
+          "columnsFrom": ["tag_id"],
           "tableTo": "badget_tag_table",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -2032,10 +1886,7 @@
       "uniqueConstraints": {
         "badget_transaction_to_tag_table_transactionId_tagId_unique": {
           "name": "badget_transaction_to_tag_table_transactionId_tagId_unique",
-          "columns": [
-            "transaction_id",
-            "tag_id"
-          ],
+          "columns": ["transaction_id", "tag_id"],
           "nullsNotDistinct": false
         }
       },
@@ -2072,21 +1923,12 @@
     "public.bank_provider": {
       "name": "bank_provider",
       "schema": "public",
-      "values": [
-        "enablebanking",
-        "gocardless",
-        "plaid",
-        "teller"
-      ]
+      "values": ["enablebanking", "gocardless", "plaid", "teller"]
     },
     "public.connection_status": {
       "name": "connection_status",
       "schema": "public",
-      "values": [
-        "connected",
-        "disconnected",
-        "unknown"
-      ]
+      "values": ["connected", "disconnected", "unknown"]
     },
     "public.transaction_frequency": {
       "name": "transaction_frequency",
@@ -2121,13 +1963,7 @@
     "public.transaction_status": {
       "name": "transaction_status",
       "schema": "public",
-      "values": [
-        "posted",
-        "pending",
-        "excluded",
-        "completed",
-        "archived"
-      ]
+      "values": ["posted", "pending", "excluded", "completed", "archived"]
     }
   },
   "schemas": {},
