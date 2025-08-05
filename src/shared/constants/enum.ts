@@ -1,6 +1,7 @@
 export const BANK_PROVIDER = {
   ENABLEBANKING: "enablebanking",
   GOCARDLESS: "gocardless",
+  SALTEDGE: "saltedge",
   PLAID: "plaid",
   TELLER: "teller",
 } as const;

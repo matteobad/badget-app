@@ -5,8 +5,8 @@ import { redirect } from "next/navigation";
 import { GlobalSheets } from "~/components/global-sheets";
 import { Header } from "~/components/layouts/header";
 import { Sidebar } from "~/components/sidebar/sidebar";
-import { auth } from "~/server/auth/auth";
 import { getCountryCode } from "~/server/services/location-service";
+import { auth } from "~/shared/helpers/better-auth/auth";
 import { HydrateClient } from "~/shared/helpers/trpc/server";
 
 export default async function AppLayout(props: PropsWithChildren) {

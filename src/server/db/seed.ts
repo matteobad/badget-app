@@ -11,26 +11,21 @@ import {
   TRANSACTION_METHOD,
   TRANSACTION_STATUS,
 } from "../../shared/constants/enum";
-import { budgetList } from "./data/budgets";
 import { categoriesIds, categoriesMap } from "./data/categories";
 
 async function main() {
   /* eslint-disable */
-  const { category_table, budget_table, rule_table, token_table, ...rest } =
-    schema;
+  const { category_table, rule_table, token_table, ...rest } = schema;
   /* eslint-enable */
 
   await reset(db, rest);
   // eslint-disable-next-line drizzle/enforce-delete-with-where
   await db.delete(category_table).execute();
-  // eslint-disable-next-line drizzle/enforce-delete-with-where
-  await db.delete(budget_table).execute();
 
   // Insert categories into the database
   await db.insert(category_table).values(categoriesMap[0]!);
   await db.insert(category_table).values(categoriesMap[1]!);
   await db.insert(category_table).values(categoriesMap[2]!);
-  await db.insert(budget_table).values(budgetList);
 
   await seed(db, rest).refine((f) => ({
     institution_table: {

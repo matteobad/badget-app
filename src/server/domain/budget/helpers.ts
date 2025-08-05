@@ -1,4 +1,4 @@
-import type { DB_BudgetInsertType } from "~/server/db/schema/budgets";
+import type { DB_BudgetInsertType } from "~/server/db/data/budgets";
 import type { BudgetRecurrenceType } from "~/shared/constants/enum";
 import type {
   budgetFilterSchema,

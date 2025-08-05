@@ -8,7 +8,7 @@
  */
 import { cache } from "react";
 import { initTRPC } from "@trpc/server";
-import { auth } from "~/server/auth/auth";
+import { auth } from "~/shared/helpers/better-auth/auth";
 import superjson from "superjson";
 import { ZodError } from "zod/v4";
 

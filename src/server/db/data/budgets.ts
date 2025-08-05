@@ -1,55 +1,70 @@
-import fs from "node:fs";
-import Papa from "papaparse";
-import { Range, RANGE_LB_INC } from "postgres-range";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import {
+  date,
+  integer,
+  pgEnum,
+  pgMaterializedView,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
-import { type BudgetRecurrenceType } from "../../../shared/constants/enum";
-import { type DB_BudgetInsertType } from "../schema/budgets";
-import { TimezoneRange } from "../utils";
+import { BUDGET_RECURRENCE } from "../../../shared/constants/enum";
+import { pgTable } from "../schema/_table";
+import { category_table } from "../schema/categories";
+import { timestamps, timezoneRange } from "../utils";
 
-// Expected Type
-type CSV_BudgetType = {
-  id: string;
-  category_id: string;
-  amount: string;
-  recurrence: BudgetRecurrenceType;
-  recurrence_end: string | null;
-  start_date: string;
-  end_date: string;
-  override_for_budget_id: string | null;
-  userId: string;
-};
+export const recurrenceEnum = pgEnum("recurrence", BUDGET_RECURRENCE);
 
-const mapParsedRow = (row: CSV_BudgetType) => {
-  const { start_date, end_date } = row;
-  const start = new Date(start_date);
-  const end = end_date ? new Date(end_date) : null;
+export const budget_table = pgTable("budget_table", (d) => ({
+  id: d.uuid().primaryKey().defaultRandom(),
 
-  return {
-    userId: row.userId,
-    categoryId: row.category_id,
-    overrideForBudgetId: row.override_for_budget_id,
-    recurrenceEnd: row.recurrence_end ? new Date(row.recurrence_end) : null,
-    recurrence: row.recurrence,
-    amount: parseInt(row.amount, 10),
-    validity: new TimezoneRange(new Range<Date>(start, end, RANGE_LB_INC)),
-  } satisfies DB_BudgetInsertType;
-};
+  categoryId: d
+    .uuid()
+    .references(() => category_table.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  userId: d.varchar({ length: 32 }).notNull(),
 
-const file = fs.readFileSync("./src/server/db/data/budgets.csv", "utf8");
+  // tsrange — validità della singola istanza (o prima ricorrenza)
+  validity: timezoneRange({ notNull: true, default: true }),
 
-const parsed = Papa.parse<CSV_BudgetType>(file, {
-  delimiter: ",",
-  dynamicTyping: true,
-  header: true,
-  skipEmptyLines: true,
-});
+  // Ricorrenza: se null = budget singolo
+  recurrence: recurrenceEnum(),
+  recurrenceEnd: d.timestamp({ mode: "date" }),
 
-const budgetsIds: string[] = [];
-const budgetList: DB_BudgetInsertType[] = [];
+  // Override: puntatore al budget ricorrente a cui fa override
+  overrideForBudgetId: d
+    .uuid()
+    .references((): AnyPgColumn => budget_table.id, { onDelete: "cascade" }),
 
-for (const row of parsed.data) {
-  budgetsIds.push(row.id);
-  budgetList.push(mapParsedRow(row));
-}
+  amount: d.integer().notNull(), // in centesimi
 
-export { budgetList, budgetsIds };
+  ...timestamps,
+}));
+
+export const budgetsRelations = relations(budget_table, ({ one }) => ({
+  overrideFor: one(budget_table, {
+    fields: [budget_table.overrideForBudgetId],
+    references: [budget_table.id],
+  }),
+}));
+
+// Solo perché serve la struttura, la query è già nel DB.
+// In Drizzle usiamo `.select()` direttamente.
+export const budget_instances = pgMaterializedView(
+  "badget_budget_instances_mview",
+  {
+    id: uuid().notNull(),
+    originalBudgetId: uuid().notNull(),
+    categoryId: uuid().notNull(),
+    amount: integer().notNull(),
+    instanceFrom: date().$type<Date>().notNull(),
+    instanceTo: date().$type<Date>().notNull(),
+    userId: varchar({ length: 32 }).notNull(),
+  },
+).existing();
+
+export type DB_BudgetType = typeof budget_table.$inferSelect;
+export type DB_BudgetInsertType = typeof budget_table.$inferInsert;

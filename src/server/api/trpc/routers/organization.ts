@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
-import { auth } from "~/server/auth/auth";
 import { createOrganization } from "~/server/services/organization-service";
+import { auth } from "~/shared/helpers/better-auth/auth";
 import {
   createOrganizationSchema,
   setActiveOrganizationSchema,

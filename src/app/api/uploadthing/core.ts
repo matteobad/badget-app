@@ -1,8 +1,8 @@
 import type { FileRouter } from "uploadthing/next";
 import { headers } from "next/headers";
-import { auth } from "~/server/auth/auth";
 import { db } from "~/server/db";
 import { attachment_table } from "~/server/db/schema/transactions";
+import { auth } from "~/shared/helpers/better-auth/auth";
 import { createUploadthing } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 

@@ -3,7 +3,7 @@ import type z from "zod/v4";
 import { headers } from "next/headers";
 
 import type { DBClient } from "../db";
-import { auth } from "../auth/auth";
+import { auth } from "../../shared/helpers/better-auth/auth";
 import { getUserByIdQuery } from "../domain/user/queries";
 
 export async function getUserById(db: DBClient, id: string) {

@@ -1,7 +1,7 @@
 "server-only";
 
 import { db } from "~/server/db";
-import { budget_instances, budget_table } from "~/server/db/schema/budgets";
+import { budget_instances, budget_table } from "~/server/db/data/budgets";
 import { and, desc, eq, gte, isNull, lte, sql } from "drizzle-orm";
 
 type GetBudgetsQueryRequest = {

@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { auth } from "~/server/auth/auth";
+import { auth } from "~/shared/helpers/better-auth/auth";
 import {
   createSafeActionClient,
   DEFAULT_SERVER_ERROR_MESSAGE,

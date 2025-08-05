@@ -1,6 +1,6 @@
 import type { MiddlewareHandler } from "hono";
 import { headers } from "next/headers";
-import { auth } from "~/server/auth/auth";
+import { auth } from "~/shared/helpers/better-auth/auth";
 
 /**
  * Database middleware that connects to the database and sets it on context

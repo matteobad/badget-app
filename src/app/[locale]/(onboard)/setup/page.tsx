@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "~/server/auth/auth";
+import { auth } from "~/shared/helpers/better-auth/auth";
 // import { SetupForm } from "@/components/setup-form";
 import { HydrateClient } from "~/shared/helpers/trpc/server";
 import { RocketIcon } from "lucide-react";

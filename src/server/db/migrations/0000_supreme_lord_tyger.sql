@@ -1,5 +1,4 @@
 CREATE TYPE "public"."account_type" AS ENUM('checking', 'savings', 'cash', 'ewallet', 'credit_card', 'loan', 'mortgage', 'other_debt', 'etf', 'stock', 'bond', 'brokerage', 'pension', 'crypto', 'real_estate', 'vehicle', 'other_asset', 'other');--> statement-breakpoint
-CREATE TYPE "public"."recurrence" AS ENUM('daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'custom');--> statement-breakpoint
 CREATE TYPE "public"."bank_provider" AS ENUM('enablebanking', 'gocardless', 'plaid', 'teller');--> statement-breakpoint
 CREATE TYPE "public"."connection_status" AS ENUM('connected', 'disconnected', 'unknown');--> statement-breakpoint
 CREATE TYPE "public"."transaction_frequency" AS ENUM('weekly', 'biweekly', 'monthly', 'semi_monthly', 'annually', 'irregular', 'unknown');--> statement-breakpoint
@@ -149,20 +148,6 @@ CREATE TABLE "badget_verification" (
 	"updated_at" timestamp
 );
 --> statement-breakpoint
-CREATE TABLE "badget_budget_table" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"category_id" uuid NOT NULL,
-	"user_id" varchar(32) NOT NULL,
-	"validity" "tstzrange",
-	"recurrence" "recurrence",
-	"recurrence_end" timestamp,
-	"override_for_budget_id" uuid,
-	"amount" integer NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone,
-	"deleted_at" timestamp with time zone
-);
---> statement-breakpoint
 CREATE TABLE "badget_category_table" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" text NOT NULL,
@@ -308,8 +293,6 @@ ALTER TABLE "badget_member" ADD CONSTRAINT "badget_member_user_id_badget_user_id
 ALTER TABLE "badget_passkey" ADD CONSTRAINT "badget_passkey_user_id_badget_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."badget_user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_session" ADD CONSTRAINT "badget_session_user_id_badget_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."badget_user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_two_factor" ADD CONSTRAINT "badget_two_factor_user_id_badget_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."badget_user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "badget_budget_table" ADD CONSTRAINT "badget_budget_table_category_id_badget_category_table_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."badget_category_table"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "badget_budget_table" ADD CONSTRAINT "badget_budget_table_override_for_budget_id_badget_budget_table_id_fk" FOREIGN KEY ("override_for_budget_id") REFERENCES "public"."badget_budget_table"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_category_table" ADD CONSTRAINT "badget_category_table_organization_id_badget_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."badget_organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_category_table" ADD CONSTRAINT "badget_category_table_parent_id_badget_category_table_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."badget_category_table"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_rule_table" ADD CONSTRAINT "badget_rule_table_organization_id_badget_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."badget_organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
