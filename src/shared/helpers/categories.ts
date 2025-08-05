@@ -99,3 +99,11 @@ export function getRandomColor() {
   const randomIndex = Math.floor(Math.random() * colors.length);
   return colors[randomIndex];
 }
+
+export function getCategoryColors(hex = "#606060") {
+  const backgroundColor = `color-mix(in oklab, ${hex} 10%, transparent)`;
+  const borderColor = `color-mix(in oklab, ${hex} 10%, transparent)`;
+  const color = hex;
+
+  return { backgroundColor, borderColor, color };
+}

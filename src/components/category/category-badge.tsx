@@ -1,4 +1,5 @@
 import type { IconName } from "lucide-react/dynamic";
+import { getCategoryColors } from "~/shared/helpers/categories";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import { Badge } from "../ui/badge";
@@ -15,9 +16,9 @@ export function CategoryBadge(props: CategoryBadgeProps) {
   const { category } = props;
   const icon = (category.icon ?? "circle-dashed") as IconName;
 
-  const backgroundColor = `color-mix(in oklab, ${category.color} 10%, transparent)`;
-  const borderColor = `color-mix(in oklab, ${category.color} 10%, transparent)`;
-  const color = `category.color`;
+  const { backgroundColor, borderColor, color } = getCategoryColors(
+    category.color ?? undefined,
+  );
 
   return (
     <Badge variant="category" style={{ backgroundColor, color, borderColor }}>

@@ -1,5 +1,3 @@
-import type { ColorKey } from "~/shared/constants/colors";
-import type { IconName } from "lucide-react/dynamic";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CategorySelect } from "~/components/category/forms/category-select";
@@ -20,9 +18,8 @@ import { createCategorySchema } from "~/shared/validators/category.schema";
 import { useForm } from "react-hook-form";
 import { type z } from "zod/v4";
 
-import { ColorPicker } from "../../forms/color-picker";
-import { IconPicker } from "../../ui/icon-picker";
 import { CategoryTypeSelect } from "./category-type-select";
+import { ColorIconPicker } from "./color-icon-picker";
 
 export default function CreateCategoryForm({
   className,
@@ -64,6 +61,9 @@ export default function CreateCategoryForm({
     createMutation.mutate(formattedData);
   };
 
+  const categoryColor = form.watch("color");
+  const categoryIcon = form.watch("icon");
+
   return (
     <Form {...form}>
       <form
@@ -96,11 +96,23 @@ export default function CreateCategoryForm({
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem className="grid w-full gap-3">
+                <FormItem className="relative grid w-full gap-3">
                   <FormLabel>Nome categoria</FormLabel>
+                  <ColorIconPicker
+                    className="border-r-solid absolute bottom-0 left-0 size-10 rounded-none rounded-l-md border-r border-none shadow-none"
+                    selectedColor={categoryColor}
+                    selectedIcon={categoryIcon}
+                    onColorChange={(color) => {
+                      form.setValue("color", color);
+                    }}
+                    onIconChange={(icon) => {
+                      form.setValue("icon", icon);
+                    }}
+                  />
                   <FormControl>
                     <Input
                       {...field}
+                      className="h-10 pl-12 shadow-none"
                       placeholder="Category name"
                       autoComplete="off"
                       autoCapitalize="none"
@@ -125,37 +137,6 @@ export default function CreateCategoryForm({
                           form.setError("name", { message: "Already exists" });
                         else form.clearErrors("name");
                       }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem className="grid size-9 gap-3">
-                  <FormControl>
-                    <ColorPicker
-                      className="border"
-                      value={field.value as ColorKey}
-                      onSelect={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="icon"
-              render={({ field }) => (
-                <FormItem className="grid h-9 gap-3">
-                  <FormControl>
-                    <IconPicker
-                      value={field.value as IconName}
-                      onValueChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />
