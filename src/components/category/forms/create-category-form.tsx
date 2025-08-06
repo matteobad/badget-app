@@ -35,7 +35,7 @@ export default function CreateCategoryForm({
     trpc.category.create.mutationOptions({
       onSuccess: (_data) => {
         void queryClient.invalidateQueries({
-          queryKey: trpc.category.get.queryKey(),
+          queryKey: trpc.transactionCategory.get.queryKey(),
         });
 
         void setParams({ createCategory: null });
