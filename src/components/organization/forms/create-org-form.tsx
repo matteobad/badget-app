@@ -54,7 +54,7 @@ export function CreateSpaceForm({
     trpc.organization.create.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries();
-        router.push("/");
+        router.push("/overview");
       },
     }),
   );
