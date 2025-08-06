@@ -29,11 +29,12 @@ export const selectCategorySchema = createSelectSchema(category_table);
 
 export const createCategorySchema = createInsertSchema(category_table, {
   type: z.enum(CATEGORY_TYPE),
-  parentId: z.string().min(1),
+  parentId: z.string().optional(),
 }).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  organizationId: true,
 });
 
 export const updateCategorySchema = createUpdateSchema(category_table, {
@@ -64,7 +65,6 @@ export const categoryFilterParamsSchema = {
   name: parseAsString,
   slug: parseAsString,
   type: parseAsStringLiteral(Object.values(CATEGORY_TYPE)),
-  deleted: parseAsBoolean.withDefault(false),
 };
 
 // Search params for sheets

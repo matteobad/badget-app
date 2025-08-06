@@ -18,9 +18,14 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
-import { ChevronDown, ChevronRight, MoreHorizontalIcon } from "lucide-react";
+import {
+  ArrowDownIcon,
+  ChevronDown,
+  ChevronRight,
+  MoreHorizontalIcon,
+} from "lucide-react";
 
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, Row, SortingFn } from "@tanstack/react-table";
 import { CategoryBadge } from "../category-badge";
 
 export type Category = RouterOutput["transactionCategory"]["get"][number];
@@ -57,27 +62,58 @@ export function flattenCategories(categories: any[]): any[] {
   return flattened;
 }
 
+// Sorting function for category type: Income, Expense, Saving, Investments, Transfers
+const CATEGORY_TYPE_ORDER: Record<string, number> = {
+  income: 0,
+  expense: 1,
+  saving: 2,
+  investments: 3,
+  transfers: 4,
+};
+
+const categoryTypeSortingFn: SortingFn<Category> = (
+  rowA: Row<Category>,
+  rowB: Row<Category>,
+) => {
+  const typeA = rowA.original.type?.toLowerCase?.() ?? "";
+  const typeB = rowB.original.type?.toLowerCase?.() ?? "";
+
+  const orderA = CATEGORY_TYPE_ORDER[typeA] ?? 99;
+  const orderB = CATEGORY_TYPE_ORDER[typeB] ?? 99;
+
+  if (orderA < orderB) return -1;
+  if (orderA > orderB) return 1;
+  return 0;
+};
+
 export const columns: ColumnDef<Category>[] = [
   {
     header: "Categories",
     accessorKey: "name",
     cell: ({ row, table }) => {
+      const [expandedCategories, setExpandedCategories] = React.useState<
+        Set<string>
+      >(new Set());
+
       // Get expanded state from table meta or use local state as fallback
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const tableExpandedCategories =
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        (table.options.meta as any)?.expandedCategories;
+        (table.options.meta as any)?.expandedCategories ?? expandedCategories;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const setTableExpandedCategories =
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        (table.options.meta as any)?.setExpandedCategories;
+        (table.options.meta as any)?.setExpandedCategories ??
+        setExpandedCategories;
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       const isExpanded = tableExpandedCategories.has(row.original.id);
-      const hasChildren = row.original.children.length > 0;
+      const hasChildren = row.original.children?.length > 0;
       const isChild = row.original.parentId;
 
-      const toggleExpanded = () => {
+      const toggleExpanded = (e: React.MouseEvent) => {
+        e.stopPropagation();
+
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const newExpanded = new Set(tableExpandedCategories);
         if (isExpanded) {
@@ -138,8 +174,27 @@ export const columns: ColumnDef<Category>[] = [
     },
   },
   {
-    header: "Type",
     accessorKey: "type",
+    sortingFn: categoryTypeSortingFn,
+    header: ({ column, header }) => {
+      const dir = header.column.getIsSorted() as string;
+
+      return (
+        <Button
+          className="space-x-2 !p-0 hover:bg-transparent"
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Type
+          <ArrowDownIcon
+            size={16}
+            className={cn("transition-transform", {
+              "-rotate-180": dir === "asc",
+            })}
+          />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       return (
         <span className="text-muted-foreground">{row.getValue("type")}</span>

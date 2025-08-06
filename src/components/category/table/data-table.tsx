@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   useMutation,
   useQueryClient,
@@ -10,6 +10,7 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -25,17 +26,23 @@ import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
+import type { SortingState } from "@tanstack/react-table";
 import { columns, flattenCategories } from "./columns";
 import { DataTableSkeleton } from "./data-table-skeleton";
 import { NoCategories, NoResults } from "./empty-states";
 
 export function DataTable() {
-  const [expandedCategories, setExpandedCategories] = React.useState<
-    Set<string>
-  >(new Set());
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "type", desc: true },
+  ]); // can set initial sorting state here
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    new Set(),
+  );
 
   const { setParams } = useCategoryParams();
   const { filter, hasFilters } = useCategoryFilterParams();
+
+  console.log(filter);
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -77,8 +84,13 @@ export function DataTable() {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     getRowId: ({ id }) => id,
     columns,
+    state: {
+      sorting,
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
     meta: {
       deleteCategory: (id: string) => {
         deleteCategoryMutation.mutate({ id });

@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { ReceiptIcon } from "lucide-react";
+import { ReceiptIcon, ShapesIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { CreateCategoryButton } from "../create-category-button";
@@ -46,9 +46,10 @@ export function NoCategories() {
 
   return (
     <div className="absolute top-0 left-0 z-20 flex h-[calc(100vh-300px)] w-full items-center justify-center">
-      <div className="mx-auto flex max-w-sm flex-col items-center justify-center text-center">
-        <h2 className="mb-2 text-xl font-medium">No categories</h2>
-        <p className="mb-6 text-sm text-[#878787]">
+      <div className="mx-auto flex max-w-sm flex-col items-center justify-center gap-2 text-center">
+        <ShapesIcon className="text-muted-foreground" />
+        <h2 className="text-xl font-medium">No categories</h2>
+        <p className="mb-4 text-sm text-[#878787]">
           Create categories to group and organize your transactions. Categories
           help you track your spending, analyze your financial habits, and
           manage your budget more effectively.
