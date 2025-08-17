@@ -75,8 +75,11 @@ export async function getTransactionsQuery(
     if (!Number.isNaN(numericQ)) {
       whereConditions.push(sql`${transaction_table.amount} = ${numericQ}`);
     } else {
+      // const searchQuery = buildSearchQuery(q);
+      // const ftsCondition = sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`;
+      const nameCondition = sql`${transaction_table.name} ILIKE '%' || ${q} || '%'`;
       const descriptionCondition = sql`${transaction_table.description} ILIKE '%' || ${q} || '%'`;
-      whereConditions.push(or(descriptionCondition));
+      whereConditions.push(or(nameCondition, descriptionCondition));
     }
   }
 
