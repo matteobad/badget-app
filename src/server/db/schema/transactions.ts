@@ -42,7 +42,7 @@ export const transaction_table = pgTable(
       .references(() => account_table.id),
     categoryId: d.uuid().references(() => category_table.id),
 
-    rawId: d.text().unique(),
+    rawId: d.text(),
     amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
     currency: d.char({ length: 3 }).notNull(),
     date: d.timestamp({ withTimezone: true, mode: "string" }).notNull(),
