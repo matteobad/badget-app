@@ -20,7 +20,7 @@ export const account_table = pgTable(
     institutionId: d.uuid().references(() => institution_table.id),
     connectionId: d.uuid().references(() => connection_table.id),
 
-    rawId: d.text().unique(),
+    rawId: d.text(),
     name: d.varchar({ length: 64 }).notNull(),
     description: d.text(),
     type: accountTypeEnum().notNull(),

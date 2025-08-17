@@ -15,6 +15,13 @@
       "when": 1754382687131,
       "tag": "0001_long_young_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1755436040062,
+      "tag": "0002_vengeful_agent_zero",
+      "breakpoints": true
     }
   ]
 }
