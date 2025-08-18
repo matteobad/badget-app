@@ -23,7 +23,11 @@ export const user = pgTable("user", {
   twoFactorEnabled: boolean("two_factor_enabled"),
   username: text("username").unique(),
   displayUsername: text("display_username"),
+  defaultOrganizationId: text("default_organization_id").notNull().default(""),
 });
+
+export type DB_UserType = typeof user.$inferSelect;
+export type DB_UserInsertType = typeof user.$inferInsert;
 
 export const session = pgTable("session", {
   id: text("id").primaryKey(),

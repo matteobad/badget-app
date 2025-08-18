@@ -1,11 +1,21 @@
-import { organizationClient, passkeyClient } from "better-auth/client/plugins";
+import {
+  adminClient,
+  organizationClient,
+  passkeyClient,
+} from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 const authClient = createAuthClient({
   /** The base URL of the server (optional if you're using the same domain) */
   // baseURL: "http://localhost:3000",
-  plugins: [passkeyClient(), organizationClient()],
+  plugins: [adminClient(), passkeyClient(), organizationClient()],
 });
 
-export const { signIn, signOut, signUp, useSession, useActiveOrganization } =
-  authClient;
+export const {
+  signIn,
+  signOut,
+  signUp,
+  useSession,
+  useActiveOrganization,
+  organization,
+} = authClient;

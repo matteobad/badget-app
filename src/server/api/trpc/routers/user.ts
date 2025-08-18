@@ -1,4 +1,5 @@
-import { getUserById } from "~/server/services/user-service";
+import { getUserById, updateUser } from "~/server/services/user-service";
+import { updateUserSchema } from "~/shared/validators/user.schema";
 
 import { createTRPCRouter, protectedProcedure } from "../init";
 
@@ -8,14 +9,12 @@ export const userRouter = createTRPCRouter({
     return getUserById(db, userId);
   }),
 
-  //   update: protectedProcedure
-  //     .input(updateUserSchema)
-  //     .mutation(async ({ ctx: { db, session }, input }) => {
-  //       return updateUser(db, {
-  //         id: session.user.id,
-  //         ...input,
-  //       });
-  //     }),
+  update: protectedProcedure
+    .input(updateUserSchema)
+    .mutation(async ({ ctx: { db, session }, input }) => {
+      const userId = session!.userId;
+      return updateUser(db, input, userId);
+    }),
 
   //   delete: protectedProcedure.mutation(
   //     async ({ ctx: { supabase, db, session } }) => {

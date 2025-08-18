@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   DropdownMenu,
@@ -10,12 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { useSession } from "~/shared/helpers/better-auth/auth-client";
+import { signOut, useSession } from "~/shared/helpers/better-auth/auth-client";
+import { getInitials } from "~/shared/helpers/format";
 import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from "lucide-react";
 
 import { Skeleton } from "./ui/skeleton";
 
 export function NavUser() {
+  const router = useRouter();
   const { data, isPending } = useSession();
 
   if (!data?.user || isPending) {
@@ -30,7 +33,9 @@ export function NavUser() {
             src={data.user.image ?? ""}
             alt={`avatar of ${data.user.name}`}
           />
-          <AvatarFallback className="rounded-full">CN</AvatarFallback>
+          <AvatarFallback className="rounded-full">
+            {getInitials(data.user.name)}
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -46,7 +51,9 @@ export function NavUser() {
                 src={data.user.image ?? ""}
                 alt={`avatar of ${data.user.name}`}
               />
-              <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+              <AvatarFallback className="rounded-lg">
+                {getInitials(data.user.name)}
+              </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-semibold">{data.user.name}</span>
@@ -77,7 +84,17 @@ export function NavUser() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            void signOut({
+              fetchOptions: {
+                onSuccess: () => {
+                  router.push("/sign-in"); // redirect to login page
+                },
+              },
+            });
+          }}
+        >
           <LogOut />
           Log out
         </DropdownMenuItem>

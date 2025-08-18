@@ -2,34 +2,37 @@
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SubmitButton } from "~/components/submit-button";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { TableRow as BaseTableRow, TableCell } from "~/components/ui/table";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 
 type Props = {
   row: RouterOutput["organization"]["list"][number];
 };
 
 export function TableRow({ row }: Props) {
-  // const queryClient = useQueryClient();
-  const [isLoading] = useState(false);
-  // const trpc = useTRPC();
-  // const router = useRouter();
+  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
+  const trpc = useTRPC();
+  const router = useRouter();
 
-  // const changeTeamMutation = useMutation(
-  //   trpc.user.update.mutationOptions({
-  //     onMutate: () => {
-  //       setIsLoading(true);
-  //     },
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries();
-  //       router.push("/");
-  //     },
-  //     onError: () => {
-  //       setIsLoading(false);
-  //     },
-  //   }),
-  // );
+  const changeSpaceMutation = useMutation(
+    trpc.user.update.mutationOptions({
+      onMutate: () => {
+        setIsLoading(true);
+      },
+      onSuccess: () => {
+        void queryClient.invalidateQueries();
+        router.push("/overview");
+      },
+      onError: () => {
+        setIsLoading(false);
+      },
+    }),
+  );
 
   return (
     <BaseTableRow key={row.id} className="hover:bg-transparent">
@@ -61,10 +64,10 @@ export function TableRow({ row }: Props) {
             <SubmitButton
               isSubmitting={isLoading}
               variant="outline"
-              onClick={() => {
-                // changeTeamMutation.mutate({
-                //   teamId: row.id!,
-                // });
+              onClick={async () => {
+                changeSpaceMutation.mutate({
+                  defaultOrganizationId: row.id,
+                });
               }}
             >
               Launch

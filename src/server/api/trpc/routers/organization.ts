@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { createOrganization } from "~/server/services/organization-service";
+import { updateUser } from "~/server/services/user-service";
 import { auth } from "~/shared/helpers/better-auth/auth";
 import {
   createOrganizationSchema,
@@ -40,12 +41,19 @@ export const organizationRouter = createTRPCRouter({
 
   setActive: protectedProcedure
     .input(setActiveOrganizationSchema)
-    .mutation(async () => {
+    .mutation(async ({ ctx: { db, session }, input }) => {
+      const userId = session!.userId;
+      await updateUser(
+        db,
+        { defaultOrganizationId: input.organizationId },
+        userId,
+      );
+
       await auth.api.setActiveOrganization({
         headers: await headers(),
         body: {
-          organizationId: "org-id",
-          organizationSlug: "org-slug",
+          organizationId: input.organizationId,
+          organizationSlug: input.organizationSlug,
         },
       });
     }),

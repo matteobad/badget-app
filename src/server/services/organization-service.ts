@@ -19,6 +19,7 @@ export async function createOrganization(
     baseCurrency: input.baseCurrency,
     countryCode: input.countryCode,
   };
+
   return await auth.api.createOrganization({
     body: {
       name: input.name, // required

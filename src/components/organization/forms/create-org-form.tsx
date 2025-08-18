@@ -50,11 +50,21 @@ export function CreateSpaceForm({
   const { data } = useSession();
   const name = data?.user.name;
 
-  const createOrganizationMutation = useMutation(
-    trpc.organization.create.mutationOptions({
+  const changeSpaceMutation = useMutation(
+    trpc.user.update.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries();
         router.push("/overview");
+      },
+    }),
+  );
+
+  const createOrganizationMutation = useMutation(
+    trpc.organization.create.mutationOptions({
+      onSuccess: (data) => {
+        changeSpaceMutation.mutate({
+          defaultOrganizationId: data?.id,
+        });
       },
     }),
   );
