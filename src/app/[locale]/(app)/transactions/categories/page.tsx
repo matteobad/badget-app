@@ -3,7 +3,7 @@ import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 import { CategoryActions } from "~/components/category/category-actions";
 import { CategorySearchFilter } from "~/components/category/category-search-filter";
-import { DataTable } from "~/components/category/table/data-table";
+import { DataList } from "~/components/category/data-list";
 import { DataTableSkeleton } from "~/components/category/table/data-table-skeleton";
 import { ErrorFallback } from "~/components/error-fallback";
 import { HydrateClient, prefetch, trpc } from "~/shared/helpers/trpc/server";
@@ -39,7 +39,8 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
       <HydrateClient>
         <ErrorBoundary fallback={<ErrorFallback />}>
           <Suspense fallback={<DataTableSkeleton />}>
-            <DataTable />
+            {/* <DataTable /> */}
+            <DataList />
           </Suspense>
         </ErrorBoundary>
       </HydrateClient>

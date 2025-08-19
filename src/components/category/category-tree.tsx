@@ -29,15 +29,26 @@ import { CategoryBadge } from "./category-badge";
 
 type Category = RouterOutput["category"]["get"][number];
 
+const ROOT_CATEGORY: Category = {
+  id: "root",
+  slug: "root",
+  name: "root",
+  description: "root",
+  parentId: null,
+  color: null,
+  icon: null,
+  type: "transfer",
+};
+
 const indent = 20;
 
 type CategoryTreeProps = {
-  rootId: string;
   items: Category[];
+  rootId?: string;
 };
 
 export function CategoryTree(props: CategoryTreeProps) {
-  const { items, rootId } = props;
+  const { items } = props;
 
   const { setParams } = useCategoryParams();
   const { filter } = useCategoryFilterParams();
@@ -55,12 +66,22 @@ export function CategoryTree(props: CategoryTreeProps) {
     }),
   );
 
+  const data: Category[] = [
+    ...items.map((item) => {
+      return {
+        ...item,
+        parentId: item.parentId ?? "root",
+      };
+    }),
+    ROOT_CATEGORY,
+  ];
+
   const tree = useTree<Category>({
     initialState: {
       expandedItems: [],
     },
     indent,
-    rootItemId: rootId,
+    rootItemId: "root",
     // onPrimaryAction(item) {
     //   void setParams({
     //     categoryId: item.getItemMeta().itemId,
@@ -68,11 +89,11 @@ export function CategoryTree(props: CategoryTreeProps) {
     // },
     getItemName: (item) => item.getItemData().name,
     isItemFolder: (item) =>
-      items.some((c) => c.parentId === item.getItemData().id),
+      data.some((c) => c.parentId === item.getItemData().id),
     dataLoader: {
-      getItem: (itemId) => items.find((c) => c.id === itemId)!,
+      getItem: (itemId) => data.find((c) => c.id === itemId)!,
       getChildren: (itemId) =>
-        items.filter((c) => c.parentId === itemId).map((c) => c.id) ?? [],
+        data.filter((c) => c.parentId === itemId).map((c) => c.id) ?? [],
     },
     features: [
       syncDataLoaderFeature,
@@ -81,6 +102,12 @@ export function CategoryTree(props: CategoryTreeProps) {
       hotkeysCoreFeature,
     ],
   });
+
+  console.log(
+    props,
+    props.rootId,
+    props.items.find((c) => c.id === props.rootId),
+  );
 
   useEffect(() => {
     const prompt = filter.q ?? "";

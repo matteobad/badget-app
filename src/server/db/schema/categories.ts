@@ -1,11 +1,13 @@
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
-import { index, unique, uniqueIndex } from "drizzle-orm/pg-core";
+import { CATEGORY_TYPE } from "~/shared/constants/enum";
+import { index, pgEnum, unique, uniqueIndex } from "drizzle-orm/pg-core";
 
-import { type CategoryType } from "../../../shared/constants/enum";
 import { timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { organization as organization_table } from "./auth";
+
+export const categoryTypeEnum = pgEnum("category_type", CATEGORY_TYPE);
 
 export const category_table = pgTable(
   "category_table",
@@ -21,7 +23,7 @@ export const category_table = pgTable(
       onDelete: "set null",
     }),
 
-    type: d.text().$type<CategoryType>().notNull(),
+    type: categoryTypeEnum().notNull(),
     name: d.varchar({ length: 64 }).notNull(),
     slug: d.varchar({ length: 64 }).notNull(),
     color: d.varchar({ length: 32 }),

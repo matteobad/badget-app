@@ -72,7 +72,7 @@ function SheetContent({
       >
         <div
           className={cn(
-            "relative h-full w-full overflow-hidden rounded-xl border bg-[#FAFAF9] p-6 dark:bg-[#121212]",
+            "relative h-full w-full overflow-hidden border bg-[#FAFAF9] p-6 dark:bg-[#121212]",
             className,
           )}
         >

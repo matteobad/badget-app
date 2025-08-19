@@ -8,7 +8,7 @@ import { CreateCategoryButton } from "./create-category-button";
 export const CategoryActions = () => {
   return (
     <div className="flex items-center gap-2">
-      <Button variant="ghost">
+      <Button variant="ghost" className="rounded-none">
         <MoreHorizontalIcon className="size-4" />
       </Button>
       <CreateCategoryButton />

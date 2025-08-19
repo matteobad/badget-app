@@ -9,7 +9,11 @@ export function CreateCategoryButton(props: CreateCategoryButtonProps) {
   const { setParams } = useCategoryParams();
 
   return (
-    <Button {...props} onClick={() => void setParams({ createCategory: true })}>
+    <Button
+      {...props}
+      onClick={() => void setParams({ createCategory: true })}
+      className="rounded-none"
+    >
       <PlusIcon className="size-4" />
       New category
     </Button>

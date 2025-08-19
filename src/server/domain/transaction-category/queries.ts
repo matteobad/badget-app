@@ -32,6 +32,7 @@ export const getTransactionCategoriesQuery = async (
       and(
         eq(category_table.organizationId, orgId),
         isNull(category_table.parentId),
+        isNull(category_table.deletedAt),
       ),
     )
     .orderBy(desc(category_table.createdAt), asc(category_table.name))
@@ -54,6 +55,7 @@ export const getTransactionCategoriesQuery = async (
       and(
         eq(category_table.organizationId, orgId),
         isNotNull(category_table.parentId),
+        isNull(category_table.deletedAt),
       ),
     )
     .orderBy(asc(category_table.name));

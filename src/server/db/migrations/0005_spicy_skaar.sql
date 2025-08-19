@@ -1,0 +1,2 @@
+CREATE TYPE "public"."category_type" AS ENUM('income', 'expense', 'transfer');--> statement-breakpoint
+ALTER TABLE "badget_category_table" ALTER COLUMN "type" TYPE "public"."category_type" USING type::category_type;

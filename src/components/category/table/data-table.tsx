@@ -1,5 +1,6 @@
 "use client";
 
+import type { CategoryType } from "~/shared/constants/enum";
 import React, { useEffect, useState } from "react";
 import {
   useMutation,
@@ -13,14 +14,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table";
 import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
 import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
@@ -31,13 +25,10 @@ import { columns, flattenCategories } from "./columns";
 import { DataTableSkeleton } from "./data-table-skeleton";
 import { NoCategories, NoResults } from "./empty-states";
 
-export function DataTable() {
+export function DataTable(props: { type: CategoryType }) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "type", desc: true },
   ]); // can set initial sorting state here
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(),
-  );
 
   const { setParams } = useCategoryParams();
   const { filter, hasFilters } = useCategoryFilterParams();
@@ -55,7 +46,7 @@ export function DataTable() {
     trpc.category.delete.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries({
-          queryKey: trpc.category.get.queryKey(),
+          queryKey: trpc.transactionCategory.get.queryKey({}),
         });
       },
     }),
@@ -66,18 +57,9 @@ export function DataTable() {
     const flattened = flattenCategories(data ?? []);
 
     // Filter to only show parent categories and children of expanded parents
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return flattened.filter((category) => {
-      // Always show parent categories
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (!category.isChild) {
-        return true;
-      }
-      // Only show children if their parent is expanded
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
-      return category.parentId && expandedCategories.has(category.parentId);
-    });
-  }, [data, expandedCategories]);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+    return flattened.filter((category) => category.type === props.type);
+  }, [data, props.type]);
 
   const table = useReactTable({
     data: flattenedData,
@@ -95,8 +77,6 @@ export function DataTable() {
       deleteCategory: (id: string) => {
         deleteCategoryMutation.mutate({ id });
       },
-      expandedCategories,
-      setExpandedCategories,
     },
   });
 
@@ -124,33 +104,18 @@ export function DataTable() {
 
   return (
     <div className="w-full">
-      <Table className="border">
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id} className="px-4">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-
+      <Table className="">
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <TableRow className="" key={row.id}>
+            <TableRow className="border-b-0" key={row.id}>
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
                   key={cell.id}
-                  className={cn(index === 3 && "w-[50px]")}
+                  className={cn(
+                    index === 3 && "w-[50px]", // @ts-expect-error - TODO: fix this
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                    cell.column.columnDef.meta?.className,
+                  )}
                   onClick={() => {
                     if (
                       cell.column.id !== "select" &&
