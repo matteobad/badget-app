@@ -3,6 +3,8 @@
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { dynamicIconImports } from "lucide-react/dynamic";
 import { memo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { CategoryBadge } from "~/components/category/category-badge";
 import { FormatAmount } from "~/components/format-amount";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
@@ -11,7 +13,9 @@ import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
@@ -21,8 +25,10 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
+import { CATEGORY_TYPE } from "~/shared/constants/enum";
 import { formatDate } from "~/shared/helpers/format";
-import { CircleDashedIcon, MoreHorizontalIcon, RepeatIcon } from "lucide-react";
+import { useTRPC } from "~/shared/helpers/trpc/client";
+import { MoreHorizontalIcon, RepeatIcon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -130,8 +136,11 @@ AmountCell.displayName = "AmountCell";
 
 const CategoryCell = memo(
   ({
+    id,
     category,
+    onUpdateTransactionCategory,
   }: {
+    id: string;
     category?: {
       id: string;
       slug: string;
@@ -139,24 +148,65 @@ const CategoryCell = memo(
       color: string | null;
       icon: string | null;
     };
+    onUpdateTransactionCategory?: (data: {
+      id: string;
+      categoryId?: string;
+    }) => void;
   }) => {
-    if (!category) {
-      return (
-        <div className="flex h-6 w-fit items-center gap-2 border border-neutral-700/5 bg-neutral-700/4 px-1.5 py-1">
-          <CircleDashedIcon className="size-3.5" />
-          <span className="text-sm text-neutral-700">Uncategorized</span>
-        </div>
-      );
-    }
+    const trpc = useTRPC();
+    const { data: categories } = useQuery({
+      ...trpc.category.get.queryOptions({}),
+    });
 
     return (
-      <div className="flex w-fit items-center space-x-2 rounded-md border px-2 py-1">
-        <DynamicIcon
-          className="size-4"
-          name={category.icon as keyof typeof dynamicIconImports}
-        />
-        <span>{category.name}</span>
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-auto p-0">
+            <CategoryBadge category={category} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {categories && categories.length > 0 ? (
+            Object.values(CATEGORY_TYPE).map((categoryType) => {
+              return (
+                <>
+                  <DropdownMenuLabel className="text-xs text-muted-foreground capitalize">
+                    {categoryType}
+                  </DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    {categories
+                      .filter(({ type }) => type === categoryType)
+                      .map((category) => (
+                        <DropdownMenuItem
+                          key={category.id}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onUpdateTransactionCategory?.({
+                              id,
+                              categoryId: category.id,
+                            });
+                          }}
+                        >
+                          <DynamicIcon
+                            name={
+                              category.icon as keyof typeof dynamicIconImports
+                            }
+                            size={16}
+                            aria-hidden="true"
+                          />
+                          {category.name}
+                        </DropdownMenuItem>
+                      ))}
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                </>
+              );
+            })
+          ) : (
+            <p className="px-2 text-sm text-[#878787]">No categories found</p>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   },
 );
@@ -339,7 +389,17 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       className: "border-l border-border",
     },
-    cell: ({ row }) => <CategoryCell category={row.original.category!} />,
+    cell: ({ row, table }) => (
+      <CategoryCell
+        id={row.original.id}
+        category={row.original.category!}
+        onUpdateTransactionCategory={
+          // @ts-expect-error - TODO: fix this
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          table.options.meta?.updateTransactionCategory
+        }
+      />
+    ),
   },
   {
     accessorKey: "tags",

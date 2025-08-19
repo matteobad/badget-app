@@ -127,7 +127,20 @@ export function DataTable({
           toast.error("Failed to copy transaction URL to clipboard");
         }
       },
-      updateTransaction: (data: { id: string; status: string }) => {
+      updateTransactionCategory: (data: {
+        id: string;
+        categoryId?: string;
+      }) => {
+        updateTransactionMutation.mutate({
+          id: data.id,
+          categoryId: data.categoryId,
+        });
+      },
+      updateTransaction: (data: {
+        id: string;
+        categoryId?: string;
+        status: string;
+      }) => {
         updateTransactionMutation.mutate({
           id: data.id,
           status: data.status as TransactionStatusType,

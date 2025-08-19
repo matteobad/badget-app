@@ -5,7 +5,7 @@ import { DynamicIcon } from "lucide-react/dynamic";
 import { Badge } from "../ui/badge";
 
 type CategoryBadgeProps = {
-  category: {
+  category?: {
     color: string | null;
     icon: string | null;
     name: string;
@@ -14,10 +14,10 @@ type CategoryBadgeProps = {
 
 export function CategoryBadge(props: CategoryBadgeProps) {
   const { category, ...rest } = props;
-  const icon = (category.icon ?? "circle-dashed") as IconName;
+  const icon = (category?.icon ?? "circle-dashed") as IconName;
 
   const { backgroundColor, borderColor, color } = getCategoryColors(
-    category.color ?? undefined,
+    category?.color ?? undefined,
   );
 
   return (
@@ -27,7 +27,7 @@ export function CategoryBadge(props: CategoryBadgeProps) {
       {...rest}
     >
       <DynamicIcon name={icon} />
-      <span>{category.name}</span>
+      <span>{category?.name ?? "Uncategorized"}</span>
     </Badge>
   );
 }
