@@ -142,7 +142,7 @@ const CategoryCell = memo(
   }) => {
     if (!category) {
       return (
-        <div className="flex h-6 w-fit items-center gap-2 rounded-full border border-neutral-700/5 bg-neutral-700/4 px-1.5 py-1">
+        <div className="flex h-6 w-fit items-center gap-2 border border-neutral-700/5 bg-neutral-700/4 px-1.5 py-1">
           <CircleDashedIcon className="size-3.5" />
           <span className="text-sm text-neutral-700">Uncategorized</span>
         </div>
@@ -191,12 +191,12 @@ const AccountCell = memo(
     bankAccount: { id?: string; name?: string; logoUrl?: string | null };
   }) => (
     <div className="relative flex w-full items-center gap-2">
-      <Avatar className="size-6">
+      <Avatar className="size-6 rounded-none">
         <AvatarImage
           src={bankAccount?.logoUrl ?? ""}
           className="object-contain"
         />
-        <AvatarFallback className="rounded-full">
+        <AvatarFallback className="rounded-none">
           {bankAccount?.name?.charAt(0)}
         </AvatarFallback>
       </Avatar>

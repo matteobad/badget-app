@@ -119,14 +119,6 @@ export const DEFAULT_CATEGORIES: Omit<
     icon: "credit-card",
     description: "Abbonamenti e servizi ricorrenti.",
   },
-  {
-    slug: "altro",
-    name: "Altro",
-    type: "expense",
-    color: "oklch(37.1% 0 0)",
-    icon: "dots-horizontal",
-    description: "Altre spese non categorizzate.",
-  },
 
   // Transfer categories
   {

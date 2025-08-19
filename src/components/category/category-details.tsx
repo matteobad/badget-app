@@ -1,14 +1,11 @@
 "use client";
 
-import type { IconName } from "lucide-react/dynamic";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCategoryParams } from "~/hooks/use-category-params";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { DynamicIcon } from "lucide-react/dynamic";
 import { Area, AreaChart } from "recharts";
 
 import type { ChartConfig } from "../ui/chart";
-import { ColorPicker } from "../forms/color-picker";
 import {
   Accordion,
   AccordionContent,
@@ -16,11 +13,14 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../ui/chart";
+import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Skeleton } from "../ui/skeleton";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
+import { CategoryBadge } from "./category-badge";
 import { CategoryShortcuts } from "./category-shortcuts";
+import { ColorIconPicker } from "./forms/color-icon-picker";
 
 const data = [
   { month: "January", budget: 100, actual: 90 },
@@ -58,7 +58,7 @@ export function CategoryDetails() {
     ...trpc.category.update.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries({
-          queryKey: trpc.category.get.queryKey(),
+          queryKey: trpc.transactionCategory.get.queryKey({}),
         });
         void queryClient.invalidateQueries({
           queryKey: trpc.category.getById.queryKey({ id: categoryId }),
@@ -68,6 +68,8 @@ export function CategoryDetails() {
   });
 
   const defaultValue = ["general"];
+
+  if (!category) return;
 
   return (
     <div className="scrollbar-hide h-[calc(100vh-80px)] overflow-auto pb-12">
@@ -83,15 +85,6 @@ export function CategoryDetails() {
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <DynamicIcon
-                  size={14}
-                  name={(category?.icon as IconName) ?? "circle-dashed"}
-                />
-                <span className="text-xs text-[#606060] uppercase select-text">
-                  {category?.parentId}
-                </span>
-              </div>
               <span className="text-xs text-[#606060] uppercase select-text">
                 {category?.type && category.type}
               </span>
@@ -104,45 +97,17 @@ export function CategoryDetails() {
                 <Skeleton className="mb-2 h-[30px] w-[50%] rounded-md" />
               ) : (
                 <div className="relative flex items-center gap-2">
-                  <ColorPicker
-                    className="top-[5px] size-7 rounded-none p-0"
-                    value={category?.color ?? "#fafafa"}
-                    onSelect={(newColor) => {
-                      updateCategoryMutation.mutate({
-                        id: categoryId,
-                        color: newColor,
-                      });
-                    }}
+                  <CategoryBadge
+                    category={category}
+                    className="h-9 gap-2 px-3 py-2 text-xl [&>svg]:size-5"
                   />
-
-                  {/* <div className="size-7 pl-10">
-                    <IconPicker
-                      value={(category?.icon as IconName) ?? "circle-dashed"}
-                      onValueChange={(newIcon) => {
-                        updateCategoryMutation.mutate({
-                          id: categoryId,
-                          icon: newIcon,
-                        });
-                      }}
-                    >
-                      <Button variant="ghost" className="h-7 p-0">
-                        <DynamicIcon
-                          className="h-full p-0"
-                          name={(category?.icon as IconName) ?? "circle-dashed"}
-                        />
-                      </Button>
-                    </IconPicker>
-                  </div> */}
-
-                  <span className="pl-10 font-mono text-4xl select-text">
-                    {category?.name}
-                  </span>
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
+
       <ChartContainer config={chartConfig} className="h-[200px] w-full">
         <AreaChart
           data={data}
@@ -173,6 +138,62 @@ export function CategoryDetails() {
           <AccordionContent className="select-text">
             <div className="mb-4 border-b pb-4">
               <Label className="text-md mb-2 block font-medium">
+                Customize
+              </Label>
+              <div className="relative grid w-full gap-3">
+                <ColorIconPicker
+                  className="border-r-solid absolute bottom-0 left-0 size-10 rounded-none border-r border-none shadow-none"
+                  selectedColor={category.color}
+                  selectedIcon={category.icon}
+                  onColorChange={(color) => {
+                    updateCategoryMutation.mutate({ id: category.id, color });
+                  }}
+                  onIconChange={(icon) => {
+                    updateCategoryMutation.mutate({ id: category.id, icon });
+                  }}
+                />
+                <Input
+                  defaultValue={category.name}
+                  className="h-10 rounded-none bg-background pl-12 shadow-none"
+                  placeholder="Category name"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  onBlur={(event) => {
+                    const name = event.target.value;
+                    const slug = event.target.value
+                      .replaceAll(" ", "_")
+                      .toLowerCase();
+
+                    updateCategoryMutation.mutate({
+                      id: category.id,
+                      name,
+                      slug,
+                    });
+                  }}
+                />
+              </div>
+            </div>
+            <div className="mb-4 border-b pb-4">
+              <Label className="text-md mb-2 block font-medium">
+                Description
+              </Label>
+              <Textarea
+                placeholder="Informazioni aggiuntive"
+                className="min-h-[100px] resize-none rounded-none bg-background shadow-none"
+                defaultValue={category?.description ?? ""}
+                onBlur={(event) => {
+                  const description = event.target.value;
+                  updateCategoryMutation.mutate({
+                    id: category.id,
+                    description,
+                  });
+                }}
+              />
+            </div>
+            <div className="">
+              <Label className="text-md mb-2 block font-medium">
                 Exclude from analytics
               </Label>
               <div className="flex flex-row items-center justify-between">
@@ -195,23 +216,13 @@ export function CategoryDetails() {
                 />
               </div>
             </div>
-            <div className="flex flex-col justify-between">
-              <Label className="text-md mb-2 block font-medium">
-                Description
-              </Label>
-              <Textarea
-                placeholder="Informazioni aggiuntive"
-                className="min-h-[100px] resize-none bg-background"
-                defaultValue={category?.description ?? ""}
-                // onChange={(_value) => {
-                //   updateTransactionMutation.mutate({
-                //     id: data?.id,
-                //     // note: value,
-                //   });
-                // }}
-              />
-            </div>
           </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="transactions">
+          <AccordionTrigger className="ring-inset">
+            Recent transactions
+          </AccordionTrigger>
+          <AccordionContent className="select-text">TODO</AccordionContent>
         </AccordionItem>
       </Accordion>
 

@@ -10,10 +10,10 @@ type CategoryBadgeProps = {
     icon: string | null;
     name: string;
   };
-};
+} & React.ComponentProps<typeof Badge>;
 
 export function CategoryBadge(props: CategoryBadgeProps) {
-  const { category } = props;
+  const { category, ...rest } = props;
   const icon = (category.icon ?? "circle-dashed") as IconName;
 
   const { backgroundColor, borderColor, color } = getCategoryColors(
@@ -21,7 +21,11 @@ export function CategoryBadge(props: CategoryBadgeProps) {
   );
 
   return (
-    <Badge variant="category" style={{ backgroundColor, color, borderColor }}>
+    <Badge
+      variant="category"
+      style={{ backgroundColor, color, borderColor }}
+      {...rest}
+    >
       <DynamicIcon name={icon} />
       <span>{category.name}</span>
     </Badge>

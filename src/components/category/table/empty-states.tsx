@@ -57,11 +57,12 @@ export function NoCategories() {
 
         <div className="flex gap-2">
           <Button
+            className="rounded-none"
             onClick={() => {
               createDefaultCategoriesMutation.mutate();
             }}
           >
-            Use defauls (reccomeneded)
+            Use defauls (reccomended)
           </Button>
           <CreateCategoryButton variant="outline" />
         </div>

@@ -1,12 +1,5 @@
 import { Skeleton } from "~/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 
 export function DataTableSkeleton({ isEmpty }: { isEmpty?: boolean }) {
@@ -21,13 +14,6 @@ export function DataTableSkeleton({ isEmpty }: { isEmpty?: boolean }) {
             isEmpty && "pointer-events-none opacity-20 blur-[7px]",
           )}
         >
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
-            </TableRow>
-          </TableHeader>
-
           <TableBody>
             {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
             {[...Array(15)].map((_, index) => (

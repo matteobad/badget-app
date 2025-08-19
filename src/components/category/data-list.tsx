@@ -8,8 +8,9 @@ import { CATEGORY_TYPE } from "~/shared/constants/enum";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { ArrowLeftRight, TrendingDown, TrendingUp } from "lucide-react";
 
-import { CategoryListEmpty } from "./data-list.empty";
 import { DataTable } from "./table/data-table";
+import { DataTableSkeleton } from "./table/data-table-skeleton";
+import { NoCategories } from "./table/empty-states";
 
 const categoryConfig = {
   [CATEGORY_TYPE.INCOME]: {
@@ -38,8 +39,13 @@ export function DataList() {
 
   if (!data) return;
 
-  if (data?.length === 0) {
-    return <CategoryListEmpty />;
+  if (!data.length) {
+    return (
+      <div className="relative h-[calc(100vh-200px)] overflow-hidden">
+        <NoCategories />
+        <DataTableSkeleton isEmpty />
+      </div>
+    );
   }
 
   return (
