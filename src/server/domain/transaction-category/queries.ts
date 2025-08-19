@@ -26,6 +26,7 @@ export const getTransactionCategoriesQuery = async (
       description: category_table.description,
       parentId: category_table.parentId,
       type: category_table.type,
+      excludeFromAnalytics: category_table.excludeFromAnalytics,
     })
     .from(category_table)
     .where(
@@ -49,6 +50,7 @@ export const getTransactionCategoriesQuery = async (
       description: category_table.description,
       parentId: category_table.parentId,
       type: category_table.type,
+      excludeFromAnalytics: category_table.excludeFromAnalytics,
     })
     .from(category_table)
     .where(

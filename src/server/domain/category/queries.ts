@@ -34,6 +34,7 @@ export async function getCategoriesQuery(params: getCategoriesQueryRequest) {
       icon: category_table.icon,
       description: category_table.description,
       parentId: category_table.parentId,
+      excludeFromAnalytics: category_table.excludeFromAnalytics,
     })
     .from(category_table)
     .where(and(...where))
@@ -57,6 +58,7 @@ export async function getCategoryByIdQuery(params: {
       icon: category_table.icon,
       description: category_table.description,
       parentId: category_table.parentId,
+      excludeFromAnalytics: category_table.excludeFromAnalytics,
       // budgets: sql<
       //   Array<{ id: string; amount: number }>
       // >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${budget_table.id}, 'amount', ${budget_table.amount})) FILTER (WHERE ${budget_table.id} IS NOT NULL), '[]'::json)`.as(

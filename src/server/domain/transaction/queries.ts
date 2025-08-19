@@ -183,6 +183,7 @@ export async function getTransactionsQuery(
       currency: transaction_table.currency,
       status: transaction_table.status,
       note: transaction_table.note,
+      internal: transaction_table.internal,
       manual: transaction_table.manual,
       recurring: transaction_table.recurring,
       counterpartyName: transaction_table.counterpartyName,
@@ -207,6 +208,7 @@ export async function getTransactionsQuery(
         name: category_table.name,
         color: category_table.color,
         icon: category_table.icon,
+        excludeFromAnalytics: category_table.excludeFromAnalytics,
       },
       account: {
         id: account_table.id,

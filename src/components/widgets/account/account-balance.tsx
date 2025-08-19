@@ -49,7 +49,7 @@ export function AccountBalance() {
               width={24}
               height={24}
               quality={100}
-              className="aspect-square rounded-full border"
+              className="aspect-square border"
             />
           )}
 

@@ -206,13 +206,13 @@ export function CategoryDetails() {
                 </div>
 
                 <Switch
-                // checked={data?.status === "excluded"}
-                // onCheckedChange={(checked) => {
-                //   updateTransactionMutation.mutate({
-                //     id: data?.id,
-                //     status: checked ? "excluded" : "booked",
-                //   });
-                // }}
+                  checked={category.excludeFromAnalytics ?? undefined}
+                  onCheckedChange={(checked) => {
+                    updateCategoryMutation.mutate({
+                      id: category.id,
+                      excludeFromAnalytics: checked,
+                    });
+                  }}
                 />
               </div>
             </div>

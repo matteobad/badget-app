@@ -211,7 +211,7 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
         {isVisible("amount") && (
           <TableHead className="w-[170px] min-w-[170px] px-3 py-2 text-right md:px-4">
             <Button
-              className="space-x-2 p-0 hover:bg-transparent"
+              className="mr-9 space-x-2 p-0 hover:bg-transparent"
               variant="ghost"
               onClick={() => createSortQuery("amount")}
             >

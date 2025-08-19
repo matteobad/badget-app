@@ -29,6 +29,7 @@ export const category_table = pgTable(
     color: d.varchar({ length: 32 }),
     icon: d.varchar({ length: 32 }),
     description: d.text(),
+    excludeFromAnalytics: d.boolean().default(false),
 
     ...timestamps,
   }),

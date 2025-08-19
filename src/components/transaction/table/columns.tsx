@@ -22,13 +22,14 @@ import {
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { CATEGORY_TYPE } from "~/shared/constants/enum";
 import { formatDate } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { MoreHorizontalIcon, RepeatIcon } from "lucide-react";
+import { EyeOffIcon, MoreHorizontalIcon, RepeatIcon } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -67,6 +68,7 @@ const DescriptionCell = memo(
     description,
     counterpartyLogo,
     recurring,
+    frequency,
     status,
   }: {
     name: string;
@@ -74,17 +76,18 @@ const DescriptionCell = memo(
     status?: string;
     counterpartyLogo?: string;
     recurring?: boolean | null;
+    frequency?: string | null;
   }) => (
     <div className="flex items-center space-x-2">
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex w-full items-center justify-between space-x-2">
-            <Avatar className="size-8">
+            <Avatar className="size-8 rounded-none">
               <AvatarImage
                 src={counterpartyLogo ?? ""}
                 className="object-contain"
               />
-              <AvatarFallback className="rounded-full">
+              <AvatarFallback className="rounded-none">
                 {name?.charAt(0)}
               </AvatarFallback>
             </Avatar>
@@ -92,7 +95,19 @@ const DescriptionCell = memo(
               {name}
             </span>
             {recurring && (
-              <RepeatIcon className="size-3.5 text-muted-foreground" />
+              <TooltipProvider delayDuration={100}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <RepeatIcon className="size-3.5 shrink-0 cursor-auto text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent
+                    className="w-[220px] text-left text-xs"
+                    side="right"
+                  >
+                    Questa transazione è ricorrente, con periodicità {frequency}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
 
             <span className="flex-1"></span>
@@ -123,11 +138,36 @@ const DescriptionCell = memo(
 DescriptionCell.displayName = "DescriptionCell";
 
 const AmountCell = memo(
-  ({ amount, currency }: { amount: number; currency: string }) => (
-    <div className="w-full text-right">
-      <span className={cn("text-sm", amount > 0 && "text-green-600")}>
+  ({
+    amount,
+    currency,
+    internal,
+  }: {
+    amount: number;
+    currency: string;
+    internal: boolean;
+  }) => (
+    <div className="relative w-full text-right">
+      <span className={cn("mr-9 text-sm", amount > 0 && "text-green-600")}>
         <FormatAmount amount={amount} currency={currency} />
       </span>
+      {internal && (
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="absolute right-0 -bottom-0.5 flex size-6 cursor-auto items-center justify-center">
+                <EyeOffIcon className="size-3.5 text-muted-foreground" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent
+              className="w-[200px] text-left text-xs"
+              side="right"
+            >
+              Questa transazione è esclusa, anche se la categoria è attiva
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
     </div>
   ),
 );
@@ -147,6 +187,7 @@ const CategoryCell = memo(
       name: string;
       color: string | null;
       icon: string | null;
+      excludeFromAnalytics: boolean | null;
     };
     onUpdateTransactionCategory?: (data: {
       id: string;
@@ -159,54 +200,59 @@ const CategoryCell = memo(
     });
 
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-auto p-0">
-            <CategoryBadge category={category} />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {categories && categories.length > 0 ? (
-            Object.values(CATEGORY_TYPE).map((categoryType) => {
-              return (
-                <>
-                  <DropdownMenuLabel className="text-xs text-muted-foreground capitalize">
-                    {categoryType}
-                  </DropdownMenuLabel>
-                  <DropdownMenuGroup>
-                    {categories
-                      .filter(({ type }) => type === categoryType)
-                      .map((category) => (
-                        <DropdownMenuItem
-                          key={category.id}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onUpdateTransactionCategory?.({
-                              id,
-                              categoryId: category.id,
-                            });
-                          }}
-                        >
-                          <DynamicIcon
-                            name={
-                              category.icon as keyof typeof dynamicIconImports
-                            }
-                            size={16}
-                            aria-hidden="true"
-                          />
-                          {category.name}
-                        </DropdownMenuItem>
-                      ))}
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                </>
-              );
-            })
-          ) : (
-            <p className="px-2 text-sm text-[#878787]">No categories found</p>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex items-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-auto p-0">
+              <CategoryBadge category={category} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {categories && categories.length > 0 ? (
+              Object.values(CATEGORY_TYPE).map((categoryType) => {
+                return (
+                  <>
+                    <DropdownMenuLabel className="text-xs text-muted-foreground capitalize">
+                      {categoryType}
+                    </DropdownMenuLabel>
+                    <DropdownMenuGroup>
+                      {categories
+                        .filter(({ type }) => type === categoryType)
+                        .map((category) => (
+                          <DropdownMenuItem
+                            key={category.id}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onUpdateTransactionCategory?.({
+                                id,
+                                categoryId: category.id,
+                              });
+                            }}
+                          >
+                            <DynamicIcon
+                              name={
+                                category.icon as keyof typeof dynamicIconImports
+                              }
+                              size={16}
+                              aria-hidden="true"
+                            />
+                            {category.name}
+                          </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                  </>
+                );
+              })
+            ) : (
+              <p className="px-2 text-sm text-[#878787]">No categories found</p>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        {category?.excludeFromAnalytics && (
+          <span className="text-sm text-muted-foreground">(Excluded)</span>
+        )}
+      </div>
     );
   },
 );
@@ -380,6 +426,7 @@ export const columns: ColumnDef<Transaction>[] = [
         description={row.original.description ?? undefined}
         status={row.original.status ?? undefined}
         recurring={row.original.recurring ?? undefined}
+        frequency={row.original.frequency ?? undefined}
       />
     ),
   },
@@ -421,6 +468,7 @@ export const columns: ColumnDef<Transaction>[] = [
       <AmountCell
         amount={row.original.amount}
         currency={row.original.currency}
+        internal={row.original.internal ?? false}
       />
     ),
   },
