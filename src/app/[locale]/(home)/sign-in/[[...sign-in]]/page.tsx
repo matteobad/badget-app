@@ -1,14 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { PasskeySignIn } from "~/components/auth/passkey-sign-in";
 import { PasswordSignIn } from "~/components/auth/password-sign-in";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "~/components/ui/accordion";
 import { RocketIcon } from "lucide-react";
 import backgroundDark from "public/assets/bg-login-dark.jpg";
 import backgroundLight from "public/assets/bg-login.jpg";
@@ -19,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function SignIn() {
   const preferredSignInOption = <PasswordSignIn />;
-  const moreSignInOptions = <PasskeySignIn />;
+  // const moreSignInOptions = <PasskeySignIn />;
 
   return (
     <div className="h-screen p-2">
@@ -73,7 +66,7 @@ export default function SignIn() {
                 </div>
 
                 {/* More Options Accordion */}
-                <Accordion type="single" collapsible className="w-full">
+                {/* <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="item-1" className="border-0">
                     <AccordionTrigger className="flex items-center justify-center py-2 text-sm hover:no-underline">
                       <span>Other options</span>
@@ -82,7 +75,18 @@ export default function SignIn() {
                       <div className="space-y-3">{moreSignInOptions}</div>
                     </AccordionContent>
                   </AccordionItem>
-                </Accordion>
+                </Accordion> */}
+
+                {/* Sign-up Option */}
+                <div className="w-full text-center text-sm">
+                  Don&apos;t have an account yet?&nbsp;
+                  <Link
+                    href="/sign-up"
+                    className="ml-auto inline-block underline"
+                  >
+                    Sign-up
+                  </Link>
+                </div>
               </div>
 
               {/* Terms and Privacy */}

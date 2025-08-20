@@ -1,194 +1,96 @@
-"use client";
-
-import { useState } from "react";
+import type { Metadata } from "next";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { signUp } from "~/shared/helpers/better-auth/auth-client";
-import { Loader2, X } from "lucide-react";
-import { toast } from "sonner";
+import Link from "next/link";
+import { SignUp } from "~/components/auth/sign-up";
+import { RocketIcon } from "lucide-react";
+import backgroundDark from "public/assets/bg-login-dark.jpg";
+import backgroundLight from "public/assets/bg-login.jpg";
 
-export default function SignUp() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirmation, setPasswordConfirmation] = useState("");
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
+export const metadata: Metadata = {
+  title: "Login | Badget.",
+};
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+export default function SignUpPage() {
+  const preferredSignInOption = <SignUp />;
 
   return (
-    <Card className="z-50 max-w-md rounded-md rounded-t-none">
-      <CardHeader>
-        <CardTitle className="text-lg md:text-xl">Sign Up</CardTitle>
-        <CardDescription className="text-xs md:text-sm">
-          Enter your information to create an account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="first-name">First name</Label>
-              <Input
-                id="first-name"
-                placeholder="Max"
-                required
-                onChange={(e) => {
-                  setFirstName(e.target.value);
-                }}
-                value={firstName}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="last-name">Last name</Label>
-              <Input
-                id="last-name"
-                placeholder="Robinson"
-                required
-                onChange={(e) => {
-                  setLastName(e.target.value);
-                }}
-                value={lastName}
-              />
-            </div>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              required
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-              value={email}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-              placeholder="Password"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Confirm Password</Label>
-            <Input
-              id="password_confirmation"
-              type="password"
-              value={passwordConfirmation}
-              onChange={(e) => setPasswordConfirmation(e.target.value)}
-              autoComplete="new-password"
-              placeholder="Confirm Password"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="image">Profile Image (optional)</Label>
-            <div className="flex items-end gap-4">
-              {imagePreview && (
-                <div className="relative h-16 w-16 overflow-hidden rounded-sm">
-                  <Image
-                    src={imagePreview}
-                    alt="Profile preview"
-                    layout="fill"
-                    objectFit="cover"
-                  />
+    <div className="h-screen p-2">
+      {/* Header - Logo */}
+      <header className="absolute top-0 left-0 z-30 w-full">
+        <div className="p-6 md:p-8">
+          <RocketIcon className="h-8 w-auto" />
+        </div>
+      </header>
+
+      {/* Main Layout */}
+      <div className="flex h-full">
+        {/* Background Image Section - Hidden on mobile, visible on desktop */}
+        <div className="relative hidden lg:flex lg:w-1/2">
+          <Image
+            src={backgroundLight}
+            alt="Background"
+            className="object-cover dark:hidden"
+            priority
+            fill
+          />
+          <Image
+            src={backgroundDark}
+            alt="Background"
+            className="hidden object-cover dark:block"
+            priority
+            fill
+          />
+        </div>
+
+        {/* Login Form Section */}
+        <div className="relative w-full lg:w-1/2">
+          {/* Form Content */}
+          <div className="relative z-10 flex h-full items-center justify-center p-6">
+            <div className="w-full max-w-md space-y-8">
+              {/* Welcome Section */}
+              <div className="text-center">
+                <h1 className="mb-4 font-serif text-lg">Welcome to Badget.</h1>
+                <p className="mb-8 text-sm text-[#878787]">
+                  New here? Register an account to continue
+                </p>
+              </div>
+
+              {/* Sign In Options */}
+              <div className="space-y-4">
+                {/* Primary Sign In Option */}
+                <div className="space-y-3">{preferredSignInOption}</div>
+                <div className="flex items-center justify-center">
+                  <span className="text-sm text-[#878787]">Or</span>
                 </div>
-              )}
-              <div className="flex w-full items-center gap-2">
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="w-full"
-                />
-                {imagePreview && (
-                  <X
-                    className="cursor-pointer"
-                    onClick={() => {
-                      setImage(null);
-                      setImagePreview(null);
-                    }}
-                  />
-                )}
+                {/* Sign-in Options */}
+                <Link
+                  href="/sign-in"
+                  className="ml-auto inline-block w-full text-center text-sm underline"
+                >
+                  Go to Sign-in
+                </Link>
+              </div>
+
+              {/* Terms and Privacy */}
+              <div className="absolute right-0 bottom-4 left-0 text-center">
+                <p className="font-mono text-xs leading-relaxed text-[#878787]">
+                  By signing in you agree to our{" "}
+                  <Link href="https://midday.ai/terms" className="underline">
+                    Terms of service
+                  </Link>{" "}
+                  &{" "}
+                  <Link href="https://midday.ai/policy" className="underline">
+                    Privacy policy
+                  </Link>
+                </p>
               </div>
             </div>
           </div>
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-            onClick={async () => {
-              await signUp.email({
-                email,
-                password,
-                name: `${firstName} ${lastName}`,
-                image: image ? await convertImageToBase64(image) : "",
-                callbackURL: "/overview",
-                fetchOptions: {
-                  onResponse: () => {
-                    setLoading(false);
-                  },
-                  onRequest: () => {
-                    setLoading(true);
-                  },
-                  onError: (ctx) => {
-                    toast.error(ctx.error.message);
-                  },
-                  onSuccess: async () => {
-                    router.push("/overview");
-                  },
-                },
-              });
-            }}
-          >
-            {loading ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              "Create an account"
-            )}
-          </Button>
         </div>
-      </CardContent>
-    </Card>
-  );
-}
+      </div>
 
-async function convertImageToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+      {/* Consent Banner */}
+      {/* {showTrackingConsent && <ConsentBanner />} */}
+    </div>
+  );
 }
