@@ -57,7 +57,7 @@ export default function ImportTransactionForm({
   const [parsedCSV, setParsedCSV] = useState<Record<string, string>>({});
   const [runId, setRunId] = useState<string | undefined>();
   const [accessToken, setAccessToken] = useState<string | undefined>();
-  const [, setIsImporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
@@ -249,27 +249,35 @@ export default function ImportTransactionForm({
           </div>
         </div>
 
-        <Accordion type="single" collapsible>
-          <AccordionItem value="attchament">
+        <Accordion type="single" collapsible defaultValue="account">
+          <AccordionItem value="settings">
             <AccordionTrigger>Impostazioni</AccordionTrigger>
             <AccordionContent className="space-y-2">
               <FormField
                 control={form.control}
                 name="settings.inverted"
                 render={({ field }) => (
-                  <FormItem className="flex items-center justify-between space-y-0">
+                  <FormItem className="">
                     <FormLabel className="mt-0">Inverti importi</FormLabel>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      aria-readonly
-                    />
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="space-y-0.5 pr-4">
+                        <p className="text-sm text-[#606060]">
+                          If the transactions are from credit account, you can
+                          invert the amount.
+                        </p>
+                      </div>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        aria-readonly
+                      />
+                    </div>
                   </FormItem>
                 )}
               />
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="note">
+          <AccordionItem value="account">
             <AccordionTrigger>Conto</AccordionTrigger>
             <AccordionContent>
               <FormField
@@ -277,7 +285,6 @@ export default function ImportTransactionForm({
                 name="extraFields.accountId"
                 render={({ field }) => (
                   <FormItem className="flex items-center justify-between gap-4 space-y-0">
-                    <FormLabel>Conto</FormLabel>
                     <AccountPicker
                       options={accounts ?? []}
                       value={field.value ?? undefined}
@@ -292,12 +299,22 @@ export default function ImportTransactionForm({
         </Accordion>
 
         <div className="grow"></div>
-        <SubmitButton
-          isSubmitting={importCSVAction.isExecuting}
-          className="col-span-2 mt-4"
-        >
+        <SubmitButton isSubmitting={isImporting} className="col-span-2 mt-4">
           Importa Transazioni
         </SubmitButton>
+        {/* {file && (
+          <Button
+            type="button"
+            variant="ghost"
+            className="col-span-2"
+            onClick={() => {
+              setParsedCSV({});
+              form.reset();
+            }}
+          >
+            Choose another file
+          </Button>
+        )} */}
       </form>
     </Form>
   );
