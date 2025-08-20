@@ -16,7 +16,7 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
   return (
     <Avatar
       style={{ width: size, height: size }}
-      className={cn(!showingFallback && "border border-border")}
+      className={cn(!showingFallback && "rounded-none")}
     >
       {src && !hasError ? (
         <AvatarImage

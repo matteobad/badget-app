@@ -10,7 +10,7 @@ import {
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 import { useConnectParams } from "~/hooks/use-connect-params";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
-import { FilePlus, Landmark } from "lucide-react";
+import { FilePlus, Landmark, PlusIcon } from "lucide-react";
 
 export function AddAccountButton() {
   const { setParams: setTransactionParams } = useTransactionParams();
@@ -20,9 +20,12 @@ export function AddAccountButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button>Add account</Button>
+        <Button>
+          <PlusIcon />
+          Add account
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[180px]">
+      <DropdownMenuContent className="w-[180px]" align="end">
         <DropdownMenuItem
           onClick={() => {
             void setTransactionParams({

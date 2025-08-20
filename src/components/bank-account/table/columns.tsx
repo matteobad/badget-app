@@ -26,9 +26,9 @@ type BankAccount = RouterOutput["bankAccount"]["get"][number];
 // Icon component
 const AccountIcon = memo(({ logoUrl }: { logoUrl: string }) => {
   return (
-    <Avatar className="size-8">
+    <Avatar className="size-8 rounded-none">
       <AvatarImage src={logoUrl} alt={`account logo`}></AvatarImage>
-      <AvatarFallback>
+      <AvatarFallback className="rounded-none">
         <Wallet2Icon className="size-3" />
       </AvatarFallback>
     </Avatar>
