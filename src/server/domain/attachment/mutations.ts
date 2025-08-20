@@ -1,10 +1,24 @@
 "server-only";
 
 import type { DBClient, TXType } from "~/server/db";
-import type { updateAttachmentSchema } from "~/shared/validators/attachment.schema";
+import type {
+  createAttachmentSchema,
+  updateAttachmentSchema,
+} from "~/shared/validators/attachment.schema";
 import type z from "zod/v4";
 import { attachment_table } from "~/server/db/schema/transactions";
 import { and, eq } from "drizzle-orm";
+
+export async function createAttachmentMutation(
+  client: DBClient,
+  input: z.infer<typeof createAttachmentSchema>,
+  orgId: string,
+) {
+  return client
+    .insert(attachment_table)
+    .values({ ...input, organizationId: orgId })
+    .returning();
+}
 
 export async function updateAttachmentMutation(
   tx: TXType,

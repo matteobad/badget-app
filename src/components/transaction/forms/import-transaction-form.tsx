@@ -1,16 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AccountPicker } from "~/components/forms/account-picker";
+import { SubmitButton } from "~/components/submit-button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
-import { Button } from "~/components/ui/button";
 import {
   Form,
   FormField,
@@ -32,10 +32,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { useSyncStatus } from "~/hooks/use-sync-status";
 import { cn } from "~/lib/utils";
-import { importTransactionAction } from "~/server/domain/transaction/actions";
-import { parseCsv } from "~/shared/helpers/transaction-csv";
-import { trpc } from "~/shared/helpers/trpc/server";
+import {
+  importTransactionsCSVAction,
+  parseTransactionsCSVAction,
+} from "~/server/domain/transaction/actions";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 import { importTransactionSchema } from "~/shared/validators/transaction.schema";
 import { UploadDropzone } from "~/utils/uploadthing";
 import { ArrowRight, Info } from "lucide-react";
@@ -52,17 +55,38 @@ export default function ImportTransactionForm({
   className,
 }: {} & React.ComponentProps<"form">) {
   const [parsedCSV, setParsedCSV] = useState<Record<string, string>>({});
+  const [runId, setRunId] = useState<string | undefined>();
+  const [accessToken, setAccessToken] = useState<string | undefined>();
+  const [, setIsImporting] = useState(false);
 
-  const { data: accounts } = useQuery(trpc.bankAccount.get.queryOptions({}));
+  const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
-  const { execute, isExecuting } = useAction(importTransactionAction, {
+  const queryClient = useQueryClient();
+  const trpc = useTRPC();
+
+  const parseCSVAction = useAction(parseTransactionsCSVAction, {
     onError: ({ error }) => {
       console.error(error);
       toast.error(error.serverError);
     },
     onSuccess: ({ data }) => {
-      console.log(data?.message);
-      toast.success("Transazione creata!");
+      if (!data) return toast.error("Something went wrong parsing your CSV");
+      setParsedCSV(data);
+    },
+  });
+
+  const importCSVAction = useAction(importTransactionsCSVAction, {
+    onSuccess: ({ data }) => {
+      if (data) {
+        setRunId(data.id);
+        setAccessToken(data.publicAccessToken);
+      }
+    },
+    onError: () => {
+      setIsImporting(false);
+      setRunId(undefined);
+      setStatus("FAILED");
+      toast.error("Something went wrong please try again.");
     },
   });
 
@@ -74,12 +98,48 @@ export default function ImportTransactionForm({
     },
   });
 
+  const { data: accounts } = useQuery(trpc.bankAccount.get.queryOptions({}));
+
   const file = form.watch("file");
+
+  useEffect(() => {
+    if (status === "FAILED") {
+      setIsImporting(false);
+      setRunId(undefined);
+      toast.error("Something went wrong please try again or contact support.");
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (status === "COMPLETED") {
+      setRunId(undefined);
+      setIsImporting(false);
+
+      void queryClient.invalidateQueries({
+        queryKey: trpc.transaction.get.queryKey(),
+      });
+
+      void queryClient.invalidateQueries({
+        queryKey: trpc.bankAccount.get.queryKey(),
+      });
+
+      void queryClient.invalidateQueries({
+        queryKey: trpc.bankConnection.get.queryKey(),
+      });
+
+      void queryClient.invalidateQueries({
+        queryKey: trpc.metrics.pathKey(),
+      });
+
+      toast.success("Transactions imported successfully.");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(execute)}
+        onSubmit={form.handleSubmit(importCSVAction.execute)}
         className={cn("flex h-full flex-col gap-2", className)}
       >
         {/* <pre>
@@ -99,12 +159,11 @@ export default function ImportTransactionForm({
                 <UploadDropzone
                   className="mt-0"
                   endpoint="csvUploader"
+                  disabled={parseCSVAction.isExecuting}
                   onChange={async (files) => {
                     const file = files[0]!;
-                    const parsedCSV = await parseCsv(file);
-                    setParsedCSV(parsedCSV);
                     field.onChange(file);
-                    console.log(parsedCSV);
+                    parseCSVAction.execute({ file });
                   }}
                   onClientUploadComplete={(res) => {
                     // Do something with the response
@@ -233,13 +292,12 @@ export default function ImportTransactionForm({
         </Accordion>
 
         <div className="grow"></div>
-        <Button
+        <SubmitButton
+          isSubmitting={importCSVAction.isExecuting}
           className="col-span-2 mt-4"
-          type="submit"
-          disabled={isExecuting}
         >
           Importa Transazioni
-        </Button>
+        </SubmitButton>
       </form>
     </Form>
   );

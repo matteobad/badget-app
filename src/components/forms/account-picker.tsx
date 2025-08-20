@@ -33,7 +33,7 @@ export function AccountPicker({
           {options.map((option) => {
             return (
               <SelectItem value={option.id} key={option.id}>
-                <Avatar className="size-4">
+                <Avatar className="size-4 rounded-none">
                   <AvatarImage
                     src={option.logoUrl!}
                     alt={`${option.name} logo`}

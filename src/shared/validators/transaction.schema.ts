@@ -84,10 +84,13 @@ export const categorizeTransactionSchema = z.object({
   id: z.cuid2(),
 });
 
+export const parseTransactionCSVSchema = z.object({
+  file: z.file().mime(["text/csv"]),
+  maxRows: z.number().default(9999),
+});
+
 export const importTransactionSchema = z.object({
-  file: z.instanceof(File).refine((file) => ["text/csv"].includes(file.type), {
-    message: "Invalid document file type",
-  }),
+  file: z.file().mime(["text/csv"]),
   fieldMapping: z.object({
     date: z.string({ message: "Missing date mapping" }),
     description: z.string({ message: "Missing description mapping" }),
@@ -98,14 +101,8 @@ export const importTransactionSchema = z.object({
   settings: z.object({ inverted: z.boolean() }),
 });
 
-export const CSV_SCHEMA = z
-  .instanceof(File)
-  .refine((file) => ["text/csv"].includes(file.type), {
-    message: "Invalid document file type",
-  });
-
 export type CSVRow = Record<string, string | null>;
-export type CSVRowParsed = Partial<DB_TransactionInsertType>;
+export type CSVRowParsed = DB_TransactionInsertType;
 
 // Query filter schema
 export const getTransactionsSchema = z.object({

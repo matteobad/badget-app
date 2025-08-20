@@ -38,6 +38,7 @@ const ROOT_CATEGORY: Category = {
   color: null,
   icon: null,
   type: "transfer",
+  excludeFromAnalytics: false,
 };
 
 const indent = 20;

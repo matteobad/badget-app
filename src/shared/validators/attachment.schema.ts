@@ -1,15 +1,17 @@
 import { attachment_table } from "~/server/db/schema/transactions";
-import { createUpdateSchema } from "drizzle-zod";
+import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import z from "zod/v4";
 
-export const updateAttachmentSchema = createUpdateSchema(attachment_table, {
-  id: z.cuid2(),
-}).omit({
-  createdAt: true,
-  updatedAt: true,
-});
+export const createAttachmentSchema = createInsertSchema(attachment_table);
+
+export const updateAttachmentSchema = createUpdateSchema(attachment_table).omit(
+  {
+    createdAt: true,
+    updatedAt: true,
+  },
+);
 
 export const attachmentDeleteSchema = z.object({
-  id: z.string(),
+  id: z.uuid(),
   fileKey: z.string(),
 });

@@ -9,6 +9,7 @@ import { SelectBankAccountsModal } from "./bank-connection/select-bank-accounts"
 import CategorySheet from "./category/sheets/category-sheet";
 import CreateCategoryDialog from "./category/sheets/create-category-dialog";
 import CreateTransactionSheet from "./transaction/sheets/create-transaction-sheet";
+import ImportTransactionDrawerDialog from "./transaction/sheets/import-transaction-drawer-dialog";
 import TransactionSheet from "./transaction/sheets/transaction-sheet";
 
 type Props = {
@@ -32,6 +33,7 @@ export function GlobalSheets({ countryCodePromise }: Props) {
       <CategorySheet />
 
       <CreateTransactionSheet />
+      <ImportTransactionDrawerDialog />
       <TransactionSheet />
     </>
   );

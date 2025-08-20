@@ -63,8 +63,6 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
     loading,
   });
 
-  console.log(tableScroll?.isScrollable);
-
   return (
     <TableHeader className="border-r-0 border-l-0">
       <TableRow className="h-[45px] hover:bg-transparent">
