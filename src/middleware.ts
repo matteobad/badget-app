@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // 1. Not authenticated
-  if (!sessionCookie && pathname !== "/sign-in") {
+  if (!sessionCookie && pathname !== "/sign-in" && pathname !== "/sign-up") {
     const url = new URL("/sign-in", request.url);
     return NextResponse.redirect(url);
   }
