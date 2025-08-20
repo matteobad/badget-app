@@ -43,6 +43,9 @@ export function DataTable() {
     trpc.tag.delete.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries({
+          queryKey: trpc.tag.get.queryKey({}),
+        });
+        void queryClient.invalidateQueries({
           queryKey: trpc.transactionTag.get.queryKey(),
         });
       },

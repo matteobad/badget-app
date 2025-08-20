@@ -35,6 +35,9 @@ export default function CreateTagForm() {
       },
       onSuccess: (_data) => {
         void queryClient.invalidateQueries({
+          queryKey: trpc.transactionTag.get.queryKey(),
+        });
+        void queryClient.invalidateQueries({
           queryKey: trpc.tag.get.queryKey(),
         });
         form.reset();
@@ -59,9 +62,9 @@ export default function CreateTagForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <pre>
+        {/* <pre>
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
-        </pre>
+        </pre> */}
 
         <FormField
           control={form.control}
