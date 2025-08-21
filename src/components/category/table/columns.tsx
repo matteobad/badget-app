@@ -1,14 +1,15 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import * as React from "react";
+import { memo, useCallback } from "react";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import {
@@ -18,6 +19,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
+import { useScopedI18n } from "~/shared/locales/client";
 import { MoreHorizontalIcon } from "lucide-react";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -56,6 +58,62 @@ export function flattenCategories(categories: any[]): any[] {
 
   return flattened;
 }
+
+const ActionsCell = memo(
+  ({
+    id,
+    onViewDetails,
+    onCreateSubCategory,
+    onDeleteCategory,
+  }: {
+    id: string;
+    onViewDetails?: (id: string) => void;
+    onCreateSubCategory?: (id: string) => void;
+    onDeleteCategory?: (id: string) => void;
+  }) => {
+    const tScoped = useScopedI18n("category.actions");
+
+    const handleViewDetails = useCallback(() => {
+      onViewDetails?.(id);
+    }, [id, onViewDetails]);
+
+    const handleCreateSubCategory = useCallback(() => {
+      onCreateSubCategory?.(id);
+    }, [id, onCreateSubCategory]);
+
+    const handleDeleteCategory = useCallback(() => {
+      onDeleteCategory?.(id);
+    }, [id, onDeleteCategory]);
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontalIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={handleViewDetails}>
+            {tScoped("view_details")}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleCreateSubCategory}>
+            {tScoped("create_subcategory")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="text-destructive"
+            onClick={handleDeleteCategory}
+          >
+            {tScoped("delete_category")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  },
+);
+
+ActionsCell.displayName = "ActionsCell";
 
 export const columns: ColumnDef<Category>[] = [
   {
@@ -105,55 +163,25 @@ export const columns: ColumnDef<Category>[] = [
   },
   {
     id: "actions",
+    meta: {
+      className: "w-auto text-right",
+    },
     cell: ({ row, table }) => {
-      const [, setIsEditOpen] = React.useState(false);
-      const [, setIsCreateSubcategoryOpen] = React.useState(false);
+      const meta = table.options.meta;
 
       return (
-        <div className="text-right">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreHorizontalIcon className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setIsCreateSubcategoryOpen(true)}
-              >
-                Create Subcategory
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() =>
-                  // @ts-expect-error type tanstack meta
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
-                  table.options.meta?.deleteCategory?.(row.original.id)
-                }
-              >
-                Remove
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* <EditCategoryModal
-            id={row.original.id}
-            defaultValue={row.original}
-            isOpen={isEditOpen}
-            onOpenChange={setIsEditOpen}
-          />
-
-          <CreateSubCategoryModal
-            isOpen={isCreateSubcategoryOpen}
-            onOpenChange={setIsCreateSubcategoryOpen}
-            parentId={row.original.id}
-            defaultTaxRate={row.original.taxRate}
-            defaultTaxType={row.original.taxType}
-            defaultColor={row.original.color}
-          /> */}
-        </div>
+        <ActionsCell
+          id={row.original.id}
+          // @ts-expect-error - TODO: fix this
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          onViewDetails={meta?.setOpen}
+          // @ts-expect-error - TODO: fix this
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          onCreateSubCategory={meta?.createSubCategory}
+          // @ts-expect-error - TODO: fix this
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          onDeleteCategory={meta?.deleteCategory}
+        />
       );
     },
   },

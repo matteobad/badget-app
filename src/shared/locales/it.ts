@@ -55,6 +55,11 @@ export default {
   },
 
   category: {
+    actions: {
+      view_details: "Vedi dettagli",
+      create_subcategory: "Crea sottocategoria",
+      delete_category: "Elimina",
+    },
     budget: "Budget di competenza",
   },
 

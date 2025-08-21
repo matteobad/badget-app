@@ -14,7 +14,7 @@ import { CategoryDetails } from "../category-details";
 export default function CategorySheet() {
   const { params, setParams } = useCategoryParams();
 
-  const isOpen = !!params.categoryId;
+  const isOpen = !!params.categoryId && !params.createCategory;
 
   const onOpenChange = () => {
     void setParams({ categoryId: null });

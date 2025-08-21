@@ -56,6 +56,11 @@ export default {
 
   category: {
     budget: "Accrual-based budget",
+    actions: {
+      view_details: "View details",
+      create_subcategory: "Create subcategory",
+      delete_category: "Delete",
+    },
   },
 
   categories: "You have {count} categories",

@@ -24,7 +24,7 @@ import { ColorIconPicker } from "./color-icon-picker";
 export default function CreateCategoryForm({
   className,
 }: React.ComponentProps<"form">) {
-  const { setParams } = useCategoryParams();
+  const { params, setParams } = useCategoryParams();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -50,6 +50,7 @@ export default function CreateCategoryForm({
     resolver: standardSchemaResolver(createCategorySchema),
     defaultValues: {
       name: "",
+      parentId: params.categoryId ?? undefined,
     },
   });
 

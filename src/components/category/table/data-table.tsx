@@ -33,8 +33,6 @@ export function DataTable(props: { type: CategoryType }) {
   const { setParams } = useCategoryParams();
   const { filter, hasFilters } = useCategoryFilterParams();
 
-  console.log(filter);
-
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
@@ -74,6 +72,12 @@ export function DataTable(props: { type: CategoryType }) {
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     meta: {
+      setOpen: (id: string) => {
+        void setParams({ categoryId: id });
+      },
+      createSubCategory: (id: string) => {
+        void setParams({ createCategory: true, categoryId: id });
+      },
       deleteCategory: (id: string) => {
         deleteCategoryMutation.mutate({ id });
       },
