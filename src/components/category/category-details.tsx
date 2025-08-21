@@ -20,6 +20,7 @@ import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 import { CategoryBadge } from "./category-badge";
 import { CategoryShortcuts } from "./category-shortcuts";
+import { CategorySelect } from "./forms/category-select";
 import { ColorIconPicker } from "./forms/color-icon-picker";
 
 const data = [
@@ -174,6 +175,20 @@ export function CategoryDetails() {
                   }}
                 />
               </div>
+            </div>
+            <div className="mb-4 border-b pb-4">
+              <Label className="text-md mb-2 block font-medium">
+                Parent Category
+              </Label>
+              <CategorySelect
+                defaultValue={category.parentId ?? undefined}
+                onValueChange={(value) => {
+                  updateCategoryMutation.mutate({
+                    id: category.id,
+                    parentId: value,
+                  });
+                }}
+              />
             </div>
             <div className="mb-4 border-b pb-4">
               <Label className="text-md mb-2 block font-medium">

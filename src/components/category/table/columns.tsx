@@ -112,7 +112,6 @@ const ActionsCell = memo(
     );
   },
 );
-
 ActionsCell.displayName = "ActionsCell";
 
 export const columns: ColumnDef<Category>[] = [

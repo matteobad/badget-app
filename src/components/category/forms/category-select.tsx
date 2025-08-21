@@ -15,9 +15,11 @@ import {
 
 type CategoryPickerProps = {
   onReset?: () => void;
+  placeholder?: string;
 };
 
 export function CategorySelect({
+  placeholder,
   ...props
 }: React.ComponentPropsWithoutRef<typeof Select> & CategoryPickerProps) {
   const trpc = useTRPC();
@@ -28,8 +30,8 @@ export function CategorySelect({
 
   return (
     <Select {...props}>
-      <SelectTrigger className="[&>span]:flex [&>span]:items-center [&>span]:gap-2 [&>span_svg]:shrink-0 [&>span_svg]:text-muted-foreground/80">
-        <SelectValue placeholder="Select category" />
+      <SelectTrigger className="w-full bg-background">
+        <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2 [&_*[role=option]>span]:flex [&_*[role=option]>span]:items-center [&_*[role=option]>span]:gap-2 [&_*[role=option]>span>svg]:shrink-0 [&_*[role=option]>span>svg]:text-muted-foreground/80">
         {isLoading ? (

@@ -19,7 +19,7 @@
     "db:visualize": "dotenv -e ./.env -- npx drizzle-lab@latest visualizer",
     "trigger:dev": "pnpm dlx trigger.dev@3.3.17 dev",
     "trigger:deploy": "pnpm dlx trigger.dev@3.3.17 deploy",
-    "ui-add": "pnpm dlx shadcn add && prettier src --write --list-different",
+    "ui-add": "pnpm dlx shadcn@latest add && prettier src --write --list-different",
     "webhook": "ngrok http --url=suitable-malamute-logical.ngrok-free.app 3000",
     "dev": "next dev --turbopack",
     "format:check": "prettier --check .",

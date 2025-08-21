@@ -56,10 +56,26 @@ export default {
 
   category: {
     budget: "Accrual-based budget",
+    labels: {
+      classification: "Classificazione",
+      name: "Nome categoria",
+      parent: "Categoria padre (opzionale)",
+    },
+    placeholders: {
+      type: "Uscite",
+      name: "Shopping",
+      parent: "Seleziona categoria...",
+    },
     actions: {
       view_details: "View details",
+      create_category: "Create category",
       create_subcategory: "Create subcategory",
       delete_category: "Delete",
+    },
+    type: {
+      income: "Income",
+      expense: "Expense",
+      transfer: "Transfer",
     },
   },
 

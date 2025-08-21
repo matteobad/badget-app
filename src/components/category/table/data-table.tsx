@@ -1,7 +1,7 @@
 "use client";
 
 import type { CategoryType } from "~/shared/constants/enum";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   useMutation,
   useQueryClient,
@@ -20,15 +20,15 @@ import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
-import type { SortingState } from "@tanstack/react-table";
 import { columns, flattenCategories } from "./columns";
 import { DataTableSkeleton } from "./data-table-skeleton";
 import { NoCategories, NoResults } from "./empty-states";
 
 export function DataTable(props: { type: CategoryType }) {
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: "type", desc: true },
-  ]); // can set initial sorting state here
+  // TODO: fix sorting with subcategories
+  // const [sorting, setSorting] = useState<SortingState>([
+  //   { id: "name", desc: true },
+  // ]); // can set initial sorting state here
 
   const { setParams } = useCategoryParams();
   const { filter, hasFilters } = useCategoryFilterParams();
@@ -64,13 +64,13 @@ export function DataTable(props: { type: CategoryType }) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     getRowId: ({ id }) => id,
     columns,
-    state: {
-      sorting,
-    },
+    // state: {
+    //   sorting,
+    // },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
+    // onSortingChange: setSorting,
     meta: {
       setOpen: (id: string) => {
         void setParams({ categoryId: id });

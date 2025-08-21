@@ -14,6 +14,7 @@ import { Input } from "~/components/ui/input";
 import { useCategoryParams } from "~/hooks/use-category-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { useScopedI18n } from "~/shared/locales/client";
 import { createCategorySchema } from "~/shared/validators/category.schema";
 import { useForm } from "react-hook-form";
 import { type z } from "zod/v4";
@@ -24,6 +25,7 @@ import { ColorIconPicker } from "./color-icon-picker";
 export default function CreateCategoryForm({
   className,
 }: React.ComponentProps<"form">) {
+  const tScoped = useScopedI18n("category");
   const { params, setParams } = useCategoryParams();
 
   const trpc = useTRPC();
@@ -49,6 +51,7 @@ export default function CreateCategoryForm({
   const form = useForm<z.infer<typeof createCategorySchema>>({
     resolver: standardSchemaResolver(createCategorySchema),
     defaultValues: {
+      type: "expense",
       name: "",
       parentId: params.categoryId ?? undefined,
     },
@@ -81,11 +84,12 @@ export default function CreateCategoryForm({
             name="type"
             render={({ field }) => (
               <FormItem className="grid w-full gap-3">
-                <FormLabel>Classification</FormLabel>
+                <FormLabel>{tScoped("labels.classification")}</FormLabel>
                 <FormControl>
                   <CategoryTypeSelect
                     value={field.value}
                     onValueChange={field.onChange}
+                    placeholder={tScoped("placeholders.type")}
                   />
                 </FormControl>
                 <FormMessage />
@@ -98,7 +102,7 @@ export default function CreateCategoryForm({
               name="name"
               render={({ field }) => (
                 <FormItem className="relative grid w-full gap-3">
-                  <FormLabel>Nome categoria</FormLabel>
+                  <FormLabel>{tScoped("labels.name")}</FormLabel>
                   <ColorIconPicker
                     className="border-r-solid absolute bottom-0 left-0 size-10 rounded-none rounded-l-md border-r border-none shadow-none"
                     selectedColor={categoryColor}
@@ -114,7 +118,7 @@ export default function CreateCategoryForm({
                     <Input
                       {...field}
                       className="h-10 pl-12 shadow-none"
-                      placeholder="Category name"
+                      placeholder={tScoped("placeholders.name")}
                       autoComplete="off"
                       autoCapitalize="none"
                       autoCorrect="off"
@@ -150,9 +154,10 @@ export default function CreateCategoryForm({
             name="parentId"
             render={({ field }) => (
               <FormItem className="grid w-full gap-3">
-                <FormLabel>Parent category (optional)</FormLabel>
+                <FormLabel>{tScoped("labels.parent")}</FormLabel>
                 <CategorySelect
                   {...field}
+                  placeholder={tScoped("placeholders.parent")}
                   onValueChange={(value) => {
                     const parent = categories?.find((c) => c.id === value);
                     if (!parent) return console.error("Invalid parent");
@@ -171,7 +176,7 @@ export default function CreateCategoryForm({
             isSubmitting={createMutation.isPending}
             className="w-full"
           >
-            Create Category
+            {tScoped("actions.create_category")}
           </SubmitButton>
         </div>
       </form>

@@ -55,10 +55,26 @@ export default {
   },
 
   category: {
+    labels: {
+      classification: "Classificazione",
+      name: "Nome categoria",
+      parent: "Categoria padre (opzionale)",
+    },
+    placeholders: {
+      type: "Uscite",
+      name: "Shopping",
+      parent: "Seleziona categoria...",
+    },
     actions: {
       view_details: "Vedi dettagli",
+      create_category: "Crea categoria",
       create_subcategory: "Crea sottocategoria",
       delete_category: "Elimina",
+    },
+    type: {
+      income: "Entrate",
+      expense: "Uscite",
+      transfer: "Trasferimenti",
     },
     budget: "Budget di competenza",
   },
