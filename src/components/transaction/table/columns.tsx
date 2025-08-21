@@ -1,9 +1,7 @@
 "use client";
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import type { dynamicIconImports } from "lucide-react/dynamic";
 import { memo, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { CategoryBadge } from "~/components/category/category-badge";
 import { FormatAmount } from "~/components/format-amount";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -13,9 +11,7 @@ import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
@@ -26,13 +22,11 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
-import { CATEGORY_TYPE } from "~/shared/constants/enum";
 import { formatDate } from "~/shared/helpers/format";
-import { useTRPC } from "~/shared/helpers/trpc/client";
 import { EyeOffIcon, MoreHorizontalIcon, RepeatIcon } from "lucide-react";
-import { DynamicIcon } from "lucide-react/dynamic";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import { TransactionCategorySelect } from "../forms/transaction-category-select";
 
 type Transaction = RouterOutput["transaction"]["get"]["data"][number];
 
@@ -194,10 +188,9 @@ const CategoryCell = memo(
       categoryId?: string;
     }) => void;
   }) => {
-    const trpc = useTRPC();
-    const { data: categories } = useQuery({
-      ...trpc.category.get.queryOptions({}),
-    });
+    const handleUpdateTransactionCategory = (categoryId?: string) => {
+      onUpdateTransactionCategory?.({ categoryId, id });
+    };
 
     return (
       <div className="flex items-center gap-2">
@@ -207,46 +200,15 @@ const CategoryCell = memo(
               <CategoryBadge category={category} />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {categories && categories.length > 0 ? (
-              Object.values(CATEGORY_TYPE).map((categoryType) => {
-                return (
-                  <>
-                    <DropdownMenuLabel className="text-xs text-muted-foreground capitalize">
-                      {categoryType}
-                    </DropdownMenuLabel>
-                    <DropdownMenuGroup>
-                      {categories
-                        .filter(({ type }) => type === categoryType)
-                        .map((category) => (
-                          <DropdownMenuItem
-                            key={category.id}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onUpdateTransactionCategory?.({
-                                id,
-                                categoryId: category.id,
-                              });
-                            }}
-                          >
-                            <DynamicIcon
-                              name={
-                                category.icon as keyof typeof dynamicIconImports
-                              }
-                              size={16}
-                              aria-hidden="true"
-                            />
-                            {category.name}
-                          </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                  </>
-                );
-              })
-            ) : (
-              <p className="px-2 text-sm text-[#878787]">No categories found</p>
-            )}
+          <DropdownMenuContent
+            align="start"
+            className="overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <TransactionCategorySelect
+              selectedItems={category ? [category.id] : []}
+              onSelect={handleUpdateTransactionCategory}
+            />
           </DropdownMenuContent>
         </DropdownMenu>
         {category?.excludeFromAnalytics && (

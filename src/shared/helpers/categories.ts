@@ -1,3 +1,5 @@
+import type { DB_CategoryType } from "~/server/db/schema/categories";
+
 export const colors = [
   "#FF6900", // Orange
   "#FCB900", // Yellow
@@ -106,4 +108,60 @@ export function getCategoryColors(hex = "#606060") {
   const color = hex;
 
   return { backgroundColor, borderColor, color };
+}
+
+export type Category = Omit<
+  DB_CategoryType,
+  "createdAt" | "updatedAt" | "deletedAt" | "organizationId"
+>;
+
+export type CategoryWithChildren = Category & {
+  children: string[];
+};
+
+export function buildCategoryRecord(categories: Category[]) {
+  const record: Record<string, CategoryWithChildren> = {};
+
+  // inizializza tutte le categorie con children vuoti
+  for (const c of categories) {
+    record[c.id] = { ...c, children: [] };
+  }
+
+  // popola i children
+  for (const c of categories) {
+    if (c.parentId && record[c.parentId]) {
+      record[c.parentId]!.children.push(c.id);
+    }
+  }
+
+  // aggiungi root (tutti quelli senza parentId)
+  record.root = {
+    id: "root",
+    parentId: null,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+    type: "root" as any, // oppure un enum custom
+    name: "Root",
+    slug: "root",
+    color: null,
+    icon: null,
+    description: null,
+    excludeFromAnalytics: false,
+    children: categories.filter((c) => !c.parentId).map((c) => c.id),
+  };
+
+  // aggiungi uncategorized (vuoto)
+  // record["uncategorized"] = {
+  //   id: "uncategorized",
+  //   parentId: null,
+  //   type: "uncategorized" as any,
+  //   name: "Uncategorized",
+  //   slug: "uncategorized",
+  //   color: null,
+  //   icon: null,
+  //   description: null,
+  //   excludeFromAnalytics: false,
+  //   children: [],
+  // };
+
+  return record;
 }

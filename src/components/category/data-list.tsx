@@ -79,16 +79,7 @@ export function DataList() {
               </CardHeader>
               {/* Transaction Rows */}
               <CardContent className="flex-1 p-1 pt-0">
-                {/* <CategoryTree items={data.filter((c) => c.type === type)} /> */}
                 <DataTable type={type as CategoryType} />
-                {/* <div className="flex h-full flex-col items-center justify-center gap-2">
-                    <ShapesIcon className="text-muted-foreground" />
-
-                    <p className="w-[50%] text-center text-sm text-muted-foreground">
-                      Create your first {type.toLowerCase()} category to start
-                      organizing your finances
-                    </p>
-                  </div> */}
               </CardContent>
             </Card>
           </div>

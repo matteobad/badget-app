@@ -1,12 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable */
+
 "use client";
 
 import * as React from "react";
-import { type ItemInstance } from "@headless-tree/core";
 import { cn } from "~/lib/utils";
-import { ChevronDownIcon } from "lucide-react";
 import { Slot } from "radix-ui";
+
+import type { ItemInstance } from "@headless-tree/core";
 
 interface TreeContextValue<T = any> {
   indent: number;
@@ -31,10 +31,8 @@ interface TreeProps extends React.HTMLAttributes<HTMLDivElement> {
 
 function Tree({ indent = 20, tree, className, ...props }: TreeProps) {
   const containerProps =
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     tree && typeof tree.getContainerProps === "function"
-      ? // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        tree.getContainerProps()
+      ? tree.getContainerProps()
       : {};
   const mergedProps = { ...props, ...containerProps };
 
@@ -144,7 +142,7 @@ function TreeItemLabel<T = any>({
   ...props
 }: TreeItemLabelProps<T>) {
   const { currentItem } = useTreeContext<T>();
-  const item = propItem ?? currentItem;
+  const item = propItem || currentItem;
 
   if (!item) {
     console.warn("TreeItemLabel: No item provided via props or context");
@@ -155,15 +153,15 @@ function TreeItemLabel<T = any>({
     <span
       data-slot="tree-item-label"
       className={cn(
-        "flex items-center gap-3 rounded-sm bg-background py-1.5 text-sm transition-colors not-in-data-[folder=true]:ps-7 hover:bg-accent in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 in-data-[drag-target=true]:bg-accent in-data-[search-match=true]:bg-blue-400/20! in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "flex items-center gap-1 rounded-sm bg-background px-2 py-1.5 text-sm transition-colors not-in-data-[folder=true]:ps-7 hover:bg-accent in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 in-data-[drag-target=true]:bg-accent in-data-[search-match=true]:bg-blue-400/20! in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className,
       )}
       {...props}
     >
-      {item.isFolder() && (
+      {/* {item.isFolder() && (
         <ChevronDownIcon className="size-4 text-muted-foreground in-aria-[expanded=false]:-rotate-90" />
-      )}
-      {children ??
+      )} */}
+      {children ||
         (typeof item.getItemName === "function" ? item.getItemName() : null)}
     </span>
   );
@@ -175,7 +173,6 @@ function TreeDragLine({
 }: React.HTMLAttributes<HTMLDivElement>) {
   const { tree } = useTreeContext();
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (!tree || typeof tree.getDragLineStyle !== "function") {
     console.warn(
       "TreeDragLine: No tree provided via context or tree does not have getDragLineStyle method",
@@ -183,7 +180,6 @@ function TreeDragLine({
     return null;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   const dragLine = tree.getDragLineStyle();
   return (
     <div

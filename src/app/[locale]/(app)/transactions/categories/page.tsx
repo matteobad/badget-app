@@ -39,7 +39,6 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
       <HydrateClient>
         <ErrorBoundary fallback={<ErrorFallback />}>
           <Suspense fallback={<DataTableSkeleton />}>
-            {/* <DataTable /> */}
             <DataList />
           </Suspense>
         </ErrorBoundary>

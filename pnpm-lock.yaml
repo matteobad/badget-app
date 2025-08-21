@@ -17,11 +17,11 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5
       "@headless-tree/core":
-        specifier: ^1.2.1
-        version: 1.2.1
+        specifier: ^1.4.0
+        version: 1.4.0
       "@headless-tree/react":
-        specifier: ^1.2.1
-        version: 1.2.1(@headless-tree/core@1.2.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: ^1.4.0
+        version: 1.4.0(@headless-tree/core@1.4.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       "@hono/zod-openapi":
         specifier: ^1.0.0-beta.1
         version: 1.0.0-beta.1(hono@4.7.11)(zod@3.25.55)
@@ -1069,16 +1069,16 @@ packages:
     engines: { node: ">=6" }
     hasBin: true
 
-  "@headless-tree/core@1.2.1":
+  "@headless-tree/core@1.4.0":
     resolution:
       {
-        integrity: sha512-4sVCtZGIqDml6mnOW+EStb1Iu37yxn3Rbv0IN6+dV6QBKSg4qh+oQwUWwD0dfxWpqTjVBKqgXPY/f+Jsui+xFQ==,
+        integrity: sha512-xBDYr9WJb7CuWuWzAAHfCfYfYUdCknsHa6OkdsLqeOc4JuwYuSlQ+TcDjeeImmgF6hVSAbeBBubOwotk5pmiMw==,
       }
 
-  "@headless-tree/react@1.2.1":
+  "@headless-tree/react@1.4.0":
     resolution:
       {
-        integrity: sha512-n86JzNwQ9Tkabee8JxUuzUftPCuIWYvfFyqAc+W0p00TG10e+W2VjUR8BIMK6jwYlo4K8vBnIpW17FSC/wZkkQ==,
+        integrity: sha512-B62Ku6E3u0JPrz2Sm3cKqTCRMltmhgo5mgkuOvfYbrVILsDSZ6ct2yX56/1GQlipPkVF3mEhlwiIVKNOQKWnqA==,
       }
     peerDependencies:
       "@headless-tree/core": "*"
@@ -8579,11 +8579,11 @@ snapshots:
       protobufjs: 7.4.0
       yargs: 17.7.2
 
-  "@headless-tree/core@1.2.1": {}
+  "@headless-tree/core@1.4.0": {}
 
-  "@headless-tree/react@1.2.1(@headless-tree/core@1.2.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)":
+  "@headless-tree/react@1.4.0(@headless-tree/core@1.4.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)":
     dependencies:
-      "@headless-tree/core": 1.2.1
+      "@headless-tree/core": 1.4.0
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
