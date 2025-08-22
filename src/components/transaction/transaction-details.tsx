@@ -226,7 +226,7 @@ export function TransactionDetails() {
   return (
     <div className="scrollbar-hide h-[calc(100vh-80px)] overflow-auto pb-12">
       <div className="mb-8 flex justify-between">
-        <div className="flex flex-1 flex-col gap-8">
+        <div className="flex flex-1 flex-col">
           {isLoading ? (
             <div className="mt-1 mb-6 flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -250,6 +250,13 @@ export function TransactionDetails() {
             </div>
           )}
 
+          <h2 className="mt-6 mb-3 select-text">
+            {isLoading ? (
+              <Skeleton className="mb-2 h-[22px] w-[35%] rounded-md" />
+            ) : (
+              data?.name
+            )}
+          </h2>
           <div className="flex items-center justify-between">
             <div className="flex w-full flex-col space-y-1">
               {isLoading ? (
