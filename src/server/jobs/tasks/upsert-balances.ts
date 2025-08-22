@@ -11,7 +11,7 @@ import {
   TRANSACTION_STATUS,
 } from "~/shared/constants/enum";
 import { format, isBefore, parseISO, subDays } from "date-fns";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod/v4";
 
 const transactionSchema = z.object({
@@ -43,7 +43,12 @@ export const upsertBalances = schemaTask({
       const [account] = await db
         .select()
         .from(account_table)
-        .where(eq(account_table.id, accountId));
+        .where(
+          and(
+            eq(account_table.id, accountId),
+            eq(account_table.organizationId, organizationId),
+          ),
+        );
 
       if (!account) {
         logger.info("No account found");

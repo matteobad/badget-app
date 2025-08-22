@@ -40,6 +40,14 @@
         "uriFormat": "%s",
         "webRoot": "${workspaceFolder}"
       }
+    },
+    {
+      "name": "Trigger.dev: Dev",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm run trigger:dev",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true
     }
   ]
 }
