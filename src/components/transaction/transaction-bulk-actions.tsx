@@ -1,11 +1,9 @@
 "use client";
 
-import type { dynamicIconImports } from "lucide-react/dynamic";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTransactionsStore } from "~/lib/stores/transaction";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { ChevronDownIcon, ShapesIcon, TagsIcon } from "lucide-react";
-import { DynamicIcon } from "lucide-react/dynamic";
 import { toast } from "sonner";
 
 import { Button } from "../ui/button";
@@ -20,6 +18,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { TransactionCategorySelect } from "./forms/transaction-category-select";
 
 type Props = {
   ids: string[];
@@ -50,15 +49,14 @@ export function BulkActions({ ids }: Props) {
     }),
   );
 
-  const { data: categories } = useQuery({
-    ...trpc.category.get.queryOptions({}),
-    enabled: ids.length > 0,
-  });
-
   const { data: tags } = useQuery({
     ...trpc.tag.get.queryOptions({}),
     enabled: ids.length > 0,
   });
+
+  const handleUpdateTransactionCategory = (categoryId?: string) => {
+    updateTransactionsMutation.mutate({ categoryId, ids });
+  };
 
   return (
     <DropdownMenu>
@@ -78,33 +76,13 @@ export function BulkActions({ ids }: Props) {
             <DropdownMenuPortal>
               <DropdownMenuSubContent
                 sideOffset={14}
-                className="max-h-[200px] w-[220px] overflow-y-auto py-1"
+                alignOffset={-5}
+                className="max-h-[300px] w-[250px] overflow-y-auto py-1"
               >
-                {categories && categories.length > 0 ? (
-                  categories.map((category) => (
-                    <DropdownMenuCheckboxItem
-                      key={category.id}
-                      // checked={ids.includes(tag.id)}
-                      onCheckedChange={() => {
-                        updateTransactionsMutation.mutate({
-                          ids,
-                          categoryId: category.id,
-                        });
-                      }}
-                    >
-                      <DynamicIcon
-                        name={category.icon as keyof typeof dynamicIconImports}
-                        size={16}
-                        aria-hidden="true"
-                      />
-                      {category.name}
-                    </DropdownMenuCheckboxItem>
-                  ))
-                ) : (
-                  <p className="px-2 text-sm text-[#878787]">
-                    No categories found
-                  </p>
-                )}
+                <TransactionCategorySelect
+                  selectedItems={[]}
+                  onSelect={handleUpdateTransactionCategory}
+                />
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>

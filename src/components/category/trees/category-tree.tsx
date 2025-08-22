@@ -200,7 +200,9 @@ export function CategoryTree({
                         size={16}
                         aria-hidden="true"
                       />
-                      <span className="line-clamp-1">{item.getItemName()}</span>
+                      <span className="line-clamp-1 text-left">
+                        {item.getItemName()}
+                      </span>
                     </span>
                   </TreeItemLabel>
                 </TreeItem>
