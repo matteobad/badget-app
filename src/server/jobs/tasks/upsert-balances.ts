@@ -1,5 +1,5 @@
 import type { DB_AccountBalanceInsertType } from "~/server/db/schema/accounts";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { db } from "~/server/db";
 import {
   account_balance_table,

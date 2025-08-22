@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createId } from "@paralleldrive/cuid2";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { authActionClient } from "~/lib/safe-action";
 import { gocardlessClient } from "~/server/integrations/open-banking/gocardless/gocardless-api";
 import { type reconnectConnection } from "~/server/jobs/tasks/reconnect-connection";

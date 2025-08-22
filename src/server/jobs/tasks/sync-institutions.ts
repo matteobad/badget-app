@@ -1,4 +1,4 @@
-import { logger, schedules } from "@trigger.dev/sdk/v3";
+import { logger, schedules } from "@trigger.dev/sdk";
 import { db } from "~/server/db";
 import { institution_table } from "~/server/db/schema/open-banking";
 import { buildConflictUpdateColumns } from "~/server/db/utils";

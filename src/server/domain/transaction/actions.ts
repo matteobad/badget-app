@@ -4,7 +4,7 @@ import type { importTransactionsTask } from "~/server/jobs/tasks/import-transact
 import { revalidateTag } from "next/cache";
 import { openai } from "@ai-sdk/openai";
 import { parse } from "@fast-csv/parse";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { authActionClient } from "~/lib/safe-action";
 import { db } from "~/server/db";
 import { utapi } from "~/server/uploadthing";

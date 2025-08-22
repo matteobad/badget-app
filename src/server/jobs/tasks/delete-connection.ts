@@ -1,4 +1,4 @@
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 import { db } from "~/server/db";
 import { connection_table } from "~/server/db/schema/open-banking";
 import { deleteConnectionSchema } from "~/shared/validators/tasks.schema";

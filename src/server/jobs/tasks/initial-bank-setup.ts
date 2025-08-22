@@ -1,4 +1,4 @@
-import { schedules, schemaTask } from "@trigger.dev/sdk/v3";
+import { schedules, schemaTask } from "@trigger.dev/sdk";
 import { generateCronTag } from "~/server/jobs/utils/generate-cron-tag";
 import { initialBankSetupSchema } from "~/shared/validators/tasks.schema";
 

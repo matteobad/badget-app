@@ -4,7 +4,7 @@ import type {
   CSVRowParsed,
 } from "~/shared/validators/transaction.schema";
 import { parse } from "@fast-csv/parse";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 import z from "zod/v4";
 
 import { transform } from "../utils/import-transactions";

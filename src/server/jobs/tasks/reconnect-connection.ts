@@ -1,4 +1,4 @@
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { connection_table } from "~/server/db/schema/open-banking";

@@ -1,4 +1,4 @@
-import { logger, schedules } from "@trigger.dev/sdk/v3";
+import { logger, schedules } from "@trigger.dev/sdk";
 import { db } from "~/server/db";
 import { connection_table } from "~/server/db/schema/open-banking";
 import { eq } from "drizzle-orm";
@@ -22,7 +22,9 @@ export const bankSyncScheduler = schedules.task({
 
     try {
       const bankConnections = await db
-        .select()
+        .select({
+          id: connection_table.id,
+        })
         .from(connection_table)
         .where(eq(connection_table.organizationId, orgId));
 

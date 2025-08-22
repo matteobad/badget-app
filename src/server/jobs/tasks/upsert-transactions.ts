@@ -1,4 +1,4 @@
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { db } from "~/server/db";
 import { transaction_table } from "~/server/db/schema/transactions";
 import { buildConflictUpdateColumns } from "~/server/db/utils";
