@@ -220,7 +220,7 @@ export default function CreateTransactionForm() {
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full bg-background">
                     <SelectValue placeholder="Seleziona valuta" />
                   </SelectTrigger>
                   <SelectContent>

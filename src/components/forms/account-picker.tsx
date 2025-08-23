@@ -25,7 +25,7 @@ export function AccountPicker({
 }: React.ComponentPropsWithoutRef<typeof Select> & AccountPickerProps) {
   return (
     <Select {...props} value={props.value ?? ""}>
-      <SelectTrigger className="[&>span]:flex [&>span]:items-center [&>span]:gap-2 [&>span_svg]:shrink-0 [&>span_svg]:text-muted-foreground/80">
+      <SelectTrigger className="w-full bg-background [&>span]:flex [&>span]:items-center [&>span]:gap-2 [&>span_svg]:shrink-0 [&>span_svg]:text-muted-foreground/80">
         <SelectValue placeholder="Seleziona..." />
       </SelectTrigger>
       <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2 [&_*[role=option]>span]:flex [&_*[role=option]>span]:items-center [&_*[role=option]>span]:gap-2 [&_*[role=option]>span>svg]:shrink-0 [&_*[role=option]>span>svg]:text-muted-foreground/80">
@@ -38,7 +38,7 @@ export function AccountPicker({
                     src={option.logoUrl!}
                     alt={`${option.name} logo`}
                   ></AvatarImage>
-                  <AvatarFallback>
+                  <AvatarFallback className="size-4 rounded-none">
                     <Wallet2Icon className="size-3" />
                   </AvatarFallback>
                 </Avatar>
