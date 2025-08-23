@@ -110,7 +110,6 @@ export const syncAccount = schemaTask({
 
       // Upsert balances
       await upsertBalances.triggerAndWait({
-        transactions: transactionsData,
         organizationId,
         accountId: id,
         manualSync,
