@@ -31,7 +31,7 @@ export const createBankAccountMutation = async (
       organizationId: payload.orgId,
       name: payload.name,
       currency: payload.currency,
-      manual: payload.manual,
+      manual: payload.manual ?? true,
       enabled: payload.enabled,
       type: payload.type ?? "checking",
       logoUrl: payload.logoUrl,

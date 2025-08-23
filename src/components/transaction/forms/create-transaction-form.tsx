@@ -66,7 +66,11 @@ export default function CreateTransactionForm() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data: accounts } = useQuery(trpc.bankAccount.get.queryOptions({}));
+  const { data: accounts } = useQuery(
+    trpc.bankAccount.get.queryOptions({
+      manual: true,
+    }),
+  );
 
   const categorizeTransactionMutation = useMutation(
     trpc.transaction.categorize.mutationOptions({
