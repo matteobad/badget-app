@@ -103,14 +103,6 @@ export default function ImportTransactionForm({
   const file = form.watch("file");
 
   useEffect(() => {
-    if (status === "FAILED") {
-      setIsImporting(false);
-      setRunId(undefined);
-      toast.error("Something went wrong please try again or contact support.");
-    }
-  }, [status]);
-
-  useEffect(() => {
     if (status === "COMPLETED") {
       setRunId(undefined);
       setIsImporting(false);
@@ -133,13 +125,30 @@ export default function ImportTransactionForm({
 
       toast.success("Transactions imported successfully.");
     }
+
+    if (status === "FAILED") {
+      setIsImporting(false);
+      setRunId(undefined);
+      toast.error("Something went wrong please try again or contact support.");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(importCSVAction.execute)}
+        onSubmit={form.handleSubmit(async (data) => {
+          setIsImporting(true);
+
+          // const filename = stripSpecialCharacters(data.file.name);
+          // const { path } = await uploadFile({
+          //   bucket: "vault",
+          //   path: [user?.team?.id ?? "", "imports", filename],
+          //   file,
+          // });
+
+          importCSVAction.execute(data);
+        })}
         className={cn("flex h-full flex-col gap-2", className)}
       >
         {/* <pre>

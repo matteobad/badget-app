@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type {
   CSVRow,
   CSVRowParsed,
@@ -118,6 +119,17 @@ export function formatAmountValue({
   return value;
 }
 
+function generateTransactionHash(
+  accountId: string,
+  description: string,
+  amount: number,
+  date: string, // ISO format
+) {
+  const normalizedDescription = description.trim().toLowerCase();
+  const payload = `${accountId}|${normalizedDescription}|${amount}|${date}`;
+  return createHash("sha256").update(payload).digest("hex");
+}
+
 export function transform(
   row: CSVRow,
   options: {
@@ -153,6 +165,7 @@ export function transform(
   else throw new Error(`Col ${column} is not present in the CSV`);
 
   // add other columns mapping here
+  const accountId = extraFields.accountId;
 
   const mappedRow: CSVRowParsed = {
     date,
@@ -163,6 +176,7 @@ export function transform(
     method: "other",
     status: "posted",
     organizationId: orgId,
+    rawId: generateTransactionHash(accountId, description, amount, date),
     ...extraFields,
   };
 

@@ -8,6 +8,7 @@ import { schemaTask } from "@trigger.dev/sdk";
 import z from "zod/v4";
 
 import { transform } from "../utils/import-transactions";
+import { upsertBalances } from "./upsert-balances";
 import { upsertTransactions } from "./upsert-transactions";
 
 const BATCH_SIZE = 500;
@@ -66,5 +67,12 @@ export const importTransactionsTask = schemaTask({
         manualSync: true,
       });
     }
+
+    // Upsert balances
+    await upsertBalances.triggerAndWait({
+      organizationId: orgId,
+      accountId: options.extraFields.accountId,
+      manualSync: true,
+    });
   },
 });
