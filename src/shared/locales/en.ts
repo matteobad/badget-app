@@ -86,6 +86,14 @@ export default {
     "We found {count} problems with your budget",
   "categories.budget.warning.node": "Budget below total children",
 
+  bank_account: {
+    actions: {
+      view_details: "View details",
+      create_category: "Create account",
+      delete_category: "Delete",
+    },
+  },
+
   bottom_bar: {
     "transactions#one": "1 Transaction",
     "transactions#other": "{count} Transactions",

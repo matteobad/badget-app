@@ -7,7 +7,9 @@ import type {
 } from "~/shared/validators/bank-account.schema";
 import type z from "zod/v4";
 
+import type { DBClient } from "../db";
 import { db } from "../db";
+import { createBankAccountBalanceMutation } from "../domain/bank-account-balance/mutations";
 import {
   createBankAccountMutation,
   deleteBankAccountMutation,
@@ -33,10 +35,29 @@ export async function getBankAccountById(
 }
 
 export async function createBankAccount(
+  db: DBClient,
   input: z.infer<typeof createBankAccountSchema>,
   orgId: string,
 ) {
-  return await createBankAccountMutation(db, { ...input, orgId });
+  return await db.transaction(async (tx) => {
+    const bankAccount = await createBankAccountMutation(tx, {
+      ...input,
+      orgId,
+    });
+
+    if (!bankAccount) {
+      console.error("No bank account created");
+      return tx.rollback();
+    }
+
+    await createBankAccountBalanceMutation(tx, {
+      accountId: bankAccount.id,
+      balance: input.balance,
+      currency: input.currency,
+      date: bankAccount.createdAt,
+      organizationId: orgId,
+    });
+  });
 }
 
 export async function updateBankAccount(
@@ -47,8 +68,9 @@ export async function updateBankAccount(
 }
 
 export async function deleteBankAccount(
+  db: DBClient,
   input: z.infer<typeof deleteBankAccountSchema>,
   orgId: string,
 ) {
-  return await deleteBankAccountMutation(db, { ...input, orgId });
+  await deleteBankAccountMutation(db, { ...input, orgId });
 }

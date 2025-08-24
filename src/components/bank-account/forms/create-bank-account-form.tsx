@@ -106,7 +106,7 @@ export default function CreateBankAccountForm() {
                 <FormLabel>Tipologia</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleziona tipologia" />
                     </SelectTrigger>
                   </FormControl>

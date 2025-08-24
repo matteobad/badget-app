@@ -2,17 +2,27 @@
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { AccountType } from "~/shared/constants/enum";
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { FormatAmount } from "~/components/format-amount";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { useScopedI18n } from "~/shared/locales/client";
 import {
   ArchiveIcon,
   Building2,
   CreditCard,
   HandIcon,
   LinkIcon,
+  MoreHorizontalIcon,
   Percent,
   RotateCcw,
   ShoppingCart,
@@ -22,6 +32,58 @@ import {
 import type { ColumnDef } from "@tanstack/react-table";
 
 type BankAccount = RouterOutput["bankAccount"]["get"][number];
+
+const ActionsCell = memo(
+  ({
+    id,
+    manual,
+    onViewDetails,
+    onDelete,
+  }: {
+    id: string;
+    manual: boolean;
+    onViewDetails?: (id: string) => void;
+    onDelete?: (id: string) => void;
+  }) => {
+    const tScoped = useScopedI18n("bank_account.actions");
+
+    const handleViewDetails = useCallback(() => {
+      onViewDetails?.(id);
+    }, [id, onViewDetails]);
+
+    const handleDelete = useCallback(() => {
+      onDelete?.(id);
+    }, [id, onDelete]);
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontalIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={handleViewDetails}>
+            {tScoped("view_details")}
+          </DropdownMenuItem>
+          {manual && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={handleDelete}
+              >
+                {tScoped("delete_category")}
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  },
+);
+ActionsCell.displayName = "ActionsCell";
 
 // Icon component
 const AccountIcon = memo(({ logoUrl }: { logoUrl: string }) => {
@@ -313,6 +375,28 @@ export const columns: ColumnDef<BankAccount>[] = [
             currency={acocunt.currency}
           />
         </div>
+      );
+    },
+  },
+  {
+    id: "actions",
+    meta: {
+      className: "w-auto text-right",
+    },
+    cell: ({ row, table }) => {
+      const meta = table.options.meta;
+
+      return (
+        <ActionsCell
+          id={row.original.id}
+          manual={row.original.manual}
+          // @ts-expect-error - TODO: fix this
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          onViewDetails={meta?.setOpen}
+          // @ts-expect-error - TODO: fix this
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          onDelete={meta?.delete}
+        />
       );
     },
   },

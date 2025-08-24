@@ -32,9 +32,8 @@ export const bankAccountRouter = createTRPCRouter({
 
   create: protectedProcedure
     .input(createBankAccountSchema)
-    .mutation(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-      return createBankAccount(input, orgId);
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return createBankAccount(db, input, orgId!);
     }),
 
   update: protectedProcedure
@@ -46,8 +45,7 @@ export const bankAccountRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteBankAccountSchema)
-    .mutation(async ({ input, ctx }) => {
-      const orgId = ctx.orgId!;
-      return deleteBankAccount(input, orgId);
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return deleteBankAccount(db, input, orgId!);
     }),
 });

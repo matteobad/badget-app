@@ -2,7 +2,7 @@
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -53,8 +53,20 @@ export function DataTable() {
   const { setParams } = useBankAccountParams();
   const { hasFilters } = useBankAccountFilterParams();
 
+  const queryClient = useQueryClient();
   const trpc = useTRPC();
+
   const { data } = useQuery(trpc.bankAccount.get.queryOptions({}));
+
+  const deleteBankAccountMutation = useMutation(
+    trpc.bankAccount.delete.mutationOptions({
+      onSuccess: () => {
+        void queryClient.invalidateQueries({
+          queryKey: trpc.bankAccount.get.queryKey({}),
+        });
+      },
+    }),
+  );
 
   const table = useReactTable({
     data: data ?? [],
@@ -67,6 +79,14 @@ export function DataTable() {
     state: {
       rowSelection,
       globalFilter,
+    },
+    meta: {
+      setOpen: (id: string) => {
+        void setParams({ bankAccountId: id });
+      },
+      delete: (id: string) => {
+        deleteBankAccountMutation.mutate({ id });
+      },
     },
   });
 
@@ -140,7 +160,7 @@ export function DataTable() {
                           {`${type} • ${typeAccounts.length}`}
                         </span>
                       </div>
-                      <span className="text-right text-xs text-muted-foreground">
+                      <span className="mr-17 text-right text-xs text-muted-foreground">
                         <FormatAmount
                           amount={typeAccounts.reduce(
                             (sum, a) => sum + a.balance,

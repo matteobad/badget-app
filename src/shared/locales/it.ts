@@ -86,6 +86,14 @@ export default {
     "Abbiamo notato {count} problemi nel budget",
   "categories.budget.warning.node": "budget inferiore al totale dei figli",
 
+  bank_account: {
+    actions: {
+      view_details: "Vedi dettagli",
+      create_category: "Crea conto",
+      delete_category: "Elimina",
+    },
+  },
+
   bottom_bar: {
     "transactions#one": "1 Transazione",
     "transactions#other": "{count} Transazioni",

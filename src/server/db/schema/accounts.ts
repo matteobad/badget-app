@@ -1,4 +1,4 @@
-import { pgEnum, unique } from "drizzle-orm/pg-core";
+import { index, pgEnum, unique } from "drizzle-orm/pg-core";
 
 import { ACCOUNT_TYPE } from "../../../shared/constants/enum";
 import { numericCasted, timestamps } from "../utils";
@@ -50,7 +50,10 @@ export const account_balance_table = pgTable(
       .text()
       .references(() => organization_table.id, { onDelete: "cascade" })
       .notNull(),
-    accountId: d.uuid().references(() => account_table.id),
+    accountId: d
+      .uuid()
+      .references(() => account_table.id, { onDelete: "cascade" }) // <-- cascade delete on account
+      .notNull(),
 
     date: d.date({ mode: "string" }).notNull(),
     balance: numericCasted({ precision: 10, scale: 2 }).notNull(),
@@ -58,7 +61,14 @@ export const account_balance_table = pgTable(
 
     ...timestamps,
   }),
-  (t) => [unique().on(t.accountId, t.date)],
+  (t) => [
+    unique().on(t.accountId, t.date),
+    index("organization_account_date_idx").on(
+      t.organizationId,
+      t.accountId,
+      t.date.desc(),
+    ),
+  ],
 );
 
 export type DB_AccountBalanceType = typeof account_balance_table.$inferSelect;
