@@ -217,7 +217,7 @@ export default function ImportTransactionForm({
                           value={field.value ?? ""}
                           onValueChange={(value) => field.onChange(value)}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select CSV column" />
                           </SelectTrigger>
                           <SelectContent>
@@ -231,7 +231,7 @@ export default function ImportTransactionForm({
 
                         <ArrowRight className="size-4 text-muted-foreground" />
 
-                        <div className="flex h-10 items-center justify-between gap-2 rounded border px-3">
+                        <div className="flex h-9 items-center justify-between gap-2 border px-3 shadow-xs">
                           <span className="text-sm text-muted-foreground">
                             {item}
                           </span>
