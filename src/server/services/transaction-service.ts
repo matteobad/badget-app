@@ -108,11 +108,11 @@ export async function updateManyTransactions(
     });
 
     // update category rules
-    if (input.categoryId) {
-      for (const { name } of transaction) {
-        await updateOrCreateRule(orgId, name, input.categoryId);
-      }
-    }
+    // if (input.categoryId) {
+    //   for (const { name } of transaction) {
+    //     await updateOrCreateRule(orgId, name, input.categoryId);
+    //   }
+    // }
 
     // update transactionTag
     if (tagId) {
