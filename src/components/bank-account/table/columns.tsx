@@ -390,12 +390,8 @@ export const columns: ColumnDef<BankAccount>[] = [
         <ActionsCell
           id={row.original.id}
           manual={row.original.manual}
-          // @ts-expect-error - TODO: fix this
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           onViewDetails={meta?.setOpen}
-          // @ts-expect-error - TODO: fix this
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          onDelete={meta?.delete}
+          onDelete={meta?.deleteBankAccount}
         />
       );
     },

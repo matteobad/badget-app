@@ -116,8 +116,7 @@ export function DataTable(props: { type: CategoryType }) {
                 <TableCell
                   key={cell.id}
                   className={cn(
-                    index === 3 && "w-[50px]", // @ts-expect-error - TODO: fix this
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                    index === 3 && "w-[50px]",
                     cell.column.columnDef.meta?.className,
                   )}
                   onClick={() => {

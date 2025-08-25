@@ -59,8 +59,6 @@ export const columns: ColumnDef<Tag>[] = [
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-                // @ts-expect-error find a way to type meta
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
                 onClick={() => table.options.meta?.deleteTag?.(row.original.id)}
               >
                 Remove

@@ -1,6 +1,5 @@
 "use client";
 
-import type { TransactionStatusType } from "~/shared/constants/enum";
 import { use, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import {
@@ -127,26 +126,13 @@ export function DataTable({
           toast.error("Failed to copy transaction URL to clipboard");
         }
       },
-      updateTransactionCategory: (data: {
-        id: string;
-        categoryId?: string;
-      }) => {
+      updateTransaction: (data: { id: string; categoryId?: string }) => {
         updateTransactionMutation.mutate({
           id: data.id,
           categoryId: data.categoryId,
         });
       },
-      updateTransaction: (data: {
-        id: string;
-        categoryId?: string;
-        status: string;
-      }) => {
-        updateTransactionMutation.mutate({
-          id: data.id,
-          status: data.status as TransactionStatusType,
-        });
-      },
-      onDeleteTransaction: (id: string) => {
+      deleteTransaction: (id: string) => {
         deleteTransactionMutation.mutate({ id });
       },
     },
@@ -264,8 +250,6 @@ export function DataTable({
                             className={cn(
                               getStickyClassName(
                                 cell.column.id,
-                                // @ts-expect-error - TODO: fix this
-                                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                                 cell.column.columnDef.meta?.className,
                               ),
                               "py-3",

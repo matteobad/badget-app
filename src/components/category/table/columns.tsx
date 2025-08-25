@@ -171,14 +171,8 @@ export const columns: ColumnDef<Category>[] = [
       return (
         <ActionsCell
           id={row.original.id}
-          // @ts-expect-error - TODO: fix this
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           onViewDetails={meta?.setOpen}
-          // @ts-expect-error - TODO: fix this
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           onCreateSubCategory={meta?.createSubCategory}
-          // @ts-expect-error - TODO: fix this
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           onDeleteCategory={meta?.deleteCategory}
         />
       );

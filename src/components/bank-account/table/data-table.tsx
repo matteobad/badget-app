@@ -84,7 +84,7 @@ export function DataTable() {
       setOpen: (id: string) => {
         void setParams({ bankAccountId: id });
       },
-      delete: (id: string) => {
+      deleteBankAccount: (id: string) => {
         deleteBankAccountMutation.mutate({ id });
       },
     },
@@ -125,8 +125,7 @@ export function DataTable() {
                   <TableHead
                     key={header.id}
                     className={cn(
-                      "py-3 text-xs font-normal tracking-wide text-muted-foreground", // @ts-expect-error - TODO: fix this
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                      "py-3 text-xs font-normal tracking-wide text-muted-foreground",
                       header.column.columnDef.meta?.className,
                     )}
                   >
@@ -199,8 +198,6 @@ export function DataTable() {
                             key={cell.id}
                             className={cn(
                               "overflow-hidden border-neutral-50 py-4",
-                              // @ts-expect-error - TODO: fix this
-                              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                               cell.column.columnDef.meta?.className,
                             )}
                           >

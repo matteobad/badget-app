@@ -50,8 +50,6 @@ export function DataTable() {
                     key={cell.id}
                     className={cn(
                       "border-r-[0px] py-4",
-                      // @ts-expect-error fix types
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                       cell.column.columnDef.meta?.className,
                     )}
                   >

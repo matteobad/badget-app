@@ -1,6 +1,8 @@
+// TODO: Remove this import once we have a better way to type the table meta
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { RouterOutputs } from "@/trpc/client";
 
-declare module "@tanstack/table-core" {
+declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData extends RowData> {
     // Transaction table meta
@@ -8,24 +10,20 @@ declare module "@tanstack/table-core" {
     hasSorting?: boolean;
     setOpen?: (id: string) => void;
     copyUrl?: (id: string) => void;
-    updateTransaction?: (data: { id: string; status: string }) => void;
-    onDeleteTransaction?: (id: string) => void;
-
-    // Vault table meta
-    handleDelete?: (id: string) => void;
-    handleShare?: (pathTokens: string[]) => void;
+    updateTransaction?: (data: { id: string; categoryId?: string }) => void;
+    deleteTransaction?: (id: string) => void;
 
     // Categories table meta
+    createSubCategory?: (id: string) => void;
     deleteCategory?: (id: string) => void;
     expandedCategories?: Set<string>;
     setExpandedCategories?: React.Dispatch<React.SetStateAction<Set<string>>>;
 
-    // Customers table meta
-    deleteCustomer?: (id: string) => void;
+    // Bank Account table meta
+    deleteBankAccount?: (id: string) => void;
 
-    // Members table meta
-    currentUser?: RouterOutputs["team"]["members"][number];
-    totalOwners?: number;
+    // Tag table meta
+    deleteTag?: (id: string) => void;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

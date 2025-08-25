@@ -16,7 +16,9 @@ export function ManualAccounts() {
 
   return (
     <div className="space-y-6 divide-y px-6 pb-6">
-      {data?.map((account) => <BankAccount key={account.id} data={account} />)}
+      {data?.map((account) => (
+        <BankAccount key={account.id} data={account} />
+      ))}
     </div>
   );
 }
