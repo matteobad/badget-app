@@ -23,6 +23,8 @@ export const {
   signIn,
   signOut,
   signUp,
+  forgetPassword,
+  resetPassword,
   useSession,
   useActiveOrganization,
   organization,

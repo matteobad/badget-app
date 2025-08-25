@@ -208,6 +208,9 @@ importers:
       recharts:
         specifier: ^2.15.3
         version: 2.15.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      resend:
+        specifier: ^6.0.1
+        version: 6.0.1
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
@@ -7172,6 +7175,18 @@ packages:
         integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==,
       }
 
+  resend@6.0.1:
+    resolution:
+      {
+        integrity: sha512-xNZ0gKAOqQcH83lXsqNOwBbpKROnsZpQr9mXRdG6hrHTF9G9Il2pkoTRtq7rJzXMvCZX+I79oahsbSeaYOWRFA==,
+      }
+    engines: { node: ">=18" }
+    peerDependencies:
+      "@react-email/render": ^1.1.0
+    peerDependenciesMeta:
+      "@react-email/render":
+        optional: true
+
   resolve-from@4.0.0:
     resolution:
       {
@@ -12585,6 +12600,8 @@ snapshots:
       - supports-color
 
   requires-port@1.0.0: {}
+
+  resend@6.0.1: {}
 
   resolve-from@4.0.0: {}
 

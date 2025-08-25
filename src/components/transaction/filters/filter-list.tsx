@@ -80,8 +80,6 @@ export function FilterList({
   onRemove,
   categories,
   accounts,
-  members,
-  customers,
   tags,
   statusFilters,
   attachmentsFilters,
@@ -174,26 +172,6 @@ export function FilterList({
               name: account?.name,
               currency: account?.currency,
             });
-          })
-          .join(", ");
-      }
-
-      case "customers": {
-        const customersValue = value as FilterValue["customers"];
-        if (!customersValue) return null;
-        return customersValue
-          .map((id) => customers?.find((customer) => customer.id === id)?.name)
-          .join(", ");
-      }
-
-      case "assignees":
-      case "owners": {
-        const membersValue = value as FilterValue["assignees"];
-        if (!membersValue) return null;
-        return membersValue
-          .map((id) => {
-            const member = members?.find((member) => member.id === id);
-            return member?.name;
           })
           .join(", ");
       }

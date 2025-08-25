@@ -2,6 +2,7 @@
 
 import { db } from "~/server/db";
 import { getUserByIdQuery } from "~/server/domain/user/queries";
+import { resend } from "~/server/emails/resend";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
@@ -42,6 +43,21 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
+    // it sends the reset password token using resend to your email
+    sendResetPassword: async ({ user, url }) => {
+      const { data, error } = await resend.emails.send({
+        from: "Acme <onboarding@resend.dev>",
+        to: user.email,
+        subject: "Reset your password",
+        html: `Click the link to reset your password: ${url}`,
+      });
+
+      if (error) {
+        return console.error({ error });
+      }
+
+      console.log("Reset passoword email sent", { data });
+    },
   },
   // emailVerification: {
   //   sendVerificationEmail: async ({ user, url }) => {
@@ -49,6 +65,7 @@ export const auth = betterAuth({
   //     console.log(user, url);
   //   },
   // },
+
   plugins: [
     admin(),
     passkey(),
