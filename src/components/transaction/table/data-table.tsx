@@ -70,15 +70,6 @@ export function DataTable({
   const { data, fetchNextPage, hasNextPage, refetch } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
 
-  const updateTransactionMutation = useMutation(
-    trpc.transaction.update.mutationOptions({
-      onSuccess: () => {
-        void refetch();
-        toast.success("Transaction updated");
-      },
-    }),
-  );
-
   const deleteTransactionMutation = useMutation(
     trpc.transaction.delete.mutationOptions({
       onSuccess: () => {
@@ -125,12 +116,6 @@ export function DataTable({
         } catch {
           toast.error("Failed to copy transaction URL to clipboard");
         }
-      },
-      updateTransaction: (data: { id: string; categoryId?: string }) => {
-        updateTransactionMutation.mutate({
-          id: data.id,
-          categoryId: data.categoryId,
-        });
       },
       deleteTransaction: (id: string) => {
         deleteTransactionMutation.mutate({ id });

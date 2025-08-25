@@ -73,7 +73,7 @@ export const updateTransactionTagsSchema = z.object({
 });
 
 export const deleteTransactionSchema = z.object({
-  id: z.cuid2(),
+  id: z.uuid(),
 });
 
 export const deleteManyTransactionsSchema = z.object({

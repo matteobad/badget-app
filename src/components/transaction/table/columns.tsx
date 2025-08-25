@@ -1,9 +1,11 @@
 "use client";
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CategoryBadge } from "~/components/category/category-badge";
 import { FormatAmount } from "~/components/format-amount";
+import { Spinner } from "~/components/load-more";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -23,6 +25,7 @@ import {
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { formatDate } from "~/shared/helpers/format";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 import { EyeOffIcon, MoreHorizontalIcon, RepeatIcon } from "lucide-react";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -172,7 +175,6 @@ const CategoryCell = memo(
   ({
     id,
     category,
-    onUpdateTransactionCategory,
   }: {
     id: string;
     category?: {
@@ -183,18 +185,25 @@ const CategoryCell = memo(
       icon: string | null;
       excludeFromAnalytics: boolean | null;
     };
-    onUpdateTransactionCategory?: (data: {
-      id: string;
-      categoryId?: string;
-    }) => void;
   }) => {
-    const handleUpdateTransactionCategory = (categoryId?: string) => {
-      onUpdateTransactionCategory?.({ categoryId, id });
-    };
+    const [isOpen, setIsOpen] = useState(false);
+
+    const queryClient = useQueryClient();
+    const trpc = useTRPC();
+
+    const updateTransactionCategoryMutation = useMutation(
+      trpc.transaction.update.mutationOptions({
+        onSuccess: () => {
+          void queryClient.invalidateQueries({
+            queryKey: trpc.transaction.get.infiniteQueryKey(),
+          });
+        },
+      }),
+    );
 
     return (
       <div className="flex items-center gap-2">
-        <DropdownMenu>
+        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-auto p-0">
               <CategoryBadge category={category} />
@@ -207,13 +216,20 @@ const CategoryCell = memo(
           >
             <TransactionCategorySelect
               selectedItems={category ? [category.id] : []}
-              onSelect={handleUpdateTransactionCategory}
+              onSelect={(categoryId) => {
+                updateTransactionCategoryMutation.mutate({
+                  id,
+                  categoryId,
+                });
+                setIsOpen(false);
+              }}
             />
           </DropdownMenuContent>
         </DropdownMenu>
         {category?.excludeFromAnalytics && (
           <span className="text-sm text-muted-foreground">(Excluded)</span>
         )}
+        {updateTransactionCategoryMutation.isPending && <Spinner />}
       </div>
     );
   },
@@ -270,13 +286,11 @@ const ActionsCell = memo(
     transaction,
     onViewDetails,
     onCopyUrl,
-    onUpdateTransaction,
     onDeleteTransaction,
   }: {
     transaction: Transaction;
     onViewDetails?: (id: string) => void;
     onCopyUrl?: (id: string) => void;
-    onUpdateTransaction?: (data: { id: string; status: string }) => void;
     onDeleteTransaction?: (id: string) => void;
   }) => {
     const handleViewDetails = useCallback(() => {
@@ -286,14 +300,6 @@ const ActionsCell = memo(
     const handleCopyUrl = useCallback(() => {
       onCopyUrl?.(transaction.id);
     }, [transaction.id, onCopyUrl]);
-
-    const handleUpdateToPosted = useCallback(() => {
-      onUpdateTransaction?.({ id: transaction.id, status: "posted" });
-    }, [transaction.id, onUpdateTransaction]);
-
-    const handleUpdateToExcluded = useCallback(() => {
-      onUpdateTransaction?.({ id: transaction.id, status: "excluded" });
-    }, [transaction.id, onUpdateTransaction]);
 
     const handleDeleteTransaction = useCallback(() => {
       onDeleteTransaction?.(transaction.id);
@@ -313,18 +319,6 @@ const ActionsCell = memo(
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleCopyUrl}>Share URL</DropdownMenuItem>
           <DropdownMenuSeparator />
-          {!transaction.manual && transaction.status === "excluded" && (
-            <DropdownMenuItem onClick={handleUpdateToPosted}>
-              Include
-            </DropdownMenuItem>
-          )}
-
-          {!transaction.manual && transaction.status !== "excluded" && (
-            <DropdownMenuItem onClick={handleUpdateToExcluded}>
-              Exclude
-            </DropdownMenuItem>
-          )}
-
           {transaction.manual && (
             <DropdownMenuItem
               className="text-destructive"
@@ -395,16 +389,8 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       className: "border-l border-border",
     },
-    cell: ({ row, table }) => (
-      <CategoryCell
-        id={row.original.id}
-        category={row.original.category!}
-        onUpdateTransactionCategory={
-          // @ts-expect-error - TODO: fix this
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          table.options.meta?.updateTransactionCategory
-        }
-      />
+    cell: ({ row }) => (
+      <CategoryCell id={row.original.id} category={row.original.category!} />
     ),
   },
   {
@@ -447,7 +433,6 @@ export const columns: ColumnDef<Transaction>[] = [
           transaction={row.original}
           onViewDetails={meta?.setOpen}
           onCopyUrl={meta?.copyUrl}
-          onUpdateTransaction={meta?.updateTransaction}
           onDeleteTransaction={meta?.deleteTransaction}
         />
       );
