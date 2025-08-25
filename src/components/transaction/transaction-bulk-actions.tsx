@@ -55,7 +55,11 @@ export function BulkActions({ ids }: Props) {
   });
 
   const handleUpdateTransactionCategory = (categoryId?: string) => {
-    updateTransactionsMutation.mutate({ categoryId, ids });
+    toast.promise(updateTransactionsMutation.mutateAsync({ categoryId, ids }), {
+      loading: "Updating transactions...",
+      success: "Transactions updated successfully",
+      error: "Something went wrong please try again.",
+    });
   };
 
   return (

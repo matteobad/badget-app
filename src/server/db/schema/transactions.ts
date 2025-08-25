@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { pgEnum, unique } from "drizzle-orm/pg-core";
+import { index, pgEnum, unique } from "drizzle-orm/pg-core";
 
 import {
   TRANSACTION_FREQUENCY,
@@ -45,7 +45,7 @@ export const transaction_table = pgTable(
     rawId: d.text(),
     amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
     currency: d.char({ length: 3 }).notNull(),
-    date: d.timestamp({ withTimezone: true, mode: "string" }).notNull(),
+    date: d.date().notNull(),
     name: d.text().notNull(),
     description: d.text(),
     manual: d.boolean().default(false),
@@ -61,7 +61,33 @@ export const transaction_table = pgTable(
 
     ...timestamps,
   }),
-  (t) => [unique().on(t.organizationId, t.rawId)],
+  (t) => [
+    index("idx_transactions_date").using("btree", t.date.asc().nullsLast()),
+    index("idx_transactions_organization_id_date_name").using(
+      "btree",
+      t.organizationId.asc().nullsLast(),
+      t.date.asc().nullsLast(),
+      t.name.asc().nullsLast(),
+    ),
+    index("idx_transactions_organization_id_name").using(
+      "btree",
+      t.organizationId.asc().nullsLast(),
+      t.name.asc().nullsLast(),
+    ),
+    index("transactions_bank_account_id_idx").using(
+      "btree",
+      t.accountId.asc().nullsLast(),
+    ),
+    index("transactions_category_slug_idx").using(
+      "btree",
+      t.categorySlug.asc().nullsLast(),
+    ),
+    index("transactions_organization_id_idx").using(
+      "btree",
+      t.organizationId.asc().nullsLast(),
+    ),
+    unique().on(t.organizationId, t.rawId),
+  ],
 );
 
 export type DB_TransactionType = typeof transaction_table.$inferSelect;
