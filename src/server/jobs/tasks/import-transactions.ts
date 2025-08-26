@@ -123,12 +123,15 @@ export const importTransactionsTask = schemaTask({
 
     // Step 2: Parse CSV
     const parsedTransactions = await parseCSV(text, options, organizationId);
+    logger.info(`Parsed transactions ${parsedTransactions.length}`);
 
     // Step 3: Deduplicate
     const { new: newTransactions, duplicates } = await deduplicateTransactions(
       parsedTransactions,
       options.extraFields.accountId,
     );
+    logger.info(`New transactions ${newTransactions.length}`);
+    logger.info(`Duplicates transactions ${duplicates.length}`);
 
     // Step 4: Get account details
     const accountId = options.extraFields.accountId;
@@ -148,6 +151,11 @@ export const importTransactionsTask = schemaTask({
       newTransactions,
       accountData,
     );
+    logger.info(`Valid transactions ${valid.length}`);
+    logger.info(`Rejected transactions ${rejected.length}`);
+
+    // Exit if no valid transactions
+    if (valid.length === 0) return;
 
     // Step 6: Insert valid transactions
     await upsertTransactions.triggerAndWait({

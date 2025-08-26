@@ -28,6 +28,7 @@ export const createBankConnectionSchema = z.object({
         type: z.enum(ACCOUNT_TYPE),
         accountReference: z.string().nullable().optional(), // EnableBanking & GoCardLess
         expiresAt: z.string().nullable().optional(), // EnableBanking & GoCardLess
+        authoritativeFrom: z.string().nullable().optional(),
       }),
     )
     .refine((accounts) => accounts.some((account) => account.enabled), {

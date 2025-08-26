@@ -62,6 +62,7 @@ export async function createBankConnection(
         type: account.type,
         logoUrl: bankConnection.logoUrl ?? undefined,
         accountReference: account.accountReference ?? undefined,
+        authoritativeFrom: account.authoritativeFrom ?? undefined,
         balance: account.balance ?? 0,
         manual: false,
         orgId,

@@ -425,6 +425,9 @@ export async function deleteTransaction(
 
     // Recalculate snapshots from the transaction date
     const affectedDate = new Date(existingTransaction.date);
+
+    // TODO: if removing last first transaction we should 0-out
+    // the spashots until the new first transactions
     await recalculateSnapshots(
       tx,
       { accountId: existingTransaction.accountId, fromDate: affectedDate },

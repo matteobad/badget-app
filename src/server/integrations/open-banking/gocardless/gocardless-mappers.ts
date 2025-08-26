@@ -108,7 +108,11 @@ export const mapAccountsResponse = (
     manual: false,
     accountReference: requisitionId,
     timezone: "UTC",
-    authoritativeFrom: metadataData.created,
+    // date from that we have api transactions data
+    authoritativeFrom: subDays(
+      new Date(),
+      institutionData.transaction_total_days,
+    ).toISOString(),
   } satisfies GetAccountsResponse[number];
 };
 

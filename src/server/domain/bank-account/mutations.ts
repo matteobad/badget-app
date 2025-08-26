@@ -16,6 +16,7 @@ export type CreateBankAccountPayload = {
   type?: AccountType;
   logoUrl?: string;
   accountReference?: string;
+  authoritativeFrom?: string;
 };
 
 export const createBankAccountMutation = async (
@@ -37,6 +38,7 @@ export const createBankAccountMutation = async (
       logoUrl: payload.logoUrl,
       balance: payload.balance,
       accountReference: payload.accountReference,
+      authoritativeFrom: payload.authoritativeFrom,
     })
     .onConflictDoUpdate({
       target: [account_table.externalId, account_table.organizationId],
@@ -47,6 +49,7 @@ export const createBankAccountMutation = async (
         enabled: payload.enabled,
         balance: payload.balance,
         logoUrl: payload.logoUrl,
+        authoritativeFrom: payload.authoritativeFrom,
         //lastAccessed: new Date().toISOString(),
       },
     })

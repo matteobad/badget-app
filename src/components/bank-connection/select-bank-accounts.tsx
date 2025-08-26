@@ -205,6 +205,7 @@ export function SelectBankAccountsModal() {
         enabled: true,
         type: account.type,
         accountReference: ref!,
+        authoritativeFrom: account.authoritativeFrom,
         // expiresAt: account.expires_at,
       })),
     });
