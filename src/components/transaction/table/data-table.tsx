@@ -71,7 +71,7 @@ export function DataTable({
     useSuspenseInfiniteQuery(infiniteQueryOptions);
 
   const deleteTransactionMutation = useMutation(
-    trpc.transaction.delete.mutationOptions({
+    trpc.transaction.deleteTransaction.mutationOptions({
       onSuccess: () => {
         void refetch();
       },

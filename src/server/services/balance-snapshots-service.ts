@@ -1,0 +1,292 @@
+import { addDays } from "date-fns";
+import { and, desc, eq } from "drizzle-orm";
+
+import type { DBClient } from "../db";
+import { db } from "../db";
+import {
+  account_table,
+  balance_offset_table,
+  balance_snapshot_table,
+} from "../db/schema/accounts";
+import { transaction_table } from "../db/schema/transactions";
+import {
+  applyOffset,
+  calculateDailyBalance,
+  shouldAdjustOffset,
+} from "../domain/transaction/utils";
+
+/**
+ * Insert transactions in batch and handle offsets
+ */
+export async function adjustBalanceOffsets(
+  client: DBClient,
+  input: {
+    accountId: string;
+    fromDate: Date;
+  },
+  organizationId: string,
+) {
+  const { accountId } = input;
+
+  // Get all transactions for this account
+  const transactions = await client
+    .select()
+    .from(transaction_table)
+    .where(
+      and(
+        eq(transaction_table.accountId, accountId),
+        eq(transaction_table.organizationId, organizationId),
+      ),
+    )
+    .orderBy(transaction_table.date);
+
+  if (transactions.length === 0) {
+    return { updated_offset: false };
+  }
+
+  // Get account details
+  const account = await client
+    .select()
+    .from(account_table)
+    .where(eq(account_table.id, accountId))
+    .limit(1);
+
+  if (!account[0]) {
+    throw new Error(`Account ${accountId} not found`);
+  }
+
+  const accountData = account[0];
+  let updatedOffset = false;
+
+  // Check if any transactions need offset adjustment
+  const transactionsBeforeT0 = transactions.filter((tx) =>
+    shouldAdjustOffset(new Date(tx.date), accountData),
+  );
+
+  if (
+    transactionsBeforeT0.length > 0 &&
+    accountData.manual &&
+    accountData.t0Datetime
+  ) {
+    // Get existing transactions before t0
+    const existingBeforeT0 = await client
+      .select()
+      .from(transaction_table)
+      .where(
+        and(
+          eq(transaction_table.accountId, accountId),
+          eq(
+            transaction_table.date,
+            new Date(accountData.t0Datetime).toISOString().split("T")[0]!,
+          ),
+        ),
+      );
+
+    // Calculate new offset
+    const allBeforeT0 = [
+      ...existingBeforeT0.map((t) => ({
+        amount: t.amount,
+        date: new Date(t.date),
+      })),
+      ...transactionsBeforeT0.map((t) => ({
+        amount: t.amount,
+        date: new Date(t.date),
+      })),
+    ];
+
+    const newOffset = applyOffset(
+      accountId,
+      new Date(accountData.t0Datetime),
+      accountData.openingBalance ?? 0,
+      allBeforeT0,
+    );
+
+    // Upsert the offset
+    await db
+      .insert(balance_offset_table)
+      .values({
+        organizationId: accountData.organizationId,
+        accountId: accountId,
+        effectiveDatetime: newOffset.effectiveDatetime.toISOString(),
+        amount: newOffset.amount,
+      })
+      .onConflictDoUpdate({
+        target: [
+          balance_offset_table.accountId,
+          balance_offset_table.effectiveDatetime,
+        ],
+        set: {
+          amount: newOffset.amount,
+          updatedAt: new Date().toISOString(),
+        },
+      });
+
+    updatedOffset = true;
+  }
+
+  return { updatedOffset };
+}
+
+/**
+ * Recalculate snapshots from a given date onwards
+ * This is the core function that maintains balance consistency
+ */
+export async function recalculateSnapshots(
+  client: DBClient,
+  input: {
+    accountId: string;
+    fromDate: Date;
+  },
+  organizationId: string,
+) {
+  const { accountId, fromDate } = input;
+
+  // Get account details
+  const account = await client
+    .select()
+    .from(account_table)
+    .where(
+      and(
+        eq(account_table.id, accountId),
+        eq(account_table.organizationId, organizationId),
+      ),
+    )
+    .limit(1);
+
+  if (!account[0]) {
+    throw new Error(`Account ${accountId} not found`);
+  }
+
+  const accountData = account[0];
+
+  // Get all transactions for this account
+  const transactions = await client
+    .select()
+    .from(transaction_table)
+    .where(
+      and(
+        eq(transaction_table.accountId, accountId),
+        eq(transaction_table.organizationId, organizationId),
+      ),
+    )
+    .orderBy(transaction_table.date);
+
+  // Get all balance offsets for this account
+  const offsets = await client
+    .select()
+    .from(balance_offset_table)
+    .where(
+      and(
+        eq(balance_offset_table.accountId, accountId),
+        eq(balance_offset_table.organizationId, organizationId),
+      ),
+    )
+    .orderBy(balance_offset_table.effectiveDatetime);
+
+  // Calculate snapshots day by day from fromDate to today
+  const today = new Date();
+  let currentDate = new Date(fromDate);
+
+  while (currentDate <= today) {
+    const dateStr = currentDate.toISOString().split("T")[0]!;
+
+    // Calculate the computed balance for this date
+    const computedBalance = calculateDailyBalance(
+      currentDate,
+      accountData,
+      transactions,
+      offsets.map((o) => ({
+        effectiveDatetime: new Date(o.effectiveDatetime),
+        amount: o.amount,
+      })),
+    );
+
+    // Upsert the snapshot (derived or API)
+    await client
+      .insert(balance_snapshot_table)
+      .values({
+        organizationId: accountData.organizationId,
+        accountId: accountId,
+        date: dateStr,
+        closingBalance: computedBalance,
+        currency: accountData.currency,
+        source: "derived",
+      })
+      .onConflictDoUpdate({
+        target: [balance_snapshot_table.accountId, balance_snapshot_table.date],
+        set: {
+          closingBalance: computedBalance,
+          source: "derived",
+          updatedAt: new Date().toISOString(),
+        },
+      });
+
+    currentDate = addDays(currentDate, 1);
+  }
+}
+
+/**
+ * Force recalculation of all snapshots for an account
+ * Useful for data migration or fixing inconsistencies
+ */
+export async function forceRecalculateAllSnapshots(
+  client: DBClient,
+  input: { accountId: string },
+  organizationId: string,
+) {
+  const { accountId } = input;
+
+  // Get the earliest transaction date as the starting point
+  const earliestTransaction = await client
+    .select({ date: transaction_table.date })
+    .from(transaction_table)
+    .where(
+      and(
+        eq(transaction_table.accountId, accountId),
+        eq(transaction_table.organizationId, organizationId),
+      ),
+    )
+    .orderBy(transaction_table.date)
+    .limit(1);
+
+  const fromDate =
+    earliestTransaction.length > 0
+      ? new Date(earliestTransaction[0]!.date)
+      : new Date(); // If no transactions, start from today
+
+  await recalculateSnapshots(client, { accountId, fromDate }, organizationId);
+}
+
+/**
+ * Update account balance to reflect current state
+ * This should be called after any transaction modifications
+ */
+export async function updateAccountBalance(
+  client: DBClient,
+  input: { accountId: string },
+  organizationId: string,
+) {
+  // Get the latest snapshot
+  const latestSnapshot = await client
+    .select()
+    .from(balance_snapshot_table)
+    .where(
+      and(
+        eq(balance_snapshot_table.accountId, input.accountId),
+        eq(balance_snapshot_table.organizationId, organizationId),
+      ),
+    )
+    .orderBy(desc(balance_snapshot_table.date))
+    .limit(1);
+
+  if (latestSnapshot.length > 0) {
+    // Update the account balance
+    await client
+      .update(account_table)
+      .set({ balance: latestSnapshot[0]!.closingBalance })
+      .where(
+        (eq(account_table.id, input.accountId),
+        eq(account_table.organizationId, organizationId)),
+      );
+  }
+}

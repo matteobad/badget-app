@@ -1,4 +1,5 @@
 import type { DB_AttachmentType } from "~/server/db/schema/transactions";
+import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import type { Tag } from "emblor";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -66,7 +67,7 @@ export function TransactionDetails() {
   );
 
   const updateTransactionMutation = useMutation(
-    trpc.transaction.update.mutationOptions({
+    trpc.transaction.updateTransaction.mutationOptions({
       onSuccess: (_data) => {
         toast.success("Transazione aggiornata");
         void queryClient.invalidateQueries({
@@ -297,7 +298,7 @@ export function TransactionDetails() {
               updateTransactionMutation.mutate({
                 id: transactionId,
                 categoryId: value,
-                description: data.description,
+                description: data.description ?? undefined,
               });
             }}
           />
@@ -458,11 +459,7 @@ export function TransactionDetails() {
                 onValueChange={async (value) => {
                   updateTransactionMutation.mutate({
                     id: data?.id,
-                    frequency: value as
-                      | "weekly"
-                      | "monthly"
-                      | "annually"
-                      | "irregular",
+                    frequency: value as TransactionFrequencyType,
                   });
                 }}
               >

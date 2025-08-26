@@ -151,7 +151,7 @@ export const importTransactionsCSVAction = authActionClient
       "import-transactions",
       {
         filePath: uploadedFile.ufsUrl,
-        orgId,
+        organizationId: orgId,
         ...options,
       },
     );

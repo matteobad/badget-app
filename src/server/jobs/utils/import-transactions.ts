@@ -1,14 +1,25 @@
-import { createHash } from "node:crypto";
-import type {
-  CSVRow,
-  CSVRowParsed,
-  importTransactionSchema,
-} from "~/shared/validators/transaction.schema";
+import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
+import type { NormalizedTx } from "~/server/domain/transaction/utils";
+import type { importTransactionSchema } from "~/shared/validators/transaction.schema";
 import type z from "zod/v4";
+import { parse } from "@fast-csv/parse";
+import { logger } from "@trigger.dev/sdk";
+import {
+  calculateFingerprint,
+  normalizeDescription,
+} from "~/server/domain/transaction/utils";
 import { createTransactionSchema } from "~/shared/validators/transaction.schema";
-import { isValid, parse, parseISO } from "date-fns";
+import { isValid, parse as parseDate, parseISO } from "date-fns";
 
-type ImportTransactionType = z.infer<typeof importTransactionSchema>;
+import type { RowValidateCallback } from "@fast-csv/parse";
+
+export type ImportTransactionType = z.infer<typeof importTransactionSchema>;
+
+// CSV row interface - can be extended based on actual CSV format
+export type CSVRow = Record<string, string | null>;
+
+// Parsed and normalized transaction
+export type CSVRowParsed = DB_TransactionInsertType;
 
 function ensureValidYear(dateString: string | undefined) {
   if (!dateString) return new Date().toISOString().split("T")[0]!;
@@ -51,7 +62,7 @@ export function formatDate(date: string) {
   ];
 
   for (const format of formats) {
-    const parsedDate = parse(date, format, new Date());
+    const parsedDate = parseDate(date, format, new Date());
     if (isValid(parsedDate)) {
       return ensureValidYear(parsedDate.toISOString().split("T")[0]);
     }
@@ -119,25 +130,62 @@ export function formatAmountValue({
   return value;
 }
 
-function generateTransactionHash(
-  accountId: string,
-  description: string,
-  amount: number,
-  date: string, // ISO format
+/**
+ * Parse CSV content and return normalized transactions
+ */
+export async function parseCSV(
+  csvContent: string,
+  options: {
+    fieldMapping: ImportTransactionType["fieldMapping"];
+    extraFields: ImportTransactionType["extraFields"];
+    settings: ImportTransactionType["settings"];
+  },
+  organizationId: string,
 ) {
-  const normalizedDescription = description.trim().toLowerCase();
-  const payload = `${accountId}|${normalizedDescription}|${amount}|${date}`;
-  return createHash("sha256").update(payload).digest("hex");
+  const parsedTransactions = await new Promise<CSVRowParsed[]>(
+    (resolve, reject) => {
+      const rows: CSVRowParsed[] = [];
+
+      const parser = parse<CSVRow, CSVRowParsed>({ headers: true })
+        .transform((data: CSVRow) =>
+          transformRow(data, options, organizationId),
+        )
+        .validate((row, cb) => validateRow(row, cb))
+        .on("error", reject)
+        .on("data", (data: CSVRowParsed) => rows.push(data))
+        .on("data-invalid", (row, rowNumber, reason) => {
+          logger.warn(
+            `Invalid [rowNumber=${rowNumber}] [row=${JSON.stringify(row)}] [reason=${reason}]`,
+          );
+        })
+        .on("end", (rowCount: number) => {
+          logger.info(`Parsed ${rowCount} rows`);
+          resolve(rows.filter(Boolean));
+        });
+
+      parser.write(csvContent);
+      parser.end();
+    },
+  );
+
+  if (parsedTransactions.length === 0) {
+    throw new Error("No transactions found in CSV");
+  }
+
+  return parsedTransactions;
 }
 
-export function transform(
+/**
+ * Transform CSV row content and into normalized transaction
+ */
+export function transformRow(
   row: CSVRow,
   options: {
     fieldMapping: ImportTransactionType["fieldMapping"];
     extraFields: ImportTransactionType["extraFields"];
     settings: ImportTransactionType["settings"];
   },
-  orgId: string,
+  organizationId: string,
 ) {
   console.info("Raw row", { row });
   const { fieldMapping, extraFields, settings } = options;
@@ -152,7 +200,7 @@ export function transform(
 
   let description: string;
   column = fieldMapping.description;
-  if (column in row) description = row[column]!;
+  if (column in row) description = normalizeDescription(row[column]!);
   else throw new Error(`Col ${column} is not present in the CSV`);
 
   let amount: number;
@@ -167,32 +215,40 @@ export function transform(
   // add other columns mapping here
   const accountId = extraFields.accountId;
 
+  // Create normalized transaction for fingerprint calculation
+  const normalizedTx: NormalizedTx = {
+    accountId,
+    amount,
+    date: new Date(date),
+    descriptionNormalized: description,
+  };
+
   const mappedRow: CSVRowParsed = {
     date,
+    accountId,
     description,
     name: description,
     amount,
     currency: "EUR",
     method: "other",
     status: "posted",
-    organizationId: orgId,
-    rawId: generateTransactionHash(accountId, description, amount, date),
-    ...extraFields,
+    source: "csv",
+    fingerprint: calculateFingerprint(normalizedTx),
+    organizationId,
   };
 
-  console.info("Mapped row", { mappedRow });
+  return mappedRow;
+}
 
-  const parsedRow = createTransactionSchema.safeParse(mappedRow);
+/**
+ * Validate parsed CSV row content
+ */
+export function validateRow(row: CSVRowParsed, cb: RowValidateCallback) {
+  const parsedRow = createTransactionSchema.safeParse(row);
 
   if (!parsedRow.success) {
-    console.warn("Failed to parse mapped row", {
-      originalRow: row,
-      mappedRow,
-      errors: parsedRow.error,
-    });
+    cb(parsedRow.error, parsedRow.success, parsedRow.error.message);
   }
 
-  console.info("Parsed row", { parsedRow: parsedRow.data });
-
-  return parsedRow.data;
+  return cb(null, parsedRow.success);
 }

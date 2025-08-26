@@ -107,6 +107,8 @@ export const mapAccountsResponse = (
     enabled: true,
     manual: false,
     accountReference: requisitionId,
+    timezone: "UTC",
+    authoritativeFrom: metadataData.created,
   } satisfies GetAccountsResponse[number];
 };
 

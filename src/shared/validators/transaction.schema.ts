@@ -7,13 +7,10 @@ import { transaction_table } from "~/server/db/schema/transactions";
 import {
   TRANSACTION_FREQUENCY,
   TRANSACTION_METHOD,
+  TRANSACTION_SOURCE,
   TRANSACTION_STATUS,
 } from "~/shared/constants/enum";
-import {
-  createInsertSchema,
-  createSelectSchema,
-  createUpdateSchema,
-} from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import {
   parseAsArrayOf,
   parseAsBoolean,
@@ -29,6 +26,7 @@ export const createTransactionSchema = createInsertSchema(transaction_table, {
   method: z.enum(TRANSACTION_METHOD),
   status: z.enum(TRANSACTION_STATUS),
   frequency: z.enum(TRANSACTION_FREQUENCY).optional(),
+  source: z.enum(TRANSACTION_SOURCE).optional(),
 })
   .extend({
     attachment_ids: z.array(z.string()).optional(),
@@ -41,22 +39,58 @@ export const createTransactionSchema = createInsertSchema(transaction_table, {
     organizationId: true,
   });
 
-export const updateTransactionSchema = createUpdateSchema(transaction_table, {
-  id: z.string().min(1),
-  method: z.enum(TRANSACTION_METHOD).optional(),
+export const createManualTransactionSchema = z.object({
+  amount: z.number(),
+  currency: z.string(),
+  date: z.iso.date(),
+  name: z.string().min(1),
+  description: z.string().min(1),
+  counterparty: z.string().optional(),
   status: z.enum(TRANSACTION_STATUS).optional(),
+  source: z.enum(TRANSACTION_SOURCE).optional(),
+  method: z.enum(TRANSACTION_METHOD).optional(),
   frequency: z.enum(TRANSACTION_FREQUENCY).optional(),
-  note: z.string().nullable().optional(),
-})
-  .extend({
-    attachment_ids: z.array(z.string()).optional(),
-    tags: z.array(z.object({ id: z.string(), text: z.string() })).optional(),
-  })
-  .omit({
-    createdAt: true,
-    updatedAt: true,
-    organizationId: true,
-  });
+  internal: z.boolean().optional(),
+  note: z.string().optional(),
+  rawId: z.string().optional(),
+  accountId: z.uuid(),
+  transferId: z.uuid().optional(),
+  categoryId: z.uuid().optional(),
+  attachment_ids: z.array(z.string()).optional(),
+  tags: z.array(z.object({ id: z.string(), text: z.string() })).optional(),
+});
+
+export const createTransferSchema = z.object({
+  fromAccountId: z.uuid(),
+  toAccountId: z.uuid(),
+  amount: z.number(),
+  date: z.iso.date(),
+  description: z.string().min(1),
+});
+
+export const updateTransactionSchema = z.object({
+  id: z.uuid(),
+  amount: z.number().optional(),
+  date: z.iso.date().optional(),
+  description: z.string().optional(),
+  counterparty: z.string().optional(),
+  status: z.enum(TRANSACTION_STATUS).optional(),
+  categoryId: z.uuid().optional(),
+  categorySlug: z.string().optional(),
+  method: z.enum(TRANSACTION_METHOD).optional(),
+  note: z.string().optional(),
+  frequency: z.enum(TRANSACTION_FREQUENCY).optional(),
+  recurring: z.boolean().optional(),
+  internal: z.boolean().optional(),
+});
+
+export const deleteTransactionSchema = z.object({
+  id: z.uuid(),
+});
+
+export const deleteTranferSchema = z.object({
+  id: z.uuid(),
+});
 
 export const updateManyTransactionsSchema = z.object({
   ids: z.array(z.string().min(1)),
@@ -70,10 +104,6 @@ export const updateManyTransactionsSchema = z.object({
 export const updateTransactionTagsSchema = z.object({
   transactionId: z.cuid2(),
   tags: z.array(z.string()),
-});
-
-export const deleteTransactionSchema = z.object({
-  id: z.uuid(),
 });
 
 export const deleteManyTransactionsSchema = z.object({

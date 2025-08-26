@@ -3,10 +3,11 @@ import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { getBankAccountProvider } from "~/server/integrations/open-banking";
 import { syncAccountSchema } from "~/shared/validators/tasks.schema";
+import { subDays } from "date-fns";
 import { eq } from "drizzle-orm";
 
 import { parseAPIError } from "../utils/parse-error";
-import { upsertBalances } from "./upsert-balances";
+import { recalculateSnapshotsTask } from "./recalculate-snapshots";
 import { upsertTransactions } from "./upsert-transactions";
 
 const BATCH_SIZE = 500;
@@ -108,11 +109,15 @@ export const syncAccount = schemaTask({
         });
       }
 
-      // Upsert balances
-      await upsertBalances.triggerAndWait({
-        organizationId,
+      // Get the earliest date for snapshot recalculation
+      const dates = transactionsData.map((t) => new Date(t.date));
+      const earliestDate = new Date(Math.min(...dates.map((d) => d.getTime())));
+
+      // Recalculate daily balances snapshots
+      await recalculateSnapshotsTask.triggerAndWait({
         accountId: id,
-        manualSync,
+        fromDate: manualSync ? earliestDate : subDays(new Date(), 5),
+        organizationId,
       });
     } catch (error) {
       logger.error("Failed to sync transactions", { error });

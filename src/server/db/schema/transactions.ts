@@ -4,6 +4,7 @@ import { index, pgEnum, unique } from "drizzle-orm/pg-core";
 import {
   TRANSACTION_FREQUENCY,
   TRANSACTION_METHOD,
+  TRANSACTION_SOURCE,
   TRANSACTION_STATUS,
 } from "../../../shared/constants/enum";
 import { numericCasted, timestamps } from "../utils";
@@ -27,6 +28,11 @@ export const transactionFrequencyEnum = pgEnum(
   TRANSACTION_FREQUENCY,
 );
 
+export const transactionSourceEnum = pgEnum(
+  "transaction_source",
+  TRANSACTION_SOURCE,
+);
+
 export const transaction_table = pgTable(
   "transaction_table",
   (d) => ({
@@ -42,7 +48,6 @@ export const transaction_table = pgTable(
       .references(() => account_table.id),
     categoryId: d.uuid().references(() => category_table.id),
 
-    rawId: d.text(),
     amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
     currency: d.char({ length: 3 }).notNull(),
     date: d.date().notNull(),
@@ -58,6 +63,11 @@ export const transaction_table = pgTable(
     frequency: transactionFrequencyEnum(),
     status: transactionStatusEnum().default("posted").notNull(),
     note: d.text(),
+
+    rawId: d.text(), // External ID from API or CSV
+    fingerprint: d.text().notNull(), // Hash for deduplication
+    source: transactionSourceEnum().notNull().default("manual"), // Source of the transaction
+    transferId: d.uuid(), // For double-entry transfers between accounts
 
     ...timestamps,
   }),
@@ -86,7 +96,17 @@ export const transaction_table = pgTable(
       "btree",
       t.organizationId.asc().nullsLast(),
     ),
+    index("transactions_fingerprint_idx").using(
+      "btree",
+      t.accountId.asc().nullsLast(),
+      t.fingerprint.asc().nullsLast(),
+    ),
+    index("transactions_transfer_id_idx").using(
+      "btree",
+      t.transferId.asc().nullsLast(),
+    ),
     unique().on(t.organizationId, t.rawId),
+    unique().on(t.organizationId, t.fingerprint),
   ],
 );
 

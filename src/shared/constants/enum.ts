@@ -39,6 +39,13 @@ export const ACCOUNT_TYPE = {
 } as const;
 export type AccountType = (typeof ACCOUNT_TYPE)[keyof typeof ACCOUNT_TYPE];
 
+export const BALANCE_SOURCE = {
+  DERIVED: "derived",
+  API: "api",
+} as const;
+export type BalanceSourceType =
+  (typeof BALANCE_SOURCE)[keyof typeof BALANCE_SOURCE];
+
 export const TRANSACTION_STATUS = {
   POSTED: "posted",
   PENDING: "pending",
@@ -76,6 +83,14 @@ export const TRANSACTION_FREQUENCY = {
 } as const;
 export type TransactionFrequencyType =
   (typeof TRANSACTION_FREQUENCY)[keyof typeof TRANSACTION_FREQUENCY];
+
+export const TRANSACTION_SOURCE = {
+  API: "api",
+  MANUAL: "manual",
+  CSV: "csv",
+} as const;
+export type TransactionSourceType =
+  (typeof TRANSACTION_SOURCE)[keyof typeof TRANSACTION_SOURCE];
 
 export const SAVING_TYPE = {
   PENSION: "pension",

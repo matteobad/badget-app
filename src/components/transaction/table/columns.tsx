@@ -192,7 +192,7 @@ const CategoryCell = memo(
     const trpc = useTRPC();
 
     const updateTransactionCategoryMutation = useMutation(
-      trpc.transaction.update.mutationOptions({
+      trpc.transaction.updateTransaction.mutationOptions({
         onSuccess: () => {
           void queryClient.invalidateQueries({
             queryKey: trpc.transaction.get.infiniteQueryKey(),

@@ -9,7 +9,6 @@ import type z from "zod/v4";
 
 import type { DBClient } from "../db";
 import { db } from "../db";
-import { createBankAccountBalanceMutation } from "../domain/bank-account-balance/mutations";
 import {
   createBankAccountMutation,
   deleteBankAccountMutation,
@@ -50,13 +49,13 @@ export async function createBankAccount(
       return tx.rollback();
     }
 
-    await createBankAccountBalanceMutation(tx, {
-      accountId: bankAccount.id,
-      balance: input.balance,
-      currency: input.currency,
-      date: bankAccount.createdAt,
-      organizationId: orgId,
-    });
+    // await createBankAccountBalanceMutation(tx, {
+    //   accountId: bankAccount.id,
+    //   balance: input.balance,
+    //   currency: input.currency,
+    //   date: bankAccount.createdAt,
+    //   organizationId: orgId,
+    // });
   });
 }
 

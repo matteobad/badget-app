@@ -1,7 +1,9 @@
 import {
-  createTransaction,
+  createManualTransaction,
+  createTransfer,
   deleteManyTransactions,
   deleteTransaction,
+  deleteTransfer,
   getTransactionAccountCounts,
   getTransactionAmountRange,
   getTransactionById,
@@ -12,8 +14,10 @@ import {
   updateTransaction,
 } from "~/server/services/transaction-service";
 import {
-  createTransactionSchema,
+  createManualTransactionSchema,
+  createTransferSchema,
   deleteManyTransactionsSchema,
+  deleteTranferSchema,
   deleteTransactionSchema,
   getTransactionsSchema,
   updateManyTransactionsSchema,
@@ -25,6 +29,7 @@ import { z } from "zod/v4";
 import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const transactionRouter = createTRPCRouter({
+  // Transaction List Management
   get: protectedProcedure
     .input(getTransactionsSchema)
     .query(async ({ ctx, input }) => {
@@ -39,6 +44,7 @@ export const transactionRouter = createTRPCRouter({
       return await getTransactionById(input.id, orgId);
     }),
 
+  // Transaction Filters Helpers
   getAmountRange: protectedProcedure.query(async ({ ctx }) => {
     const orgId = ctx.orgId!;
     return await getTransactionAmountRange(orgId);
@@ -59,32 +65,43 @@ export const transactionRouter = createTRPCRouter({
     return await getTransactionAccountCounts(orgId);
   }),
 
-  create: protectedProcedure
-    .input(createTransactionSchema)
-    .mutation(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-      return await createTransaction(input, orgId);
+  // Manual Transaction Management
+  createManualTransaction: protectedProcedure
+    .input(createManualTransactionSchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await createManualTransaction(db, input, orgId!);
     }),
 
-  update: protectedProcedure
+  createTransfer: protectedProcedure
+    .input(createTransferSchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await createTransfer(db, input, orgId!);
+    }),
+
+  updateTransaction: protectedProcedure
     .input(updateTransactionSchema)
-    .mutation(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-      return await updateTransaction(input, orgId);
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await updateTransaction(db, input, orgId!);
     }),
 
+  deleteTransaction: protectedProcedure
+    .input(deleteTransactionSchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await deleteTransaction(db, input, orgId!);
+    }),
+
+  deleteTransfer: protectedProcedure
+    .input(deleteTranferSchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await deleteTransfer(db, input, orgId!);
+    }),
+
+  // Other Transaction Management
   updateMany: protectedProcedure
     .input(updateManyTransactionsSchema)
     .mutation(async ({ ctx, input }) => {
       const orgId = ctx.orgId!;
       return await updateManyTransactions(input, orgId);
-    }),
-
-  delete: protectedProcedure
-    .input(deleteTransactionSchema)
-    .mutation(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-      return await deleteTransaction(input, orgId);
     }),
 
   deleteMany: protectedProcedure

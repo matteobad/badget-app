@@ -46,7 +46,7 @@ import { type DB_AttachmentType } from "~/server/db/schema/transactions";
 import { deleteTransactionAttachmentAction } from "~/server/domain/transaction/actions";
 import { formatSize } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { createTransactionSchema } from "~/shared/validators/transaction.schema";
+import { createManualTransactionSchema } from "~/shared/validators/transaction.schema";
 import { UploadDropzone } from "~/utils/uploadthing";
 import { format } from "date-fns";
 import { type Tag } from "emblor";
@@ -77,13 +77,13 @@ export default function CreateTransactionForm() {
       onError: console.error,
       onSuccess: (data) => {
         if (form.getFieldState("categoryId").isDirty) return;
-        form.setValue("categoryId", data);
+        form.setValue("categoryId", data ?? undefined);
       },
     }),
   );
 
   const createTransactionMutation = useMutation(
-    trpc.transaction.create.mutationOptions({
+    trpc.transaction.createManualTransaction.mutationOptions({
       onError: (error) => {
         toast.error(error.message);
       },
@@ -112,8 +112,8 @@ export default function CreateTransactionForm() {
     },
   });
 
-  const form = useForm<z.infer<typeof createTransactionSchema>>({
-    resolver: standardSchemaResolver(createTransactionSchema),
+  const form = useForm<z.infer<typeof createManualTransactionSchema>>({
+    resolver: standardSchemaResolver(createManualTransactionSchema),
     defaultValues: {
       date: new Date().toISOString(),
       description: undefined,
@@ -121,7 +121,6 @@ export default function CreateTransactionForm() {
       accountId: accounts?.at(0)?.id,
       attachment_ids: [],
       tags: tags,
-      manual: true,
       method: "unknown",
       status: "posted",
     },
@@ -129,12 +128,10 @@ export default function CreateTransactionForm() {
 
   const bankAccountId = form.watch("accountId");
 
-  const handleSubmit = (data: z.infer<typeof createTransactionSchema>) => {
-    const formattedData = {
-      ...data,
-    };
-
-    createTransactionMutation.mutate(formattedData);
+  const handleSubmit = (
+    data: z.infer<typeof createManualTransactionSchema>,
+  ) => {
+    createTransactionMutation.mutate(data);
   };
 
   useEffect(() => {
@@ -201,7 +198,7 @@ export default function CreateTransactionForm() {
                         values.floatValue !== undefined &&
                         values.floatValue < 0
                       ) {
-                        form.setValue("categoryId", null);
+                        form.setValue("categoryId", undefined);
                       }
                     }}
                   />
