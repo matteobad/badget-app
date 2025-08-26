@@ -15,7 +15,7 @@ import {
   transaction_table,
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, ne } from "drizzle-orm";
 
 export async function createTransactionMutation(
   tx: TXType,
@@ -157,7 +157,7 @@ export async function deleteTransactionMutation(
     .where(
       and(
         eq(transaction_table.id, input.id),
-        eq(transaction_table.manual, true),
+        ne(transaction_table.source, "api"),
         eq(transaction_table.organizationId, orgId),
       ),
     )

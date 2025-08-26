@@ -60,7 +60,7 @@ export const reconnectConnection = schemaTask({
           await db
             .update(account_table)
             .set({
-              rawId: account.rawId,
+              externalId: account.externalId,
             })
             .where(
               eq(account_table.accountReference, account.accountReference!),

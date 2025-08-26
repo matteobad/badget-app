@@ -1,6 +1,10 @@
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
+import {
+  calculateFingerprint,
+  normalizeDescription,
+} from "~/server/domain/transaction/utils";
 import { getBankAccountProvider } from "~/server/integrations/open-banking";
 import { syncAccountSchema } from "~/shared/validators/tasks.schema";
 import { subDays } from "date-fns";
@@ -100,7 +104,27 @@ export const syncAccount = schemaTask({
       // Upsert transactions in batches of 500
       // This is to avoid memory issues with the DB
       for (let i = 0; i < transactionsData.length; i += BATCH_SIZE) {
-        const transactionBatch = transactionsData.slice(i, i + BATCH_SIZE);
+        const transactionBatch = transactionsData
+          .slice(i, i + BATCH_SIZE)
+          .map((transaction) => {
+            // Create normalized transaction for fingerprint calculation
+            const descriptionNormalized = normalizeDescription(
+              transaction.name,
+            );
+
+            const fingerprint = calculateFingerprint({
+              accountId,
+              amount: transaction.amount,
+              date: new Date(transaction.date),
+              descriptionNormalized,
+            });
+
+            return {
+              ...transaction,
+              fingerprint,
+            };
+          });
+
         await upsertTransactions.triggerAndWait({
           transactions: transactionBatch,
           organizationId,

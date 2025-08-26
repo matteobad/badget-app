@@ -195,7 +195,7 @@ export function SelectBankAccountsModal() {
       referenceId: ref!,
       provider: provider!,
       accounts: data?.map((account) => ({
-        accountId: account.rawId!,
+        accountId: account.externalId!,
         // institutionId: account.  .!,
         logoUrl: account.logoUrl,
         name: account.name,
@@ -243,13 +243,13 @@ export function SelectBankAccountsModal() {
 
                     {data?.map((account) => (
                       <FormField
-                        key={account.rawId}
+                        key={account.externalId}
                         control={form.control}
                         name="accounts"
                         render={({ field }) => {
                           return (
                             <FormItem
-                              key={account.rawId}
+                              key={account.externalId}
                               className="flex items-center justify-between"
                             >
                               <FormLabel className="mr-8 flex w-full items-center space-x-4">
@@ -289,14 +289,16 @@ export function SelectBankAccountsModal() {
                                     checked={
                                       field.value?.find(
                                         (value) =>
-                                          value.accountId === account.rawId,
+                                          value.accountId ===
+                                          account.externalId,
                                       )?.enabled
                                     }
                                     onCheckedChange={(checked) => {
                                       return field.onChange(
                                         field.value.map((value) => {
                                           if (
-                                            value.accountId === account.rawId
+                                            value.accountId ===
+                                            account.externalId
                                           ) {
                                             return {
                                               ...value,

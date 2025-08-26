@@ -319,7 +319,7 @@ const ActionsCell = memo(
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleCopyUrl}>Share URL</DropdownMenuItem>
           <DropdownMenuSeparator />
-          {transaction.manual && (
+          {transaction.source !== "api" && (
             <DropdownMenuItem
               className="text-destructive"
               onClick={handleDeleteTransaction}

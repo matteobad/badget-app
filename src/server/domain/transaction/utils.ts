@@ -122,12 +122,17 @@ export function calculateDailyBalance(
     balance += account.openingBalance;
   }
 
+  // Add balance for connected accounts
+  if (!account.manual && account.balance !== null) {
+    balance += account.balance;
+  }
+
   // Add all posted transactions up to this date
   const relevantTransactions = transactions.filter(
-    (tx) => tx.status === "posted" && new Date(tx.date) <= date,
+    (tx) => tx.status === "posted" && new Date(tx.date) >= date,
   );
 
-  balance += relevantTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+  balance += relevantTransactions.reduce((sum, tx) => sum - tx.amount, 0);
 
   // Add all offsets effective up to this date
   const relevantOffsets = offsets.filter(

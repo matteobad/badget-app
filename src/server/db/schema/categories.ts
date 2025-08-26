@@ -16,7 +16,7 @@ export const category_table = pgTable(
 
     // FK
     organizationId: d
-      .text()
+      .uuid()
       .references(() => organization_table.id, { onDelete: "cascade" })
       .notNull(),
     parentId: d.uuid().references((): AnyPgColumn => category_table.id, {
@@ -50,7 +50,7 @@ export const rule_table = pgTable(
 
     // FK
     organizationId: d
-      .text()
+      .uuid()
       .references(() => organization_table.id, { onDelete: "cascade" })
       .notNull(),
     categoryId: d

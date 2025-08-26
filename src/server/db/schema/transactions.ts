@@ -38,36 +38,40 @@ export const transaction_table = pgTable(
   (d) => ({
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
+    // FK
     organizationId: d
-      .text()
+      .uuid()
       .references(() => organization_table.id, { onDelete: "cascade" })
       .notNull(),
     accountId: d
       .uuid()
       .notNull()
-      .references(() => account_table.id),
-    categoryId: d.uuid().references(() => category_table.id),
+      .references(() => account_table.id, { onDelete: "cascade" }),
 
+    // Base properties
     amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
     currency: d.char({ length: 3 }).notNull(),
     date: d.date().notNull(),
     name: d.text().notNull(),
     description: d.text(),
-    manual: d.boolean().default(false),
-    notified: d.boolean().default(false),
     internal: d.boolean().default(false),
-    categorySlug: d.text(),
-    counterpartyName: d.text(),
     method: transactionMethodEnum().notNull(),
-    recurring: d.boolean().notNull().default(false),
-    frequency: transactionFrequencyEnum(),
     status: transactionStatusEnum().default("posted").notNull(),
     note: d.text(),
 
-    rawId: d.text(), // External ID from API or CSV
-    fingerprint: d.text().notNull(), // Hash for deduplication
-    source: transactionSourceEnum().notNull().default("manual"), // Source of the transaction
+    // Enrichement fields
+    categoryId: d.uuid().references(() => category_table.id),
+    categorySlug: d.text(),
+    counterpartyName: d.text(),
+    recurring: d.boolean().notNull().default(false),
+    frequency: transactionFrequencyEnum(),
     transferId: d.uuid(), // For double-entry transfers between accounts
+
+    // Metadata for internal use
+    externalId: d.text(), // External ID from API or CSV
+    fingerprint: d.text().notNull(), // Hash for deduplication
+    notified: d.boolean().default(false), // For notification to the user
+    source: transactionSourceEnum().notNull().default("manual"), // Source of the transaction
 
     ...timestamps,
   }),
@@ -105,8 +109,7 @@ export const transaction_table = pgTable(
       "btree",
       t.transferId.asc().nullsLast(),
     ),
-    unique().on(t.organizationId, t.rawId),
-    unique().on(t.organizationId, t.fingerprint),
+    unique().on(t.organizationId, t.externalId),
   ],
 );
 
@@ -122,7 +125,7 @@ export const attachment_table = pgTable("attachment_table", (d) => ({
     .notNull(),
 
   organizationId: d
-    .text()
+    .uuid()
     .references(() => organization_table.id, { onDelete: "cascade" })
     .notNull(),
   transactionId: d
@@ -148,7 +151,7 @@ export const tag_table = pgTable(
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
     organizationId: d
-      .text()
+      .uuid()
       .references(() => organization_table.id, { onDelete: "cascade" })
       .notNull(),
     text: d.text().notNull(),

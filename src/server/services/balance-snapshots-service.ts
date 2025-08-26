@@ -1,7 +1,8 @@
 import { addDays } from "date-fns";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 
 import type { DBClient } from "../db";
+import type { DB_BalanceSnapshotInsertType } from "../db/schema/accounts";
 import { db } from "../db";
 import {
   account_table,
@@ -184,6 +185,7 @@ export async function recalculateSnapshots(
     .orderBy(balance_offset_table.effectiveDatetime);
 
   // Calculate snapshots day by day from fromDate to today
+  const balances: DB_BalanceSnapshotInsertType[] = [];
   const today = new Date();
   let currentDate = new Date(fromDate);
 
@@ -201,28 +203,29 @@ export async function recalculateSnapshots(
       })),
     );
 
-    // Upsert the snapshot (derived or API)
-    await client
-      .insert(balance_snapshot_table)
-      .values({
-        organizationId: accountData.organizationId,
-        accountId: accountId,
-        date: dateStr,
-        closingBalance: computedBalance,
-        currency: accountData.currency,
-        source: "derived",
-      })
-      .onConflictDoUpdate({
-        target: [balance_snapshot_table.accountId, balance_snapshot_table.date],
-        set: {
-          closingBalance: computedBalance,
-          source: "derived",
-          updatedAt: new Date().toISOString(),
-        },
-      });
+    balances.push({
+      organizationId: accountData.organizationId,
+      accountId: accountId,
+      date: dateStr,
+      closingBalance: computedBalance,
+      currency: accountData.currency,
+      source: "derived",
+    });
 
     currentDate = addDays(currentDate, 1);
   }
+
+  // Upsert the snapshots (derived or API)
+  await client
+    .insert(balance_snapshot_table)
+    .values(balances)
+    .onConflictDoUpdate({
+      target: [balance_snapshot_table.accountId, balance_snapshot_table.date],
+      set: {
+        closingBalance: sql`excluded.closing_balance`,
+        source: sql`excluded.source`,
+      },
+    });
 }
 
 /**

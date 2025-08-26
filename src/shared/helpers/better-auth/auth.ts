@@ -10,6 +10,11 @@ import { admin, organization, twoFactor, username } from "better-auth/plugins";
 import { passkey } from "better-auth/plugins/passkey";
 
 export const auth = betterAuth({
+  advanced: {
+    database: {
+      generateId: false,
+    },
+  },
   user: {
     additionalFields: {
       defaultOrganizationId: {

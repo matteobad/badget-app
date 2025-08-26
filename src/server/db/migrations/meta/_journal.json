@@ -5,64 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1754378185041,
-      "tag": "0000_supreme_lord_tyger",
+      "when": 1756220357087,
+      "tag": "0000_chilly_albert_cleary",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1754382687131,
-      "tag": "0001_long_young_avengers",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1755436040062,
-      "tag": "0002_vengeful_agent_zero",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1755436515855,
-      "tag": "0003_open_cannonball",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1755520684687,
-      "tag": "0004_short_darwin",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1755600054729,
-      "tag": "0005_spicy_skaar",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1755622703386,
-      "tag": "0006_big_magik",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1756063553572,
-      "tag": "0007_flat_morg",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1756121614871,
-      "tag": "0008_wonderful_psylocke",
+      "when": 1756230851526,
+      "tag": "0001_misty_hammerhead",
       "breakpoints": true
     }
   ]

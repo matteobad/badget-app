@@ -153,7 +153,7 @@ export function DataTable({
       const found = rowSelection[transaction.id];
 
       if (found) {
-        return !transaction?.manual;
+        return transaction?.source !== "api"; // TODO: investigate why this is necessary
       }
       return false;
     });

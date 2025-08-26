@@ -25,7 +25,7 @@ export const createBankAccountMutation = async (
   const [result] = await db
     .insert(account_table)
     .values({
-      rawId: payload.accountId,
+      externalId: payload.accountId,
       connectionId: payload.connectionId,
       institutionId: payload.institutionId,
       organizationId: payload.orgId,
@@ -39,7 +39,7 @@ export const createBankAccountMutation = async (
       accountReference: payload.accountReference,
     })
     .onConflictDoUpdate({
-      target: [account_table.rawId, account_table.organizationId],
+      target: [account_table.externalId, account_table.organizationId],
       set: {
         connectionId: payload.connectionId,
         name: payload.name,

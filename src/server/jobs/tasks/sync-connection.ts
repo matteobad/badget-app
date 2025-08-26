@@ -48,7 +48,7 @@ export const syncConnection = schemaTask({
         const bankAccountsData = await db
           .select({
             id: account_table.id,
-            accountId: account_table.rawId,
+            accountId: account_table.externalId,
             organizationId: account_table.organizationId,
             type: account_table.type,
           })

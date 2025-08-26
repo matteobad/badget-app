@@ -1,1 +1,0 @@
-ALTER TABLE "badget_transaction_table" DROP CONSTRAINT "badget_transaction_table_rawId_unique";

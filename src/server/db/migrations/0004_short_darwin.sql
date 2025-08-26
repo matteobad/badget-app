@@ -1,1 +1,0 @@
-ALTER TABLE "badget_user" ADD COLUMN "default_organization_id" text DEFAULT '' NOT NULL;

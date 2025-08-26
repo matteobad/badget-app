@@ -1,28 +1,17 @@
 CREATE TYPE "public"."account_type" AS ENUM('checking', 'savings', 'cash', 'ewallet', 'credit_card', 'loan', 'mortgage', 'other_debt', 'etf', 'stock', 'bond', 'brokerage', 'pension', 'crypto', 'real_estate', 'vehicle', 'other_asset', 'other');--> statement-breakpoint
-CREATE TYPE "public"."bank_provider" AS ENUM('enablebanking', 'gocardless', 'plaid', 'teller');--> statement-breakpoint
+CREATE TYPE "public"."balance_source" AS ENUM('derived', 'api');--> statement-breakpoint
+CREATE TYPE "public"."category_type" AS ENUM('income', 'expense', 'transfer');--> statement-breakpoint
+CREATE TYPE "public"."bank_provider" AS ENUM('enablebanking', 'gocardless', 'saltedge', 'plaid', 'teller');--> statement-breakpoint
 CREATE TYPE "public"."connection_status" AS ENUM('connected', 'disconnected', 'unknown');--> statement-breakpoint
 CREATE TYPE "public"."transaction_frequency" AS ENUM('weekly', 'biweekly', 'monthly', 'semi_monthly', 'annually', 'irregular', 'unknown');--> statement-breakpoint
 CREATE TYPE "public"."transaction_method" AS ENUM('payment', 'card_purchase', 'card_atm', 'transfer', 'other', 'unknown', 'ach', 'interest', 'deposit', 'wire', 'fee');--> statement-breakpoint
+CREATE TYPE "public"."transaction_source" AS ENUM('api', 'manual', 'csv');--> statement-breakpoint
 CREATE TYPE "public"."transaction_status" AS ENUM('posted', 'pending', 'excluded', 'completed', 'archived');--> statement-breakpoint
-CREATE TABLE "badget_account_balance_table" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"organization_id" text NOT NULL,
-	"account_id" uuid,
-	"date" date NOT NULL,
-	"balance" numeric(10, 2) NOT NULL,
-	"currency" char(3) NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone,
-	"deleted_at" timestamp with time zone,
-	CONSTRAINT "badget_account_balance_table_accountId_date_unique" UNIQUE("account_id","date")
-);
---> statement-breakpoint
 CREATE TABLE "badget_account_table" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"organization_id" text NOT NULL,
+	"organization_id" uuid NOT NULL,
 	"institution_id" uuid,
 	"connection_id" uuid,
-	"raw_id" text,
 	"name" varchar(64) NOT NULL,
 	"description" text,
 	"type" "account_type" NOT NULL,
@@ -31,21 +20,65 @@ CREATE TABLE "badget_account_table" (
 	"currency" char(3) NOT NULL,
 	"enabled" boolean DEFAULT true NOT NULL,
 	"manual" boolean DEFAULT false NOT NULL,
+	"external_id" text,
+	"account_reference" text,
+	"timezone" text DEFAULT 'UTC' NOT NULL,
+	"t0_datetime" timestamp with time zone,
+	"opening_balance" numeric(10, 2),
+	"authoritative_from" timestamp with time zone,
 	"error_details" text,
 	"error_retries" smallint,
-	"account_reference" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "badget_account_table_rawId_unique" UNIQUE("raw_id"),
-	CONSTRAINT "badget_account_table_organizationId_rawId_unique" UNIQUE("organization_id","raw_id")
+	CONSTRAINT "badget_account_table_organizationId_externalId_unique" UNIQUE("organization_id","external_id")
+);
+--> statement-breakpoint
+CREATE TABLE "badget_balance_offset_table" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"account_id" uuid NOT NULL,
+	"effective_datetime" timestamp with time zone NOT NULL,
+	"amount" numeric(10, 2) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone,
+	"deleted_at" timestamp with time zone
+);
+--> statement-breakpoint
+CREATE TABLE "badget_balance_snapshot_table" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"account_id" uuid NOT NULL,
+	"date" date NOT NULL,
+	"closing_balance" numeric(10, 2) NOT NULL,
+	"currency" char(3) NOT NULL,
+	"source" "balance_source" DEFAULT 'derived' NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone,
+	"deleted_at" timestamp with time zone,
+	CONSTRAINT "badget_balance_snapshot_table_accountId_date_unique" UNIQUE("account_id","date")
+);
+--> statement-breakpoint
+CREATE TABLE "badget_import_table" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"account_id" uuid NOT NULL,
+	"file_name" text NOT NULL,
+	"rows_ok" integer DEFAULT 0 NOT NULL,
+	"rows_dup" integer DEFAULT 0 NOT NULL,
+	"rows_rej" integer DEFAULT 0 NOT NULL,
+	"date_min" date,
+	"date_max" date,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone,
+	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "badget_account" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"account_id" text NOT NULL,
 	"provider_id" text NOT NULL,
-	"user_id" text NOT NULL,
+	"user_id" uuid NOT NULL,
 	"access_token" text,
 	"refresh_token" text,
 	"id_token" text,
@@ -58,25 +91,25 @@ CREATE TABLE "badget_account" (
 );
 --> statement-breakpoint
 CREATE TABLE "badget_invitation" (
-	"id" text PRIMARY KEY NOT NULL,
-	"organization_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" uuid NOT NULL,
 	"email" text NOT NULL,
 	"role" text,
 	"status" text DEFAULT 'pending' NOT NULL,
 	"expires_at" timestamp NOT NULL,
-	"inviter_id" text NOT NULL
+	"inviter_id" uuid NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "badget_member" (
-	"id" text PRIMARY KEY NOT NULL,
-	"organization_id" text NOT NULL,
-	"user_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"user_id" uuid NOT NULL,
 	"role" text DEFAULT 'member' NOT NULL,
 	"created_at" timestamp NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "badget_organization" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
 	"slug" text,
 	"logo" text,
@@ -86,10 +119,10 @@ CREATE TABLE "badget_organization" (
 );
 --> statement-breakpoint
 CREATE TABLE "badget_passkey" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text,
 	"public_key" text NOT NULL,
-	"user_id" text NOT NULL,
+	"user_id" uuid NOT NULL,
 	"credential_i_d" text NOT NULL,
 	"counter" integer NOT NULL,
 	"device_type" text NOT NULL,
@@ -100,28 +133,28 @@ CREATE TABLE "badget_passkey" (
 );
 --> statement-breakpoint
 CREATE TABLE "badget_session" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"expires_at" timestamp NOT NULL,
 	"token" text NOT NULL,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL,
 	"ip_address" text,
 	"user_agent" text,
-	"user_id" text NOT NULL,
+	"user_id" uuid NOT NULL,
 	"impersonated_by" text,
 	"active_organization_id" text,
 	CONSTRAINT "badget_session_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
 CREATE TABLE "badget_two_factor" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"secret" text NOT NULL,
 	"backup_codes" text NOT NULL,
-	"user_id" text NOT NULL
+	"user_id" uuid NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "badget_user" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
 	"email" text NOT NULL,
 	"email_verified" boolean NOT NULL,
@@ -135,12 +168,13 @@ CREATE TABLE "badget_user" (
 	"two_factor_enabled" boolean,
 	"username" text,
 	"display_username" text,
+	"default_organization_id" text DEFAULT '' NOT NULL,
 	CONSTRAINT "badget_user_email_unique" UNIQUE("email"),
 	CONSTRAINT "badget_user_username_unique" UNIQUE("username")
 );
 --> statement-breakpoint
 CREATE TABLE "badget_verification" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"identifier" text NOT NULL,
 	"value" text NOT NULL,
 	"expires_at" timestamp NOT NULL,
@@ -150,14 +184,15 @@ CREATE TABLE "badget_verification" (
 --> statement-breakpoint
 CREATE TABLE "badget_category_table" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"organization_id" text NOT NULL,
+	"organization_id" uuid NOT NULL,
 	"parent_id" uuid,
-	"type" text NOT NULL,
+	"type" "category_type" NOT NULL,
 	"name" varchar(64) NOT NULL,
 	"slug" varchar(64) NOT NULL,
 	"color" varchar(32),
 	"icon" varchar(32),
 	"description" text,
+	"exclude_from_analytics" boolean DEFAULT false,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone,
 	"deleted_at" timestamp with time zone,
@@ -166,7 +201,7 @@ CREATE TABLE "badget_category_table" (
 --> statement-breakpoint
 CREATE TABLE "badget_rule_table" (
 	"id" varchar(128) PRIMARY KEY NOT NULL,
-	"organization_id" text NOT NULL,
+	"organization_id" uuid NOT NULL,
 	"category_id" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone,
@@ -185,7 +220,7 @@ CREATE TABLE "badget_token_table" (
 --> statement-breakpoint
 CREATE TABLE "badget_connection_table" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"organization_id" text NOT NULL,
+	"organization_id" uuid NOT NULL,
 	"institution_id" uuid NOT NULL,
 	"name" text NOT NULL,
 	"logo_url" text,
@@ -220,7 +255,7 @@ CREATE TABLE "badget_institution_table" (
 --> statement-breakpoint
 CREATE TABLE "badget_attachment_table" (
 	"id" varchar(128) PRIMARY KEY NOT NULL,
-	"organization_id" text NOT NULL,
+	"organization_id" uuid NOT NULL,
 	"transaction_id" uuid,
 	"file_name" text NOT NULL,
 	"file_key" text NOT NULL,
@@ -234,7 +269,7 @@ CREATE TABLE "badget_attachment_table" (
 --> statement-breakpoint
 CREATE TABLE "badget_tag_table" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"organization_id" text NOT NULL,
+	"organization_id" uuid NOT NULL,
 	"text" text NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone,
@@ -244,30 +279,32 @@ CREATE TABLE "badget_tag_table" (
 --> statement-breakpoint
 CREATE TABLE "badget_transaction_table" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"organization_id" text NOT NULL,
+	"organization_id" uuid NOT NULL,
 	"account_id" uuid NOT NULL,
-	"category_id" uuid,
-	"raw_id" text,
 	"amount" numeric(10, 2) NOT NULL,
 	"currency" char(3) NOT NULL,
-	"date" timestamp with time zone NOT NULL,
+	"date" date NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
-	"manual" boolean DEFAULT false,
-	"notified" boolean DEFAULT false,
 	"internal" boolean DEFAULT false,
-	"category_slug" text,
-	"counterparty_name" text,
 	"method" "transaction_method" NOT NULL,
-	"recurring" boolean DEFAULT false NOT NULL,
-	"frequency" "transaction_frequency",
 	"status" "transaction_status" DEFAULT 'posted' NOT NULL,
 	"note" text,
+	"category_id" uuid,
+	"category_slug" text,
+	"counterparty_name" text,
+	"recurring" boolean DEFAULT false NOT NULL,
+	"frequency" "transaction_frequency",
+	"transfer_id" uuid,
+	"external_id" text,
+	"fingerprint" text NOT NULL,
+	"notified" boolean DEFAULT false,
+	"source" "transaction_source" DEFAULT 'manual' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "badget_transaction_table_rawId_unique" UNIQUE("raw_id"),
-	CONSTRAINT "badget_transaction_table_organizationId_rawId_unique" UNIQUE("organization_id","raw_id")
+	CONSTRAINT "badget_transaction_table_organizationId_externalId_unique" UNIQUE("organization_id","external_id"),
+	CONSTRAINT "badget_transaction_table_organizationId_fingerprint_unique" UNIQUE("organization_id","fingerprint")
 );
 --> statement-breakpoint
 CREATE TABLE "badget_transaction_to_tag_table" (
@@ -280,11 +317,15 @@ CREATE TABLE "badget_transaction_to_tag_table" (
 	CONSTRAINT "badget_transaction_to_tag_table_transactionId_tagId_unique" UNIQUE("transaction_id","tag_id")
 );
 --> statement-breakpoint
-ALTER TABLE "badget_account_balance_table" ADD CONSTRAINT "badget_account_balance_table_organization_id_badget_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."badget_organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "badget_account_balance_table" ADD CONSTRAINT "badget_account_balance_table_account_id_badget_account_table_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."badget_account_table"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_account_table" ADD CONSTRAINT "badget_account_table_organization_id_badget_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."badget_organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_account_table" ADD CONSTRAINT "badget_account_table_institution_id_badget_institution_table_id_fk" FOREIGN KEY ("institution_id") REFERENCES "public"."badget_institution_table"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_account_table" ADD CONSTRAINT "badget_account_table_connection_id_badget_connection_table_id_fk" FOREIGN KEY ("connection_id") REFERENCES "public"."badget_connection_table"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "badget_balance_offset_table" ADD CONSTRAINT "badget_balance_offset_table_organization_id_badget_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."badget_organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "badget_balance_offset_table" ADD CONSTRAINT "badget_balance_offset_table_account_id_badget_account_table_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."badget_account_table"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "badget_balance_snapshot_table" ADD CONSTRAINT "badget_balance_snapshot_table_organization_id_badget_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."badget_organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "badget_balance_snapshot_table" ADD CONSTRAINT "badget_balance_snapshot_table_account_id_badget_account_table_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."badget_account_table"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "badget_import_table" ADD CONSTRAINT "badget_import_table_organization_id_badget_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."badget_organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "badget_import_table" ADD CONSTRAINT "badget_import_table_account_id_badget_account_table_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."badget_account_table"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_account" ADD CONSTRAINT "badget_account_user_id_badget_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."badget_user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_invitation" ADD CONSTRAINT "badget_invitation_organization_id_badget_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."badget_organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_invitation" ADD CONSTRAINT "badget_invitation_inviter_id_badget_user_id_fk" FOREIGN KEY ("inviter_id") REFERENCES "public"."badget_user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -304,9 +345,20 @@ ALTER TABLE "badget_attachment_table" ADD CONSTRAINT "badget_attachment_table_or
 ALTER TABLE "badget_attachment_table" ADD CONSTRAINT "badget_attachment_table_transaction_id_badget_transaction_table_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."badget_transaction_table"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_tag_table" ADD CONSTRAINT "badget_tag_table_organization_id_badget_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."badget_organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_transaction_table" ADD CONSTRAINT "badget_transaction_table_organization_id_badget_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."badget_organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "badget_transaction_table" ADD CONSTRAINT "badget_transaction_table_account_id_badget_account_table_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."badget_account_table"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "badget_transaction_table" ADD CONSTRAINT "badget_transaction_table_account_id_badget_account_table_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."badget_account_table"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_transaction_table" ADD CONSTRAINT "badget_transaction_table_category_id_badget_category_table_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."badget_category_table"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_transaction_to_tag_table" ADD CONSTRAINT "badget_transaction_to_tag_table_transaction_id_badget_transaction_table_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."badget_transaction_table"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_transaction_to_tag_table" ADD CONSTRAINT "badget_transaction_to_tag_table_tag_id_badget_tag_table_id_fk" FOREIGN KEY ("tag_id") REFERENCES "public"."badget_tag_table"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "balance_offset_account_datetime_idx" ON "badget_balance_offset_table" USING btree ("account_id","effective_datetime" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "organization_account_date_idx" ON "badget_balance_snapshot_table" USING btree ("organization_id","account_id","date" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "import_account_created_idx" ON "badget_import_table" USING btree ("account_id","created_at" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "badget_rule_table_organization_id_index" ON "badget_rule_table" USING btree ("organization_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "badget_token_table_rule_id_token_index" ON "badget_token_table" USING btree ("rule_id","token");
+CREATE UNIQUE INDEX "badget_token_table_rule_id_token_index" ON "badget_token_table" USING btree ("rule_id","token");--> statement-breakpoint
+CREATE INDEX "idx_transactions_date" ON "badget_transaction_table" USING btree ("date");--> statement-breakpoint
+CREATE INDEX "idx_transactions_organization_id_date_name" ON "badget_transaction_table" USING btree ("organization_id","date","name");--> statement-breakpoint
+CREATE INDEX "idx_transactions_organization_id_name" ON "badget_transaction_table" USING btree ("organization_id","name");--> statement-breakpoint
+CREATE INDEX "transactions_bank_account_id_idx" ON "badget_transaction_table" USING btree ("account_id");--> statement-breakpoint
+CREATE INDEX "transactions_category_slug_idx" ON "badget_transaction_table" USING btree ("category_slug");--> statement-breakpoint
+CREATE INDEX "transactions_organization_id_idx" ON "badget_transaction_table" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "transactions_fingerprint_idx" ON "badget_transaction_table" USING btree ("account_id","fingerprint");--> statement-breakpoint
+CREATE INDEX "transactions_transfer_id_idx" ON "badget_transaction_table" USING btree ("transfer_id");

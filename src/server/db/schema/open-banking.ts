@@ -43,7 +43,7 @@ export const connection_table = pgTable(
 
     // FK
     organizationId: d
-      .text()
+      .uuid()
       .references(() => organization_table.id, { onDelete: "cascade" })
       .notNull(),
     institutionId: d

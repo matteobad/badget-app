@@ -168,7 +168,7 @@ export async function createManualTransaction(
         method: input.method ?? "other",
         status: input.status ?? "posted",
         source: input.source ?? "manual",
-        rawId: input.rawId,
+        externalId: input.rawId,
         fingerprint,
         transferId: input.transferId,
         categoryId: input.categoryId,

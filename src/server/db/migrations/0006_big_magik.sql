@@ -1,1 +1,0 @@
-ALTER TABLE "badget_category_table" ADD COLUMN "exclude_from_analytics" boolean DEFAULT false;

@@ -16,13 +16,12 @@ export const account_table = pgTable(
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
     organizationId: d
-      .text()
+      .uuid()
       .references(() => organization_table.id, { onDelete: "cascade" })
       .notNull(),
     institutionId: d.uuid().references(() => institution_table.id),
     connectionId: d.uuid().references(() => connection_table.id),
 
-    rawId: d.text(),
     name: d.varchar({ length: 64 }).notNull(),
     description: d.text(),
     type: accountTypeEnum().notNull(),
@@ -31,19 +30,20 @@ export const account_table = pgTable(
     currency: d.char({ length: 3 }).notNull(),
     enabled: d.boolean().notNull().default(true),
     manual: d.boolean().notNull().default(false),
-    errorDetails: d.text(),
-    errorRetries: d.smallint(),
-    accountReference: d.text(),
 
-    // New fields for robust transaction system
+    // Metadata for internal use
+    externalId: d.text(), // External ID from API
+    accountReference: d.text(), // Gocardless ref of the connection
     timezone: d.text().notNull().default("UTC"), // Account timezone for end-of-day calculations
     t0Datetime: d.timestamp({ withTimezone: true, mode: "string" }), // Start-of-day for manual accounts
     openingBalance: numericCasted({ precision: 10, scale: 2 }), // Opening balance for manual accounts
     authoritativeFrom: d.timestamp({ withTimezone: true, mode: "string" }), // First API snapshot date for connected accounts
+    errorDetails: d.text(),
+    errorRetries: d.smallint(),
 
     ...timestamps,
   }),
-  (t) => [unique().on(t.organizationId, t.rawId)],
+  (t) => [unique().on(t.organizationId, t.externalId)],
 );
 
 export type DB_AccountType = typeof account_table.$inferSelect;
@@ -55,7 +55,7 @@ export const balance_snapshot_table = pgTable(
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
     organizationId: d
-      .text()
+      .uuid()
       .references(() => organization_table.id, { onDelete: "cascade" })
       .notNull(),
     accountId: d
@@ -91,7 +91,7 @@ export const balance_offset_table = pgTable(
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
     organizationId: d
-      .text()
+      .uuid()
       .references(() => organization_table.id, { onDelete: "cascade" })
       .notNull(),
     accountId: d
@@ -125,7 +125,7 @@ export const import_table = pgTable(
     id: d.uuid().defaultRandom().primaryKey().notNull(),
 
     organizationId: d
-      .text()
+      .uuid()
       .references(() => organization_table.id, { onDelete: "cascade" })
       .notNull(),
     accountId: d

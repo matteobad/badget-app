@@ -88,7 +88,7 @@ export const mapAccountsResponse = (
   institutionData: GC_GetInstitutionByIdResponse,
 ) => {
   return {
-    rawId: accountId,
+    externalId: accountId,
     name:
       detailsData.account.name ??
       detailsData.account.product ??
@@ -251,7 +251,7 @@ export const mapTransactionsResponse = (transaction: GC_Transaction) => {
   //   : null;
 
   return {
-    rawId: transaction.internalTransactionId ?? transaction.transactionId,
+    externalId: transaction.internalTransactionId ?? transaction.transactionId,
     date: transaction.bookingDateTime ?? transaction.bookingDate,
     method,
     amount: parseFloat(transaction.transactionAmount.amount),
@@ -264,6 +264,7 @@ export const mapTransactionsResponse = (transaction: GC_Transaction) => {
     name,
     description,
     status: "posted",
+    source: "api",
   } satisfies GetTransactionsResponse[number];
 };
 
