@@ -53,13 +53,13 @@ export function NetWorthChart({ disabled }: Props) {
       <div className="mb-14 space-y-2 select-text">
         <h1 className="font-mono text-4xl">
           <AnimatedNumber
-            value={data?.summary?.averageNetWorth ?? 0}
+            value={data?.summary?.currentNetWorth ?? 0}
             currency={data?.summary?.currency ?? "EUR"}
           />
         </h1>
 
         <div className="flex items-center space-x-2 text-sm">
-          <p className="text-sm">Average net worth</p>
+          <p className="text-sm">Current net worth</p>
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -70,19 +70,22 @@ export function NetWorthChart({ disabled }: Props) {
                 side="bottom"
                 sideOffset={10}
               >
-                <h3 className="font-medium text-primary">
-                  The Burn Rate is your monthly expenses divided by your current
-                  balance, estimating how long your funds will last.
+                <h3 className="font-medium">
+                  Net worth is the total value of all your assets minus your
+                  liabilities.
                 </h3>
                 <p>
-                  Explanation: This tracks how fast you&apos;re spending. If
-                  it&apos;s incorrect, internal transfers may be counted as
-                  income. You can adjust this by excluding the transactions from
-                  the calculations.
+                  This chart shows how your net worth changes over time, helping
+                  you track your overall financial progress. Your net worth
+                  increases as you save, invest, or pay down debts, and
+                  decreases if your expenses or debts grow. If it&apos;s
+                  incorrect, internal transfers may be counted as income. You
+                  can adjust this by excluding the transactions from the
+                  calculations.
                 </p>
 
                 <p>
-                  All amounts are converted into your{" "}
+                  All amounts are shown in your{" "}
                   <Link href="/settings/accounts" className="underline">
                     base currency
                   </Link>

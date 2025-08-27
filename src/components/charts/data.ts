@@ -111,7 +111,7 @@ export const expenseChartExampleData = {
 export const netWorthExamleData = {
   summary: {
     currency: "USD",
-    averageNetWorth: 800000,
+    currentNetWorth: 800000,
   },
   meta: {
     type: "net_worth",

@@ -90,21 +90,14 @@ export async function getNetWorth(db: DBClient, params: GetNetWorthParams) {
 
   const rawData = result.rows as unknown as NetWorthResultItem[];
 
-  const averageNetWorth =
+  const currentNetWorth =
     rawData && rawData.length > 0
-      ? Number(
-          (
-            rawData.reduce(
-              (sum, item) => sum + Number.parseFloat(item.value),
-              0,
-            ) / rawData.length
-          ).toFixed(2),
-        )
+      ? parseFloat(rawData[rawData.length - 1]?.value ?? "0")
       : 0;
 
   return {
     summary: {
-      averageNetWorth: Math.abs(averageNetWorth),
+      currentNetWorth: Math.abs(currentNetWorth),
       currency: rawData?.at(0)?.currency ?? inputCurrency,
     },
     meta: {
