@@ -111,34 +111,28 @@ export async function createManualTransaction(
 ) {
   return client.transaction(async (tx) => {
     // Get account details
-    const account = await tx
+    const [account] = await tx
       .select()
       .from(account_table)
       .where(eq(account_table.id, input.accountId))
       .limit(1);
 
-    if (!account[0]) {
+    if (!account) {
       throw new Error(`Account ${input.accountId} not found`);
     }
 
-    const accountData = account[0];
-
     // Validate account allows manual transactions
-    if (!accountData.manual) {
+    if (!account.manual) {
       throw new Error("Manual transactions not allowed for connected accounts");
     }
 
-    // Prepare transaction data
-    const date = new Date(input.date);
-    const description = input.description;
-    const descriptionNormalized = normalizeDescription(input.name);
-
     // Create normalized transaction for fingerprint calculation
+    const date = new Date(input.date);
     const normalizedTx: NormalizedTx = {
       accountId: input.accountId,
       amount: input.amount,
-      date: date,
-      descriptionNormalized,
+      date: new Date(input.date),
+      descriptionNormalized: normalizeDescription(input.name),
     };
 
     const fingerprint = calculateFingerprint(normalizedTx);
@@ -161,18 +155,17 @@ export async function createManualTransaction(
         organizationId,
         accountId: input.accountId,
         amount: input.amount,
-        currency: accountData.currency,
+        currency: account.currency,
         date: input.date,
         name: input.name,
-        description,
+        description: input.description,
         method: input.method ?? "other",
         status: input.status ?? "posted",
         source: input.source ?? "manual",
-        externalId: input.rawId,
-        fingerprint,
         transferId: input.transferId,
         categoryId: input.categoryId,
         note: input.note,
+        fingerprint,
       })
       .returning({ id: transaction_table.id });
 

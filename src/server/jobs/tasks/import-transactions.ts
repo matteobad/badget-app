@@ -170,7 +170,7 @@ export const importTransactionsTask = schemaTask({
     const maxDate = max(dates);
 
     // Step 8: Recalculate snapshots
-    void recalculateSnapshotsTask.trigger({
+    await recalculateSnapshotsTask.triggerAndWait({
       accountId: accountData.id,
       fromDate: minDate,
       organizationId,

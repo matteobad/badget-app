@@ -18,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { env } from "~/env";
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 import { ACCOUNT_TYPE } from "~/shared/constants/enum";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -77,12 +76,6 @@ export default function CreateBankAccountForm() {
         onSubmit={form.handleSubmit(handleSubmit, onError)}
         className="flex h-full flex-col gap-4"
       >
-        {env.NODE_ENV !== "production" && (
-          <pre>
-            <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
-          </pre>
-        )}
-
         <div className="grid w-full grid-cols-2 gap-4">
           <FormField
             control={form.control}

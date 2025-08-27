@@ -52,7 +52,6 @@ export const createManualTransactionSchema = z.object({
   frequency: z.enum(TRANSACTION_FREQUENCY).optional(),
   internal: z.boolean().optional(),
   note: z.string().optional(),
-  rawId: z.string().optional(),
   accountId: z.uuid(),
   transferId: z.uuid().optional(),
   categoryId: z.uuid().optional(),

@@ -115,31 +115,37 @@ export function calculateDailyBalance(
   transactions: DB_TransactionType[],
   offsets: Array<{ effectiveDatetime: Date; amount: number }>,
 ) {
-  let balance = 0;
+  // Manual accounts: forward accumulation from opening balance + offsets
+  if (account.manual) {
+    let balance = 0;
 
-  // Add opening balance for manual accounts
-  if (account.manual && account.openingBalance !== null) {
-    balance += account.openingBalance;
+    if (account.openingBalance !== null) {
+      balance += account.openingBalance;
+    }
+
+    const relevantTransactions = transactions.filter(
+      (tx) => tx.status === "posted" && new Date(tx.date) <= date,
+    );
+    balance += relevantTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+
+    const relevantOffsets = offsets.filter(
+      (offset) => offset.effectiveDatetime <= date,
+    );
+    balance += relevantOffsets.reduce((sum, offset) => sum + offset.amount, 0);
+
+    return balance;
   }
 
-  // Add balance for connected accounts
-  if (!account.manual && account.balance !== null) {
-    balance += account.balance;
-  }
+  // Connected accounts: reverse accumulation from current balance
+  // Assume account.balance reflects up-to-today closing balance
+  let balance = account.balance ?? 0;
 
-  // Add all posted transactions up to this date
-  const relevantTransactions = transactions.filter(
-    (tx) => tx.status === "posted" && new Date(tx.date) >= date,
+  const futureTransactions = transactions.filter(
+    (tx) => tx.status === "posted" && new Date(tx.date) > date,
   );
 
-  balance += relevantTransactions.reduce((sum, tx) => sum - tx.amount, 0);
-
-  // Add all offsets effective up to this date
-  const relevantOffsets = offsets.filter(
-    (offset) => offset.effectiveDatetime <= date,
-  );
-
-  balance += relevantOffsets.reduce((sum, offset) => sum + offset.amount, 0);
+  // Remove the effect of future transactions to get historical balance
+  balance -= futureTransactions.reduce((sum, tx) => sum + tx.amount, 0);
 
   return balance;
 }
@@ -189,7 +195,17 @@ export function shouldAdjustOffset(
     return false;
   }
 
-  return transactionDate < new Date(account.t0Datetime);
+  // Compare at date granularity in the account timezone
+  const txStartOfDay = toStartOfDayInTimezone(
+    transactionDate,
+    account.timezone,
+  );
+  const t0StartOfDay = toStartOfDayInTimezone(
+    new Date(account.t0Datetime),
+    account.timezone,
+  );
+
+  return txStartOfDay < t0StartOfDay;
 }
 
 /**

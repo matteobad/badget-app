@@ -3,7 +3,6 @@ import { and, desc, eq, sql } from "drizzle-orm";
 
 import type { DBClient } from "../db";
 import type { DB_BalanceSnapshotInsertType } from "../db/schema/accounts";
-import { db } from "../db";
 import {
   account_table,
   balance_offset_table,
@@ -13,7 +12,6 @@ import { transaction_table } from "../db/schema/transactions";
 import {
   applyOffset,
   calculateDailyBalance,
-  shouldAdjustOffset,
 } from "../domain/transaction/utils";
 
 /**
@@ -29,81 +27,61 @@ export async function adjustBalanceOffsets(
 ) {
   const { accountId } = input;
 
-  // Get all transactions for this account
-  const transactions = await client
-    .select()
-    .from(transaction_table)
-    .where(
-      and(
-        eq(transaction_table.accountId, accountId),
-        eq(transaction_table.organizationId, organizationId),
-      ),
-    )
-    .orderBy(transaction_table.date);
-
-  if (transactions.length === 0) {
-    return { updated_offset: false };
-  }
-
   // Get account details
-  const account = await client
+  const [account] = await client
     .select()
     .from(account_table)
-    .where(eq(account_table.id, accountId))
+    .where(
+      and(
+        eq(account_table.id, accountId),
+        eq(account_table.organizationId, organizationId),
+      ),
+    )
     .limit(1);
 
-  if (!account[0]) {
+  if (!account) {
     throw new Error(`Account ${accountId} not found`);
   }
 
-  const accountData = account[0];
   let updatedOffset = false;
 
-  // Check if any transactions need offset adjustment
-  const transactionsBeforeT0 = transactions.filter((tx) =>
-    shouldAdjustOffset(new Date(tx.date), accountData),
-  );
-
-  if (
-    transactionsBeforeT0.length > 0 &&
-    accountData.manual &&
-    accountData.t0Datetime
-  ) {
-    // Get existing transactions before t0
-    const existingBeforeT0 = await client
-      .select()
-      .from(transaction_table)
-      .where(
-        and(
-          eq(transaction_table.accountId, accountId),
-          eq(
-            transaction_table.date,
-            new Date(accountData.t0Datetime).toISOString().split("T")[0]!,
+  // If manual account with t0, collect posted tx strictly before t0 (date-only)
+  const transactionsBeforeT0 = account.t0Datetime
+    ? await client
+        .select()
+        .from(transaction_table)
+        .where(
+          and(
+            eq(transaction_table.accountId, accountId),
+            eq(transaction_table.organizationId, organizationId),
           ),
-        ),
-      );
+        )
+        .orderBy(transaction_table.date)
+    : [];
 
-    // Calculate new offset
-    const allBeforeT0 = [
-      ...existingBeforeT0.map((t) => ({
-        amount: t.amount,
-        date: new Date(t.date),
-      })),
-      ...transactionsBeforeT0.map((t) => ({
-        amount: t.amount,
-        date: new Date(t.date),
-      })),
-    ];
+  if (account.manual && account.t0Datetime) {
+    const t0DateStr = new Date(account.t0Datetime).toISOString().split("T")[0]!;
+
+    // Only posted and strictly before t0 date
+    const beforeT0Posted = transactionsBeforeT0.filter(
+      (t) => t.status === "posted" && t.date < t0DateStr,
+    );
+
+    // Compute offset from transactions strictly before t0
+    const allBeforeT0 = beforeT0Posted.map((t) => ({
+      amount: t.amount,
+      date: new Date(t.date),
+    }));
 
     const newOffset = applyOffset(
       accountId,
-      new Date(accountData.t0Datetime),
-      accountData.openingBalance ?? 0,
+      new Date(account.t0Datetime),
+      account.openingBalance ?? 0,
       allBeforeT0,
     );
 
-    // Upsert the offset
-    await db
+    // Upsert the offset using the same client (transaction-aware)
+    await client
       .insert(balance_offset_table)
       .values({
         organizationId,
