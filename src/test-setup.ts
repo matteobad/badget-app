@@ -17,7 +17,7 @@ await mock.module("./server/db", () => {
     logger: false,
     casing: "snake_case",
   });
-  return { client, db, schema };
+  return { client, db };
 });
 
 // Apply migrations before each test
@@ -28,6 +28,7 @@ beforeEach(async () => {
 // Clean up the database after each test
 afterEach(async () => {
   await reset(db, schema);
+  // TODO: Seed 1 fake user with 1 fake org
 });
 
 // Free up resources after all tests are done

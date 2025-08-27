@@ -24,7 +24,7 @@ export const account_table = pgTable(
 
     name: d.varchar({ length: 64 }).notNull(),
     description: d.text(),
-    type: accountTypeEnum().notNull(),
+    type: accountTypeEnum().notNull().default("checking"),
     logoUrl: d.varchar({ length: 2048 }),
     balance: numericCasted({ precision: 10, scale: 2 }).notNull(),
     currency: d.char({ length: 3 }).notNull(),

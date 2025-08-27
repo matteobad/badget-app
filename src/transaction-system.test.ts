@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+
 import { describe, it } from "bun:test";
 
 // ------------------------------

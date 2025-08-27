@@ -1,12 +1,12 @@
 import {
-  createBankAccount,
+  createManualBankAccount,
   deleteBankAccount,
   getBankAccountById,
   getBankAccounts,
   updateBankAccount,
 } from "~/server/services/bank-account-service";
 import {
-  createBankAccountSchema,
+  createManualBankAccountSchema,
   deleteBankAccountSchema,
   getBankAccountByIdSchema,
   getBankAccountsSchema,
@@ -30,10 +30,10 @@ export const bankAccountRouter = createTRPCRouter({
       return await getBankAccountById(input, orgId);
     }),
 
-  create: protectedProcedure
-    .input(createBankAccountSchema)
+  createManualBankAccount: protectedProcedure
+    .input(createManualBankAccountSchema)
     .mutation(async ({ ctx: { db, orgId }, input }) => {
-      return createBankAccount(db, input, orgId!);
+      return createManualBankAccount(db, input, orgId!);
     }),
 
   update: protectedProcedure

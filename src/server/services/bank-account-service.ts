@@ -1,5 +1,5 @@
 import type {
-  createBankAccountSchema,
+  createManualBankAccountSchema,
   deleteBankAccountSchema,
   getBankAccountByIdSchema,
   getBankAccountsSchema,
@@ -18,6 +18,7 @@ import {
   getBankAccountByIdQuery,
   getBankAccountsQuery,
 } from "../domain/bank-account/queries";
+import { recalculateSnapshots } from "./balance-snapshots-service";
 
 export async function getBankAccounts(
   input: z.infer<typeof getBankAccountsSchema>,
@@ -33,15 +34,17 @@ export async function getBankAccountById(
   return await getBankAccountByIdQuery({ ...input, orgId });
 }
 
-export async function createBankAccount(
+export async function createManualBankAccount(
   db: DBClient,
-  input: z.infer<typeof createBankAccountSchema>,
-  orgId: string,
+  input: z.infer<typeof createManualBankAccountSchema>,
+  organizationId: string,
 ) {
   return await db.transaction(async (tx) => {
     const bankAccount = await createBankAccountMutation(tx, {
       ...input,
-      orgId,
+      openingBalance: input.balance,
+      t0Datetime: new Date().toISOString(),
+      organizationId,
     });
 
     if (!bankAccount) {
@@ -49,13 +52,14 @@ export async function createBankAccount(
       return tx.rollback();
     }
 
-    // await createBankAccountBalanceMutation(tx, {
-    //   accountId: bankAccount.id,
-    //   balance: input.balance,
-    //   currency: input.currency,
-    //   date: bankAccount.createdAt,
-    //   organizationId: orgId,
-    // });
+    // Recalculate snapshots from the affected date
+    await recalculateSnapshots(
+      tx,
+      { accountId: bankAccount.id, fromDate: new Date() },
+      organizationId,
+    );
+
+    return bankAccount;
   });
 }
 

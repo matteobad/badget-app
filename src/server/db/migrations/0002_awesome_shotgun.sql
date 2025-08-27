@@ -1,0 +1,1 @@
+ALTER TABLE "badget_account_table" ALTER COLUMN "type" SET DEFAULT 'checking';

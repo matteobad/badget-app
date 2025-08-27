@@ -57,7 +57,7 @@ export const getBankAccountByIdSchema = z.object({
   }),
 });
 
-export const createBankAccountSchema = z
+export const createManualBankAccountSchema = z
   .object({
     name: z.string().openapi({
       description: "The name of the bank account.",

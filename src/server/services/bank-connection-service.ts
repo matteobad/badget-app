@@ -65,7 +65,7 @@ export async function createBankConnection(
         authoritativeFrom: account.authoritativeFrom ?? undefined,
         balance: account.balance ?? 0,
         manual: false,
-        orgId,
+        organizationId: orgId,
       });
     }
 

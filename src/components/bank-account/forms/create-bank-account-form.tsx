@@ -21,14 +21,10 @@ import {
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 import { ACCOUNT_TYPE } from "~/shared/constants/enum";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { createBankAccountSchema } from "~/shared/validators/bank-account.schema";
+import { createManualBankAccountSchema } from "~/shared/validators/bank-account.schema";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod/v4";
-
-// import { createAccountAction } from "../server/actions";
-// import { AccountInsertSchema } from "../utils/schemas";
-// import { AccountTypePicker } from "./account-type-picker";
 
 export default function CreateBankAccountForm() {
   const { setParams } = useBankAccountParams();
@@ -37,7 +33,7 @@ export default function CreateBankAccountForm() {
   const queryClient = useQueryClient();
 
   const createBankAccountMutation = useMutation(
-    trpc.bankAccount.create.mutationOptions({
+    trpc.bankAccount.createManualBankAccount.mutationOptions({
       onError: (error) => {
         toast.error(error.message);
       },
@@ -52,19 +48,17 @@ export default function CreateBankAccountForm() {
     }),
   );
 
-  const form = useForm<z.infer<typeof createBankAccountSchema>>({
-    resolver: standardSchemaResolver(createBankAccountSchema),
+  const form = useForm<z.infer<typeof createManualBankAccountSchema>>({
+    resolver: standardSchemaResolver(createManualBankAccountSchema),
     defaultValues: {
       currency: "EUR",
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof createBankAccountSchema>) => {
-    const formattedData = {
-      ...data,
-    };
-
-    createBankAccountMutation.mutate(formattedData);
+  const handleSubmit = (
+    data: z.infer<typeof createManualBankAccountSchema>,
+  ) => {
+    createBankAccountMutation.mutate(data);
   };
 
   return (
@@ -73,9 +67,9 @@ export default function CreateBankAccountForm() {
         onSubmit={form.handleSubmit(handleSubmit)}
         className="flex h-full flex-col gap-4"
       >
-        {/* <pre>
+        <pre>
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
-        </pre> */}
+        </pre>
 
         <div className="grid w-full grid-cols-2 gap-4">
           <FormField

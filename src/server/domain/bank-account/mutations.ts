@@ -5,18 +5,20 @@ import { and, eq } from "drizzle-orm";
 
 export type CreateBankAccountPayload = {
   name: string;
+  balance: number;
+  currency: string;
   accountId?: string;
   institutionId?: string;
   connectionId?: string;
-  balance: number;
-  currency: string;
-  orgId: string;
+  openingBalance?: number;
   manual?: boolean;
   enabled?: boolean;
   type?: AccountType;
   logoUrl?: string;
   accountReference?: string;
   authoritativeFrom?: string;
+  t0Datetime?: string;
+  organizationId: string;
 };
 
 export const createBankAccountMutation = async (
@@ -25,21 +27,7 @@ export const createBankAccountMutation = async (
 ) => {
   const [result] = await db
     .insert(account_table)
-    .values({
-      externalId: payload.accountId,
-      connectionId: payload.connectionId,
-      institutionId: payload.institutionId,
-      organizationId: payload.orgId,
-      name: payload.name,
-      currency: payload.currency,
-      manual: payload.manual ?? true,
-      enabled: payload.enabled,
-      type: payload.type ?? "checking",
-      logoUrl: payload.logoUrl,
-      balance: payload.balance,
-      accountReference: payload.accountReference,
-      authoritativeFrom: payload.authoritativeFrom,
-    })
+    .values(payload)
     .onConflictDoUpdate({
       target: [account_table.externalId, account_table.organizationId],
       set: {
