@@ -115,8 +115,8 @@ export default function CreateTransactionForm() {
   const form = useForm<z.infer<typeof createManualTransactionSchema>>({
     resolver: standardSchemaResolver(createManualTransactionSchema),
     defaultValues: {
-      date: new Date().toISOString(),
-      description: undefined,
+      date: format(new Date(), "yyyy-MM-dd"),
+      description: "",
       currency: "EUR",
       accountId: accounts?.at(0)?.id,
       attachment_ids: [],
@@ -134,6 +134,15 @@ export default function CreateTransactionForm() {
     createTransactionMutation.mutate(data);
   };
 
+  const onError = (errors: typeof form.formState.errors) => {
+    // raccogli tutti i messaggi di errore
+    const messages = Object.values(errors).map((err) => err?.message);
+
+    messages.forEach((msg) => {
+      if (msg) toast.error(msg);
+    });
+  };
+
   useEffect(() => {
     if (!bankAccountId && accounts?.length) {
       const firstAccountId = accounts.at(0)?.id;
@@ -146,7 +155,10 @@ export default function CreateTransactionForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit, onError)}
+        className="space-y-4"
+      >
         {/* <pre>
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
         </pre> */}
@@ -280,7 +292,9 @@ export default function CreateTransactionForm() {
                     <Calendar
                       mode="single"
                       selected={new Date(field.value)}
-                      onSelect={field.onChange}
+                      onSelect={(value) => {
+                        field.onChange(format(value, "yyyy-MM-dd"));
+                      }}
                       disabled={(date) => date < new Date("1900-01-01")}
                       captionLayout="dropdown"
                       required // allow selecting same date

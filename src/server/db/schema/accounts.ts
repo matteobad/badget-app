@@ -1,4 +1,4 @@
-import { index, pgEnum, unique } from "drizzle-orm/pg-core";
+import { index, pgEnum, unique, uniqueIndex } from "drizzle-orm/pg-core";
 
 import { ACCOUNT_TYPE, BALANCE_SOURCE } from "../../../shared/constants/enum";
 import { numericCasted, timestamps } from "../utils";
@@ -107,7 +107,7 @@ export const balance_offset_table = pgTable(
     ...timestamps,
   }),
   (t) => [
-    index("balance_offset_account_datetime_idx").on(
+    uniqueIndex("balance_offset_account_datetime_idx").on(
       t.accountId,
       t.effectiveDatetime.desc(),
     ),

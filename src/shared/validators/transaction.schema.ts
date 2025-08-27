@@ -44,7 +44,7 @@ export const createManualTransactionSchema = z.object({
   currency: z.string(),
   date: z.iso.date(),
   name: z.string().min(1),
-  description: z.string().min(1),
+  description: z.string(),
   counterparty: z.string().optional(),
   status: z.enum(TRANSACTION_STATUS).optional(),
   source: z.enum(TRANSACTION_SOURCE).optional(),

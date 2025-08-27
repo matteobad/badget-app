@@ -130,8 +130,8 @@ export async function createManualTransaction(
 
     // Prepare transaction data
     const date = new Date(input.date);
-    const description = input.description || "";
-    const descriptionNormalized = normalizeDescription(description);
+    const description = input.description;
+    const descriptionNormalized = normalizeDescription(input.name);
 
     // Create normalized transaction for fingerprint calculation
     const normalizedTx: NormalizedTx = {
@@ -163,7 +163,7 @@ export async function createManualTransaction(
         amount: input.amount,
         currency: accountData.currency,
         date: input.date,
-        name: description,
+        name: input.name,
         description,
         method: input.method ?? "other",
         status: input.status ?? "posted",

@@ -44,6 +44,7 @@ export async function createManualBankAccount(
       ...input,
       openingBalance: input.balance,
       t0Datetime: new Date().toISOString(),
+      manual: true,
       organizationId,
     });
 

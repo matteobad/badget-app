@@ -106,8 +106,8 @@ export async function adjustBalanceOffsets(
     await db
       .insert(balance_offset_table)
       .values({
-        organizationId: accountData.organizationId,
-        accountId: accountId,
+        organizationId,
+        accountId,
         effectiveDatetime: newOffset.effectiveDatetime.toISOString(),
         amount: newOffset.amount,
       })
@@ -118,7 +118,6 @@ export async function adjustBalanceOffsets(
         ],
         set: {
           amount: newOffset.amount,
-          updatedAt: new Date().toISOString(),
         },
       });
 
@@ -215,6 +214,10 @@ export async function recalculateSnapshots(
     currentDate = addDays(currentDate, 1);
   }
 
+  if (balances.length === 0) {
+    return;
+  }
+
   // Upsert the snapshots (derived or API)
   await client
     .insert(balance_snapshot_table)
@@ -288,8 +291,10 @@ export async function updateAccountBalance(
       .update(account_table)
       .set({ balance: latestSnapshot[0]!.closingBalance })
       .where(
-        (eq(account_table.id, input.accountId),
-        eq(account_table.organizationId, organizationId)),
+        and(
+          eq(account_table.id, input.accountId),
+          eq(account_table.organizationId, organizationId),
+        ),
       );
   }
 }
