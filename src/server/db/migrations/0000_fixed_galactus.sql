@@ -14,7 +14,7 @@ CREATE TABLE "badget_account_table" (
 	"connection_id" uuid,
 	"name" varchar(64) NOT NULL,
 	"description" text,
-	"type" "account_type" NOT NULL,
+	"type" "account_type" DEFAULT 'checking' NOT NULL,
 	"logo_url" varchar(2048),
 	"balance" numeric(10, 2) NOT NULL,
 	"currency" char(3) NOT NULL,
@@ -303,8 +303,7 @@ CREATE TABLE "badget_transaction_table" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "badget_transaction_table_organizationId_externalId_unique" UNIQUE("organization_id","external_id"),
-	CONSTRAINT "badget_transaction_table_organizationId_fingerprint_unique" UNIQUE("organization_id","fingerprint")
+	CONSTRAINT "badget_transaction_table_organizationId_externalId_unique" UNIQUE("organization_id","external_id")
 );
 --> statement-breakpoint
 CREATE TABLE "badget_transaction_to_tag_table" (
@@ -349,7 +348,7 @@ ALTER TABLE "badget_transaction_table" ADD CONSTRAINT "badget_transaction_table_
 ALTER TABLE "badget_transaction_table" ADD CONSTRAINT "badget_transaction_table_category_id_badget_category_table_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."badget_category_table"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_transaction_to_tag_table" ADD CONSTRAINT "badget_transaction_to_tag_table_transaction_id_badget_transaction_table_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."badget_transaction_table"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "badget_transaction_to_tag_table" ADD CONSTRAINT "badget_transaction_to_tag_table_tag_id_badget_tag_table_id_fk" FOREIGN KEY ("tag_id") REFERENCES "public"."badget_tag_table"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "balance_offset_account_datetime_idx" ON "badget_balance_offset_table" USING btree ("account_id","effective_datetime" DESC NULLS LAST);--> statement-breakpoint
+CREATE UNIQUE INDEX "balance_offset_account_datetime_idx" ON "badget_balance_offset_table" USING btree ("account_id","effective_datetime" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "organization_account_date_idx" ON "badget_balance_snapshot_table" USING btree ("organization_id","account_id","date" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "import_account_created_idx" ON "badget_import_table" USING btree ("account_id","created_at" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "badget_rule_table_organization_id_index" ON "badget_rule_table" USING btree ("organization_id");--> statement-breakpoint

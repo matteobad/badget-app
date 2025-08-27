@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1756220357087,
-      "tag": "0000_chilly_albert_cleary",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1756230851526,
-      "tag": "0001_misty_hammerhead",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1756295946912,
-      "tag": "0002_awesome_shotgun",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1756299130308,
-      "tag": "0003_jazzy_ulik",
+      "when": 1756318948359,
+      "tag": "0000_fixed_galactus",
       "breakpoints": true
     }
   ]

@@ -1,2 +1,0 @@
-DROP INDEX "balance_offset_account_datetime_idx";--> statement-breakpoint
-CREATE UNIQUE INDEX "balance_offset_account_datetime_idx" ON "badget_balance_offset_table" USING btree ("account_id","effective_datetime" DESC NULLS LAST);
