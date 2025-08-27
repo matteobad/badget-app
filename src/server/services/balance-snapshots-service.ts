@@ -73,6 +73,9 @@ export async function adjustBalanceOffsets(
       date: new Date(t.date),
     }));
 
+    // When no transactions before t0 nothing to do here
+    if (allBeforeT0.length === 0) return { updatedOffset: false };
+
     const newOffset = applyOffset(
       accountId,
       new Date(account.t0Datetime),
