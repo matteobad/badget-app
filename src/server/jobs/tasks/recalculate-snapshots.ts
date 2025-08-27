@@ -17,8 +17,8 @@ export const recalculateSnapshotsTask = schemaTask({
   },
   schema: z.object({
     accountId: z.uuid(),
-    fromDate: z.date(),
-    organizationId: z.string(),
+    fromDate: z.coerce.date(),
+    organizationId: z.uuid(),
   }),
   run: async ({ accountId, fromDate, organizationId }) => {
     try {
