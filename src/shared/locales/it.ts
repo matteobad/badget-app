@@ -3,6 +3,14 @@ export default {
   "hello.world": "Ciao mondo!",
   welcome: "Benvenuto {name}!",
 
+  charts: {
+    stacked_bar_chart: {
+      total: "Totale",
+      total_expense: "Totale uscite",
+      recurring: "Ricorrenti",
+    },
+  },
+
   chart_type: {
     net_worth: "Patrimonio Netto",
     expense: "Uscite",

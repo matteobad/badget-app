@@ -4,7 +4,6 @@ import type { getExpenses } from "~/server/services/metrics-service";
 import { formatAmount } from "~/shared/helpers/format";
 import { useScopedI18n } from "~/shared/locales/client";
 import { format } from "date-fns";
-import { DotIcon } from "lucide-react";
 import {
   Bar,
   CartesianGrid,
@@ -16,9 +15,12 @@ import {
   YAxis,
 } from "recharts";
 
+import { DotRaster } from "../icons";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ToolTipContent = ({ payload = [] }: { payload: any[] }) => {
   const tScoped = useScopedI18n("chart_type");
+  const tStackedBarChart = useScopedI18n("charts.stacked_bar_chart");
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const current = payload[0]?.payload;
@@ -48,12 +50,14 @@ const ToolTipContent = ({ payload = [] }: { payload: any[] }) => {
             </p>
           </div>
 
-          <p className="text-right text-xs text-[#606060]">Total</p>
+          <p className="text-right text-xs text-[#606060]">
+            {tStackedBarChart("total")}
+          </p>
         </div>
 
         <div className="flex justify-between">
           <div className="flex items-center justify-center space-x-2">
-            <DotIcon />
+            <DotRaster />
             <p className="text-[13px] font-medium">
               {formatAmount({
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -66,7 +70,9 @@ const ToolTipContent = ({ payload = [] }: { payload: any[] }) => {
             </p>
           </div>
 
-          <p className="text-right text-xs text-[#606060]">Recurring</p>
+          <p className="text-right text-xs text-[#606060]">
+            {tStackedBarChart("recurring")}
+          </p>
         </div>
       </div>
     </div>
@@ -80,6 +86,8 @@ export function StackedBarChart({
   data: Awaited<ReturnType<typeof getExpenses>>;
   height?: number;
 }) {
+  const tScoped = useScopedI18n("charts.stacked_bar_chart");
+
   const formattedData = data.result.map((item) => ({
     ...item,
     value: item.value,
@@ -94,11 +102,13 @@ export function StackedBarChart({
       <div className="absolute -top-10 right-0 hidden space-x-4 md:flex">
         <div className="flex items-center space-x-2">
           <span className="h-2 w-2 rounded-full bg-[#C6C6C6] dark:bg-[#606060]" />
-          <span className="text-sm text-[#606060]">Total expenses</span>
+          <span className="text-sm text-[#606060]">
+            {tScoped("total_expense")}
+          </span>
         </div>
         <div className="flex items-center space-x-2">
-          <DotIcon />
-          <span className="text-sm text-[#606060]">Recurring</span>
+          <DotRaster />
+          <span className="text-sm text-[#606060]">{tScoped("recurring")}</span>
         </div>
       </div>
 
@@ -207,6 +217,13 @@ export function StackedBarChart({
             tickMargin={10}
             tickLine={false}
             axisLine={false}
+            tickFormatter={(value: number) => {
+              return formatAmount({
+                currency: "EUR",
+                amount: value,
+                maximumFractionDigits: 0,
+              });
+            }}
             tick={{
               fill: "#606060",
               fontSize: 12,

@@ -116,6 +116,49 @@ export const transaction_table = pgTable(
 export type DB_TransactionType = typeof transaction_table.$inferSelect;
 export type DB_TransactionInsertType = typeof transaction_table.$inferInsert;
 
+export const transaction_embeddings_table = pgTable(
+  "transaction_embeddings_table",
+  (d) => ({
+    id: d.uuid().defaultRandom().primaryKey().notNull(),
+
+    transactionId: d
+      .uuid()
+      .references(() => transaction_table.id, { onDelete: "cascade" })
+      .notNull(),
+    organizationId: d
+      .uuid()
+      .references(() => organization_table.id, { onDelete: "cascade" })
+      .notNull(),
+
+    embedding: d.vector({ dimensions: 768 }),
+    sourceText: d.text().notNull(),
+    model: d.text("model").notNull().default("gemini-embedding-001"),
+
+    createdAt: d
+      .timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  }),
+  (t) => [
+    index("transaction_embeddings_transaction_id_idx").using(
+      "btree",
+      t.transactionId.asc().nullsLast(),
+    ),
+    index("transaction_embeddings_team_id_idx").using(
+      "btree",
+      t.organizationId.asc().nullsLast(),
+    ),
+    // Vector similarity index for fast cosine similarity searches
+    index("transaction_embeddings_vector_idx").using("hnsw", t.embedding),
+    unique("transaction_embeddings_unique").on(t.transactionId),
+  ],
+);
+
+export type DB_TransactionEmbeddingsType =
+  typeof transaction_embeddings_table.$inferSelect;
+export type DB_TransactionEmbeddingsInsertType =
+  typeof transaction_embeddings_table.$inferInsert;
+
 // TODO: attachment are a completly different feature
 export const attachment_table = pgTable("attachment_table", (d) => ({
   id: d
