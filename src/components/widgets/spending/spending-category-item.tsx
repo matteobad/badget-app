@@ -10,20 +10,20 @@ type Props = {
 
 export function SpendingCategoryItem({ amount, currency, percentage }: Props) {
   return (
-    <div className="ml-auto flex items-center justify-between space-x-12 px-3 py-1">
-      <div className="flex items-center space-x-2 text-sm font-medium">
-        <p>
-          {amount &&
-            formatAmount({
-              amount: amount,
-              currency,
-              maximumFractionDigits: 0,
-              minimumFractionDigits: 0,
-            })}
-        </p>
-      </div>
+    <div className="ml-auto flex items-baseline justify-between space-x-4 py-1 pl-3">
+      <p className="font-medium">
+        {amount &&
+          formatAmount({
+            amount: amount,
+            currency,
+            maximumFractionDigits: 0,
+            minimumFractionDigits: 0,
+          })}
+      </p>
 
-      <p className="truncate text-sm text-[#606060]">{percentage}%</p>
+      <p className="w-[40px] truncate text-right text-xs text-[#606060]">
+        {Math.round(percentage)}%
+      </p>
     </div>
   );
 }

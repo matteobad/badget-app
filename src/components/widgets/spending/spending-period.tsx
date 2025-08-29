@@ -8,11 +8,12 @@ import {
 import { useI18n } from "~/shared/locales/client";
 import { ChevronDownIcon } from "lucide-react";
 
+import type { SpendingPeriodType } from "./data";
 import { options } from "./data";
 
 type Props = {
-  period: string;
-  onChange: (period: string) => void;
+  period: SpendingPeriodType;
+  onChange: (period: SpendingPeriodType) => void;
 };
 
 export function SpendingPeriod({ period, onChange }: Props) {
@@ -21,7 +22,7 @@ export function SpendingPeriod({ period, onChange }: Props) {
   const selectedPeriod = options.find((option) => option.id === period);
 
   return (
-    <div className="flex justify-between">
+    <div className="flex items-center justify-between">
       <div>
         <Link
           href={`/transactions?start=${selectedPeriod?.from}&end=${selectedPeriod?.to}&amount=lte,0`}
@@ -33,17 +34,16 @@ export function SpendingPeriod({ period, onChange }: Props) {
 
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <div className="flex items-center space-x-2">
-            {/* @ts-expect-error boh */}
+          <div className="flex h-9 items-center space-x-2 border p-2 px-3 text-sm">
             <span>{t(`spending_period.${period}`)}</span>
-            <ChevronDownIcon />
+            <ChevronDownIcon className="size-4" />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[180px]">
+        <DropdownMenuContent className="w-auto" align="end">
           {options.map((option) => (
             <DropdownMenuCheckboxItem
               key={option.id}
-              onCheckedChange={() => onChange(option.id)}
+              onCheckedChange={() => onChange(option.id as SpendingPeriodType)}
               checked={option.id === period}
             >
               {/* @ts-expect-error boh */}

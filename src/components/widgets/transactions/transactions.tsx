@@ -17,7 +17,7 @@ export function Transactions({ disabled }: Props) {
   const [type, setType] = useState<TransactionType>("all");
 
   return (
-    <div className="relative flex aspect-square flex-col gap-4 overflow-hidden rounded-xl border p-4 md:p-8">
+    <div className="relative flex aspect-square flex-col gap-4 overflow-hidden border p-4 md:p-8">
       <TransactionsPeriod type={type} setType={setType} disabled={disabled} />
 
       <ErrorBoundary errorComponent={ErrorFallback}>

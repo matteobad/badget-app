@@ -25,7 +25,14 @@ export function SpendingCategoryList({ data, selectedPeriod }: Props) {
               className="flex items-center"
               href={`/transactions?categories=${category.slug}&start=${formatISO(new Date(selectedPeriod.from), { representation: "date" })}&end=${formatISO(new Date(selectedPeriod.to), { representation: "date" })}`}
             >
-              <CategoryBadge category={category} />
+              <div className="w-[90%] space-x-3 text-sm text-primary">
+                <CategoryBadge category={category} />
+              </div>
+
+              {/* <Progress
+                className="h-[6px] w-full rounded-none"
+                value={category.percentage}
+              /> */}
 
               <SpendingCategoryItem
                 amount={category.amount}

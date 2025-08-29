@@ -3,24 +3,28 @@ import {
   formatISO,
   startOfMonth,
   startOfYear,
-  subDays,
   subMonths,
   subYears,
 } from "date-fns";
 
+export const SPENDING_PERIOD = {
+  THIS_MONTH: "this_month",
+  LAST_MONTH: "last_month",
+  THIS_YEAR: "this_year",
+  LAST_YEAR: "last_year",
+} as const;
+
+export type SpendingPeriodType =
+  (typeof SPENDING_PERIOD)[keyof typeof SPENDING_PERIOD];
+
 export const defaultPeriod = {
-  id: "last_30d",
-  from: formatISO(subDays(new Date(), 30), { representation: "date" }),
+  id: "this_month",
+  from: formatISO(startOfMonth(new Date()), { representation: "date" }),
   to: formatISO(new Date(), { representation: "date" }),
 };
 
 export const options = [
   defaultPeriod,
-  {
-    id: "this_month",
-    from: formatISO(startOfMonth(new Date()), { representation: "date" }),
-    to: formatISO(new Date(), { representation: "date" }),
-  },
   {
     id: "last_month",
     from: formatISO(subMonths(startOfMonth(new Date()), 1), {

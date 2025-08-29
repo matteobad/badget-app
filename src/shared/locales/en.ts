@@ -9,7 +9,6 @@ export default {
   },
 
   spending_period: {
-    last_30d: "Last 30 days",
     this_month: "This month",
     last_month: "Last month",
     this_year: "This year",

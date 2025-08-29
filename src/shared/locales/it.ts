@@ -9,11 +9,10 @@ export default {
   },
 
   spending_period: {
-    last_30d: "Last 30 days",
-    this_month: "This month",
-    last_month: "Last month",
-    this_year: "This year",
-    last_year: "Last year",
+    this_month: "Questo mese",
+    last_month: "Mese scorso",
+    this_year: "Anno corrente",
+    last_year: "Anno passato",
   },
   transactions_period: {
     all: "All",
