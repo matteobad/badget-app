@@ -3,6 +3,12 @@ export default {
   "hello.world": "Ciao mondo!",
   welcome: "Benvenuto {name}!",
 
+  auth: {
+    signin_title: "Benvenuto in Badget.",
+    signin_subtitle: "Nuovo qui o stai tornando? Scegli come vuoi continuare",
+    no_account: "Non hai ancora un account?",
+  },
+
   charts: {
     stacked_bar_chart: {
       total: "Totale",

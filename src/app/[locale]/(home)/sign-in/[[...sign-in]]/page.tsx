@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PasswordSignIn } from "~/components/auth/password-sign-in";
+import { getScopedI18n } from "~/shared/locales/server";
 
 export const metadata: Metadata = {
   title: "Login | Badget.",
 };
 
-export default function SignIn() {
+export default async function SignIn() {
+  const tScoped = await getScopedI18n("auth");
   const preferredSignInOption = <PasswordSignIn />;
   // const moreSignInOptions = <PasskeySignIn />;
 
@@ -14,9 +16,9 @@ export default function SignIn() {
     <div className="p-2">
       {/* Welcome Section */}
       <div className="text-center">
-        <h1 className="mb-4 font-serif text-lg">Welcome to Badget.</h1>
+        <h1 className="mb-4 font-serif text-lg">{tScoped("signin_title")}</h1>
         <p className="mb-8 text-sm text-[#878787]">
-          New here or coming back? Choose how you want to continue
+          {tScoped("signin_subtitle")}
         </p>
       </div>
 
@@ -43,7 +45,7 @@ export default function SignIn() {
 
         {/* Sign-up Option */}
         <div className="w-full text-center text-sm">
-          Don&apos;t have an account yet?&nbsp;
+          {tScoped("no_account")}{" "}
           <Link href="/sign-up" className="ml-auto inline-block underline">
             Sign-up
           </Link>

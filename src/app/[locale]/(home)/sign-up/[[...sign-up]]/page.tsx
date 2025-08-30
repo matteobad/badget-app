@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SignUp } from "~/components/auth/sign-up";
 
 export const metadata: Metadata = {
-  title: "Login | Badget.",
+  title: "Signup | Badget.",
 };
 
 export default function SignUpPage() {
