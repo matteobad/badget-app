@@ -2,7 +2,7 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { FormatAmount } from "~/components/format-amount";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { cn } from "~/lib/utils";
 import { formatDate } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -57,10 +57,10 @@ export function TransactionsList({ type }: Props) {
               )}
             >
               <Avatar className="size-4">
-                <AvatarImage
+                {/* <AvatarImage
                   src={transaction.counterpartyName ?? ""}
                   className="object-contain"
-                />
+                /> */}
                 <AvatarFallback className="rounded-full">
                   {transaction.name?.charAt(0)}
                 </AvatarFallback>

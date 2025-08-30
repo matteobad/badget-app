@@ -2,7 +2,7 @@
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { FormatAmount } from "~/components/format-amount";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
 import { RepeatIcon } from "lucide-react";
@@ -25,10 +25,10 @@ export function TransactionListItem({ transaction, disabled }: Props) {
           <div className="flex w-[65%] space-x-2">
             <div className="flex w-full items-center justify-between gap-2">
               <Avatar className="size-9">
-                <AvatarImage
+                {/* <AvatarImage
                   src={transaction.counterpartyName ?? ""}
                   className="object-contain"
-                />
+                /> */}
                 <AvatarFallback className="rounded-full">
                   {transaction.name?.charAt(0)}
                 </AvatarFallback>
