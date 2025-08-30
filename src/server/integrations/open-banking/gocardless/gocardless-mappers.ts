@@ -265,6 +265,7 @@ export const mapTransactionsResponse = (transaction: GC_Transaction) => {
     // currency_source: currencyExchange?.currency?.toUpperCase() ?? null,
     // balance,
     counterpartyName: transformCounterpartyName(transaction),
+    merchantName: null,
     name,
     description,
     status: "posted",

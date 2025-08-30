@@ -3,6 +3,7 @@
 import type { importTransactionsTask } from "~/server/jobs/tasks/import-transactions";
 import { revalidateTag } from "next/cache";
 import { openai } from "@ai-sdk/openai";
+import { createStreamableValue } from "@ai-sdk/rsc";
 import { parse } from "@fast-csv/parse";
 import { tasks } from "@trigger.dev/sdk";
 import { authActionClient } from "~/lib/safe-action";
@@ -14,8 +15,7 @@ import {
   parseTransactionCSVSchema,
 } from "~/shared/validators/transaction.schema";
 import { streamObject } from "ai";
-import { createStreamableValue } from "ai/rsc";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import {
   createAttachmentMutation,
@@ -61,21 +61,24 @@ export async function generateTransactionsFilters(
 ) {
   const stream = createStreamableValue();
 
-  const { partialObjectStream } = streamObject({
-    model: openai("gpt-4o-mini"),
-    system: `You are a helpful assistant that generates filters for a given prompt. \n
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  (async () => {
+    const { partialObjectStream } = streamObject({
+      model: openai("gpt-4o-mini"),
+      system: `You are a helpful assistant that generates filters for a given prompt. \n
                Current date is: ${new Date().toISOString().split("T")[0]} \n
                ${context}
       `,
-    schema,
-    prompt,
-  });
+      schema,
+      prompt,
+    });
 
-  for await (const partialObject of partialObjectStream) {
-    stream.update(partialObject);
-  }
+    for await (const partialObject of partialObjectStream) {
+      stream.update(partialObject);
+    }
 
-  stream.done();
+    stream.done();
+  })();
 
   return { object: stream.value };
 }

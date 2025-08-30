@@ -1,9 +1,11 @@
 "server-only";
 
+import type { DBClient } from "~/server/db";
 import type { CategoryType } from "~/shared/constants/enum";
 import { db } from "~/server/db";
 import { category_table } from "~/server/db/schema/categories";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 type getCategoriesQueryRequest = {
   orgId: string;
@@ -74,4 +76,35 @@ export async function getCategoryByIdQuery(params: {
     );
 
   return result[0];
+}
+
+type GetCategoriesForEnrichmentParams = {
+  organizationId: string;
+};
+
+export async function getCategoriesForEnrichment(
+  db: DBClient,
+  params: GetCategoriesForEnrichmentParams,
+) {
+  const parent = alias(category_table, "parent");
+
+  const categories = await db
+    .select({
+      slug: category_table.slug,
+      name: category_table.name,
+      description: category_table.description,
+      type: category_table.type,
+      parentSlug: parent.slug,
+    })
+    .from(category_table)
+    .leftJoin(parent, eq(category_table.parentId, parent.id))
+    .where(
+      and(
+        eq(category_table.organizationId, params.organizationId),
+        isNull(category_table.deletedAt),
+      ),
+    )
+    .orderBy(desc(category_table.createdAt), asc(category_table.name));
+
+  return categories;
 }

@@ -2,6 +2,7 @@ import type {
   DB_TransactionInsertType,
   DB_TransactionType,
 } from "~/server/db/schema/transactions";
+import { z } from "@hono/zod-openapi";
 import { getSortingStateParser } from "~/lib/validators";
 import { transaction_table } from "~/server/db/schema/transactions";
 import {
@@ -17,7 +18,6 @@ import {
   parseAsInteger,
   parseAsString,
 } from "nuqs/server";
-import z from "zod/v4";
 
 export const selectTransactionSchema = createSelectSchema(transaction_table);
 

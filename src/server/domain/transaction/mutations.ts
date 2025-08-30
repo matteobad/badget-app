@@ -12,6 +12,7 @@ import type z from "zod/v4";
 import { db } from "~/server/db";
 import {
   tag_table,
+  transaction_embeddings_table,
   transaction_table,
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
@@ -178,4 +179,26 @@ export async function deleteManyTransactionsMutation(
         eq(transaction_table.organizationId, input.orgId),
       ),
     );
+}
+
+export type CreateTransactionEmbeddingParams = {
+  transactionId: string;
+  organizationId: string;
+  embedding: number[];
+  sourceText: string;
+  model: string;
+};
+
+export async function createTransactionEmbeddings(
+  db: DBClient,
+  params: CreateTransactionEmbeddingParams[],
+) {
+  if (params.length === 0) {
+    return [];
+  }
+
+  return db.insert(transaction_embeddings_table).values(params).returning({
+    id: transaction_embeddings_table.id,
+    transactionId: transaction_embeddings_table.transactionId,
+  });
 }

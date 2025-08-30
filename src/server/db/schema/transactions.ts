@@ -68,6 +68,8 @@ export const transaction_table = pgTable(
     recurring: d.boolean().notNull().default(false),
     frequency: transactionFrequencyEnum(),
     transferId: d.uuid(), // For double-entry transfers between accounts
+    merchantName: d.text(),
+    enrichmentCompleted: d.boolean().default(false),
 
     // Metadata for internal use
     externalId: d.text(), // External ID from API or CSV

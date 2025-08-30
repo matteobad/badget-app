@@ -9,6 +9,8 @@ import {
 import { sql } from "drizzle-orm";
 import { z } from "zod/v4";
 
+import { embedTransactionsTask } from "./embed-transactions";
+
 const transactionSchema = z.object({
   fingerprint: z.string(),
   externalId: z.string().nullable().optional(),
@@ -43,7 +45,7 @@ export const upsertTransactions = schemaTask({
       // );
 
       // Upsert transactions into the transactions table, skipping duplicates based on internal_id
-      await db
+      const upsertedTransactions = await db
         .insert(transaction_table)
         .values(
           transactions.map((transaction) => ({
@@ -68,7 +70,25 @@ export const upsertTransactions = schemaTask({
             counterpartyName: sql`excluded.counterparty_name`,
             fingerprint: sql`excluded.fingerprint`,
           },
+        })
+        .returning();
+
+      // Extract transaction IDs for embedding
+      const transactionIds = upsertedTransactions?.map((tx) => tx.id) || [];
+
+      // Process new transactions: embedding
+      if (transactionIds.length > 0) {
+        // Step 1: Create embeddings and wait for completion
+        await embedTransactionsTask.triggerAndWait({
+          transactionIds,
+          organizationId,
         });
+
+        logger.info("Transaction embedding completed", {
+          transactionCount: transactionIds.length,
+          organizationId,
+        });
+      }
     } catch (error) {
       logger.error("Failed to upsert transactions", { error });
 
