@@ -8,6 +8,20 @@
       "when": 1756318948359,
       "tag": "0000_fixed_galactus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1756544392950,
+      "tag": "0001_smooth_doctor_doom",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756544415491,
+      "tag": "0002_amused_lady_mastermind",
+      "breakpoints": true
     }
   ]
 }

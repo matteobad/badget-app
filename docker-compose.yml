@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:17
+    image: pgvector/pgvector:pg17
     command: "-d 1"
     volumes:
       - db_data:/var/lib/postgresql/data

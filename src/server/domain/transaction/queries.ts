@@ -1,5 +1,6 @@
 "server-only";
 
+import type { DBClient } from "~/server/db";
 import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import type { getTransactionTagsSchema } from "~/shared/validators/tag.schema";
 import type { getTransactionsSchema } from "~/shared/validators/transaction.schema";
@@ -12,12 +13,14 @@ import { connection_table } from "~/server/db/schema/open-banking";
 import {
   attachment_table,
   tag_table,
+  transaction_embeddings_table,
   transaction_table,
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
 import {
   and,
   asc,
+  cosineDistance,
   count,
   desc,
   eq,
@@ -36,7 +39,7 @@ export async function getTransactionsQuery(
   params: z.infer<typeof getTransactionsSchema>,
   orgId: string,
 ) {
-  // Always limit by teamId
+  // Always limit by organizationId
   const {
     sort,
     cursor,
@@ -174,7 +177,7 @@ export async function getTransactionsQuery(
 
   const finalWhereConditions = whereConditions.filter((c) => c !== undefined);
 
-  // All joins must also be limited by teamId where relevant
+  // All joins must also be limited by organizationId where relevant
   const queryBuilder = db
     .select({
       id: transaction_table.id,
@@ -413,6 +416,7 @@ export async function getTransactionByIdQuery(id: string, orgId: string) {
         name: category_table.name,
         color: category_table.color,
         icon: category_table.icon,
+        excludeFromAnalytics: category_table.excludeFromAnalytics,
       },
       account: {
         id: account_table.id,
@@ -597,4 +601,310 @@ export async function getTransactionTagCountsQuery(orgId: string) {
     console.error(err);
     return {} as Record<string, number>;
   }
+}
+
+type GetSimilarTransactionsParams = {
+  name: string;
+  organizationId: string;
+  categorySlug?: string;
+  frequency?: TransactionFrequencyType;
+  transactionId?: string; // Optional: if we want to exclude the source transaction
+  limit?: number;
+  minSimilarityScore?: number; // Alternative to limit: quality-based filtering
+};
+
+/**
+ * Find similar transactions using hybrid search: combines embeddings AND FTS for comprehensive results
+ *
+ * @param db - Database connection
+ * @param params - Search parameters including optional embedding settings
+ * @returns Array of similar transactions, ordered by relevance (embedding matches first, then FTS matches)
+ */
+export async function getSimilarTransactions(
+  db: DBClient,
+  params: GetSimilarTransactionsParams,
+) {
+  const {
+    name,
+    organizationId,
+    categorySlug,
+    frequency,
+    transactionId,
+    minSimilarityScore = 0.9,
+  } = params;
+
+  console.info({
+    msg: "Starting hybrid search for similar transactions",
+    name,
+    organizationId,
+    minSimilarityScore,
+    transactionId,
+    categorySlug,
+    frequency,
+  });
+
+  let embeddingResults: {
+    id: string;
+    amount: number;
+    organizationId: string;
+    name: string;
+    date: string;
+    categorySlug: string | null;
+    frequency: TransactionFrequencyType | null;
+    similarity: number;
+    source: string;
+  }[] = [];
+  let ftsResults: {
+    id: string;
+    amount: number;
+    organizationId: string;
+    name: string;
+    date: string;
+    categorySlug: string | null;
+    frequency: TransactionFrequencyType | null;
+    source: string;
+  }[] = [];
+  let embeddingSourceText: string | null = null;
+
+  // 1. EMBEDDING SEARCH (if transactionId provided)
+  if (transactionId) {
+    console.info("Attempting embedding search", {
+      transactionId,
+      organizationId,
+    });
+
+    try {
+      const sourceEmbedding = await db
+        .select({
+          embedding: transaction_embeddings_table.embedding,
+          sourceText: transaction_embeddings_table.sourceText,
+        })
+        .from(transaction_embeddings_table)
+        .where(
+          and(
+            eq(transaction_embeddings_table.transactionId, transactionId),
+            eq(transaction_embeddings_table.organizationId, organizationId),
+          ),
+        )
+        .limit(1);
+
+      if (sourceEmbedding.length > 0 && sourceEmbedding[0]!.embedding) {
+        const sourceEmbeddingVector = sourceEmbedding[0]!.embedding;
+        const sourceText = sourceEmbedding[0]!.sourceText;
+        embeddingSourceText = sourceText; // Store for FTS search
+
+        console.info("✅ Found embedding for transaction", {
+          transactionId,
+          sourceText,
+          embeddingExists: true,
+        });
+
+        // Calculate similarity using cosineDistance function from Drizzle
+        const similarity = sql<number>`1 - (${cosineDistance(transaction_embeddings_table.embedding, sourceEmbeddingVector)})`;
+
+        const embeddingConditions: (SQL | undefined)[] = [
+          eq(transaction_table.organizationId, organizationId),
+          ne(transaction_table.id, transactionId), // Exclude the source transaction
+          gt(similarity, minSimilarityScore), // Use configurable similarity threshold
+        ];
+
+        if (categorySlug) {
+          embeddingConditions.push(
+            or(
+              isNull(transaction_table.categorySlug),
+              ne(transaction_table.categorySlug, categorySlug),
+            ),
+          );
+        }
+
+        // Note: We don't filter by frequency here because we want to find similar transactions
+        // regardless of their current frequency so we can update them to the new frequency
+
+        const finalEmbeddingConditions = embeddingConditions.filter(
+          (c) => c !== undefined,
+        );
+
+        embeddingResults = await db
+          .select({
+            id: transaction_table.id,
+            amount: transaction_table.amount,
+            organizationId: transaction_table.organizationId,
+            name: transaction_table.name,
+            date: transaction_table.date,
+            categorySlug: transaction_table.categorySlug,
+            frequency: transaction_table.frequency,
+            similarity,
+            source: sql<string>`'embedding'`.as("source"),
+          })
+          .from(transaction_table)
+          .innerJoin(
+            transaction_embeddings_table,
+            eq(
+              transaction_embeddings_table.transactionId,
+              transaction_table.id,
+            ),
+          )
+          .where(and(...finalEmbeddingConditions))
+          .orderBy(desc(similarity)); // No limit - let similarity threshold determine results
+
+        console.info("Embedding search completed", {
+          resultsFound: embeddingResults.length,
+          minSimilarityScore,
+          transactionId,
+        });
+      } else {
+        console.warn(
+          "❌ No embedding found for transaction - will rely on FTS only",
+          {
+            transactionId,
+            organizationId,
+            transactionName: name,
+          },
+        );
+      }
+    } catch (error) {
+      console.error("Embedding search failed", {
+        error: error instanceof Error ? error.message : String(error),
+        transactionId,
+        organizationId,
+      });
+    }
+  }
+
+  // 2. FTS SEARCH (always run to complement embeddings)
+  console.info("Running FTS search", {
+    name,
+    organizationId,
+    hasEmbeddingResults: embeddingResults.length > 0,
+    hasSourceEmbedding: !!embeddingSourceText,
+  });
+
+  const ftsConditions: (SQL | undefined)[] = [
+    eq(transaction_table.organizationId, organizationId),
+  ];
+
+  if (transactionId) {
+    ftsConditions.push(ne(transaction_table.id, transactionId));
+  }
+
+  // Always use the original transaction name for FTS search to ensure we find exact matches
+  // The embedding source text might be different from the actual transaction names
+  const searchTerm = name;
+  const searchQuery = searchTerm
+    .trim()
+    .split(/\s+/)
+    .map((term) => `${term.toLowerCase()}:*`)
+    .join(" & ");
+  ftsConditions.push(
+    sql`to_tsquery('english', ${searchQuery}) @@ ${transaction_table.ftsVector}`,
+  );
+
+  console.info({
+    msg: "FTS search using term",
+    searchTerm,
+    searchQuery,
+    usingEmbeddingSourceText: false, // Always false now - we use original name
+    originalName: name,
+    embeddingSourceText: embeddingSourceText ?? "none",
+    reason: "Using original transaction name to find exact matches",
+  });
+
+  if (categorySlug) {
+    ftsConditions.push(
+      or(
+        isNull(transaction_table.categorySlug),
+        ne(transaction_table.categorySlug, categorySlug),
+      ),
+    );
+  }
+
+  // Exclude transactions already found by embeddings
+  if (embeddingResults.length > 0) {
+    const embeddingIds = embeddingResults.map((r) => r.id);
+    ftsConditions.push(
+      sql`${transaction_table.id} NOT IN (${sql.join(
+        embeddingIds.map((id) => sql`${id}`),
+        sql`, `,
+      )})`,
+    );
+  }
+
+  const finalFtsConditions = ftsConditions.filter((c) => c !== undefined);
+
+  console.info({
+    msg: "FTS search conditions",
+    searchTerm,
+    searchQuery,
+    conditionsCount: finalFtsConditions.length,
+    organizationId,
+    transactionId,
+    categorySlug,
+    frequency,
+  });
+
+  ftsResults = await db
+    .select({
+      id: transaction_table.id,
+      amount: transaction_table.amount,
+      organizationId: transaction_table.organizationId,
+      name: transaction_table.name,
+      date: transaction_table.date,
+      categorySlug: transaction_table.categorySlug,
+      frequency: transaction_table.frequency,
+      source: sql<string>`'fts'`.as("source"),
+    })
+    .from(transaction_table)
+    .where(and(...finalFtsConditions)); // No limit - get all FTS matches
+
+  console.info({
+    msg: "FTS search completed",
+    resultsFound: ftsResults.length,
+    searchTerm,
+    searchQuery,
+    organizationId,
+    sampleResults: ftsResults.slice(0, 3).map((r) => ({
+      name: r.name,
+      id: r.id,
+    })),
+  });
+
+  // 3. COMBINE AND DEDUPLICATE RESULTS
+  const allResults = [
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ...embeddingResults.map(({ similarity, source, ...rest }) => ({
+      ...rest,
+      matchType: source,
+    })),
+    ...ftsResults.map(({ source, ...rest }) => ({
+      ...rest,
+      matchType: source,
+    })),
+  ];
+
+  // Remove duplicates based on transaction ID (most accurate)
+  // If same ID appears in both embedding and FTS results, prioritize embedding
+  const uniqueResults = allResults.filter((transaction, index, array) => {
+    return index === array.findIndex((t) => t.id === transaction.id);
+  });
+
+  // Log final results with structured data
+  console.info("Hybrid search completed", {
+    totalResults: allResults.length,
+    uniqueResults: uniqueResults.length,
+    embeddingMatches: embeddingResults.length,
+    ftsMatches: ftsResults.length,
+    name,
+    organizationId,
+    minSimilarityScore,
+    results: uniqueResults.map((t, i) => ({
+      rank: i + 1,
+      name: t.name,
+      matchType: t.matchType,
+      id: t.id,
+    })),
+  });
+
+  // Remove matchType field and return all quality matches
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return uniqueResults.map(({ matchType, ...rest }) => rest);
 }

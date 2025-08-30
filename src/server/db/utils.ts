@@ -134,3 +134,11 @@ export const numericCasted = customType<{
   fromDriver: (value: string) => Number.parseFloat(value),
   toDriver: (value: number) => value.toString(),
 });
+
+export const tsvector = customType<{
+  data: string;
+}>({
+  dataType() {
+    return "tsvector";
+  },
+});

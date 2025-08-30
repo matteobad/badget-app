@@ -1,3 +1,4 @@
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { DB_AttachmentType } from "~/server/db/schema/transactions";
 import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import type { Tag } from "emblor";
@@ -27,25 +28,38 @@ import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
 import { formatSize } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { useScopedI18n } from "~/shared/locales/client";
 import { UploadDropzone } from "~/utils/uploadthing";
 import { format } from "date-fns";
 import { XIcon } from "lucide-react";
 import { toast } from "sonner";
 
-import { CategorySelect } from "../category/forms/category-select";
+import { CategoryBadge } from "../category/category-badge";
 import { TagsSelect } from "../tag/tags-select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { TransactionCategorySelect } from "./forms/transaction-category-select";
+import { SimilarTransactionsUpdateToast } from "./similar-transactions-update-toast";
 import { TransactionBankAccount } from "./transaction-bank-account";
 import { TransactionShortcuts } from "./transaction-shortcuts";
 
+type Category = RouterOutput["transactionCategory"]["getAll"][number];
+
 export function TransactionDetails() {
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [, setAttachments] = useState<DB_AttachmentType[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
+
+  const tScoped = useScopedI18n("transaction");
 
   const { params } = useTransactionParams();
   const transactionId = params.transactionId!;
 
-  const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const trpc = useTRPC();
 
   const { data, isLoading } = useQuery(
     trpc.transaction.getById.queryOptions(
@@ -214,6 +228,44 @@ export function TransactionDetails() {
     }),
   );
 
+  const handleTransactionCategoryUpdate = async (category?: Category) => {
+    if (!data) return;
+
+    updateTransactionMutation.mutate({
+      id: transactionId,
+      categoryId: category?.id,
+    });
+
+    const similarTransactions = await queryClient.fetchQuery(
+      trpc.transaction.getSimilarTransactions.queryOptions(
+        {
+          transactionId: data.id,
+          name: data.name,
+          categorySlug: category?.slug,
+        },
+        { enabled: !!category },
+      ),
+    );
+
+    if (
+      category &&
+      similarTransactions?.length &&
+      similarTransactions.length > 1
+    ) {
+      toast.custom(
+        (t) => (
+          <SimilarTransactionsUpdateToast
+            toastId={t}
+            similarTransactions={similarTransactions}
+            transactionId={data.id}
+            category={category}
+          />
+        ),
+        { duration: 6000 },
+      );
+    }
+  };
+
   if (isLoading || !data) {
     return null;
   }
@@ -263,17 +315,50 @@ export function TransactionDetails() {
               {isLoading ? (
                 <Skeleton className="mb-2 h-[30px] w-[50%] rounded-md" />
               ) : (
-                <span
-                  className={cn(
-                    "font-mono text-4xl select-text",
-                    data?.category?.slug === "income" && "text-[#00C969]",
-                  )}
-                >
-                  <FormatAmount
-                    amount={data?.amount}
-                    currency={data?.currency}
-                  />
-                </span>
+                <div className="flex items-baseline justify-between">
+                  <span
+                    className={cn(
+                      "font-mono text-4xl select-text",
+                      data?.category?.slug === "income" && "text-[#00C969]",
+                    )}
+                  >
+                    <FormatAmount
+                      amount={data?.amount}
+                      currency={data?.currency}
+                    />
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <DropdownMenu
+                      open={categoryDropdownOpen}
+                      onOpenChange={setCategoryDropdownOpen}
+                    >
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-auto p-0">
+                          <CategoryBadge
+                            category={data.category ?? undefined}
+                          />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="start"
+                        className="overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <TransactionCategorySelect
+                          selectedItems={
+                            data.category ? [data.category.id] : []
+                          }
+                          onSelect={handleTransactionCategoryUpdate}
+                        />
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    {data.category?.excludeFromAnalytics && (
+                      <span className="text-sm text-muted-foreground">
+                        (Excluded)
+                      </span>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -286,26 +371,10 @@ export function TransactionDetails() {
         </div>
       )}
 
-      <div className="mt-6 mb-2 grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="category" className="mb-2 block">
-            Category
-          </Label>
-
-          <CategorySelect
-            value={data.category?.id}
-            onValueChange={(value) => {
-              updateTransactionMutation.mutate({
-                id: transactionId,
-                categoryId: value,
-                description: data.description ?? undefined,
-              });
-            }}
-          />
-        </div>
+      <div className="mt-6 mb-2 grid grid-cols-1 gap-4">
         <div>
           <Label htmlFor="tags" className="mb-2 block">
-            Tags
+            {tScoped("tags")}
           </Label>
 
           <TagsSelect
@@ -343,7 +412,7 @@ export function TransactionDetails() {
 
       <Accordion type="multiple" defaultValue={defaultValue}>
         <AccordionItem value="attachment">
-          <AccordionTrigger>Attachments</AccordionTrigger>
+          <AccordionTrigger>{tScoped("attachments")}</AccordionTrigger>
           <AccordionContent className="select-text">
             <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden">
               <UploadDropzone
@@ -405,7 +474,7 @@ export function TransactionDetails() {
         </AccordionItem>
 
         <AccordionItem value="general">
-          <AccordionTrigger>General</AccordionTrigger>
+          <AccordionTrigger>{tScoped("general")}</AccordionTrigger>
           <AccordionContent className="select-text">
             <div className="mb-4 border-b pb-4">
               <Label className="text-md mb-2 block font-medium">
@@ -485,7 +554,7 @@ export function TransactionDetails() {
         </AccordionItem>
 
         <AccordionItem value="note">
-          <AccordionTrigger>Note</AccordionTrigger>
+          <AccordionTrigger>{tScoped("notes")}</AccordionTrigger>
           <AccordionContent className="select-text">
             <Textarea
               placeholder="Informazioni aggiuntive"

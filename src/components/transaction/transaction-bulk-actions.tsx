@@ -85,7 +85,9 @@ export function BulkActions({ ids }: Props) {
               >
                 <TransactionCategorySelect
                   selectedItems={[]}
-                  onSelect={handleUpdateTransactionCategory}
+                  onSelect={(category) => {
+                    handleUpdateTransactionCategory(category?.id);
+                  }}
                 />
               </DropdownMenuSubContent>
             </DropdownMenuPortal>

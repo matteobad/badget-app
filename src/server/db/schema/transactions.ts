@@ -1,4 +1,6 @@
+import type { SQL } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
+import { sql } from "drizzle-orm";
 import { index, pgEnum, unique } from "drizzle-orm/pg-core";
 
 import {
@@ -7,7 +9,7 @@ import {
   TRANSACTION_SOURCE,
   TRANSACTION_STATUS,
 } from "../../../shared/constants/enum";
-import { numericCasted, timestamps } from "../utils";
+import { numericCasted, timestamps, tsvector } from "../utils";
 import { pgTable } from "./_table";
 import { account_table } from "./accounts";
 import { organization as organization_table } from "./auth";
@@ -72,6 +74,18 @@ export const transaction_table = pgTable(
     fingerprint: d.text().notNull(), // Hash for deduplication
     notified: d.boolean().default(false), // For notification to the user
     source: transactionSourceEnum().notNull().default("manual"), // Source of the transaction
+    ftsVector: tsvector("fts_vector")
+      .notNull()
+      .generatedAlwaysAs(
+        (): SQL => sql`
+				to_tsvector(
+					'english',
+					(
+						(COALESCE(name, ''::text) || ' '::text) || COALESCE(description, ''::text)
+					)
+				)
+			`,
+      ),
 
     ...timestamps,
   }),
@@ -109,6 +123,14 @@ export const transaction_table = pgTable(
       "btree",
       t.transferId.asc().nullsLast(),
     ),
+    index("idx_transactions_fts").using(
+      "gin",
+      t.ftsVector.asc().nullsLast().op("tsvector_ops"),
+    ),
+    index("idx_transactions_fts_vector").using(
+      "gin",
+      t.ftsVector.asc().nullsLast().op("tsvector_ops"),
+    ),
     unique().on(t.organizationId, t.externalId),
   ],
 );
@@ -142,14 +164,17 @@ export const transaction_embeddings_table = pgTable(
   (t) => [
     index("transaction_embeddings_transaction_id_idx").using(
       "btree",
-      t.transactionId.asc().nullsLast(),
+      t.transactionId.asc().nullsLast().op("uuid_ops"),
     ),
     index("transaction_embeddings_team_id_idx").using(
       "btree",
-      t.organizationId.asc().nullsLast(),
+      t.organizationId.asc().nullsLast().op("uuid_ops"),
     ),
     // Vector similarity index for fast cosine similarity searches
-    index("transaction_embeddings_vector_idx").using("hnsw", t.embedding),
+    index("transaction_embeddings_vector_idx").using(
+      "hnsw",
+      t.embedding.op("vector_cosine_ops"),
+    ),
     unique("transaction_embeddings_unique").on(t.transactionId),
   ],
 );

@@ -27,11 +27,14 @@ import { cn } from "~/lib/utils";
 import { formatDate } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { EyeOffIcon, MoreHorizontalIcon, RepeatIcon } from "lucide-react";
+import { toast } from "sonner";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { TransactionCategorySelect } from "../forms/transaction-category-select";
+import { SimilarTransactionsUpdateToast } from "../similar-transactions-update-toast";
 
 type Transaction = RouterOutput["transaction"]["get"]["data"][number];
+type Category = RouterOutput["transactionCategory"]["getAll"][number];
 
 const SelectCell = memo(
   ({
@@ -173,10 +176,10 @@ AmountCell.displayName = "AmountCell";
 
 const CategoryCell = memo(
   ({
-    id,
+    transaction,
     category,
   }: {
-    id: string;
+    transaction: Transaction;
     category?: {
       id: string;
       slug: string;
@@ -201,6 +204,44 @@ const CategoryCell = memo(
       }),
     );
 
+    const handleTransactionCategoryUpdate = async (category?: Category) => {
+      updateTransactionCategoryMutation.mutate({
+        id: transaction.id,
+        categoryId: category?.id,
+      });
+
+      setIsOpen(false);
+
+      const similarTransactions = await queryClient.fetchQuery(
+        trpc.transaction.getSimilarTransactions.queryOptions(
+          {
+            transactionId: transaction.id,
+            name: transaction.name,
+            categorySlug: category?.slug,
+          },
+          { enabled: !!category },
+        ),
+      );
+
+      if (
+        category &&
+        similarTransactions?.length &&
+        similarTransactions.length > 1
+      ) {
+        toast.custom(
+          (t) => (
+            <SimilarTransactionsUpdateToast
+              toastId={t}
+              similarTransactions={similarTransactions}
+              transactionId={transaction.id}
+              category={category}
+            />
+          ),
+          { duration: 6000 },
+        );
+      }
+    };
+
     return (
       <div className="flex items-center gap-2">
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -216,13 +257,7 @@ const CategoryCell = memo(
           >
             <TransactionCategorySelect
               selectedItems={category ? [category.id] : []}
-              onSelect={(categoryId) => {
-                updateTransactionCategoryMutation.mutate({
-                  id,
-                  categoryId,
-                });
-                setIsOpen(false);
-              }}
+              onSelect={handleTransactionCategoryUpdate}
             />
           </DropdownMenuContent>
         </DropdownMenu>
@@ -390,7 +425,10 @@ export const columns: ColumnDef<Transaction>[] = [
       className: "border-l border-border",
     },
     cell: ({ row }) => (
-      <CategoryCell id={row.original.id} category={row.original.category!} />
+      <CategoryCell
+        transaction={row.original}
+        category={row.original.category!}
+      />
     ),
   },
   {

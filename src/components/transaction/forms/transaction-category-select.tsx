@@ -1,5 +1,4 @@
-"use client";
-
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CategoryTree } from "~/components/category/trees/category-tree";
@@ -11,9 +10,11 @@ import { buildCategoryRecord } from "~/shared/helpers/categories";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
 
+type Category = RouterOutput["transactionCategory"]["getAll"][number];
+
 type Props = {
   selectedItems?: string[];
-  onSelect?: (categoryId?: string) => void;
+  onSelect?: (category?: Category) => void;
 };
 
 export function TransactionCategorySelect({ selectedItems, onSelect }: Props) {
@@ -61,7 +62,10 @@ export function TransactionCategorySelect({ selectedItems, onSelect }: Props) {
                   items={items[categoryType]}
                   selectedItems={selectedItems}
                   searchValue={search}
-                  onSelect={onSelect}
+                  onSelect={(categoryId: string) => {
+                    const category = data?.find(({ id }) => id === categoryId);
+                    onSelect?.(category);
+                  }}
                 />
               </div>
             </div>

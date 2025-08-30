@@ -91,6 +91,49 @@ export const deleteTranferSchema = z.object({
   id: z.uuid(),
 });
 
+export const getSimilarTransactionsSchema = z.object({
+  name: z.string().openapi({
+    description: "Name of the transaction.",
+    param: {
+      in: "query",
+    },
+  }),
+  categorySlug: z
+    .string()
+    .optional()
+    .openapi({
+      description: "Category slug to filter similar transactions.",
+      param: {
+        in: "query",
+      },
+    }),
+  frequency: z
+    .enum(["weekly", "monthly", "annually", "irregular"])
+    .optional()
+    .openapi({
+      description: "Recurring frequency to filter similar transactions.",
+      param: {
+        in: "query",
+      },
+    }),
+  transactionId: z.uuid().optional().openapi({
+    description: "Transaction ID to exclude from results.",
+  }),
+  minSimilarityScore: z
+    .number()
+    .min(0.1)
+    .max(1.0)
+    .optional()
+    .default(0.8)
+    .openapi({
+      description:
+        "Minimum similarity score (0.1-1.0) for transactions to be considered similar.",
+      param: {
+        in: "query",
+      },
+    }),
+});
+
 export const updateManyTransactionsSchema = z.object({
   ids: z.array(z.string().min(1)),
   categoryId: z.string().nullable().optional(),

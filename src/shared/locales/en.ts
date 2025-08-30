@@ -61,6 +61,14 @@ export default {
     },
   },
 
+  bank_account: {
+    actions: {
+      view_details: "View details",
+      create_category: "Create account",
+      delete_category: "Delete",
+    },
+  },
+
   category: {
     budget: "Accrual-based budget",
     labels: {
@@ -93,12 +101,15 @@ export default {
     "We found {count} problems with your budget",
   "categories.budget.warning.node": "Budget below total children",
 
-  bank_account: {
-    actions: {
-      view_details: "View details",
-      create_category: "Create account",
-      delete_category: "Delete",
-    },
+  transaction: {
+    tags: "Tags",
+    attachments: "Attachments",
+    general: "General",
+    notes: "Notes",
+    "similar#one":
+      "We found {count} similar transaction. Should we mark it too?",
+    "similar#other":
+      "We found {count} similar transactions. Should we mark them too?",
   },
 
   bottom_bar: {

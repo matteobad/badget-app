@@ -44,10 +44,10 @@ export default async function RootLayout({
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
               <NuqsAdapter>{children}</NuqsAdapter>
               <TailwindIndicator />
+              <Toaster />
             </ThemeProvider>
           </I18nProviderClient>
         </TRPCReactProvider>
-        <Toaster />
         <Analytics />
         <SpeedInsights />
         <NextSSRPlugin

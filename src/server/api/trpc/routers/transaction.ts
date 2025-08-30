@@ -1,3 +1,4 @@
+import { getSimilarTransactions } from "~/server/domain/transaction/queries";
 import {
   createManualTransaction,
   createTransfer,
@@ -19,6 +20,7 @@ import {
   deleteManyTransactionsSchema,
   deleteTranferSchema,
   deleteTransactionSchema,
+  getSimilarTransactionsSchema,
   getTransactionsSchema,
   updateManyTransactionsSchema,
   updateTransactionSchema,
@@ -64,6 +66,18 @@ export const transactionRouter = createTRPCRouter({
     const orgId = ctx.orgId!;
     return await getTransactionAccountCounts(orgId);
   }),
+
+  getSimilarTransactions: protectedProcedure
+    .input(getSimilarTransactionsSchema)
+    .query(async ({ input, ctx: { db, orgId } }) => {
+      return getSimilarTransactions(db, {
+        name: input.name,
+        categorySlug: input.categorySlug,
+        frequency: input.frequency,
+        organizationId: orgId!,
+        transactionId: input.transactionId,
+      });
+    }),
 
   // Manual Transaction Management
   createManualTransaction: protectedProcedure

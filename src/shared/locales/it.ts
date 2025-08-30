@@ -61,6 +61,14 @@ export default {
     },
   },
 
+  bank_account: {
+    actions: {
+      view_details: "Vedi dettagli",
+      create_category: "Crea conto",
+      delete_category: "Elimina",
+    },
+  },
+
   category: {
     labels: {
       classification: "Classificazione",
@@ -93,12 +101,15 @@ export default {
     "Abbiamo notato {count} problemi nel budget",
   "categories.budget.warning.node": "budget inferiore al totale dei figli",
 
-  bank_account: {
-    actions: {
-      view_details: "Vedi dettagli",
-      create_category: "Crea conto",
-      delete_category: "Elimina",
-    },
+  transaction: {
+    tags: "Tags",
+    attachments: "Allegati",
+    general: "Generali",
+    notes: "Note",
+    "similar#one":
+      "Abbiamo trovato {count} transazione simile. Vuoi categorizzarla allo stesso modo?",
+    "similar#other":
+      "Abbiamo trovato {count} transazioni simili. Vuoi categorizzarle allo stesso modo?",
   },
 
   bottom_bar: {
