@@ -22,8 +22,8 @@ import {
   deleteTransactionSchema,
   getSimilarTransactionsSchema,
   getTransactionsSchema,
-  updateManyTransactionsSchema,
   updateTransactionSchema,
+  updateTransactionsSchema,
 } from "~/shared/validators/transaction.schema";
 import { categorizeUserTransaction } from "~/utils/categorization";
 import { z } from "zod/v4";
@@ -112,10 +112,9 @@ export const transactionRouter = createTRPCRouter({
 
   // Other Transaction Management
   updateMany: protectedProcedure
-    .input(updateManyTransactionsSchema)
-    .mutation(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-      return await updateManyTransactions(input, orgId);
+    .input(updateTransactionsSchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await updateManyTransactions(db, input, orgId!);
     }),
 
   deleteMany: protectedProcedure

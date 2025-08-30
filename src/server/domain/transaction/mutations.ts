@@ -1,11 +1,13 @@
 "server-only";
 
 import type { DBClient, TXType } from "~/server/db";
-import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
+import type {
+  TransactionFrequencyType,
+  TransactionStatusType,
+} from "~/shared/constants/enum";
 import type {
   createTransactionSchema,
   deleteTransactionSchema,
-  updateTransactionSchema,
   updateTransactionTagsSchema,
 } from "~/shared/validators/transaction.schema";
 import type z from "zod/v4";
@@ -29,37 +31,99 @@ export async function createTransactionMutation(
     .returning();
 }
 
+type UpdateTransactionData = {
+  id: string;
+  organizationId: string;
+  categorySlug?: string | null;
+  status?: TransactionStatusType;
+  internal?: boolean;
+  note?: string | null;
+  assignedId?: string | null;
+  recurring?: boolean;
+  frequency?: TransactionFrequencyType | null;
+};
+
 export async function updateTransactionMutation(
-  input: z.infer<typeof updateTransactionSchema>,
-  orgId: string,
+  client: DBClient,
+  params: UpdateTransactionData,
 ) {
-  const { id, ...rest } = input;
-  await db
+  const { id, organizationId, ...dataToUpdate } = params;
+
+  const [result] = await db
     .update(transaction_table)
-    .set(rest)
+    .set(dataToUpdate)
     .where(
       and(
         eq(transaction_table.id, id),
-        eq(transaction_table.organizationId, orgId),
+        eq(transaction_table.organizationId, organizationId),
       ),
-    );
+    )
+    .returning({
+      id: transaction_table.id,
+    });
+
+  if (!result) {
+    return null;
+  }
+
+  return result;
 }
+
+type UpdateTransactionsData = {
+  ids: string[];
+  organizationId: string;
+  categorySlug?: string | null;
+  status?: TransactionStatusType;
+  internal?: boolean;
+  note?: string | null;
+  assignedId?: string | null;
+  tagId?: string | null;
+  recurring?: boolean;
+  frequency?: TransactionFrequencyType | null;
+};
 
 export async function updateManyTransactionsMutation(
   client: DBClient,
-  input: Partial<DB_TransactionInsertType> & { ids: string[]; orgId: string },
+  data: UpdateTransactionsData,
 ) {
-  const { ids, ...rest } = input;
-  return await client
-    .update(transaction_table)
-    .set(rest)
-    .where(
-      and(
-        inArray(transaction_table.id, ids),
-        eq(transaction_table.organizationId, input.orgId),
-      ),
-    )
-    .returning();
+  const { ids, tagId, organizationId, ...input } = data;
+
+  if (tagId) {
+    await client
+      .insert(transaction_to_tag_table)
+      .values(
+        ids.map((id) => ({
+          transactionId: id,
+          tagId,
+          organizationId,
+        })),
+      )
+      .onConflictDoNothing();
+  }
+
+  let results: { id: string }[] = [];
+
+  // Only update transactions if there are fields to update
+  if (Object.keys(input).length > 0) {
+    results = await client
+      .update(transaction_table)
+      .set(input)
+      .where(
+        and(
+          eq(transaction_table.organizationId, organizationId),
+          inArray(transaction_table.id, ids),
+        ),
+      )
+      .returning({
+        id: transaction_table.id,
+      });
+  } else {
+    // If no fields to update, just return the transaction IDs
+    results = ids.map((id) => ({ id }));
+  }
+
+  // Filter out any null results
+  return results.filter((transaction) => transaction !== null);
 }
 
 export async function updateTransactionTagsMutation(

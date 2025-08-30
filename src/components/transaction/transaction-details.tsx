@@ -26,6 +26,7 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
+import { TRANSACTION_FREQUENCY } from "~/shared/constants/enum";
 import { formatSize } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
@@ -83,12 +84,8 @@ export function TransactionDetails() {
   const updateTransactionMutation = useMutation(
     trpc.transaction.updateTransaction.mutationOptions({
       onSuccess: (_data) => {
-        toast.success("Transazione aggiornata");
         void queryClient.invalidateQueries({
           queryKey: trpc.transaction.get.infiniteQueryKey(),
-        });
-        void queryClient.invalidateQueries({
-          queryKey: trpc.transaction.getAmountRange.queryKey(),
         });
       },
       onMutate: async (variables) => {
@@ -228,6 +225,19 @@ export function TransactionDetails() {
     }),
   );
 
+  const updateTransactionsMutation = useMutation(
+    trpc.transaction.updateMany.mutationOptions({
+      onSuccess: () => {
+        void queryClient.invalidateQueries({
+          queryKey: trpc.transaction.getById.queryKey({ id: transactionId }),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: trpc.transaction.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
+
   const handleTransactionCategoryUpdate = async (category?: Category) => {
     if (!data) return;
 
@@ -260,6 +270,59 @@ export function TransactionDetails() {
             transactionId={data.id}
             category={category}
           />
+        ),
+        { duration: 6000 },
+      );
+    }
+  };
+
+  const handleTransactionFrequencyUpdate = async (
+    frequency?: TransactionFrequencyType,
+  ) => {
+    if (!data) return;
+
+    updateTransactionMutation.mutate({
+      id: transactionId,
+      frequency,
+    });
+
+    const similarTransactions = await queryClient.fetchQuery(
+      trpc.transaction.getSimilarTransactions.queryOptions({
+        transactionId: data.id,
+        name: data.name,
+        frequency,
+      }),
+    );
+
+    if (similarTransactions?.length && similarTransactions.length > 1) {
+      toast.custom(
+        (t) => (
+          <div className="p-4">
+            <div className="mb-1 font-semibold">Badget AI</div>
+            <div className="mb-2 text-sm">
+              {tScoped("similar", { count: similarTransactions.length })}
+            </div>
+            <div className="mt-4 flex space-x-2">
+              <Button variant="secondary" onClick={() => toast.dismiss(t)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  const similarTransactionIds = similarTransactions.map(
+                    (tr) => tr.id,
+                  );
+                  updateTransactionsMutation.mutate({
+                    ids: similarTransactionIds,
+                    recurring: true,
+                    frequency,
+                  });
+                  toast.dismiss(t);
+                }}
+              >
+                Yes
+              </Button>
+            </div>
+          </div>
         ),
         { duration: 6000 },
       );
@@ -478,14 +541,12 @@ export function TransactionDetails() {
           <AccordionContent className="select-text">
             <div className="mb-4 border-b pb-4">
               <Label className="text-md mb-2 block font-medium">
-                Exclude from analytics
+                {tScoped("exclude_label")}
               </Label>
               <div className="flex flex-row items-center justify-between">
                 <div className="space-y-0.5 pr-4">
                   <p className="text-xs text-muted-foreground">
-                    Exclude this transaction from analytics like profit, expense
-                    and revenue. This is useful for internal transfers between
-                    accounts to avoid double-counting.
+                    {tScoped("exclude_description")}
                   </p>
                 </div>
 
@@ -504,18 +565,17 @@ export function TransactionDetails() {
             <div className="flex flex-row items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-md mb-2 block font-medium">
-                  Mark as recurring
+                  {tScoped("recurring_label")}
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Mark as recurring. Similar future transactions will be
-                  automatically categorized and flagged as recurring.
+                  {tScoped("recurring_description")}
                 </p>
               </div>
               <Switch
-                checked={data?.recurring ?? false}
+                checked={data.recurring}
                 onCheckedChange={(checked) => {
                   updateTransactionMutation.mutate({
-                    id: data?.id,
+                    id: data.id,
                     recurring: checked,
                   });
                 }}
@@ -525,27 +585,22 @@ export function TransactionDetails() {
             {data?.recurring && (
               <Select
                 value={data?.frequency ?? undefined}
-                onValueChange={async (value) => {
-                  updateTransactionMutation.mutate({
-                    id: data?.id,
-                    frequency: value as TransactionFrequencyType,
-                  });
-                }}
+                onValueChange={(value: TransactionFrequencyType) =>
+                  handleTransactionFrequencyUpdate(value)
+                }
               >
-                <SelectTrigger className="mt-4 w-full">
+                <SelectTrigger className="mt-4 w-full bg-background">
                   <SelectValue placeholder="Select frequency" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {[
-                      { id: "weekly", name: "Weekly" },
-                      { id: "monthly", name: "Monthly" },
-                      { id: "annually", name: "Annually" },
-                    ].map(({ id, name }) => (
-                      <SelectItem key={id} value={id}>
-                        {name}
-                      </SelectItem>
-                    ))}
+                    {Object.values(TRANSACTION_FREQUENCY)
+                      .filter((f) => f !== "unknown")
+                      .map((frequency) => (
+                        <SelectItem key={frequency} value={frequency}>
+                          {tScoped(`frequency.${frequency}`)}
+                        </SelectItem>
+                      ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>

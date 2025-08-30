@@ -108,7 +108,7 @@ export const getSimilarTransactionsSchema = z.object({
       },
     }),
   frequency: z
-    .enum(["weekly", "monthly", "annually", "irregular"])
+    .enum(TRANSACTION_FREQUENCY)
     .optional()
     .openapi({
       description: "Recurring frequency to filter similar transactions.",
@@ -134,13 +134,37 @@ export const getSimilarTransactionsSchema = z.object({
     }),
 });
 
-export const updateManyTransactionsSchema = z.object({
-  ids: z.array(z.string().min(1)),
-  categoryId: z.string().nullable().optional(),
-  tagId: z.string().nullable().optional(),
-  note: z.string().nullable().optional(),
-  // recurring?: boolean;
-  // frequency?: "weekly" | "monthly" | "annually" | "irregular" | null;
+export const updateTransactionsSchema = z.object({
+  ids: z.array(z.string()).openapi({
+    description: "Array of transaction IDs to update.",
+  }),
+  categoryId: z.string().nullable().optional().openapi({
+    description: "Category id for the transactions.",
+  }),
+  categorySlug: z.string().nullable().optional().openapi({
+    description: "Category slug for the transactions.",
+  }),
+  status: z.enum(TRANSACTION_STATUS).optional().openapi({
+    description: "Status to set for the transactions.",
+  }),
+  frequency: z.enum(TRANSACTION_FREQUENCY).nullable().optional().openapi({
+    description: "Recurring frequency to set for the transactions.",
+  }),
+  internal: z.boolean().optional().openapi({
+    description: "Whether the transactions are internal.",
+  }),
+  note: z.string().nullable().optional().openapi({
+    description: "Note to set for the transactions.",
+  }),
+  assignedId: z.string().nullable().optional().openapi({
+    description: "Assigned user ID for the transactions.",
+  }),
+  recurring: z.boolean().optional().openapi({
+    description: "Whether the transactions are recurring.",
+  }),
+  tagId: z.string().nullable().optional().openapi({
+    description: "Tag ID to set for the transactions.",
+  }),
 });
 
 export const updateTransactionTagsSchema = z.object({

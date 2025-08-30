@@ -110,6 +110,21 @@ export default {
       "We found {count} similar transaction. Should we mark it too?",
     "similar#other":
       "We found {count} similar transactions. Should we mark them too?",
+    exclude_label: "Exclude from analytics",
+    exclude_description:
+      "Exclude this transaction from analytics like profit, expense and revenue. This is useful for internal transfers between accounts to avoid double-counting.",
+    recurring_label: "Mark as recurring",
+    recurring_description:
+      "Mark as recurring. Similar future transactions will be automatically categorized and flagged as recurring.",
+    frequency: {
+      weekly: "Weekly",
+      biweekly: "Biweekly",
+      monthly: "Monthly",
+      semi_monthly: "Semi monthly",
+      annually: "Annualy",
+      irregular: "Irregular",
+      unknown: "Unknown",
+    },
   },
 
   bottom_bar: {

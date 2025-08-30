@@ -7,25 +7,24 @@ import type {
   deleteTranferSchema,
   deleteTransactionSchema,
   getTransactionsSchema,
-  updateManyTransactionsSchema,
   updateTransactionSchema,
+  updateTransactionsSchema,
 } from "~/shared/validators/transaction.schema";
 import type z from "zod/v4";
 import { updateOrCreateRule } from "~/utils/categorization";
 import { eq } from "drizzle-orm";
 
 import type { DBClient } from "../db";
-import type { DB_TransactionInsertType } from "../db/schema/transactions";
 import type { NormalizedTx } from "../domain/transaction/utils";
 import { db, withTransaction } from "../db";
 import { account_table } from "../db/schema/accounts";
 import { transaction_table } from "../db/schema/transactions";
 import { updateAttachmentMutation } from "../domain/attachment/mutations";
-import { createTransactionToTagMutation } from "../domain/transaction-tag/mutations";
 import {
   createTransactionMutation,
   deleteManyTransactionsMutation,
   updateManyTransactionsMutation,
+  updateTransactionMutation,
   updateTransactionTagsMutation,
 } from "../domain/transaction/mutations";
 import {
@@ -266,106 +265,7 @@ export async function updateTransaction(
   input: z.infer<typeof updateTransactionSchema>,
   organizationId: string,
 ) {
-  return client.transaction(async (tx) => {
-    // Get existing transaction
-    const existing = await tx
-      .select()
-      .from(transaction_table)
-      .where(eq(transaction_table.id, input.id))
-      .limit(1);
-
-    if (!existing[0]) {
-      throw new Error(`Transaction ${input.id} not found`);
-    }
-
-    const existingTransaction = existing[0];
-
-    // Validate organization ownership
-    if (existingTransaction.organizationId !== organizationId) {
-      throw new Error("Transaction not found");
-    }
-
-    // Get account details
-    const account = await tx
-      .select()
-      .from(account_table)
-      .where(eq(account_table.id, existingTransaction.accountId))
-      .limit(1);
-
-    if (!account.length) {
-      throw new Error(`Account ${existingTransaction.accountId} not found`);
-    }
-
-    // Prepare update data
-    const updateData: Partial<DB_TransactionInsertType> = {};
-
-    if (input.amount !== undefined) updateData.amount = input.amount;
-    if (input.date !== undefined) updateData.date = input.date;
-    if (input.description !== undefined) updateData.name = input.description;
-    if (input.description !== undefined)
-      updateData.description = input.description;
-    if (input.counterparty !== undefined)
-      updateData.counterpartyName = input.counterparty;
-    if (input.status !== undefined) updateData.status = input.status;
-    if (input.categoryId !== undefined)
-      updateData.categoryId = input.categoryId;
-    if (input.method !== undefined) updateData.method = input.method;
-    if (input.note !== undefined) updateData.note = input.note;
-
-    // Update fingerprint if relevant fields changed
-    if (
-      input.amount !== undefined ||
-      input.date !== undefined ||
-      input.description !== undefined ||
-      input.counterparty !== undefined
-    ) {
-      const date = input.date
-        ? new Date(input.date)
-        : new Date(existingTransaction.date);
-      const description =
-        input.description ?? existingTransaction.description ?? "";
-      const amount = input.amount ?? existingTransaction.amount;
-
-      const normalizedTx: NormalizedTx = {
-        accountId: existingTransaction.accountId,
-        amount,
-        date,
-        descriptionNormalized: normalizeDescription(description),
-      };
-
-      updateData.fingerprint = calculateFingerprint(normalizedTx);
-    }
-
-    // Update the transaction
-    await tx
-      .update(transaction_table)
-      .set({
-        ...updateData,
-        updatedAt: new Date().toISOString(),
-      })
-      .where(eq(transaction_table.id, input.id));
-
-    // Recalculate snapshots from the earliest affected date
-    const affectedDate = new Date(
-      Math.min(
-        new Date(existingTransaction.date).getTime(),
-        input.date ? new Date(input.date).getTime() : Infinity,
-      ),
-    );
-
-    await recalculateSnapshots(
-      tx,
-      { accountId: existingTransaction.accountId, fromDate: affectedDate },
-      organizationId,
-    );
-
-    // Update account balance
-    await updateAccountBalance(
-      tx,
-      { accountId: existingTransaction.accountId },
-      organizationId,
-    );
-  });
+  return await updateTransactionMutation(client, { ...input, organizationId });
 }
 
 /**
@@ -492,32 +392,15 @@ export async function deleteTransfer(
 }
 
 export async function updateManyTransactions(
-  input: z.infer<typeof updateManyTransactionsSchema>,
-  orgId: string,
+  client: DBClient,
+  input: z.infer<typeof updateTransactionsSchema>,
+  organizationId: string,
 ) {
-  const { tagId, ...rest } = input;
-
-  await withTransaction(async (tx) => {
-    const transaction = await updateManyTransactionsMutation(tx, {
-      ...rest,
-      orgId,
+  return client.transaction(async (tx) => {
+    return await updateManyTransactionsMutation(tx, {
+      ...input,
+      organizationId,
     });
-
-    // update category rules
-    // if (input.categoryId) {
-    //   for (const { name } of transaction) {
-    //     await updateOrCreateRule(orgId, name, input.categoryId);
-    //   }
-    // }
-
-    // update transactionTag
-    if (tagId) {
-      for (const transactionId of input.ids) {
-        await createTransactionToTagMutation(tx, { transactionId, tagId });
-      }
-    }
-
-    return transaction;
   });
 }
 

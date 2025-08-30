@@ -110,6 +110,21 @@ export default {
       "Abbiamo trovato {count} transazione simile. Vuoi categorizzarla allo stesso modo?",
     "similar#other":
       "Abbiamo trovato {count} transazioni simili. Vuoi categorizzarle allo stesso modo?",
+    exclude_label: "Escludi dalle metriche",
+    exclude_description:
+      "Escludi questa transazione dalle analisi come profitti, spese e ricavi. Utile per i trasferimenti interni tra conti per evitare doppi conteggi.",
+    recurring_label: "Segna come ricorrente",
+    recurring_description:
+      "Segna come ricorrente. Le future transazioni simili saranno automaticamente categorizzate e contrassegnate come ricorrenti.",
+    frequency: {
+      weekly: "Settimanale",
+      biweekly: "Bi-settimanale",
+      monthly: "Mensile",
+      semi_monthly: "Semi mensile",
+      annually: "Annuale",
+      irregular: "Irregolare",
+      unknown: "Sconosciuta",
+    },
   },
 
   bottom_bar: {
