@@ -152,15 +152,13 @@ export function DataTable({
       if (!transaction?.id) return false;
       const found = rowSelection[transaction.id];
 
-      if (found) {
-        return transaction?.source !== "api"; // TODO: investigate why this is necessary
-      }
-      return false;
+      if (found === undefined) return false;
+      else return found;
     });
 
     if (Object.keys(rowSelection)?.length > 0) {
       if (transactions.length === 0) {
-        setCanDelete(true);
+        setCanDelete(transactions.every((t) => t.source !== "api"));
       } else {
         setCanDelete(false);
       }
@@ -217,7 +215,7 @@ export function DataTable({
           <div className="w-full">
             <div
               ref={tableScroll.containerRef}
-              className="scrollbar-hide overflow-x-auto overscroll-x-none border-border md:border"
+              className="scrollbar-hide overflow-x-auto overscroll-x-none border border-border"
             >
               <Table>
                 <DataTableHeader table={table} tableScroll={tableScroll} />

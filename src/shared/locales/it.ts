@@ -131,6 +131,16 @@ export default {
       irregular: "Irregolare",
       unknown: "Sconosciuta",
     },
+    action_bar: {
+      "selected#one": "selezionato",
+      "selected#other": "selezionati",
+      deselect_tooltip: "Deseleziona tutti",
+      categories_tooltip: "Applica categoria",
+      tags_tooltip: "Applica tag",
+      delete_tooltip: "Elimina tutte",
+      cannot_delete_tooltip: "Puoi eliminare solo transazioni manuali",
+      export_label: "Esporta",
+    },
   },
 
   bottom_bar: {

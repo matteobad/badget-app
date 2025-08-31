@@ -24,6 +24,7 @@ export function BottomBar() {
   const t = useI18n();
   const trpc = useTRPC();
   const { filter } = useTransactionFilterParams();
+
   const { data: transactions, isLoading } = useQuery({
     ...trpc.transaction.get.queryOptions({
       ...filter,
