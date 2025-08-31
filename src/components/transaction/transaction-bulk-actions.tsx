@@ -3,9 +3,15 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTransactionsStore } from "~/lib/stores/transaction";
+import { TRANSACTION_FREQUENCY } from "~/shared/constants/enum";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
-import { ShapesIcon, TagsIcon, Trash2Icon } from "lucide-react";
+import {
+  CalendarSyncIcon,
+  ShapesIcon,
+  TagsIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "../ui/button";
@@ -13,6 +19,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -25,8 +32,10 @@ type Props = {
 export function BulkActions({ ids }: Props) {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [tagOpen, setTagOpen] = useState(false);
+  const [recurringOpen, setRecurringOpen] = useState(false);
 
   const tScoped = useScopedI18n("transaction.action_bar");
+  const tFrequency = useScopedI18n("transaction.frequency");
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -146,6 +155,41 @@ export function BulkActions({ ids }: Props) {
         </DropdownMenuContent>
       </DropdownMenu>
 
+      <DropdownMenu open={recurringOpen} onOpenChange={setRecurringOpen}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger className="flex size-9 items-center justify-center hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50">
+              <CalendarSyncIcon className="size-4" />
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{tScoped("recurring_tooltip")}</p>
+          </TooltipContent>
+        </Tooltip>
+        <DropdownMenuContent
+          className="max-h-[300px] w-[250px] overflow-y-auto py-1"
+          sideOffset={8}
+        >
+          {Object.values(TRANSACTION_FREQUENCY).map((frequency) => (
+            <DropdownMenuRadioItem
+              key={frequency}
+              value={frequency}
+              onClick={() => {
+                setRecurringOpen(false);
+                updateTransactionsMutation.mutate({
+                  ids,
+                  // a bit of a hack to handle removing recurrency
+                  frequency: frequency !== "unknown" ? frequency : undefined,
+                  recurring: frequency !== "unknown",
+                });
+              }}
+            >
+              {tFrequency(frequency)}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -155,7 +199,6 @@ export function BulkActions({ ids }: Props) {
             onClick={handleDeleteTransactions}
           >
             <Trash2Icon className="size-4" />
-            <span className="sr-only">{tScoped("delete_tooltip")}</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent>

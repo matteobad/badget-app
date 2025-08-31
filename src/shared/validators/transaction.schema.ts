@@ -197,6 +197,12 @@ export const importTransactionSchema = z.object({
   settings: z.object({ inverted: z.boolean() }),
 });
 
+export const exportTransactionsSchema = z.object({
+  transactionIds: z.array(z.string()),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional().default("en"),
+});
+
 export type CSVRow = Record<string, string | null>;
 export type CSVRowParsed = DB_TransactionInsertType;
 

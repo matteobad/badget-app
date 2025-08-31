@@ -7,17 +7,19 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { useExportStore } from "~/lib/stores/export";
 import { useTransactionsStore } from "~/lib/stores/transaction";
+import { exportTransactionsAction } from "~/server/domain/transaction/actions";
 import { useScopedI18n } from "~/shared/locales/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { DownloadIcon, XIcon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
 
 import { BulkActions } from "../transaction-bulk-actions";
 
-// import { exportTransactionsAction } from "@/actions/export-transactions-action";
-
 export function ExportBar() {
-  // const { setExportData } = useExportStore();
+  const { setExportData } = useExportStore();
   const { rowSelection, setRowSelection } = useTransactionsStore();
   const [isOpen, setOpen] = useState(false);
 
@@ -26,23 +28,23 @@ export function ExportBar() {
 
   const tScoped = useScopedI18n("transaction.action_bar");
 
-  // const { execute, status } = useAction(exportTransactionsAction, {
-  //   onSuccess: ({ data }) => {
-  //     if (data?.id && data?.publicAccessToken) {
-  //       setExportData({
-  //         runId: data.id,
-  //         accessToken: data.publicAccessToken,
-  //       });
+  const { execute, status } = useAction(exportTransactionsAction, {
+    onSuccess: ({ data }) => {
+      if (data?.id && data?.publicAccessToken) {
+        setExportData({
+          runId: data.id,
+          accessToken: data.publicAccessToken,
+        });
 
-  //       setRowSelection(() => ({}));
-  //     }
+        setRowSelection(() => ({}));
+      }
 
-  //     setOpen(false);
-  //   },
-  //   onError: () => {
-  //     toast.error("Something went wrong please try again.");
-  //   },
-  // });
+      setOpen(false);
+    },
+    onError: () => {
+      toast.error("Something went wrong please try again.");
+    },
+  });
 
   useEffect(() => {
     if (totalSelected) {
@@ -55,7 +57,7 @@ export function ExportBar() {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed bottom-4 left-[50%] z-10 -ml-[200px] h-12 w-[450px] shadow"
+        className="fixed bottom-4 left-[50%] z-10 -ml-[200px] h-12 w-[470px] shadow"
         animate={{ y: isOpen ? 0 : 100 }}
         initial={{ y: 100 }}
       >
@@ -84,14 +86,16 @@ export function ExportBar() {
             </div>
             <BulkActions ids={ids} />
             <SubmitButton
-              isSubmitting={false}
-              // onClick={() =>
-              //   execute({
-              //     transactionIds: ids,
-              //     dateFormat: user?.dateFormat ?? undefined,
-              //     locale: user?.locale ?? undefined,
-              //   })
-              // }
+              size="sm"
+              className="ml-2"
+              isSubmitting={status === "executing"}
+              onClick={() =>
+                execute({
+                  transactionIds: ids,
+                  // dateFormat: user?.dateFormat ?? undefined,
+                  // locale: user?.locale ?? undefined,
+                })
+              }
             >
               <div className="flex items-center space-x-2">
                 <span>{tScoped("export_label")}</span>

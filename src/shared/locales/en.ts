@@ -129,7 +129,7 @@ export default {
       semi_monthly: "Semi monthly",
       annually: "Annualy",
       irregular: "Irregular",
-      unknown: "Unknown",
+      unknown: "None",
     },
 
     action_bar: {
@@ -138,6 +138,7 @@ export default {
       deselect_tooltip: "Deselect all",
       categories_tooltip: "Manage categories",
       tags_tooltip: "Manage tags",
+      recurring_tooltip: "Manage recurrence",
       delete_tooltip: "Delete all",
       cannot_delete_tooltip: "You can only delete manual transactions",
       export_label: "Export",

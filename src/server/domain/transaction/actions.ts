@@ -1,5 +1,6 @@
 "use server";
 
+import type { exportTransactionsTask } from "~/server/jobs/tasks/export-transactions";
 import type { importTransactionsTask } from "~/server/jobs/tasks/import-transactions";
 import { revalidateTag } from "next/cache";
 import { openai } from "@ai-sdk/openai";
@@ -11,6 +12,7 @@ import { db } from "~/server/db";
 import { utapi } from "~/server/uploadthing";
 import { attachmentDeleteSchema } from "~/shared/validators/attachment.schema";
 import {
+  exportTransactionsSchema,
   importTransactionSchema,
   parseTransactionCSVSchema,
 } from "~/shared/validators/transaction.schema";
@@ -159,3 +161,29 @@ export const importTransactionsCSVAction = authActionClient
       },
     );
   });
+
+export const exportTransactionsAction = authActionClient
+  .inputSchema(exportTransactionsSchema)
+  .metadata({ actionName: "export-transactions" })
+  .action(
+    async ({
+      parsedInput: { transactionIds, dateFormat, locale },
+      ctx: { orgId },
+    }) => {
+      if (!orgId) {
+        throw new Error("Organization not found");
+      }
+
+      const event = await tasks.trigger<typeof exportTransactionsTask>(
+        "export-transactions",
+        {
+          organizationId: orgId,
+          locale,
+          transactionIds,
+          dateFormat,
+        },
+      );
+
+      return event;
+    },
+  );

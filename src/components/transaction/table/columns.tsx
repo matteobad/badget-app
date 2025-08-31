@@ -26,7 +26,7 @@ import {
 import { cn } from "~/lib/utils";
 import { formatDate } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { EyeOffIcon, MoreHorizontalIcon, RepeatIcon } from "lucide-react";
+import { CalendarSyncIcon, EyeOffIcon, MoreHorizontalIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -91,14 +91,14 @@ const DescriptionCell = memo(
                 {name?.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <span className="line-clamp-1 max-w-[100px] text-ellipsis md:max-w-none">
+            <span className="line-clamp-1 w-full max-w-[100px] text-ellipsis md:max-w-none">
               {name}
             </span>
             {recurring && (
               <TooltipProvider delayDuration={100}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <RepeatIcon className="size-3.5 shrink-0 cursor-auto text-muted-foreground" />
+                    <CalendarSyncIcon className="size-3.5 shrink-0 cursor-auto text-muted-foreground" />
                   </TooltipTrigger>
                   <TooltipContent
                     className="w-[220px] text-left text-xs"

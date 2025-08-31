@@ -2,6 +2,7 @@ import type { PropsWithChildren } from "react";
 import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { ExportStatus } from "~/components/export-status";
 import { GlobalSheets } from "~/components/global-sheets";
 import { Header } from "~/components/layouts/header";
 import { Sidebar } from "~/components/sidebar/sidebar";
@@ -36,6 +37,8 @@ export default async function AppLayout(props: PropsWithChildren) {
 
           {props.children}
         </div>
+
+        <ExportStatus />
 
         <Suspense>
           {/* Global Sheets here */}
