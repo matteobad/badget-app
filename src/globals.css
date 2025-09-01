@@ -157,3 +157,9 @@
   > div {
   @apply pr-1;
 }
+
+number-flow-react::part(fraction) {
+  margin-left: 0.0625em;
+  font-size: 0.75em;
+  /* color: var(--muted-foreground); */
+}

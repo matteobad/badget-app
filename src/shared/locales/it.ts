@@ -49,13 +49,48 @@ export default {
   },
 
   account: {
+    actions: {
+      add: "Aggiungi account",
+      connect: "Collega un conto",
+      create: "Crea manualmente",
+      recalculate: "Aggiorna saldi",
+    },
+    metrics: {
+      net_worth: {
+        title: "Patrimonio netto",
+        description:
+          "Il patrimonio netto è il valore totale di tutti i tuoi asset meno le tue passività.",
+        info: "Tutti gli importi sono mostrati nella tua valuta base",
+      },
+      asset: {
+        title: "Attività",
+        description: "Valore totale delle tue attività finanziarie",
+        info: "Le attività includono conti correnti, risparmi e altri asset di valore.",
+      },
+      liability: {
+        title: "Passività",
+        description: "Valore totale delle tue passività finanziarie",
+        info: "Le passività includono debiti, mutui e altri obblighi finanziari.",
+      },
+      "account#one": "{count} account",
+      "account#other": "{count} account",
+    },
     type: {
-      checking: "Conto corrente",
-      savings: "Conto deposito",
-      investment: "Conto titoli",
-      debt: "Conto di debito",
-      cash: "Liquidi",
-      other: "Altro",
+      asset: "Conto corrente",
+      liability: "Conto deposito",
+    },
+    subtype: {
+      cash: "Contanti",
+      "checking#one": "Conto corrente",
+      "checking#other": "Conti corrente",
+      "savings#one": "Conto deposito",
+      "savings#other": "Conti deposito",
+      investment: "",
+      property: "",
+      credit_card: "",
+      loan: "",
+      mortgage: "",
+      other_liability: "",
     },
   },
 

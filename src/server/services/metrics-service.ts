@@ -152,8 +152,8 @@ export async function getFinanancialMetrics(
   return {
     summary: {
       netWorth: Math.abs(netNorth),
-      assets: Math.abs(assets),
-      liabilities: Math.abs(liabilities),
+      asset: Math.abs(assets),
+      liability: Math.abs(liabilities),
       currency: rawData?.at(0)?.currency ?? inputCurrency,
     },
     meta: {

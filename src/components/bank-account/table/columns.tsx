@@ -191,22 +191,6 @@ const AccountOrigin = memo(({ origin }: { origin: "manual" | "linked" }) => {
 });
 AccountOrigin.displayName = "AccountOrigin";
 
-// Amount component
-const AccountBalance = memo(
-  ({ balance, currency }: { balance: number; currency: string }) => {
-    const isPositive = balance > 0;
-
-    return (
-      <span
-        className={`font-medium ${isPositive ? "text-green-600" : "text-gray-900"}`}
-      >
-        <FormatAmount amount={balance} currency={currency} />
-      </span>
-    );
-  },
-);
-AccountBalance.displayName = "AccountBalance";
-
 export const columns: ColumnDef<BankAccount>[] = [
   {
     id: "select",
@@ -225,6 +209,7 @@ export const columns: ColumnDef<BankAccount>[] = [
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
+        className="mt-1 ml-1"
         aria-label="Select row"
       />
     ),
@@ -234,67 +219,21 @@ export const columns: ColumnDef<BankAccount>[] = [
   {
     accessorKey: "name",
     meta: {
-      className:
-        "md:sticky bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-secondary z-10 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]",
+      className: "border-r border-border",
     },
     cell: ({ row }) => {
       const account = row.original;
 
       return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex items-center gap-3">
-              <AccountIcon logoUrl={account.logoUrl ?? ""} />
-              <div className="flex items-center gap-2">
-                <span className="line-clamp-1 w-full max-w-[100px] text-ellipsis md:max-w-none">
-                  {account.name}
-                </span>
-              </div>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            {account.description && (
-              <TooltipContent
-                className="max-w-[380px] px-3 py-1.5 text-xs"
-                side="right"
-                sideOffset={10}
-              >
-                {account.description}
-              </TooltipContent>
-            )}
-          </TooltipContent>
-        </Tooltip>
+        <div className="flex items-center gap-3">
+          <AccountIcon logoUrl={account.logoUrl ?? ""} />
+          <div className="flex items-center gap-2">
+            <span className="line-clamp-1 w-full max-w-[100px] text-ellipsis text-primary md:max-w-none">
+              {account.name} {account.description && `- ${account.description}`}
+            </span>
+          </div>
+        </div>
       );
-    },
-  },
-  {
-    accessorKey: "lastUpdate",
-    meta: {
-      className: "",
-    },
-    cell: ({ row }) => {
-      const date = row.original.lastUpdate;
-      return formatDate(date);
-    },
-  },
-  {
-    accessorKey: "expiresAt",
-    meta: {
-      className: "",
-    },
-    cell: ({ row }) => {
-      const date = row.original.expiresAt;
-      return date ? formatDate(date) : "-";
-    },
-  },
-  {
-    accessorKey: "provider",
-    meta: {
-      className: "",
-    },
-    cell: ({ row }) => {
-      const provider = row.original.provider;
-      return provider;
     },
   },
   {
@@ -304,14 +243,23 @@ export const columns: ColumnDef<BankAccount>[] = [
       className: "w-[130px] min-w-[130px]",
     },
     cell: ({ row }) => {
-      const acocunt = row.original;
+      const { balance, currency, lastUpdate } = row.original;
+      const isPositive = balance > 0;
 
       return (
         <div className="text-right">
-          <AccountBalance
-            balance={acocunt.balance}
-            currency={acocunt.currency}
-          />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className={`font-medium ${isPositive ? "text-green-600" : "text-gray-900"}`}
+              >
+                <FormatAmount amount={balance} currency={currency} />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              last updated: {formatDate(lastUpdate)}
+            </TooltipContent>
+          </Tooltip>
         </div>
       );
     },

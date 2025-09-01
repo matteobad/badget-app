@@ -49,13 +49,48 @@ export default {
   },
 
   account: {
+    actions: {
+      add: "Add account",
+      connect: "Connect account",
+      create: "Create manually",
+      recalculate: "Refresh balances",
+    },
+    metrics: {
+      net_worth: {
+        title: "Patrimonio netto",
+        description:
+          "Net worth is the total value of all your assets minus your liabilities.",
+        info: "All amounts are shown in your base currency",
+      },
+      asset: {
+        title: "Assets",
+        description: "Total value of what you own",
+        info: "Assets include cash, investments, property, and other valuables you possess.",
+      },
+      liability: {
+        title: "Liabilities",
+        description: "Total value of what you owe",
+        info: "Liabilities include debts, loans, credit cards, and other financial obligations.",
+      },
+      "account#one": "{count} account",
+      "account#other": "{count} accounts",
+    },
     type: {
-      checking: "Conto corrente",
-      savings: "Conto deposito",
-      investment: "Conto titoli",
-      debt: "Conto di debito",
-      cash: "Liquidi",
-      other: "Altro",
+      asset: "Asset",
+      liability: "Liability",
+    },
+    subtype: {
+      cash: "Cash",
+      "checking#one": "Checking account",
+      "checking#other": "Checking accounts",
+      "savings#one": "Saving account",
+      "savings#other": "Saving accounts",
+      investment: "",
+      property: "",
+      credit_card: "",
+      loan: "",
+      mortgage: "",
+      other_liability: "",
     },
   },
 

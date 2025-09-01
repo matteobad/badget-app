@@ -8,13 +8,16 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { ACCOUNT_SUBTYPE } from "~/shared/constants/enum";
+import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { useScopedI18n } from "~/shared/locales/client";
 
 import { DataTable } from "../bank-account/table/data-table";
 import { NoAccounts } from "../bank-account/table/empty-states";
 import { Loading } from "../bank-account/table/loading";
 
 export function AssetsAccordion() {
+  const tScoped = useScopedI18n("account.subtype");
   const trpc = useTRPC();
 
   const { data, isSuccess } = useQuery(trpc.asset.get.queryOptions());
@@ -31,25 +34,35 @@ export function AssetsAccordion() {
   return (
     <Accordion
       type="multiple"
-      className="w-full space-y-2"
-      defaultValue={["checking"]}
+      className="w-full space-y-4"
+      defaultValue={["checking", "savings"]}
     >
-      {Object.values(ACCOUNT_SUBTYPE).map((item) => {
-        const accounts = data?.filter(({ subtype }) => item === subtype);
+      {Object.values(ACCOUNT_SUBTYPE).map((accountSubtype) => {
+        const accounts = data?.filter(
+          ({ subtype }) => accountSubtype === subtype,
+        );
+
+        const total =
+          accounts?.reduce((tot, value) => (tot += value.balance), 0) ?? 0;
 
         if (!accounts?.length) return;
 
         return (
           <AccordionItem
-            value={item}
-            key={item}
+            value={accountSubtype}
+            key={accountSubtype}
             className="rounded-md border bg-background p-0 outline-none last:border-b has-focus-visible:border-ring has-focus-visible:ring-[3px] has-focus-visible:ring-ring/50"
           >
-            <AccordionTrigger className="h-10 px-4 text-[15px] leading-6 hover:no-underline focus-visible:ring-0">
-              {item}
+            <AccordionTrigger className="flex h-10 px-4 text-sm leading-6 hover:no-underline focus-visible:ring-0">
+              <span className="shrink-0">
+                {tScoped(accountSubtype, { count: accounts.length })}
+              </span>
+              <div className="mr-[48px] w-full text-right">
+                {formatAmount({ amount: total, currency: "EUR" })}
+              </div>
             </AccordionTrigger>
             <AccordionContent className="p-0 text-muted-foreground">
-              <DataTable />
+              <DataTable data={accounts} />
             </AccordionContent>
           </AccordionItem>
         );

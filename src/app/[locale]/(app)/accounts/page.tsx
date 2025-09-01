@@ -43,7 +43,7 @@ export default async function AssetsLiabilitiesPage(props: PageProps) {
           <FinancialMetrics />
         </Suspense>
       </ErrorBoundary>
-      <div className="flex flex-col gap-6 p-6 pt-0">
+      <div className="flex flex-col gap-4 p-6 pt-0">
         <div className="flex items-center justify-between">
           <AccountsSearchFilter />
           <MainActions />

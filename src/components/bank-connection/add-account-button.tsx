@@ -10,9 +10,12 @@ import {
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 import { useConnectParams } from "~/hooks/use-connect-params";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
+import { useScopedI18n } from "~/shared/locales/client";
 import { FilePlus, Landmark, PlusIcon } from "lucide-react";
 
 export function AddAccountButton() {
+  const tScoped = useScopedI18n("account.actions");
+
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setBankAccountParams } = useBankAccountParams();
   const { setParams: setBankConnectParams } = useConnectParams();
@@ -22,7 +25,7 @@ export function AddAccountButton() {
       <DropdownMenuTrigger asChild>
         <Button>
           <PlusIcon />
-          Add account
+          {tScoped("add")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-[180px]" align="end">
@@ -43,7 +46,7 @@ export function AddAccountButton() {
           }}
         >
           <Landmark />
-          Collega un conto
+          {tScoped("connect")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
@@ -58,7 +61,7 @@ export function AddAccountButton() {
             });
           }}
         >
-          <FilePlus /> Crea manualmente
+          <FilePlus /> {tScoped("create")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

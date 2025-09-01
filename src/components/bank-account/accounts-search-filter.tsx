@@ -62,7 +62,7 @@ export function AccountsSearchFilter() {
         <Input
           ref={inputRef}
           placeholder="Search accounts by name"
-          className="w-full pr-8 pl-9 shadow-none"
+          className="w-full pr-8 pl-9"
           value={prompt}
           onChange={handleSearch}
           onFocus={() => setIsFocused(true)}

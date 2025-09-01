@@ -1,7 +1,8 @@
 "use client";
 
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -18,7 +19,7 @@ import { columns } from "./columns";
 import { NoResults } from "./empty-states";
 import { Loading } from "./loading";
 
-export function DataTable() {
+export function DataTable({ data }: { data: RouterOutput["asset"]["get"] }) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
 
@@ -27,8 +28,6 @@ export function DataTable() {
 
   const queryClient = useQueryClient();
   const trpc = useTRPC();
-
-  const { data } = useQuery(trpc.asset.get.queryOptions({}));
 
   const deleteBankAccountMutation = useMutation(
     trpc.bankAccount.delete.mutationOptions({
@@ -77,7 +76,7 @@ export function DataTable() {
         {/* Transaction Rows */}
         <TableBody>
           {table.getFilteredRowModel().rows.map((row) => (
-            <TableRow className="hover:bg-transparent" key={row.id}>
+            <TableRow key={row.id}>
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
                   key={cell.id}
@@ -86,7 +85,7 @@ export function DataTable() {
                     "border-x py-3",
                     {
                       "border-l-0": index === 0,
-                      "border-r-0": index === 6,
+                      "border-r-0": index === 3,
                     },
                   )}
                 >
