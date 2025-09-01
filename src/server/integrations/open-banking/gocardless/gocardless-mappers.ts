@@ -98,7 +98,8 @@ export const mapAccountsResponse = (
       ? parseFloat(balancesData.balances[0].balanceAmount.amount)
       : 0,
     currency: detailsData.account.currency,
-    type: "checking",
+    type: "asset",
+    subtype: "checking",
     description: "",
     // resource_id: detailsData.account.resourceId,
     // enrollment_id: null,

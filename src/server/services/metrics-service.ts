@@ -1,7 +1,6 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 import type { DBClient } from "../db";
-import { account_table } from "../db/schema/accounts";
 
 export type GetExpensesParams = {
   orgId: string;
@@ -69,31 +68,36 @@ export async function getExpenses(db: DBClient, params: GetExpensesParams) {
   };
 }
 
-type GetNetWorthParams = {
+type GetFinancialMetricsParams = {
   orgId: string;
   from: string;
   to: string;
   currency?: string;
 };
 
-type NetWorthResultItem = {
+type FinancialMetricsResultItem = {
   date: string;
-  value: string;
+  assets: string;
+  liabilities: string;
+  net_worth: string;
   currency: string;
 };
 
-export async function getNetWorth(db: DBClient, params: GetNetWorthParams) {
+export async function getNetWorth(
+  db: DBClient,
+  params: GetFinancialMetricsParams,
+) {
   const { orgId, from, to, currency: inputCurrency } = params;
 
   const result = await db.execute(
-    sql`SELECT * FROM ${sql.raw("get_net_worth")}(${orgId}, ${from}, ${to})`,
+    sql`SELECT * FROM ${sql.raw("get_financial_metrics")}(${orgId}, ${from}, ${to})`,
   );
 
-  const rawData = result.rows as unknown as NetWorthResultItem[];
+  const rawData = result.rows as unknown as FinancialMetricsResultItem[];
 
   const currentNetWorth =
     rawData && rawData.length > 0
-      ? parseFloat(rawData[rawData.length - 1]?.value ?? "0")
+      ? parseFloat(rawData[rawData.length - 1]?.net_worth ?? "0")
       : 0;
 
   return {
@@ -107,7 +111,58 @@ export async function getNetWorth(db: DBClient, params: GetNetWorthParams) {
     },
     result: rawData?.map((item) => {
       const value = Number.parseFloat(
-        Number.parseFloat(item.value || "0").toFixed(2),
+        Number.parseFloat(item.net_worth || "0").toFixed(2),
+      );
+      return {
+        date: item.date,
+        value: value,
+        currency: item.currency,
+      };
+    }),
+  };
+}
+
+export async function getFinanancialMetrics(
+  db: DBClient,
+  params: GetFinancialMetricsParams,
+) {
+  const { orgId, from, to, currency: inputCurrency } = params;
+
+  const result = await db.execute(
+    sql`SELECT * FROM ${sql.raw("get_financial_metrics")}(${orgId}, ${from}, ${to})`,
+  );
+
+  const rawData = result.rows as unknown as FinancialMetricsResultItem[];
+
+  const netNorth =
+    rawData && rawData.length > 0
+      ? parseFloat(rawData[rawData.length - 1]?.net_worth ?? "0")
+      : 0;
+
+  const assets =
+    rawData && rawData.length > 0
+      ? parseFloat(rawData[rawData.length - 1]?.assets ?? "0")
+      : 0;
+
+  const liabilities =
+    rawData && rawData.length > 0
+      ? parseFloat(rawData[rawData.length - 1]?.liabilities ?? "0")
+      : 0;
+
+  return {
+    summary: {
+      netWorth: Math.abs(netNorth),
+      assets: Math.abs(assets),
+      liabilities: Math.abs(liabilities),
+      currency: rawData?.at(0)?.currency ?? inputCurrency,
+    },
+    meta: {
+      type: "assets",
+      currency: rawData?.at(0)?.currency ?? inputCurrency,
+    },
+    result: rawData?.map((item) => {
+      const value = Number.parseFloat(
+        Number.parseFloat(item.net_worth || "0").toFixed(2),
       );
       return {
         date: item.date,
@@ -156,109 +211,4 @@ export async function getSpending(
         percentage: Number.parseFloat(Number(item.percentage).toFixed(2)),
       }))
     : [];
-}
-
-type GetAssetsParams = {
-  orgId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
-
-type AssetsResultItem = {
-  total: number;
-  currency: string;
-};
-
-export async function getAssets(db: DBClient, params: GetAssetsParams) {
-  const { orgId, currency: inputCurrency } = params;
-
-  const result = await db
-    .select({
-      total: sql`SUM(${account_table.balance})`.as("total"),
-      currency: account_table.currency,
-    })
-    .from(account_table)
-
-    .where(
-      and(
-        eq(account_table.organizationId, orgId),
-        inArray(account_table.type, [
-          "cash",
-          "checking",
-          "other_asset",
-          "pension",
-          "stock",
-          "savings",
-          "real_estate",
-          "vehicle",
-        ]),
-      ),
-    )
-    .groupBy(account_table.currency);
-
-  const rawData = result[0] as AssetsResultItem;
-
-  return {
-    summary: {
-      totalAssets: Math.abs(rawData?.total ?? 0),
-      currency: rawData?.currency ?? inputCurrency,
-    },
-    meta: {
-      type: "assets",
-      currency: rawData?.currency ?? inputCurrency,
-    },
-  };
-}
-
-type GetLiabilitiesParams = {
-  orgId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
-
-type LiabilitiesResultItem = {
-  total: number;
-  currency: string;
-};
-
-export async function getLiabilities(
-  db: DBClient,
-  params: GetLiabilitiesParams,
-) {
-  const { orgId, currency: inputCurrency } = params;
-
-  const result = await db
-    .select({
-      total: sql`SUM(${account_table.balance})`.as("total"),
-      currency: account_table.currency,
-    })
-    .from(account_table)
-
-    .where(
-      and(
-        eq(account_table.organizationId, orgId),
-        inArray(account_table.type, [
-          "credit_card",
-          "loan",
-          "mortgage",
-          "other_debt",
-        ]),
-      ),
-    )
-    .groupBy(account_table.currency);
-
-  const rawData = result[0] as LiabilitiesResultItem;
-
-  return {
-    summary: {
-      totalAssets: Math.abs(rawData?.total ?? 0),
-      currency: rawData?.currency ?? inputCurrency,
-    },
-    meta: {
-      type: "assets",
-      currency: rawData?.currency ?? inputCurrency,
-    },
-  };
 }

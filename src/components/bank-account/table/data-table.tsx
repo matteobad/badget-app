@@ -15,7 +15,7 @@ import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import { columns } from "./columns";
-import { NoAccounts, NoResults } from "./empty-states";
+import { NoResults } from "./empty-states";
 import { Loading } from "./loading";
 
 export function DataTable() {
@@ -28,7 +28,7 @@ export function DataTable() {
   const queryClient = useQueryClient();
   const trpc = useTRPC();
 
-  const { data } = useQuery(trpc.bankAccount.get.queryOptions({}));
+  const { data } = useQuery(trpc.asset.get.queryOptions({}));
 
   const deleteBankAccountMutation = useMutation(
     trpc.bankAccount.delete.mutationOptions({
@@ -62,15 +62,6 @@ export function DataTable() {
     },
   });
 
-  if (!data?.length && !hasFilters) {
-    return (
-      <div className="relative h-[calc(100vh-200px)] overflow-hidden px-6">
-        <NoAccounts />
-        <Loading isEmpty />
-      </div>
-    );
-  }
-
   if (!data?.length && hasFilters) {
     return (
       <div className="relative h-[calc(100vh-200px)] overflow-hidden px-6">
@@ -90,7 +81,14 @@ export function DataTable() {
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
                   key={cell.id}
-                  className={cn(index === 3 && "w-[50px]")}
+                  className={cn(
+                    cell.column.columnDef.meta?.className,
+                    "border-x py-3",
+                    {
+                      "border-l-0": index === 0,
+                      "border-r-0": index === 6,
+                    },
+                  )}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>

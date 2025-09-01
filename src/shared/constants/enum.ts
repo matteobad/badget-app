@@ -9,35 +9,27 @@ export type BankProviderType =
   (typeof BANK_PROVIDER)[keyof typeof BANK_PROVIDER];
 
 export const ACCOUNT_TYPE = {
-  // Liquidità
-  CHECKING: "checking",
-  SAVINGS: "savings",
-  CASH: "cash",
-  EWALLET: "ewallet",
+  ASSET: "asset",
+  LIABILITY: "liability",
+} as const;
+export type AccountType = (typeof ACCOUNT_TYPE)[keyof typeof ACCOUNT_TYPE];
 
-  // Debiti
+export const ACCOUNT_SUBTYPE = {
+  // Assets
+  CASH: "cash", // contanti
+  CHECKING: "checking", // conto corrente
+  SAVINGS: "savings", // conto deposito
+  INVESTMENT: "investment", // ETF, azioni
+  PROPERTY: "property", // immobili, beni durevoli
+
+  // Liabilities
   CREDIT_CARD: "credit_card",
   LOAN: "loan",
   MORTGAGE: "mortgage",
-  OTHER_DEBT: "other_debt",
-
-  // Investimenti
-  ETF: "etf",
-  STOCK: "stock",
-  BOND: "bond",
-  BROKERAGE: "brokerage",
-  PENSION: "pension",
-  CRYPTO: "crypto",
-
-  // Beni patrimoniali
-  REAL_ESTATE: "real_estate",
-  VEHICLE: "vehicle",
-  OTHER_ASSET: "other_asset",
-
-  // Altro
-  OTHER: "other",
+  OTHER_LIABILITY: "other_liability",
 } as const;
-export type AccountType = (typeof ACCOUNT_TYPE)[keyof typeof ACCOUNT_TYPE];
+export type AccountSubtype =
+  (typeof ACCOUNT_SUBTYPE)[keyof typeof ACCOUNT_SUBTYPE];
 
 export const BALANCE_SOURCE = {
   DERIVED: "derived",

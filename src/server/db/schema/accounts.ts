@@ -1,12 +1,22 @@
 import { index, pgEnum, unique, uniqueIndex } from "drizzle-orm/pg-core";
 
-import { ACCOUNT_TYPE, BALANCE_SOURCE } from "../../../shared/constants/enum";
+import type {
+  AccountSubtype,
+  AccountType,
+} from "../../../shared/constants/enum";
+import {
+  ACCOUNT_SUBTYPE,
+  ACCOUNT_TYPE,
+  BALANCE_SOURCE,
+} from "../../../shared/constants/enum";
 import { numericCasted, timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { organization as organization_table } from "./auth";
 import { connection_table, institution_table } from "./open-banking";
 
 export const accountTypeEnum = pgEnum("account_type", ACCOUNT_TYPE);
+
+export const accountSubtypeEnum = pgEnum("account_subtype", ACCOUNT_SUBTYPE);
 
 export const balanceSourceEnum = pgEnum("balance_source", BALANCE_SOURCE);
 
@@ -24,7 +34,8 @@ export const account_table = pgTable(
 
     name: d.varchar({ length: 64 }).notNull(),
     description: d.text(),
-    type: accountTypeEnum().notNull().default("checking"),
+    type: d.text().$type<AccountType>().notNull().default("asset"),
+    subtype: d.text().$type<AccountSubtype>(),
     logoUrl: d.varchar({ length: 2048 }),
     balance: numericCasted({ precision: 10, scale: 2 }).notNull(),
     currency: d.char({ length: 3 }).notNull(),
@@ -43,7 +54,17 @@ export const account_table = pgTable(
 
     ...timestamps,
   }),
-  (t) => [unique().on(t.organizationId, t.externalId)],
+  (t) => [
+    index("bank_accounts_bank_connection_id_idx").using(
+      "btree",
+      t.connectionId.asc().nullsLast(),
+    ),
+    index("bank_accounts_organization_id_idx").using(
+      "btree",
+      t.organizationId.asc().nullsLast(),
+    ),
+    unique().on(t.organizationId, t.externalId),
+  ],
 );
 
 export type DB_AccountType = typeof account_table.$inferSelect;
