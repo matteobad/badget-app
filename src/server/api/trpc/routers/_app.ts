@@ -6,6 +6,7 @@ import {
   createTRPCRouter,
   publicProcedure,
 } from "../init";
+import { assetRouter } from "./asset";
 import { bankAccountRouter } from "./bank-account";
 import { bankConnectionRouter } from "./bank-connection";
 import { budgetRouter } from "./budget";
@@ -28,6 +29,7 @@ export const appRouter = createTRPCRouter({
   user: userRouter,
   organization: organizationRouter,
   metrics: metricsRouter,
+  asset: assetRouter,
   institution: institutionRouter,
   bankConnection: bankConnectionRouter,
   bankAccount: bankAccountRouter,

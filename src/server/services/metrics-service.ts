@@ -1,6 +1,7 @@
-import { sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
 import type { DBClient } from "../db";
+import { account_table } from "../db/schema/accounts";
 
 export type GetExpensesParams = {
   orgId: string;
@@ -148,8 +149,6 @@ export async function getSpending(
 
   const rawData = result.rows as unknown as SpendingResultItem[];
 
-  console.log(rawData);
-
   return Array.isArray(rawData)
     ? rawData.map((item) => ({
         ...item,
@@ -157,4 +156,109 @@ export async function getSpending(
         percentage: Number.parseFloat(Number(item.percentage).toFixed(2)),
       }))
     : [];
+}
+
+type GetAssetsParams = {
+  orgId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+type AssetsResultItem = {
+  total: number;
+  currency: string;
+};
+
+export async function getAssets(db: DBClient, params: GetAssetsParams) {
+  const { orgId, currency: inputCurrency } = params;
+
+  const result = await db
+    .select({
+      total: sql`SUM(${account_table.balance})`.as("total"),
+      currency: account_table.currency,
+    })
+    .from(account_table)
+
+    .where(
+      and(
+        eq(account_table.organizationId, orgId),
+        inArray(account_table.type, [
+          "cash",
+          "checking",
+          "other_asset",
+          "pension",
+          "stock",
+          "savings",
+          "real_estate",
+          "vehicle",
+        ]),
+      ),
+    )
+    .groupBy(account_table.currency);
+
+  const rawData = result[0] as AssetsResultItem;
+
+  return {
+    summary: {
+      totalAssets: Math.abs(rawData?.total ?? 0),
+      currency: rawData?.currency ?? inputCurrency,
+    },
+    meta: {
+      type: "assets",
+      currency: rawData?.currency ?? inputCurrency,
+    },
+  };
+}
+
+type GetLiabilitiesParams = {
+  orgId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+type LiabilitiesResultItem = {
+  total: number;
+  currency: string;
+};
+
+export async function getLiabilities(
+  db: DBClient,
+  params: GetLiabilitiesParams,
+) {
+  const { orgId, currency: inputCurrency } = params;
+
+  const result = await db
+    .select({
+      total: sql`SUM(${account_table.balance})`.as("total"),
+      currency: account_table.currency,
+    })
+    .from(account_table)
+
+    .where(
+      and(
+        eq(account_table.organizationId, orgId),
+        inArray(account_table.type, [
+          "credit_card",
+          "loan",
+          "mortgage",
+          "other_debt",
+        ]),
+      ),
+    )
+    .groupBy(account_table.currency);
+
+  const rawData = result[0] as LiabilitiesResultItem;
+
+  return {
+    summary: {
+      totalAssets: Math.abs(rawData?.total ?? 0),
+      currency: rawData?.currency ?? inputCurrency,
+    },
+    meta: {
+      type: "assets",
+      currency: rawData?.currency ?? inputCurrency,
+    },
+  };
 }

@@ -62,7 +62,7 @@ export function ChartPeriod({ disabled }: Props) {
         <PopoverTrigger asChild disabled={Boolean(disabled)}>
           <Button
             variant="outline"
-            className="h-10 justify-start space-x-2 text-left font-medium shadow-none"
+            className="h-10 justify-start space-x-2 text-left font-medium"
           >
             <span className="line-clamp-1 text-ellipsis">
               {params.from && params.to

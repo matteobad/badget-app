@@ -32,7 +32,7 @@ export function ChartType({ disabled }: Props) {
       }}
     >
       <SelectTrigger
-        className="flex-1 space-x-1 font-medium"
+        className="!h-10 flex-1 space-x-1 font-medium"
         disabled={disabled}
       >
         <span>{tScoped(params.chart)}</span>

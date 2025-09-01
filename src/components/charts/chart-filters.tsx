@@ -38,7 +38,7 @@ export function ChartFilters({ currencies }: Props) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className="size-10 shadow-none">
+        <Button variant="outline" size="icon" className="size-10">
           <FilterIcon size={18} />
         </Button>
       </DropdownMenuTrigger>
