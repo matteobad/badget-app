@@ -19,15 +19,18 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
-import { ACCOUNT_TYPE } from "~/shared/constants/enum";
+import { useMetricsParams } from "~/hooks/use-metrics-params";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createManualBankAccountSchema } from "~/shared/validators/bank-account.schema";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod/v4";
 
+import { AccountTypeSelect } from "./account-type-select";
+
 export default function CreateBankAccountForm() {
   const { setParams } = useBankAccountParams();
+  const { params } = useMetricsParams();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -39,6 +42,15 @@ export default function CreateBankAccountForm() {
       },
       onSuccess: (_data) => {
         toast.success("Bank Account created");
+        void queryClient.invalidateQueries({
+          queryKey: trpc.metrics.financialMetrics.queryKey({
+            from: params.from,
+            to: params.to,
+          }),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: trpc.asset.get.queryKey(),
+        });
         void queryClient.invalidateQueries({
           queryKey: trpc.bankAccount.get.queryKey(),
         });
@@ -99,24 +111,17 @@ export default function CreateBankAccountForm() {
           />
           <FormField
             control={form.control}
-            name="type"
+            name="subtype"
             render={({ field }) => (
               <FormItem className="col-span-2 flex flex-col">
                 <FormLabel>Tipologia</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleziona tipologia" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Object.values(ACCOUNT_TYPE).map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <AccountTypeSelect
+                  value={field.value}
+                  onValueChange={(type, subtype) => {
+                    field.onChange(subtype);
+                    form.setValue("type", type);
+                  }}
+                />
                 <FormMessage />
               </FormItem>
             )}

@@ -1,5 +1,5 @@
 import type { DBClient } from "~/server/db";
-import type { AccountType } from "~/shared/constants/enum";
+import type { AccountSubtype, AccountType } from "~/shared/constants/enum";
 import { account_table } from "~/server/db/schema/accounts";
 import { and, eq } from "drizzle-orm";
 
@@ -14,6 +14,7 @@ export type CreateBankAccountPayload = {
   manual?: boolean;
   enabled?: boolean;
   type?: AccountType;
+  subtype?: AccountSubtype;
   logoUrl?: string;
   accountReference?: string;
   authoritativeFrom?: string;

@@ -77,7 +77,11 @@ export const createManualBankAccountSchema = z
     }),
     type: z.enum(ACCOUNT_TYPE).optional().openapi({
       description: "Type of the bank account.",
-      example: "depository",
+      example: "asset",
+    }),
+    subtype: z.enum(ACCOUNT_SUBTYPE).optional().openapi({
+      description: "Subtype of the bank account.",
+      example: "checking",
     }),
   })
   .openapi({

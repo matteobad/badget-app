@@ -1,4 +1,3 @@
-import type { AccountSubtype } from "~/shared/constants/enum";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormatAmount } from "~/components/format-amount";
 import {
@@ -13,9 +12,7 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 import { cn } from "~/lib/utils";
-import { ACCOUNT_SUBTYPE, ACCOUNT_TYPE } from "~/shared/constants/enum";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { useI18n, useScopedI18n } from "~/shared/locales/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -26,25 +23,10 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-
-const ASSET_SUBTYPES = new Set<AccountSubtype>([
-  ACCOUNT_SUBTYPE.CASH,
-  ACCOUNT_SUBTYPE.CHECKING,
-  ACCOUNT_SUBTYPE.SAVINGS,
-  ACCOUNT_SUBTYPE.INVESTMENT,
-  ACCOUNT_SUBTYPE.PROPERTY,
-]);
-
-const LIABILITY_SUBTYPES = new Set<AccountSubtype>([
-  ACCOUNT_SUBTYPE.CREDIT_CARD,
-  ACCOUNT_SUBTYPE.LOAN,
-  ACCOUNT_SUBTYPE.MORTGAGE,
-  ACCOUNT_SUBTYPE.OTHER_LIABILITY,
-]);
+import { AccountTypeSelect } from "./forms/account-type-select";
 
 export function BankAccountDetails() {
   const { params } = useBankAccountParams();
@@ -52,8 +34,6 @@ export function BankAccountDetails() {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const t = useI18n();
-  const tSubtype = useScopedI18n("account.subtype");
 
   const { data, isLoading } = useQuery(
     trpc.bankAccount.getById.queryOptions(
@@ -268,57 +248,16 @@ export function BankAccountDetails() {
                     displayed and managed.
                   </p>
                 </div>
-                <Select
+                <AccountTypeSelect
                   value={data.subtype ?? undefined}
-                  onValueChange={(value) => {
-                    const selectedSubtype = value as AccountSubtype;
-
-                    const derivedType = ASSET_SUBTYPES.has(selectedSubtype)
-                      ? ACCOUNT_TYPE.ASSET
-                      : ACCOUNT_TYPE.LIABILITY;
-
+                  onValueChange={(type, subtype) => {
                     updateBankAccountMutation.mutate({
                       id: bankAccountId,
-                      subtype: selectedSubtype,
-                      type: derivedType,
+                      subtype: subtype,
+                      type: type,
                     });
                   }}
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent className="">
-                    <SelectGroup>
-                      <SelectLabel>
-                        {t(`account.type.${ACCOUNT_TYPE.ASSET}`)}
-                      </SelectLabel>
-                      {[...ASSET_SUBTYPES].map((subtype) => {
-                        return (
-                          <SelectItem value={subtype} key={subtype}>
-                            <span className="truncate">
-                              {tSubtype(subtype)}
-                            </span>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectGroup>
-
-                    <SelectGroup>
-                      <SelectLabel>
-                        {t(`account.type.${ACCOUNT_TYPE.LIABILITY}`)}
-                      </SelectLabel>
-                      {[...LIABILITY_SUBTYPES].map((subtype) => {
-                        return (
-                          <SelectItem value={subtype} key={subtype}>
-                            <span className="truncate">
-                              {tSubtype(subtype)}
-                            </span>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                />
               </div>
             </div>
             <div className="mb-4 border-b pb-4">
