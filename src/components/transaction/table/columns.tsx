@@ -320,17 +320,23 @@ const ActionsCell = memo(
   ({
     transaction,
     onViewDetails,
+    onSplitTransaction,
     onCopyUrl,
     onDeleteTransaction,
   }: {
     transaction: Transaction;
     onViewDetails?: (id: string) => void;
+    onSplitTransaction?: (id: string) => void;
     onCopyUrl?: (id: string) => void;
     onDeleteTransaction?: (id: string) => void;
   }) => {
     const handleViewDetails = useCallback(() => {
       onViewDetails?.(transaction.id);
     }, [transaction.id, onViewDetails]);
+
+    const handleSplitTransaction = useCallback(() => {
+      onSplitTransaction?.(transaction.id);
+    }, [transaction.id, onSplitTransaction]);
 
     const handleCopyUrl = useCallback(() => {
       onCopyUrl?.(transaction.id);
@@ -351,6 +357,9 @@ const ActionsCell = memo(
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleViewDetails}>
             View details
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleSplitTransaction}>
+            Split transaction
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleCopyUrl}>Share URL</DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -470,6 +479,7 @@ export const columns: ColumnDef<Transaction>[] = [
         <ActionsCell
           transaction={row.original}
           onViewDetails={meta?.setOpen}
+          onSplitTransaction={meta?.splitTransaction}
           onCopyUrl={meta?.copyUrl}
           onDeleteTransaction={meta?.deleteTransaction}
         />

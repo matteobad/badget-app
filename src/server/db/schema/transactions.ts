@@ -140,6 +140,41 @@ export const transaction_table = pgTable(
 export type DB_TransactionType = typeof transaction_table.$inferSelect;
 export type DB_TransactionInsertType = typeof transaction_table.$inferInsert;
 
+export const transaction_split_table = pgTable(
+  "transaction_split_table",
+  (d) => ({
+    id: d.uuid().defaultRandom().primaryKey().notNull(),
+
+    transactionId: d
+      .uuid()
+      .references(() => transaction_table.id, { onDelete: "cascade" })
+      .notNull(),
+    categoryId: d
+      .uuid()
+      .references(() => category_table.id, { onDelete: "set null" }),
+
+    amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
+    note: d.text(),
+
+    ...timestamps,
+  }),
+  (t) => [
+    index("transaction_splits_transaction_id_idx").using(
+      "btree",
+      t.transactionId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("transaction_splits_category_id_idx").using(
+      "btree",
+      t.categoryId.asc().nullsLast().op("uuid_ops"),
+    ),
+  ],
+);
+
+export type DB_TransactionSplitType =
+  typeof transaction_split_table.$inferSelect;
+export type DB_TransactionSplitInsertType =
+  typeof transaction_split_table.$inferInsert;
+
 export const transaction_embeddings_table = pgTable(
   "transaction_embeddings_table",
   (d) => ({

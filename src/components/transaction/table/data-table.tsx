@@ -117,6 +117,9 @@ export function DataTable({
           toast.error("Failed to copy transaction URL to clipboard");
         }
       },
+      splitTransaction: (id: string) => {
+        void setParams({ splitTransaction: id });
+      },
       deleteTransaction: (id: string) => {
         deleteTransactionMutation.mutate({ id });
       },

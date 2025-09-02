@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 import { TransactionsSearchFilter } from "~/components/transaction/filters/transactions-search-filter";
+import { TransactionSplitDialog } from "~/components/transaction/sheets/transaction-split-dialog";
 import { DataTable } from "~/components/transaction/table/data-table";
 import { Loading } from "~/components/transaction/table/loading";
 import { TransactionsActions } from "~/components/transaction/transactions-actions";
@@ -54,6 +55,9 @@ export default async function TransactionsPage(props: PageProps) {
           <DataTable columnVisibility={columnVisibility} />
         </Suspense>
       </ErrorBoundary>
+
+      {/* Local sheets */}
+      <TransactionSplitDialog />
     </HydrateClient>
   );
 }

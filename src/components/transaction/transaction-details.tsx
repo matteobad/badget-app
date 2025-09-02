@@ -391,6 +391,34 @@ export function TransactionDetails() {
                     />
                   </span>
                   <div className="flex items-center gap-2">
+                    {/* <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="secondary" size="sm">
+                          Split transaction
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Split transaction</DialogTitle>
+                        </DialogHeader>
+                        <TransactionSplitsEditor
+                          transactionId={data.id}
+                          transactionAmount={data.amount}
+                          currency={data.currency}
+                          onSaved={() => {
+                            // refresh details
+                            void queryClient.invalidateQueries({
+                              queryKey: trpc.transaction.getById.queryKey({
+                                id: data.id,
+                              }),
+                            });
+                            void queryClient.invalidateQueries({
+                              queryKey: trpc.transaction.get.infiniteQueryKey(),
+                            });
+                          }}
+                        />
+                      </DialogContent>
+                    </Dialog> */}
                     <DropdownMenu
                       open={categoryDropdownOpen}
                       onOpenChange={setCategoryDropdownOpen}

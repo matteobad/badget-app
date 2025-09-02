@@ -15,6 +15,18 @@ import {
   updateTransaction,
 } from "~/server/services/transaction-service";
 import {
+  addTransactionSplits,
+  deleteTransactionSplit,
+  getTransactionSplits,
+  updateTransactionSplit,
+} from "~/server/services/transaction-split-service";
+import {
+  addTransactionSplitsSchema,
+  deleteTransactionSplitSchema,
+  getTransactionSplitsSchema,
+  updateTransactionSplitSchema,
+} from "~/shared/validators/transaction-split.schema";
+import {
   createManualTransactionSchema,
   createTransferSchema,
   deleteManyTransactionsSchema,
@@ -129,5 +141,30 @@ export const transactionRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const orgId = ctx.orgId!;
       return await categorizeUserTransaction(orgId, input);
+    }),
+
+  // Transaction Splits
+  getSplits: protectedProcedure
+    .input(getTransactionSplitsSchema)
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      return await getTransactionSplits(db, input, orgId!);
+    }),
+
+  addSplit: protectedProcedure
+    .input(addTransactionSplitsSchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await addTransactionSplits(db, input, orgId!);
+    }),
+
+  updateSplit: protectedProcedure
+    .input(updateTransactionSplitSchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await updateTransactionSplit(db, input, orgId!);
+    }),
+
+  deleteSplit: protectedProcedure
+    .input(deleteTransactionSplitSchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await deleteTransactionSplit(db, input, orgId!);
     }),
 });

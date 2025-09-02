@@ -245,6 +245,7 @@ export const transactionFilterParamsSchema = {
 // Search params for sheets
 export const transactionParamsSchema = {
   transactionId: parseAsString,
+  splitTransaction: parseAsString,
   createTransaction: parseAsBoolean,
   importTransaction: parseAsBoolean,
 };
