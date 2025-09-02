@@ -59,6 +59,9 @@ export function BankAccountDetails() {
       onSuccess: (_data) => {
         toast.success("Bank account updated");
         void queryClient.invalidateQueries({
+          queryKey: trpc.asset.get.queryKey(),
+        });
+        void queryClient.invalidateQueries({
           queryKey: trpc.bankAccount.get.queryKey(),
         });
         void queryClient.invalidateQueries({
@@ -76,6 +79,9 @@ export function BankAccountDetails() {
           queryClient.cancelQueries({
             queryKey: trpc.bankAccount.get.queryKey(),
           }),
+          queryClient.cancelQueries({
+            queryKey: trpc.asset.get.queryKey(),
+          }),
         ]);
 
         // Snapshot the previous values
@@ -83,7 +89,7 @@ export function BankAccountDetails() {
           details: queryClient.getQueryData(
             trpc.bankAccount.getById.queryKey({ id: bankAccountId }),
           ),
-          list: queryClient.getQueryData(trpc.bankAccount.get.queryKey()),
+          list: queryClient.getQueryData(trpc.asset.get.queryKey()),
         };
 
         // Optimistically update details view
@@ -100,7 +106,7 @@ export function BankAccountDetails() {
 
         // Optimistically update list view
         queryClient.setQueryData(
-          trpc.bankAccount.get.queryKey(),
+          trpc.asset.get.queryKey(),
           // @ts-expect-error update payload can have undefined fields
           (old) => {
             if (!old || !variables) return old;
@@ -124,7 +130,7 @@ export function BankAccountDetails() {
           context?.previousData.details,
         );
         queryClient.setQueryData(
-          trpc.bankAccount.get.queryKey(),
+          trpc.asset.get.queryKey(),
           context?.previousData.list,
         );
       },
@@ -134,6 +140,9 @@ export function BankAccountDetails() {
         });
         void queryClient.invalidateQueries({
           queryKey: trpc.bankAccount.get.queryKey(),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: trpc.asset.get.queryKey(),
         });
       },
     }),
