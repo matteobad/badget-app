@@ -2,7 +2,8 @@
 
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { institution_table } from "~/server/db/schema/open-banking";
+import { and, asc, desc, eq, getTableColumns } from "drizzle-orm";
 
 type GetBankAccountsQuery = {
   connectionId?: string;
@@ -52,8 +53,15 @@ export async function getBankAccountByIdQuery(
   const { id, orgId } = params;
 
   const [result] = await db
-    .select()
+    .select({
+      ...getTableColumns(account_table),
+      institutionName: institution_table.name,
+    })
     .from(account_table)
+    .leftJoin(
+      institution_table,
+      eq(institution_table.id, account_table.institutionId),
+    )
     .where(
       and(eq(account_table.id, id), eq(account_table.organizationId, orgId)),
     );

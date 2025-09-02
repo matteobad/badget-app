@@ -22,6 +22,7 @@ type AssetData = {
   currency: string;
   lastUpdate: string;
   manual: boolean;
+  enabled: boolean;
   provider?: BankProviderType | null;
   expiresAt?: string | null;
   logoUrl?: string | null;
@@ -49,6 +50,7 @@ export async function getAssets(
       balance: account_table.balance,
       currency: account_table.currency,
       manual: account_table.manual,
+      enabled: account_table.enabled,
       lastUpdate: sql<string>`coalesce(${account_table.updatedAt}, ${account_table.createdAt})`,
       provider: connection_table.provider,
       expiresAt: connection_table.expiresAt,

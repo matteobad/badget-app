@@ -85,14 +85,11 @@ export function DataTable({ data }: { data: RouterOutput["asset"]["get"] }) {
                     "border-x py-3",
                     {
                       "border-l-0": index === 0,
-                      "border-r-0": index === 3,
+                      "border-r-0": index === 2,
                     },
                   )}
                   onClick={() => {
-                    if (
-                      cell.column.id !== "select" &&
-                      cell.column.id !== "actions"
-                    ) {
+                    if (cell.column.id !== "actions") {
                       void setParams({
                         bankAccountId: row.original.id,
                       });

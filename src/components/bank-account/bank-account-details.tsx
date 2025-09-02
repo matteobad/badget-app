@@ -20,6 +20,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 
 import { BankLogo } from "../bank-logo";
+import { Input } from "../ui/input";
 import {
   Select,
   SelectContent,
@@ -184,9 +185,15 @@ export function BankAccountDetails() {
             <div className="flex items-center justify-between">
               <div className="mt-1 flex items-center space-x-2">
                 {data.logoUrl && (
-                  <BankLogo src={data.logoUrl} alt={data.name} size={24} />
+                  <BankLogo
+                    src={data.logoUrl}
+                    alt={data.institutionName ?? data.name}
+                    size={24}
+                  />
                 )}
-                <span className="line-clamp-1 text-sm">{data.name}</span>
+                <span className="line-clamp-1 text-sm">
+                  {data.institutionName}
+                </span>
               </div>
               <span className="text-xs text-[#606060] select-text">
                 {data.updatedAt && format(new Date(data.updatedAt), "MMM d, y")}
@@ -228,6 +235,27 @@ export function BankAccountDetails() {
         <AccordionItem value="general">
           <AccordionTrigger>General</AccordionTrigger>
           <AccordionContent className="select-text">
+            <div className="mb-4 border-b pb-4">
+              <Label className="text-md mb-2 block font-medium">Name</Label>
+              <p className="mb-2 text-xs text-muted-foreground">
+                This is the name of your bank account. You can use a custom name
+                to help you identify it easily.
+              </p>
+              <Input
+                className="bg-background"
+                defaultValue={data.name}
+                autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck="false"
+                onBlur={(event) => {
+                  updateBankAccountMutation.mutate({
+                    id: bankAccountId,
+                    name: event.target.value,
+                  });
+                }}
+              />
+            </div>
             <div className="mb-4 border-b pb-4">
               <Label className="text-md mb-2 block font-medium">
                 Account Type

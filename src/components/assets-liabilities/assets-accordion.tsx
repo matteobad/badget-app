@@ -71,7 +71,7 @@ export function AssetsAccordion() {
           >
             <AccordionTrigger className="flex h-10 px-4 text-sm leading-6 hover:no-underline focus-visible:ring-0">
               <span className="shrink-0">{tScoped(accountSubtype)}</span>
-              <div className="mr-[48px] w-full text-right">
+              <div className="mr-[84px] w-full text-right">
                 {formatAmount({ amount: total, currency: "EUR" })}
               </div>
             </AccordionTrigger>

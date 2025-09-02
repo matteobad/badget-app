@@ -8,7 +8,6 @@ import { FormatAmount } from "~/components/format-amount";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,14 +18,17 @@ import {
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
 import { formatDate } from "~/shared/helpers/format";
 import { useScopedI18n } from "~/shared/locales/client";
 import {
   ArchiveIcon,
   Building2,
   CreditCard,
+  EyeOffIcon,
   HandIcon,
   LinkIcon,
   MoreHorizontalIcon,
@@ -203,30 +205,6 @@ AccountOrigin.displayName = "AccountOrigin";
 
 export const columns: ColumnDef<BankAccount>[] = [
   {
-    id: "select",
-    meta: {
-      className: "w-[56px]",
-    },
-    header: ({ table }) => (
-      <Checkbox
-        className="ml-3"
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        className="mt-1 ml-1"
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: "name",
     meta: {
       className: "border-r border-border",
@@ -238,7 +216,7 @@ export const columns: ColumnDef<BankAccount>[] = [
         <div className="flex items-center gap-3">
           <AccountIcon logoUrl={account.logoUrl ?? ""} />
           <div className="flex items-center gap-2">
-            <span className="line-clamp-1 w-full max-w-[100px] text-ellipsis text-primary md:max-w-none">
+            <span className="line-clamp-1 w-full text-ellipsis text-primary md:max-w-none">
               {account.name} {account.description && `- ${account.description}`}
             </span>
           </div>
@@ -250,26 +228,48 @@ export const columns: ColumnDef<BankAccount>[] = [
     id: "balance",
     accessorKey: "balance",
     meta: {
-      className: "w-[130px] min-w-[130px]",
+      className: "w-[180px] min-w-[180px]",
     },
     cell: ({ row }) => {
-      const { balance, currency, lastUpdate } = row.original;
+      const { balance, currency, lastUpdate, enabled } = row.original;
       const isPositive = balance > 0;
 
       return (
-        <div className="text-right">
+        <div className="relative text-right">
           <Tooltip>
             <TooltipTrigger asChild>
               <span
-                className={`font-medium ${isPositive ? "text-green-600" : "text-gray-900"}`}
+                className={cn(
+                  "mr-9 font-medium",
+                  isPositive ? "text-green-600" : "text-gray-900",
+                )}
               >
                 <FormatAmount amount={balance} currency={currency} />
               </span>
             </TooltipTrigger>
             <TooltipContent side="left">
-              last updated: {formatDate(lastUpdate)}
+              Ultimo aggiornamento {formatDate(lastUpdate)}
             </TooltipContent>
           </Tooltip>
+          {!enabled && (
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="absolute right-0 -bottom-0.5 flex size-6 cursor-auto items-center justify-center">
+                    <EyeOffIcon className="size-3.5 text-muted-foreground" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent
+                  className="w-[200px] text-left text-xs"
+                  side="right"
+                >
+                  Questo conto è disabilitato, il suo saldo non verrà
+                  conteggiato nelle metriche e non verranno scaricate nuove
+                  transazioni per i conti connessi.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
       );
     },
