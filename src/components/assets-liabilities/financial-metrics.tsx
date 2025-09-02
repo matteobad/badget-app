@@ -28,7 +28,7 @@ export function FinancialMetrics() {
     }),
   );
 
-  // const { data: accounts, isLoading } = useQuery(trpc.asset.get.queryOptions());
+  const { data: accounts } = useQuery(trpc.asset.get.queryOptions());
 
   return (
     <div className="grid gap-6 p-6 pb-4 lg:grid-cols-3">
@@ -61,7 +61,7 @@ export function FinancialMetrics() {
           </TooltipProvider>
         </div>
         <p className="text-sm text-muted-foreground">
-          {t("account.metrics.account", { count: 2 })}
+          {t("account.metrics.account", { count: accounts?.length ?? 0 })}
         </p>
       </div>
 
@@ -99,7 +99,11 @@ export function FinancialMetrics() {
               </TooltipProvider>
             </div>
             <p className="text-sm text-muted-foreground">
-              {t("account.metrics.account", { count: 2 })}
+              {t("account.metrics.account", {
+                count:
+                  accounts?.filter(({ type }) => type === accountType).length ??
+                  0,
+              })}
             </p>
           </div>
         );

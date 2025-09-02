@@ -9,7 +9,7 @@ export function NoResults() {
   const { clearAllFilters } = useBankAccountFilterParams();
 
   return (
-    <div className="flex h-[calc(100vh-300px)] items-center justify-center">
+    <div className="flex h-full items-center justify-center">
       <div className="flex flex-col items-center">
         <ReceiptIcon className="mb-4" />
         <div className="mb-6 space-y-2 text-center">

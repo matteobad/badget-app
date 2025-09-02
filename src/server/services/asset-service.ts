@@ -5,7 +5,7 @@ import type {
 } from "~/shared/constants/enum";
 import type { getAssetsSchema } from "~/shared/validators/asset.schema";
 import type z from "zod/v4";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, ilike, sql } from "drizzle-orm";
 
 import type { DBClient } from "../db";
 import { account_table } from "../db/schema/accounts";
@@ -32,6 +32,13 @@ export async function getAssets(
   input: z.infer<typeof getAssetsSchema>,
   organizationId: string,
 ): Promise<AssetData[]> {
+  // Always filter for organization
+  const where = [eq(account_table.organizationId, organizationId)];
+
+  if (input?.q) {
+    where.push(ilike(account_table.name, `%${input.q}%`));
+  }
+
   // 1. Get banking data
   const bankAccounts = await client
     .select({
@@ -57,7 +64,7 @@ export async function getAssets(
       connection_table,
       eq(connection_table.id, account_table.connectionId),
     )
-    .where(eq(account_table.organizationId, organizationId));
+    .where(and(...where));
 
   // 2. Get investments data
 

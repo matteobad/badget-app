@@ -7,26 +7,42 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
+import { useBankAccountFilterParams } from "~/hooks/use-bank-account-filter-params";
 import { ACCOUNT_SUBTYPE } from "~/shared/constants/enum";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
 
 import { DataTable } from "../bank-account/table/data-table";
-import { NoAccounts } from "../bank-account/table/empty-states";
+import { NoAccounts, NoResults } from "../bank-account/table/empty-states";
 import { Loading } from "../bank-account/table/loading";
 
 export function AssetsAccordion() {
   const tScoped = useScopedI18n("account.subtype");
+
+  const { filters, hasFilters } = useBankAccountFilterParams();
+
   const trpc = useTRPC();
 
-  const { data, isSuccess } = useQuery(trpc.asset.get.queryOptions());
+  const { data, isSuccess } = useQuery(
+    trpc.asset.get.queryOptions({
+      q: filters.q,
+    }),
+  );
 
-  if (!data?.length && isSuccess) {
+  if (!data?.length && isSuccess && !hasFilters) {
     return (
       <div className="absolute inset-0 h-screen overflow-hidden p-6">
         <NoAccounts />
         <Loading isEmpty />
+      </div>
+    );
+  }
+
+  if (!data?.length && isSuccess && hasFilters) {
+    return (
+      <div className="relative h-[300px] overflow-hidden p-6">
+        <NoResults />
       </div>
     );
   }
