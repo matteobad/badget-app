@@ -1,4 +1,4 @@
-import type { AccountType } from "~/shared/constants/enum";
+import type { AccountSubtype } from "~/shared/constants/enum";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormatAmount } from "~/components/format-amount";
 import {
@@ -13,7 +13,9 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 import { cn } from "~/lib/utils";
+import { ACCOUNT_SUBTYPE, ACCOUNT_TYPE } from "~/shared/constants/enum";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { useI18n, useScopedI18n } from "~/shared/locales/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -23,10 +25,25 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { AccountTypeSelect } from "./forms/account-type-select";
+
+const ASSET_SUBTYPES = new Set<AccountSubtype>([
+  ACCOUNT_SUBTYPE.CASH,
+  ACCOUNT_SUBTYPE.CHECKING,
+  ACCOUNT_SUBTYPE.SAVINGS,
+  ACCOUNT_SUBTYPE.INVESTMENT,
+  ACCOUNT_SUBTYPE.PROPERTY,
+]);
+
+const LIABILITY_SUBTYPES = new Set<AccountSubtype>([
+  ACCOUNT_SUBTYPE.CREDIT_CARD,
+  ACCOUNT_SUBTYPE.LOAN,
+  ACCOUNT_SUBTYPE.MORTGAGE,
+  ACCOUNT_SUBTYPE.OTHER_LIABILITY,
+]);
 
 export function BankAccountDetails() {
   const { params } = useBankAccountParams();
@@ -34,6 +51,8 @@ export function BankAccountDetails() {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const t = useI18n();
+  const tSubtype = useScopedI18n("account.subtype");
 
   const { data, isLoading } = useQuery(
     trpc.bankAccount.getById.queryOptions(
@@ -143,7 +162,7 @@ export function BankAccountDetails() {
     return null;
   }
 
-  const defaultValue = [""];
+  const defaultValue = ["general"];
 
   if (data?.description) {
     defaultValue.push("description");
@@ -152,7 +171,7 @@ export function BankAccountDetails() {
   return (
     <div className="scrollbar-hide h-[calc(100vh-80px)] overflow-auto pb-12">
       <div className="mb-8 flex justify-between">
-        <div className="flex flex-1 flex-col gap-8">
+        <div className="flex flex-1 flex-col">
           {isLoading ? (
             <div className="mt-1 mb-6 flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -175,6 +194,13 @@ export function BankAccountDetails() {
             </div>
           )}
 
+          <h2 className="mt-6 mb-3 select-text">
+            {isLoading ? (
+              <Skeleton className="mb-2 h-[22px] w-[35%] rounded-md" />
+            ) : (
+              data?.name
+            )}
+          </h2>
           <div className="flex items-center justify-between">
             <div className="flex w-full flex-col space-y-1">
               {isLoading ? (
@@ -198,28 +224,75 @@ export function BankAccountDetails() {
         </div>
       )}
 
-      <div className="mt-6 mb-2 grid grid-cols-1 gap-4">
-        <div>
-          <Label htmlFor="category" className="mb-2 block">
-            Type
-          </Label>
-
-          <AccountTypeSelect
-            value={data.type}
-            onValueChange={(value) => {
-              updateBankAccountMutation.mutate({
-                id: bankAccountId,
-                type: value as AccountType,
-              });
-            }}
-          />
-        </div>
-      </div>
-
       <Accordion type="multiple" defaultValue={defaultValue}>
         <AccordionItem value="general">
           <AccordionTrigger>General</AccordionTrigger>
           <AccordionContent className="select-text">
+            <div className="mb-4 border-b pb-4">
+              <Label className="text-md mb-2 block font-medium">
+                Account Type
+              </Label>
+              <div className="flex flex-row items-center justify-between">
+                <div className="flex-1 space-y-0.5 pr-4">
+                  <p className="text-xs text-muted-foreground">
+                    The type of account determines its classification, such as
+                    asset or liability. This affects how the account is
+                    displayed and managed.
+                  </p>
+                </div>
+                <Select
+                  value={data.subtype ?? undefined}
+                  onValueChange={(value) => {
+                    const selectedSubtype = value as AccountSubtype;
+
+                    const derivedType = ASSET_SUBTYPES.has(selectedSubtype)
+                      ? ACCOUNT_TYPE.ASSET
+                      : ACCOUNT_TYPE.LIABILITY;
+
+                    updateBankAccountMutation.mutate({
+                      id: bankAccountId,
+                      subtype: selectedSubtype,
+                      type: derivedType,
+                    });
+                  }}
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent className="">
+                    <SelectGroup>
+                      <SelectLabel>
+                        {t(`account.type.${ACCOUNT_TYPE.ASSET}`)}
+                      </SelectLabel>
+                      {[...ASSET_SUBTYPES].map((subtype) => {
+                        return (
+                          <SelectItem value={subtype} key={subtype}>
+                            <span className="truncate">
+                              {tSubtype(subtype)}
+                            </span>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectGroup>
+
+                    <SelectGroup>
+                      <SelectLabel>
+                        {t(`account.type.${ACCOUNT_TYPE.LIABILITY}`)}
+                      </SelectLabel>
+                      {[...LIABILITY_SUBTYPES].map((subtype) => {
+                        return (
+                          <SelectItem value={subtype} key={subtype}>
+                            <span className="truncate">
+                              {tSubtype(subtype)}
+                            </span>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <div className="mb-4 border-b pb-4">
               <Label className="text-md mb-2 block font-medium">Currency</Label>
               <div className="flex flex-row items-center justify-between">
@@ -239,7 +312,7 @@ export function BankAccountDetails() {
                     });
                   }}
                 >
-                  <SelectTrigger className="min-w-[80px] flex-0">
+                  <SelectTrigger className="min-w-[80px] flex-0 bg-background">
                     <SelectValue placeholder="Select currency" />
                   </SelectTrigger>
                   <SelectContent align="end">

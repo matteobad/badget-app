@@ -1,5 +1,9 @@
 import { z } from "@hono/zod-openapi";
-import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/shared/constants/enum";
+import {
+  ACCOUNT_SUBTYPE,
+  ACCOUNT_TYPE,
+  BANK_PROVIDER,
+} from "~/shared/constants/enum";
 import { parseAsBoolean, parseAsString } from "nuqs/server";
 
 export const getBankAccountsSchema = z.object({
@@ -115,6 +119,10 @@ export const updateBankAccountSchema = z
     }),
     type: z.enum(ACCOUNT_TYPE).optional().openapi({
       description: "Type of the bank account.",
+      example: "asset",
+    }),
+    subtype: z.enum(ACCOUNT_SUBTYPE).optional().openapi({
+      description: "Subtype of the bank account.",
       example: "depository",
     }),
   })

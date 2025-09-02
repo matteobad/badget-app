@@ -54,9 +54,7 @@ export function AssetsAccordion() {
             className="rounded-md border bg-background p-0 outline-none last:border-b has-focus-visible:border-ring has-focus-visible:ring-[3px] has-focus-visible:ring-ring/50"
           >
             <AccordionTrigger className="flex h-10 px-4 text-sm leading-6 hover:no-underline focus-visible:ring-0">
-              <span className="shrink-0">
-                {tScoped(accountSubtype, { count: accounts.length })}
-              </span>
+              <span className="shrink-0">{tScoped(accountSubtype)}</span>
               <div className="mr-[48px] w-full text-right">
                 {formatAmount({ amount: total, currency: "EUR" })}
               </div>

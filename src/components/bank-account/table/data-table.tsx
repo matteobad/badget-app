@@ -88,6 +88,16 @@ export function DataTable({ data }: { data: RouterOutput["asset"]["get"] }) {
                       "border-r-0": index === 3,
                     },
                   )}
+                  onClick={() => {
+                    if (
+                      cell.column.id !== "select" &&
+                      cell.column.id !== "actions"
+                    ) {
+                      void setParams({
+                        bankAccountId: row.original.id,
+                      });
+                    }
+                  }}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>

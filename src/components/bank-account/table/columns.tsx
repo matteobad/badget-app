@@ -3,6 +3,7 @@
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { AccountSubtype } from "~/shared/constants/enum";
 import { memo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { FormatAmount } from "~/components/format-amount";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
@@ -51,9 +52,15 @@ const ActionsCell = memo(
   }) => {
     const tScoped = useScopedI18n("bank_account.actions");
 
+    const router = useRouter();
+
     const handleViewDetails = useCallback(() => {
       onViewDetails?.(id);
     }, [id, onViewDetails]);
+
+    const handleViewTransactions = useCallback(() => {
+      router.push(`/transactions?accounts=${id}`);
+    }, [id, router]);
 
     const handleDelete = useCallback(() => {
       onDelete?.(id);
@@ -70,6 +77,9 @@ const ActionsCell = memo(
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleViewDetails}>
             {tScoped("view_details")}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleViewTransactions}>
+            {tScoped("view_transactions")}
           </DropdownMenuItem>
           {manual && (
             <>

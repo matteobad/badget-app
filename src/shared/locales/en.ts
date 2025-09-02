@@ -81,16 +81,14 @@ export default {
     },
     subtype: {
       cash: "Cash",
-      "checking#one": "Checking account",
-      "checking#other": "Checking accounts",
-      "savings#one": "Saving account",
-      "savings#other": "Saving accounts",
-      investment: "",
-      property: "",
-      credit_card: "",
-      loan: "",
-      mortgage: "",
-      other_liability: "",
+      checking: "Checking account",
+      savings: "Saving account",
+      investment: "Investment",
+      property: "Property",
+      credit_card: "Credit card",
+      loan: "Loan",
+      mortgage: "Mortgage",
+      other_liability: "Other liability",
     },
   },
 
@@ -105,6 +103,7 @@ export default {
   bank_account: {
     actions: {
       view_details: "View details",
+      view_transactions: "Vedi transactions",
       create_category: "Create account",
       delete_category: "Delete",
     },
