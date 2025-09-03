@@ -26,7 +26,15 @@ import {
 import { cn } from "~/lib/utils";
 import { formatDate } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { CalendarSyncIcon, EyeOffIcon, MoreHorizontalIcon } from "lucide-react";
+import {
+  CalendarSyncIcon,
+  EyeOffIcon,
+  MoreHorizontalIcon,
+  ReceiptTextIcon,
+  ShareIcon,
+  SplitIcon,
+  TrashIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -356,20 +364,29 @@ const ActionsCell = memo(
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleViewDetails}>
+            <ReceiptTextIcon className="size-3.5" />
             View details
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleSplitTransaction}>
+            <SplitIcon className="size-3.5" />
             Split transaction
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleCopyUrl}>Share URL</DropdownMenuItem>
-          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleCopyUrl}>
+            <ShareIcon className="size-3.5" />
+            Share URL
+          </DropdownMenuItem>
           {transaction.source !== "api" && (
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={handleDeleteTransaction}
-            >
-              Delete
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={handleDeleteTransaction}
+              >
+                <TrashIcon className="size-3.5" />
+                Delete
+              </DropdownMenuItem>
+            </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>

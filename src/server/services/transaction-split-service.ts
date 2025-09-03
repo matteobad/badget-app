@@ -54,7 +54,7 @@ export async function getTransactionSplits(
 export async function addTransactionSplits(
   client: DBClient,
   input: z.infer<typeof addTransactionSplitsSchema>,
-  orgId: string,
+  organizationId: string,
 ) {
   return await client.transaction(async (tx) => {
     // Load transaction and validate org
@@ -65,7 +65,7 @@ export async function addTransactionSplits(
         .where(
           and(
             eq(transaction_table.id, input.transactionId),
-            eq(transaction_table.organizationId, orgId),
+            eq(transaction_table.organizationId, organizationId),
           ),
         )
         .limit(1)
@@ -75,10 +75,18 @@ export async function addTransactionSplits(
       throw new Error("Transaction not found");
     }
 
+    // Validate splits sum to transaction amount
     const total = input.splits.reduce((acc, s) => acc + s.amount, 0);
+
     if (Number(total.toFixed(2)) !== Number(transaction.amount.toFixed(2))) {
       throw new Error("Splits must sum to the transaction amount");
     }
+
+    // Exclude transaction from analytics
+    await tx
+      .update(transaction_table)
+      .set({ categoryId: null, categorySlug: null, internal: true })
+      .where(eq(transaction_table.id, input.transactionId));
 
     // Replace existing splits
     await tx
@@ -88,7 +96,7 @@ export async function addTransactionSplits(
     await tx.insert(transaction_split_table).values(
       input.splits.map((s) => ({
         transactionId: input.transactionId,
-        categoryId: s.categoryId,
+        categoryId: s.category?.id,
         amount: s.amount,
         note: s.note,
       })),
