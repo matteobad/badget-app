@@ -1,5 +1,5 @@
 import type { TransactionFrequencyType } from "~/shared/constants/enum";
-import { CalendarSyncIcon, EyeOffIcon } from "lucide-react";
+import { CalendarSyncIcon, EyeOffIcon, SplitIcon } from "lucide-react";
 
 import {
   Tooltip,
@@ -9,18 +9,20 @@ import {
 } from "../ui/tooltip";
 
 type TransactionInfoTooltipsProps = {
-  recurring: boolean;
+  recurring?: boolean;
   frequency?: TransactionFrequencyType;
-  excludeFromReports: boolean;
+  excludeFromReports?: boolean;
+  split?: boolean;
 };
 
 export function TransactionInfoTooltips({
   recurring,
   frequency,
   excludeFromReports,
+  split,
 }: TransactionInfoTooltipsProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-4">
       {recurring && (
         <TooltipProvider delayDuration={100}>
           <Tooltip>
@@ -36,7 +38,7 @@ export function TransactionInfoTooltips({
           </Tooltip>
         </TooltipProvider>
       )}
-      {excludeFromReports && (
+      {excludeFromReports && !split && (
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -47,6 +49,21 @@ export function TransactionInfoTooltips({
               side="right"
             >
               Questa transazione è esclusa dai report
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      {split && (
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <SplitIcon className="size-3.5 shrink-0 cursor-auto text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent
+              className="w-[220px] text-left text-xs"
+              side="right"
+            >
+              Questa transazione è stata splittata in più parti
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

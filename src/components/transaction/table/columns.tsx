@@ -42,6 +42,8 @@ import { TransactionInfoTooltips } from "../transaction-info-tooltips";
 
 type Transaction = RouterOutput["transaction"]["get"]["data"][number];
 type Category = RouterOutput["transactionCategory"]["getAll"][number];
+type TransactionSplit =
+  RouterOutput["transaction"]["get"]["data"][number]["splits"][number];
 
 const SelectCell = memo(
   ({
@@ -77,6 +79,7 @@ const DescriptionCell = memo(
     recurring,
     frequency,
     excludeFromReports,
+    split,
   }: {
     name: string;
     description?: string;
@@ -84,6 +87,7 @@ const DescriptionCell = memo(
     recurring?: boolean;
     frequency?: TransactionFrequencyType;
     excludeFromReports?: boolean;
+    split?: boolean;
   }) => (
     <div className="flex items-center space-x-2">
       <Tooltip>
@@ -103,9 +107,10 @@ const DescriptionCell = memo(
             </span>
 
             <TransactionInfoTooltips
-              recurring={!!recurring}
+              recurring={recurring}
               frequency={frequency}
-              excludeFromReports={!!excludeFromReports}
+              excludeFromReports={excludeFromReports}
+              split={split}
             />
           </div>
         </TooltipTrigger>
@@ -127,11 +132,56 @@ const DescriptionCell = memo(
 DescriptionCell.displayName = "DescriptionCell";
 
 const AmountCell = memo(
-  ({ amount, currency }: { amount: number; currency: string }) => (
+  ({
+    amount,
+    currency,
+    splits,
+  }: {
+    amount: number;
+    currency: string;
+    splits: TransactionSplit[];
+  }) => (
     <div className="relative w-full text-right">
-      <span className={cn("text-sm", amount > 0 && "text-green-600")}>
-        <FormatAmount amount={amount} currency={currency} />
-      </span>
+      {splits && splits.length > 1 ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span
+              className={cn(
+                "cursor-pointer text-sm",
+                amount > 0 && "text-green-600",
+              )}
+            >
+              <FormatAmount amount={amount} currency={currency} />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent
+            className="max-w-[380px] px-3 py-1.5 text-xs"
+            side="top"
+            sideOffset={6}
+          >
+            <div>
+              <div className="mb-2 font-semibold">{splits.length} splits:</div>
+              <ul className="space-y-1">
+                {splits.map((split, idx) => (
+                  <li
+                    key={split.id ?? idx}
+                    className="flex items-center justify-between gap-4"
+                  >
+                    <span className="truncate">{split.note}</span>
+                    <span className="font-mono text-xs">
+                      <FormatAmount amount={split.amount} currency={currency} />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      ) : (
+        <span className={cn("text-sm", amount > 0 && "text-green-600")}>
+          <FormatAmount amount={amount} currency={currency} />
+        </span>
+      )}
     </div>
   ),
 );
@@ -142,6 +192,8 @@ const CategoryCell = memo(
   ({
     transaction,
     category,
+    splits,
+    onSplitTransaction,
   }: {
     transaction: Transaction;
     category?: {
@@ -152,6 +204,8 @@ const CategoryCell = memo(
       icon: string | null;
       excludeFromAnalytics: boolean | null;
     };
+    splits: TransactionSplit[];
+    onSplitTransaction?: (id: string) => void;
   }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -205,6 +259,30 @@ const CategoryCell = memo(
         );
       }
     };
+
+    const handleSplitTransaction = useCallback(() => {
+      onSplitTransaction?.(transaction.id);
+    }, [transaction.id, onSplitTransaction]);
+
+    if (splits.length >= 2) {
+      return (
+        <button
+          className="flex items-center gap-2"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleSplitTransaction();
+          }}
+        >
+          <CategoryBadge
+            category={{
+              name: `${splits.length} Categorie`,
+              icon: "shapes",
+              color: "#606060",
+            }}
+          />
+        </button>
+      );
+    }
 
     return (
       <div className="flex items-center gap-2">
@@ -397,6 +475,7 @@ export const columns: ColumnDef<Transaction>[] = [
         recurring={row.original.recurring ?? undefined}
         frequency={row.original.frequency ?? undefined}
         excludeFromReports={row.original.internal ?? undefined}
+        split={row.original.splits.length > 0}
       />
     ),
   },
@@ -406,10 +485,12 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       className: "border-l border-border",
     },
-    cell: ({ row }) => (
+    cell: ({ row, table }) => (
       <CategoryCell
         transaction={row.original}
         category={row.original.category!}
+        splits={row.original.splits}
+        onSplitTransaction={table.options.meta?.splitTransaction}
       />
     ),
   },
@@ -433,6 +514,7 @@ export const columns: ColumnDef<Transaction>[] = [
       <AmountCell
         amount={row.original.amount}
         currency={row.original.currency}
+        splits={row.original.splits}
       />
     ),
   },

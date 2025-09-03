@@ -14,6 +14,7 @@ import {
   attachment_table,
   tag_table,
   transaction_embeddings_table,
+  transaction_split_table,
   transaction_table,
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
@@ -224,6 +225,16 @@ export async function getTransactionsQuery(
       >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tag_table.id}, 'text', ${tag_table.text})) FILTER (WHERE ${tag_table.id} IS NOT NULL), '[]'::json)`.as(
         "tags",
       ),
+      splits: sql<
+        Array<{
+          id: string;
+          note: string | null;
+          categoryId: string | null;
+          amount: number;
+        }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transaction_split_table.id}, 'categoryId', ${transaction_split_table.categoryId}, 'note', ${transaction_split_table.note}, 'amount', ${transaction_split_table.amount})) FILTER (WHERE ${transaction_split_table.id} IS NOT NULL), '[]'::json)`.as(
+        "tags",
+      ),
     })
     .from(transaction_table)
     .leftJoin(
@@ -254,6 +265,10 @@ export async function getTransactionsQuery(
         eq(tag_table.id, transaction_to_tag_table.tagId),
         eq(tag_table.organizationId, orgId),
       ),
+    )
+    .leftJoin(
+      transaction_split_table,
+      and(eq(transaction_split_table.transactionId, transaction_table.id)),
     )
     .leftJoin(
       attachment_table,
