@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
@@ -34,16 +35,18 @@ export function TransactionSplitDialog() {
         void setParams({ splitTransaction: null });
       }}
     >
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>Split transaction</DialogTitle>
+      <DialogContent>
+        <DialogHeader className="mb-4">
+          <DialogTitle>Dividi transazione</DialogTitle>
+          <DialogDescription>
+            Dividi la transazione in più parti, ognuna con la propria categoria
+            e importo. La somma dei splits deve essere uguale all&apos;importo.
+          </DialogDescription>
         </DialogHeader>
 
         {data && (
           <TransactionSplitsEditor
-            transactionId={data.id}
-            transactionAmount={data.amount}
-            currency={data.currency}
+            transaction={data}
             onSaved={() => {
               // refresh details
               void queryClient.invalidateQueries({
