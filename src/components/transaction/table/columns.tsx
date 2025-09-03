@@ -1,6 +1,7 @@
 "use client";
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import { memo, useCallback, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CategoryBadge } from "~/components/category/category-badge";
@@ -20,15 +21,12 @@ import {
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { formatDate } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import {
-  CalendarSyncIcon,
-  EyeOffIcon,
   MoreHorizontalIcon,
   ReceiptTextIcon,
   ShareIcon,
@@ -40,6 +38,7 @@ import { toast } from "sonner";
 import type { ColumnDef } from "@tanstack/react-table";
 import { TransactionCategorySelect } from "../forms/transaction-category-select";
 import { SimilarTransactionsUpdateToast } from "../similar-transactions-update-toast";
+import { TransactionInfoTooltips } from "../transaction-info-tooltips";
 
 type Transaction = RouterOutput["transaction"]["get"]["data"][number];
 type Category = RouterOutput["transactionCategory"]["getAll"][number];
@@ -77,14 +76,14 @@ const DescriptionCell = memo(
     counterpartyLogo,
     recurring,
     frequency,
-    status,
+    excludeFromReports,
   }: {
     name: string;
     description?: string;
-    status?: string;
     counterpartyLogo?: string;
-    recurring?: boolean | null;
-    frequency?: string | null;
+    recurring?: boolean;
+    frequency?: TransactionFrequencyType;
+    excludeFromReports?: boolean;
   }) => (
     <div className="flex items-center space-x-2">
       <Tooltip>
@@ -102,30 +101,12 @@ const DescriptionCell = memo(
             <span className="line-clamp-1 w-full max-w-[100px] text-ellipsis md:max-w-none">
               {name}
             </span>
-            {recurring && (
-              <TooltipProvider delayDuration={100}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <CalendarSyncIcon className="size-3.5 shrink-0 cursor-auto text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent
-                    className="w-[220px] text-left text-xs"
-                    side="right"
-                  >
-                    Questa transazione è ricorrente, con periodicità {frequency}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
 
-            <span className="flex-1"></span>
-            {status === "pending" && (
-              <>
-                <div className="flex h-[22px] items-center space-x-1 rounded-md border px-2 py-1 text-[10px] text-[#878787]">
-                  <span>Pending</span>
-                </div>
-              </>
-            )}
+            <TransactionInfoTooltips
+              recurring={!!recurring}
+              frequency={frequency}
+              excludeFromReports={!!excludeFromReports}
+            />
           </div>
         </TooltipTrigger>
 
@@ -146,36 +127,11 @@ const DescriptionCell = memo(
 DescriptionCell.displayName = "DescriptionCell";
 
 const AmountCell = memo(
-  ({
-    amount,
-    currency,
-    internal,
-  }: {
-    amount: number;
-    currency: string;
-    internal: boolean;
-  }) => (
+  ({ amount, currency }: { amount: number; currency: string }) => (
     <div className="relative w-full text-right">
-      <span className={cn("mr-9 text-sm", amount > 0 && "text-green-600")}>
+      <span className={cn("text-sm", amount > 0 && "text-green-600")}>
         <FormatAmount amount={amount} currency={currency} />
       </span>
-      {internal && (
-        <TooltipProvider delayDuration={100}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="absolute right-0 -bottom-0.5 flex size-6 cursor-auto items-center justify-center">
-                <EyeOffIcon className="size-3.5 text-muted-foreground" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent
-              className="w-[200px] text-left text-xs"
-              side="right"
-            >
-              Questa transazione è esclusa, anche se la categoria è attiva
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
     </div>
   ),
 );
@@ -438,9 +394,9 @@ export const columns: ColumnDef<Transaction>[] = [
       <DescriptionCell
         name={row.original.name}
         description={row.original.description ?? undefined}
-        status={row.original.status ?? undefined}
         recurring={row.original.recurring ?? undefined}
         frequency={row.original.frequency ?? undefined}
+        excludeFromReports={row.original.internal ?? undefined}
       />
     ),
   },
@@ -477,7 +433,6 @@ export const columns: ColumnDef<Transaction>[] = [
       <AmountCell
         amount={row.original.amount}
         currency={row.original.currency}
-        internal={row.original.internal ?? false}
       />
     ),
   },
