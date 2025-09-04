@@ -18,13 +18,11 @@ import {
   addTransactionSplits,
   deleteTransactionSplit,
   getTransactionSplits,
-  updateTransactionSplit,
 } from "~/server/services/transaction-split-service";
 import {
   addTransactionSplitsSchema,
   deleteTransactionSplitSchema,
   getTransactionSplitsSchema,
-  updateTransactionSplitSchema,
 } from "~/shared/validators/transaction-split.schema";
 import {
   createManualTransactionSchema,
@@ -154,12 +152,6 @@ export const transactionRouter = createTRPCRouter({
     .input(addTransactionSplitsSchema)
     .mutation(async ({ ctx: { db, orgId }, input }) => {
       return await addTransactionSplits(db, input, orgId!);
-    }),
-
-  updateSplit: protectedProcedure
-    .input(updateTransactionSplitSchema)
-    .mutation(async ({ ctx: { db, orgId }, input }) => {
-      return await updateTransactionSplit(db, input, orgId!);
     }),
 
   deleteSplit: protectedProcedure

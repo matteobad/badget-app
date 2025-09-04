@@ -1,14 +1,13 @@
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { TransactionSplitItem } from "~/shared/validators/transaction-split.schema";
 import type z from "zod/v4";
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CategoryBadge } from "~/components/category/category-badge";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { FormatAmount } from "~/components/format-amount";
 import { SubmitButton } from "~/components/submit-button";
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { DialogFooter } from "~/components/ui/dialog";
 import {
@@ -20,8 +19,11 @@ import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
+import { useTransactionParams } from "~/hooks/use-transaction-params";
+import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { addTransactionSplitsSchema } from "~/shared/validators/transaction-split.schema";
+import { MinusIcon, PlusIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -42,6 +44,8 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
     [],
   );
 
+  const { setParams } = useTransactionParams();
+
   const trpc = useTRPC();
 
   const { data: existingSplits } = useQuery(
@@ -54,6 +58,10 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
         toast.success("Split registrato correttamente");
         onSaved?.();
       },
+      onError: (error) => {
+        toast.error(error.message);
+        onSaved?.();
+      },
     }),
   );
 
@@ -64,7 +72,6 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
       splits:
         existingSplits && existingSplits?.length > 0
           ? existingSplits.map((s) => ({
-              id: s.id,
               category: s.category ?? undefined,
               amount: s.amount,
               note: s.note ?? undefined,
@@ -74,14 +81,13 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
   });
 
   const splits = form.watch("splits");
+  const splitsJSON = JSON.stringify(splits);
 
-  const total = useMemo(
-    () =>
-      Number(
-        splits.reduce((a, r) => a + (Number(r.amount) || 0), 0).toFixed(2),
-      ),
-    [splits],
-  );
+  // Use a stringified version of splits to ensure sub-property changes trigger recalculation
+  const total = useMemo(() => {
+    return splits.reduce((a, r) => a + r.amount, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [splitsJSON, splits]);
 
   const autoCompleteSplits = useCallback(() => {
     const transactionAmount = Number(Number(transaction.amount).toFixed(2));
@@ -142,162 +148,137 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
     addSplitMutation.mutate(data);
   };
 
+  useEffect(() => {
+    if (!existingSplits?.length) return;
+
+    existingSplits.forEach((s, idx) => {
+      form.setValue(`splits.${idx}.category`, s.category ?? undefined);
+      form.setValue(`splits.${idx}.amount`, s.amount);
+      form.setValue(`splits.${idx}.note`, s.note ?? undefined);
+    });
+  }, [existingSplits, form]);
+
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="flex h-full flex-col gap-6"
+        className="flex h-full flex-col gap-8"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex w-full items-center justify-start space-x-2">
-            <Avatar className="size-10 rounded-none">
-              <AvatarFallback className="rounded-none">
-                {transaction.counterpartyName?.charAt(0) ??
-                  transaction.name?.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="line-clamp-1 w-full max-w-[100px] text-ellipsis md:max-w-none">
-                {transaction.name}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {transaction.description}
-              </span>
-            </div>
-          </div>
-          <div>
+        <div className="grid grid-cols-[1fr_auto] grid-rows-2 items-center gap-x-8 gap-y-1 px-3 font-mono text-sm">
+          <span className="text-muted-foreground">Description</span>
+          {/* <span className="text-muted-foreground">Date</span> */}
+          <span className="text-right text-muted-foreground">Amount</span>
+
+          <span className="line-clamp-1 text-ellipsis">
+            {transaction.name || transaction.description}
+          </span>
+          {/* <span>{formatDate(transaction.date)}</span> */}
+          <span className="text-right">
             <FormatAmount
               amount={transaction.amount}
               currency={transaction.currency}
             />
-          </div>
+          </span>
         </div>
-        <Separator />
+
         <ScrollArea className="max-h-80">
-          <div className="flex flex-col items-end gap-4">
-            <div className="flex w-full items-center justify-between">
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  type="button"
-                  variant="secondary"
-                  onClick={handleAddRow}
-                >
-                  Aggiungi riga
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  disabled={splits.length === 2}
-                  onClick={() => handleDeleteRow(splits.length - 1)}
-                >
-                  Rimuovi riga
-                </Button>
-              </div>
-              <div
-                className={
-                  total === Number(Number(transaction.amount).toFixed(2))
-                    ? "text-sm"
-                    : "text-sm text-destructive"
-                }
-              >
-                Totale:{" "}
-                <FormatAmount amount={total} currency={transaction.currency} />
-              </div>
-            </div>
+          <div className="flex flex-col items-end gap-3">
             <div className="w-full space-y-4">
               <FormField
                 control={form.control}
                 name="splits"
-                render={({ field }) => (
+                render={() => (
                   <FormItem>
                     <FormControl>
-                      <div className="flex flex-col gap-4">
-                        {field.value.map((row, idx) => (
-                          <div key={idx} className="flex items-center gap-3">
-                            <div className="relative w-full">
-                              <FormField
-                                control={form.control}
-                                name={`splits.${idx}.note`}
-                                render={({ field }) => (
-                                  <Input
-                                    autoFocus={idx === 0}
-                                    placeholder="Note"
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                  />
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name={`splits.${idx}.category`}
-                                render={({ field }) => (
-                                  <DropdownMenu
-                                    open={categoryDropdownOpen[idx]}
-                                    onOpenChange={(open) =>
-                                      setCategoryDropdownOpen((p) =>
-                                        p.map((o, i) => (i === idx ? open : o)),
-                                      )
-                                    }
-                                  >
-                                    <DropdownMenuTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        className="absolute top-0 right-0 h-auto p-0"
-                                      >
-                                        <CategoryBadge
-                                          className="h-[36px]"
-                                          category={row.category ?? undefined}
-                                        />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent
-                                      align="start"
-                                      className="overflow-hidden"
-                                      onClick={(e) => e.stopPropagation()}
+                      <div className="flex flex-col gap-3">
+                        {splits.map((row, idx) => (
+                          <React.Fragment key={idx}>
+                            <div className="flex items-center gap-3">
+                              <div className="relative w-full">
+                                <FormField
+                                  control={form.control}
+                                  name={`splits.${idx}.note`}
+                                  render={({ field }) => (
+                                    <Input
+                                      className="border-transparent font-mono text-muted-foreground shadow-none transition-all hover:border-input"
+                                      autoFocus={idx === 0}
+                                      placeholder="Note"
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                    />
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name={`splits.${idx}.category`}
+                                  render={({ field }) => (
+                                    <DropdownMenu
+                                      open={categoryDropdownOpen[idx]}
+                                      onOpenChange={(open) =>
+                                        setCategoryDropdownOpen((p) =>
+                                          p.map((o, i) =>
+                                            i === idx ? open : o,
+                                          ),
+                                        )
+                                      }
                                     >
-                                      <TransactionCategorySelect
-                                        selectedItems={
-                                          field.value?.id
-                                            ? [field.value.id]
-                                            : []
-                                        }
-                                        onSelect={(c) => {
-                                          field.onChange(c);
-                                          setCategoryDropdownOpen((p) =>
-                                            p.map((o, i) =>
-                                              i === idx ? false : o,
-                                            ),
-                                          );
-                                        }}
-                                      />
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          className="absolute top-0 right-1 p-0"
+                                        >
+                                          <CategoryBadge
+                                            category={row.category ?? undefined}
+                                          />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent
+                                        align="start"
+                                        className="overflow-hidden"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <TransactionCategorySelect
+                                          selectedItems={
+                                            field.value?.id
+                                              ? [field.value.id]
+                                              : []
+                                          }
+                                          onSelect={(c) => {
+                                            field.onChange(c);
+                                            setCategoryDropdownOpen(() =>
+                                              splits.map(() => false),
+                                            );
+                                          }}
+                                        />
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  )}
+                                />
+                              </div>
+
+                              <FormField
+                                control={form.control}
+                                name={`splits.${idx}.amount`}
+                                render={({ field }) => (
+                                  <div className="w-[105px] shrink-0 space-y-2">
+                                    <CurrencyInput
+                                      className="border-transparent text-right font-mono text-muted-foreground shadow-none transition-all hover:border-input"
+                                      placeholder="0,00"
+                                      value={field.value}
+                                      onValueChange={(values) => {
+                                        field.onChange(values.floatValue);
+                                      }}
+                                      onBlur={() => {
+                                        // Auto-complete other splits if possible
+                                        autoCompleteSplits();
+                                      }}
+                                    />
+                                  </div>
                                 )}
                               />
                             </div>
-
-                            <FormField
-                              control={form.control}
-                              name={`splits.${idx}.amount`}
-                              render={({ field }) => (
-                                <div className="w-[120px] space-y-2">
-                                  <CurrencyInput
-                                    className="text-right"
-                                    value={field.value}
-                                    onValueChange={(values) => {
-                                      field.onChange(values.floatValue);
-                                    }}
-                                    onBlur={() => {
-                                      // Auto-complete other splits if possible
-                                      autoCompleteSplits();
-                                    }}
-                                  />
-                                </div>
-                              )}
-                            />
-                          </div>
+                            <Separator />
+                          </React.Fragment>
                         ))}
                       </div>
                     </FormControl>
@@ -305,12 +286,62 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
                 )}
               />
             </div>
+            <div className="flex w-full items-center justify-between">
+              <div className="grow"></div>
+              <div
+                className={cn(
+                  "flex items-center justify-between pt-2 pr-3 font-mono text-sm",
+                  total !== Number(Number(transaction.amount).toFixed(2)) &&
+                    "text-destructive",
+                )}
+              >
+                <span className="pr-2 text-muted-foreground">Totale</span>
+                <div className="w-[100px] text-right text-base">
+                  <FormatAmount
+                    amount={total}
+                    currency={transaction.currency}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </ScrollArea>
         <DialogFooter>
-          <SubmitButton isSubmitting={addSplitMutation.isPending}>
-            Salva divisione
-          </SubmitButton>
+          <div className="flex w-full justify-between">
+            <div className="flex gap-2">
+              <Button
+                size="icon"
+                type="button"
+                variant="outline"
+                onClick={handleAddRow}
+              >
+                <PlusIcon className="size-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                disabled={splits.length === 2}
+                onClick={() => handleDeleteRow(splits.length - 1)}
+              >
+                <MinusIcon className="size-4" />
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  void setParams({ splitTransaction: null });
+                }}
+              >
+                Annulla
+              </Button>
+              <SubmitButton isSubmitting={addSplitMutation.isPending}>
+                Salva divisione
+              </SubmitButton>
+            </div>
+          </div>
         </DialogFooter>
       </form>
     </Form>

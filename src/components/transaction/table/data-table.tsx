@@ -70,6 +70,14 @@ export function DataTable({
   const { data, fetchNextPage, hasNextPage, refetch } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
 
+  const deleteTransactionSplitMutation = useMutation(
+    trpc.transaction.deleteSplit.mutationOptions({
+      onSuccess: () => {
+        void refetch();
+      },
+    }),
+  );
+
   const deleteTransactionMutation = useMutation(
     trpc.transaction.deleteTransaction.mutationOptions({
       onSuccess: () => {
@@ -119,6 +127,9 @@ export function DataTable({
       },
       splitTransaction: (id: string) => {
         void setParams({ splitTransaction: id });
+      },
+      deleteTransactionSplit: (id: string) => {
+        deleteTransactionSplitMutation.mutate({ transactionId: id });
       },
       deleteTransaction: (id: string) => {
         deleteTransactionMutation.mutate({ id });

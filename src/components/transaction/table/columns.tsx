@@ -364,12 +364,14 @@ const ActionsCell = memo(
     onViewDetails,
     onSplitTransaction,
     onCopyUrl,
+    onDeleteTransactionSplit,
     onDeleteTransaction,
   }: {
     transaction: Transaction;
     onViewDetails?: (id: string) => void;
     onSplitTransaction?: (id: string) => void;
     onCopyUrl?: (id: string) => void;
+    onDeleteTransactionSplit?: (id: string) => void;
     onDeleteTransaction?: (id: string) => void;
   }) => {
     const handleViewDetails = useCallback(() => {
@@ -383,6 +385,10 @@ const ActionsCell = memo(
     const handleCopyUrl = useCallback(() => {
       onCopyUrl?.(transaction.id);
     }, [transaction.id, onCopyUrl]);
+
+    const handleDeleteTransactionSplit = useCallback(() => {
+      onDeleteTransactionSplit?.(transaction.id);
+    }, [transaction.id, onDeleteTransactionSplit]);
 
     const handleDeleteTransaction = useCallback(() => {
       onDeleteTransaction?.(transaction.id);
@@ -401,27 +407,39 @@ const ActionsCell = memo(
             <ReceiptTextIcon className="size-3.5" />
             View details
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleSplitTransaction}>
-            <SplitIcon className="size-3.5" />
-            Split transaction
-          </DropdownMenuItem>
+          {!transaction.splits.length && (
+            <DropdownMenuItem onClick={handleSplitTransaction}>
+              <SplitIcon className="size-3.5" />
+              Split transaction
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={handleCopyUrl}>
             <ShareIcon className="size-3.5" />
             Share URL
           </DropdownMenuItem>
-          {transaction.source !== "api" && (
-            <>
-              <DropdownMenuSeparator />
+          <>
+            {(transaction.splits.length > 0 ||
+              transaction.source !== "api") && <DropdownMenuSeparator />}
 
+            {transaction.splits.length > 0 && (
               <DropdownMenuItem
-                className="text-destructive"
+                variant="destructive"
+                onClick={handleDeleteTransactionSplit}
+              >
+                <TrashIcon className="size-3.5" />
+                Elimina Splits
+              </DropdownMenuItem>
+            )}
+            {transaction.source !== "api" && (
+              <DropdownMenuItem
+                variant="destructive"
                 onClick={handleDeleteTransaction}
               >
                 <TrashIcon className="size-3.5" />
                 Delete
               </DropdownMenuItem>
-            </>
-          )}
+            )}
+          </>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -535,6 +553,7 @@ export const columns: ColumnDef<Transaction>[] = [
           onViewDetails={meta?.setOpen}
           onSplitTransaction={meta?.splitTransaction}
           onCopyUrl={meta?.copyUrl}
+          onDeleteTransactionSplit={meta?.deleteTransactionSplit}
           onDeleteTransaction={meta?.deleteTransaction}
         />
       );

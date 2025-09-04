@@ -2,10 +2,9 @@ import type {
   addTransactionSplitsSchema,
   deleteTransactionSplitSchema,
   getTransactionSplitsSchema,
-  updateTransactionSplitSchema,
 } from "~/shared/validators/transaction-split.schema";
 import type z from "zod/v4";
-import { and, eq, sum } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import type { DBClient } from "../db";
 import { category_table } from "../db/schema/categories";
@@ -46,7 +45,8 @@ export async function getTransactionSplits(
         eq(transaction_split_table.transactionId, input.transactionId),
         eq(transaction_table.organizationId, orgId),
       ),
-    );
+    )
+    .orderBy(desc(transaction_split_table.amount));
 
   return trx;
 }
@@ -106,65 +106,10 @@ export async function addTransactionSplits(
   });
 }
 
-export async function updateTransactionSplit(
-  client: DBClient,
-  input: z.infer<typeof updateTransactionSplitSchema>,
-  orgId: string,
-) {
-  return await client.transaction(async (tx) => {
-    // Ensure split belongs to org via join
-    const split = (
-      await tx
-        .select({
-          id: transaction_split_table.id,
-          transactionId: transaction_split_table.transactionId,
-        })
-        .from(transaction_split_table)
-        .innerJoin(
-          transaction_table,
-          eq(transaction_table.id, transaction_split_table.transactionId),
-        )
-        .where(
-          and(
-            eq(transaction_split_table.id, input.splitId),
-            eq(transaction_table.organizationId, orgId),
-          ),
-        )
-        .limit(1)
-    )[0];
-
-    if (!split) throw new Error("Split not found");
-
-    await tx
-      .update(transaction_split_table)
-      .set(input.data)
-      .where(eq(transaction_split_table.id, input.splitId));
-
-    // Validate new total still matches transaction amount
-    const [sumRow] = await tx
-      .select({ total: sum(transaction_split_table.amount) })
-      .from(transaction_split_table)
-      .where(eq(transaction_split_table.transactionId, split.transactionId));
-
-    const [trx] = await tx
-      .select({ amount: transaction_table.amount })
-      .from(transaction_table)
-      .where(eq(transaction_table.id, split.transactionId))
-      .limit(1);
-
-    const total = Number(Number(sumRow?.total ?? "0").toFixed(2));
-    if (Number(trx?.amount.toFixed(2)) !== total) {
-      throw new Error("Splits must sum to the transaction amount");
-    }
-
-    return { ok: true } as const;
-  });
-}
-
 export async function deleteTransactionSplit(
   client: DBClient,
   input: z.infer<typeof deleteTransactionSplitSchema>,
-  orgId: string,
+  organizationId: string,
 ) {
   return await client.transaction(async (tx) => {
     // Resolve split and transaction
@@ -181,35 +126,25 @@ export async function deleteTransactionSplit(
         )
         .where(
           and(
-            eq(transaction_split_table.id, input.splitId),
-            eq(transaction_table.organizationId, orgId),
+            eq(transaction_split_table.transactionId, input.transactionId),
+            eq(transaction_table.organizationId, organizationId),
           ),
         )
         .limit(1)
     )[0];
 
-    if (!split) throw new Error("Split not found");
+    if (!split) throw new Error("Splits not found");
 
+    // Delete splis
     await tx
       .delete(transaction_split_table)
-      .where(eq(transaction_split_table.id, input.splitId));
+      .where(eq(transaction_split_table.transactionId, input.transactionId));
 
-    // After deletion, if there are remaining splits, they must still sum to amount
-    const [sumRow] = await tx
-      .select({ total: sum(transaction_split_table.amount) })
-      .from(transaction_split_table)
-      .where(eq(transaction_split_table.transactionId, split.transactionId));
-
-    const [trx] = await tx
-      .select({ amount: transaction_table.amount })
-      .from(transaction_table)
-      .where(eq(transaction_table.id, split.transactionId))
-      .limit(1);
-
-    const total = Number(Number(sumRow?.total ?? 0).toFixed(2));
-    if (total !== 0 && Number(trx?.amount.toFixed(2)) !== total) {
-      throw new Error("Splits must sum to the transaction amount");
-    }
+    // include transaction in reports
+    await tx
+      .update(transaction_table)
+      .set({ internal: false })
+      .where(eq(transaction_table.id, input.transactionId));
 
     return { ok: true } as const;
   });

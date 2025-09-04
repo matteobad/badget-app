@@ -11,6 +11,7 @@ declare module "@tanstack/react-table" {
     setOpen?: (id: string) => void;
     copyUrl?: (id: string) => void;
     splitTransaction?: (id: string) => void;
+    deleteTransactionSplit?: (id: string) => void;
     deleteTransaction?: (id: string) => void;
 
     // Categories table meta

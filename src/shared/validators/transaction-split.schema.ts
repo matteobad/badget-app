@@ -19,21 +19,8 @@ export const addTransactionSplitsSchema = z.object({
   splits: z.array(transactionSplitItemSchema).min(2),
 });
 
-export const updateTransactionSplitSchema = z.object({
-  splitId: z.uuid(),
-  data: z
-    .object({
-      categoryId: z.uuid().optional(),
-      amount: z.number().positive().optional(),
-      note: z.string().optional(),
-    })
-    .refine((d) => Object.keys(d).length > 0, {
-      message: "At least one field must be provided",
-    }),
-});
-
 export const deleteTransactionSplitSchema = z.object({
-  splitId: z.uuid(),
+  transactionId: z.uuid(),
 });
 
 export const getTransactionSplitsSchema = z.object({

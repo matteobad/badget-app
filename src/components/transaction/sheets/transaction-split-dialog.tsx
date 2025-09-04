@@ -35,7 +35,7 @@ export function TransactionSplitDialog() {
         void setParams({ splitTransaction: null });
       }}
     >
-      <DialogContent>
+      <DialogContent className="[&>button]:hidden">
         <DialogHeader className="mb-4">
           <DialogTitle>Dividi transazione</DialogTitle>
           <DialogDescription>
