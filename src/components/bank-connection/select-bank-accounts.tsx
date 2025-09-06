@@ -204,6 +204,7 @@ export function SelectBankAccountsModal() {
         currency: account.currency,
         enabled: true,
         type: account.type,
+        subtype: account.subtype ?? undefined,
         accountReference: ref!,
         authoritativeFrom: account.authoritativeFrom,
         // expiresAt: account.expires_at,

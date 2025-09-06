@@ -53,13 +53,14 @@ export async function createBankConnection(
 
     for (const account of input.accounts) {
       await createBankAccountMutation(tx, {
-        accountId: account.accountId,
+        externalId: account.accountId,
         connectionId: bankConnection.id,
         institutionId: bankConnection.institutionId,
         name: account.name,
         currency: account.currency,
         enabled: account.enabled,
         type: account.type,
+        subtype: account.subtype,
         logoUrl: bankConnection.logoUrl ?? undefined,
         accountReference: account.accountReference ?? undefined,
         authoritativeFrom: account.authoritativeFrom ?? undefined,

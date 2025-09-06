@@ -1,5 +1,9 @@
 import { z } from "@hono/zod-openapi";
-import { ACCOUNT_TYPE, BANK_PROVIDER } from "~/shared/constants/enum";
+import {
+  ACCOUNT_SUBTYPE,
+  ACCOUNT_TYPE,
+  BANK_PROVIDER,
+} from "~/shared/constants/enum";
 import { parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 export const getBankConnectionsSchema = z
@@ -26,6 +30,7 @@ export const createBankConnectionSchema = z.object({
         enabled: z.boolean(),
         balance: z.number().optional(),
         type: z.enum(ACCOUNT_TYPE),
+        subtype: z.enum(ACCOUNT_SUBTYPE).optional(),
         accountReference: z.string().nullable().optional(), // EnableBanking & GoCardLess
         expiresAt: z.string().nullable().optional(), // EnableBanking & GoCardLess
         authoritativeFrom: z.string().nullable().optional(),

@@ -7,7 +7,7 @@ export type CreateBankAccountPayload = {
   name: string;
   balance: number;
   currency: string;
-  accountId?: string;
+  externalId?: string;
   institutionId?: string;
   connectionId?: string;
   openingBalance?: number;
@@ -38,6 +38,7 @@ export const createBankAccountMutation = async (
         enabled: payload.enabled,
         balance: payload.balance,
         logoUrl: payload.logoUrl,
+        externalId: payload.externalId,
         authoritativeFrom: payload.authoritativeFrom,
         //lastAccessed: new Date().toISOString(),
       },
