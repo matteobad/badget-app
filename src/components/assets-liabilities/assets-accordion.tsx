@@ -28,8 +28,8 @@ export function AssetsAccordion() {
   const [groupsLocal, setGroupsLocal] = useState<AccountGroupDto[]>([]);
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState<string>("");
-  const [accordionValues, setAccordionValues] = useState<string[]>([]);
   const [hoverGroupId, setHoverGroupId] = useState<string | null>(null);
+  const [accordionValues, setAccordionValues] = useState<string[]>();
 
   const { filters, hasFilters } = useBankAccountFilterParams();
 
@@ -71,6 +71,10 @@ export function AssetsAccordion() {
 
   const { editing } = useEditGroups();
 
+  useEffect(() => {
+    if (groupsData) setGroupsLocal(groupsData);
+  }, [groupsData]);
+
   const persistGroups = (next: AccountGroupDto[]) => {
     setGroupsLocal(next);
     updateGroupsMutation.mutate({ groups: next });
@@ -104,42 +108,27 @@ export function AssetsAccordion() {
     persistGroups(reassigned);
   };
 
-  const accountById = useMemo(
-    () => new Map((accounts ?? []).map((a) => [a.id, a] as const)),
-    [accounts],
-  );
+  const accountById = new Map((accounts ?? []).map((a) => [a.id, a] as const));
 
   const sortedGroups = useMemo(
     () => [...(groupsLocal ?? [])].sort((a, b) => a.order - b.order),
     [groupsLocal],
   );
 
-  const assignedIds = useMemo(
-    () => new Set(sortedGroups.flatMap((g) => g.accounts ?? [])),
-    [sortedGroups],
-  );
+  const assignedIds = new Set(sortedGroups.flatMap((g) => g.accounts ?? []));
 
   const others = (accounts ?? []).filter((a) => !assignedIds.has(a.id));
 
-  let groupsWithAccounts = useMemo(
-    () =>
-      [
-        ...sortedGroups.map((g) => ({
-          id: g.id,
-          name: g.name,
-          order: g.order,
-          accounts: (g.accounts ?? [])
-            .map((id) => accountById.get(id))
-            .filter((a): a is NonNullable<typeof a> => Boolean(a)),
-        })),
-      ] as {
-        id: string;
-        name: string;
-        order: number;
-        accounts: typeof accounts;
-      }[],
-    [sortedGroups, accountById],
-  );
+  let groupsWithAccounts = [
+    ...sortedGroups.map((g) => ({
+      id: g.id,
+      name: g.name,
+      order: g.order,
+      accounts: (g.accounts ?? [])
+        .map((id) => accountById.get(id))
+        .filter((a): a is NonNullable<typeof a> => Boolean(a)),
+    })),
+  ] as { id: string; name: string; order: number; accounts: typeof accounts }[];
 
   const othersGroup = {
     id: "others",
@@ -159,14 +148,10 @@ export function AssetsAccordion() {
   }
 
   useEffect(() => {
-    if (groupsData) setGroupsLocal(groupsData);
-  }, [groupsData]);
-
-  useEffect(() => {
     if (editing) {
       setAccordionValues(groupsWithAccounts.map((g) => g.id));
     }
-  }, [editing, groupsWithAccounts]);
+  }, [editing, groupsWithAccounts.map((g) => g.id).join("|")]);
 
   if (!accounts?.length && isSuccess && !hasFilters) {
     return (
@@ -191,7 +176,7 @@ export function AssetsAccordion() {
       className="w-full space-y-4"
       value={accordionValues}
       onValueChange={(vals) => {
-        if (!editing) setAccordionValues(vals);
+        if (!editing) setAccordionValues(vals as string[]);
       }}
     >
       {editing ? (
@@ -229,6 +214,7 @@ export function AssetsAccordion() {
               editing
                 ? (e) => {
                     if (draggingGroupIdRef.current) e.preventDefault();
+                    setHoverGroupId(group.id);
                   }
                 : undefined
             }
@@ -251,12 +237,25 @@ export function AssetsAccordion() {
                     }));
                     persistGroups(withOrder);
                     draggingGroupIdRef.current = null;
+                    setHoverGroupId(null);
                   }
                 : undefined
             }
+            onDragLeave={
+              editing
+                ? () => setHoverGroupId((id) => (id === group.id ? null : id))
+                : undefined
+            }
+            onClick={(e) => {
+              if (editing) {
+                e.preventDefault();
+                setEditingNameId(group.id);
+                setEditingNameValue(group.name);
+              }
+            }}
           >
             <AccordionTrigger
-              className="relative flex h-10 px-4 text-sm leading-6 hover:no-underline focus-visible:ring-0"
+              className="flex h-10 px-4 text-sm leading-6 hover:no-underline focus-visible:ring-0"
               onDragOver={
                 editing
                   ? (e) => {
@@ -280,18 +279,6 @@ export function AssetsAccordion() {
                     }
                   : undefined
               }
-              onDragLeave={
-                editing
-                  ? () => setHoverGroupId((id) => (id === group.id ? null : id))
-                  : undefined
-              }
-              onClick={(e) => {
-                if (editing) {
-                  e.preventDefault();
-                  setEditingNameId(group.id);
-                  setEditingNameValue(group.name);
-                }
-              }}
             >
               {editing ? (
                 <span className="mr-2 inline-flex cursor-grab text-muted-foreground">
@@ -348,23 +335,23 @@ export function AssetsAccordion() {
               {editing && hoverGroupId === group.id ? (
                 <span className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-ring" />
               ) : null}
+              {editing && group.id !== "others" ? (
+                <button
+                  type="button"
+                  className="ml-2 shrink-0 text-xs text-destructive hover:underline"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (window.confirm("Eliminare il gruppo?"))
+                      deleteGroup(group.id);
+                  }}
+                >
+                  Elimina
+                </button>
+              ) : null}
               <div className="mr-[50px] w-full text-right">
                 {formatAmount({ amount: total, currency: "EUR" })}
               </div>
             </AccordionTrigger>
-            {editing && group.id !== "others" ? (
-              <button
-                type="button"
-                className="absolute top-2 right-2 z-10 text-xs text-destructive hover:underline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (window.confirm("Eliminare il gruppo?"))
-                    deleteGroup(group.id);
-                }}
-              >
-                Elimina
-              </button>
-            ) : null}
             <AccordionContent
               className="p-0 text-muted-foreground"
               onDragOver={
@@ -406,7 +393,6 @@ export function AssetsAccordion() {
                     editing
                       ? (e) => {
                           if (draggingIdRef.current) e.preventDefault();
-                          setHoverGroupId(group.id);
                         }
                       : undefined
                   }
@@ -421,7 +407,6 @@ export function AssetsAccordion() {
                             groupId: group.id,
                           });
                           draggingIdRef.current = null;
-                          setHoverGroupId(null);
                         }
                       : undefined
                   }
