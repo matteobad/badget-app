@@ -14,6 +14,7 @@ import { categoryRouter } from "./category";
 import { institutionRouter } from "./institution";
 import { metricsRouter } from "./metrics";
 import { organizationRouter } from "./organization";
+import { preferencesRouter } from "./preferences";
 import { tagRouter } from "./tag";
 import { transactionRouter } from "./transaction";
 import { transactionCategoryRouter } from "./transaction-category";
@@ -34,6 +35,7 @@ export const appRouter = createTRPCRouter({
   bankConnection: bankConnectionRouter,
   bankAccount: bankAccountRouter,
   tag: tagRouter,
+  preferences: preferencesRouter,
   category: categoryRouter,
   budget: budgetRouter,
   transaction: transactionRouter,

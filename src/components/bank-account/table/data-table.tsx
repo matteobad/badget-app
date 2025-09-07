@@ -19,7 +19,15 @@ import { columns } from "./columns";
 import { NoResults } from "./empty-states";
 import { Loading } from "./loading";
 
-export function DataTable({ data }: { data: RouterOutput["asset"]["get"] }) {
+export function DataTable({
+  data,
+  draggable,
+  onRowDragStart,
+}: {
+  data: RouterOutput["asset"]["get"];
+  draggable?: boolean;
+  onRowDragStart?: (accountId: string) => void;
+}) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
 
@@ -76,7 +84,15 @@ export function DataTable({ data }: { data: RouterOutput["asset"]["get"] }) {
         {/* Transaction Rows */}
         <TableBody>
           {table.getFilteredRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
+            <TableRow
+              key={row.id}
+              draggable={draggable}
+              onDragStart={() => {
+                if (draggable && onRowDragStart) {
+                  onRowDragStart(row.original.id);
+                }
+              }}
+            >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
                   key={cell.id}
@@ -85,7 +101,7 @@ export function DataTable({ data }: { data: RouterOutput["asset"]["get"] }) {
                     "border-x py-3",
                     {
                       "border-l-0": index === 0,
-                      "border-r-0": index === 2,
+                      "border-r-0": index === 3,
                     },
                   )}
                   onClick={() => {

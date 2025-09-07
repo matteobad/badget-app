@@ -18,7 +18,6 @@ import {
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
@@ -28,7 +27,6 @@ import {
   ArchiveIcon,
   Building2,
   CreditCard,
-  EyeOffIcon,
   HandIcon,
   LinkIcon,
   MoreHorizontalIcon,
@@ -37,6 +35,7 @@ import {
 } from "lucide-react";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import { AccountInfoTooltips } from "./account-info-tooltips";
 
 type BankAccount = RouterOutput["asset"]["get"][number];
 
@@ -220,6 +219,26 @@ export const columns: ColumnDef<BankAccount>[] = [
               {account.name} {account.description && `- ${account.description}`}
             </span>
           </div>
+          <div className="grow"></div>
+          <AccountInfoTooltips excludeFromReports={!account.enabled} />
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "subtype",
+    meta: {
+      className: "border-r border-border w-[150px] min-w-[150px]",
+    },
+    cell: ({ row }) => {
+      return (
+        <div className="relative w-full">
+          <Badge
+            variant="tag-rounded"
+            className="flex-shrink-0 whitespace-nowrap"
+          >
+            {row.getValue("subtype")}
+          </Badge>
         </div>
       );
     },
@@ -228,10 +247,10 @@ export const columns: ColumnDef<BankAccount>[] = [
     id: "balance",
     accessorKey: "balance",
     meta: {
-      className: "w-[180px] min-w-[180px]",
+      className: "w-[150px] min-w-[150px]",
     },
     cell: ({ row }) => {
-      const { balance, currency, lastUpdate, enabled } = row.original;
+      const { balance, currency, lastUpdate } = row.original;
       const isPositive = balance > 0;
 
       return (
@@ -240,7 +259,7 @@ export const columns: ColumnDef<BankAccount>[] = [
             <TooltipTrigger asChild>
               <span
                 className={cn(
-                  "mr-9 font-medium",
+                  "font-medium",
                   isPositive ? "text-green-600" : "text-gray-900",
                 )}
               >
@@ -251,25 +270,6 @@ export const columns: ColumnDef<BankAccount>[] = [
               Ultimo aggiornamento {formatDate(lastUpdate)}
             </TooltipContent>
           </Tooltip>
-          {!enabled && (
-            <TooltipProvider delayDuration={100}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="absolute right-0 -bottom-0.5 flex size-6 cursor-auto items-center justify-center">
-                    <EyeOffIcon className="size-3.5 text-muted-foreground" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  className="w-[200px] text-left text-xs"
-                  side="right"
-                >
-                  Questo conto è disabilitato, il suo saldo non verrà
-                  conteggiato nelle metriche e non verranno scaricate nuove
-                  transazioni per i conti connessi.
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
         </div>
       );
     },

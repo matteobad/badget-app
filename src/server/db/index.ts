@@ -10,6 +10,7 @@ import * as accounts from "./schema/accounts";
 import * as auth from "./schema/auth";
 import * as categories from "./schema/categories";
 import * as openBanking from "./schema/open-banking";
+import * as preferences from "./schema/preferences";
 import * as transactions from "./schema/transactions";
 
 let connectionString = env.DATABASE_URL;
@@ -44,6 +45,7 @@ export const schema = {
   ...categories,
   ...openBanking,
   ...transactions,
+  ...preferences,
 };
 
 // Drizzle supports both HTTP and WebSocket clients. Choose the one that fits your needs:

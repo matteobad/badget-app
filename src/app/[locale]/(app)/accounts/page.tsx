@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 import { AssetsAccordion } from "~/components/assets-liabilities/assets-accordion";
+import { EditGroupsProvider } from "~/components/assets-liabilities/edit-groups-context";
 import { FinancialMetrics } from "~/components/assets-liabilities/financial-metrics";
 import { FinancialMetricsSkeleton } from "~/components/assets-liabilities/financial-metrics-skeleton";
 import { MainActions } from "~/components/assets-liabilities/main-actions";
@@ -43,17 +44,19 @@ export default async function AssetsLiabilitiesPage(props: PageProps) {
           <FinancialMetrics />
         </Suspense>
       </ErrorBoundary>
-      <div className="flex flex-col gap-4 p-6 pt-0">
-        <div className="flex items-center justify-between">
-          <AccountsSearchFilter />
-          <MainActions />
+      <EditGroupsProvider>
+        <div className="flex flex-col gap-4 p-6 pt-0">
+          <div className="flex items-center justify-between">
+            <AccountsSearchFilter />
+            <MainActions />
+          </div>
+          <ErrorBoundary fallback={<ErrorFallback />}>
+            <Suspense fallback={<Loading />}>
+              <AssetsAccordion />
+            </Suspense>
+          </ErrorBoundary>
         </div>
-        <ErrorBoundary fallback={<ErrorFallback />}>
-          <Suspense fallback={<Loading />}>
-            <AssetsAccordion />
-          </Suspense>
-        </ErrorBoundary>
-      </div>
+      </EditGroupsProvider>
     </HydrateClient>
   );
 }
