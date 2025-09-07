@@ -183,17 +183,6 @@ export function AssetsAccordion() {
         if (!editing) setAccordionValues(value);
       }}
     >
-      {editing ? (
-        <div className="flex justify-end px-1">
-          <button
-            type="button"
-            className="text-xs text-muted-foreground hover:underline"
-            onClick={addGroup}
-          >
-            + Aggiungi gruppo
-          </button>
-        </div>
-      ) : null}
       {groupsWithAccounts.map((group) => {
         const total =
           group.accounts?.reduce(
@@ -205,7 +194,7 @@ export function AssetsAccordion() {
           <AccordionItem
             value={group.id}
             key={group.id}
-            className="rounded-md border bg-background p-0 outline-none last:border-b has-focus-visible:border-ring has-focus-visible:ring-[3px] has-focus-visible:ring-ring/50"
+            className="relative rounded-md border bg-background p-0 outline-none last:border-b has-focus-visible:border-ring has-focus-visible:ring-[3px] has-focus-visible:ring-ring/50"
             draggable={editing}
             onDragStart={
               editing
@@ -339,23 +328,24 @@ export function AssetsAccordion() {
               {editing && hoverGroupId === group.id ? (
                 <span className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-ring" />
               ) : null}
-              {editing && group.id !== "others" ? (
-                <button
-                  type="button"
-                  className="ml-2 shrink-0 text-xs text-destructive hover:underline"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (window.confirm("Eliminare il gruppo?"))
-                      deleteGroup(group.id);
-                  }}
-                >
-                  Elimina
-                </button>
-              ) : null}
-              <div className="mr-[50px] w-full text-right">
+              <div className="mr-[48px] w-full text-right">
                 {formatAmount({ amount: total, currency: "EUR" })}
               </div>
             </AccordionTrigger>
+
+            {editing && group.id !== "others" ? (
+              <button
+                type="button"
+                className="absolute top-3 right-4 z-10 bg-background text-xs text-destructive hover:underline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (window.confirm("Eliminare il gruppo?"))
+                    deleteGroup(group.id);
+                }}
+              >
+                Elimina
+              </button>
+            ) : null}
             <AccordionContent
               className="p-0 text-muted-foreground"
               onDragOver={
@@ -422,6 +412,17 @@ export function AssetsAccordion() {
           </AccordionItem>
         );
       })}
+      {editing ? (
+        <div className="flex justify-end px-1">
+          <button
+            type="button"
+            className="text-xs text-muted-foreground hover:underline"
+            onClick={addGroup}
+          >
+            + Aggiungi gruppo
+          </button>
+        </div>
+      ) : null}
     </Accordion>
   );
 }
