@@ -26,10 +26,20 @@ export type HybridPreferences = {
 };
 
 const DEFAULT_ACCOUNT_GROUPS: AccountGroup[] = [
-  { id: "liq", name: "Liquidità", order: 1, accounts: [] },
-  { id: "inv", name: "Investimenti", order: 2, accounts: [] },
-  { id: "debt_short", name: "Passività breve", order: 3, accounts: [] },
-  { id: "debt_long", name: "Passività lungo", order: 4, accounts: [] },
+  { id: "liquidity", name: "Liquidità", order: 1, accounts: [] },
+  { id: "emergency", name: "Fondo di emergenza", order: 2, accounts: [] },
+  {
+    id: "expenses_mid",
+    name: "Spese previste",
+    order: 3,
+    accounts: [],
+  },
+  {
+    id: "investment_long",
+    name: "Investimenti a lungo termine",
+    order: 4,
+    accounts: [],
+  },
 ];
 
 export async function getOrCreateOrganizationPreferences(
