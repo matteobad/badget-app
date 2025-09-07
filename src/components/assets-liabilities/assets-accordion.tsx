@@ -32,6 +32,7 @@ export function AssetsAccordion() {
   const [accordionValues, setAccordionValues] = useState<string[]>();
 
   const { filters, hasFilters } = useBankAccountFilterParams();
+  const { editing } = useEditGroups();
 
   const queryClient = useQueryClient();
   const trpc = useTRPC();
@@ -69,12 +70,6 @@ export function AssetsAccordion() {
     }),
   );
 
-  const { editing } = useEditGroups();
-
-  useEffect(() => {
-    if (groupsData) setGroupsLocal(groupsData);
-  }, [groupsData]);
-
   const persistGroups = (next: AccountGroupDto[]) => {
     setGroupsLocal(next);
     updateGroupsMutation.mutate({ groups: next });
@@ -108,50 +103,59 @@ export function AssetsAccordion() {
     persistGroups(reassigned);
   };
 
-  const accountById = new Map((accounts ?? []).map((a) => [a.id, a] as const));
-
   const sortedGroups = useMemo(
     () => [...(groupsLocal ?? [])].sort((a, b) => a.order - b.order),
     [groupsLocal],
   );
 
-  const assignedIds = new Set(sortedGroups.flatMap((g) => g.accounts ?? []));
-
-  const others = (accounts ?? []).filter((a) => !assignedIds.has(a.id));
-
-  let groupsWithAccounts = [
-    ...sortedGroups.map((g) => ({
-      id: g.id,
-      name: g.name,
-      order: g.order,
-      accounts: (g.accounts ?? [])
-        .map((id) => accountById.get(id))
-        .filter((a): a is NonNullable<typeof a> => Boolean(a)),
-    })),
-  ] as { id: string; name: string; order: number; accounts: typeof accounts }[];
-
-  const othersGroup = {
-    id: "others",
-    name: "Altri account",
-    order: Number.MAX_SAFE_INTEGER,
-    accounts: others,
-  } as const;
-
-  if ((others?.length ?? 0) > 0) {
-    groupsWithAccounts.push(othersGroup);
-  }
-
-  if (!editing) {
-    groupsWithAccounts = groupsWithAccounts.filter(
-      (g) => (g.accounts?.length ?? 0) > 0,
+  const groupsWithAccounts = useMemo(() => {
+    const accountById = new Map(
+      (accounts ?? []).map((a) => [a.id, a] as const),
     );
-  }
+    const assignedIds = new Set(sortedGroups.flatMap((g) => g.accounts ?? []));
+    const others = (accounts ?? []).filter((a) => !assignedIds.has(a.id));
+
+    const othersGroup = {
+      id: "others",
+      name: "Altri account",
+      order: Number.MAX_SAFE_INTEGER,
+      accounts: others,
+    } as const;
+
+    let result = [
+      ...sortedGroups.map((g) => ({
+        id: g.id,
+        name: g.name,
+        order: g.order,
+        accounts: (g.accounts ?? [])
+          .map((id) => accountById.get(id))
+          .filter((a): a is NonNullable<typeof a> => Boolean(a)),
+      })),
+    ];
+
+    if ((others?.length ?? 0) > 0) {
+      result.push(othersGroup);
+    }
+
+    if (!editing) {
+      result = result.filter((g) => (g.accounts?.length ?? 0) > 0);
+    }
+
+    return result;
+  }, [sortedGroups, editing, accounts]);
+
+  const groupIdsJoined = groupsWithAccounts.map((g) => g.id).join("|");
+
+  useEffect(() => {
+    if (groupsData) setGroupsLocal(groupsData);
+  }, [groupsData]);
 
   useEffect(() => {
     if (editing) {
       setAccordionValues(groupsWithAccounts.map((g) => g.id));
     }
-  }, [editing, groupsWithAccounts.map((g) => g.id).join("|")]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editing, groupIdsJoined]);
 
   if (!accounts?.length && isSuccess && !hasFilters) {
     return (
@@ -175,8 +179,8 @@ export function AssetsAccordion() {
       type="multiple"
       className="w-full space-y-4"
       value={accordionValues}
-      onValueChange={(vals) => {
-        if (!editing) setAccordionValues(vals as string[]);
+      onValueChange={(value) => {
+        if (!editing) setAccordionValues(value);
       }}
     >
       {editing ? (
