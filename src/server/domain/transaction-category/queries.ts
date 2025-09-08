@@ -1,81 +1,96 @@
 "server-only";
 
 import type { DBClient } from "~/server/db";
-import { category_table } from "~/server/db/schema/categories";
-import { and, asc, desc, eq, isNotNull, isNull } from "drizzle-orm";
+import { transaction_category_table } from "~/server/db/schema/transactions";
+import { and, asc, desc, eq, isNull } from "drizzle-orm";
 
-export type GetCategoriesParams = {
-  orgId: string;
-  limit?: number;
+export type GetTransactionCategoriesParams = {
+  organizationId: string;
 };
 
 export const getTransactionCategoriesQuery = async (
-  db: DBClient,
-  params: GetCategoriesParams,
+  client: DBClient,
+  params: GetTransactionCategoriesParams,
 ) => {
-  const { orgId, limit = 1000 } = params;
+  const { organizationId } = params;
 
-  // First get all parent categories (categories with no parentId)
-  const parentCategories = await db
+  return await client
     .select({
-      id: category_table.id,
-      name: category_table.name,
-      color: category_table.color,
-      icon: category_table.icon,
-      slug: category_table.slug,
-      description: category_table.description,
-      parentId: category_table.parentId,
-      type: category_table.type,
-      excludeFromAnalytics: category_table.excludeFromAnalytics,
+      id: transaction_category_table.id,
+      name: transaction_category_table.name,
+      color: transaction_category_table.color,
+      icon: transaction_category_table.icon,
+      slug: transaction_category_table.slug,
+      description: transaction_category_table.description,
+      parentId: transaction_category_table.parentId,
+      type: transaction_category_table.type,
+      excludeFromAnalytics: transaction_category_table.excludeFromAnalytics,
     })
-    .from(category_table)
+    .from(transaction_category_table)
     .where(
       and(
-        eq(category_table.organizationId, orgId),
-        isNull(category_table.parentId),
-        isNull(category_table.deletedAt),
+        eq(transaction_category_table.organizationId, organizationId),
+        isNull(transaction_category_table.deletedAt),
       ),
     )
-    .orderBy(desc(category_table.createdAt), asc(category_table.name))
-    .limit(limit);
+    .orderBy(
+      desc(transaction_category_table.createdAt),
+      asc(transaction_category_table.name),
+    );
+};
 
-  // Then get all child categories for these parents
-  const childCategories = await db
+export type GetTransactionCategoryParams = {
+  id: string;
+  organizationId: string;
+};
+
+export async function getTransactionCategoryQuery(
+  client: DBClient,
+  params: GetTransactionCategoryParams,
+) {
+  const [result] = await client
     .select({
-      id: category_table.id,
-      name: category_table.name,
-      color: category_table.color,
-      icon: category_table.icon,
-      slug: category_table.slug,
-      description: category_table.description,
-      parentId: category_table.parentId,
-      type: category_table.type,
-      excludeFromAnalytics: category_table.excludeFromAnalytics,
+      id: transaction_category_table.id,
+      name: transaction_category_table.name,
+      slug: transaction_category_table.slug,
+      type: transaction_category_table.type,
+      color: transaction_category_table.color,
+      icon: transaction_category_table.icon,
+      description: transaction_category_table.description,
+      parentId: transaction_category_table.parentId,
+      excludeFromAnalytics: transaction_category_table.excludeFromAnalytics,
+      // budgets: sql<
+      //   Array<{ id: string; amount: number }>
+      // >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${budget_table.id}, 'amount', ${budget_table.amount})) FILTER (WHERE ${budget_table.id} IS NOT NULL), '[]'::json)`.as(
+      //   "budgets",
+      // ),
     })
-    .from(category_table)
+    .from(transaction_category_table)
     .where(
       and(
-        eq(category_table.organizationId, orgId),
-        isNotNull(category_table.parentId),
-        isNull(category_table.deletedAt),
+        eq(transaction_category_table.id, params.id),
+        eq(transaction_category_table.organizationId, params.organizationId),
       ),
     )
-    .orderBy(asc(category_table.name));
+    .limit(1);
 
-  // Group children by parentId for efficient lookup
-  const childrenByParentId = new Map<string, typeof childCategories>();
-  for (const child of childCategories) {
-    if (child.parentId) {
-      if (!childrenByParentId.has(child.parentId)) {
-        childrenByParentId.set(child.parentId, []);
-      }
-      childrenByParentId.get(child.parentId)!.push(child);
-    }
-  }
+  return result;
+}
 
-  // Attach children to their parents
-  return parentCategories.map((parent) => ({
-    ...parent,
-    children: childrenByParentId.get(parent.id) ?? [],
-  }));
+export type GetTransactionCategorySlugsParams = {
+  organizationId: string;
+};
+
+export const getTransactionCategorySlugsQuery = async (
+  client: DBClient,
+  params: GetTransactionCategorySlugsParams,
+) => {
+  const { organizationId } = params;
+
+  return await client
+    .select({
+      slug: transaction_category_table.slug,
+    })
+    .from(transaction_category_table)
+    .where(eq(transaction_category_table.organizationId, organizationId));
 };

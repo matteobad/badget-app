@@ -35,7 +35,7 @@ import {
   updateTransactionSchema,
   updateTransactionsSchema,
 } from "~/shared/validators/transaction.schema";
-import { categorizeUserTransaction } from "~/utils/categorization";
+// import { categorizeUserTransaction } from "~/utils/categorization";
 import { z } from "zod/v4";
 
 import { createTRPCRouter, protectedProcedure } from "../init";
@@ -134,12 +134,12 @@ export const transactionRouter = createTRPCRouter({
       return await deleteManyTransactions(input, orgId);
     }),
 
-  categorize: protectedProcedure
-    .input(z.object({ name: z.string().min(1) }))
-    .mutation(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-      return await categorizeUserTransaction(orgId, input);
-    }),
+  // categorize: protectedProcedure
+  //   .input(z.object({ name: z.string().min(1) }))
+  //   .mutation(async ({ ctx, input }) => {
+  //     const orgId = ctx.orgId!;
+  //     return await categorizeUserTransaction(orgId, input);
+  //   }),
 
   // Transaction Splits
   getSplits: protectedProcedure

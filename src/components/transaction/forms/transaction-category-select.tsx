@@ -10,7 +10,7 @@ import { buildCategoryRecord } from "~/shared/helpers/categories";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
 
-type Category = RouterOutput["transactionCategory"]["getAll"][number];
+type Category = RouterOutput["transactionCategory"]["get"][number];
 
 type Props = {
   selectedItems?: string[];
@@ -24,7 +24,7 @@ export function TransactionCategorySelect({ selectedItems, onSelect }: Props) {
 
   const trpc = useTRPC();
 
-  const { data } = useQuery(trpc.transactionCategory.getAll.queryOptions({}));
+  const { data } = useQuery(trpc.transactionCategory.get.queryOptions());
 
   const items = useMemo(() => {
     const incomeCategories =

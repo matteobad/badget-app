@@ -1,6 +1,6 @@
 "use client";
 
-import { useCategoryParams } from "~/hooks/use-category-params";
+import { useTransactionCategoryParams } from "~/hooks/use-transaction-category-params";
 
 import {
   Dialog,
@@ -12,7 +12,7 @@ import CreateCategoryForm from "../forms/create-category-form";
 
 export default function CreateCategoryDialog() {
   const { params: categoryParams, setParams: setCategoryParams } =
-    useCategoryParams();
+    useTransactionCategoryParams();
 
   const isOpen = !!categoryParams.createCategory;
 

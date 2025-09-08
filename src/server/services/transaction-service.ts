@@ -11,7 +11,7 @@ import type {
   updateTransactionsSchema,
 } from "~/shared/validators/transaction.schema";
 import type z from "zod/v4";
-import { updateOrCreateRule } from "~/utils/categorization";
+// import { updateOrCreateRule } from "~/utils/categorization";
 import { eq } from "drizzle-orm";
 
 import type { DBClient } from "../db";
@@ -97,7 +97,7 @@ export async function createTransaction(
   });
 
   // update category rule relevance
-  await updateOrCreateRule(orgId, input.name, input.categoryId);
+  // await updateOrCreateRule(orgId, input.name, input.categoryId);
 }
 
 /**

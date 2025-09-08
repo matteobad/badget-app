@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi"; // Extended Zod instance
 
-import { category_table } from "~/server/db/schema/categories";
+import { transaction_category_table } from "~/server/db/schema/transactions";
 import { CATEGORY_TYPE } from "~/shared/constants/enum";
 import {
   createInsertSchema,
@@ -25,22 +25,30 @@ export const getCategoriesWithBudgetsSchema = z.object({
   ...getBudgetsSchema.shape,
 });
 
-export const selectCategorySchema = createSelectSchema(category_table);
+export const selectCategorySchema = createSelectSchema(
+  transaction_category_table,
+);
 
-export const createCategorySchema = createInsertSchema(category_table, {
-  type: z.enum(CATEGORY_TYPE),
-  parentId: z.string().optional(),
-}).omit({
+export const createCategorySchema = createInsertSchema(
+  transaction_category_table,
+  {
+    type: z.enum(CATEGORY_TYPE),
+    parentId: z.string().optional(),
+  },
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
   organizationId: true,
 });
 
-export const updateCategorySchema = createUpdateSchema(category_table, {
-  id: z.uuid(),
-  type: z.enum(CATEGORY_TYPE).optional(),
-}).omit({
+export const updateCategorySchema = createUpdateSchema(
+  transaction_category_table,
+  {
+    id: z.uuid(),
+    type: z.enum(CATEGORY_TYPE).optional(),
+  },
+).omit({
   createdAt: true,
   updatedAt: true,
 });

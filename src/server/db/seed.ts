@@ -15,17 +15,17 @@ import { categoriesIds, categoriesMap } from "./data/categories";
 
 async function main() {
   /* eslint-disable */
-  const { category_table, rule_table, token_table, ...rest } = schema;
+  const { transaction_category_table, ...rest } = schema;
   /* eslint-enable */
 
   await reset(db, rest);
   // eslint-disable-next-line drizzle/enforce-delete-with-where
-  await db.delete(category_table).execute();
+  await db.delete(transaction_category_table).execute();
 
   // Insert categories into the database
-  await db.insert(category_table).values(categoriesMap[0]!);
-  await db.insert(category_table).values(categoriesMap[1]!);
-  await db.insert(category_table).values(categoriesMap[2]!);
+  await db.insert(transaction_category_table).values(categoriesMap[0]!);
+  await db.insert(transaction_category_table).values(categoriesMap[1]!);
+  await db.insert(transaction_category_table).values(categoriesMap[2]!);
 
   await seed(db, rest).refine((f) => ({
     institution_table: {

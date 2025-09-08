@@ -1,16 +1,9 @@
-import { checkHealth } from "~/server/services/health-service";
-
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
-import {
-  createCallerFactory,
-  createTRPCRouter,
-  publicProcedure,
-} from "../init";
+import { createCallerFactory, createTRPCRouter } from "../init";
 import { assetRouter } from "./asset";
 import { bankAccountRouter } from "./bank-account";
 import { bankConnectionRouter } from "./bank-connection";
 import { budgetRouter } from "./budget";
-import { categoryRouter } from "./category";
 import { institutionRouter } from "./institution";
 import { metricsRouter } from "./metrics";
 import { organizationRouter } from "./organization";
@@ -36,19 +29,10 @@ export const appRouter = createTRPCRouter({
   bankAccount: bankAccountRouter,
   tag: tagRouter,
   preferences: preferencesRouter,
-  category: categoryRouter,
   budget: budgetRouter,
   transaction: transactionRouter,
   transactionCategory: transactionCategoryRouter,
   transactionTag: transactionTagRouter,
-  health: publicProcedure.query(async () => {
-    try {
-      await checkHealth();
-      return { status: "ok" };
-    } catch (error) {
-      return { status: "error", error };
-    }
-  }),
 });
 
 // export type definition of API

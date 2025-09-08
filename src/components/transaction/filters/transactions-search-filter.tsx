@@ -166,7 +166,7 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
 
   // We want to fetch the categories data on mount
   const { data: categoriesData } = useQuery({
-    ...trpc.category.get.queryOptions({}),
+    ...trpc.transactionCategory.get.queryOptions(),
   });
 
   return {

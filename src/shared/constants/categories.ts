@@ -1,7 +1,13 @@
-import type { DB_CategoryInsertType } from "~/server/db/schema/categories";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import type {
+  DB_TransactionCategoryInsertType,
+  DB_TransactionCategoryType,
+} from "~/server/db/schema/transactions";
+
+type TransactionCategory = RouterOutput["transactionCategory"]["get"][number];
 
 export const DEFAULT_CATEGORIES: Omit<
-  DB_CategoryInsertType,
+  DB_TransactionCategoryInsertType,
   "organizationId"
 >[] = [
   // Income categories
@@ -146,3 +152,15 @@ export const DEFAULT_CATEGORIES: Omit<
     description: "Trasferimenti interni.",
   },
 ] as const;
+
+export const ROOT_CATEGORY: TransactionCategory = {
+  id: "root",
+  slug: "root",
+  name: "Root",
+  color: null,
+  icon: null,
+  description: null,
+  parentId: null,
+  excludeFromAnalytics: null,
+  type: "transfer",
+};

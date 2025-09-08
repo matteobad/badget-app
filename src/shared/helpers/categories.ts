@@ -1,4 +1,4 @@
-import type { DB_CategoryType } from "~/server/db/schema/categories";
+import type { DB_TransactionCategoryType } from "~/server/db/schema/transactions";
 
 export const colors = [
   "#FF6900", // Orange
@@ -111,7 +111,7 @@ export function getCategoryColors(hex = "#606060") {
 }
 
 export type Category = Omit<
-  DB_CategoryType,
+  DB_TransactionCategoryType,
   "createdAt" | "updatedAt" | "deletedAt" | "organizationId"
 >;
 

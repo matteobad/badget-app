@@ -1,10 +1,10 @@
 import { schemaTask } from "@trigger.dev/sdk";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
-import { category_table } from "~/server/db/schema/categories";
 import {
   attachment_table,
   tag_table,
+  transaction_category_table,
   transaction_table,
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
@@ -56,9 +56,9 @@ export const processExportTask = schemaTask({
           "attachments",
         ),
         category: {
-          id: category_table.id,
-          name: category_table.name,
-          description: category_table.description,
+          id: transaction_category_table.id,
+          name: transaction_category_table.name,
+          description: transaction_category_table.description,
         },
         bank_account: {
           id: account_table.id,
@@ -72,8 +72,8 @@ export const processExportTask = schemaTask({
       })
       .from(transaction_table)
       .leftJoin(
-        category_table,
-        eq(transaction_table.categoryId, category_table.id),
+        transaction_category_table,
+        eq(transaction_table.categoryId, transaction_category_table.id),
       )
       .leftJoin(
         account_table,
@@ -100,8 +100,8 @@ export const processExportTask = schemaTask({
         transaction_table.counterpartyName,
         transaction_table.name,
         transaction_table.description,
-        category_table.id,
-        category_table.name,
+        transaction_category_table.id,
+        transaction_category_table.name,
         account_table.id,
         account_table.name,
       );

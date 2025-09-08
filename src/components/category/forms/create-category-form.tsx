@@ -11,13 +11,13 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { useCategoryParams } from "~/hooks/use-category-params";
+import { useTransactionCategoryParams } from "~/hooks/use-transaction-category-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
-import { createCategorySchema } from "~/shared/validators/category.schema";
+import { createTransactionCategorySchema } from "~/shared/validators/transaction-category.schema";
 import { useForm } from "react-hook-form";
-import { type z } from "zod/v4";
+import { type z } from "zod";
 
 import { CategoryTypeSelect } from "./category-type-select";
 import { ColorIconPicker } from "./color-icon-picker";
@@ -26,16 +26,18 @@ export default function CreateCategoryForm({
   className,
 }: React.ComponentProps<"form">) {
   const tScoped = useScopedI18n("category");
-  const { params, setParams } = useCategoryParams();
+  const { params, setParams } = useTransactionCategoryParams();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data: categories } = useQuery(trpc.category.get.queryOptions({}));
+  const { data: categories } = useQuery(
+    trpc.transactionCategory.get.queryOptions({}),
+  );
 
   const createMutation = useMutation(
-    trpc.category.create.mutationOptions({
-      onSuccess: (_data) => {
+    trpc.transactionCategory.create.mutationOptions({
+      onSuccess: () => {
         void queryClient.invalidateQueries({
           queryKey: trpc.transactionCategory.get.queryKey(),
         });
@@ -48,8 +50,8 @@ export default function CreateCategoryForm({
     }),
   );
 
-  const form = useForm<z.infer<typeof createCategorySchema>>({
-    resolver: standardSchemaResolver(createCategorySchema),
+  const form = useForm<z.infer<typeof createTransactionCategorySchema>>({
+    resolver: standardSchemaResolver(createTransactionCategorySchema),
     defaultValues: {
       type: "expense",
       name: "",
@@ -57,7 +59,9 @@ export default function CreateCategoryForm({
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof createCategorySchema>) => {
+  const handleSubmit = (
+    data: z.infer<typeof createTransactionCategorySchema>,
+  ) => {
     const formattedData = {
       ...data,
     };
@@ -123,25 +127,7 @@ export default function CreateCategoryForm({
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck="false"
-                      onChange={(event) => {
-                        // TODO: validate unique slug
-                        field.onChange(event);
-                        form.setValue(
-                          "slug",
-                          event.target.value.replaceAll(" ", "_").toLowerCase(),
-                        );
-                      }}
-                      onBlur={(event) => {
-                        const slug = event.target.value
-                          .replaceAll(" ", "_")
-                          .toLowerCase();
-                        const alreadyExists = categories?.some(
-                          (c) => c.slug === slug,
-                        );
-                        if (alreadyExists)
-                          form.setError("name", { message: "Already exists" });
-                        else form.clearErrors("name");
-                      }}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />

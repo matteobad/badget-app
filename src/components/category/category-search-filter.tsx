@@ -1,17 +1,17 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
+import { useTransactionCategoryFilterParams } from "~/hooks/use-transaction-category-filter-params";
 import { SearchIcon } from "lucide-react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { Input } from "../ui/input";
 
 export function CategorySearchFilter() {
-  const { filter, setFilter } = useCategoryFilterParams();
+  const { filters, setFilters } = useTransactionCategoryFilterParams();
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const [prompt, setPrompt] = useState(filter.q ?? "");
+  const [prompt, setPrompt] = useState(filters.q ?? "");
 
   useHotkeys(
     "esc",
@@ -39,7 +39,7 @@ export function CategorySearchFilter() {
   };
 
   const handleSubmit = async () => {
-    void setFilter({ q: prompt.length > 0 ? prompt : null });
+    void setFilters({ q: prompt.length > 0 ? prompt : null });
   };
 
   return (

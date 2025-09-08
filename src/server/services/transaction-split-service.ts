@@ -7,8 +7,8 @@ import type z from "zod/v4";
 import { and, desc, eq } from "drizzle-orm";
 
 import type { DBClient } from "../db";
-import { category_table } from "../db/schema/categories";
 import {
+  transaction_category_table,
   transaction_split_table,
   transaction_table,
 } from "../db/schema/transactions";
@@ -22,11 +22,11 @@ export async function getTransactionSplits(
     .select({
       id: transaction_split_table.id,
       category: {
-        id: category_table.id,
-        slug: category_table.slug,
-        name: category_table.name,
-        color: category_table.color,
-        icon: category_table.icon,
+        id: transaction_category_table.id,
+        slug: transaction_category_table.slug,
+        name: transaction_category_table.name,
+        color: transaction_category_table.color,
+        icon: transaction_category_table.icon,
       },
       amount: transaction_split_table.amount,
       note: transaction_split_table.note,
@@ -37,8 +37,8 @@ export async function getTransactionSplits(
       eq(transaction_table.id, transaction_split_table.transactionId),
     )
     .leftJoin(
-      category_table,
-      eq(category_table.id, transaction_split_table.categoryId),
+      transaction_category_table,
+      eq(transaction_category_table.id, transaction_split_table.categoryId),
     )
     .where(
       and(

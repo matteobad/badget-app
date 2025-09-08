@@ -15,8 +15,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table";
-import { useCategoryFilterParams } from "~/hooks/use-category-filter-params";
-import { useCategoryParams } from "~/hooks/use-category-params";
+import { useTransactionCategoryFilterParams } from "~/hooks/use-transaction-category-filter-params";
+import { useTransactionCategoryParams } from "~/hooks/use-transaction-category-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
@@ -30,8 +30,8 @@ export function DataTable(props: { type: CategoryType }) {
   //   { id: "name", desc: true },
   // ]); // can set initial sorting state here
 
-  const { setParams } = useCategoryParams();
-  const { filter, hasFilters } = useCategoryFilterParams();
+  const { setParams } = useTransactionCategoryParams();
+  const { filters, hasFilters } = useTransactionCategoryFilterParams();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -41,7 +41,7 @@ export function DataTable(props: { type: CategoryType }) {
   );
 
   const deleteCategoryMutation = useMutation(
-    trpc.category.delete.mutationOptions({
+    trpc.transactionCategory.delete.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries({
           queryKey: trpc.transactionCategory.get.queryKey({}),
@@ -85,8 +85,8 @@ export function DataTable(props: { type: CategoryType }) {
   });
 
   useEffect(() => {
-    table?.getColumn("name")?.setFilterValue(filter.q);
-  }, [filter.q, table]);
+    table?.getColumn("name")?.setFilterValue(filters.q);
+  }, [filters.q, table]);
 
   if (!data.length && !hasFilters) {
     return (

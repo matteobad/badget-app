@@ -47,7 +47,7 @@ import { SimilarTransactionsUpdateToast } from "./similar-transactions-update-to
 import { TransactionBankAccount } from "./transaction-bank-account";
 import { TransactionShortcuts } from "./transaction-shortcuts";
 
-type Category = RouterOutput["transactionCategory"]["getAll"][number];
+type Category = RouterOutput["transactionCategory"]["get"][number];
 
 export function TransactionDetails() {
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
@@ -118,7 +118,7 @@ export function TransactionDetails() {
           (old) => {
             if (variables.categorySlug) {
               const categories = queryClient.getQueryData(
-                trpc.category.get.queryKey(),
+                trpc.transactionCategory.get.queryKey(),
               );
               const category = categories?.find(
                 (c) => c.slug === variables.categorySlug,
@@ -157,7 +157,9 @@ export function TransactionDetails() {
                         ...variables,
                         ...(variables.categorySlug && {
                           category: queryClient
-                            .getQueryData(trpc.category.get.queryKey())
+                            .getQueryData(
+                              trpc.transactionCategory.get.queryKey(),
+                            )
                             ?.find((c) => c.slug === variables.categorySlug),
                         }),
                       }

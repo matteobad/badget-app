@@ -7,12 +7,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { useCategoryParams } from "~/hooks/use-category-params";
+import { useTransactionCategoryParams } from "~/hooks/use-transaction-category-params";
 
 import { CategoryDetails } from "../category-details";
 
 export default function CategorySheet() {
-  const { params, setParams } = useCategoryParams();
+  const { params, setParams } = useTransactionCategoryParams();
 
   const isOpen = !!params.categoryId && !params.createCategory;
 

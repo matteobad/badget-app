@@ -25,7 +25,7 @@ export function CategorySelect({
   const trpc = useTRPC();
 
   const { data: categories, isLoading } = useQuery(
-    trpc.category.get.queryOptions({}),
+    trpc.transactionCategory.get.queryOptions(),
   );
 
   return (

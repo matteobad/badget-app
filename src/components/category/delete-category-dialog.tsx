@@ -21,14 +21,11 @@ export function DeleteCategoryDialog({ categoryId }: { categoryId: string }) {
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation(
-    trpc.category.delete.mutationOptions({
+    trpc.transactionCategory.delete.mutationOptions({
       onSuccess: () => {
         setOpen(false);
         void queryClient.invalidateQueries({
-          queryKey: trpc.category.get.queryKey(),
-        });
-        void queryClient.invalidateQueries({
-          queryKey: trpc.category.getWithBudgets.queryKey(),
+          queryKey: trpc.transactionCategory.get.queryKey(),
         });
       },
     }),

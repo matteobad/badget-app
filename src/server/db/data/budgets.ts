@@ -11,7 +11,7 @@ import {
 
 import { BUDGET_RECURRENCE } from "../../../shared/constants/enum";
 import { pgTable } from "../schema/_table";
-import { category_table } from "../schema/categories";
+import { transaction_category_table } from "../schema/transactions";
 import { timestamps, timezoneRange } from "../utils";
 
 export const recurrenceEnum = pgEnum("recurrence", BUDGET_RECURRENCE);
@@ -21,7 +21,7 @@ export const budget_table = pgTable("budget_table", (d) => ({
 
   categoryId: d
     .uuid()
-    .references(() => category_table.id, {
+    .references(() => transaction_category_table.id, {
       onDelete: "cascade",
     })
     .notNull(),

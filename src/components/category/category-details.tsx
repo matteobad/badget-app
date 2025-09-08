@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCategoryParams } from "~/hooks/use-category-params";
+import { useTransactionCategoryParams } from "~/hooks/use-transaction-category-params";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { Area, AreaChart } from "recharts";
 
@@ -44,25 +44,27 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function CategoryDetails() {
-  const { params } = useCategoryParams();
+  const { params } = useTransactionCategoryParams();
   const categoryId = params.categoryId!;
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   const { data: category, isLoading } = useQuery({
-    ...trpc.category.getById.queryOptions({ id: categoryId }),
+    ...trpc.transactionCategory.getById.queryOptions({ id: categoryId }),
     enabled: !!categoryId,
   });
 
   const updateCategoryMutation = useMutation({
-    ...trpc.category.update.mutationOptions({
+    ...trpc.transactionCategory.update.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries({
-          queryKey: trpc.transactionCategory.get.queryKey({}),
+          queryKey: trpc.transactionCategory.get.queryKey(),
         });
         void queryClient.invalidateQueries({
-          queryKey: trpc.category.getById.queryKey({ id: categoryId }),
+          queryKey: trpc.transactionCategory.getById.queryKey({
+            id: categoryId,
+          }),
         });
       },
     }),
@@ -163,14 +165,10 @@ export function CategoryDetails() {
                   spellCheck="false"
                   onBlur={(event) => {
                     const name = event.target.value;
-                    const slug = event.target.value
-                      .replaceAll(" ", "_")
-                      .toLowerCase();
 
                     updateCategoryMutation.mutate({
                       id: category.id,
                       name,
-                      slug,
                     });
                   }}
                 />

@@ -3,7 +3,7 @@
 import type { DBClient } from "~/server/db";
 import type { CategoryType } from "~/shared/constants/enum";
 import { db } from "~/server/db";
-import { category_table } from "~/server/db/schema/categories";
+import { transaction_category_table } from "~/server/db/schema/transactions";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
@@ -17,30 +17,33 @@ export async function getCategoriesQuery(params: getCategoriesQueryRequest) {
   const { orgId, type, limit = 1000 } = params;
 
   const where = [
-    eq(category_table.organizationId, orgId),
-    isNull(category_table.deletedAt),
+    eq(transaction_category_table.organizationId, orgId),
+    isNull(transaction_category_table.deletedAt),
   ];
 
   if (type) {
-    where.push(eq(category_table.type, type));
+    where.push(eq(transaction_category_table.type, type));
   }
 
   // First get all categories
   const categories = await db
     .select({
-      id: category_table.id,
-      name: category_table.name,
-      slug: category_table.slug,
-      type: category_table.type,
-      color: category_table.color,
-      icon: category_table.icon,
-      description: category_table.description,
-      parentId: category_table.parentId,
-      excludeFromAnalytics: category_table.excludeFromAnalytics,
+      id: transaction_category_table.id,
+      name: transaction_category_table.name,
+      slug: transaction_category_table.slug,
+      type: transaction_category_table.type,
+      color: transaction_category_table.color,
+      icon: transaction_category_table.icon,
+      description: transaction_category_table.description,
+      parentId: transaction_category_table.parentId,
+      excludeFromAnalytics: transaction_category_table.excludeFromAnalytics,
     })
-    .from(category_table)
+    .from(transaction_category_table)
     .where(and(...where))
-    .orderBy(desc(category_table.createdAt), asc(category_table.name))
+    .orderBy(
+      desc(transaction_category_table.createdAt),
+      asc(transaction_category_table.name),
+    )
     .limit(limit);
 
   return categories;
@@ -52,26 +55,26 @@ export async function getCategoryByIdQuery(params: {
 }) {
   const result = await db
     .select({
-      id: category_table.id,
-      name: category_table.name,
-      slug: category_table.slug,
-      type: category_table.type,
-      color: category_table.color,
-      icon: category_table.icon,
-      description: category_table.description,
-      parentId: category_table.parentId,
-      excludeFromAnalytics: category_table.excludeFromAnalytics,
+      id: transaction_category_table.id,
+      name: transaction_category_table.name,
+      slug: transaction_category_table.slug,
+      type: transaction_category_table.type,
+      color: transaction_category_table.color,
+      icon: transaction_category_table.icon,
+      description: transaction_category_table.description,
+      parentId: transaction_category_table.parentId,
+      excludeFromAnalytics: transaction_category_table.excludeFromAnalytics,
       // budgets: sql<
       //   Array<{ id: string; amount: number }>
       // >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${budget_table.id}, 'amount', ${budget_table.amount})) FILTER (WHERE ${budget_table.id} IS NOT NULL), '[]'::json)`.as(
       //   "budgets",
       // ),
     })
-    .from(category_table)
+    .from(transaction_category_table)
     .where(
       and(
-        eq(category_table.id, params.id),
-        eq(category_table.organizationId, params.orgId),
+        eq(transaction_category_table.id, params.id),
+        eq(transaction_category_table.organizationId, params.orgId),
       ),
     );
 
@@ -86,25 +89,28 @@ export async function getCategoriesForEnrichment(
   db: DBClient,
   params: GetCategoriesForEnrichmentParams,
 ) {
-  const parent = alias(category_table, "parent");
+  const parent = alias(transaction_category_table, "parent");
 
   const categories = await db
     .select({
-      slug: category_table.slug,
-      name: category_table.name,
-      description: category_table.description,
-      type: category_table.type,
+      slug: transaction_category_table.slug,
+      name: transaction_category_table.name,
+      description: transaction_category_table.description,
+      type: transaction_category_table.type,
       parentSlug: parent.slug,
     })
-    .from(category_table)
-    .leftJoin(parent, eq(category_table.parentId, parent.id))
+    .from(transaction_category_table)
+    .leftJoin(parent, eq(transaction_category_table.parentId, parent.id))
     .where(
       and(
-        eq(category_table.organizationId, params.organizationId),
-        isNull(category_table.deletedAt),
+        eq(transaction_category_table.organizationId, params.organizationId),
+        isNull(transaction_category_table.deletedAt),
       ),
     )
-    .orderBy(desc(category_table.createdAt), asc(category_table.name));
+    .orderBy(
+      desc(transaction_category_table.createdAt),
+      asc(transaction_category_table.name),
+    );
 
   return categories;
 }

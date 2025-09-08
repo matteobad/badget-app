@@ -8,11 +8,11 @@ import type { SQL } from "drizzle-orm";
 import type z from "zod/v4";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
-import { category_table } from "~/server/db/schema/categories";
 import { connection_table } from "~/server/db/schema/open-banking";
 import {
   attachment_table,
   tag_table,
+  transaction_category_table,
   transaction_embeddings_table,
   transaction_split_table,
   transaction_table,
@@ -92,9 +92,11 @@ export async function getTransactionsQuery(
     const categoryConditions: (SQL | undefined)[] = [];
     for (const categorySlug of filterCategories) {
       if (categorySlug === "uncategorized") {
-        categoryConditions.push(isNull(category_table.slug));
+        categoryConditions.push(isNull(transaction_category_table.slug));
       } else {
-        categoryConditions.push(eq(category_table.slug, categorySlug));
+        categoryConditions.push(
+          eq(transaction_category_table.slug, categorySlug),
+        );
       }
     }
     const definedCategoryConditions = categoryConditions.filter(
@@ -207,12 +209,12 @@ export async function getTransactionsQuery(
         "attachments",
       ),
       category: {
-        id: category_table.id,
-        slug: category_table.slug,
-        name: category_table.name,
-        color: category_table.color,
-        icon: category_table.icon,
-        excludeFromAnalytics: category_table.excludeFromAnalytics,
+        id: transaction_category_table.id,
+        slug: transaction_category_table.slug,
+        name: transaction_category_table.name,
+        color: transaction_category_table.color,
+        icon: transaction_category_table.icon,
+        excludeFromAnalytics: transaction_category_table.excludeFromAnalytics,
       },
       account: {
         id: account_table.id,
@@ -238,10 +240,10 @@ export async function getTransactionsQuery(
     })
     .from(transaction_table)
     .leftJoin(
-      category_table,
+      transaction_category_table,
       and(
-        eq(transaction_table.categoryId, category_table.id),
-        eq(category_table.organizationId, orgId),
+        eq(transaction_table.categoryId, transaction_category_table.id),
+        eq(transaction_category_table.organizationId, orgId),
       ),
     )
     .leftJoin(
@@ -291,10 +293,10 @@ export async function getTransactionsQuery(
       transaction_table.name,
       transaction_table.description,
       transaction_table.createdAt,
-      category_table.id,
-      category_table.name,
-      category_table.color,
-      category_table.slug,
+      transaction_category_table.id,
+      transaction_category_table.name,
+      transaction_category_table.color,
+      transaction_category_table.slug,
       account_table.id,
       account_table.name,
       account_table.currency,
@@ -323,7 +325,7 @@ export async function getTransactionsQuery(
       );
     } else if (column === "category") {
       query = query.orderBy(
-        order(category_table.name),
+        order(transaction_category_table.name),
         order(transaction_table.id),
       );
     } else if (column === "tags") {
@@ -426,12 +428,12 @@ export async function getTransactionByIdQuery(id: string, orgId: string) {
         "attachments",
       ),
       category: {
-        id: category_table.id,
-        slug: category_table.slug,
-        name: category_table.name,
-        color: category_table.color,
-        icon: category_table.icon,
-        excludeFromAnalytics: category_table.excludeFromAnalytics,
+        id: transaction_category_table.id,
+        slug: transaction_category_table.slug,
+        name: transaction_category_table.name,
+        color: transaction_category_table.color,
+        icon: transaction_category_table.icon,
+        excludeFromAnalytics: transaction_category_table.excludeFromAnalytics,
       },
       account: {
         id: account_table.id,
@@ -447,10 +449,10 @@ export async function getTransactionByIdQuery(id: string, orgId: string) {
     })
     .from(transaction_table)
     .leftJoin(
-      category_table,
+      transaction_category_table,
       and(
-        eq(transaction_table.categoryId, category_table.id),
-        eq(category_table.organizationId, orgId),
+        eq(transaction_table.categoryId, transaction_category_table.id),
+        eq(transaction_category_table.organizationId, orgId),
       ),
     )
     .leftJoin(
@@ -500,10 +502,10 @@ export async function getTransactionByIdQuery(id: string, orgId: string) {
       transaction_table.frequency,
       transaction_table.description,
       transaction_table.createdAt,
-      category_table.id,
-      category_table.name,
-      category_table.color,
-      category_table.slug,
+      transaction_category_table.id,
+      transaction_category_table.name,
+      transaction_category_table.color,
+      transaction_category_table.slug,
       account_table.id,
       account_table.name,
       account_table.currency,

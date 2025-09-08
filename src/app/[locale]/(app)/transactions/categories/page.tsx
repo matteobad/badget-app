@@ -3,11 +3,13 @@ import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 import { CategoryActions } from "~/components/category/category-actions";
 import { CategorySearchFilter } from "~/components/category/category-search-filter";
-import { DataList } from "~/components/category/data-list";
+// import CategorySheet from "~/components/category/sheets/category-sheet";
+// import CreateCategoryDialog from "~/components/category/sheets/create-category-dialog";
 import { DataTableSkeleton } from "~/components/category/table/data-table-skeleton";
 import { ErrorFallback } from "~/components/error-fallback";
+import { TransactionCategoryTree } from "~/components/transaction-category/transaction-category-tree";
 import { HydrateClient, prefetch, trpc } from "~/shared/helpers/trpc/server";
-import { categoryFilterParamsSchema } from "~/shared/validators/category.schema";
+import { transactionCategoryFilterParamsSchema } from "~/shared/validators/transaction-category.schema";
 import { createLoader } from "nuqs/server";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -22,10 +24,14 @@ type CategoriesPageProps = {
 export default async function CategoriesPage(props: CategoriesPageProps) {
   // Load search parameters
   const searchParams = await props.searchParams;
-  const loadCategoryFilterParams = createLoader(categoryFilterParamsSchema);
-  const categoryFilters = loadCategoryFilterParams(searchParams);
+  const loadParams = createLoader(transactionCategoryFilterParamsSchema);
+  const transactionCategoryFilters = loadParams(searchParams);
 
-  prefetch(trpc.category.get.queryOptions({ ...categoryFilters }));
+  prefetch(
+    trpc.transactionCategory.get.queryOptions({
+      ...transactionCategoryFilters,
+    }),
+  );
 
   return (
     <div className="flex max-w-screen-lg flex-col gap-4 p-6">
@@ -35,17 +41,16 @@ export default async function CategoriesPage(props: CategoriesPageProps) {
         <span className="flex-1"></span>
         <CategoryActions />
       </header>
-
       <HydrateClient>
         <ErrorBoundary fallback={<ErrorFallback />}>
           <Suspense fallback={<DataTableSkeleton />}>
-            <DataList />
+            <TransactionCategoryTree />
           </Suspense>
         </ErrorBoundary>
       </HydrateClient>
-
-      {/* <CreateCategoryDrawerSheet categories={categories} />
-      <UpdateCategoryDrawerSheet categories={categories} /> */}
+      {/* Transaction Category sheets */}
+      {/* <CreateCategoryDialog />
+      <CategorySheet />{" "} */}
     </div>
   );
 }

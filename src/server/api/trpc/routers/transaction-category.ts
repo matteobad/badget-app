@@ -1,28 +1,48 @@
-import { getTransactionCategoriesQuery } from "~/server/domain/transaction-category/queries";
-import { getCategories } from "~/server/services/category-service";
-import { getCategoriesSchema } from "~/shared/validators/category.schema";
+import {
+  createTransactionCategory,
+  deleteTransactionCategory,
+  getTransactionCategories,
+  getTransactionCategory,
+  updateTransactionCategory,
+} from "~/server/services/transaction-category";
+import {
+  createTransactionCategorySchema,
+  deleteTransactionCategorySchema,
+  getTransactionCategoriesSchema,
+  getTransactionCategorySchema,
+  updateTransactionCategorySchema,
+} from "~/shared/validators/transaction-category.schema";
 
 import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const transactionCategoryRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(getCategoriesSchema)
+    .input(getTransactionCategoriesSchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
-      const data = await getTransactionCategoriesQuery(db, {
-        orgId: orgId!,
-        limit: input?.limit,
-      });
-
-      return data;
+      return await getTransactionCategories(db, input, orgId!);
     }),
 
-  getAll: protectedProcedure
-    .input(getCategoriesSchema)
-    .query(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-      return await getCategories(
-        { type: input.type, limit: input?.limit },
-        orgId,
-      );
+  getById: protectedProcedure
+    .input(getTransactionCategorySchema)
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      return await getTransactionCategory(db, input, orgId!);
+    }),
+
+  create: protectedProcedure
+    .input(createTransactionCategorySchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await createTransactionCategory(db, input, orgId!);
+    }),
+
+  update: protectedProcedure
+    .input(updateTransactionCategorySchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await updateTransactionCategory(db, input, orgId!);
+    }),
+
+  delete: protectedProcedure
+    .input(deleteTransactionCategorySchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await deleteTransactionCategory(db, input, orgId!);
     }),
 });

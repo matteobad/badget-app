@@ -3,7 +3,7 @@ import { type dynamicIconImports } from "lucide-react/dynamic";
 import Papa from "papaparse";
 
 import type { CategoryType } from "../../../shared/constants/enum";
-import { type DB_CategoryInsertType } from "../schema/categories";
+import type { DB_TransactionCategoryInsertType } from "../schema/transactions";
 
 // Expected Type
 type CSV_CategoryType = {
@@ -25,7 +25,7 @@ const mapParsedRow = (row: CSV_CategoryType) => {
 
   return {
     ...rest,
-  } satisfies DB_CategoryInsertType;
+  } satisfies DB_TransactionCategoryInsertType;
 };
 
 const file = fs.readFileSync("./src/server/db/data/categories.csv", "utf8");
@@ -38,7 +38,7 @@ const parsed = Papa.parse<CSV_CategoryType>(file, {
 });
 
 const categoriesIds: string[] = [];
-const categoriesMap: Record<number, DB_CategoryInsertType[]> = {
+const categoriesMap: Record<number, DB_TransactionCategoryInsertType[]> = {
   0: [],
   1: [],
   2: [],

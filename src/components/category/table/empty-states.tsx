@@ -32,17 +32,17 @@ export function NoCategories() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const createDefaultCategoriesMutation = useMutation(
-    trpc.category.createDefaults.mutationOptions({
-      onSuccess: () => {
-        void queryClient.invalidateQueries({
-          queryKey: trpc.category.get.queryKey(),
-        });
+  // const createDefaultCategoriesMutation = useMutation(
+  //   trpc.transactionCategory.createDefaults.mutationOptions({
+  //     onSuccess: () => {
+  //       void queryClient.invalidateQueries({
+  //         queryKey: trpc.transactionCategory.get.queryKey(),
+  //       });
 
-        toast.success("Default categories created");
-      },
-    }),
-  );
+  //       toast.success("Default categories created");
+  //     },
+  //   }),
+  // );
 
   return (
     <div className="absolute top-0 left-0 z-20 flex h-[calc(100vh-300px)] w-full items-center justify-center">
@@ -59,7 +59,7 @@ export function NoCategories() {
           <Button
             className="rounded-none"
             onClick={() => {
-              createDefaultCategoriesMutation.mutate();
+              // createDefaultCategoriesMutation.mutate();
             }}
           >
             Use defauls (reccomended)

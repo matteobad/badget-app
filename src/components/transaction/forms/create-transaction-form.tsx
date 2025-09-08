@@ -72,15 +72,16 @@ export default function CreateTransactionForm() {
     }),
   );
 
-  const categorizeTransactionMutation = useMutation(
-    trpc.transaction.categorize.mutationOptions({
-      onError: console.error,
-      onSuccess: (data) => {
-        if (form.getFieldState("categoryId").isDirty) return;
-        form.setValue("categoryId", data ?? undefined);
-      },
-    }),
-  );
+  // TODO: rewrite this logic with gemini
+  // const categorizeTransactionMutation = useMutation(
+  //   trpc.transaction.categorize.mutationOptions({
+  //     onError: console.error,
+  //     onSuccess: (data) => {
+  //       if (form.getFieldState("categoryId").isDirty) return;
+  //       form.setValue("categoryId", data ?? undefined);
+  //     },
+  //   }),
+  // );
 
   const createTransactionMutation = useMutation(
     trpc.transaction.createManualTransaction.mutationOptions({
@@ -179,9 +180,9 @@ export default function CreateTransactionForm() {
                   className="bg-background"
                   onBlur={(event) => {
                     if (event.target.value.length < 3) return;
-                    categorizeTransactionMutation.mutate({
-                      name: event.target.value,
-                    });
+                    // categorizeTransactionMutation.mutate({
+                    //   name: event.target.value,
+                    // });
                   }}
                 />
               </FormControl>

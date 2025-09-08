@@ -41,7 +41,7 @@ import { SimilarTransactionsUpdateToast } from "../similar-transactions-update-t
 import { TransactionInfoTooltips } from "../transaction-info-tooltips";
 
 type Transaction = RouterOutput["transaction"]["get"]["data"][number];
-type Category = RouterOutput["transactionCategory"]["getAll"][number];
+type Category = RouterOutput["transactionCategory"]["get"][number];
 type TransactionSplit =
   RouterOutput["transaction"]["get"]["data"][number]["splits"][number];
 
