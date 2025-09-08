@@ -6,14 +6,12 @@ import type {
   updateCategorySchema,
 } from "~/shared/validators/category.schema";
 import type z from "zod/v4";
-import { DEFAULT_CATEGORIES } from "~/shared/constants/categories";
 
 import { db } from "../db";
 import { getMaterializedBudgetsQuery } from "../domain/budget/queries";
 import { buildCategoryAccrual } from "../domain/category/helpers";
 import {
   createCategoryMutation,
-  createManyCategoryMutation,
   deleteCategoryMutation,
   updateCategoryMutation,
 } from "../domain/category/mutations";
@@ -65,14 +63,6 @@ export async function createCategory(
     organizationId,
   });
   return result;
-}
-
-export async function createDefaultCategories(orgId: string) {
-  const results = await createManyCategoryMutation(
-    db,
-    DEFAULT_CATEGORIES.map((c) => ({ ...c, organizationId: orgId })),
-  );
-  return results;
 }
 
 export async function updateCategory(

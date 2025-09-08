@@ -5,7 +5,6 @@ import { sql } from "drizzle-orm";
 import { index, pgEnum, unique } from "drizzle-orm/pg-core";
 
 import {
-  CATEGORY_TYPE,
   TRANSACTION_FREQUENCY,
   TRANSACTION_METHOD,
   TRANSACTION_SOURCE,
@@ -34,11 +33,6 @@ export const transactionFrequencyEnum = pgEnum(
 export const transactionSourceEnum = pgEnum(
   "transaction_source",
   TRANSACTION_SOURCE,
-);
-
-export const transactionCategoryTypeEnum = pgEnum(
-  "transaction_category_type",
-  CATEGORY_TYPE,
 );
 
 export const transaction_table = pgTable(
@@ -154,11 +148,9 @@ export const transaction_split_table = pgTable(
       .uuid()
       .references(() => transaction_table.id, { onDelete: "cascade" })
       .notNull(),
-    categoryId: d
-      .uuid()
-      .references(() => transaction_category_table.id, {
-        onDelete: "set null",
-      }),
+    categoryId: d.uuid().references(() => transaction_category_table.id, {
+      onDelete: "set null",
+    }),
 
     amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
     note: d.text(),
@@ -234,17 +226,42 @@ export const transaction_category_table = pgTable(
         onDelete: "set null",
       }),
 
-    type: transactionCategoryTypeEnum().notNull(),
     name: d.varchar({ length: 64 }).notNull(),
     slug: d.varchar({ length: 64 }).notNull(),
     color: d.varchar({ length: 32 }),
     icon: d.varchar({ length: 32 }),
     description: d.text(),
     excludeFromAnalytics: d.boolean().default(false),
+    system: d.boolean().default(false),
 
     ...timestamps,
   }),
   (t) => [unique("unique_organization_slug").on(t.slug, t.organizationId)],
+);
+
+export const transaction_category_embeddings_table = pgTable(
+  "transaction_category_embeddings_table",
+  (d) => ({
+    id: d.uuid().defaultRandom().primaryKey().notNull(),
+
+    name: d.text().primaryKey().notNull(), // Unique by name - same embedding for all teams
+    embedding: d.vector({ dimensions: 768 }),
+    model: d.text().notNull().default("gemini-embedding-001"),
+    system: d.boolean().default(false).notNull(), // Whether this comes from system categories
+
+    ...timestamps,
+  }),
+  (t) => [
+    // Vector similarity index for fast cosine similarity search
+    index("transaction_category_embeddings_vector_idx")
+      .using("hnsw", t.embedding.asc().nullsLast().op("vector_cosine_ops"))
+      .with({ m: "16", ef_construction: "64" }),
+    // System categories index for filtering
+    index("transaction_category_embeddings_system_idx").using(
+      "btree",
+      t.system.asc().nullsLast(),
+    ),
+  ],
 );
 
 // TODO: attachment are a completly different feature

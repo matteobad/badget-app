@@ -1,10 +1,7 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
-import { useTRPC } from "~/shared/helpers/trpc/client";
 import { ReceiptIcon, ShapesIcon } from "lucide-react";
-import { toast } from "sonner";
 
 import { CreateCategoryButton } from "../create-category-button";
 
@@ -29,8 +26,8 @@ export function NoResults() {
 }
 
 export function NoCategories() {
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
+  // const trpc = useTRPC();
+  // const queryClient = useQueryClient();
 
   // const createDefaultCategoriesMutation = useMutation(
   //   trpc.transactionCategory.createDefaults.mutationOptions({

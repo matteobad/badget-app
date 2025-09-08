@@ -23,7 +23,6 @@ export const getTransactionCategoriesQuery = async (
       slug: transaction_category_table.slug,
       description: transaction_category_table.description,
       parentId: transaction_category_table.parentId,
-      type: transaction_category_table.type,
       excludeFromAnalytics: transaction_category_table.excludeFromAnalytics,
     })
     .from(transaction_category_table)
@@ -53,7 +52,6 @@ export async function getTransactionCategoryQuery(
       id: transaction_category_table.id,
       name: transaction_category_table.name,
       slug: transaction_category_table.slug,
-      type: transaction_category_table.type,
       color: transaction_category_table.color,
       icon: transaction_category_table.icon,
       description: transaction_category_table.description,

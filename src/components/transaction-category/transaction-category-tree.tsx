@@ -1,3 +1,5 @@
+"use client";
+
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { dynamicIconImports } from "lucide-react/dynamic";
 import React, { useCallback, useMemo } from "react";
@@ -10,12 +12,11 @@ import {
   syncDataLoaderFeature,
 } from "@headless-tree/core";
 import { useTree } from "@headless-tree/react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Tree, TreeItem, TreeItemLabel } from "~/components/ui/tree";
 import { useTransactionCategoryFilterParams } from "~/hooks/use-transaction-category-filter-params";
 import { useTransactionCategoryParams } from "~/hooks/use-transaction-category-params";
-import { ROOT_CATEGORY } from "~/shared/constants/categories";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { DynamicIcon } from "lucide-react/dynamic";
 
@@ -27,21 +28,12 @@ export function TransactionCategoryTree() {
   const { filters } = useTransactionCategoryFilterParams();
   const { setParams } = useTransactionCategoryParams();
 
-  const queryClient = useQueryClient();
   const trpc = useTRPC();
 
-  const { data } = useQuery(
-    trpc.transactionCategory.get.queryOptions(filters, {
-      initialData: [ROOT_CATEGORY],
-    }),
-  );
+  const { data } = useQuery(trpc.transactionCategory.get.queryOptions(filters));
 
   const transactionCategories = useMemo(() => {
-    const items = data ?? [];
-    return [
-      ROOT_CATEGORY,
-      ...items.map((item) => ({ ...item, parentId: item.parentId ?? "root" })),
-    ];
+    return data ?? [];
   }, [data]);
 
   const getTransactionCategory = useCallback(

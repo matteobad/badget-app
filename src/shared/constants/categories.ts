@@ -1,166 +1,180 @@
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import type {
-  DB_TransactionCategoryInsertType,
-  DB_TransactionCategoryType,
-} from "~/server/db/schema/transactions";
+import type { CategoryHierarchy } from "../types/category-types";
+import { getCategoryColor } from "../helpers/categories";
 
-type TransactionCategory = RouterOutput["transactionCategory"]["get"][number];
-
-export const DEFAULT_CATEGORIES: Omit<
-  DB_TransactionCategoryInsertType,
-  "organizationId"
->[] = [
-  // Income categories
+// Raw category definitions without colors
+const RAW_CATEGORIES = [
+  // 1. INCOME
   {
-    slug: "stipendio",
-    name: "Stipendio",
-    type: "income",
-    color: "oklch(52.7% 0.154 150.069)",
-    icon: "badge-dollar-sign",
-    description: "Reddito da lavoro dipendente.",
-  },
-  {
-    slug: "bonus-premi",
-    name: "Bonus / Premi",
-    type: "income",
-    color: "oklch(50.8% 0.118 165.612)",
-    icon: "star",
-    description: "Bonus, premi o incentivi.",
-  },
-  {
-    slug: "altro-reddito",
-    name: "Altro reddito",
-    type: "income",
-    color: "oklch(51.1% 0.096 186.391)",
-    icon: "plus-circle",
-    description: "Altre fonti di reddito.",
+    slug: "income",
+    name: "Entrate",
+    children: [
+      { slug: "salary", name: "Stipendio" },
+      { slug: "bonus", name: "Bonus & Premi" },
+      { slug: "freelance", name: "Freelance" },
+      { slug: "refunds", name: "Rimborsi" },
+      { slug: "other-income", name: "Altre Entrate" },
+    ],
   },
 
-  // Expense categories
+  // 2. HOUSING
   {
-    slug: "casa",
+    slug: "housing",
     name: "Casa",
-    type: "expense",
-    color: "oklch(50.5% 0.213 27.518)",
-    icon: "home",
-    description: "Spese generali per la casa.",
-  },
-  {
-    slug: "affitto-mutuo",
-    name: "Affitto / Mutuo",
-    type: "expense",
-    color: "oklch(55.3% 0.195 38.402)",
-    icon: "building-2",
-    description: "Pagamento affitto o mutuo.",
-  },
-  {
-    slug: "utenze",
-    name: "Utenze (Luce, Gas, Internet)",
-    type: "expense",
-    color: "oklch(55.5% 0.163 48.998)",
-    icon: "plug",
-    description: "Bolletta luce, gas, internet, ecc.",
-  },
-  {
-    slug: "trasporti",
-    name: "Trasporti",
-    type: "expense",
-    color: "oklch(55.4% 0.135 66.442)",
-    icon: "car",
-    description: "Spese per spostamenti e trasporti.",
-  },
-  {
-    slug: "spesa-cibo",
-    name: "Spesa e cibo",
-    type: "expense",
-    color: "oklch(52.5% 0.223 3.958)",
-    icon: "shopping-cart",
-    description: "Spese alimentari e cibo.",
-  },
-  {
-    slug: "ristoranti-bar",
-    name: "Ristoranti & Bar",
-    type: "expense",
-    color: "oklch(51.4% 0.222 16.935)",
-    icon: "utensils",
-    description: "Pranzi, cene, bar e locali.",
-  },
-  {
-    slug: "famiglia-persone",
-    name: "Famiglia & Persone",
-    type: "expense",
-    color: "oklch(52% 0.105 223.128)",
-    icon: "users",
-    description: "Spese per famiglia e persone care.",
-  },
-  {
-    slug: "salute",
-    name: "Salute",
-    type: "expense",
-    color: "oklch(50% 0.134 242.749)",
-    icon: "heart-pulse",
-    description: "Spese mediche e salute.",
-  },
-  {
-    slug: "tempo-libero",
-    name: "Tempo libero",
-    type: "expense",
-    color: "oklch(51.8% 0.253 323.949)",
-    icon: "gamepad-2",
-    description: "Hobby, sport, attività ricreative.",
-  },
-  {
-    slug: "viaggi",
-    name: "Viaggi",
-    type: "expense",
-    color: "oklch(53.2% 0.157 131.589)",
-    icon: "plane",
-    description: "Vacanze e viaggi.",
-  },
-  {
-    slug: "abbonamenti",
-    name: "Abbonamenti (Netflix, Spotify, ecc.)",
-    type: "expense",
-    color: "oklch(37.2% 0.044 257.287)",
-    icon: "credit-card",
-    description: "Abbonamenti e servizi ricorrenti.",
+    children: [
+      { slug: "rent-mortgage", name: "Affitto / Mutuo" },
+      { slug: "utilities", name: "Utenze" },
+      { slug: "maintenance", name: "Manutenzione" },
+    ],
   },
 
-  // Transfer categories
+  // 3. FOOD & DRINK
   {
-    slug: "risparmi",
-    name: "Risparmi",
-    type: "transfer",
-    color: "oklch(48.8% 0.243 264.376)",
-    icon: "piggy-bank",
-    description: "Trasferimenti verso risparmi.",
+    slug: "food-drink",
+    name: "Cibo e Bevande",
+    children: [
+      { slug: "groceries", name: "Spesa" },
+      { slug: "restaurants", name: "Ristoranti & Bar" },
+      { slug: "coffee", name: "Caffè & Snack" },
+    ],
   },
+
+  // 4. TRANSPORTATION
   {
-    slug: "investimenti",
-    name: "Investimenti",
-    type: "transfer",
-    color: "oklch(49.6% 0.265 301.924)",
-    icon: "chart-candlestick",
-    description: "Trasferimenti verso investimenti.",
+    slug: "transport",
+    name: "Trasporti",
+    children: [
+      { slug: "fuel", name: "Carburante" },
+      { slug: "public-transport", name: "Trasporto Pubblico" },
+      { slug: "car-maintenance", name: "Manutenzione Auto" },
+    ],
   },
+
+  // 5. HEALTH
   {
-    slug: "transfers",
-    name: "Giroconti",
-    type: "transfer",
-    color: "oklch(37.4% 0.01 67.558)",
-    icon: "chart-candlestick",
-    description: "Trasferimenti interni.",
+    slug: "health",
+    name: "Salute",
+    children: [
+      { slug: "doctor", name: "Visite Mediche" },
+      { slug: "pharmacy", name: "Farmacia" },
+      { slug: "insurance", name: "Assicurazione Sanitaria" },
+    ],
+  },
+
+  // 6. LEISURE
+  {
+    slug: "leisure",
+    name: "Tempo Libero",
+    children: [
+      { slug: "entertainment", name: "Intrattenimento" },
+      { slug: "subscriptions", name: "Abbonamenti" },
+      { slug: "travel", name: "Viaggi" },
+    ],
+  },
+
+  // 7. OTHER
+  {
+    slug: "other",
+    name: "Varie",
+    children: [
+      { slug: "gifts", name: "Regali" },
+      { slug: "donations", name: "Donazioni" },
+      { slug: "misc", name: "Altro" },
+    ],
+  },
+
+  // 8. SYSTEM
+  {
+    slug: "system",
+    name: "Sistema",
+    children: [
+      { slug: "uncategorized", name: "Uncategorized" },
+      { slug: "transfer", name: "Transfer" },
+    ],
   },
 ] as const;
 
-export const ROOT_CATEGORY: TransactionCategory = {
-  id: "root",
-  slug: "root",
-  name: "Root",
-  color: null,
-  icon: null,
-  description: null,
-  parentId: null,
-  excludeFromAnalytics: null,
-  type: "transfer",
-};
+// Predefined colors for parent categories (for consistency)
+export const PARENT_CATEGORY_COLORS = {
+  income: "#00D084", // Green
+  expense: "#EB144C", // Red
+  "saving-investment": "#9900EF", // Purple
+  system: "#6B7280", // Gray
+} as const;
+
+// Comprehensive color mapping for all categories
+export const CATEGORY_COLOR_MAP = {
+  // Parent
+  income: "#00D084",
+  expenses: "#FF6900",
+  transfers: "#0074D9",
+  system: "#6B7280",
+
+  // 1. INCOME
+  salary: "#22c55e",
+  bonus: "#4ade80",
+  freelance: "#86efac",
+  refunds: "#bbf7d0",
+  "other-income": "#dcfce7",
+
+  // 2. HOUSING
+  housing: "#2563eb", // blu
+  "rent-mortgage": "#3b82f6",
+  utilities: "#60a5fa",
+  maintenance: "#93c5fd",
+
+  // 3. FOOD & DRINK
+  "food-drink": "#f59e0b", // arancione
+  groceries: "#fbbf24",
+  restaurants: "#fcd34d",
+  coffee: "#fde68a",
+
+  // 4. TRANSPORTATION
+  transport: "#7c3aed", // viola
+  fuel: "#8b5cf6",
+  "public-transport": "#a78bfa",
+  "car-maintenance": "#c4b5fd",
+
+  // 5. HEALTH
+  health: "#dc2626", // rosso
+  doctor: "#ef4444",
+  pharmacy: "#f87171",
+  insurance: "#fca5a5",
+
+  // 6. LEISURE
+  leisure: "#db2777", // rosa
+  entertainment: "#ec4899",
+  subscriptions: "#f472b6",
+  travel: "#f9a8d4",
+
+  // 7. OTHER
+  other: "#6b7280", // grigio neutro
+  gifts: "#9ca3af",
+  donations: "#d1d5db",
+  misc: "#e5e7eb",
+
+  // 8. SYSTEM
+  uncategorized: "#475569",
+  transfer: "#334155",
+} as const;
+
+// Function to automatically apply colors and parentSlug to all categories
+function applyColorsToCategories(
+  rawCategories: typeof RAW_CATEGORIES,
+): CategoryHierarchy {
+  return rawCategories.map((parent) => ({
+    ...parent,
+    color: getCategoryColor(parent.slug),
+    system: true,
+    excluded: false, // Default to not excluded
+    children: parent.children.map((child) => ({
+      ...child,
+      parentSlug: parent.slug, // Automatically add parentSlug
+      color: getCategoryColor(child.slug),
+      system: true,
+      excluded: false, // Default to not excluded
+    })),
+  }));
+}
+
+export const CATEGORIES: CategoryHierarchy =
+  applyColorsToCategories(RAW_CATEGORIES);

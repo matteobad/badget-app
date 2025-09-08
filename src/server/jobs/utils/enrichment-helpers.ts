@@ -41,7 +41,7 @@ export function generateEnrichmentPrompt(
     .map((cat) => {
       const parent = cat.parentSlug ? `(child of ${cat.parentSlug})` : "";
       const desc = cat.description ? ` — ${cat.description}` : "";
-      return `• ${cat.slug} → ${cat.name} [type: ${cat.type}] ${parent}${desc}`;
+      return `• ${cat.slug} → ${cat.name} ${parent}${desc}`;
     })
     .join("\n");
 

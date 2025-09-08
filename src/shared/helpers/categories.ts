@@ -1,5 +1,8 @@
 import type { DB_TransactionCategoryType } from "~/server/db/schema/transactions";
 
+import { CATEGORY_COLOR_MAP } from "../constants/categories";
+import { CATEGORY_COLORS } from "../constants/colors";
+
 export const colors = [
   "#FF6900", // Orange
   "#FCB900", // Yellow
@@ -74,17 +77,6 @@ export const colors = [
   "#696969", // Dim Gray
 ];
 
-export function customHash(value: string) {
-  let hash = 0;
-
-  for (let i = 0; i < value.length; i++) {
-    hash = (hash << 5) + value.charCodeAt(i);
-    hash = hash & hash;
-  }
-
-  return Math.abs(hash);
-}
-
 export function getColor(value: string, arrayLength: number) {
   const hashValue = customHash(value);
   const index = hashValue % arrayLength;
@@ -139,13 +131,13 @@ export function buildCategoryRecord(categories: Category[]) {
     id: "root",
     parentId: null,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    type: "root" as any, // oppure un enum custom
     name: "Root",
     slug: "root",
     color: null,
     icon: null,
     description: null,
     excludeFromAnalytics: false,
+    system: false,
     children: categories.filter((c) => !c.parentId).map((c) => c.id),
   };
 
@@ -164,4 +156,38 @@ export function buildCategoryRecord(categories: Category[]) {
   // };
 
   return record;
+}
+
+// Hash function for consistent color generation
+export function customHash(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash << 5) + value.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+// Get color index from a string value
+export function getColorIndex(value: string): number {
+  const hashValue = customHash(value);
+  return hashValue % CATEGORY_COLORS.length;
+}
+
+// Get color from a string value (slug)
+export function getColorFromSlug(slug: string): string {
+  const index = getColorIndex(slug);
+  // Ensure index is within bounds and CATEGORY_COLORS[index] is defined
+  return CATEGORY_COLORS[index] ?? CATEGORY_COLORS[0];
+}
+
+// Get color for a category (uses predefined mapping)
+export function getCategoryColor(slug: string): string {
+  const color = CATEGORY_COLOR_MAP[slug as keyof typeof CATEGORY_COLOR_MAP];
+  if (color) {
+    return color;
+  }
+
+  // Fallback to hash-based generation for any unmapped categories
+  return getColorFromSlug(slug);
 }

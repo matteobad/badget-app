@@ -1,8 +1,4 @@
-import type {
-  BudgetRecurrenceType,
-  CategoryType,
-} from "~/shared/constants/enum";
-import { CATEGORY_TYPE } from "~/shared/constants/enum";
+import type { BudgetRecurrenceType } from "~/shared/constants/enum";
 import { differenceInCalendarDays, max, min } from "date-fns";
 
 export type BudgetInstance = {
@@ -20,7 +16,6 @@ export type Category = {
   name: string;
   color: string | null;
   icon: string | null;
-  type: CategoryType;
 };
 
 export type Period = {
@@ -110,8 +105,7 @@ export function buildCategoryAccrual(
 
   // Find totalIncome: max of accrualAmount or childrenAccrualAmount for root income categories
   const incomeRoots = nodes.filter(
-    (n) =>
-      n.category.parentId === null && n.category.type === CATEGORY_TYPE.INCOME,
+    (n) => n.category.parentId === null, // FIXME: implement filtering logic
   );
   const totalIncome = Math.max(
     0,
@@ -140,9 +134,7 @@ export function buildCategoryAccrual(
   });
 
   const roots = tree.filter(
-    (n) =>
-      n.category.parentId === "root" &&
-      n.category.type !== CATEGORY_TYPE.INCOME,
+    (n) => n.category.parentId === "root", // FIXME: implement filtering logic
   );
   const notAllocated =
     totalIncome -
@@ -154,18 +146,6 @@ export function buildCategoryAccrual(
 
   // TODO: add root category for tree view render and remaining
 
-  // Sort order for category types
-  const CATEGORY_SORT_ORDER = [
-    CATEGORY_TYPE.INCOME,
-    CATEGORY_TYPE.EXPENSE,
-    CATEGORY_TYPE.TRANSFER,
-  ];
-
-  function getCategorySortIndex(type: CategoryType) {
-    const idx = CATEGORY_SORT_ORDER.indexOf(type);
-    return idx === -1 ? CATEGORY_SORT_ORDER.length : idx;
-  }
-
   // Sort the tree before returning
   const sortedTree = [
     ...tree,
@@ -176,7 +156,6 @@ export function buildCategoryAccrual(
         parentId: null,
         color: null,
         icon: null,
-        type: CATEGORY_TYPE.TRANSFER,
       },
       budgetInstances: [],
       accrualAmount: notAllocated,
@@ -184,11 +163,7 @@ export function buildCategoryAccrual(
       incomePercentage:
         totalIncome > 0 ? (notAllocated / totalIncome) * 100 : 0,
     },
-  ].sort(
-    (a, b) =>
-      getCategorySortIndex(a.category.type) -
-      getCategorySortIndex(b.category.type),
-  );
+  ];
 
   return sortedTree;
 }

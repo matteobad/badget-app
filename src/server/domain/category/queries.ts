@@ -1,7 +1,6 @@
 "server-only";
 
 import type { DBClient } from "~/server/db";
-import type { CategoryType } from "~/shared/constants/enum";
 import { db } from "~/server/db";
 import { transaction_category_table } from "~/server/db/schema/transactions";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
@@ -9,21 +8,16 @@ import { alias } from "drizzle-orm/pg-core";
 
 type getCategoriesQueryRequest = {
   orgId: string;
-  type?: CategoryType;
   limit?: number;
 };
 
 export async function getCategoriesQuery(params: getCategoriesQueryRequest) {
-  const { orgId, type, limit = 1000 } = params;
+  const { orgId, limit = 1000 } = params;
 
   const where = [
     eq(transaction_category_table.organizationId, orgId),
     isNull(transaction_category_table.deletedAt),
   ];
-
-  if (type) {
-    where.push(eq(transaction_category_table.type, type));
-  }
 
   // First get all categories
   const categories = await db
@@ -31,7 +25,6 @@ export async function getCategoriesQuery(params: getCategoriesQueryRequest) {
       id: transaction_category_table.id,
       name: transaction_category_table.name,
       slug: transaction_category_table.slug,
-      type: transaction_category_table.type,
       color: transaction_category_table.color,
       icon: transaction_category_table.icon,
       description: transaction_category_table.description,
@@ -58,7 +51,6 @@ export async function getCategoryByIdQuery(params: {
       id: transaction_category_table.id,
       name: transaction_category_table.name,
       slug: transaction_category_table.slug,
-      type: transaction_category_table.type,
       color: transaction_category_table.color,
       icon: transaction_category_table.icon,
       description: transaction_category_table.description,
@@ -96,7 +88,6 @@ export async function getCategoriesForEnrichment(
       slug: transaction_category_table.slug,
       name: transaction_category_table.name,
       description: transaction_category_table.description,
-      type: transaction_category_table.type,
       parentSlug: parent.slug,
     })
     .from(transaction_category_table)

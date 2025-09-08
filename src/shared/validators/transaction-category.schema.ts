@@ -1,7 +1,5 @@
 import { z } from "@hono/zod-openapi"; // Extended Zod instance
-import { parseAsBoolean, parseAsString } from "nuqs";
-
-import { CATEGORY_TYPE } from "../constants/enum";
+import { parseAsBoolean, parseAsString } from "nuqs/server";
 
 export const getTransactionCategoriesSchema = z
   .object({
@@ -40,10 +38,6 @@ export const createTransactionCategorySchema = z
     description: z.string().optional().openapi({
       description: "A description of the transaction category",
       example: "Expenses for food and household supplies",
-    }),
-    type: z.enum(CATEGORY_TYPE).openapi({
-      description: "The type of the transaction category",
-      example: "expense",
     }),
     parentId: z.uuid().optional().openapi({
       description: "The UUID of the parent category, if this is a subcategory",

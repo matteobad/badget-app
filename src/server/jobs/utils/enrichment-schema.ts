@@ -1,4 +1,3 @@
-import type { CategoryType } from "~/shared/constants/enum";
 import { z } from "zod/v4";
 
 // Structured output schema for LLM response (for use with output: "array")
@@ -29,7 +28,6 @@ export type CategoryData = {
   slug: string;
   name: string;
   description: string | null;
-  type: CategoryType;
   parentSlug: string | null;
 };
 

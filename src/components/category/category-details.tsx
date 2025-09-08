@@ -78,22 +78,6 @@ export function CategoryDetails() {
     <div className="scrollbar-hide h-[calc(100vh-80px)] overflow-auto pb-12">
       <div className="mb-8 flex justify-between">
         <div className="flex flex-1 flex-col gap-8">
-          {isLoading ? (
-            <div className="mt-1 mb-6 flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Skeleton className="h-5 w-5 rounded-full" />
-                <Skeleton className="h-[14px] w-[100px] rounded-full" />
-              </div>
-              <Skeleton className="h-[14px] w-[10%] rounded-full" />
-            </div>
-          ) : (
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-[#606060] uppercase select-text">
-                {category?.type && category.type}
-              </span>
-            </div>
-          )}
-
           <div className="flex items-center justify-between">
             <div className="flex w-full flex-col space-y-1">
               {isLoading ? (

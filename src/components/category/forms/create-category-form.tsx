@@ -19,7 +19,6 @@ import { createTransactionCategorySchema } from "~/shared/validators/transaction
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 
-import { CategoryTypeSelect } from "./category-type-select";
 import { ColorIconPicker } from "./color-icon-picker";
 
 export default function CreateCategoryForm({
@@ -53,7 +52,6 @@ export default function CreateCategoryForm({
   const form = useForm<z.infer<typeof createTransactionCategorySchema>>({
     resolver: standardSchemaResolver(createTransactionCategorySchema),
     defaultValues: {
-      type: "expense",
       name: "",
       parentId: params.categoryId ?? undefined,
     },
@@ -83,23 +81,6 @@ export default function CreateCategoryForm({
         </pre> */}
 
         <div className="grid gap-4">
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem className="grid w-full gap-3">
-                <FormLabel>{tScoped("labels.classification")}</FormLabel>
-                <FormControl>
-                  <CategoryTypeSelect
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    placeholder={tScoped("placeholders.type")}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <div className="flex w-full items-end gap-2">
             <FormField
               control={form.control}
@@ -144,12 +125,7 @@ export default function CreateCategoryForm({
                 <CategorySelect
                   {...field}
                   placeholder={tScoped("placeholders.parent")}
-                  onValueChange={(value) => {
-                    const parent = categories?.find((c) => c.id === value);
-                    if (!parent) return console.error("Invalid parent");
-                    field.onChange(value);
-                    form.setValue("type", parent.type);
-                  }}
+                  onValueChange={field.onChange}
                 />
                 <FormMessage />
               </FormItem>

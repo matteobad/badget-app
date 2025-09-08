@@ -14,9 +14,7 @@ import {
 import { categoriesIds, categoriesMap } from "./data/categories";
 
 async function main() {
-  /* eslint-disable */
   const { transaction_category_table, ...rest } = schema;
-  /* eslint-enable */
 
   await reset(db, rest);
   // eslint-disable-next-line drizzle/enforce-delete-with-where

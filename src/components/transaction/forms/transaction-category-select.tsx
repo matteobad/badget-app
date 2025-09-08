@@ -5,7 +5,6 @@ import { CategoryTree } from "~/components/category/trees/category-tree";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
-import { CATEGORY_TYPE } from "~/shared/constants/enum";
 import { buildCategoryRecord } from "~/shared/helpers/categories";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";

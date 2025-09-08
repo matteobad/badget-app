@@ -3,9 +3,9 @@ import type {
   deleteTransactionCategorySchema,
   getTransactionCategoriesSchema,
   getTransactionCategorySchema,
+  updateTransactionCategorySchema,
 } from "~/shared/validators/transaction-category.schema";
 import type z from "zod";
-import { updateTransactionCategorySchema } from "~/shared/validators/transaction-category.schema";
 
 import type { DBClient } from "../db";
 import {

@@ -2,13 +2,11 @@ import fs from "node:fs";
 import { type dynamicIconImports } from "lucide-react/dynamic";
 import Papa from "papaparse";
 
-import type { CategoryType } from "../../../shared/constants/enum";
 import type { DB_TransactionCategoryInsertType } from "../schema/transactions";
 
 // Expected Type
 type CSV_CategoryType = {
   id: string;
-  type: CategoryType;
   name: string;
   slug: string;
   color: string;
