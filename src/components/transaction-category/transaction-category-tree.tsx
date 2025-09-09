@@ -20,7 +20,9 @@ import { useTransactionCategoryParams } from "~/hooks/use-transaction-category-p
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { DynamicIcon } from "lucide-react/dynamic";
 
-const indent = 20;
+import { CategoryBadge } from "../category/category-badge";
+
+const indent = 28;
 
 type TransactionCategory = RouterOutput["transactionCategory"]["get"][number];
 
@@ -33,7 +35,17 @@ export function TransactionCategoryTree() {
   const { data } = useQuery(trpc.transactionCategory.get.queryOptions(filters));
 
   const transactionCategories = useMemo(() => {
-    return data ?? [];
+    return (
+      data?.map((category) => {
+        const parentCategory = data.find((c) => c.id === category.parentId);
+
+        return {
+          ...category,
+          id: category.slug,
+          parentId: parentCategory?.slug ?? null,
+        };
+      }) ?? []
+    );
   }, [data]);
 
   const getTransactionCategory = useCallback(
@@ -79,16 +91,12 @@ export function TransactionCategoryTree() {
   return (
     <div className="flex h-full flex-col gap-2 *:first:grow">
       <div>
-        <Tree
-          className="relative before:absolute before:inset-0 before:-ms-1 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]"
-          indent={indent}
-          tree={tree}
-        >
+        <Tree className="relative" indent={indent} tree={tree}>
           {tree.getItems().map((item) => {
             return (
               <div
                 key={item.getId()}
-                className="flex items-center gap-1.5 not-last:pb-0.5 data-[visible=false]:hidden"
+                className="flex items-center gap-3 border-x border-t pl-3 not-last:pb-0 last:border-b data-[visible=false]:hidden"
               >
                 <Checkbox
                   checked={
@@ -106,21 +114,11 @@ export function TransactionCategoryTree() {
                 />
                 <TreeItem
                   item={item}
-                  className="flex-1 not-last:pb-0 data-[visible=false]:hidden"
+                  className="flex-1 border-l not-last:pb-0 data-[visible=false]:hidden"
                 >
-                  <TreeItemLabel className="relative not-in-data-[folder=true]:ps-2 before:absolute before:inset-x-0 before:-inset-y-0.5 before:-z-10 before:bg-background">
+                  <TreeItemLabel className="relative gap-2 not-in-data-[folder=true]:ps-2">
                     <span className="flex items-center gap-2">
-                      <DynamicIcon
-                        name={
-                          item.getItemData()
-                            .icon as keyof typeof dynamicIconImports
-                        }
-                        size={16}
-                        aria-hidden="true"
-                      />
-                      <span className="line-clamp-1 text-left">
-                        {item.getItemName()}
-                      </span>
+                      <CategoryBadge category={item.getItemData()} />
                     </span>
                   </TreeItemLabel>
                 </TreeItem>

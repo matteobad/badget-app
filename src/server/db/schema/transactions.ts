@@ -242,8 +242,6 @@ export const transaction_category_table = pgTable(
 export const transaction_category_embeddings_table = pgTable(
   "transaction_category_embeddings_table",
   (d) => ({
-    id: d.uuid().defaultRandom().primaryKey().notNull(),
-
     name: d.text().primaryKey().notNull(), // Unique by name - same embedding for all teams
     embedding: d.vector({ dimensions: 768 }),
     model: d.text().notNull().default("gemini-embedding-001"),

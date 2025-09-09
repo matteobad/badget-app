@@ -6,9 +6,12 @@ import type {
   updateTransactionCategorySchema,
 } from "~/shared/validators/transaction-category.schema";
 import type z from "zod";
+import { eq } from "drizzle-orm";
 
 import type { DBClient } from "../db";
+import { transaction_category_table } from "../db/schema/transactions";
 import {
+  createDefaultCategoriesForSpace,
   createTransactionCategoryMutation,
   deleteTransactionCategoryMutation,
   updateTransactionCategoryMutation,
@@ -115,5 +118,18 @@ export async function deleteTransactionCategory(
   return await deleteTransactionCategoryMutation(client, {
     ...input,
     organizationId,
+  });
+}
+
+export async function resetDefaultTransactionCategories(
+  client: DBClient,
+  organizationId: string,
+) {
+  return await client.transaction(async (tx) => {
+    await tx
+      .delete(transaction_category_table)
+      .where(eq(transaction_category_table.organizationId, organizationId));
+
+    await createDefaultCategoriesForSpace(tx, { organizationId });
   });
 }

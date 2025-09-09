@@ -167,7 +167,7 @@ export function CategoryTree({
             return (
               <div
                 key={item.getId()}
-                className="flex items-center gap-1.5 not-last:pb-0.5 data-[visible=false]:hidden"
+                className="flex items-center gap-1.5 not-last:pb-0 data-[visible=false]:hidden"
                 data-visible={isVisible || !searchValue}
               >
                 {checkboxes && (

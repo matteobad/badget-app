@@ -1,7 +1,6 @@
 import type { DB_TransactionCategoryType } from "~/server/db/schema/transactions";
 
-import { CATEGORY_COLOR_MAP } from "../constants/categories";
-import { CATEGORY_COLORS } from "../constants/colors";
+import { CATEGORY_COLOR_MAP, CATEGORY_COLORS } from "../constants/colors";
 
 export const colors = [
   "#FF6900", // Orange

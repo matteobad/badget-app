@@ -5,19 +5,14 @@ export interface BaseCategory {
   name: string;
   color?: string;
   system: boolean;
-  taxReportingCode?: string;
   excluded?: boolean;
 }
 
-// Parent category interface
-export interface ParentCategory extends BaseCategory {
-  children: ChildCategory[];
+// Category with children - supports unlimited nesting levels
+export interface CategoryWithChildren extends BaseCategory {
+  children: CategoryWithChildren[];
+  parentSlug?: string; // Reference to parent category slug (for readability)
 }
 
-// Child category interface
-export interface ChildCategory extends BaseCategory {
-  parentSlug: string; // Reference to parent category slug (for readability)
-}
-
-// Category hierarchy type
-export type CategoryHierarchy = ParentCategory[];
+// Category hierarchy type - now supports unlimited levels
+export type CategoryHierarchy = CategoryWithChildren[];

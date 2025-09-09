@@ -4,6 +4,7 @@
 
 import * as React from "react";
 import { cn } from "~/lib/utils";
+import { ChevronDownIcon } from "lucide-react";
 import { Slot } from "radix-ui";
 
 import type { ItemInstance } from "@headless-tree/core";
@@ -158,9 +159,9 @@ function TreeItemLabel<T = any>({
       )}
       {...props}
     >
-      {/* {item.isFolder() && (
+      {item.isFolder() && (
         <ChevronDownIcon className="size-4 text-muted-foreground in-aria-[expanded=false]:-rotate-90" />
-      )} */}
+      )}
       {children ||
         (typeof item.getItemName === "function" ? item.getItemName() : null)}
     </span>

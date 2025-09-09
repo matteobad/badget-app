@@ -3,6 +3,7 @@ import {
   deleteTransactionCategory,
   getTransactionCategories,
   getTransactionCategory,
+  resetDefaultTransactionCategories,
   updateTransactionCategory,
 } from "~/server/services/transaction-category";
 import {
@@ -45,4 +46,8 @@ export const transactionCategoryRouter = createTRPCRouter({
     .mutation(async ({ ctx: { db, orgId }, input }) => {
       return await deleteTransactionCategory(db, input, orgId!);
     }),
+
+  reset: protectedProcedure.mutation(async ({ ctx: { db, orgId } }) => {
+    return await resetDefaultTransactionCategories(db, orgId!);
+  }),
 });
