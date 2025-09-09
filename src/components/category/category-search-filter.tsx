@@ -50,11 +50,11 @@ export function CategorySearchFilter() {
         void handleSubmit();
       }}
     >
-      <SearchIcon className="pointer-events-none absolute top-[11px] left-3 size-4" />
+      <SearchIcon className="pointer-events-none absolute top-[11px] left-3 size-4 text-muted-foreground" />
 
       <Input
         placeholder="Search categories..."
-        className="w-full rounded-none pr-8 pl-9 sm:w-[250px]"
+        className="w-full rounded-none pr-8 pl-9 text-sm font-normal sm:w-[250px]"
         value={prompt}
         onChange={handleSearch}
         autoComplete="off"

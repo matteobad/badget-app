@@ -16,7 +16,6 @@ const RAW_CATEGORIES = [
           { slug: "salary", name: "Stipendio" },
           { slug: "bonus", name: "Bonus & Premi" },
           { slug: "freelance", name: "Freelance" },
-          { slug: "refunds", name: "Rimborsi" },
           { slug: "other-income", name: "Altre Entrate" },
         ],
       },
@@ -88,14 +87,8 @@ const RAW_CATEGORIES = [
       },
 
       // 8. SYSTEM
-      {
-        slug: "system",
-        name: "Sistema",
-        children: [
-          { slug: "uncategorized", name: "Uncategorized", system: true },
-          { slug: "transfer", name: "Transfer", system: true, excluded: true },
-        ],
-      },
+      { slug: "uncategorized", name: "Uncategorized", system: true },
+      { slug: "transfer", name: "Transfer", system: true, excluded: true },
     ],
   },
 ] as const;

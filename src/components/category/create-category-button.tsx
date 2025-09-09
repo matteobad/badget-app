@@ -15,7 +15,7 @@ export function CreateCategoryButton(props: CreateCategoryButtonProps) {
       className="rounded-none"
     >
       <PlusIcon className="size-4" />
-      New category
+      Create
     </Button>
   );
 }

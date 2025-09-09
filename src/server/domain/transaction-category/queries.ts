@@ -23,6 +23,7 @@ export const getTransactionCategoriesQuery = async (
       slug: transaction_category_table.slug,
       description: transaction_category_table.description,
       parentId: transaction_category_table.parentId,
+      system: transaction_category_table.system,
       excludeFromAnalytics: transaction_category_table.excludeFromAnalytics,
     })
     .from(transaction_category_table)
