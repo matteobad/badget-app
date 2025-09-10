@@ -17,7 +17,6 @@ import { useTransactionCategoryParams } from "~/hooks/use-transaction-category-p
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { MoreHorizontal } from "lucide-react";
 
-import { CategoryBadge } from "../category/category-badge";
 import { Badge } from "../ui/badge";
 import {
   DropdownMenu,
@@ -26,6 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { CategoryBadge } from "./category-badge";
 
 const indent = 28;
 

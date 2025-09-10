@@ -77,6 +77,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
         value={inputValue}
         onValueChange={setInputValue}
         placeholder={searchPlaceholder ?? "Search item..."}
+        className="px-3"
       />
 
       <CommandGroup>

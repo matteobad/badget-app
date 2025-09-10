@@ -30,10 +30,6 @@ export default function CreateCategoryForm({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data: categories } = useQuery(
-    trpc.transactionCategory.get.queryOptions({}),
-  );
-
   const createMutation = useMutation(
     trpc.transactionCategory.create.mutationOptions({
       onSuccess: () => {

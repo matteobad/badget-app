@@ -4,10 +4,10 @@ import type z from "zod/v4";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CategoryBadge } from "~/components/category/category-badge";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { FormatAmount } from "~/components/format-amount";
 import { SubmitButton } from "~/components/submit-button";
+import { CategoryBadge } from "~/components/transaction-category/category-badge";
 import { Button } from "~/components/ui/button";
 import { DialogFooter } from "~/components/ui/dialog";
 import {

@@ -2,7 +2,7 @@
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import Link from "next/link";
-import { CategoryBadge } from "~/components/category/category-badge";
+import { CategoryBadge } from "~/components/transaction-category/category-badge";
 import { formatISO } from "date-fns";
 
 import { SpendingCategoryItem } from "./spending-category-item";

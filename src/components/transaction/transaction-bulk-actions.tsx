@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { SelectCategoryHeadless } from "../transaction-category/select-category-headless";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -23,7 +24,6 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { TransactionCategorySelect } from "./forms/transaction-category-select";
 
 type Props = {
   ids: string[];
@@ -105,13 +105,12 @@ export function BulkActions({ ids }: Props) {
           </TooltipContent>
         </Tooltip>
         <DropdownMenuContent
-          className="max-h-[300px] w-[250px] overflow-y-auto py-1"
+          className="max-h-[270px] w-[250px] overflow-y-auto p-0"
           sideOffset={8}
         >
-          <TransactionCategorySelect
-            selectedItems={[]}
-            onSelect={(category) => {
-              setCategoryOpen(false);
+          <SelectCategoryHeadless
+            selected={undefined}
+            onChange={(category) => {
               handleUpdateTransactionsCategory(category?.id);
             }}
           />

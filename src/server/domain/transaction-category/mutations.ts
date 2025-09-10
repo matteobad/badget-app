@@ -22,11 +22,13 @@ export async function createTransactionCategoryMutation(
   client: DBClient,
   params: CreateTransactionCategoryParams,
 ) {
-  return await client
+  const [result] = await client
     .insert(transaction_category_table)
     .values({ ...params })
     .onConflictDoNothing()
     .returning();
+
+  return result;
 }
 
 type UpdateTransactionCategoryParams = {

@@ -23,7 +23,7 @@ import { useScopedI18n } from "~/shared/locales/client";
 import { MoreHorizontalIcon } from "lucide-react";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { CategoryBadge } from "../category-badge";
+import { CategoryBadge } from "../../transaction-category/category-badge";
 
 export type Category = RouterOutput["transactionCategory"]["get"][number];
 

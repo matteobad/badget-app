@@ -2,11 +2,12 @@
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { TransactionFrequencyType } from "~/shared/constants/enum";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CategoryBadge } from "~/components/category/category-badge";
 import { FormatAmount } from "~/components/format-amount";
 import { Spinner } from "~/components/load-more";
+import { CategoryBadge } from "~/components/transaction-category/category-badge";
+import { SelectCategory } from "~/components/transaction-category/select-category";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -36,12 +37,10 @@ import {
 import { toast } from "sonner";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { TransactionCategorySelect } from "../forms/transaction-category-select";
 import { SimilarTransactionsUpdateToast } from "../similar-transactions-update-toast";
 import { TransactionInfoTooltips } from "../transaction-info-tooltips";
 
 type Transaction = RouterOutput["transaction"]["get"]["data"][number];
-type Category = RouterOutput["transactionCategory"]["get"][number];
 type TransactionSplit =
   RouterOutput["transaction"]["get"]["data"][number]["splits"][number];
 
@@ -191,24 +190,11 @@ AmountCell.displayName = "AmountCell";
 const CategoryCell = memo(
   ({
     transaction,
-    category,
-    splits,
     onSplitTransaction,
   }: {
     transaction: Transaction;
-    category?: {
-      id: string;
-      slug: string;
-      name: string;
-      color: string | null;
-      icon: string | null;
-      excludeFromAnalytics: boolean | null;
-    };
-    splits: TransactionSplit[];
     onSplitTransaction?: (id: string) => void;
   }) => {
-    const [isOpen, setIsOpen] = useState(false);
-
     const queryClient = useQueryClient();
     const trpc = useTRPC();
 
@@ -222,13 +208,15 @@ const CategoryCell = memo(
       }),
     );
 
-    const handleTransactionCategoryUpdate = async (category?: Category) => {
+    const handleTransactionCategoryUpdate = async (category?: {
+      id: string;
+      slug: string;
+      name: string;
+    }) => {
       updateTransactionCategoryMutation.mutate({
         id: transaction.id,
         categoryId: category?.id,
       });
-
-      setIsOpen(false);
 
       const similarTransactions = await queryClient.fetchQuery(
         trpc.transaction.getSimilarTransactions.queryOptions(
@@ -264,7 +252,7 @@ const CategoryCell = memo(
       onSplitTransaction?.(transaction.id);
     }, [transaction.id, onSplitTransaction]);
 
-    if (splits.length >= 2) {
+    if (transaction.splits.length >= 2) {
       return (
         <button
           className="flex items-center gap-2"
@@ -275,7 +263,7 @@ const CategoryCell = memo(
         >
           <CategoryBadge
             category={{
-              name: `${splits.length} Categorie`,
+              name: `${transaction.splits.length} Categorie`,
               icon: "shapes",
               color: "#606060",
             }}
@@ -286,24 +274,15 @@ const CategoryCell = memo(
 
     return (
       <div className="flex items-center gap-2">
-        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-auto p-0">
-              <CategoryBadge category={category} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            className="overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <TransactionCategorySelect
-              selectedItems={category ? [category.id] : []}
-              onSelect={handleTransactionCategoryUpdate}
-            />
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {category?.excludeFromAnalytics && (
+        <SelectCategory
+          align="start"
+          selected={transaction.category ?? undefined}
+          onChange={(category) => {
+            handleTransactionCategoryUpdate(category);
+          }}
+        />
+
+        {transaction.category?.excludeFromAnalytics && (
           <span className="text-sm text-muted-foreground">(Excluded)</span>
         )}
         {updateTransactionCategoryMutation.isPending && <Spinner />}
@@ -506,8 +485,6 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ row, table }) => (
       <CategoryCell
         transaction={row.original}
-        category={row.original.category!}
-        splits={row.original.splits}
         onSplitTransaction={table.options.meta?.splitTransaction}
       />
     ),

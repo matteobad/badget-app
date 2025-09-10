@@ -1,4 +1,3 @@
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { DB_AttachmentType } from "~/server/db/schema/transactions";
 import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import type { Tag } from "emblor";
@@ -35,22 +34,13 @@ import { format } from "date-fns";
 import { XIcon } from "lucide-react";
 import { toast } from "sonner";
 
-import { CategoryBadge } from "../category/category-badge";
 import { TagsSelect } from "../tag/tags-select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { TransactionCategorySelect } from "./forms/transaction-category-select";
+import { SelectCategory } from "../transaction-category/select-category";
 import { SimilarTransactionsUpdateToast } from "./similar-transactions-update-toast";
 import { TransactionBankAccount } from "./transaction-bank-account";
 import { TransactionShortcuts } from "./transaction-shortcuts";
 
-type Category = RouterOutput["transactionCategory"]["get"][number];
-
 export function TransactionDetails() {
-  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [, setAttachments] = useState<DB_AttachmentType[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
@@ -240,7 +230,11 @@ export function TransactionDetails() {
     }),
   );
 
-  const handleTransactionCategoryUpdate = async (category?: Category) => {
+  const handleTransactionCategoryUpdate = async (category?: {
+    id: string;
+    slug: string;
+    name: string;
+  }) => {
     if (!data) return;
 
     updateTransactionMutation.mutate({
@@ -421,30 +415,14 @@ export function TransactionDetails() {
                         />
                       </DialogContent>
                     </Dialog> */}
-                    <DropdownMenu
-                      open={categoryDropdownOpen}
-                      onOpenChange={setCategoryDropdownOpen}
-                    >
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-auto p-0">
-                          <CategoryBadge
-                            category={data.category ?? undefined}
-                          />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align="start"
-                        className="overflow-hidden"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <TransactionCategorySelect
-                          selectedItems={
-                            data.category ? [data.category.id] : []
-                          }
-                          onSelect={handleTransactionCategoryUpdate}
-                        />
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <SelectCategory
+                      align="end"
+                      selected={data.category ?? undefined}
+                      onChange={(category) => {
+                        handleTransactionCategoryUpdate(category);
+                      }}
+                    />
+
                     {data.category?.excludeFromAnalytics && (
                       <span className="text-sm text-muted-foreground">
                         (Excluded)

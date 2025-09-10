@@ -22,12 +22,12 @@ export const getTransactionCategorySchema = z
 
 export const createTransactionCategorySchema = z
   .object({
-    color: z.string().openapi({
+    color: z.string().optional().openapi({
       description:
         "The color of the transaction category (e.g. hex code or color name)",
       example: "#FF5733",
     }),
-    icon: z.string().openapi({
+    icon: z.string().optional().openapi({
       description: "The icon identifier for the transaction category",
       example: "shopping-cart",
     }),

@@ -6,6 +6,7 @@ import { useTRPC } from "~/shared/helpers/trpc/client";
 import { Area, AreaChart } from "recharts";
 
 import type { ChartConfig } from "../ui/chart";
+import { CategoryBadge } from "../transaction-category/category-badge";
 import {
   Accordion,
   AccordionContent,
@@ -18,7 +19,6 @@ import { Label } from "../ui/label";
 import { Skeleton } from "../ui/skeleton";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
-import { CategoryBadge } from "./category-badge";
 import { CategoryShortcuts } from "./category-shortcuts";
 import { CategorySelect } from "./forms/category-select";
 import { ColorIconPicker } from "./forms/color-icon-picker";

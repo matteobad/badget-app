@@ -196,13 +196,13 @@ export async function getSpending(
 ): Promise<SpendingResultItem[]> {
   const { orgId, from, to, currency: inputCurrency } = params;
 
-  console.log("get_spending", orgId, from, to);
-
   const result = await db.execute(
     sql`SELECT * FROM ${sql.raw("get_spending")}(${orgId}, ${from}, ${to}, ${inputCurrency ?? null})`,
   );
 
   const rawData = result.rows as unknown as SpendingResultItem[];
+
+  console.log(rawData);
 
   return Array.isArray(rawData)
     ? rawData.map((item) => ({
