@@ -42,6 +42,16 @@ export async function createOrganization(
 
     // Create system categories for the new team
     await createDefaultCategoriesForSpace(db, { organizationId: newOrg.id });
+
+    // Optionally switch user to the new team
+    if (input.switchSpace) {
+      await auth.api.setActiveOrganization({
+        headers: await headers(),
+        body: {
+          organizationId: newOrg.id,
+        },
+      });
+    }
   } catch (error) {
     console.error(error);
     throw new Error("Failed to create space.");

@@ -50,21 +50,11 @@ export function CreateSpaceForm({
   const { data } = useSession();
   const name = data?.user.name;
 
-  const changeSpaceMutation = useMutation(
-    trpc.user.update.mutationOptions({
+  const createOrganizationMutation = useMutation(
+    trpc.organization.create.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries();
         router.push("/overview");
-      },
-    }),
-  );
-
-  const createOrganizationMutation = useMutation(
-    trpc.organization.create.mutationOptions({
-      onSuccess: (data) => {
-        changeSpaceMutation.mutate({
-          defaultOrganizationId: data?.id,
-        });
       },
     }),
   );
@@ -83,6 +73,7 @@ export function CreateSpaceForm({
       name: values.name,
       baseCurrency: values.baseCurrency,
       countryCode: values.countryCode,
+      switchSpace: true,
     });
   }
 

@@ -7,14 +7,9 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { FormatAmount } from "~/components/format-amount";
 import { SubmitButton } from "~/components/submit-button";
-import { CategoryBadge } from "~/components/transaction-category/category-badge";
+import { SelectCategory } from "~/components/transaction-category/select-category";
 import { Button } from "~/components/ui/button";
 import { DialogFooter } from "~/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -26,8 +21,6 @@ import { addTransactionSplitsSchema } from "~/shared/validators/transaction-spli
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-
-import { TransactionCategorySelect } from "../forms/transaction-category-select";
 
 const DEFAULT_SPLITS: TransactionSplitItem[] = [
   { amount: 0 },
@@ -212,46 +205,15 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
                                   control={form.control}
                                   name={`splits.${idx}.category`}
                                   render={({ field }) => (
-                                    <DropdownMenu
-                                      open={categoryDropdownOpen[idx]}
-                                      onOpenChange={(open) =>
-                                        setCategoryDropdownOpen((p) =>
-                                          p.map((o, i) =>
-                                            i === idx ? open : o,
-                                          ),
-                                        )
-                                      }
-                                    >
-                                      <DropdownMenuTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          className="absolute top-0 right-1 p-0"
-                                        >
-                                          <CategoryBadge
-                                            category={row.category ?? undefined}
-                                          />
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent
-                                        align="start"
-                                        className="overflow-hidden"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        <TransactionCategorySelect
-                                          selectedItems={
-                                            field.value?.id
-                                              ? [field.value.id]
-                                              : []
-                                          }
-                                          onSelect={(c) => {
-                                            field.onChange(c);
-                                            setCategoryDropdownOpen(() =>
-                                              splits.map(() => false),
-                                            );
-                                          }}
-                                        />
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
+                                    <SelectCategory
+                                      selected={field.value}
+                                      onChange={(c) => {
+                                        field.onChange(c);
+                                        setCategoryDropdownOpen(() =>
+                                          splits.map(() => false),
+                                        );
+                                      }}
+                                    />
                                   )}
                                 />
                               </div>

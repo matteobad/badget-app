@@ -1,4 +1,5 @@
 import type {
+  createManyTransactionCategorySchema,
   createTransactionCategorySchema,
   deleteTransactionCategorySchema,
   getTransactionCategoriesSchema,
@@ -12,6 +13,7 @@ import type { DBClient } from "../db";
 import { transaction_category_table } from "../db/schema/transactions";
 import {
   createDefaultCategoriesForSpace,
+  createTransactionCategoriesMutation,
   createTransactionCategoryMutation,
   deleteTransactionCategoryMutation,
   updateTransactionCategoryMutation,
@@ -33,30 +35,28 @@ export async function getTransactionCategories(
     organizationId,
   });
 
-  return categories;
+  // First get all parent categories (categories with no parentId)
+  const parentCategories = categories.filter((c) => !c.parentId);
 
-  // // First get all parent categories (categories with no parentId)
-  // const parentCategories = categories.filter((c) => !c.parentId);
+  // Then get all child categories for these parents
+  const childCategories = categories.filter((c) => c.parentId);
 
-  // // Then get all child categories for these parents
-  // const childCategories = categories.filter((c) => c.parentId);
+  // Group children by parentId for efficient lookup
+  const childrenByParentId = new Map<string, typeof childCategories>();
+  for (const child of childCategories) {
+    if (child.parentId) {
+      if (!childrenByParentId.has(child.parentId)) {
+        childrenByParentId.set(child.parentId, []);
+      }
+      childrenByParentId.get(child.parentId)!.push(child);
+    }
+  }
 
-  // // Group children by parentId for efficient lookup
-  // const childrenByParentId = new Map<string, typeof childCategories>();
-  // for (const child of childCategories) {
-  //   if (child.parentId) {
-  //     if (!childrenByParentId.has(child.parentId)) {
-  //       childrenByParentId.set(child.parentId, []);
-  //     }
-  //     childrenByParentId.get(child.parentId)!.push(child);
-  //   }
-  // }
-
-  // // Attach children to their parents
-  // return parentCategories.map((parent) => ({
-  //   ...parent,
-  //   children: childrenByParentId.get(parent.id) ?? [],
-  // }));
+  // Attach children to their parents
+  return parentCategories.map((parent) => ({
+    ...parent,
+    children: childrenByParentId.get(parent.id) ?? [],
+  }));
 }
 
 export async function getTransactionCategory(
@@ -91,10 +91,46 @@ export async function createTransactionCategory(
     index++;
   }
 
-  // Persiste new category
+  // Persist new category
   return await createTransactionCategoryMutation(client, {
     ...input,
     slug: uniqueSlug,
+    organizationId,
+  });
+}
+
+export async function createTransactionCategories(
+  db: DBClient,
+  input: z.infer<typeof createManyTransactionCategorySchema>,
+  organizationId: string,
+) {
+  // Get all existing categories slugs
+  const existingSlugs = await getTransactionCategorySlugsQuery(db, {
+    organizationId,
+  });
+  const existingSlugSet = new Set(existingSlugs.map((s) => s.slug));
+
+  // TODO: extract slug logic into helper
+  const categories = input.map((category) => {
+    // Create category unique slug
+    const baseSlug = category.name.toLowerCase().replaceAll(" ", "_");
+    let uniqueSlug = baseSlug;
+    let index = 1;
+
+    while (existingSlugSet.has(uniqueSlug)) {
+      uniqueSlug = `${baseSlug}_${index}`;
+      index++;
+    }
+
+    return {
+      ...category,
+      slug: uniqueSlug,
+    };
+  });
+
+  // Persist new categories
+  return await createTransactionCategoriesMutation(db, {
+    categories,
     organizationId,
   });
 }

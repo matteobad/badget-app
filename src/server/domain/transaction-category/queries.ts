@@ -9,12 +9,12 @@ export type GetTransactionCategoriesParams = {
 };
 
 export const getTransactionCategoriesQuery = async (
-  client: DBClient,
+  db: DBClient,
   params: GetTransactionCategoriesParams,
 ) => {
   const { organizationId } = params;
 
-  return await client
+  return await db
     .select({
       id: transaction_category_table.id,
       name: transaction_category_table.name,
@@ -45,10 +45,10 @@ export type GetTransactionCategoryParams = {
 };
 
 export async function getTransactionCategoryQuery(
-  client: DBClient,
+  db: DBClient,
   params: GetTransactionCategoryParams,
 ) {
-  const [result] = await client
+  const [result] = await db
     .select({
       id: transaction_category_table.id,
       name: transaction_category_table.name,
@@ -81,12 +81,12 @@ export type GetTransactionCategorySlugsParams = {
 };
 
 export const getTransactionCategorySlugsQuery = async (
-  client: DBClient,
+  db: DBClient,
   params: GetTransactionCategorySlugsParams,
 ) => {
   const { organizationId } = params;
 
-  return await client
+  return await db
     .select({
       slug: transaction_category_table.slug,
     })

@@ -51,6 +51,31 @@ export const createTransactionCategorySchema = z
   })
   .openapi("CreateTransactionCategorySchema");
 
+export const createManyTransactionCategorySchema = z
+  .array(
+    z.object({
+      name: z.string().openapi({
+        description: "The name of the transaction category",
+        example: "Groceries",
+      }),
+      color: z.string().optional().openapi({
+        description:
+          "The color of the transaction category (e.g. hex code or color name)",
+        example: "#FF5733",
+      }),
+      description: z.string().optional().openapi({
+        description: "A description of the transaction category",
+        example: "Expenses for food and household supplies",
+      }),
+      excluded: z.boolean().optional().openapi({
+        description: "Whether to exclude this category from analytics",
+        example: false,
+        default: false,
+      }),
+    }),
+  )
+  .openapi("CreateManyTransactionCategorySchema");
+
 export const updateTransactionCategorySchema = z
   .object({
     id: z.uuid().openapi({

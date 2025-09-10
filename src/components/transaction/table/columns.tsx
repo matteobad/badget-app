@@ -277,8 +277,8 @@ const CategoryCell = memo(
         <SelectCategory
           align="start"
           selected={transaction.category ?? undefined}
-          onChange={(category) => {
-            handleTransactionCategoryUpdate(category);
+          onChange={async (category) => {
+            await handleTransactionCategoryUpdate(category);
           }}
         />
 

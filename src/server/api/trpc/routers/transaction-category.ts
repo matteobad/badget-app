@@ -1,4 +1,5 @@
 import {
+  createTransactionCategories,
   createTransactionCategory,
   deleteTransactionCategory,
   getTransactionCategories,
@@ -7,6 +8,7 @@ import {
   updateTransactionCategory,
 } from "~/server/services/transaction-category";
 import {
+  createManyTransactionCategorySchema,
   createTransactionCategorySchema,
   deleteTransactionCategorySchema,
   getTransactionCategoriesSchema,
@@ -33,6 +35,12 @@ export const transactionCategoryRouter = createTRPCRouter({
     .input(createTransactionCategorySchema)
     .mutation(async ({ ctx: { db, orgId }, input }) => {
       return await createTransactionCategory(db, input, orgId!);
+    }),
+
+  createMany: protectedProcedure
+    .input(createManyTransactionCategorySchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return await createTransactionCategories(db, input, orgId!);
     }),
 
   update: protectedProcedure

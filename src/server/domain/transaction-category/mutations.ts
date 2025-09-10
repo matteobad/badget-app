@@ -7,6 +7,11 @@ import { transaction_category_table } from "~/server/db/schema/transactions";
 import { CATEGORIES } from "~/shared/constants/categories";
 import { and, eq } from "drizzle-orm";
 
+import {
+  generateCategoryEmbedding,
+  generateCategoryEmbeddingsBatch,
+} from "./helpers";
+
 type CreateTransactionCategoryParams = {
   name: string;
   slug: string;
@@ -19,17 +24,78 @@ type CreateTransactionCategoryParams = {
 };
 
 export async function createTransactionCategoryMutation(
-  client: DBClient,
+  db: DBClient,
   params: CreateTransactionCategoryParams,
 ) {
-  const [result] = await client
+  const [result] = await db
     .insert(transaction_category_table)
     .values({ ...params })
-    .onConflictDoNothing()
     .returning();
+
+  if (result) {
+    // Generate embedding for the new category (async, don't block the response)
+    generateCategoryEmbedding(db, {
+      name: result.name,
+      system: false, // User-created category
+    }).catch((error) => {
+      console.error(
+        `Failed to generate embedding for category "${result.name}":`,
+        error,
+      );
+    });
+  }
 
   return result;
 }
+
+export type CreateTransactionCategoriesParams = {
+  organizationId: string;
+  categories: {
+    name: string;
+    slug: string;
+    color?: string | null;
+    description?: string | null;
+    parentId?: string | null;
+  }[];
+};
+
+export const createTransactionCategoriesMutation = async (
+  db: DBClient,
+  params: CreateTransactionCategoriesParams,
+) => {
+  const { organizationId, categories } = params;
+
+  if (categories.length === 0) {
+    return [];
+  }
+
+  const result = await db
+    .insert(transaction_category_table)
+    .values(
+      categories.map((category) => ({
+        ...category,
+        organizationId,
+      })),
+    )
+    .returning();
+
+  // Generate embeddings for all new categories (async, don't block the response)
+  if (result.length > 0) {
+    const categoryNames = result.map((category) => ({
+      name: category.name,
+      system: false, // User-created categories
+    }));
+
+    generateCategoryEmbeddingsBatch(db, categoryNames).catch((error) => {
+      console.error(
+        "Failed to generate embeddings for batch categories:",
+        error,
+      );
+    });
+  }
+
+  return result;
+};
 
 type UpdateTransactionCategoryParams = {
   id: string;
@@ -43,13 +109,31 @@ type UpdateTransactionCategoryParams = {
 };
 
 export async function updateTransactionCategoryMutation(
-  client: DBClient,
+  db: DBClient,
   params: UpdateTransactionCategoryParams,
 ) {
-  const { id, organizationId, ...rest } = params;
-  return await client
+  const { id, organizationId, ...updates } = params;
+
+  // If name is being updated, get the current category first
+  let oldName: string | undefined;
+  if (updates.name) {
+    const [currentCategory] = await db
+      .select({ name: transaction_category_table.name })
+      .from(transaction_category_table)
+      .where(
+        and(
+          eq(transaction_category_table.id, id),
+          eq(transaction_category_table.organizationId, organizationId),
+        ),
+      )
+      .limit(1);
+
+    oldName = currentCategory?.name;
+  }
+
+  const [result] = await db
     .update(transaction_category_table)
-    .set(rest)
+    .set(updates)
     .where(
       and(
         eq(transaction_category_table.id, id),
@@ -57,6 +141,21 @@ export async function updateTransactionCategoryMutation(
       ),
     )
     .returning();
+
+  // If the name was updated, regenerate the embedding
+  if (result && updates.name && oldName && updates.name !== oldName) {
+    generateCategoryEmbedding(db, {
+      name: updates.name,
+      system: result.system ?? false,
+    }).catch((error) => {
+      console.error(
+        `Failed to update embedding for category "${updates.name}":`,
+        error,
+      );
+    });
+  }
+
+  return result;
 }
 
 type DeleteTransactionCategoryParams = {

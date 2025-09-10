@@ -129,7 +129,6 @@ export function buildCategoryRecord(categories: Category[]) {
   record.root = {
     id: "root",
     parentId: null,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
     name: "Root",
     slug: "root",
     color: null,

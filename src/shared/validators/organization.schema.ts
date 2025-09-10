@@ -18,6 +18,10 @@ export const createOrganizationSchema = z.object({
     description: "URL to the org's logo image",
     example: "https://cdn.midday.ai/logos/acme-corp.png",
   }),
+  switchSpace: z.boolean().optional().openapi({
+    description: "Whether to switch the user to the new space after creation",
+    example: true,
+  }),
 });
 
 export const setActiveOrganizationSchema = z.object({
