@@ -25,12 +25,6 @@ importers:
       "@fast-csv/parse":
         specifier: ^5.0.5
         version: 5.0.5
-      "@headless-tree/core":
-        specifier: ^1.4.0
-        version: 1.4.0
-      "@headless-tree/react":
-        specifier: ^1.4.0
-        version: 1.4.0(@headless-tree/core@1.4.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       "@hono/zod-openapi":
         specifier: ^1.1.0
         version: 1.1.0(hono@4.7.11)(zod@4.1.5)
@@ -256,10 +250,6 @@ importers:
       zustand:
         specifier: ^5.0.8
         version: 5.0.8(@types/react@19.0.10)(react@19.1.1)(use-sync-external-store@1.5.0(react@19.1.1))
-    optionalDependencies:
-      bufferutil:
-        specifier: ^4.0.8
-        version: 4.0.9
     devDependencies:
       "@electric-sql/pglite":
         specifier: ^0.3.7
@@ -333,6 +323,10 @@ importers:
       typescript-eslint:
         specifier: ^8.40.0
         version: 8.40.0(eslint@9.34.0(jiti@2.5.1))(typescript@5.9.2)
+    optionalDependencies:
+      bufferutil:
+        specifier: ^4.0.8
+        version: 4.0.9
 
 packages:
   "@ai-sdk/gateway@1.0.15":
@@ -1073,22 +1067,6 @@ packages:
         integrity: sha512-1TUx3KdaU3cN7nfCdNf+UVqA/PSX29Cjcox3fZZBtINlRrXVTmUkQnCKv2MbBUbCopbK4olAT1IHl76uZyCiVA==,
       }
     engines: { node: ">=14.0.0" }
-
-  "@headless-tree/core@1.4.0":
-    resolution:
-      {
-        integrity: sha512-xBDYr9WJb7CuWuWzAAHfCfYfYUdCknsHa6OkdsLqeOc4JuwYuSlQ+TcDjeeImmgF6hVSAbeBBubOwotk5pmiMw==,
-      }
-
-  "@headless-tree/react@1.4.0":
-    resolution:
-      {
-        integrity: sha512-B62Ku6E3u0JPrz2Sm3cKqTCRMltmhgo5mgkuOvfYbrVILsDSZ6ct2yX56/1GQlipPkVF3mEhlwiIVKNOQKWnqA==,
-      }
-    peerDependencies:
-      "@headless-tree/core": "*"
-      react: "*"
-      react-dom: "*"
 
   "@hexagon/base64@1.1.28":
     resolution:
@@ -8350,14 +8328,6 @@ snapshots:
   "@floating-ui/utils@0.2.9": {}
 
   "@google-cloud/precise-date@4.0.0": {}
-
-  "@headless-tree/core@1.4.0": {}
-
-  "@headless-tree/react@1.4.0(@headless-tree/core@1.4.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)":
-    dependencies:
-      "@headless-tree/core": 1.4.0
-      react: 19.1.1
-      react-dom: 19.1.1(react@19.1.1)
 
   "@hexagon/base64@1.1.28": {}
 

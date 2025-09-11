@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { SelectCategoryHeadless } from "../transaction-category/select-category-headless";
+import { SelectCategory } from "../transaction-category/select-category";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -108,7 +108,8 @@ export function BulkActions({ ids }: Props) {
           className="max-h-[270px] w-[250px] overflow-y-auto p-0"
           sideOffset={8}
         >
-          <SelectCategoryHeadless
+          <SelectCategory
+            headless
             selected={undefined}
             onChange={(category) => {
               handleUpdateTransactionsCategory(category?.id);

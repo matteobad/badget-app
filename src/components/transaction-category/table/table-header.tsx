@@ -4,11 +4,11 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { PlusIcon } from "lucide-react";
 
-import type { Category } from "./columns";
+import type { CategoryWithChildren } from "./columns";
 import type { Table } from "@tanstack/react-table";
 
 type Props = {
-  table?: Table<Category>;
+  table?: Table<CategoryWithChildren>;
   onOpenChange?: (isOpen: boolean) => void;
 };
 

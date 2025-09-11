@@ -85,12 +85,12 @@ export function getColor(value: string, arrayLength: number) {
 export function getColorFromName(value: string) {
   const index = getColor(value, colors.length);
 
-  return colors[index];
+  return colors[index]!;
 }
 
 export function getRandomColor() {
   const randomIndex = Math.floor(Math.random() * colors.length);
-  return colors[randomIndex];
+  return colors[randomIndex]!;
 }
 
 export function getCategoryColors(hex = "#606060") {

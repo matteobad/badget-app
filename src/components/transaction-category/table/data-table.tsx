@@ -44,7 +44,7 @@ export function CategoriesDataTable() {
   const deleteCategoryMutation = useMutation(
     trpc.transactionCategory.delete.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: trpc.transactionCategory.get.queryKey(),
         });
       },
@@ -91,7 +91,7 @@ export function CategoriesDataTable() {
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="px-4">
                     {header.isPlaceholder
                       ? null
                       : flexRender(

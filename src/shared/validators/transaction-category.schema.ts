@@ -63,6 +63,10 @@ export const createManyTransactionCategorySchema = z
           "The color of the transaction category (e.g. hex code or color name)",
         example: "#FF5733",
       }),
+      icon: z.string().optional().openapi({
+        description: "The icon identifier for the transaction category",
+        example: "shopping-cart",
+      }),
       description: z.string().optional().openapi({
         description: "A description of the transaction category",
         example: "Expenses for food and household supplies",

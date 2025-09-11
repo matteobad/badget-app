@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CategorySelect } from "~/components/category/forms/category-select";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { AccountPicker } from "~/components/forms/account-picker";
 import { SubmitButton } from "~/components/submit-button";
 import { TagsSelect } from "~/components/tag/tags-select";
+import { SelectCategory } from "~/components/transaction-category/select-category";
 import {
   Accordion,
   AccordionContent,
@@ -70,6 +70,10 @@ export default function CreateTransactionForm() {
     trpc.bankAccount.get.queryOptions({
       manual: true,
     }),
+  );
+
+  const { data: categories } = useQuery(
+    trpc.transactionCategory.get.queryOptions(),
   );
 
   // TODO: rewrite this logic with gemini
@@ -315,12 +319,26 @@ export default function CreateTransactionForm() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Categoria</FormLabel>
-                <CategorySelect
-                  value={field.value ?? undefined}
-                  onValueChange={field.onChange}
-                  onReset={() => {
-                    form.resetField("categoryId", { defaultValue: undefined });
-                  }}
+                <SelectCategory
+                  hideLoading
+                  selected={categories
+                    ?.map((category) => {
+                      if (!category) return undefined;
+
+                      const { id, name, color, slug } = category;
+                      return {
+                        id,
+                        name,
+                        color,
+                        slug,
+                      };
+                    })
+                    .filter(
+                      (category): category is NonNullable<typeof category> =>
+                        category !== undefined,
+                    )
+                    .find((category) => category.slug === field.value)}
+                  onChange={field.onChange}
                 />
                 <FormMessage />
               </FormItem>

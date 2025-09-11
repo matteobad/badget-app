@@ -37,8 +37,6 @@
     "@date-fns/tz": "^1.2.0",
     "@fast-csv/format": "^5.0.5",
     "@fast-csv/parse": "^5.0.5",
-    "@headless-tree/core": "^1.4.0",
-    "@headless-tree/react": "^1.4.0",
     "@hono/zod-openapi": "^1.1.0",
     "@hookform/resolvers": "^5.2.1",
     "@neondatabase/serverless": "^1.0.1",

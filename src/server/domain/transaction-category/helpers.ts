@@ -167,6 +167,7 @@ export async function generateCategoryEmbeddingsBatch(
         results.push({
           name: "unknown",
           success: false,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
           error: promiseResult.reason?.message ?? "Promise rejected",
         });
         errors++;
@@ -207,6 +208,7 @@ export async function generateCategoryEmbeddingsBatch(
         results.push({
           name: "unknown",
           success: false,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
           error: promiseResult.reason?.message ?? "Promise rejected",
         });
         errors++;

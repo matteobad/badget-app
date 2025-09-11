@@ -1,6 +1,9 @@
+import type { IconName } from "lucide-react/dynamic";
 import { useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SubmitButton } from "~/components/submit-button";
+import { InputColorIcon } from "~/components/transaction-category/color-icon-picker";
 import { Button } from "~/components/ui/button";
 import {
   DialogContent,
@@ -19,8 +22,8 @@ import {
 import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { useScopedI18n } from "~/shared/locales/client";
-import { PlusIcon } from "lucide-react";
+import { createManyTransactionCategorySchema } from "~/shared/validators/transaction-category.schema";
+import { MinusIcon, PlusIcon } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import z from "zod";
 
@@ -41,22 +44,13 @@ interface CreateCategoriesFormValues {
 }
 
 const formSchema = z.object({
-  categories: z.array(
-    z.object({
-      name: z.string().min(1, "Name is required"),
-      description: z.string().optional(),
-      color: z.string().optional(),
-      excluded: z.boolean().optional(),
-    }),
-  ),
+  categories: createManyTransactionCategorySchema,
 });
 
 export function CreateTransactionCategoriesModal({
   onOpenChange,
   isOpen,
 }: Props) {
-  const tScoped = useScopedI18n("category");
-
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
@@ -76,10 +70,12 @@ export function CreateTransactionCategoriesModal({
     name: "",
     description: "",
     color: undefined,
+    icon: "circle-dashed" as IconName,
     excluded: false,
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       categories: [newItem],
     },
@@ -89,13 +85,14 @@ export function CreateTransactionCategoriesModal({
     form.reset({
       categories: [newItem],
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, form]);
 
   const onSubmit = (data: CreateCategoriesFormValues) => {
     categoriesMutation.mutate(data.categories);
   };
 
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     name: "categories",
     control: form.control,
   });
@@ -105,83 +102,77 @@ export function CreateTransactionCategoriesModal({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="">
-            <DialogHeader className="mb-4">
+            <DialogHeader className="mb-6 p-[3px]">
               <DialogTitle>Create categories</DialogTitle>
               <DialogDescription>
                 You can add your own categories here.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex max-h-[420px] flex-col space-y-6 overflow-auto">
+            <div className="flex max-h-[420px] flex-col space-y-6 overflow-auto p-[3px]">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex flex-col space-y-2">
-                  <FormField
-                    control={form.control}
-                    name={`categories.${index}.name`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1 space-y-1">
-                        <FormLabel className="text-xs font-normal text-[#878787]">
-                          Name
-                        </FormLabel>
-                        <FormControl>
-                          {/* <InputColor
-                            autoFocus
-                            placeholder="Name"
-                            onChange={({ name, color }) => {
-                              field.onChange(name);
-                              form.setValue(`categories.${index}.color`, color);
-                            }}
-                            defaultValue={field.value}
-                            defaultColor={form.watch(
-                              `categories.${index}.color`,
-                            )}
-                          /> */}
-                          <Input
-                            {...field}
-                            autoFocus
-                            className="h-10 pl-12 shadow-none"
-                            placeholder={tScoped("placeholders.name")}
-                            autoComplete="off"
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                            spellCheck="false"
-                            onChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                  <div className="flex items-center gap-4">
+                    <FormField
+                      control={form.control}
+                      name={`categories.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1 space-y-1">
+                          <FormLabel>Name</FormLabel>
+                          <FormControl className="p-1">
+                            <InputColorIcon
+                              autoFocus
+                              placeholder="Name"
+                              onChange={({ name, color, icon }) => {
+                                field.onChange(name);
+                                form.setValue(
+                                  `categories.${index}.color`,
+                                  color,
+                                );
+                                form.setValue(`categories.${index}.icon`, icon);
+                              }}
+                              defaultValue={field.value}
+                              defaultColor={form.watch(
+                                `categories.${index}.color`,
+                              )}
+                              defaultIcon={
+                                form.watch(
+                                  `categories.${index}.icon`,
+                                ) as IconName
+                              }
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name={`categories.${index}.description`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1 space-y-1">
-                        <FormLabel className="text-xs font-normal text-[#878787]">
-                          Description
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            autoFocus={false}
-                            placeholder="Description"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name={`categories.${index}.description`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1 space-y-1">
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              autoFocus={false}
+                              placeholder="Description"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   <FormField
                     control={form.control}
                     name={`categories.${index}.excluded`}
                     render={({ field }) => (
                       <FormItem className="flex-1 space-y-1">
-                        <div className="mt-2 border border-border p-3 pt-1.5">
+                        <div className="mt-2 border border-border p-3">
                           <div className="flex items-center justify-between space-x-2">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-xs font-normal text-[#878787]">
-                                Exclude from Reports
-                              </FormLabel>
+                            <div className="space-y-1">
+                              <FormLabel>Exclude from Reports</FormLabel>
                               <div className="text-xs text-muted-foreground">
                                 Transactions in this category won&apos;t appear
                                 in financial reports
@@ -202,19 +193,37 @@ export function CreateTransactionCategoriesModal({
               ))}
             </div>
 
-            <Button
-              variant="outline"
-              type="button"
-              className="mt-4 space-x-1"
-              onClick={() => {
-                append(newItem);
-              }}
-            >
-              <PlusIcon />
-              <span>Add more</span>
-            </Button>
+            <div className="p-[3px]">
+              <Button
+                variant="outline"
+                type="button"
+                size="sm"
+                className="mt-6 space-x-1"
+                onClick={() => {
+                  append(newItem);
+                }}
+              >
+                <PlusIcon />
+                <span>Add more</span>
+              </Button>
 
-            <DialogFooter className="mt-8 items-center !justify-between border-t-[1px] pt-4">
+              {fields.length > 1 && (
+                <Button
+                  variant="outline"
+                  type="button"
+                  size="sm"
+                  className="mt-6 ml-4 space-x-1"
+                  onClick={() => {
+                    remove(fields.length - 1);
+                  }}
+                >
+                  <MinusIcon />
+                  <span>Remove last</span>
+                </Button>
+              )}
+            </div>
+
+            <DialogFooter className="mt-6 items-center !justify-between border-t-[1px] p-[3px] pt-6">
               <div>
                 {Object.values(form.formState.errors).length > 0 && (
                   <span className="text-sm text-destructive">
