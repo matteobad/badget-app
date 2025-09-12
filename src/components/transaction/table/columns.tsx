@@ -215,7 +215,7 @@ const CategoryCell = memo(
     }) => {
       updateTransactionCategoryMutation.mutate({
         id: transaction.id,
-        categoryId: category?.id,
+        categorySlug: category?.slug,
       });
 
       const similarTransactions = await queryClient.fetchQuery(
@@ -273,13 +273,13 @@ const CategoryCell = memo(
     }
 
     // Show analyzing state when enrichment is not completed
-    if (!transaction.enrichmentCompleted) {
+    if (!transaction.category && !transaction.enrichmentCompleted) {
       return (
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="flex cursor-help items-center space-x-2">
               <Spinner size={14} className="stroke-primary" />
-              <span className="text-sm text-[#878787]">Analyzing</span>
+              <span className="text-sm text-muted-foreground">Analyzing</span>
             </div>
           </TooltipTrigger>
           <TooltipContent

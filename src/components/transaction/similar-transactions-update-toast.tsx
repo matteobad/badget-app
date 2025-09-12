@@ -9,7 +9,7 @@ import { Button } from "../ui/button";
 
 type SimilarTransactionsUpdateToastProps = {
   similarTransactions: { id: string }[];
-  category: { id: string; name: string };
+  category: { id: string; slug: string; name: string };
   transactionId: string;
   toastId: string | number;
 };
@@ -55,7 +55,7 @@ export function SimilarTransactionsUpdateToast({
             );
             updateTransactionsMutation.mutate({
               ids: similarTransactionIds,
-              categoryId: category.id,
+              categorySlug: category.slug,
             });
             toast.dismiss(toastId);
           }}

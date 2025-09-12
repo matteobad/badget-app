@@ -1,9 +1,9 @@
 # Badget
 
-## Notes 2025-03-10
+## Notes 2025-09-12
 
-- [ ] edit category parent dropdown with treeview select (map possible warnings and problems)
-- [ ] category default sorting (alfabetico)
-- [ ] expand tree on single click on chevron
-- [ ] drag & drop within same category type
-- [ ]
+- [ ] create default system categories for every organization
+- [ ] trigger embed + enrich for every transaction in the DB
+- [ ] backfill/override category_slug from category_id, fallback to "uncategorized"
+- [ ] handle transaction_split category somehow...
+- [ ] apply migration on PROD

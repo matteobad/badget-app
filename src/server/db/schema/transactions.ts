@@ -176,7 +176,7 @@ export const transaction_split_table = pgTable(
         transaction_category_table.organizationId,
         transaction_category_table.slug,
       ],
-      name: "transactions_category_slug_organization_id_fkey",
+      name: "transactions_split_category_slug_organization_id_fkey",
     }),
     index("transaction_splits_transaction_id_idx").using(
       "btree",
@@ -229,7 +229,7 @@ export const transaction_embeddings_table = pgTable(
 export const transaction_category_table = pgTable(
   "transaction_category_table",
   (d) => ({
-    id: d.uuid().defaultRandom().notNull(),
+    id: d.uuid().defaultRandom().primaryKey().notNull(),
 
     // FK
     organizationId: d
@@ -262,11 +262,7 @@ export const transaction_category_table = pgTable(
       foreignColumns: [t.id],
       name: "transaction_categories_parent_id_fkey",
     }).onDelete("set null"),
-    primaryKey({
-      columns: [t.organizationId, t.slug],
-      name: "transaction_categories_pkey",
-    }),
-    unique("unique_organization_slug").on(t.organizationId, t.slug),
+    unique("unique_organization_slug").on(t.slug, t.organizationId),
   ],
 );
 

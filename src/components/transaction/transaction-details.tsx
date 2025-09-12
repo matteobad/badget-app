@@ -239,7 +239,7 @@ export function TransactionDetails() {
 
     updateTransactionMutation.mutate({
       id: transactionId,
-      categoryId: category?.id,
+      categorySlug: category?.slug,
     });
 
     const similarTransactions = await queryClient.fetchQuery(
