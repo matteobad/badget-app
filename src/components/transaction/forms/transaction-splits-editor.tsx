@@ -12,7 +12,6 @@ import { Button } from "~/components/ui/button";
 import { DialogFooter } from "~/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
@@ -159,13 +158,11 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
       >
         <div className="grid grid-cols-[1fr_auto] grid-rows-2 items-center gap-x-8 gap-y-1 px-3 font-mono text-sm">
           <span className="text-muted-foreground">Description</span>
-          {/* <span className="text-muted-foreground">Date</span> */}
           <span className="text-right text-muted-foreground">Amount</span>
 
           <span className="line-clamp-1 text-ellipsis">
             {transaction.name || transaction.description}
           </span>
-          {/* <span>{formatDate(transaction.date)}</span> */}
           <span className="text-right">
             <FormatAmount
               amount={transaction.amount}
@@ -174,7 +171,7 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
           </span>
         </div>
 
-        <ScrollArea className="max-h-80">
+        <div className="flex max-h-[420px] flex-col space-y-6 overflow-auto p-[3px]">
           <div className="flex flex-col items-end gap-3">
             <div className="w-full space-y-4">
               <FormField
@@ -183,40 +180,22 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
                 render={() => (
                   <FormItem>
                     <FormControl>
-                      <div className="flex flex-col gap-3">
+                      <div className="flex flex-col">
                         {splits.map((row, idx) => (
-                          <React.Fragment key={idx}>
-                            <div className="flex items-center gap-3">
-                              <div className="relative w-full">
-                                <FormField
-                                  control={form.control}
-                                  name={`splits.${idx}.note`}
-                                  render={({ field }) => (
-                                    <Input
-                                      className="border-transparent font-mono text-muted-foreground shadow-none transition-all hover:border-input"
-                                      autoFocus={idx === 0}
-                                      placeholder="Note"
-                                      value={field.value}
-                                      onChange={field.onChange}
-                                    />
-                                  )}
-                                />
-                                <FormField
-                                  control={form.control}
-                                  name={`splits.${idx}.category`}
-                                  render={({ field }) => (
-                                    <SelectCategory
-                                      selected={field.value}
-                                      onChange={(c) => {
-                                        field.onChange(c);
-                                        setCategoryDropdownOpen(() =>
-                                          splits.map(() => false),
-                                        );
-                                      }}
-                                    />
-                                  )}
-                                />
-                              </div>
+                          <div key={idx} className="flex flex-col">
+                            <div className="flex items-center gap-4">
+                              <FormField
+                                control={form.control}
+                                name={`splits.${idx}.note`}
+                                render={({ field }) => (
+                                  <Input
+                                    autoFocus={idx === 0}
+                                    placeholder="Note"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                  />
+                                )}
+                              />
 
                               <FormField
                                 control={form.control}
@@ -224,7 +203,7 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
                                 render={({ field }) => (
                                   <div className="w-[105px] shrink-0 space-y-2">
                                     <CurrencyInput
-                                      className="border-transparent text-right font-mono text-muted-foreground shadow-none transition-all hover:border-input"
+                                      className="text-right"
                                       placeholder="0,00"
                                       value={field.value}
                                       onValueChange={(values) => {
@@ -239,8 +218,41 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
                                 )}
                               />
                             </div>
-                            <Separator />
-                          </React.Fragment>
+
+                            <FormField
+                              control={form.control}
+                              name={`splits.${idx}.category`}
+                              render={({ field }) => (
+                                <FormItem className="flex-1 space-y-1">
+                                  <div className="mt-2 border border-border p-3">
+                                    <div className="flex items-center justify-between space-x-2">
+                                      <div className="space-y-1">
+                                        <div className="max-w-[250px] text-xs text-muted-foreground">
+                                          Select a category for this split to
+                                          organize your transaction
+                                        </div>
+                                      </div>
+                                      <FormControl>
+                                        <SelectCategory
+                                          selected={field.value}
+                                          onChange={(c) => {
+                                            field.onChange(c);
+                                            setCategoryDropdownOpen(() =>
+                                              splits.map(() => false),
+                                            );
+                                          }}
+                                        />
+                                      </FormControl>
+                                    </div>
+                                  </div>
+                                </FormItem>
+                              )}
+                            />
+
+                            {idx < splits.length - 1 && (
+                              <Separator className="my-6" />
+                            )}
+                          </div>
                         ))}
                       </div>
                     </FormControl>
@@ -267,7 +279,7 @@ export function TransactionSplitsEditor({ transaction, onSaved }: Props) {
               </div>
             </div>
           </div>
-        </ScrollArea>
+        </div>
         <DialogFooter>
           <div className="flex w-full justify-between">
             <div className="flex gap-2">

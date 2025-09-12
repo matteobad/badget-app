@@ -3,6 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { SelectCategory } from "~/components/transaction-category/select-category";
 import { Calendar } from "~/components/ui/calendar";
 import {
   DropdownMenu,
@@ -36,7 +37,6 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
 import { TransactionAccountFilter } from "./transaction-account-filter";
 import { TransactionAmountFilter } from "./transaction-amount-filter";
-import { TransactionCategoryFilter } from "./transaction-category-filter";
 import { TransactionTagFilter } from "./transaction-tag-filter";
 
 type StatusFilter = "completed" | "uncompleted" | "archived" | "excluded";
@@ -388,12 +388,12 @@ export function TransactionsSearchFilter() {
         </FilterMenuItem>
 
         <FilterMenuItem icon={ShapesIcon} label="Categories">
-          <div className="max-h-[280px] w-[250px]">
-            <TransactionCategoryFilter
-              selected={filter.categories}
+          <div className="h-[270px] w-[250px]">
+            <SelectCategory
+              headless
               onChange={(selected) =>
                 updateArrayFilter(
-                  selected,
+                  selected.slug,
                   filter.categories,
                   setFilter,
                   "categories",

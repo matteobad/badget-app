@@ -415,6 +415,7 @@ export function TransactionDetails() {
                         />
                       </DialogContent>
                     </Dialog> */}
+
                     <SelectCategory
                       align="end"
                       selected={data.category ?? undefined}
@@ -422,12 +423,6 @@ export function TransactionDetails() {
                         await handleTransactionCategoryUpdate(category);
                       }}
                     />
-
-                    {data.category?.excluded && (
-                      <span className="text-sm text-muted-foreground">
-                        (Excluded)
-                      </span>
-                    )}
                   </div>
                 </div>
               )}

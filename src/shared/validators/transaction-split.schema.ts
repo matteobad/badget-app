@@ -6,8 +6,6 @@ export const transactionSplitItemSchema = z.object({
       id: z.uuid(),
       slug: z.string(),
       name: z.string(),
-      icon: z.string().nullable(),
-      color: z.string().nullable(),
     })
     .optional(),
   amount: z.number(),

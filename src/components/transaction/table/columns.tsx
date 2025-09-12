@@ -303,9 +303,6 @@ const CategoryCell = memo(
           }}
         />
 
-        {transaction.category?.excluded && (
-          <span className="text-sm text-muted-foreground">(Excluded)</span>
-        )}
         {updateTransactionCategoryMutation.isPending && <Spinner />}
       </div>
     );
@@ -492,7 +489,9 @@ export const columns: ColumnDef<Transaction>[] = [
         description={row.original.description ?? undefined}
         recurring={row.original.recurring ?? undefined}
         frequency={row.original.frequency ?? undefined}
-        excludeFromReports={row.original.internal ?? undefined}
+        excludeFromReports={Boolean(
+          row.original.internal ?? row.original.category?.excluded,
+        )}
         split={row.original.splits.length > 0}
       />
     ),
