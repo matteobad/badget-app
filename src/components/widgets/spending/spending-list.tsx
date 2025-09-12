@@ -22,8 +22,6 @@ export function SpendingList({ period }: Props) {
     }),
   );
 
-  console.log(spending, selectedPeriod);
-
   if (!spending?.length) {
     return (
       <div className="flex aspect-square flex-col items-center justify-center gap-2">

@@ -1,13 +1,7 @@
 import type { SQL } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { sql } from "drizzle-orm";
-import {
-  foreignKey,
-  index,
-  pgEnum,
-  primaryKey,
-  unique,
-} from "drizzle-orm/pg-core";
+import { foreignKey, index, pgEnum, unique } from "drizzle-orm/pg-core";
 
 import {
   TRANSACTION_FREQUENCY,

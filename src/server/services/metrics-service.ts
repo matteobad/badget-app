@@ -202,8 +202,6 @@ export async function getSpending(
 
   const rawData = result.rows as unknown as SpendingResultItem[];
 
-  console.log(rawData);
-
   return Array.isArray(rawData)
     ? rawData.map((item) => ({
         ...item,
