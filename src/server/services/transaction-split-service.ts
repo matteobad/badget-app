@@ -38,7 +38,16 @@ export async function getTransactionSplits(
     )
     .leftJoin(
       transaction_category_table,
-      eq(transaction_category_table.id, transaction_split_table.categoryId),
+      and(
+        eq(
+          transaction_category_table.slug,
+          transaction_split_table.categorySlug,
+        ),
+        eq(
+          transaction_category_table.organizationId,
+          transaction_split_table.organizationId,
+        ),
+      ),
     )
     .where(
       and(
@@ -95,8 +104,9 @@ export async function addTransactionSplits(
 
     await tx.insert(transaction_split_table).values(
       input.splits.map((s) => ({
+        organizationId,
         transactionId: input.transactionId,
-        categoryId: s.category?.id,
+        categorySlug: s.category?.slug,
         amount: s.amount,
         note: s.note,
       })),

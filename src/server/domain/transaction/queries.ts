@@ -232,10 +232,10 @@ export async function getTransactionsQuery(
         Array<{
           id: string;
           note: string | null;
-          categoryId: string | null;
+          categorySlug: string | null;
           amount: number;
         }>
-      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transaction_split_table.id}, 'categoryId', ${transaction_split_table.categoryId}, 'note', ${transaction_split_table.note}, 'amount', ${transaction_split_table.amount})) FILTER (WHERE ${transaction_split_table.id} IS NOT NULL), '[]'::json)`.as(
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transaction_split_table.id}, 'categorySlug', ${transaction_split_table.categorySlug}, 'note', ${transaction_split_table.note}, 'amount', ${transaction_split_table.amount})) FILTER (WHERE ${transaction_split_table.id} IS NOT NULL), '[]'::json)`.as(
         "tags",
       ),
     })
