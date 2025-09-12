@@ -85,7 +85,7 @@ export async function addTransactionSplits(
     // Exclude transaction from analytics
     await tx
       .update(transaction_table)
-      .set({ categoryId: null, categorySlug: null, internal: true })
+      .set({ categorySlug: null, internal: true })
       .where(eq(transaction_table.id, input.transactionId));
 
     // Replace existing splits

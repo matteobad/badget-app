@@ -209,13 +209,13 @@ export default function CreateTransactionForm() {
                     onValueChange={(values) => {
                       field.onChange(values.floatValue);
 
-                      if (form.getFieldState("categoryId").isDirty) return;
+                      if (form.getFieldState("categorySlug").isDirty) return;
 
                       if (
                         values.floatValue !== undefined &&
                         values.floatValue < 0
                       ) {
-                        form.setValue("categoryId", undefined);
+                        form.setValue("categorySlug", undefined);
                       }
                     }}
                   />
@@ -315,7 +315,7 @@ export default function CreateTransactionForm() {
         <div className="mt-4 flex space-x-4">
           <FormField
             control={form.control}
-            name="categoryId"
+            name="categorySlug"
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Categoria</FormLabel>

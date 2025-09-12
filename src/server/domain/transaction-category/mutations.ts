@@ -172,7 +172,7 @@ export async function createDefaultCategoriesForSpace(
       color: parent.color,
       icon: parent.icon,
       system: parent.system,
-      excludeFromAnalytics: parent.excluded,
+      excluded: parent.excluded,
       description: undefined,
       parentId: undefined, // Parent categories have no parent
     });
@@ -206,7 +206,7 @@ export async function createDefaultCategoriesForSpace(
           color: child.color,
           icon: child.icon,
           system: child.system,
-          excludeFromAnalytics: child.excluded,
+          excluded: child.excluded,
           description: undefined,
           parentId: parentId,
         });

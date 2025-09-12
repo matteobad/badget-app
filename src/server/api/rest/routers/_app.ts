@@ -5,7 +5,6 @@ import { secureHeaders } from "hono/secure-headers";
 
 import { protectedMiddleware } from "../init";
 import { budgetRouter } from "./budget";
-import { categoryRouter } from "./category";
 
 const routers = new OpenAPIHono();
 
@@ -56,7 +55,6 @@ routers.get("/health", async (c) => {
   }
 });
 
-routers.route("/categories", categoryRouter);
 routers.route("/budgets", budgetRouter);
 
 export { routers };

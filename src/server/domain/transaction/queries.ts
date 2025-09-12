@@ -215,7 +215,7 @@ export async function getTransactionsQuery(
         name: transaction_category_table.name,
         color: transaction_category_table.color,
         icon: transaction_category_table.icon,
-        excludeFromAnalytics: transaction_category_table.excludeFromAnalytics,
+        excluded: transaction_category_table.excluded,
       },
       account: {
         id: account_table.id,
@@ -243,7 +243,7 @@ export async function getTransactionsQuery(
     .leftJoin(
       transaction_category_table,
       and(
-        eq(transaction_table.categoryId, transaction_category_table.id),
+        eq(transaction_table.categorySlug, transaction_category_table.slug),
         eq(transaction_category_table.organizationId, orgId),
       ),
     )
@@ -434,7 +434,7 @@ export async function getTransactionByIdQuery(id: string, orgId: string) {
         name: transaction_category_table.name,
         color: transaction_category_table.color,
         icon: transaction_category_table.icon,
-        excludeFromAnalytics: transaction_category_table.excludeFromAnalytics,
+        excluded: transaction_category_table.excluded,
       },
       account: {
         id: account_table.id,
@@ -452,7 +452,7 @@ export async function getTransactionByIdQuery(id: string, orgId: string) {
     .leftJoin(
       transaction_category_table,
       and(
-        eq(transaction_table.categoryId, transaction_category_table.id),
+        eq(transaction_table.categorySlug, transaction_category_table.slug),
         eq(transaction_category_table.organizationId, orgId),
       ),
     )
@@ -543,17 +543,17 @@ export async function getTransactionCategoryCountsQuery(orgId: string) {
   try {
     return await db
       .select({
-        categoryId: transaction_table.categoryId,
+        categorySlug: transaction_table.categorySlug,
         count: count(),
       })
       .from(transaction_table)
       .where(eq(transaction_table.organizationId, orgId))
-      .groupBy(transaction_table.categoryId)
+      .groupBy(transaction_table.categorySlug)
       .having(gt(count(), 0))
       .then((res) =>
         res.reduce(
-          (acc, { categoryId, count }) => {
-            acc[categoryId ?? "null"] = count;
+          (acc, { categorySlug, count }) => {
+            acc[categorySlug ?? "null"] = count;
             return acc;
           },
           {} as Record<string, number>,

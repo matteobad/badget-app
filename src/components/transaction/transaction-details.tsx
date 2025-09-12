@@ -423,7 +423,7 @@ export function TransactionDetails() {
                       }}
                     />
 
-                    {data.category?.excludeFromAnalytics && (
+                    {data.category?.excluded && (
                       <span className="text-sm text-muted-foreground">
                         (Excluded)
                       </span>

@@ -9,7 +9,7 @@ import {
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
 import { format, parseISO } from "date-fns";
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 
 import { blobToSerializable } from "../utils/blob";
@@ -73,7 +73,13 @@ export const processExportTask = schemaTask({
       .from(transaction_table)
       .leftJoin(
         transaction_category_table,
-        eq(transaction_table.categoryId, transaction_category_table.id),
+        and(
+          eq(transaction_table.categorySlug, transaction_category_table.slug),
+          eq(
+            transaction_table.organizationId,
+            transaction_category_table.organizationId,
+          ),
+        ),
       )
       .leftJoin(
         account_table,

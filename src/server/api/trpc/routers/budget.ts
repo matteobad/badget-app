@@ -1,5 +1,5 @@
 import { getBudgetsQuery } from "~/server/domain/budget/queries";
-import { getCategoriesQuery } from "~/server/domain/category/queries";
+import { getTransactionCategoriesQuery } from "~/server/domain/transaction-category/queries";
 import {
   createBudget,
   deleteBudget,
@@ -31,7 +31,9 @@ export const budgetRouter = createTRPCRouter({
       const orgId = ctx.orgId!;
       const { budgetFilters } = input;
 
-      const categories = await getCategoriesQuery({ orgId });
+      const categories = await getTransactionCategoriesQuery(ctx.db, {
+        organizationId: orgId,
+      });
       const budgets = await getBudgetsQuery({ ...budgetFilters, orgId });
       return findBudgetWarnings(categories, budgets, budgetFilters);
     }),

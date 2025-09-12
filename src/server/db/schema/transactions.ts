@@ -2,7 +2,13 @@ import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
 import { sql } from "drizzle-orm";
-import { index, pgEnum, unique } from "drizzle-orm/pg-core";
+import {
+  foreignKey,
+  index,
+  pgEnum,
+  primaryKey,
+  unique,
+} from "drizzle-orm/pg-core";
 
 import {
   TRANSACTION_FREQUENCY,
@@ -49,9 +55,6 @@ export const transaction_table = pgTable(
       .uuid()
       .notNull()
       .references(() => account_table.id, { onDelete: "cascade" }),
-    categoryId: d.uuid().references(() => transaction_category_table.id, {
-      onDelete: "set null",
-    }),
 
     // Base properties
     amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
@@ -94,6 +97,14 @@ export const transaction_table = pgTable(
     ...timestamps,
   }),
   (t) => [
+    foreignKey({
+      columns: [t.organizationId, t.categorySlug],
+      foreignColumns: [
+        transaction_category_table.organizationId,
+        transaction_category_table.slug,
+      ],
+      name: "transactions_category_slug_team_id_fkey",
+    }),
     index("idx_transactions_date").using("btree", t.date.asc().nullsLast()),
     index("idx_transactions_organization_id_date_name").using(
       "btree",
@@ -213,7 +224,7 @@ export const transaction_embeddings_table = pgTable(
 export const transaction_category_table = pgTable(
   "transaction_category_table",
   (d) => ({
-    id: d.uuid().primaryKey().defaultRandom(),
+    id: d.uuid().defaultRandom().notNull(),
 
     // FK
     organizationId: d
@@ -231,12 +242,26 @@ export const transaction_category_table = pgTable(
     color: d.varchar({ length: 32 }),
     icon: d.varchar({ length: 32 }),
     description: d.text(),
-    excludeFromAnalytics: d.boolean().default(false),
+    excluded: d.boolean().default(false),
     system: d.boolean().default(false),
 
     ...timestamps,
   }),
-  (t) => [unique("unique_organization_slug").on(t.slug, t.organizationId)],
+  (t) => [
+    index("transaction_categories_organization_id_idx").using(
+      "btree",
+      t.organizationId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("transaction_categories_parent_id_idx").using(
+      "btree",
+      t.parentId.asc().nullsLast().op("uuid_ops"),
+    ),
+    primaryKey({
+      columns: [t.organizationId, t.slug],
+      name: "transaction_categories_pkey",
+    }),
+    unique("unique_organization_slug").on(t.organizationId, t.slug),
+  ],
 );
 
 export const transaction_category_embeddings_table = pgTable(

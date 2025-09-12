@@ -8,7 +8,7 @@ import type {
 import type z from "zod/v4";
 import { addDays, format } from "date-fns";
 
-import type { getCategoriesQuery } from "../domain/category/queries";
+import type { getTransactionCategoriesQuery } from "../domain/transaction-category/queries";
 import { db, withTransaction } from "../db";
 import {
   buildValidity,
@@ -29,7 +29,7 @@ import {
 } from "../domain/budget/queries";
 
 export type CategoryType = Awaited<
-  ReturnType<typeof getCategoriesQuery>
+  ReturnType<typeof getTransactionCategoriesQuery>
 >[number];
 
 export type BudgetType = Awaited<ReturnType<typeof getBudgetsQuery>>[number];

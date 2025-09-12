@@ -2,7 +2,7 @@ import type { UpdateTransactionEnrichmentParams } from "~/server/domain/transact
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { db } from "~/server/db";
-import { getCategoriesForEnrichment } from "~/server/domain/category/queries";
+import { getCategoriesForEnrichment } from "~/server/domain/transaction-category/queries";
 import {
   getTransactionsForEnrichment,
   markTransactionsAsEnriched,
@@ -49,9 +49,7 @@ export const enrichTransactionsTask = schemaTask({
       return { enrichedCount: 0, organizationId };
     }
 
-    const categories = await getCategoriesForEnrichment(db, {
-      organizationId,
-    });
+    const categories = await getCategoriesForEnrichment(db, { organizationId });
 
     logger.info("Starting transaction enrichment", {
       organizationId,

@@ -303,7 +303,7 @@ const CategoryCell = memo(
           }}
         />
 
-        {transaction.category?.excludeFromAnalytics && (
+        {transaction.category?.excluded && (
           <span className="text-sm text-muted-foreground">(Excluded)</span>
         )}
         {updateTransactionCategoryMutation.isPending && <Spinner />}

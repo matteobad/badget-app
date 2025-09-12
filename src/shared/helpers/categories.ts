@@ -106,56 +106,6 @@ export type Category = Omit<
   "createdAt" | "updatedAt" | "deletedAt" | "organizationId"
 >;
 
-export type CategoryWithChildren = Category & {
-  children: string[];
-};
-
-export function buildCategoryRecord(categories: Category[]) {
-  const record: Record<string, CategoryWithChildren> = {};
-
-  // inizializza tutte le categorie con children vuoti
-  for (const c of categories) {
-    record[c.id] = { ...c, children: [] };
-  }
-
-  // popola i children
-  for (const c of categories) {
-    if (c.parentId && record[c.parentId]) {
-      record[c.parentId]!.children.push(c.id);
-    }
-  }
-
-  // aggiungi root (tutti quelli senza parentId)
-  record.root = {
-    id: "root",
-    parentId: null,
-    name: "Root",
-    slug: "root",
-    color: null,
-    icon: null,
-    description: null,
-    excludeFromAnalytics: false,
-    system: false,
-    children: categories.filter((c) => !c.parentId).map((c) => c.id),
-  };
-
-  // aggiungi uncategorized (vuoto)
-  // record["uncategorized"] = {
-  //   id: "uncategorized",
-  //   parentId: null,
-  //   type: "uncategorized" as any,
-  //   name: "Uncategorized",
-  //   slug: "uncategorized",
-  //   color: null,
-  //   icon: null,
-  //   description: null,
-  //   excludeFromAnalytics: false,
-  //   children: [],
-  // };
-
-  return record;
-}
-
 // Hash function for consistent color generation
 export function customHash(value: string): number {
   let hash = 0;

@@ -231,7 +231,7 @@ const ActionsCell = memo(
           onOpenChange={setIsCreateSubcategoryOpen}
           parentId={category.id}
           defaultColor={category.color ?? undefined}
-          defaultExcluded={category.excludeFromAnalytics ?? undefined}
+          defaultExcluded={category.excluded ?? undefined}
         />
       </div>
     );

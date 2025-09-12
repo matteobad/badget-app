@@ -3,7 +3,7 @@ import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SubmitButton } from "~/components/submit-button";
-import { InputColorIcon } from "~/components/transaction-category/color-icon-picker";
+import { InputColorIcon } from "~/components/transaction-category/input-color-icon";
 import {
   Dialog,
   DialogContent,
