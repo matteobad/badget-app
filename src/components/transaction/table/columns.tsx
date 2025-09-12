@@ -272,6 +272,27 @@ const CategoryCell = memo(
       );
     }
 
+    // Show analyzing state when enrichment is not completed
+    if (!transaction.enrichmentCompleted) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex cursor-help items-center space-x-2">
+              <Spinner size={14} className="stroke-primary" />
+              <span className="text-sm text-[#878787]">Analyzing</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent
+            className="max-w-[280px] px-3 py-1.5 text-xs"
+            side="top"
+            sideOffset={5}
+          >
+            Analyzing transaction details to determine the best category.
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
     return (
       <div className="flex items-center gap-2">
         <SelectCategory

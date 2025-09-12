@@ -196,6 +196,7 @@ export async function getTransactionsQuery(
       frequency: transaction_table.frequency,
       name: transaction_table.name,
       description: transaction_table.description,
+      enrichmentCompleted: transaction_table.enrichmentCompleted,
       createdAt: transaction_table.createdAt,
       attachments: sql<
         Array<{

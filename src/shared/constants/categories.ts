@@ -78,43 +78,30 @@ const RAW_CATEGORIES = [
       { slug: "gifts", name: "Regali" },
       { slug: "donations", name: "Donazioni" },
       { slug: "misc", name: "Altro" },
+      // 8. SYSTEM
+      { slug: "uncategorized", name: "Uncategorized", system: true },
+      { slug: "transfer", name: "Transfer", system: true, excluded: true },
     ],
   },
-
-  // 8. SYSTEM
-  { slug: "uncategorized", name: "Uncategorized", system: true },
-  { slug: "transfer", name: "Transfer", system: true, excluded: true },
 ] as const;
 
-// Function to automatically apply colors and parentSlug to all categories, recursively for unlimited nested levels
+// Function to automatically apply colors and parentSlug to all categories
 function applyColorsToCategories(
-  rawCategories: readonly any[],
-  parentSlug?: string,
+  rawCategories: typeof RAW_CATEGORIES,
 ): CategoryHierarchy {
-  return rawCategories.map((category) => {
-    const { children, ...rest } = category;
-    const withMeta = {
-      ...rest,
-      color: getCategoryColor(category.slug),
-      system: !!category.system,
-      excluded: !!category.excluded,
-      ...(parentSlug ? { parentSlug } : {}),
-    };
-
-    // Recursively process children if they exist
-    if (children && Array.isArray(children)) {
-      return {
-        ...withMeta,
-        children: applyColorsToCategories(children, category.slug),
-      };
-    }
-
-    // Return category with empty children array if no children
-    return {
-      ...withMeta,
-      children: [],
-    };
-  });
+  return rawCategories.map((parent) => ({
+    ...parent,
+    color: getCategoryColor(parent.slug),
+    system: true,
+    excluded: false, // Default to not excluded
+    children: parent.children.map((child) => ({
+      ...child,
+      parentSlug: parent.slug, // Automatically add parentSlug
+      color: getCategoryColor(child.slug),
+      system: true,
+      excluded: false, // Default to not excluded
+    })),
+  }));
 }
 
 export const CATEGORIES: CategoryHierarchy =

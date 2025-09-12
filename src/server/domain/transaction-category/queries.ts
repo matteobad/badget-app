@@ -75,21 +75,3 @@ export async function getTransactionCategoryQuery(
 
   return result;
 }
-
-export type GetTransactionCategorySlugsParams = {
-  organizationId: string;
-};
-
-export const getTransactionCategorySlugsQuery = async (
-  db: DBClient,
-  params: GetTransactionCategorySlugsParams,
-) => {
-  const { organizationId } = params;
-
-  return await db
-    .select({
-      slug: transaction_category_table.slug,
-    })
-    .from(transaction_category_table)
-    .where(eq(transaction_category_table.organizationId, organizationId));
-};

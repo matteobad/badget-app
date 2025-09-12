@@ -1,5 +1,8 @@
 import type { DBClient } from "~/server/db";
-import { transaction_category_embeddings_table } from "~/server/db/schema/transactions";
+import {
+  transaction_category_embeddings_table,
+  transaction_category_table,
+} from "~/server/db/schema/transactions";
 import { eq, inArray } from "drizzle-orm";
 
 import { CategoryEmbeddings } from "../transaction-category-embeddings/helpers";
@@ -217,4 +220,61 @@ export async function generateCategoryEmbeddingsBatch(
   }
 
   return { processed, skipped, errors, results };
+}
+
+type EnsureUniqueSlugParams = {
+  categories: {
+    name: string;
+    color?: string;
+    icon?: string;
+    description?: string;
+    excluded?: boolean;
+  }[];
+  organizationId: string;
+};
+
+/**
+ * Ensures unique slugs for transaction categories within an organization
+ *
+ * This helper function takes a list of category names and generates unique slugs
+ * by appending incremental numbers when duplicates are found. It queries existing
+ * category slugs in the organization to avoid conflicts and returns the categories
+ * with their generated unique slugs.
+ *
+ * @param db - Database client instance
+ * @param params - Object containing categories array and organizationId
+ * @returns Array of categories with unique slugs appended
+ */
+export async function ensureUniqueSlugs(
+  db: DBClient,
+  params: EnsureUniqueSlugParams,
+) {
+  // Get all existing categories slugs
+  const existingSlugs = await db
+    .select({
+      slug: transaction_category_table.slug,
+    })
+    .from(transaction_category_table)
+    .where(
+      eq(transaction_category_table.organizationId, params.organizationId),
+    );
+
+  const existingSlugSet = new Set(existingSlugs.map((s) => s.slug));
+
+  // Create category unique slug
+  return params.categories.map((category) => {
+    const baseSlug = category.name.toLowerCase().replaceAll(" ", "_");
+    let uniqueSlug = baseSlug;
+    let index = 1;
+
+    while (existingSlugSet.has(uniqueSlug)) {
+      uniqueSlug = `${baseSlug}_${index}`;
+      index++;
+    }
+
+    return {
+      ...category,
+      slug: uniqueSlug,
+    };
+  });
 }

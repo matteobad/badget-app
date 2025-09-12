@@ -2,15 +2,11 @@
 
 import type { DBClient } from "~/server/db";
 import type { DB_TransactionCategoryInsertType } from "~/server/db/schema/transactions";
-import type { CategoryHierarchy } from "~/shared/types/category-types";
 import { transaction_category_table } from "~/server/db/schema/transactions";
 import { CATEGORIES } from "~/shared/constants/categories";
 import { and, eq } from "drizzle-orm";
 
-import {
-  generateCategoryEmbedding,
-  generateCategoryEmbeddingsBatch,
-} from "./helpers";
+import { generateCategoryEmbedding } from "./helpers";
 
 type CreateTransactionCategoryParams = {
   name: string;
@@ -31,19 +27,6 @@ export async function createTransactionCategoryMutation(
     .insert(transaction_category_table)
     .values({ ...params })
     .returning();
-
-  if (result) {
-    // Generate embedding for the new category (async, don't block the response)
-    generateCategoryEmbedding(db, {
-      name: result.name,
-      system: false, // User-created category
-    }).catch((error) => {
-      console.error(
-        `Failed to generate embedding for category "${result.name}":`,
-        error,
-      );
-    });
-  }
 
   return result;
 }
@@ -78,21 +61,6 @@ export const createTransactionCategoriesMutation = async (
       })),
     )
     .returning();
-
-  // Generate embeddings for all new categories (async, don't block the response)
-  if (result.length > 0) {
-    const categoryNames = result.map((category) => ({
-      name: category.name,
-      system: false, // User-created categories
-    }));
-
-    generateCategoryEmbeddingsBatch(db, categoryNames).catch((error) => {
-      console.error(
-        "Failed to generate embeddings for batch categories:",
-        error,
-      );
-    });
-  }
 
   return result;
 };
@@ -192,56 +160,62 @@ export async function createDefaultCategoriesForSpace(
   db: DBClient,
   params: CreateDefaultCategoriesForSpaceParams,
 ) {
-  // Map to track slug to ID for parent references
-  const slugToId = new Map<string, string>();
+  // Since teams have no previous categories on creation, we can insert all categories directly
+  const categoriesToInsert: DB_TransactionCategoryInsertType[] = [];
 
-  // Recursive function to process categories at any level
-  async function processCategories(
-    categories: CategoryHierarchy,
-    parentId?: string,
-  ): Promise<void> {
-    const categoriesToInsert: DB_TransactionCategoryInsertType[] = [];
+  // First, add all parent categories
+  for (const parent of CATEGORIES) {
+    categoriesToInsert.push({
+      organizationId: params.organizationId,
+      name: parent.name,
+      slug: parent.slug,
+      color: parent.color,
+      icon: parent.icon,
+      system: parent.system,
+      excludeFromAnalytics: parent.excluded,
+      description: undefined,
+      parentId: undefined, // Parent categories have no parent
+    });
+  }
 
-    // Prepare all categories at this level for insertion
-    for (const category of categories) {
-      categoriesToInsert.push({
-        organizationId: params.organizationId,
-        name: category.name,
-        slug: category.slug,
-        color: category.color,
-        system: category.system,
-        excludeFromAnalytics: category.excluded,
-        description: undefined,
-        parentId: parentId,
-      });
-    }
+  // Insert all parent categories first
+  const insertedParents = await db
+    .insert(transaction_category_table)
+    .values(categoriesToInsert)
+    .returning({
+      id: transaction_category_table.id,
+      slug: transaction_category_table.slug,
+    });
 
-    // Insert categories at this level
-    if (categoriesToInsert.length > 0) {
-      const insertedCategories = await db
-        .insert(transaction_category_table)
-        .values(categoriesToInsert)
-        .returning({
-          id: transaction_category_table.id,
-          slug: transaction_category_table.slug,
+  // Create a map of parent slug to parent ID for child category references
+  const parentSlugToId = new Map(
+    insertedParents.map((parent) => [parent.slug, parent.id]),
+  );
+
+  // Now add all child categories with proper parent references
+  const childCategoriesToInsert: DB_TransactionCategoryInsertType[] = [];
+
+  for (const parent of CATEGORIES) {
+    const parentId = parentSlugToId.get(parent.slug);
+    if (parentId) {
+      for (const child of parent.children) {
+        childCategoriesToInsert.push({
+          organizationId: params.organizationId,
+          name: child.name,
+          slug: child.slug,
+          color: child.color,
+          icon: child.icon,
+          system: child.system,
+          excludeFromAnalytics: child.excluded,
+          description: undefined,
+          parentId: parentId,
         });
-
-      // Update the slug to ID mapping
-      for (const inserted of insertedCategories) {
-        slugToId.set(inserted.slug, inserted.id);
-      }
-
-      // Recursively process children of each inserted category
-      for (const category of categories) {
-        const categoryId = slugToId.get(category.slug);
-        if (categoryId && category.children && category.children.length > 0) {
-          await processCategories(category.children, categoryId);
-        }
       }
     }
   }
 
-  // Start processing from the root level
-  console.log("CATEGORIES.length", CATEGORIES.length);
-  await processCategories(CATEGORIES);
+  // Insert all child categories
+  if (childCategoriesToInsert.length > 0) {
+    await db.insert(transaction_category_table).values(childCategoriesToInsert);
+  }
 }

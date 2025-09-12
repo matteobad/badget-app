@@ -56,8 +56,8 @@ export function InputColorIcon({
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
-            variant="outline"
-            className="size-10 rounded-full border-2 p-0 hover:[&>svg]:scale-105"
+            variant="ghost"
+            className="absolute top-0 left-0 size-9 border-r p-0 hover:[&>svg]:scale-105"
             style={{ backgroundColor, color: textColor, borderColor }}
           >
             <DynamicIcon name={icon} className="size-4 transition-transform" />
@@ -132,7 +132,7 @@ export function InputColorIcon({
         autoFocus={autoFocus}
         autoCorrect="off"
         spellCheck="false"
-        className="pl-7"
+        className="pl-11"
         value={value}
         onChange={(evt) => {
           const newName = evt.target.value;

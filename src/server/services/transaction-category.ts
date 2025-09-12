@@ -12,6 +12,11 @@ import { eq } from "drizzle-orm";
 import type { DBClient } from "../db";
 import { transaction_category_table } from "../db/schema/transactions";
 import {
+  ensureUniqueSlugs,
+  generateCategoryEmbedding,
+  generateCategoryEmbeddingsBatch,
+} from "../domain/transaction-category/helpers";
+import {
   createDefaultCategoriesForSpace,
   createTransactionCategoriesMutation,
   createTransactionCategoryMutation,
@@ -21,7 +26,6 @@ import {
 import {
   getTransactionCategoriesQuery,
   getTransactionCategoryQuery,
-  getTransactionCategorySlugsQuery,
 } from "../domain/transaction-category/queries";
 
 // CRUD operation on Transaction Category
@@ -71,31 +75,44 @@ export async function getTransactionCategory(
 }
 
 export async function createTransactionCategory(
-  client: DBClient,
+  db: DBClient,
   input: z.infer<typeof createTransactionCategorySchema>,
   organizationId: string,
 ) {
-  // Get all existing categories slugs
-  const existingSlugs = await getTransactionCategorySlugsQuery(client, {
+  // Ensure unique slugs for categories
+  const [category] = await ensureUniqueSlugs(db, {
+    categories: [input],
     organizationId,
   });
 
-  // Create category unique slug
-  const existingSlugSet = new Set(existingSlugs.map((s) => s.slug));
-  const baseSlug = input.name.toLowerCase().replaceAll(" ", "_");
-  let uniqueSlug = baseSlug;
-  let index = 1;
-
-  while (existingSlugSet.has(uniqueSlug)) {
-    uniqueSlug = `${baseSlug}_${index}`;
-    index++;
+  if (!category) {
+    // Should never happend!
+    console.error("Failed to ensure unique slugs");
+    throw new Error("Failed to ensure unique slugs");
   }
 
   // Persist new category
-  return await createTransactionCategoryMutation(client, {
-    ...input,
-    slug: uniqueSlug,
-    organizationId,
+  return await db.transaction(async (tx) => {
+    const result = await createTransactionCategoryMutation(tx, {
+      ...input,
+      slug: category.slug,
+      organizationId,
+    });
+
+    if (result) {
+      // Generate embedding for the new category (async, don't block the response)
+      generateCategoryEmbedding(tx, {
+        name: result.name,
+        system: false, // User-created category
+      }).catch((error) => {
+        console.error(
+          `Failed to generate embedding for category "${result.name}":`,
+          error,
+        );
+      });
+    }
+
+    return result;
   });
 }
 
@@ -104,34 +121,35 @@ export async function createTransactionCategories(
   input: z.infer<typeof createManyTransactionCategorySchema>,
   organizationId: string,
 ) {
-  // Get all existing categories slugs
-  const existingSlugs = await getTransactionCategorySlugsQuery(db, {
+  // Ensure unique slugs for categories
+  const categories = await ensureUniqueSlugs(db, {
+    categories: input,
     organizationId,
-  });
-  const existingSlugSet = new Set(existingSlugs.map((s) => s.slug));
-
-  // TODO: extract slug logic into helper
-  const categories = input.map((category) => {
-    // Create category unique slug
-    const baseSlug = category.name.toLowerCase().replaceAll(" ", "_");
-    let uniqueSlug = baseSlug;
-    let index = 1;
-
-    while (existingSlugSet.has(uniqueSlug)) {
-      uniqueSlug = `${baseSlug}_${index}`;
-      index++;
-    }
-
-    return {
-      ...category,
-      slug: uniqueSlug,
-    };
   });
 
   // Persist new categories
-  return await createTransactionCategoriesMutation(db, {
-    categories,
-    organizationId,
+  await db.transaction(async (tx) => {
+    const result = await createTransactionCategoriesMutation(tx, {
+      categories,
+      organizationId,
+    });
+
+    // Generate embeddings for all new categories (async, don't block the response)
+    if (result.length > 0) {
+      const categoryNames = result.map((category) => ({
+        name: category.name,
+        system: false, // User-created categories
+      }));
+
+      generateCategoryEmbeddingsBatch(tx, categoryNames).catch((error) => {
+        console.error(
+          "Failed to generate embeddings for batch categories:",
+          error,
+        );
+      });
+    }
+
+    return result;
   });
 }
 
