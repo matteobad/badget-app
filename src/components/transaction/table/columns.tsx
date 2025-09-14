@@ -77,7 +77,7 @@ const DescriptionCell = memo(
     counterpartyLogo,
     recurring,
     frequency,
-    excludeFromReports,
+    excluded,
     split,
   }: {
     name: string;
@@ -85,7 +85,7 @@ const DescriptionCell = memo(
     counterpartyLogo?: string;
     recurring?: boolean;
     frequency?: TransactionFrequencyType;
-    excludeFromReports?: boolean;
+    excluded?: boolean;
     split?: boolean;
   }) => (
     <div className="flex items-center space-x-2">
@@ -108,7 +108,7 @@ const DescriptionCell = memo(
             <TransactionInfoTooltips
               recurring={recurring}
               frequency={frequency}
-              excludeFromReports={excludeFromReports}
+              excludeFromReports={excluded}
               split={split}
             />
           </div>
@@ -489,8 +489,9 @@ export const columns: ColumnDef<Transaction>[] = [
         description={row.original.description ?? undefined}
         recurring={row.original.recurring ?? undefined}
         frequency={row.original.frequency ?? undefined}
-        excludeFromReports={Boolean(
-          row.original.internal ?? row.original.category?.excluded,
+        excluded={Boolean(
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+          row.original.internal || row.original.category?.excluded,
         )}
         split={row.original.splits.length > 0}
       />

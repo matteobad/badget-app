@@ -107,7 +107,7 @@ export const updateTransactionCategorySchema = z
       description: "The UUID of the parent category, if this is a subcategory",
       example: "a1b2c3d4-e5f6-7a8b-9c0d-ef1234567890",
     }),
-    excludeFromAnalytics: z.boolean().optional().openapi({
+    excluded: z.boolean().optional().openapi({
       description: "Whether to exclude this category from analytics",
       example: false,
       default: false,

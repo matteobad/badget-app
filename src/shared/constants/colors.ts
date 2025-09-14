@@ -81,22 +81,18 @@ export const CATEGORY_COLORS = [
 
 // Comprehensive color mapping for all categories
 export const CATEGORY_COLOR_MAP = {
-  // 0. ROOT
-  root: "#000000", // Placeholder
-
   // 1. INCOME
-  income: "#00D084", // Green
-  salary: "#22c55e",
-  bonus: "#4ade80",
-  freelance: "#86efac",
-  refunds: "#bbf7d0",
-  "other-income": "#dcfce7",
+  income: "#14532d", // green-900
+  salary: "#166534", // green-800
+  bonus: "#15803d", // green-700
+  freelance: "#16a34a", // green-600
+  "other-income": "#22c55e", // green-500
 
   // 2. HOUSING
-  housing: "#FF6900", // Orange
-  "rent-mortgage": "#3b82f6",
-  utilities: "#60a5fa",
-  maintenance: "#93c5fd",
+  housing: "#7c2d12", // orange-900
+  "rent-mortgage": "#9a3412", // orange-800
+  utilities: "#c2410c", // orange-700
+  maintenance: "#ea580c", // orange-600
 
   // 3. FOOD & DRINK
   "food-drink": "#0693E3", // Blue

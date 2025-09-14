@@ -66,7 +66,7 @@ export function EditCategoryModal({
       color: defaultValue.color ?? undefined,
       icon: defaultValue.icon ?? undefined,
       description: defaultValue.description ?? undefined,
-      excludeFromAnalytics: defaultValue?.excluded ?? false,
+      excluded: defaultValue?.excluded ?? false,
     },
   });
 
@@ -76,7 +76,7 @@ export function EditCategoryModal({
       description: values.description ?? undefined,
       color: values.color ?? undefined,
       icon: values.icon ?? undefined,
-      excludeFromAnalytics: values.excludeFromAnalytics ?? false,
+      excluded: values.excluded ?? false,
     });
   }
 
@@ -140,7 +140,7 @@ export function EditCategoryModal({
 
               <FormField
                 control={form.control}
-                name="excludeFromAnalytics"
+                name="excluded"
                 render={({ field }) => (
                   <FormItem className="flex-1 space-y-1">
                     <div className="mt-4 border border-border p-3">

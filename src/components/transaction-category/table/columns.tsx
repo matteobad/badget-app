@@ -160,6 +160,11 @@ const NameCell = memo(
             System
           </span>
         )}
+        {category.excluded && (
+          <span className="border border-border px-2 py-1 font-mono text-xs text-muted-foreground">
+            Excluded
+          </span>
+        )}
       </div>
     );
   },

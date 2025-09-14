@@ -1,6 +1,7 @@
 import type { DB_TransactionCategoryType } from "~/server/db/schema/transactions";
 
 import { CATEGORY_COLOR_MAP, CATEGORY_COLORS } from "../constants/colors";
+import { CATEGORY_ICON_MAP } from "../constants/icons";
 
 export const colors = [
   "#FF6900", // Orange
@@ -138,4 +139,20 @@ export function getCategoryColor(slug: string): string {
 
   // Fallback to hash-based generation for any unmapped categories
   return getColorFromSlug(slug);
+}
+
+// Get color from a string value (slug)
+export function getIconFromSlug(_slug: string): string {
+  return "circle-dashed";
+}
+
+// Get color for a category (uses predefined mapping)
+export function getCategoryIcon(slug: string): string {
+  const icon = CATEGORY_ICON_MAP[slug as keyof typeof CATEGORY_ICON_MAP];
+  if (icon) {
+    return icon;
+  }
+
+  // TODO: Fallback to pattern matching for any unmapped categories
+  return getIconFromSlug(slug);
 }
