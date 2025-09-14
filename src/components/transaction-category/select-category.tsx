@@ -240,7 +240,7 @@ export function SelectCategory({
               ? {
                   name: selectedValue.label,
                   color: selectedValue.color,
-                  icon: null,
+                  icon: selectedValue.icon,
                 }
               : undefined
           }
