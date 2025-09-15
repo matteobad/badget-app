@@ -2,8 +2,8 @@ import { schemaTask } from "@trigger.dev/sdk";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import {
-  attachment_table,
   tag_table,
+  transaction_attachment_table,
   transaction_category_table,
   transaction_table,
   transaction_to_tag_table,
@@ -52,7 +52,7 @@ export const processExportTask = schemaTask({
             type: string;
             size: number;
           }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${attachment_table.id}, 'filename', ${attachment_table.fileName}, 'path', ${attachment_table.fileUrl}, 'type', ${attachment_table.fileType}, 'size', ${attachment_table.fileSize})) FILTER (WHERE ${attachment_table.id} IS NOT NULL), '[]'::json)`.as(
+        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transaction_attachment_table.id}, 'filename', ${transaction_attachment_table.name}, 'path', ${transaction_attachment_table.path}, 'type', ${transaction_attachment_table.type}, 'size', ${transaction_attachment_table.size})) FILTER (WHERE ${transaction_attachment_table.id} IS NOT NULL), '[]'::json)`.as(
           "attachments",
         ),
         category: {
@@ -91,8 +91,8 @@ export const processExportTask = schemaTask({
       )
       .leftJoin(tag_table, eq(tag_table.id, transaction_to_tag_table.tagId))
       .leftJoin(
-        attachment_table,
-        eq(attachment_table.transactionId, transaction_table.id),
+        transaction_attachment_table,
+        eq(transaction_attachment_table.transactionId, transaction_table.id),
       )
       .where(inArray(transaction_table.id, ids))
       .groupBy(

@@ -10,8 +10,8 @@ import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { connection_table } from "~/server/db/schema/open-banking";
 import {
-  attachment_table,
   tag_table,
+  transaction_attachment_table,
   transaction_category_table,
   transaction_embeddings_table,
   transaction_split_table,
@@ -206,7 +206,7 @@ export async function getTransactionsQuery(
           type: string;
           size: number;
         }>
-      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${attachment_table.id}, 'filename', ${attachment_table.fileName}, 'path', ${attachment_table.fileUrl}, 'type', ${attachment_table.fileType}, 'size', ${attachment_table.fileSize})) FILTER (WHERE ${attachment_table.id} IS NOT NULL), '[]'::json)`.as(
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transaction_attachment_table.id}, 'filename', ${transaction_attachment_table.name}, 'path', ${transaction_attachment_table.path}, 'type', ${transaction_attachment_table.type}, 'size', ${transaction_attachment_table.size})) FILTER (WHERE ${transaction_attachment_table.id} IS NOT NULL), '[]'::json)`.as(
         "attachments",
       ),
       category: {
@@ -274,10 +274,10 @@ export async function getTransactionsQuery(
       and(eq(transaction_split_table.transactionId, transaction_table.id)),
     )
     .leftJoin(
-      attachment_table,
+      transaction_attachment_table,
       and(
-        eq(attachment_table.transactionId, transaction_table.id),
-        eq(attachment_table.organizationId, orgId),
+        eq(transaction_attachment_table.transactionId, transaction_table.id),
+        eq(transaction_attachment_table.organizationId, orgId),
       ),
     )
     .where(and(...finalWhereConditions))
@@ -315,7 +315,7 @@ export async function getTransactionsQuery(
     if (column === "attachment") {
       query = query.orderBy(
         order(
-          sql`(EXISTS (SELECT 1 FROM ${attachment_table} WHERE ${eq(attachment_table.transactionId, transaction_table.id)} AND ${eq(attachment_table.organizationId, orgId)}) OR ${transaction_table.status} = 'completed')`,
+          sql`(EXISTS (SELECT 1 FROM ${transaction_attachment_table} WHERE ${eq(transaction_attachment_table.transactionId, transaction_table.id)} AND ${eq(transaction_attachment_table.organizationId, orgId)}) OR ${transaction_table.status} = 'completed')`,
         ),
         order(transaction_table.id),
       );
@@ -425,7 +425,7 @@ export async function getTransactionByIdQuery(id: string, orgId: string) {
           type: string;
           size: number;
         }>
-      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${attachment_table.id}, 'filename', ${attachment_table.fileName}, 'path', ${attachment_table.fileUrl}, 'type', ${attachment_table.fileType}, 'size', ${attachment_table.fileSize})) FILTER (WHERE ${attachment_table.id} IS NOT NULL), '[]'::json)`.as(
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transaction_attachment_table.id}, 'filename', ${transaction_attachment_table.name}, 'path', ${transaction_attachment_table.path}, 'type', ${transaction_attachment_table.type}, 'size', ${transaction_attachment_table.size})) FILTER (WHERE ${transaction_attachment_table.id} IS NOT NULL), '[]'::json)`.as(
         "attachments",
       ),
       category: {
@@ -479,10 +479,10 @@ export async function getTransactionByIdQuery(id: string, orgId: string) {
       ),
     )
     .leftJoin(
-      attachment_table,
+      transaction_attachment_table,
       and(
-        eq(attachment_table.transactionId, transaction_table.id),
-        eq(attachment_table.organizationId, orgId),
+        eq(transaction_attachment_table.transactionId, transaction_table.id),
+        eq(transaction_attachment_table.organizationId, orgId),
       ),
     )
     .where(

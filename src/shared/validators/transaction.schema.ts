@@ -55,7 +55,16 @@ export const createManualTransactionSchema = z.object({
   accountId: z.uuid(),
   transferId: z.uuid().optional(),
   categorySlug: z.string().optional(),
-  attachment_ids: z.array(z.string()).optional(),
+  attachments: z
+    .array(
+      z.object({
+        path: z.array(z.string()),
+        name: z.string(),
+        size: z.number(),
+        type: z.string(),
+      }),
+    )
+    .optional(),
   tags: z.array(z.object({ id: z.string(), text: z.string() })).optional(),
 });
 

@@ -1,7 +1,6 @@
 import type {
   categorizeTransactionSchema,
   createManualTransactionSchema,
-  createTransactionSchema,
   createTransferSchema,
   deleteManyTransactionsSchema,
   deleteTranferSchema,
@@ -18,16 +17,13 @@ import { eq } from "drizzle-orm";
 import type { DBClient } from "../db";
 import type { NormalizedTx } from "../domain/transaction/utils";
 import type { embedTransactionsTask } from "../jobs/tasks/embed-transactions";
-import { db, withTransaction } from "../db";
+import { db } from "../db";
 import { account_table } from "../db/schema/accounts";
 import { transaction_table } from "../db/schema/transactions";
-import { updateAttachmentMutation } from "../domain/attachment/mutations";
 import {
-  createTransactionMutation,
   deleteManyTransactionsMutation,
   updateManyTransactionsMutation,
   updateTransactionMutation,
-  updateTransactionTagsMutation,
 } from "../domain/transaction/mutations";
 import {
   getTransactionAccountCountsQuery,
@@ -74,32 +70,6 @@ export async function getTransactionTagsCounts(orgId: string) {
 
 export async function getTransactionAccountCounts(orgId: string) {
   return await getTransactionAccountCountsQuery(orgId);
-}
-
-export async function createTransaction(
-  input: z.infer<typeof createTransactionSchema>,
-  orgId: string,
-) {
-  await withTransaction(async (tx) => {
-    // insert transaction
-    const inserted = await createTransactionMutation(tx, input, orgId);
-
-    if (!inserted[0]?.id) return tx.rollback();
-    const transactionId = inserted[0].id;
-
-    // update transaction attachments
-    for (const id of input?.attachment_ids ?? []) {
-      const updatedAttachment = { id, orgId, transactionId };
-      await updateAttachmentMutation(tx, updatedAttachment, orgId);
-    }
-
-    // update transaction tags
-    const tags = input?.tags?.map((t) => t.text) ?? [];
-    await updateTransactionTagsMutation(tx, { tags, transactionId }, orgId);
-  });
-
-  // update category rule relevance
-  // await updateOrCreateRule(orgId, input.name, input.categoryId);
 }
 
 /**

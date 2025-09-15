@@ -14,6 +14,7 @@ import { pgTable } from "./_table";
 import { account_table } from "./accounts";
 import { organization as organization_table } from "./auth";
 
+// Enums
 export const transactionMethodEnum = pgEnum(
   "transaction_method",
   TRANSACTION_METHOD,
@@ -34,6 +35,7 @@ export const transactionSourceEnum = pgEnum(
   TRANSACTION_SOURCE,
 );
 
+// Tables
 export const transaction_table = pgTable(
   "transaction_table",
   (d) => ({
@@ -283,33 +285,37 @@ export const transaction_category_embeddings_table = pgTable(
   ],
 );
 
-// TODO: attachment are a completly different feature
-export const attachment_table = pgTable("attachment_table", (d) => ({
-  id: d
-    .varchar({ length: 128 })
-    .primaryKey()
-    .$defaultFn(() => createId())
-    .notNull(),
+export const transaction_attachment_table = pgTable(
+  "transaction_attachment_table",
+  (d) => ({
+    id: d.uuid().defaultRandom().primaryKey().notNull(),
 
-  organizationId: d
-    .uuid()
-    .references(() => organization_table.id, { onDelete: "cascade" })
-    .notNull(),
-  transactionId: d
-    .uuid()
-    .references(() => transaction_table.id, { onDelete: "cascade" }),
+    organizationId: d
+      .uuid()
+      .references(() => organization_table.id, { onDelete: "cascade" })
+      .notNull(),
+    transactionId: d
+      .uuid()
+      .references(() => transaction_table.id, { onDelete: "cascade" }),
 
-  fileName: d.text().notNull(),
-  fileKey: d.text().notNull(), // Chiave del file in UploadThing (equivalente a file_name su S3)
-  fileUrl: d.text().notNull(), // URL pubblico o presigned
-  fileType: d.text().notNull(), // MIME type
-  fileSize: d.integer().notNull(), // number
+    path: d.text().array(),
+    name: d.text(),
+    type: d.text(), // MIME type
+    size: d.bigint({ mode: "number" }), // number
 
-  ...timestamps,
-}));
-
-export type DB_AttachmentType = typeof attachment_table.$inferSelect;
-export type DB_AttachmentInsertType = typeof attachment_table.$inferInsert;
+    ...timestamps,
+  }),
+  (t) => [
+    index("transaction_attachments_organization_id_idx").using(
+      "btree",
+      t.organizationId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("transaction_attachments_transaction_id_idx").using(
+      "btree",
+      t.transactionId.asc().nullsLast().op("uuid_ops"),
+    ),
+  ],
+);
 
 // Tags Table (for multi-label categorization)
 export const tag_table = pgTable(
@@ -354,6 +360,7 @@ export const transaction_to_tag_table = pgTable(
   (t) => [unique().on(t.transactionId, t.tagId)],
 );
 
+// Types
 export type DB_TransactionType = typeof transaction_table.$inferSelect;
 export type DB_TransactionInsertType = typeof transaction_table.$inferInsert;
 export type DB_TransactionSplitType =
@@ -374,3 +381,7 @@ export type DB_TransactionToTagType =
   typeof transaction_to_tag_table.$inferSelect;
 export type DB_TransactionToTagInsertType =
   typeof transaction_to_tag_table.$inferInsert;
+export type DB_TransactionAttachmentType =
+  typeof transaction_attachment_table.$inferSelect;
+export type DB_TransactionAttachmentInsertType =
+  typeof transaction_attachment_table.$inferInsert;

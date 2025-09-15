@@ -10,6 +10,7 @@ import { organizationRouter } from "./organization";
 import { preferencesRouter } from "./preferences";
 import { tagRouter } from "./tag";
 import { transactionRouter } from "./transaction";
+import { transactionAttachmentRouter } from "./transaction-attachment";
 import { transactionCategoryRouter } from "./transaction-category";
 import { transactionTagRouter } from "./transaction-tag";
 import { userRouter } from "./user";
@@ -31,6 +32,7 @@ export const appRouter = createTRPCRouter({
   preferences: preferencesRouter,
   budget: budgetRouter,
   transaction: transactionRouter,
+  transactionAttachment: transactionAttachmentRouter,
   transactionCategory: transactionCategoryRouter,
   transactionTag: transactionTagRouter,
 });

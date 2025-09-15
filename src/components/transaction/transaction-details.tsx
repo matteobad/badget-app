@@ -1,4 +1,3 @@
-import type { DB_AttachmentType } from "~/server/db/schema/transactions";
 import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import type { Tag } from "emblor";
 import { useState } from "react";
@@ -26,22 +25,19 @@ import { Textarea } from "~/components/ui/textarea";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
 import { TRANSACTION_FREQUENCY } from "~/shared/constants/enum";
-import { formatSize } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
-import { UploadDropzone } from "~/utils/uploadthing";
 import { format } from "date-fns";
-import { XIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { TagsSelect } from "../tag/tags-select";
+import { TransactionAttachments } from "../transaction-attachment/transaction-attachment";
 import { SelectCategory } from "../transaction-category/select-category";
 import { SimilarTransactionsUpdateToast } from "./similar-transactions-update-toast";
 import { TransactionBankAccount } from "./transaction-bank-account";
 import { TransactionShortcuts } from "./transaction-shortcuts";
 
 export function TransactionDetails() {
-  const [, setAttachments] = useState<DB_AttachmentType[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   const tScoped = useScopedI18n("transaction");
@@ -480,62 +476,7 @@ export function TransactionDetails() {
         <AccordionItem value="attachment">
           <AccordionTrigger>{tScoped("attachments")}</AccordionTrigger>
           <AccordionContent className="select-text">
-            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden">
-              <UploadDropzone
-                content={{
-                  uploadIcon: <></>,
-                }}
-                className="mt-0 h-[200px]"
-                endpoint="attachmentUploader"
-                onClientUploadComplete={(res) => {
-                  // Do something with the response
-                  console.log("Files: ", res);
-                  const serverData = res[0]?.serverData.attachments ?? "[]";
-                  const uploaded = JSON.parse(
-                    serverData,
-                  ) as DB_AttachmentType[];
-                  // const attachmentIds = uploaded.map((_) => _.id);
-                  setAttachments(uploaded);
-                  toast.info("Attachment caricati");
-                }}
-                onUploadError={(error: Error) => {
-                  // Do something with the error.
-                  console.error(error.message);
-                  toast.error(error.message);
-                }}
-              />
-            </div>
-            <ul className="mt-4 space-y-4">
-              {data.attachments.map((file) => (
-                <div
-                  className="flex items-center justify-between"
-                  key={file.id}
-                >
-                  <div className="flex w-80 flex-col space-y-0.5">
-                    <span className="truncate">{file.filename}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {file.size && formatSize(file.size)}
-                    </span>
-                  </div>
-
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    type="button"
-                    className="flex w-auto hover:bg-transparent"
-                    // disabled={deleteAttachment.isExecuting}
-                    // onClick={() =>
-                    //   deleteAttachment.execute({
-                    //     id: file.id,
-                    //     fileKey: file.fileKey,
-                    //   })
-                    // }
-                  >
-                    <XIcon size={14} />
-                  </Button>
-                </div>
-              ))}
-            </ul>
+            <TransactionAttachments id={data?.id} data={data?.attachments} />
           </AccordionContent>
         </AccordionItem>
 

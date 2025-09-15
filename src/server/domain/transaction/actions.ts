@@ -2,7 +2,6 @@
 
 import type { exportTransactionsTask } from "~/server/jobs/tasks/export-transactions";
 import type { importTransactionsTask } from "~/server/jobs/tasks/import-transactions";
-import { revalidateTag } from "next/cache";
 import { openai } from "@ai-sdk/openai";
 import { createStreamableValue } from "@ai-sdk/rsc";
 import { parse } from "@fast-csv/parse";
@@ -10,19 +9,13 @@ import { tasks } from "@trigger.dev/sdk";
 import { authActionClient } from "~/lib/safe-action";
 import { db } from "~/server/db";
 import { utapi } from "~/server/uploadthing";
-import { attachmentDeleteSchema } from "~/shared/validators/attachment.schema";
 import {
   exportTransactionsSchema,
   importTransactionSchema,
   parseTransactionCSVSchema,
 } from "~/shared/validators/transaction.schema";
 import { streamObject } from "ai";
-import { z } from "zod/v4";
-
-import {
-  createAttachmentMutation,
-  deleteAttachmentMutation,
-} from "../attachment/mutations";
+import { z } from "zod";
 
 const schema = z.object({
   name: z.string().optional().describe("The name to search for"),
@@ -84,23 +77,6 @@ export async function generateTransactionsFilters(
 
   return { object: stream.value };
 }
-
-export const deleteTransactionAttachmentAction = authActionClient
-  .inputSchema(attachmentDeleteSchema)
-  .metadata({ actionName: "delete-transaction-attachment" })
-  .action(async ({ parsedInput, ctx }) => {
-    // Mutate data
-    // TODO: attachment can be associated to multiple transactions
-    // remove it only if it's not associated with anything
-    await deleteAttachmentMutation(db, parsedInput.id, ctx.userId);
-    await utapi.deleteFiles(parsedInput.fileKey);
-
-    // Invalidate cache
-    revalidateTag(`attachment_${ctx.userId}`);
-
-    // Return success message
-    return { message: "delete-attachment-success-message" };
-  });
 
 export const parseTransactionsCSVAction = authActionClient
   .inputSchema(parseTransactionCSVSchema)

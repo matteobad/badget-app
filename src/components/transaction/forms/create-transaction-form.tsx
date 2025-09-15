@@ -7,6 +7,7 @@ import { CurrencyInput } from "~/components/custom/currency-input";
 import { AccountPicker } from "~/components/forms/account-picker";
 import { SubmitButton } from "~/components/submit-button";
 import { TagsSelect } from "~/components/tag/tags-select";
+import { TransactionAttachments } from "~/components/transaction-attachment/transaction-attachment";
 import { SelectCategory } from "~/components/transaction-category/select-category";
 import {
   Accordion,
@@ -42,22 +43,17 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
-import { type DB_AttachmentType } from "~/server/db/schema/transactions";
-import { deleteTransactionAttachmentAction } from "~/server/domain/transaction/actions";
-import { formatSize } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createManualTransactionSchema } from "~/shared/validators/transaction.schema";
-import { UploadDropzone } from "~/utils/uploadthing";
 import { format } from "date-fns";
 import { type Tag } from "emblor";
-import { CalendarIcon, X } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { CalendarIcon } from "lucide-react";
+import { nanoid } from "nanoid";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod/v4";
 
 export default function CreateTransactionForm() {
-  const [attachments, setAttachments] = useState<DB_AttachmentType[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
@@ -106,31 +102,22 @@ export default function CreateTransactionForm() {
     }),
   );
 
-  const deleteAttachment = useAction(deleteTransactionAttachmentAction, {
-    onError: ({ error }) => {
-      console.error(error);
-      toast.error(error.serverError);
-    },
-    onSuccess: ({ data, input }) => {
-      console.log(data?.message);
-      setAttachments((prev) => prev.filter((_) => _.id !== input.id));
-    },
-  });
-
   const form = useForm<z.infer<typeof createManualTransactionSchema>>({
     resolver: standardSchemaResolver(createManualTransactionSchema),
     defaultValues: {
+      categorySlug: undefined,
       date: format(new Date(), "yyyy-MM-dd"),
       description: "",
       currency: "EUR",
       accountId: accounts?.at(0)?.id,
-      attachment_ids: [],
+      attachments: undefined,
       tags: tags,
       method: "unknown",
       status: "posted",
     },
   });
 
+  const attachments = form.watch("attachments");
   const bankAccountId = form.watch("accountId");
 
   const handleSubmit = (
@@ -372,63 +359,20 @@ export default function CreateTransactionForm() {
           <AccordionItem value="attchament">
             <AccordionTrigger>Allegati</AccordionTrigger>
             <AccordionContent className="space-y-2">
-              <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden">
-                <UploadDropzone
-                  content={{
-                    uploadIcon: <></>,
-                  }}
-                  className="mt-0 h-[200px]"
-                  endpoint="attachmentUploader"
-                  onClientUploadComplete={(res) => {
-                    // Do something with the response
-                    console.log("Files: ", res);
-                    const serverData = res[0]?.serverData.attachments ?? "[]";
-                    const uploaded = JSON.parse(
-                      serverData,
-                    ) as DB_AttachmentType[];
-                    const attachmentIds = uploaded.map((_) => _.id);
-                    setAttachments(uploaded);
-                    form.setValue("attachment_ids", attachmentIds);
-                    toast.info("Attachment caricati");
-                  }}
-                  onUploadError={(error: Error) => {
-                    // Do something with the error.
-                    console.error(error.message);
-                    toast.error(error.message);
-                  }}
-                />
-              </div>
-              <ul className="mt-4 space-y-4">
-                {attachments.map((file) => (
-                  <div
-                    className="flex items-center justify-between"
-                    key={file.fileKey}
-                  >
-                    <div className="flex w-80 flex-col space-y-0.5">
-                      <span className="truncate">{file.fileName}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {file.fileSize && formatSize(file.fileSize)}
-                      </span>
-                    </div>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      type="button"
-                      className="flex w-auto hover:bg-transparent"
-                      disabled={deleteAttachment.isExecuting}
-                      onClick={() =>
-                        deleteAttachment.execute({
-                          id: file.id,
-                          fileKey: file.fileKey,
-                        })
-                      }
-                    >
-                      <X size={14} />
-                    </Button>
-                  </div>
-                ))}
-              </ul>
+              <TransactionAttachments
+                // NOTE: For manual attachments, we need to generate a unique id
+                id={nanoid()}
+                data={attachments?.map((attachment) => ({
+                  ...attachment,
+                  id: nanoid(),
+                  filename: attachment.name,
+                  path: attachment.path.join("/"),
+                }))}
+                onUpload={(files) => {
+                  // @ts-expect-error possible undefined
+                  form.setValue("attachments", files);
+                }}
+              />
             </AccordionContent>
           </AccordionItem>
 
