@@ -141,6 +141,29 @@ export const updateBankAccountSchema = z
     },
   });
 
+export const updateBankAccountBalanceSchema = z
+  .object({
+    id: z.uuid().openapi({
+      description: "The unique identifier of the bank account.",
+      example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
+    }),
+    balance: z.number().openapi({
+      description: "The new balance to set for the bank account.",
+      example: 1500.75,
+    }),
+    date: z.iso.date().openapi({
+      description: "The date for which the new balance is set.",
+      example: "2024-06-01",
+    }),
+  })
+  .openapi({
+    description: "Schema for updating only the balance of a bank account.",
+    example: {
+      id: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
+      balance: 1500.75,
+    },
+  });
+
 // Search params for sheets
 export const bankAccountParamsSchema = {
   bankAccountId: parseAsString,

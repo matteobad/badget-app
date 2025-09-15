@@ -4,12 +4,14 @@ import {
   getBankAccountById,
   getBankAccounts,
   updateBankAccount,
+  updateManualBankAccountBalance,
 } from "~/server/services/bank-account-service";
 import {
   createManualBankAccountSchema,
   deleteBankAccountSchema,
   getBankAccountByIdSchema,
   getBankAccountsSchema,
+  updateBankAccountBalanceSchema,
   updateBankAccountSchema,
 } from "~/shared/validators/bank-account.schema";
 
@@ -38,9 +40,14 @@ export const bankAccountRouter = createTRPCRouter({
 
   update: protectedProcedure
     .input(updateBankAccountSchema)
-    .mutation(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-      return updateBankAccount(input, orgId);
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return updateBankAccount(db, input, orgId!);
+    }),
+
+  updateBankAccountBalance: protectedProcedure
+    .input(updateBankAccountBalanceSchema)
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return updateManualBankAccountBalance(db, input, orgId!);
     }),
 
   delete: protectedProcedure

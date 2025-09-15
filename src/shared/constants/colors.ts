@@ -95,39 +95,39 @@ export const CATEGORY_COLOR_MAP = {
   maintenance: "#ea580c", // orange-600
 
   // 3. FOOD & DRINK
-  "food-drink": "#0693E3", // Blue
-  groceries: "#fbbf24",
-  restaurants: "#fcd34d",
-  coffee: "#fde68a",
+  "food-drink": "#78350f", // amber-900
+  groceries: "#92400e", // amber-800
+  restaurants: "#b45309", // amber-700
+  coffee: "#d97706", // amber-600
 
   // 4. TRANSPORTATION
-  transport: "#8ED1FC", // Sky Blue
-  fuel: "#8b5cf6",
-  "public-transport": "#a78bfa",
-  "car-maintenance": "#c4b5fd",
+  transport: "#0c4a6e", // sky-900
+  fuel: "#075985", // sky-800
+  "public-transport": "#0369a1", // sky-700
+  "car-maintenance": "#0284c7", // sky-600
 
   // 5. HEALTH
-  health: "#EB144C", // Red
-  doctor: "#ef4444",
-  pharmacy: "#f87171",
-  insurance: "#fca5a5",
+  health: "#7f1d1d", // red-900
+  doctor: "#991b1b", // red-800
+  pharmacy: "#b91c1c", // red-700
+  insurance: "#dc2626", // red-600
 
   // 6. LEISURE
-  leisure: "#39CCCC", // Teal
-  entertainment: "#ec4899",
-  subscriptions: "#f472b6",
-  travel: "#f9a8d4",
+  leisure: "#134e4a", // teal-900
+  entertainment: "#115e59", // teal-800
+  subscriptions: "#0f766e", // teal-700
+  travel: "#0d9488", // teal-600
 
   // 7. OTHER
-  other: "#6b7280", // grigio neutro
-  gifts: "#9ca3af",
-  donations: "#d1d5db",
-  misc: "#e5e7eb",
+  other: "#111827", // gray-900
+  gifts: "#1f2937", // gray-800
+  donations: "#374151", // gray-700
+  misc: "#4b5563", // gray-600
 
   // 8. SYSTEM
-  system: "#475569",
-  uncategorized: "#475569",
-  transfer: "#334155",
+  uncategorized: "#404040", // neutral-700
+  transfer: "#44403c", // stone-700
+  adjustment: "#3f3f46", // zinc-700
 } as const;
 
 // Define available colors with their Tailwind classes and hex values

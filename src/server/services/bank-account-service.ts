@@ -3,16 +3,17 @@ import type {
   deleteBankAccountSchema,
   getBankAccountByIdSchema,
   getBankAccountsSchema,
+  updateBankAccountBalanceSchema,
   updateBankAccountSchema,
 } from "~/shared/validators/bank-account.schema";
-import type z from "zod/v4";
+import type z from "zod";
 
 import type { DBClient } from "../db";
-import { db } from "../db";
 import {
   createBankAccountMutation,
   deleteBankAccountMutation,
   updateBankAccountMutation,
+  upsertBalanceOffsetMutation,
 } from "../domain/bank-account/mutations";
 import {
   getBankAccountByIdQuery,
@@ -65,10 +66,39 @@ export async function createManualBankAccount(
 }
 
 export async function updateBankAccount(
+  db: DBClient,
   input: z.infer<typeof updateBankAccountSchema>,
   orgId: string,
 ) {
   return await updateBankAccountMutation(db, { ...input, orgId });
+}
+
+export async function updateManualBankAccountBalance(
+  db: DBClient,
+  input: z.infer<typeof updateBankAccountBalanceSchema>,
+  organizationId: string,
+) {
+  await db.transaction(async (tx) => {
+    // Update current balance of the account
+    await updateBankAccountMutation(tx, {
+      id: input.id,
+      balance: input.balance,
+      orgId: organizationId,
+    });
+
+    // Upsert balance offset from provided date
+    await upsertBalanceOffsetMutation(tx, {
+      ...input,
+      organizationId,
+    });
+
+    // Recalculate snapshots from the affected date
+    await recalculateSnapshots(
+      tx,
+      { accountId: input.id, fromDate: new Date(input.date) },
+      organizationId,
+    );
+  });
 }
 
 export async function deleteBankAccount(

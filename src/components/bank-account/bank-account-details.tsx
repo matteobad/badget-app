@@ -249,25 +249,21 @@ export function BankAccountDetails() {
               <Label className="text-md mb-2 block font-medium">
                 Account Type
               </Label>
-              <div className="flex flex-row items-center justify-between">
-                <div className="flex-1 space-y-0.5 pr-4">
-                  <p className="text-xs text-muted-foreground">
-                    The type of account determines its classification, such as
-                    asset or liability. This affects how the account is
-                    displayed and managed.
-                  </p>
-                </div>
-                <AccountTypeSelect
-                  value={data.subtype ?? undefined}
-                  onValueChange={(type, subtype) => {
-                    updateBankAccountMutation.mutate({
-                      id: bankAccountId,
-                      subtype: subtype,
-                      type: type,
-                    });
-                  }}
-                />
-              </div>
+              <p className="mb-2 text-xs text-muted-foreground">
+                The type of account determines its classification, such as asset
+                or liability. This affects how the account is displayed and
+                managed.
+              </p>
+              <AccountTypeSelect
+                value={data.subtype ?? undefined}
+                onValueChange={(type, subtype) => {
+                  updateBankAccountMutation.mutate({
+                    id: bankAccountId,
+                    subtype: subtype,
+                    type: type,
+                  });
+                }}
+              />
             </div>
             <div className="mb-4 border-b pb-4">
               <Label className="text-md mb-2 block font-medium">Currency</Label>

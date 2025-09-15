@@ -105,6 +105,7 @@ export default {
       view_details: "Vedi dettagli",
       view_transactions: "Vedi transazioni",
       create_category: "Crea conto",
+      edit_balance: "Aggiorna saldo",
       delete_category: "Elimina",
     },
   },

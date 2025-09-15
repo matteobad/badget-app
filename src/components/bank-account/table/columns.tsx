@@ -2,7 +2,7 @@
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { AccountSubtype } from "~/shared/constants/enum";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FormatAmount } from "~/components/format-amount";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -23,6 +23,7 @@ import {
 import { cn } from "~/lib/utils";
 import { formatDate } from "~/shared/helpers/format";
 import { useScopedI18n } from "~/shared/locales/client";
+import { format } from "date-fns";
 import {
   ArchiveIcon,
   Building2,
@@ -31,10 +32,15 @@ import {
   LinkIcon,
   MoreHorizontalIcon,
   Percent,
+  ReceiptEuroIcon,
+  ReceiptTextIcon,
+  SquarePenIcon,
+  TrashIcon,
   Wallet2Icon,
 } from "lucide-react";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import EditBankAccountDialog from "../sheets/edit-bank-account-dialog";
 import { AccountInfoTooltips } from "./account-info-tooltips";
 
 type BankAccount = RouterOutput["asset"]["get"][number];
@@ -42,15 +48,18 @@ type BankAccount = RouterOutput["asset"]["get"][number];
 const ActionsCell = memo(
   ({
     id,
+    balance,
     manual,
     onViewDetails,
     onDelete,
   }: {
     id: string;
+    balance: number;
     manual: boolean;
     onViewDetails?: (id: string) => void;
     onDelete?: (id: string) => void;
   }) => {
+    const [isEditOpen, setIsEditOpen] = useState(false);
     const tScoped = useScopedI18n("bank_account.actions");
 
     const router = useRouter();
@@ -68,33 +77,57 @@ const ActionsCell = memo(
     }, [id, onDelete]);
 
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontalIcon />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleViewDetails}>
-            {tScoped("view_details")}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleViewTransactions}>
-            {tScoped("view_transactions")}
-          </DropdownMenuItem>
-          {manual && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={handleDelete}
-              >
-                {tScoped("delete_category")}
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontalIcon />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleViewDetails}>
+              <ReceiptTextIcon className="size-3.5" />
+              {tScoped("view_details")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleViewTransactions}>
+              <ReceiptEuroIcon className="size-3.5" />
+              {tScoped("view_transactions")}
+            </DropdownMenuItem>
+            {manual && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
+                  <SquarePenIcon className="size-3.5" />
+                  {tScoped("edit_balance")}
+                </DropdownMenuItem>
+              </>
+            )}
+            {manual && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={handleDelete}
+                >
+                  <TrashIcon className="size-3.5" />
+                  {tScoped("delete_category")}
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <EditBankAccountDialog
+          id={id}
+          defaultValue={{
+            balance: balance,
+            date: format(new Date(), "yyyy-MM-dd"),
+          }}
+          isOpen={isEditOpen}
+          onOpenChange={setIsEditOpen}
+        />
+      </div>
     );
   },
 );
@@ -285,6 +318,7 @@ export const columns: ColumnDef<BankAccount>[] = [
       return (
         <ActionsCell
           id={row.original.id}
+          balance={row.original.balance}
           manual={row.original.manual}
           onViewDetails={meta?.setOpen}
           onDelete={meta?.deleteBankAccount}

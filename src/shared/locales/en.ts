@@ -105,6 +105,7 @@ export default {
       view_details: "View details",
       view_transactions: "Vedi transactions",
       create_category: "Create account",
+      edit_balance: "Update balance",
       delete_category: "Delete",
     },
   },
