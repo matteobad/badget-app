@@ -1,9 +1,6 @@
 import type { DBClient } from "~/server/db";
 import type { AccountSubtype, AccountType } from "~/shared/constants/enum";
-import {
-  account_table,
-  balance_offset_table,
-} from "~/server/db/schema/accounts";
+import { account_table } from "~/server/db/schema/accounts";
 import { and, eq } from "drizzle-orm";
 
 export type CreateBankAccountPayload = {
@@ -106,27 +103,3 @@ export type UpsertBalanceOffsetParams = {
   date: string;
   organizationId: string;
 };
-
-export async function upsertBalanceOffsetMutation(
-  db: DBClient,
-  params: UpsertBalanceOffsetParams,
-) {
-  return await db
-    .insert(balance_offset_table)
-    .values({
-      accountId: params.id,
-      amount: params.balance,
-      effectiveDatetime: params.date,
-      organizationId: params.organizationId,
-    })
-    .onConflictDoUpdate({
-      target: [
-        balance_offset_table.accountId,
-        balance_offset_table.effectiveDatetime,
-      ],
-      set: {
-        amount: params.balance,
-      },
-    })
-    .returning();
-}

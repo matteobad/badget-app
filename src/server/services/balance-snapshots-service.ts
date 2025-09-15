@@ -1,5 +1,5 @@
 import { addDays } from "date-fns";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, lt, sql, sum } from "drizzle-orm";
 
 import type { DBClient } from "../db";
 import type { DB_BalanceSnapshotInsertType } from "../db/schema/accounts";
@@ -63,24 +63,21 @@ export async function adjustBalanceOffsets(
     const t0DateStr = new Date(account.t0Datetime).toISOString().split("T")[0]!;
 
     // Only posted and strictly before t0 date
-    const beforeT0Posted = transactionsBeforeT0.filter(
-      (t) => t.status === "posted" && t.date < t0DateStr,
-    );
-
-    // Compute offset from transactions strictly before t0
-    const allBeforeT0 = beforeT0Posted.map((t) => ({
-      amount: t.amount,
-      date: new Date(t.date),
-    }));
+    const beforeT0Posted = transactionsBeforeT0
+      .filter((t) => t.status === "posted" && t.date < t0DateStr)
+      .map((t) => ({
+        amount: t.amount,
+        date: new Date(t.date),
+      }));
 
     // When no transactions before t0 nothing to do here
-    if (allBeforeT0.length === 0) return { updatedOffset: false };
+    if (beforeT0Posted.length === 0) return { updatedOffset: false };
 
     const newOffset = applyOffset(
       accountId,
       new Date(account.t0Datetime),
       account.openingBalance ?? 0,
-      allBeforeT0,
+      beforeT0Posted,
     );
 
     // Upsert the offset using the same client (transaction-aware)
@@ -106,6 +103,109 @@ export async function adjustBalanceOffsets(
   }
 
   return { updatedOffset };
+}
+
+/**
+ * Update balance and handle offsets
+ */
+export async function upsertBalanceOffsets(
+  db: DBClient,
+  input: {
+    accountId: string;
+    fromDate: Date;
+    targetBalance: number;
+  },
+  organizationId: string,
+) {
+  const { accountId } = input;
+
+  // Get account details
+  const [account] = await db
+    .select()
+    .from(account_table)
+    .where(
+      and(
+        eq(account_table.id, accountId),
+        eq(account_table.organizationId, organizationId),
+      ),
+    )
+    .limit(1);
+
+  if (!account) {
+    throw new Error(`Account ${accountId} not found`);
+  }
+
+  if (!account.manual) {
+    throw new Error(`Account ${accountId} is not manually managed`);
+  }
+
+  if (!account.openingBalance) {
+    throw new Error(`Account ${accountId} have no opening balance`);
+  }
+
+  // Collect posted tx strictly before date
+  const [transactionsTotalBeforeDate] = await db
+    .select({
+      value: sum(transaction_table.amount).mapWith(Number),
+    })
+    .from(transaction_table)
+    .where(
+      and(
+        eq(transaction_table.accountId, accountId),
+        eq(transaction_table.organizationId, organizationId),
+        eq(transaction_table.status, "posted"),
+        lt(transaction_table.date, input.fromDate.toISOString()),
+      ),
+    );
+
+  // Collect all offsets up to date
+  const [offsetsTotalBeforeDate] = await db
+    .select({
+      value: sum(balance_offset_table.amount).mapWith(Number),
+    })
+    .from(balance_offset_table)
+    .where(
+      and(
+        eq(balance_offset_table.accountId, accountId),
+        eq(balance_offset_table.organizationId, organizationId),
+        lt(
+          balance_offset_table.effectiveDatetime,
+          input.fromDate.toISOString(),
+        ),
+      ),
+    );
+
+  // When no transactions before t0 nothing to do here
+  if (!transactionsTotalBeforeDate && !offsetsTotalBeforeDate)
+    return { updatedOffset: false };
+
+  // Compute new offset
+  const newOffsetAmount =
+    input.targetBalance -
+    account.openingBalance +
+    (transactionsTotalBeforeDate?.value ?? 0) +
+    (offsetsTotalBeforeDate?.value ?? 0);
+
+  // Upsert the offset using the same client (transaction-aware)
+  await db
+    .insert(balance_offset_table)
+    .values({
+      organizationId,
+      accountId,
+      effectiveDatetime: input.fromDate.toISOString(),
+      amount: newOffsetAmount,
+    })
+    .onConflictDoUpdate({
+      target: [
+        balance_offset_table.accountId,
+        balance_offset_table.effectiveDatetime,
+      ],
+      set: {
+        amount: newOffsetAmount,
+      },
+    });
+
+  return { updatedOffset: true };
 }
 
 /**

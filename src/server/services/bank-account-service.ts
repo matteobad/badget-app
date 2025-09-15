@@ -13,13 +13,16 @@ import {
   createBankAccountMutation,
   deleteBankAccountMutation,
   updateBankAccountMutation,
-  upsertBalanceOffsetMutation,
 } from "../domain/bank-account/mutations";
 import {
   getBankAccountByIdQuery,
   getBankAccountsQuery,
 } from "../domain/bank-account/queries";
-import { recalculateSnapshots } from "./balance-snapshots-service";
+import {
+  recalculateSnapshots,
+  updateAccountBalance,
+  upsertBalanceOffsets,
+} from "./balance-snapshots-service";
 
 export async function getBankAccounts(
   input: z.infer<typeof getBankAccountsSchema>,
@@ -79,18 +82,16 @@ export async function updateManualBankAccountBalance(
   organizationId: string,
 ) {
   await db.transaction(async (tx) => {
-    // Update current balance of the account
-    await updateBankAccountMutation(tx, {
-      id: input.id,
-      balance: input.balance,
-      orgId: organizationId,
-    });
-
     // Upsert balance offset from provided date
-    await upsertBalanceOffsetMutation(tx, {
-      ...input,
+    await upsertBalanceOffsets(
+      tx,
+      {
+        accountId: input.id,
+        fromDate: new Date(input.date),
+        targetBalance: input.balance,
+      },
       organizationId,
-    });
+    );
 
     // Recalculate snapshots from the affected date
     await recalculateSnapshots(
@@ -98,6 +99,9 @@ export async function updateManualBankAccountBalance(
       { accountId: input.id, fromDate: new Date(input.date) },
       organizationId,
     );
+
+    // Update account balance
+    await updateAccountBalance(tx, { accountId: input.id }, organizationId);
   });
 }
 

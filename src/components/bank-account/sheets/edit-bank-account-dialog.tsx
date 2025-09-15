@@ -27,6 +27,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { useMetricsParams } from "~/hooks/use-metrics-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { updateBankAccountBalanceSchema } from "~/shared/validators/bank-account.schema";
@@ -50,6 +51,8 @@ export default function EditBankAccountDialog({
   id,
   defaultValue,
 }: Props) {
+  const { params } = useMetricsParams();
+
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
@@ -57,6 +60,15 @@ export default function EditBankAccountDialog({
     trpc.bankAccount.updateBankAccountBalance.mutationOptions({
       onSuccess: () => {
         onOpenChange(false);
+        void queryClient.invalidateQueries({
+          queryKey: trpc.metrics.financialMetrics.queryKey({
+            from: params.from,
+            to: params.to,
+          }),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: trpc.asset.get.queryKey(),
+        });
         void queryClient.invalidateQueries({
           queryKey: trpc.bankAccount.get.queryKey(),
         });

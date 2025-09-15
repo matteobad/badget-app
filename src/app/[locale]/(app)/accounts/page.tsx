@@ -35,6 +35,7 @@ export default async function AssetsLiabilitiesPage(props: PageProps) {
   batchPrefetch([
     trpc.asset.get.queryOptions(),
     trpc.metrics.financialMetrics.queryOptions({ from, to }),
+    trpc.preferences.listAccountGroups.queryOptions(),
   ]);
 
   return (

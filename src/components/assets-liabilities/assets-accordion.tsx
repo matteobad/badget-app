@@ -147,7 +147,10 @@ export function AssetsAccordion() {
   const groupIdsJoined = groupsWithAccounts.map((g) => g.id).join("|");
 
   useEffect(() => {
-    if (groupsData) setGroupsLocal(groupsData);
+    if (groupsData) {
+      setGroupsLocal(groupsData);
+      setAccordionValues(groupsData.map((g) => g.id));
+    }
   }, [groupsData]);
 
   useEffect(() => {
