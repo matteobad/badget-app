@@ -176,10 +176,6 @@ export const exportTransactionsAction = authActionClient
       parsedInput: { transactionIds, dateFormat, locale },
       ctx: { orgId },
     }) => {
-      if (!orgId) {
-        throw new Error("Organization not found");
-      }
-
       const event = await tasks.trigger<typeof exportTransactionsTask>(
         "export-transactions",
         {

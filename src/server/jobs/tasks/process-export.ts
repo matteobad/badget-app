@@ -1,4 +1,5 @@
 import { schemaTask } from "@trigger.dev/sdk";
+import { list } from "@vercel/blob";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import {
@@ -10,7 +11,7 @@ import {
 } from "~/server/db/schema/transactions";
 import { format, parseISO } from "date-fns";
 import { and, eq, inArray, sql } from "drizzle-orm";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 import { blobToSerializable } from "../utils/blob";
 import { ensureFileExtension } from "../utils/mime-to-extension";
@@ -47,8 +48,8 @@ export const processExportTask = schemaTask({
         attachments: sql<
           Array<{
             id: string;
-            name: string | null;
-            path: string | null;
+            filename: string | null;
+            path: string[] | null;
             type: string;
             size: number;
           }>
@@ -116,12 +117,13 @@ export const processExportTask = schemaTask({
       transactionsData ?? [],
       ATTACHMENT_BATCH_SIZE,
       async (batch) => {
+        const blobResponse = await list();
         const batchAttachments = await Promise.all(
           batch.flatMap((transaction, idx) => {
             const rowId = idx + 1;
             return (transaction.attachments ?? []).map(
               async (attachment, idx2: number) => {
-                const originalName = attachment.name ?? "attachment";
+                const originalName = attachment.filename ?? "attachment";
 
                 // Only apply MIME type extension if we have a valid MIME type
                 const nameWithExtension = attachment.type
@@ -138,14 +140,16 @@ export const processExportTask = schemaTask({
                     ? `${baseFilename}-${rowId}_${idx2}.${extension}`
                     : `${baseFilename}-${rowId}.${extension}`;
 
-                // const { data } = await download(supabase, {
-                //   bucket: "vault",
-                //   path: (attachment.path ?? []).join("/"),
-                // });
+                let data: Blob | undefined;
+                const blobData = blobResponse.blobs.find(
+                  (b) => b.pathname === (attachment.path ?? []).join("/"),
+                );
 
-                const url = new URL(attachment.path!);
-                const response = await fetch(url);
-                const data = await response.blob();
+                if (blobData) {
+                  const url = new URL(blobData.downloadUrl);
+                  const response = await fetch(url);
+                  data = await response.blob();
+                }
 
                 return {
                   id: transaction.id,

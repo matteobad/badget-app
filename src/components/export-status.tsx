@@ -57,8 +57,8 @@ export function ExportStatus() {
             <Button
               size="sm"
               onClick={async () => {
-                if (result?.fullPath && result?.fileName) {
-                  const url = new URL(result.fullPath);
+                if (result?.downloadUrl && result?.fileName) {
+                  const url = new URL(result.downloadUrl);
                   const response = await fetch(url);
                   const blob = await response.blob();
 

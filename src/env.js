@@ -1,13 +1,9 @@
 import { createEnv } from "@t3-oss/env-nextjs";
-import {
-  neonVercel,
-  uploadthing,
-  vercel,
-} from "@t3-oss/env-nextjs/presets-zod";
+import { neonVercel, vercel } from "@t3-oss/env-nextjs/presets-zod";
 import { z } from "zod/v4";
 
 export const env = createEnv({
-  extends: [vercel(), neonVercel(), uploadthing()],
+  extends: [vercel(), neonVercel()],
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app
    * isn't built with invalid env vars.

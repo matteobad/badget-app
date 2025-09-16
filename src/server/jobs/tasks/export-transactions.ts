@@ -1,5 +1,6 @@
 import { writeToString } from "@fast-csv/format";
 import { metadata, schemaTask } from "@trigger.dev/sdk";
+import { put } from "@vercel/blob";
 import {
   BlobReader,
   BlobWriter,
@@ -7,10 +8,9 @@ import {
   Uint8ArrayReader,
   ZipWriter,
 } from "@zip.js/zip.js";
-import { utapi } from "~/server/uploadthing";
 import { format } from "date-fns";
 import xlsx from "node-xlsx";
-import z from "zod/v4";
+import z from "zod";
 
 import { serializableToBlob } from "../utils/blob";
 import { processExportTask } from "./process-export";
@@ -52,9 +52,9 @@ export const exportTransactionsTask = schemaTask({
   machine: {
     preset: "small-1x",
   },
-  run: async ({ locale, transactionIds, dateFormat }) => {
+  run: async ({ locale, transactionIds, dateFormat, organizationId }) => {
     const filePath = `export-${format(new Date(), dateFormat ?? "yyyy-MM-dd")}`;
-    // const path = `${organizationId}/exports`;
+    const path = `${organizationId}/exports`;
     const fileName = `${filePath}.zip`;
 
     metadata.set("progress", 20);
@@ -134,11 +134,12 @@ export const exportTransactionsTask = schemaTask({
 
     metadata.set("progress", 95);
 
-    // const fullPath = `${path}/${fileName}`;
-
-    // Upload file to uploadthing
+    const fullPath = `${path}/${fileName}`;
     const file = new File([zip], fileName);
-    const uploadedFile = await utapi.uploadFiles(file);
+    const uploadedFile = await put(fullPath, file, {
+      access: "public",
+      allowOverwrite: true,
+    });
 
     metadata.set("progress", 100);
 
@@ -151,9 +152,9 @@ export const exportTransactionsTask = schemaTask({
     //   .eq("name", fullPath);
 
     return {
+      fileName,
       filePath,
-      fullPath: uploadedFile.data?.ufsUrl,
-      fileName: uploadedFile.data?.name,
+      downloadUrl: uploadedFile.downloadUrl,
       totalItems: rows.length,
     };
   },

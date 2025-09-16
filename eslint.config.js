@@ -9,7 +9,7 @@ const compat = new FlatCompat({
 
 export default tseslint.config(
   {
-    ignores: [".next"],
+    ignores: [".next", ".trigger"],
   },
   ...compat.extends("next/core-web-vitals"),
   {

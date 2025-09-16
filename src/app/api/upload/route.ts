@@ -21,6 +21,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         // like allowing users to modify other users' posts
 
         return {
+          allowOverwrite: true,
           allowedContentTypes: [
             "application/pdf",
             "image/jpeg",

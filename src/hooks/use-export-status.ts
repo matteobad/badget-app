@@ -21,9 +21,9 @@ export function useExportStatus({
   const [, setProgress] = useState<number>(0);
 
   const [result, setResult] = useState<{
-    filePath: string;
-    fullPath: string | undefined;
     fileName: string | undefined;
+    filePath: string;
+    downloadUrl: string;
     totalItems: number;
   } | null>(null);
 
@@ -56,9 +56,9 @@ export function useExportStatus({
     if (run?.output) {
       setResult(
         run.output as {
-          filePath: string;
-          fullPath: string | undefined;
           fileName: string | undefined;
+          filePath: string;
+          downloadUrl: string;
           totalItems: number;
         },
       );

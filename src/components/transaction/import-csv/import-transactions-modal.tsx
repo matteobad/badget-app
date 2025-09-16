@@ -230,9 +230,6 @@ export function ImportTransactionsModal({ defaultCurrency }: Props) {
                       });
                     })}
                   >
-                    <pre>
-                      <code>{JSON.stringify(formState.errors, null, 2)}</code>
-                    </pre>
                     {page === "select-file" && <SelectFile />}
                     {page === "confirm-import" && (
                       <>
