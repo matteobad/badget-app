@@ -195,15 +195,16 @@ export const parseTransactionCSVSchema = z.object({
 });
 
 export const importTransactionSchema = z.object({
-  file: z.file().mime(["text/csv"]),
-  fieldMapping: z.object({
-    date: z.string({ message: "Missing date mapping" }),
-    description: z.string({ message: "Missing description mapping" }),
-    amount: z.string({ message: "Missing amount mapping" }),
-    currency: z.string(),
+  filePath: z.array(z.string()).optional(),
+  bankAccountId: z.string(),
+  currency: z.string(),
+  inverted: z.boolean(),
+  mappings: z.object({
+    amount: z.string(),
+    date: z.string(),
+    description: z.string(),
+    balance: z.string().optional(),
   }),
-  extraFields: z.object({ accountId: z.string() }),
-  settings: z.object({ inverted: z.boolean() }),
 });
 
 export const exportTransactionsSchema = z.object({
@@ -257,4 +258,8 @@ export const transactionParamsSchema = {
   splitTransaction: parseAsString,
   createTransaction: parseAsBoolean,
   importTransaction: parseAsBoolean,
+  step: parseAsString,
+  accountId: parseAsString,
+  type: parseAsString,
+  hide: parseAsBoolean.withDefault(false),
 };

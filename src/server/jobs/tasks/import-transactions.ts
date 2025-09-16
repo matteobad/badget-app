@@ -1,111 +1,33 @@
-import type { DB_AccountType } from "~/server/db/schema/accounts";
-import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
-import type { NormalizedTx } from "~/server/domain/transaction/utils";
 import { logger, schemaTask } from "@trigger.dev/sdk";
+import { list } from "@vercel/blob";
 import { db } from "~/server/db";
-import { account_table, import_table } from "~/server/db/schema/accounts";
-import { transaction_table } from "~/server/db/schema/transactions";
+import { import_table } from "~/server/db/schema/accounts";
 import {
-  normalizeDescription,
-  validateTransaction,
-} from "~/server/domain/transaction/utils";
+  deduplicateTransactions,
+  validateTransactions,
+} from "~/server/domain/transaction/helpers";
 import { max, min } from "date-fns";
-import { and, eq, inArray } from "drizzle-orm";
+import Papa from "papaparse";
 import z from "zod/v4";
 
-import type { CSVRowParsed } from "../utils/import-transactions";
-import { parseCSV } from "../utils/import-transactions";
+import { mapTransactions, transform } from "../utils/import-transactions";
+import { processBatch } from "../utils/process-batch";
 import { recalculateSnapshotsTask } from "./recalculate-snapshots";
 import { upsertTransactions } from "./upsert-transactions";
 
-/**
- * Deduplicate transactions against existing ones
- */
-export async function deduplicateTransactions(
-  transactions: CSVRowParsed[],
-  accountId: string,
-) {
-  if (transactions.length === 0) {
-    return { new: [], duplicates: [] };
-  }
-
-  // Get existing fingerprints
-  const fingerprints = transactions.map((t) => t.fingerprint);
-  const existingTransactions = await db
-    .select({ fingerprint: transaction_table.fingerprint })
-    .from(transaction_table)
-    .where(
-      and(
-        eq(transaction_table.accountId, accountId),
-        inArray(transaction_table.fingerprint, fingerprints),
-      ),
-    );
-
-  const existingFingerprints = new Set(
-    existingTransactions.map((t) => t.fingerprint),
-  );
-
-  const newTransactions: DB_TransactionInsertType[] = [];
-  const duplicates: DB_TransactionInsertType[] = [];
-
-  for (const transaction of transactions) {
-    if (existingFingerprints.has(transaction.fingerprint)) {
-      duplicates.push(transaction);
-    } else {
-      newTransactions.push(transaction);
-    }
-  }
-
-  return { new: newTransactions, duplicates };
-}
-
-/**
- * Validate transactions against account rules
- */
-export function validateTransactions(
-  transactions: DB_TransactionInsertType[],
-  account: DB_AccountType,
-) {
-  const valid: DB_TransactionInsertType[] = [];
-  const rejected: Array<{
-    transaction: DB_TransactionInsertType;
-    reason: string;
-  }> = [];
-
-  for (const transaction of transactions) {
-    const normalizedTx: NormalizedTx = {
-      accountId: transaction.accountId,
-      amount: transaction.amount,
-      date: new Date(transaction.date),
-      descriptionNormalized: normalizeDescription(transaction.description!),
-    };
-
-    const validation = validateTransaction(normalizedTx, account, true); // true = CSV import
-
-    if (validation.valid) {
-      valid.push(transaction);
-    } else {
-      rejected.push({
-        transaction,
-        reason: validation.reason ?? "Unknown validation error",
-      });
-    }
-  }
-
-  return { valid, rejected };
-}
+const BATCH_SIZE = 500;
 
 const importTransactionsTaskSchema = z.object({
-  filePath: z.string(),
+  inverted: z.boolean(),
+  filePath: z.array(z.string()).optional(),
+  bankAccountId: z.string(),
+  currency: z.string(),
   organizationId: z.string(),
-  fieldMapping: z.object({
-    date: z.string({ message: "Missing date mapping" }),
-    description: z.string({ message: "Missing description mapping" }),
-    amount: z.string({ message: "Missing amount mapping" }),
-    currency: z.string(),
+  mappings: z.object({
+    amount: z.string(),
+    date: z.string(),
+    description: z.string(),
   }),
-  extraFields: z.object({ accountId: z.string() }),
-  settings: z.object({ inverted: z.boolean() }),
 });
 
 export const importTransactionsTask = schemaTask({
@@ -115,83 +37,146 @@ export const importTransactionsTask = schemaTask({
   queue: {
     concurrencyLimit: 5,
   },
-  run: async ({ filePath, organizationId, ...options }) => {
+  run: async ({
+    organizationId,
+    filePath,
+    bankAccountId,
+    currency,
+    mappings,
+    inverted,
+  }) => {
     // Step 1: Get CSV
-    const url = new URL(filePath);
-    const response = await fetch(url);
-    const text = await response.text();
-
-    // Step 2: Parse CSV
-    const parsedTransactions = await parseCSV(text, options, organizationId);
-    logger.info(`Parsed transactions ${parsedTransactions.length}`);
-
-    // Step 3: Deduplicate
-    const { new: newTransactions, duplicates } = await deduplicateTransactions(
-      parsedTransactions,
-      options.extraFields.accountId,
-    );
-    logger.info(`New transactions ${newTransactions.length}`);
-    logger.info(`Duplicates transactions ${duplicates.length}`);
-
-    // Step 4: Get account details
-    const accountId = options.extraFields.accountId;
-    const [accountData] = await db
-      .select()
-      .from(account_table)
-      .where(eq(account_table.id, accountId))
-      .limit(1);
-
-    if (!accountData) {
-      logger.error(`Account ${accountId} not found`);
-      throw new Error(`Account ${accountId} not found`);
+    if (!filePath) {
+      throw new Error("File path is required");
     }
 
-    // Step 5: Validate
-    const { valid, rejected } = validateTransactions(
-      newTransactions,
-      accountData,
+    const blobResponse = await list();
+    const blobData = blobResponse.blobs.find(
+      (b) => b.pathname === filePath?.join("/"),
     );
-    logger.info(`Valid transactions ${valid.length}`);
-    logger.info(`Rejected transactions ${rejected.length}`);
 
-    // Exit if no valid transactions
-    if (valid.length === 0) return;
+    if (!blobData) {
+      throw new Error("File path not found");
+    }
 
-    // Step 6: Insert valid transactions
-    await upsertTransactions.triggerAndWait({
-      bankAccountId: accountData.id,
-      transactions: valid,
-      organizationId,
+    const url = new URL(blobData.downloadUrl);
+    const response = await fetch(url);
+    const content = await response.text();
+
+    if (!content) {
+      throw new Error("File content is required");
+    }
+
+    // Step 2: Parse CSV
+    let valid = 0;
+    let invalid = 0;
+    let duplicates = 0;
+    let minDate: Date | undefined;
+    let maxDate: Date | undefined;
+
+    await new Promise((resolve, reject) => {
+      Papa.parse(content, {
+        header: true,
+        skipEmptyLines: true,
+        worker: false,
+        complete: resolve,
+        error: reject,
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        chunk: async (
+          chunk: {
+            data: Record<string, string>[];
+            errors: Array<{ message: string }>;
+          },
+          parser: Papa.Parser,
+        ) => {
+          parser.pause();
+
+          const { data } = chunk;
+
+          if (!data?.length) {
+            throw new Error("No data in CSV import chunk");
+          }
+
+          // Step 2.1: Map & Transform
+          logger.info("Map");
+          const mappedTransactions = mapTransactions(
+            data,
+            mappings,
+            currency,
+            organizationId,
+            bankAccountId,
+          );
+
+          logger.info("Transform");
+          const transactions = mappedTransactions.map((transaction) => {
+            const result = transform({ transaction, inverted });
+            return result;
+          });
+
+          // Step 2.2: Deduplicate
+          logger.info("Deduplicate");
+          const { newTransactions, duplicateTransactions } =
+            await deduplicateTransactions(transactions, bankAccountId);
+
+          // Step 2.3: Validate
+          logger.info("Validate");
+          const { validTransactions, invalidTransactions } =
+            await validateTransactions(newTransactions, bankAccountId);
+
+          // Step 2.4: Insert valid transactions in batches
+          logger.info("Batch insert");
+          await processBatch(validTransactions, BATCH_SIZE, async (batch) => {
+            await upsertTransactions.triggerAndWait({
+              bankAccountId: bankAccountId,
+              transactions: batch,
+              organizationId,
+            });
+
+            return data || [];
+          });
+
+          // Step 2.5 Get min and max date values from validTransactions
+          valid += validTransactions.length;
+          invalid += invalidTransactions.length;
+          duplicates += duplicateTransactions.length;
+          const dates = validTransactions.map((t) => t.date);
+          if (dates.length > 0) {
+            const minTxDate = min(dates);
+            const maxTxDate = max(dates);
+            minDate = minDate ? min([minDate, minTxDate]) : minTxDate;
+            maxDate = maxDate ? max([maxDate, maxTxDate]) : maxTxDate;
+          }
+
+          parser.resume();
+        },
+      });
     });
 
-    // Step 7: Calculate affected date range
-    const dates = valid.map((t) => t.date);
-    const minDate = min(dates);
-    const maxDate = max(dates);
+    // Step 3: Recalculate snapshots
+    if (valid > 0 && minDate) {
+      await recalculateSnapshotsTask.triggerAndWait({
+        accountId: bankAccountId,
+        fromDate: minDate,
+        organizationId,
+      });
+    }
 
-    // Step 8: Recalculate snapshots
-    await recalculateSnapshotsTask.triggerAndWait({
-      accountId: accountData.id,
-      fromDate: minDate,
-      organizationId,
-    });
-
-    // Step 9: Record import
+    // Step 4: Record import
     await db.insert(import_table).values({
       organizationId,
-      accountId: accountData.id,
-      fileName: filePath, // FIXME: file management feature
-      rowsOk: valid.length,
-      rowsDup: duplicates.length,
-      rowsRej: rejected.length,
-      dateMin: minDate.toISOString().split("T")[0]!,
-      dateMax: maxDate.toISOString().split("T")[0]!,
+      accountId: bankAccountId,
+      fileName: filePath.join("/"),
+      rowsOk: valid,
+      rowsDup: duplicates,
+      rowsRej: invalid,
+      dateMin: minDate?.toISOString().split("T")[0],
+      dateMax: maxDate?.toISOString().split("T")[0],
     });
 
     return {
-      new: valid.length,
-      duplicates: duplicates.length,
-      rejected: rejected.length,
+      new: valid,
+      duplicates: duplicates,
+      rejected: invalid,
       range: { min: minDate, max: maxDate },
     };
   },

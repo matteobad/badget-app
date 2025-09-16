@@ -132,19 +132,21 @@ type DeleteTransactionCategoryParams = {
 };
 
 export async function deleteTransactionCategoryMutation(
-  client: DBClient,
+  db: DBClient,
   params: DeleteTransactionCategoryParams,
 ) {
-  const { id, organizationId } = params;
-  return await client
-    .update(transaction_category_table)
-    .set({ deletedAt: new Date().toISOString() }) // soft delete
+  const [result] = await db
+    .delete(transaction_category_table)
     .where(
       and(
-        eq(transaction_category_table.id, id),
-        eq(transaction_category_table.organizationId, organizationId),
+        eq(transaction_category_table.id, params.id),
+        eq(transaction_category_table.organizationId, params.organizationId),
+        eq(transaction_category_table.system, false),
       ),
-    );
+    )
+    .returning();
+
+  return result;
 }
 
 type CreateDefaultCategoriesForSpaceParams = {

@@ -126,6 +126,7 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
   }, [data]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     onDrop,
     onDropRejected: ([reject]) => {
       if (reject?.errors.find(({ code }) => code === "file-too-large")) {

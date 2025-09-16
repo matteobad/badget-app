@@ -2,13 +2,11 @@
 
 import type { exportTransactionsTask } from "~/server/jobs/tasks/export-transactions";
 import type { importTransactionsTask } from "~/server/jobs/tasks/import-transactions";
-import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 import { createStreamableValue } from "@ai-sdk/rsc";
 import { parse } from "@fast-csv/parse";
 import { tasks } from "@trigger.dev/sdk";
 import { authActionClient } from "~/lib/safe-action";
-import { db } from "~/server/db";
-import { utapi } from "~/server/uploadthing";
 import {
   exportTransactionsSchema,
   importTransactionSchema,
@@ -59,13 +57,60 @@ export async function generateTransactionsFilters(
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   (async () => {
     const { partialObjectStream } = streamObject({
-      model: openai("gpt-4o-mini"),
+      model: google("gemini-2.5-flash-lite"),
       system: `You are a helpful assistant that generates filters for a given prompt. \n
                Current date is: ${new Date().toISOString().split("T")[0]} \n
                ${context}
       `,
       schema,
       prompt,
+    });
+
+    for await (const partialObject of partialObjectStream) {
+      stream.update(partialObject);
+    }
+
+    stream.done();
+  })();
+
+  return { object: stream.value };
+}
+
+export async function generateCsvMapping(
+  fieldColumns: string[],
+  firstRows: Record<string, string>[],
+) {
+  const stream = createStreamableValue();
+
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  (async () => {
+    const { partialObjectStream } = streamObject({
+      model: google("gemini-2.5-flash-lite"),
+      schema: z.object({
+        date: z.iso
+          .date()
+          .describe(
+            "The date of the transaction, return it in ISO-8601 format",
+          ),
+        description: z.string().describe("The text describing the transaction"),
+        amount: z
+          .number()
+          .describe(
+            "The amount involved in the transaction, including the minus sign if present",
+          ),
+      }),
+      prompt: `
+        The following columns are the headings from a CSV import file for importing a transactions. 
+        Map these column names to the correct fields in our database (date, description, amount) by providing the matching column name for each field.
+        You may also consult the first few rows of data to help you make the mapping, but you are mapping the columns, not the values. 
+        If you are not sure or there is no matching column, omit the value.
+
+        Columns:
+        ${fieldColumns.join(",")}
+
+        First few rows of data:
+        ${firstRows.map((row) => JSON.stringify(row)).join("\n")}
+      `,
     });
 
     for await (const partialObject of partialObjectStream) {
@@ -104,36 +149,21 @@ export const parseTransactionsCSVAction = authActionClient
     });
   });
 
-export const importTransactionsCSVAction = authActionClient
+export const importTransactionsAction = authActionClient
   .inputSchema(importTransactionSchema)
   .metadata({ actionName: "import-transactions-csv" })
-  .action(async ({ parsedInput, ctx }) => {
-    // Mutate data
-    const orgId = ctx.orgId;
-    const { file, ...options } = parsedInput;
-
-    // upload file and create attachment
-    const response = await utapi.uploadFiles(file);
-    const uploadedFile = response.data!;
-    await createAttachmentMutation(
-      db,
-      {
-        fileKey: uploadedFile.key,
-        fileName: uploadedFile.name,
-        fileSize: uploadedFile.size,
-        fileType: uploadedFile.type,
-        fileUrl: uploadedFile.ufsUrl,
-        organizationId: orgId,
-      },
-      orgId,
-    );
-
+  .action(async ({ parsedInput, ctx: { orgId } }) => {
+    const { filePath, bankAccountId, currency, mappings, inverted } =
+      parsedInput;
     return await tasks.trigger<typeof importTransactionsTask>(
       "import-transactions",
       {
-        filePath: uploadedFile.ufsUrl,
+        filePath,
+        bankAccountId,
+        currency,
+        mappings,
         organizationId: orgId,
-        ...options,
+        inverted,
       },
     );
   });

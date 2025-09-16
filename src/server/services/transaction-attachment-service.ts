@@ -1,3 +1,4 @@
+import { del } from "@vercel/blob";
 import { and, eq } from "drizzle-orm";
 
 import type { DBClient } from "../db";
@@ -91,6 +92,7 @@ export async function deleteAttachment(
     .select({
       id: transaction_attachment_table.id,
       transactionId: transaction_attachment_table.transactionId,
+      path: transaction_attachment_table.path,
       name: transaction_attachment_table.name,
       organizationId: transaction_attachment_table.organizationId,
     })
@@ -102,9 +104,12 @@ export async function deleteAttachment(
       ),
     );
 
-  if (!result) {
+  if (!result?.path) {
     throw new Error("Attachment not found");
   }
+
+  // Delete from Vercel Blob
+  await del(result.path.join("/"));
 
   // Delete the attachment
   return db

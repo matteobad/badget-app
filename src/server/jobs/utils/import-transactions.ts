@@ -1,25 +1,26 @@
 import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
 import type { NormalizedTx } from "~/server/domain/transaction/utils";
 import type { importTransactionSchema } from "~/shared/validators/transaction.schema";
-import type z from "zod/v4";
-import { parse } from "@fast-csv/parse";
-import { logger } from "@trigger.dev/sdk";
+import type z from "zod";
 import {
   calculateFingerprint,
   normalizeDescription,
 } from "~/server/domain/transaction/utils";
-import { createTransactionSchema } from "~/shared/validators/transaction.schema";
+import { capitalCase } from "change-case";
 import { isValid, parse as parseDate, parseISO } from "date-fns";
-
-import type { RowValidateCallback } from "@fast-csv/parse";
+import { nanoid } from "nanoid";
 
 export type ImportTransactionType = z.infer<typeof importTransactionSchema>;
 
-// CSV row interface - can be extended based on actual CSV format
-export type CSVRow = Record<string, string | null>;
-
-// Parsed and normalized transaction
-export type CSVRowParsed = DB_TransactionInsertType;
+export type Transaction = {
+  date: string;
+  description: string;
+  amount: string;
+  organizationId: string;
+  bankAccountId: string;
+  currency: string;
+  fingerprint: string;
+};
 
 function ensureValidYear(dateString: string | undefined) {
   if (!dateString) return new Date().toISOString().split("T")[0]!;
@@ -35,7 +36,7 @@ function ensureValidYear(dateString: string | undefined) {
   return `${correctedYear}-${month}-${day}`;
 }
 
-export function formatDate(date: string) {
+export function parseDateValue(date: string) {
   const formats = [
     "dd/MMM/yyyy",
     "dd/MM/yyyy",
@@ -93,7 +94,7 @@ export function formatDate(date: string) {
   return new Date().toISOString().split("T")[0]!;
 }
 
-export function formatAmountValue({
+export function parseAmountValue({
   amount,
   inverted,
 }: {
@@ -130,125 +131,52 @@ export function formatAmountValue({
   return value;
 }
 
-/**
- * Parse CSV content and return normalized transactions
- */
-export async function parseCSV(
-  csvContent: string,
-  options: {
-    fieldMapping: ImportTransactionType["fieldMapping"];
-    extraFields: ImportTransactionType["extraFields"];
-    settings: ImportTransactionType["settings"];
-  },
+export const mapTransactions = (
+  data: Record<string, string>[],
+  mappings: Record<string, string>,
+  currency: string,
   organizationId: string,
-) {
-  const parsedTransactions = await new Promise<CSVRowParsed[]>(
-    (resolve, reject) => {
-      const rows: CSVRowParsed[] = [];
-
-      const parser = parse<CSVRow, CSVRowParsed>({ headers: true })
-        .transform((data: CSVRow) =>
-          transformRow(data, options, organizationId),
-        )
-        .validate((row, cb) => validateRow(row, cb))
-        .on("error", reject)
-        .on("data", (data: CSVRowParsed) => rows.push(data))
-        .on("data-invalid", (row, rowNumber, reason) => {
-          logger.warn(
-            `Invalid [rowNumber=${rowNumber}] [row=${JSON.stringify(row)}] [reason=${reason}]`,
-          );
-        })
-        .on("end", (rowCount: number) => {
-          logger.info(`Parsed ${rowCount} rows`);
-          resolve(rows.filter(Boolean));
-        });
-
-      parser.write(csvContent);
-      parser.end();
-    },
-  );
-
-  if (parsedTransactions.length === 0) {
-    throw new Error("No transactions found in CSV");
-  }
-
-  return parsedTransactions;
-}
-
-/**
- * Transform CSV row content and into normalized transaction
- */
-export function transformRow(
-  row: CSVRow,
-  options: {
-    fieldMapping: ImportTransactionType["fieldMapping"];
-    extraFields: ImportTransactionType["extraFields"];
-    settings: ImportTransactionType["settings"];
-  },
-  organizationId: string,
-) {
-  console.info("Raw row", { row });
-  const { fieldMapping, extraFields, settings } = options;
-
-  // column mapping
-  let column: string;
-
-  let date: string;
-  column = fieldMapping.date;
-  if (column in row) date = formatDate(row[column]!);
-  else throw new Error(`Col ${column} is not present in the CSV`);
-
-  let description: string;
-  column = fieldMapping.description;
-  if (column in row) description = normalizeDescription(row[column]!);
-  else throw new Error(`Col ${column} is not present in the CSV`);
-
-  let amount: number;
-  column = fieldMapping.amount;
-  if (column in row)
-    amount = formatAmountValue({
-      amount: row[column]!,
-      inverted: settings.inverted,
-    });
-  else throw new Error(`Col ${column} is not present in the CSV`);
-
-  // add other columns mapping here
-  const accountId = extraFields.accountId;
-
-  // Create normalized transaction for fingerprint calculation
-  const normalizedTx: NormalizedTx = {
-    accountId,
-    amount,
-    date: new Date(date),
-    descriptionNormalized: description,
-  };
-
-  const mappedRow: CSVRowParsed = {
-    date,
-    accountId,
-    description,
-    name: description,
-    amount,
-    currency: "EUR",
-    method: "other",
-    status: "posted",
-    source: "csv",
-    fingerprint: calculateFingerprint(normalizedTx),
+  bankAccountId: string,
+): Transaction[] => {
+  return data.map((row) => ({
+    ...(Object.fromEntries(
+      Object.entries(mappings)
+        .filter(([_, value]) => value !== "")
+        .map(([key, value]) => [key, row[value]]),
+    ) as Transaction),
+    currency,
     organizationId,
+    bankAccountId,
+  }));
+};
+
+export function transform({
+  transaction,
+  inverted,
+}: {
+  transaction: Transaction;
+  inverted: boolean;
+}) {
+  const normalizedTx: NormalizedTx = {
+    accountId: transaction.bankAccountId,
+    amount: parseAmountValue({ amount: transaction.amount, inverted }),
+    date: new Date(parseDateValue(transaction.date)),
+    descriptionNormalized: normalizeDescription(transaction.description),
   };
 
-  return mappedRow;
-}
-
-/**
- * Validate parsed CSV row content
- */
-export function validateRow(row: CSVRowParsed, cb: RowValidateCallback) {
-  const parsedRow = createTransactionSchema.safeParse(row);
-
-  if (!parsedRow.success) {
-    cb(parsedRow.error, parsedRow.success, parsedRow.error.message);
-  }
-
-  return cb(null, parsedRow.success);
+  return {
+    externalId: `${transaction.organizationId}_${nanoid()}`,
+    organizationId: transaction.organizationId,
+    status: "posted",
+    method: "other",
+    date: parseDateValue(transaction.date),
+    amount: parseAmountValue({ amount: transaction.amount, inverted }),
+    name: transaction?.description && capitalCase(transaction.description),
+    source: "csv",
+    categorySlug: null,
+    accountId: transaction.bankAccountId,
+    currency: transaction.currency.toUpperCase(),
+    fingerprint: calculateFingerprint(normalizedTx),
+    notified: true,
+  } satisfies DB_TransactionInsertType;
 }
