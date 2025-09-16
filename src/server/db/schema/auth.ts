@@ -105,6 +105,9 @@ export const organization = pgTable("organization", {
   name: text("name").notNull(),
   slug: text("slug").unique(),
   logo: text("logo"),
+  baseCurrency: text("base_currency"),
+  countryCode: text("country_code"),
+  email: text("email"),
   createdAt: timestamp("created_at").notNull(),
   metadata: text("metadata"),
 });

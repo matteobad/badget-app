@@ -75,7 +75,29 @@ export const auth = betterAuth({
     admin(),
     passkey(),
     twoFactor(),
-    organization(),
+    organization({
+      schema: {
+        organization: {
+          additionalFields: {
+            baseCurrency: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            countryCode: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+            email: {
+              type: "string",
+              input: true,
+              required: false,
+            },
+          },
+        },
+      },
+    }),
     username(),
     nextCookies(),
   ],

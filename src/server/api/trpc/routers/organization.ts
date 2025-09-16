@@ -1,27 +1,30 @@
 import { headers } from "next/headers";
-import { createOrganization } from "~/server/services/organization-service";
+import {
+  createOrganization,
+  getSpaceById,
+  updateSpaceById,
+} from "~/server/services/better-auth-service";
 import { updateUser } from "~/server/services/user-service";
 import { auth } from "~/shared/helpers/better-auth/auth";
 import {
   createOrganizationSchema,
+  deleteSpaceSchema,
   setActiveOrganizationSchema,
+  updateSpaceByIdSchema,
 } from "~/shared/validators/organization.schema";
 
 import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const organizationRouter = createTRPCRouter({
-  // current: protectedProcedure.query(async ({ ctx: { db, orgId } }) => {
-  //   return getTeamById(db, orgId);
-  // }),
+  current: protectedProcedure.query(async ({ ctx: { orgId } }) => {
+    return await getSpaceById(orgId!);
+  }),
 
-  // update: protectedProcedure
-  //   .input(updateTeamByIdSchema)
-  //   .mutation(async ({ ctx: { db, teamId }, input }) => {
-  //     return updateTeamById(db, {
-  //       id: teamId!,
-  //       data: input,
-  //     });
-  //   }),
+  update: protectedProcedure
+    .input(updateSpaceByIdSchema)
+    .mutation(async ({ ctx: { orgId }, input }) => {
+      return await updateSpaceById(input, orgId!);
+    }),
 
   // members: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
   //   return getTeamMembers(db, teamId);
@@ -99,33 +102,28 @@ export const organizationRouter = createTRPCRouter({
   //     });
   //   }),
 
-  // delete: protectedProcedure
-  //   .input(deleteTeamSchema)
-  //   .mutation(async ({ ctx: { db }, input }) => {
-  //     const data = await deleteTeam(db, input.teamId);
-
-  //     if (!data) {
-  //       throw new TRPCError({
-  //         code: "INTERNAL_SERVER_ERROR",
-  //         message: "Team not found",
-  //       });
-  //     }
-
-  //     const bankConnections = await getBankConnections(db, {
-  //       teamId: data.id,
-  //     });
-
-  //     if (bankConnections.length > 0) {
-  //       await tasks.trigger("delete-team", {
-  //         teamId: input.teamId!,
-  //         connections: bankConnections.map((connection) => ({
-  //           accessToken: connection.accessToken,
-  //           provider: connection.provider,
-  //           referenceId: connection.referenceId,
-  //         })),
-  //       } satisfies DeleteTeamPayload);
-  //     }
-  //   }),
+  delete: protectedProcedure.input(deleteSpaceSchema).mutation(async () => {
+    // const data = await deleteTeam(db, input.teamId);
+    // if (!data) {
+    //   throw new TRPCError({
+    //     code: "INTERNAL_SERVER_ERROR",
+    //     message: "Team not found",
+    //   });
+    // }
+    // const bankConnections = await getBankConnections(db, {
+    //   teamId: data.id,
+    // });
+    // if (bankConnections.length > 0) {
+    //   await tasks.trigger("delete-team", {
+    //     teamId: input.teamId!,
+    //     connections: bankConnections.map((connection) => ({
+    //       accessToken: connection.accessToken,
+    //       provider: connection.provider,
+    //       referenceId: connection.referenceId,
+    //     })),
+    //   } satisfies DeleteTeamPayload);
+    // }
+  }),
 
   // deleteMember: protectedProcedure
   //   .input(deleteTeamMemberSchema)

@@ -1,26 +1,19 @@
 import type { Metadata } from "next";
-
-// import { CompanyCountry } from "@/components/company-country";
-// import { CompanyEmail } from "@/components/company-email";
-// import { CompanyLogo } from "@/components/company-logo";
-// import { CompanyName } from "@/components/company-name";
-// import { DeleteTeam } from "@/components/delete-team";
-// import { prefetch, trpc } from "~/shared/helpers/trpc/server";
+import { DeleteSpace } from "~/components/space/delete-space";
+import { SpaceSettings } from "~/components/space/space-settings";
+import { prefetch, trpc } from "~/shared/helpers/trpc/server";
 
 export const metadata: Metadata = {
-  title: "Team Settings | Badget",
+  title: "Space Settings | Badget",
 };
 
 export default async function Account() {
-  //   prefetch(trpc.team.current.queryOptions());
+  prefetch(trpc.organization.current.queryOptions());
 
   return (
-    <div className="space-y-12">
-      {/* <CompanyLogo />
-      <CompanyName />
-      <CompanyEmail />
-      <CompanyCountry />
-      <DeleteTeam /> */}
+    <div className="space-y-6">
+      <SpaceSettings />
+      <DeleteSpace />
     </div>
   );
 }

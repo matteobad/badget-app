@@ -40,7 +40,7 @@ export function CountrySelector({ defaultValue, onSelect }: Props) {
         <Button
           variant="outline"
           aria-expanded={open}
-          className="w-full justify-between truncate font-normal"
+          className="w-full max-w-[300px] justify-between truncate font-normal"
         >
           {value ? selected?.name : "Select country"}
           <ArrowUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />

@@ -1,6 +1,7 @@
 import {
   adminClient,
   inferAdditionalFields,
+  inferOrgAdditionalFields,
   organizationClient,
   passkeyClient,
 } from "better-auth/client/plugins";
@@ -15,7 +16,9 @@ const authClient = createAuthClient({
     inferAdditionalFields<typeof auth>(),
     adminClient(),
     passkeyClient(),
-    organizationClient(),
+    organizationClient({
+      schema: inferOrgAdditionalFields<typeof auth>(),
+    }),
   ],
 });
 

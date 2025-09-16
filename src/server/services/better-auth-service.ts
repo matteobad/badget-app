@@ -1,4 +1,7 @@
-import type { createOrganizationSchema } from "~/shared/validators/organization.schema";
+import type {
+  createOrganizationSchema,
+  updateSpaceByIdSchema,
+} from "~/shared/validators/organization.schema";
 import type z from "zod";
 import { headers } from "next/headers";
 
@@ -9,6 +12,35 @@ import { getUserByIdQuery } from "../domain/user/queries";
 
 export async function getUserById(db: DBClient, id: string) {
   return await getUserByIdQuery(db, id);
+}
+
+export async function getSpaceById(organizationId: string) {
+  const data = await auth.api.getFullOrganization({
+    query: {
+      organizationId,
+      membersLimit: 100,
+    },
+    // This endpoint requires session cookies.
+    headers: await headers(),
+  });
+
+  return data;
+}
+
+export async function updateSpaceById(
+  params: z.infer<typeof updateSpaceByIdSchema>,
+  organizationId: string,
+) {
+  const data = await auth.api.updateOrganization({
+    body: {
+      data: params,
+      organizationId,
+    },
+    // This endpoint requires session cookies.
+    headers: await headers(),
+  });
+
+  return data;
 }
 
 export async function createOrganization(

@@ -17,7 +17,7 @@ export function SecondaryMenu({ items }: Props) {
   const pathname = usePathname();
 
   return (
-    <nav className="py-4">
+    <nav className="py-3">
       <ul className="scrollbar-hide flex space-x-6 overflow-auto text-sm">
         {items.map((item) => (
           <Link

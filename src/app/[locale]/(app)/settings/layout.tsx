@@ -2,7 +2,7 @@ import { SecondaryMenu } from "~/components/layouts/secondary-menu";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="max-w-[800px] px-6">
+    <div className="max-w-[800px] p-6">
       <SecondaryMenu
         items={[
           { path: "/settings", label: "General" },
@@ -12,7 +12,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ]}
       />
 
-      <main className="mt-8">{children}</main>
+      <main className="mt-6">{children}</main>
     </div>
   );
 }
