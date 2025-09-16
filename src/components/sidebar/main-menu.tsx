@@ -96,10 +96,10 @@ const items = [
   //   //   { path: "/wealth/liabilities", name: "Passività" },
   //   // ],
   // },
-  {
-    path: "/vault",
-    name: "Vault",
-  },
+  // {
+  //   path: "/vault",
+  //   name: "Vault",
+  // },
   {
     path: "/settings",
     name: "Settings",
