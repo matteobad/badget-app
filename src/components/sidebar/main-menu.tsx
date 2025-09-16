@@ -11,6 +11,7 @@ import {
   LeafIcon,
   ReceiptIcon,
   Settings2Icon,
+  VaultIcon,
   WalletIcon,
 } from "lucide-react";
 
@@ -19,6 +20,7 @@ const icons = {
   "/accounts": () => <LandmarkIcon size={20} />,
   "/transactions": () => <ReceiptIcon size={20} />,
   "/budgeting": () => <GoalIcon size={20} />,
+  "/vault": () => <VaultIcon size={20} />,
   "/pension": () => <LeafIcon size={20} />,
   "/investments": () => <CandlestickChartIcon size={20} />,
   "/wealth": () => <WalletIcon size={20} />,
@@ -94,6 +96,10 @@ const items = [
   //   //   { path: "/wealth/liabilities", name: "Passività" },
   //   // ],
   // },
+  {
+    path: "/vault",
+    name: "Vault",
+  },
   {
     path: "/settings",
     name: "Settings",

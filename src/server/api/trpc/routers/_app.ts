@@ -4,6 +4,8 @@ import { assetRouter } from "./asset";
 import { bankAccountRouter } from "./bank-account";
 import { bankConnectionRouter } from "./bank-connection";
 import { budgetRouter } from "./budget";
+import { documentsRouter } from "./document";
+import { documentTagsRouter } from "./document-tag";
 import { institutionRouter } from "./institution";
 import { metricsRouter } from "./metrics";
 import { organizationRouter } from "./organization";
@@ -28,6 +30,8 @@ export const appRouter = createTRPCRouter({
   institution: institutionRouter,
   bankConnection: bankConnectionRouter,
   bankAccount: bankAccountRouter,
+  documents: documentsRouter,
+  documentTags: documentTagsRouter,
   tag: tagRouter,
   preferences: preferencesRouter,
   budget: budgetRouter,

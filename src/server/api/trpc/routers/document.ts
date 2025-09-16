@@ -1,0 +1,142 @@
+import {
+  getDocumentById,
+  getDocuments,
+  getRelatedDocuments,
+} from "~/server/domain/documents/queries";
+import {
+  getDocumentSchema,
+  getDocumentsSchema,
+  getRelatedDocumentsSchema,
+} from "~/shared/validators/documents.schema";
+
+import { createTRPCRouter, protectedProcedure } from "../init";
+
+export const documentsRouter = createTRPCRouter({
+  get: protectedProcedure
+    .input(getDocumentsSchema)
+    .query(async ({ input, ctx: { db, orgId } }) => {
+      return getDocuments(db, {
+        organizationId: orgId!,
+        ...input,
+      });
+    }),
+
+  getById: protectedProcedure
+    .input(getDocumentSchema)
+    .query(async ({ input, ctx: { db, orgId } }) => {
+      return getDocumentById(db, {
+        id: input.id,
+        filePath: input.filePath,
+        organizationId: orgId!,
+      });
+    }),
+
+  getRelatedDocuments: protectedProcedure
+    .input(getRelatedDocumentsSchema)
+    .query(async ({ input, ctx: { db, orgId } }) => {
+      return getRelatedDocuments(db, {
+        id: input.id,
+        pageSize: input.pageSize,
+        organizationId: orgId!,
+      });
+    }),
+
+  // delete: protectedProcedure
+  //   .input(deleteDocumentSchema)
+  //   .mutation(async ({ input, ctx: { db, orgId } }) => {
+  //     const document = await deleteDocument(db, {
+  //       id: input.id,
+  //       organizationId: orgId!,
+  //     });
+
+  //     if (!document || !document.pathTokens) {
+  //       throw new TRPCError({
+  //         code: "NOT_FOUND",
+  //         message: "Document not found",
+  //       });
+  //     }
+
+  //     // Delete from storage
+  //     await remove(supabase, {
+  //       bucket: "vault",
+  //       path: document.pathTokens,
+  //     });
+
+  //     return document;
+  //   }),
+
+  //   processDocument: protectedProcedure
+  //     .input(processDocumentSchema)
+  //     .mutation(async ({ ctx: { orgId, db }, input }) => {
+  //       const supportedDocuments = input.filter((item) =>
+  //         isMimeTypeSupportedForProcessing(item.mimetype),
+  //       );
+
+  //       const unsupportedDocuments = input.filter(
+  //         (item) => !isMimeTypeSupportedForProcessing(item.mimetype),
+  //       );
+
+  //       if (unsupportedDocuments.length > 0) {
+  //         const unsupportedNames = unsupportedDocuments.map((doc) =>
+  //           doc.filePath.join("/"),
+  //         );
+
+  //         await updateDocuments(db, {
+  //           ids: unsupportedNames,
+  //           teamId: teamId!,
+  //           processingStatus: "completed",
+  //         });
+  //       }
+
+  //       if (supportedDocuments.length === 0) {
+  //         return;
+  //       }
+
+  //       // Trigger processing task only for supported documents
+  //       return tasks.batchTrigger(
+  //         "process-document",
+  //         supportedDocuments.map(
+  //           (item) =>
+  //             ({
+  //               payload: {
+  //                 filePath: item.filePath,
+  //                 mimetype: item.mimetype,
+  //                 teamId: teamId!,
+  //               },
+  //             }) as { payload: ProcessDocumentPayload },
+  //         ),
+  //       );
+  //     }),
+
+  //   signedUrl: protectedProcedure
+  //     .input(signedUrlSchema)
+  //     .mutation(async ({ input, ctx: { supabase } }) => {
+  //       const { data } = await signedUrl(supabase, {
+  //         bucket: "vault",
+  //         path: input.filePath,
+  //         expireIn: input.expireIn,
+  //       });
+
+  //       return data;
+  //     }),
+
+  //   signedUrls: protectedProcedure
+  //     .input(signedUrlsSchema)
+  //     .mutation(async ({ input, ctx: { supabase } }) => {
+  //       const signedUrls = [];
+
+  //       for (const filePath of input) {
+  //         const { data } = await signedUrl(supabase, {
+  //           bucket: "vault",
+  //           path: filePath,
+  //           expireIn: 60, // 1 Minute
+  //         });
+
+  //         if (data?.signedUrl) {
+  //           signedUrls.push(data.signedUrl);
+  //         }
+  //       }
+
+  //       return signedUrls ?? [];
+  //     }),
+});
