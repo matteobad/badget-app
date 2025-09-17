@@ -12,7 +12,7 @@ import { ComboboxDropdown } from "~/components/ui/combobox-dropdown";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { useUserMutation, useUserQuery } from "~/hooks/use-user";
-import { getTimezones } from "~/server/services/location-service";
+import timezones from "~/shared/constants/timezones.json";
 import { useI18n } from "~/shared/locales/client";
 
 export function ChangeTimezone() {
@@ -20,7 +20,6 @@ export function ChangeTimezone() {
   const { data: user } = useUserQuery();
   const updateUserMutation = useUserMutation();
 
-  const timezones = getTimezones();
   const [currentBrowserTimezone, setCurrentBrowserTimezone] =
     useState<string>("");
 
