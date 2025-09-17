@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -11,7 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { signOut, useSession } from "~/shared/helpers/better-auth/auth-client";
+import { useUserQuery } from "~/hooks/use-user";
+import { signOut } from "~/shared/helpers/better-auth/auth-client";
 import { getInitials } from "~/shared/helpers/format";
 import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from "lucide-react";
 
@@ -19,9 +21,9 @@ import { Skeleton } from "./ui/skeleton";
 
 export function NavUser() {
   const router = useRouter();
-  const { data, isPending } = useSession();
+  const { data, isLoading } = useUserQuery();
 
-  if (!data?.user || isPending) {
+  if (!data || isLoading) {
     return <Skeleton className="size-8 rounded-full" />;
   }
 
@@ -29,12 +31,9 @@ export function NavUser() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="w-auto">
         <Avatar className="h-8 w-8 rounded-full">
-          <AvatarImage
-            src={data.user.image ?? ""}
-            alt={`avatar of ${data.user.name}`}
-          />
+          <AvatarImage src={data.image ?? ""} alt={`avatar of ${data.name}`} />
           <AvatarFallback className="rounded-full">
-            {getInitials(data.user.name)}
+            {getInitials(data.name)}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -48,16 +47,16 @@ export function NavUser() {
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="h-8 w-8 rounded-lg">
               <AvatarImage
-                src={data.user.image ?? ""}
-                alt={`avatar of ${data.user.name}`}
+                src={data.image ?? ""}
+                alt={`avatar of ${data.name}`}
               />
               <AvatarFallback className="rounded-lg">
-                {getInitials(data.user.name)}
+                {getInitials(data.name)}
               </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">{data.user.name}</span>
-              <span className="truncate text-xs">{data.user.email}</span>
+              <span className="truncate font-semibold">{data.name}</span>
+              <span className="truncate text-xs">{data.email}</span>
             </div>
           </div>
         </DropdownMenuLabel>
@@ -70,9 +69,11 @@ export function NavUser() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <BadgeCheck />
-            Account
+          <DropdownMenuItem asChild>
+            <Link href="/account">
+              <BadgeCheck />
+              Account
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <CreditCard />

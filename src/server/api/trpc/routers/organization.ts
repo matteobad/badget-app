@@ -44,13 +44,8 @@ export const organizationRouter = createTRPCRouter({
 
   setActive: protectedProcedure
     .input(setActiveOrganizationSchema)
-    .mutation(async ({ ctx: { db, session }, input }) => {
-      const userId = session!.userId;
-      await updateUser(
-        db,
-        { defaultOrganizationId: input.organizationId },
-        userId,
-      );
+    .mutation(async ({ input }) => {
+      await updateUser({ defaultOrganizationId: input.organizationId });
 
       await auth.api.setActiveOrganization({
         headers: await headers(),

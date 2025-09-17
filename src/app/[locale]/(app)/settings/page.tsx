@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { DeleteSpace } from "~/components/space/delete-space";
-import { SpaceSettings } from "~/components/space/space-settings";
+// import { DeleteSpace } from "~/components/space/delete-space";
+// import { SpaceSettings } from "~/components/space/space-settings";
 import { prefetch, trpc } from "~/shared/helpers/trpc/server";
 
 export const metadata: Metadata = {
@@ -12,8 +12,8 @@ export default async function Account() {
 
   return (
     <div className="space-y-6">
-      <SpaceSettings />
-      <DeleteSpace />
+      {/* <SpaceSettings /> */}
+      {/* <DeleteSpace /> */}
     </div>
   );
 }
