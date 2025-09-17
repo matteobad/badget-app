@@ -92,6 +92,13 @@
       "when": 1758051401319,
       "tag": "0012_damp_gorgon",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1758101425751,
+      "tag": "0013_lonely_lord_hawal",
+      "breakpoints": true
     }
   ]
 }

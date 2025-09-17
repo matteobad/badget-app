@@ -44,7 +44,7 @@ export const ThemeSelect = () => {
   return (
     <div className="relative flex items-center">
       <Select value={theme} onValueChange={(value: Theme) => setTheme(value)}>
-        <SelectTrigger className="h-[32px] w-full bg-transparent py-1.5 pr-3 pl-6 text-xs capitalize outline-none">
+        <SelectTrigger className="h-[32px] w-full bg-transparent py-1.5 pr-3 pl-8 text-xs capitalize outline-none">
           <SelectValue>
             {theme
               ? theme.charAt(0).toUpperCase() + theme.slice(1)
@@ -62,7 +62,7 @@ export const ThemeSelect = () => {
         </SelectContent>
       </Select>
 
-      <div className="pointer-events-none absolute left-2">
+      <div className="pointer-events-none absolute left-3">
         <ThemeIcon currentTheme={resolvedTheme as Theme} />
       </div>
     </div>

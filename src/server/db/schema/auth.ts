@@ -1,5 +1,6 @@
 import { boolean, integer, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
+import { numericCasted } from "../utils";
 import { pgTable } from "./_table";
 
 export const user = pgTable("user", {
@@ -23,7 +24,15 @@ export const user = pgTable("user", {
   twoFactorEnabled: boolean("two_factor_enabled"),
   username: text("username").unique(),
   displayUsername: text("display_username"),
+
+  // custom
   defaultOrganizationId: text("default_organization_id").notNull().default(""),
+  locale: text().default("it-IT"),
+  weekStartsOnMonday: boolean("week_starts_on_monday").default(false),
+  timezone: text(),
+  timezoneAutoSync: boolean("timezone_auto_sync").default(true),
+  timeFormat: numericCasted("time_format").default(24),
+  dateFormat: text("date_format"),
 });
 
 export type DB_UserType = typeof user.$inferSelect;

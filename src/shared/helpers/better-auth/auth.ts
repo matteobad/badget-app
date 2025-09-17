@@ -23,6 +23,40 @@ export const auth = betterAuth({
         defaultValue: "",
         input: true,
       },
+      locale: {
+        type: "string",
+        required: false,
+        defaultValue: "it",
+        input: true,
+      },
+      weekStartsOnMonday: {
+        type: "boolean",
+        required: false,
+        defaultValue: true,
+        input: true,
+      },
+      timezone: {
+        type: "string",
+        required: false,
+        input: true,
+      },
+      timezoneAutoSync: {
+        type: "boolean",
+        required: false,
+        defaultValue: true,
+        input: true,
+      },
+      timeFormat: {
+        type: "number",
+        required: false,
+        defaultValue: 24,
+        input: true,
+      },
+      dateFormat: {
+        type: "string",
+        required: false,
+        input: true,
+      },
     },
     changeEmail: {
       enabled: true,

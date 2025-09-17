@@ -3,6 +3,30 @@ export default {
   "hello.world": "Ciao mondo!",
   welcome: "Benvenuto {name}!",
 
+  language: {
+    title: "Languages",
+    description: "Change the language used in the user interface.",
+    placeholder: "Select language",
+  },
+  locale: {
+    title: "Locale",
+    searchPlaceholder: "Search locale",
+    description:
+      "Sets the region and language preferences for currency, dates, and other locale-specific formats.",
+    placeholder: "Select locale",
+  },
+  languages: {
+    en: "English",
+    sv: "Swedish",
+  },
+  timezone: {
+    title: "Time Zone",
+    searchPlaceholder: "Search timezone",
+    description:
+      "Defines the default time zone used for displaying times in the app.",
+    placeholder: "Select timezone",
+  },
+
   auth: {
     signin_title: "Benvenuto in Badget.",
     signin_subtitle: "Nuovo qui o stai tornando? Scegli come vuoi continuare",
