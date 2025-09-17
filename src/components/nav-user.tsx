@@ -15,7 +15,7 @@ import {
 import { useUserQuery } from "~/hooks/use-user";
 import { signOut } from "~/shared/helpers/better-auth/auth-client";
 import { getInitials } from "~/shared/helpers/format";
-import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from "lucide-react";
+import { LifeBuoyIcon, LogOut, UserIcon, UsersIcon } from "lucide-react";
 
 import { Skeleton } from "./ui/skeleton";
 
@@ -30,9 +30,9 @@ export function NavUser() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="w-auto">
-        <Avatar className="h-8 w-8 rounded-full">
+        <Avatar className="h-8 w-8 rounded-none">
           <AvatarImage src={data.image ?? ""} alt={`avatar of ${data.name}`} />
-          <AvatarFallback className="rounded-full">
+          <AvatarFallback className="rounded-none">
             {getInitials(data.name)}
           </AvatarFallback>
         </Avatar>
@@ -45,12 +45,13 @@ export function NavUser() {
       >
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-            <Avatar className="h-8 w-8 rounded-lg">
+            <Avatar className="h-8 w-8 rounded-none">
               <AvatarImage
+                className="rounded-none"
                 src={data.image ?? ""}
                 alt={`avatar of ${data.name}`}
               />
-              <AvatarFallback className="rounded-lg">
+              <AvatarFallback className="rounded-none">
                 {getInitials(data.name)}
               </AvatarFallback>
             </Avatar>
@@ -62,26 +63,23 @@ export function NavUser() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <Sparkles />
-            Upgrade to Pro
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link href="/account">
-              <BadgeCheck />
+              <UserIcon />
               Account
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCard />
-            Billing
+          <DropdownMenuItem asChild>
+            <Link href="/account/support">
+              <LifeBuoyIcon />
+              Support
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Bell />
-            Notifications
+          <DropdownMenuItem asChild>
+            <Link href="/account/spaces">
+              <UsersIcon />
+              Spaces
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
