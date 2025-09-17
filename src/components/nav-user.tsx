@@ -17,6 +17,7 @@ import { signOut } from "~/shared/helpers/better-auth/auth-client";
 import { getInitials } from "~/shared/helpers/format";
 import { LifeBuoyIcon, LogOut, UserIcon, UsersIcon } from "lucide-react";
 
+import { ThemeSelect } from "./theme-select";
 import { Skeleton } from "./ui/skeleton";
 
 export function NavUser() {
@@ -82,6 +83,11 @@ export function NavUser() {
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <div className="flex flex-row items-center justify-between p-2">
+          <p className="text-sm">Theme</p>
+          <ThemeSelect />
+        </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cn } from "~/lib/utils";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -42,9 +43,13 @@ export const ThemeSelect = () => {
   }
 
   return (
-    <div className="relative flex items-center">
+    <div className="relative flex h-[28px] items-center">
       <Select value={theme} onValueChange={(value: Theme) => setTheme(value)}>
-        <SelectTrigger className="h-[32px] w-full bg-transparent py-1.5 pr-3 pl-8 text-xs capitalize outline-none">
+        <SelectTrigger
+          className={cn(
+            "h-[32px] w-full bg-transparent py-1 pr-3 pl-8 text-xs capitalize outline-none",
+          )}
+        >
           <SelectValue>
             {theme
               ? theme.charAt(0).toUpperCase() + theme.slice(1)
