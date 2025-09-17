@@ -3,6 +3,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { FormatAmount } from "~/components/format-amount";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { useUserQuery } from "~/hooks/use-user";
 import { cn } from "~/lib/utils";
 import { formatDate } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -16,6 +17,8 @@ type Props = {
 };
 
 export function TransactionsList({ type }: Props) {
+  const { data: user } = useUserQuery();
+
   const trpc = useTRPC();
 
   const { data: transactions } = useSuspenseQuery(
@@ -73,7 +76,7 @@ export function TransactionsList({ type }: Props) {
                   {transaction.name}
                 </h3>
                 <p className="text-[11px] text-muted-foreground">
-                  {formatDate(transaction.date)}
+                  {formatDate(transaction.date, user?.dateFormat)}
                 </p>
               </div>
 

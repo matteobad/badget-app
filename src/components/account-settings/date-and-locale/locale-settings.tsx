@@ -9,7 +9,7 @@ import {
 } from "~/components/ui/card";
 import { ComboboxDropdown } from "~/components/ui/combobox-dropdown";
 import { useUserMutation, useUserQuery } from "~/hooks/use-user";
-import { countries } from "~/shared/constants/countries-intl";
+import { getCountries } from "~/server/services/location-service";
 import { useI18n } from "~/shared/locales/client";
 
 export function LocaleSettings() {
@@ -17,6 +17,7 @@ export function LocaleSettings() {
   const { data: user } = useUserQuery();
   const updateUserMutation = useUserMutation();
 
+  const countries = getCountries();
   const localeItems = Object.values(countries).map((c, index) => ({
     id: index.toString(),
     label: `${c.name} (${c.default_locale})`,

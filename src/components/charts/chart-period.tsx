@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useMetricsParams } from "~/hooks/use-metrics-params";
+import { useUserQuery } from "~/hooks/use-user";
 import { chartPeriodOptions } from "~/shared/validators/metrics.schema";
 import { formatISO } from "date-fns";
 import { ChevronDownIcon } from "lucide-react";
@@ -27,6 +28,8 @@ type Props = {
 
 export function ChartPeriod({ disabled }: Props) {
   const { params, setParams } = useMetricsParams();
+
+  const { data: user } = useUserQuery();
 
   const handleChangePeriod = (
     range: DateRange | undefined,
@@ -120,7 +123,7 @@ export function ChartPeriod({ disabled }: Props) {
             autoFocus
             hidden={{ after: new Date() }}
             onSelect={handleCalendarSelect}
-            weekStartsOn={1}
+            weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
           />
         </PopoverContent>
       </Popover>

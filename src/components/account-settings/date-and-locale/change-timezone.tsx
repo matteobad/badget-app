@@ -12,7 +12,7 @@ import { ComboboxDropdown } from "~/components/ui/combobox-dropdown";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { useUserMutation, useUserQuery } from "~/hooks/use-user";
-import { getTimezones } from "~/shared/constants/timezones";
+import { getTimezones } from "~/server/services/location-service";
 import { useI18n } from "~/shared/locales/client";
 
 export function ChangeTimezone() {

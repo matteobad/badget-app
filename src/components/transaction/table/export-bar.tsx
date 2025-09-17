@@ -7,6 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { useUserQuery } from "~/hooks/use-user";
 import { useExportStore } from "~/lib/stores/export";
 import { useTransactionsStore } from "~/lib/stores/transaction";
 import { exportTransactionsAction } from "~/server/domain/transaction/actions";
@@ -19,6 +20,8 @@ import { toast } from "sonner";
 import { BulkActions } from "../transaction-bulk-actions";
 
 export function ExportBar() {
+  const { data: user } = useUserQuery();
+
   const { setExportData } = useExportStore();
   const { rowSelection, setRowSelection } = useTransactionsStore();
   const [isOpen, setOpen] = useState(false);
@@ -92,8 +95,8 @@ export function ExportBar() {
               onClick={() =>
                 execute({
                   transactionIds: ids,
-                  // dateFormat: user?.dateFormat ?? undefined,
-                  // locale: user?.locale ?? undefined,
+                  dateFormat: user?.dateFormat ?? undefined,
+                  locale: user?.locale ?? undefined,
                 })
               }
             >
