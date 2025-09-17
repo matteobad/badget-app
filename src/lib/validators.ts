@@ -1,10 +1,7 @@
-import type { ExtendedSortingState, Filter } from "~/utils/data-table";
-import { tag_table } from "~/server/db/schema/transactions";
-import { SAVING_TYPE } from "~/shared/constants/enum";
+import type { ExtendedSortingState } from "~/utils/data-table";
 import { dataTableConfig } from "~/utils/data-table";
-import { createInsertSchema } from "drizzle-zod";
 import { createParser } from "nuqs/server";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 import type { Row } from "@tanstack/react-table";
 
@@ -58,88 +55,3 @@ export const filterSchema = z.object({
   operator: z.enum(dataTableConfig.globalOperators),
   rowId: z.string(),
 });
-
-/**
- * Create a parser for data table filters.
- * @param originalRow The original row data to create the parser for.
- * @returns A parser for data table filters state.
- */
-export const getFiltersStateParser = <T>(originalRow?: Row<T>["original"]) => {
-  const validKeys = originalRow ? new Set(Object.keys(originalRow)) : null;
-
-  return createParser<Filter<T>[]>({
-    parse: (value) => {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const parsed = JSON.parse(value);
-        const result = z.array(filterSchema).safeParse(parsed);
-
-        if (!result.success) return null;
-
-        if (validKeys && result.data.some((item) => !validKeys.has(item.id))) {
-          return null;
-        }
-
-        return result.data as Filter<T>[];
-      } catch {
-        return null;
-      }
-    },
-    serialize: (value) => JSON.stringify(value),
-    eq: (a, b) =>
-      a.length === b.length &&
-      a.every(
-        (filter, index) =>
-          filter.id === b[index]?.id &&
-          filter.value === b[index]?.value &&
-          filter.type === b[index]?.type &&
-          filter.operator === b[index]?.operator,
-      ),
-  });
-};
-
-// savings
-export const addSavingsAccountFormSchema = z.object({
-  type: z.enum(Object.values(SAVING_TYPE)),
-});
-
-export const CreatePensionAccountSchema = z.object({
-  pensionFundId: z.number(),
-  investmentBranchId: z.number(),
-  joinedAt: z.date().default(new Date()),
-  baseContribution: z.number().default(0),
-});
-
-export const TagInsertSchema = createInsertSchema(tag_table, {
-  id: z.string(),
-  text: z.string(),
-}).omit({
-  organizationId: true,
-  createdAt: true,
-  updatedAt: true,
-  deletedAt: true,
-});
-
-export const ImportDataSchema = z.object({
-  id: z.string(),
-  provider: z.string(),
-  connectionId: z.string(),
-  institutionId: z.string(),
-});
-
-export const ToggleAccountSchema = z.object({
-  id: z.string(),
-  enabled: z.boolean(),
-});
-export type ToggleAccountType = z.infer<typeof ToggleAccountSchema> & {
-  orgId: string;
-};
-
-// Define the feedback schema
-export const FeedbackSchema = z.object({
-  message: z.string().min(3, "Feedback must be at least 3 characters long"),
-  category: z.enum(["bug", "feature", "other"]),
-});
-
-// Type for the feedback data
-export type FeedbackType = z.infer<typeof FeedbackSchema>;

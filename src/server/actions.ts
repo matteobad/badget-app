@@ -2,30 +2,27 @@
 
 import { cookies } from "next/headers";
 import { authActionClient } from "~/lib/safe-action";
-import { sendToTelegram } from "~/lib/telegram";
-import { FeedbackSchema } from "~/lib/validators";
+import { sendSupportSchema } from "~/shared/validators/support.schema";
 import { addYears } from "date-fns";
 
 import type { VisibilityState } from "@tanstack/react-table";
+import { resend } from "./emails/resend";
 
 // Server action to submit feedback
 export const submitFeedbackAction = authActionClient
-  .inputSchema(FeedbackSchema)
+  .inputSchema(sendSupportSchema)
   .metadata({ actionName: "submit-feedback" })
-  .action(async ({ parsedInput, ctx }) => {
+  .action(async ({ parsedInput }) => {
     try {
-      const { message, category } = parsedInput;
+      const { message, email, subject, type, priority } = parsedInput;
 
-      // Format the message for Telegram
-      const formattedMessage = `
-      <b>New Feedback</b>
-      <b>Category:</b> ${category}
-      <b>User:</b> ${ctx.userId}
-      <b>Time:</b> ${new Date().toISOString()}
-      <b>Message:</b> ${message}`;
-
-      // Send to Telegram
-      await sendToTelegram(formattedMessage);
+      await resend.emails.send({
+        from: "Badget <support@resend.dev>",
+        cc: [email],
+        to: "matteo.badini95@gmail.com", // TODO: use admin email
+        subject: `Support [${type}] [${priority}]- ${subject}`,
+        text: message,
+      });
 
       return { success: true };
     } catch (error) {
