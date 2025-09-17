@@ -179,6 +179,7 @@ export function SelectCategory({
                     color: foundItem.color,
                     slug: foundItem.slug,
                   });
+                  setOpen(false);
                 }}
               >
                 <CategoryLabel
@@ -203,6 +204,7 @@ export function SelectCategory({
                   name: inputValue,
                   color: getColorFromName(inputValue),
                 });
+                setOpen(false);
                 setInputValue("");
               }}
               onMouseDown={(event) => {

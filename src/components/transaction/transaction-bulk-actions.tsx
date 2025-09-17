@@ -75,12 +75,15 @@ export function BulkActions({ ids }: Props) {
     enabled: ids.length > 0,
   });
 
-  const handleUpdateTransactionsCategory = (categoryId?: string) => {
-    toast.promise(updateTransactionsMutation.mutateAsync({ categoryId, ids }), {
-      loading: "Updating transactions...",
-      success: "Transactions updated successfully",
-      error: "Something went wrong please try again.",
-    });
+  const handleUpdateTransactionsCategory = (categorySlug?: string) => {
+    toast.promise(
+      updateTransactionsMutation.mutateAsync({ categorySlug, ids }),
+      {
+        loading: "Updating transactions...",
+        success: "Transactions updated successfully",
+        error: "Something went wrong please try again.",
+      },
+    );
   };
 
   const handleDeleteTransactions = () => {
@@ -110,9 +113,9 @@ export function BulkActions({ ids }: Props) {
         >
           <SelectCategory
             headless
-            selected={undefined}
             onChange={(category) => {
-              handleUpdateTransactionsCategory(category?.id);
+              setCategoryOpen(false);
+              handleUpdateTransactionsCategory(category?.slug);
             }}
           />
         </DropdownMenuContent>
