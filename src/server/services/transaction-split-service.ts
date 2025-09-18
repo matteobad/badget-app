@@ -72,6 +72,8 @@ export async function getTransactionSplits(
     )
     .orderBy(desc(transaction_split_table.amount));
 
+  const subtotal = splits.reduce((tot, value) => (tot += value.amount), 0);
+
   return {
     transaction: {
       id: input.transactionId,
@@ -87,8 +89,8 @@ export async function getTransactionSplits(
       note: split.note ?? "",
       category: split.category?.slug,
     })),
-    total: transaction.amount,
-    subtotal: splits.reduce((tot, value) => (tot += value.amount), 0),
+    remaining: transaction.amount - subtotal,
+    subtotal: subtotal,
   } satisfies SplitFormValues;
 }
 

@@ -48,7 +48,7 @@ export function AmountInput<P extends Path<SplitFormValues>>({
         className={cn(
           className,
           isPlaceholder && "opacity-0",
-          "h-6 border-0 border-b border-transparent !bg-transparent p-0 text-xs focus:border-border",
+          "h-6 border-0 border-b border-transparent !bg-transparent p-0 text-xs shadow-none focus:border-border",
         )}
         thousandSeparator={true}
       />

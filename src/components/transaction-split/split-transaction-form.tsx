@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import type { SplitFormValues } from "./form-context";
 import { SubmitButton } from "../submit-button";
 import { Button } from "../ui/button";
+import { DialogClose } from "../ui/dialog";
 import { ScrollArea } from "../ui/scroll-area";
 import { LineItems } from "./line-items";
 import { Logo } from "./logo";
@@ -87,9 +88,11 @@ export function SplitTransactionForm() {
       </ScrollArea>
 
       <div className="mt-auto flex items-center justify-end gap-4 pt-6">
-        <Button variant="ghost" type="button">
-          Annulla
-        </Button>
+        <DialogClose asChild>
+          <Button variant="ghost" type="button">
+            Annulla
+          </Button>
+        </DialogClose>
         <SubmitButton
           isSubmitting={transactionSplitMutation.isPending}
           disabled={transactionSplitMutation.isPending}

@@ -37,7 +37,7 @@ export const lineItemSchema = z.object({
 
 export const splitFormSchema = z.object({
   subtotal: z.number().nullable().optional(),
-  total: z.number(),
+  remaining: z.number(),
   transaction: transactionSchema,
   splits: z.array(lineItemSchema).min(2),
 });

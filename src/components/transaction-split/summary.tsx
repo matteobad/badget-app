@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { useUserQuery } from "~/hooks/use-user";
+import { cn } from "~/lib/utils";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import { AnimatedNumber } from "../animated-number";
@@ -16,9 +17,14 @@ export function Summary() {
     name: "transaction.currency",
   });
 
-  const total = useWatch({
+  const amount = useWatch({
     control,
     name: "transaction.amount",
+  });
+
+  const remaining = useWatch({
+    control,
+    name: "remaining",
   });
 
   const lineItems = useWatch({
@@ -31,6 +37,7 @@ export function Summary() {
 
   const updateFormValues = useCallback(() => {
     setValue("subtotal", subTotal, { shouldValidate: true });
+    setValue("remaining", amount - subTotal, { shouldValidate: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subTotal]);
 
@@ -44,7 +51,7 @@ export function Summary() {
         <span className="min-w-6 flex-shrink-0 font-mono text-xs text-muted-foreground">
           Subtotal
         </span>
-        <span className="text-right font-mono text-[11px] text-[#878787]">
+        <span className="text-right font-mono text-[11px] text-muted-foreground">
           <FormatAmount
             amount={subTotal}
             currency={currency}
@@ -55,10 +62,17 @@ export function Summary() {
 
       <div className="mt-2 flex items-center justify-between border-t border-border py-4">
         <span className="min-w-6 flex-shrink-0 font-mono text-xs text-muted-foreground">
-          Total
+          Restanti
         </span>
-        <span className="text-right font-mono text-[21px] font-medium">
-          <AnimatedNumber value={total} currency={currency} />
+        <span
+          className={cn(
+            "text-right font-mono text-xl font-medium",
+            remaining === 0
+              ? "text-green-600 dark:text-green-400"
+              : "text-red-600 dark:text-red-400",
+          )}
+        >
+          <AnimatedNumber value={remaining} currency={currency} />
         </span>
       </div>
     </div>

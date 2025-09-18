@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { Reorder, useDragControls } from "framer-motion";
 import { GripVerticalIcon, PlusIcon, XIcon } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -10,12 +11,55 @@ import { AmountInput } from "./amount-input";
 import { DescriptionInput } from "./description-input";
 
 export function LineItems() {
-  const { control } = useFormContext<SplitFormValues>();
+  const { control, watch, getFieldState, setValue } =
+    useFormContext<SplitFormValues>();
+
+  const transactionAmount = watch("transaction.amount");
+  const currentSplits = watch("splits");
 
   const { fields, append, remove, swap } = useFieldArray({
     control,
     name: "splits",
   });
+
+  const autoCompleteSplits = useCallback(() => {
+    // Check which splits are dirty or touched using React Hook Form state
+    const dirtyOrTouchedSplits = currentSplits.map((_, index) => {
+      const fieldState = getFieldState(`splits.${index}.amount`);
+      return fieldState.isDirty || fieldState.isTouched;
+    });
+
+    const cleanSplits = currentSplits.filter(
+      (_, index) => !dirtyOrTouchedSplits[index],
+    );
+
+    // If more than 1 split is not dirty/touched, don't adjust anything
+    if (cleanSplits.length > 1) {
+      return;
+    }
+
+    // If only 1 split is not dirty/touched, adjust it to the remaining amount
+    if (cleanSplits.length === 1) {
+      const dirtyAmount = currentSplits
+        .filter((_, index) => dirtyOrTouchedSplits[index])
+        .reduce((sum, split) => (sum += split.amount), 0);
+
+      const remainingAmount = (transactionAmount - dirtyAmount).toFixed(2);
+
+      // Find the clean split and update it
+      const cleanSplitIndex = currentSplits.findIndex(
+        (_, index) => !dirtyOrTouchedSplits[index],
+      );
+
+      if (cleanSplitIndex !== -1) {
+        // Update the specific split amount directly to ensure proper re-rendering
+        setValue(`splits.${cleanSplitIndex}.amount`, Number(remainingAmount), {
+          shouldValidate: true,
+          shouldDirty: false, // Don't mark as dirty since this is auto-completion
+        });
+      }
+    }
+  }, [currentSplits, transactionAmount, getFieldState, setValue]);
 
   const reorderList = (newFields: typeof fields) => {
     const firstDiffIndex = fields.findIndex(
@@ -61,6 +105,7 @@ export function LineItems() {
             item={field}
             index={index}
             handleRemove={handleRemove}
+            handleBlur={autoCompleteSplits}
             isReorderable={fields.length > 1}
           />
         ))}
@@ -75,7 +120,7 @@ export function LineItems() {
             amount: 0,
           })
         }
-        className="flex cursor-pointer items-center space-x-2 font-mono text-xs text-muted-foreground"
+        className="flex w-fit cursor-pointer items-center space-x-2 font-mono text-xs text-muted-foreground"
       >
         <PlusIcon className="size-3.5" />
         <span className="text-xs">Add item</span>
@@ -87,11 +132,13 @@ export function LineItems() {
 function LineItemRow({
   index,
   handleRemove,
+  handleBlur,
   isReorderable,
   item,
 }: {
   index: number;
   handleRemove: (index: number) => void;
+  handleBlur: (index: number) => void;
   isReorderable: boolean;
   item: SplitFormValues["splits"][number];
 }) {
@@ -122,7 +169,11 @@ function LineItemRow({
       </div>
 
       <div className="text-right">
-        <AmountInput name={`splits.${index}.amount`} className="text-right" />
+        <AmountInput
+          name={`splits.${index}.amount`}
+          className="text-right"
+          onBlur={() => handleBlur(index)}
+        />
       </div>
 
       {index > 1 && (
