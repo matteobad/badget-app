@@ -1,3 +1,4 @@
+import type { SplitFormValues } from "~/components/transaction-split/form-context";
 import type {
   addTransactionSplitsSchema,
   deleteTransactionSplitSchema,
@@ -14,11 +15,25 @@ import {
 } from "../db/schema/transactions";
 
 export async function getTransactionSplits(
-  client: DBClient,
+  db: DBClient,
   input: z.infer<typeof getTransactionSplitsSchema>,
-  orgId: string,
+  organizationId: string,
 ) {
-  const trx = await client
+  const [transaction] = await db
+    .select()
+    .from(transaction_table)
+    .where(
+      and(
+        eq(transaction_table.organizationId, organizationId),
+        eq(transaction_table.id, input.transactionId),
+      ),
+    );
+
+  if (!transaction) {
+    throw new Error("Transaction not found");
+  }
+
+  const splits = await db
     .select({
       id: transaction_split_table.id,
       category: {
@@ -52,12 +67,29 @@ export async function getTransactionSplits(
     .where(
       and(
         eq(transaction_split_table.transactionId, input.transactionId),
-        eq(transaction_table.organizationId, orgId),
+        eq(transaction_table.organizationId, organizationId),
       ),
     )
     .orderBy(desc(transaction_split_table.amount));
 
-  return trx;
+  return {
+    transaction: {
+      id: input.transactionId,
+      date: transaction.date,
+      name: transaction.name,
+      amount: transaction.amount,
+      currency: transaction.currency,
+      logoUrl: transaction.merchantName, // TODO: show some images
+    },
+    splits: splits.map((split) => ({
+      id: split.id,
+      amount: split.amount,
+      note: split.note ?? "",
+      category: split.category?.slug,
+    })),
+    total: transaction.amount,
+    subtotal: splits.reduce((tot, value) => (tot += value.amount), 0),
+  } satisfies SplitFormValues;
 }
 
 export async function addTransactionSplits(
