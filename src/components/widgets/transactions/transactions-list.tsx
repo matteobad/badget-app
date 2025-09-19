@@ -16,7 +16,7 @@ type Props = {
   disabled: boolean;
 };
 
-export function TransactionsList({ type }: Props) {
+export function TransactionsList({}: Props) {
   const { data: user } = useUserQuery();
 
   const trpc = useTRPC();
@@ -24,7 +24,6 @@ export function TransactionsList({ type }: Props) {
   const { data: transactions } = useSuspenseQuery(
     trpc.transaction.get.queryOptions({
       pageSize: 15,
-      type: type === "all" ? undefined : type,
     }),
   );
 

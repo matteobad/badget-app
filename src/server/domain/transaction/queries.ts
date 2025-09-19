@@ -29,7 +29,6 @@ import {
   gte,
   inArray,
   isNull,
-  lt,
   lte,
   ne,
   or,
@@ -48,7 +47,6 @@ export async function getTransactionsQuery(
     q,
     categories: filterCategories,
     tags: filterTags,
-    type,
     accounts: filterAccounts,
     start,
     end,
@@ -91,13 +89,9 @@ export async function getTransactionsQuery(
   if (filterCategories && filterCategories.length > 0) {
     const categoryConditions: (SQL | undefined)[] = [];
     for (const categorySlug of filterCategories) {
-      if (categorySlug === "uncategorized") {
-        categoryConditions.push(isNull(transaction_category_table.slug));
-      } else {
-        categoryConditions.push(
-          eq(transaction_category_table.slug, categorySlug),
-        );
-      }
+      categoryConditions.push(
+        eq(transaction_category_table.slug, categorySlug),
+      );
     }
     const definedCategoryConditions = categoryConditions.filter(
       (c) => c !== undefined,
@@ -137,14 +131,6 @@ export async function getTransactionsQuery(
         );
       }
     }
-  }
-
-  // Type filter (expense/income)
-  if (type === "expense") {
-    whereConditions.push(lt(transaction_table.amount, 0));
-    whereConditions.push(ne(transaction_table.categorySlug, "transfer"));
-  } else if (type === "income") {
-    whereConditions.push(eq(transaction_table.categorySlug, "income"));
   }
 
   // Accounts filter

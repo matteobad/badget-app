@@ -233,7 +233,33 @@ export const getTransactionsSchema = z.object({
   attachments: z.enum(["include", "exclude"]).nullable().optional(),
   amount_range: z.array(z.coerce.number()).nullable().optional(),
   amount: z.array(z.string()).nullable().optional(),
-  type: z.enum(["income", "expense"]).nullable().optional(),
+});
+
+export const generateTransactionFiltersSchema = z.object({
+  name: z.string().optional().describe("The name to search for"),
+  start: z.iso
+    .date()
+    .optional()
+    .describe("The start date when to retrieve from. Return ISO-8601 format."),
+  end: z.iso
+    .date()
+    .optional()
+    .describe(
+      "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
+    ),
+  categories: z
+    .array(z.string())
+    .optional()
+    .describe("The categories to filter by"),
+  tags: z.array(z.string()).optional().describe("The tags to filter by"),
+  recurring: z
+    .array(z.enum(["all", "weekly", "monthly", "annually"]))
+    .optional()
+    .describe("The recurring to filter by"),
+  amount_range: z
+    .array(z.number())
+    .optional()
+    .describe("The amount range to filter by"),
 });
 
 // Search params filter schema

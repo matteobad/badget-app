@@ -35,7 +35,6 @@ export const EMPTY_FILTER_STATE: TransactionFilters = {
   categories: null,
   tags: null,
   accounts: null,
-  assignees: null,
   amount_range: null,
   amount: null,
   recurring: null,

@@ -2,6 +2,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { useQuery } from "@tanstack/react-query";
 import { SelectCategory } from "~/components/transaction-category/select-category";
 import { Calendar } from "~/components/ui/calendar";
@@ -21,6 +22,7 @@ import { useTransactionFilterParams } from "~/hooks/use-transaction-filter-param
 import { useTransactionFilterParamsWithPersistence } from "~/hooks/use-transaction-filter-params-with-persistence";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { generateTransactionFiltersSchema } from "~/shared/validators/transaction.schema";
 import { formatISO } from "date-fns";
 import {
   CalendarIcon,
@@ -206,13 +208,21 @@ function updateArrayFilter(
 export function TransactionsSearchFilter() {
   const [placeholder, setPlaceholder] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const [streaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const { filter = defaultSearch, setFilter } =
     useTransactionFilterParamsWithPersistence();
   const { tags, accounts, categories } = useFilterData(isOpen, isFocused);
   const [prompt, setPrompt] = useState(filter.q ?? "");
+
+  const {
+    object,
+    submit,
+    isLoading: isStreaming,
+  } = useObject({
+    api: "/api/ai/generate-transaction-filters",
+    schema: generateTransactionFiltersSchema,
+  });
 
   useEffect(() => {
     const randomPlaceholder =
@@ -221,6 +231,33 @@ export function TransactionsSearchFilter() {
 
     setPlaceholder(randomPlaceholder);
   }, []);
+
+  useEffect(() => {
+    if (object) {
+      console.log(object);
+      void setFilter({
+        // q: null,
+        ...defaultSearch,
+        ...object,
+        // @ts-expect-error find a way to better type this
+        categories:
+          object?.categories
+            ?.map((name) => categories?.find((c) => c.name === name)?.slug)
+            .filter(Boolean) ?? null,
+        // @ts-expect-error find a way to better type this
+        tags:
+          object?.tags
+            ?.map((name) => tags?.find((t) => t.text === name)?.id)
+            .filter(Boolean) ?? null,
+        // @ts-expect-error find a way to better type this
+        recurring: object?.recurring ?? null,
+        q: object?.name ?? null,
+        // @ts-expect-error find a way to better type this
+        amount_range: object?.amount_range ?? null,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [object]);
 
   useHotkeys(
     "esc",
@@ -251,8 +288,17 @@ export function TransactionsSearchFilter() {
   };
 
   const handleSubmit = async () => {
-    // TODO: add AI filtering @ref: midday
-    setFilter({ q: prompt.length > 0 ? prompt : null });
+    if (prompt.split(" ").length > 1) {
+      submit({
+        prompt,
+        context: `
+          Categories: ${categories?.map((category) => category.name).join(", ")}
+          Tags: ${tags?.map((tag) => tag.text).join(", ")}
+        `,
+      });
+    } else {
+      setFilter({ q: prompt.length > 0 ? prompt : null });
+    }
   };
 
   const validFilters = Object.fromEntries(
@@ -335,7 +381,7 @@ export function TransactionsSearchFilter() {
 
         <FilterList
           filters={processFiltersForList()}
-          loading={streaming}
+          loading={isStreaming}
           onRemove={setFilter}
           categories={categories}
           accounts={accounts}
@@ -376,6 +422,7 @@ export function TransactionsSearchFilter() {
                   : null,
               };
 
+              console.log({ newRange });
               setFilter(newRange);
             }}
           />

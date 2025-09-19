@@ -145,7 +145,7 @@ export default function CreateTransactionForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit, onError)}
-        className="space-y-4"
+        className="space-y-4 p-[3px]"
       >
         {/* <pre>
           <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
