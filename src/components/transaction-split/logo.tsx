@@ -10,7 +10,7 @@ export function Logo() {
   const logoUrl = watch("transaction.logoUrl");
 
   return (
-    <div className="group relative h-[80px]">
+    <div className="group relative mt-[40px] h-[80px] shrink-0">
       <Avatar className="h-full w-auto max-w-none rounded-none object-contain">
         <AvatarImage
           className="rounded-none"

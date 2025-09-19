@@ -18,6 +18,7 @@ export function SplitTransactionForm() {
   const { setParams } = useTransactionParams();
 
   const form = useFormContext<SplitFormValues>();
+  const transactionId = form.watch("transaction.id");
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -30,6 +31,9 @@ export function SplitTransactionForm() {
 
         await queryClient.invalidateQueries({
           queryKey: trpc.transaction.get.infiniteQueryKey(),
+        });
+        await queryClient.invalidateQueries({
+          queryKey: trpc.transaction.getSplits.queryKey({ transactionId }),
         });
       },
       onError: (error) => {
@@ -44,11 +48,7 @@ export function SplitTransactionForm() {
       transactionId: values.transaction.id,
       splits: values.splits.map((item) => ({
         ...item,
-        category: {
-          id: item.category ?? "id",
-          slug: item.category ?? "uncategorized",
-          name: item.category ?? "Uncategorized",
-        },
+        categorySlug: item.category,
       })),
     });
   };
@@ -70,8 +70,11 @@ export function SplitTransactionForm() {
         className="max-h-[500px] overflow-auto bg-background"
         hideScrollbar
       >
+        {/* <pre>
+          <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
+        </pre> */}
         <div className="flex h-full flex-col p-6 pb-4">
-          <div className="flex items-end justify-between">
+          <div className="flex items-start justify-between gap-8">
             <Meta />
             <Logo />
           </div>

@@ -8,6 +8,7 @@ import type z from "zod/v4";
 import { and, desc, eq } from "drizzle-orm";
 
 import type { DBClient } from "../db";
+import { account_table } from "../db/schema/accounts";
 import {
   transaction_category_table,
   transaction_split_table,
@@ -20,8 +21,15 @@ export async function getTransactionSplits(
   organizationId: string,
 ) {
   const [transaction] = await db
-    .select()
+    .select({
+      date: transaction_table.date,
+      amount: transaction_table.amount,
+      name: transaction_table.name,
+      currency: transaction_table.currency,
+      logoUrl: account_table.logoUrl,
+    })
     .from(transaction_table)
+    .leftJoin(account_table, eq(account_table.id, transaction_table.accountId))
     .where(
       and(
         eq(transaction_table.organizationId, organizationId),
@@ -36,13 +44,7 @@ export async function getTransactionSplits(
   const splits = await db
     .select({
       id: transaction_split_table.id,
-      category: {
-        id: transaction_category_table.id,
-        slug: transaction_category_table.slug,
-        name: transaction_category_table.name,
-        color: transaction_category_table.color,
-        icon: transaction_category_table.icon,
-      },
+      categorySlug: transaction_category_table.slug,
       amount: transaction_split_table.amount,
       note: transaction_split_table.note,
     })
@@ -81,13 +83,13 @@ export async function getTransactionSplits(
       name: transaction.name,
       amount: transaction.amount,
       currency: transaction.currency,
-      logoUrl: transaction.merchantName, // TODO: show some images
+      logoUrl: transaction.logoUrl, // TODO: show some images
     },
     splits: splits.map((split) => ({
       id: split.id,
       amount: split.amount,
       note: split.note ?? "",
-      category: split.category?.slug,
+      category: split.categorySlug ?? undefined,
     })),
     remaining: transaction.amount - subtotal,
     subtotal: subtotal,
@@ -140,7 +142,7 @@ export async function addTransactionSplits(
       input.splits.map((s) => ({
         organizationId,
         transactionId: input.transactionId,
-        categorySlug: s.category?.slug,
+        categorySlug: s.categorySlug,
         amount: s.amount,
         note: s.note,
       })),

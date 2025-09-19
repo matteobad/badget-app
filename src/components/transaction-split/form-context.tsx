@@ -3,16 +3,19 @@
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { nanoid } from "nanoid";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 const DEFAULT_SPLITS = [
   {
+    id: nanoid(),
     note: "",
     category: "",
     amount: 0,
   },
   {
+    id: nanoid(),
     note: "",
     category: "",
     amount: 0,
@@ -29,7 +32,7 @@ export const transactionSchema = z.object({
 });
 
 export const lineItemSchema = z.object({
-  id: z.uuid().optional(),
+  id: z.string(),
   note: z.string().min(1, "Name is required"),
   category: z.string().optional(),
   amount: z.number(),
@@ -55,7 +58,7 @@ export function FormContext({ children, data }: FormContextProps) {
     defaultValues: {
       splits: DEFAULT_SPLITS,
     },
-    mode: "onChange",
+    // mode: "onChange",
   });
 
   useEffect(() => {
@@ -65,8 +68,7 @@ export function FormContext({ children, data }: FormContextProps) {
         splits: data.splits?.length > 0 ? data.splits : DEFAULT_SPLITS,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, [form, data]);
 
   return <FormProvider {...form}>{children}</FormProvider>;
 }

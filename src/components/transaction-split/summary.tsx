@@ -37,7 +37,9 @@ export function Summary() {
 
   const updateFormValues = useCallback(() => {
     setValue("subtotal", subTotal, { shouldValidate: true });
-    setValue("remaining", amount - subTotal, { shouldValidate: true });
+    setValue("remaining", Number((amount - subTotal).toFixed(2)), {
+      shouldValidate: true,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subTotal]);
 

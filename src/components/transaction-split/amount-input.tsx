@@ -12,6 +12,7 @@ type AmountInputProps<P extends Path<SplitFormValues>> = Omit<
   "value" | "onChange"
 > & {
   name: P;
+  handleBlur: () => void;
   className?: string;
 };
 
@@ -37,12 +38,15 @@ export function AmountInput<P extends Path<SplitFormValues>>({
         autoComplete="off"
         value={value as number}
         onValueChange={(values) => {
-          onChange(values.floatValue ?? 0, { shouldValidate: true });
+          onChange(values.floatValue, {
+            shouldValidate: true,
+          });
         }}
         onFocus={() => setIsFocused(true)}
         onBlur={() => {
           setIsFocused(false);
           onBlur();
+          props.handleBlur();
         }}
         {...props}
         className={cn(
@@ -51,6 +55,10 @@ export function AmountInput<P extends Path<SplitFormValues>>({
           "h-6 border-0 border-b border-transparent !bg-transparent p-0 text-xs shadow-none focus:border-border",
         )}
         thousandSeparator={true}
+        allowLeadingZeros={false}
+        fixedDecimalScale={true}
+        decimalScale={2}
+        allowNegative={true}
       />
 
       {isPlaceholder && (

@@ -1,7 +1,11 @@
 "use client";
 
 import { use, useDeferredValue, useEffect, useMemo, useState } from "react";
-import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseInfiniteQuery,
+} from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -40,7 +44,9 @@ type Props = {
 export function DataTable({
   columnVisibility: columnVisibilityPromise,
 }: Props) {
+  const queryClient = useQueryClient();
   const trpc = useTRPC();
+
   const { filter, hasFilters } = useTransactionFilterParamsWithPersistence();
   const { setRowSelection, rowSelection, setColumns, setCanDelete } =
     useTransactionsStore();
@@ -72,8 +78,14 @@ export function DataTable({
 
   const deleteTransactionSplitMutation = useMutation(
     trpc.transaction.deleteSplit.mutationOptions({
-      onSuccess: () => {
-        void refetch();
+      onSuccess: async (_, variables) => {
+        await queryClient.invalidateQueries({
+          queryKey: trpc.transaction.getSplits.queryKey({
+            transactionId: variables.transactionId,
+          }),
+        });
+
+        await refetch();
       },
     }),
   );

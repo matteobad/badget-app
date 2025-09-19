@@ -1,13 +1,7 @@
 import { z } from "zod/v4";
 
 export const transactionSplitItemSchema = z.object({
-  category: z
-    .object({
-      id: z.uuid(),
-      slug: z.string(),
-      name: z.string(),
-    })
-    .optional(),
+  categorySlug: z.string().optional(),
   amount: z.number(),
   note: z.string().optional(),
 });

@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { Reorder, useDragControls } from "framer-motion";
 import { GripVerticalIcon, PlusIcon, XIcon } from "lucide-react";
+import { nanoid } from "nanoid";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
 import type { SplitFormValues } from "./form-context";
@@ -24,42 +25,67 @@ export function LineItems() {
   });
 
   const autoCompleteSplits = useCallback(() => {
-    // Check which splits are dirty or touched using React Hook Form state
-    const dirtyOrTouchedSplits = currentSplits.map((_, index) => {
+    // Check which splits are touched using React Hook Form state
+    const touchedSplits = currentSplits.map((_, index) => {
       const fieldState = getFieldState(`splits.${index}.amount`);
-      return fieldState.isDirty || fieldState.isTouched;
+      return fieldState.isTouched;
     });
 
     const cleanSplits = currentSplits.filter(
-      (_, index) => !dirtyOrTouchedSplits[index],
+      (_, index) => !touchedSplits[index],
     );
 
-    // If more than 1 split is not dirty/touched, don't adjust anything
-    if (cleanSplits.length > 1) {
+    // Serve almeno uno split "libero"
+    if (cleanSplits.length === 0) return;
+
+    if (cleanSplits.length === 0) return;
+
+    // Somma dei touched in centesimi
+    const touchedAmountCents = Math.round(
+      currentSplits
+        .filter((_, index) => touchedSplits[index])
+        .reduce((sum, split) => sum + Number(split.amount || 0), 0) * 100,
+    );
+
+    const transactionCents = Math.round(Number(transactionAmount) * 100);
+    const remainingCents = transactionCents - touchedAmountCents;
+
+    if (remainingCents === 0) {
+      // Non c'è nulla da distribuire → metto 0 su tutti i clean
+      cleanSplits.forEach((split) => {
+        const idx = currentSplits.findIndex((s) => s.id === split.id);
+        if (idx !== -1) {
+          setValue(`splits.${idx}.amount`, 0, {
+            shouldValidate: true,
+            shouldDirty: false,
+            shouldTouch: false,
+          });
+        }
+      });
       return;
     }
 
-    // If only 1 split is not dirty/touched, adjust it to the remaining amount
-    if (cleanSplits.length === 1) {
-      const dirtyAmount = currentSplits
-        .filter((_, index) => dirtyOrTouchedSplits[index])
-        .reduce((sum, split) => (sum += split.amount), 0);
+    // Distribuzione con supporto a valori negativi
+    const sign = remainingCents < 0 ? -1 : 1;
+    const absRemaining = Math.abs(remainingCents);
 
-      const remainingAmount = (transactionAmount - dirtyAmount).toFixed(2);
+    const base = Math.floor(absRemaining / cleanSplits.length);
+    const remainder = absRemaining % cleanSplits.length;
 
-      // Find the clean split and update it
-      const cleanSplitIndex = currentSplits.findIndex(
-        (_, index) => !dirtyOrTouchedSplits[index],
-      );
+    cleanSplits.forEach((split, idx) => {
+      const cents = base + (idx < remainder ? 1 : 0);
+      const signedCents = sign * cents;
+      const amount = (signedCents / 100).toFixed(2);
 
-      if (cleanSplitIndex !== -1) {
-        // Update the specific split amount directly to ensure proper re-rendering
-        setValue(`splits.${cleanSplitIndex}.amount`, Number(remainingAmount), {
-          shouldValidate: true,
-          shouldDirty: false, // Don't mark as dirty since this is auto-completion
-        });
-      }
-    }
+      const cleanSplitIndex = currentSplits.findIndex((s) => s.id === split.id);
+      if (cleanSplitIndex === -1) return;
+
+      setValue(`splits.${cleanSplitIndex}.amount`, Number(amount), {
+        shouldValidate: true,
+        shouldDirty: false,
+        shouldTouch: false,
+      });
+    });
   }, [currentSplits, transactionAmount, getFieldState, setValue]);
 
   const reorderList = (newFields: typeof fields) => {
@@ -116,8 +142,9 @@ export function LineItems() {
         type="button"
         onClick={() =>
           append({
+            id: nanoid(),
             note: "",
-            category: "uncategorized",
+            category: "",
             amount: 0,
           })
         }
@@ -139,7 +166,7 @@ function LineItemRow({
 }: {
   index: number;
   handleRemove: (index: number) => void;
-  handleBlur: (index: number) => void;
+  handleBlur: () => void;
   isReorderable: boolean;
   item: SplitFormValues["splits"][number];
 }) {
@@ -173,7 +200,7 @@ function LineItemRow({
         <AmountInput
           name={`splits.${index}.amount`}
           className="text-right"
-          onBlur={() => handleBlur(index)}
+          handleBlur={() => handleBlur()}
         />
       </div>
 
