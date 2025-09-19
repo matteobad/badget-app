@@ -134,12 +134,11 @@ export function FieldMapping() {
           render={({ field: { value, onChange } }) => (
             <SelectAccount
               className="w-full"
-              placeholder="Select account"
-              value={value}
+              selected={value}
               onChange={(account) => {
                 onChange(account.id);
 
-                if (account.type === "credit") {
+                if (account.type === "liability") {
                   setValue("inverted", true, {
                     shouldValidate: true,
                   });

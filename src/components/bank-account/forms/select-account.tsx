@@ -1,32 +1,81 @@
-import type { ComboboxItem } from "~/components/ui/combobox-dropdown";
-import { useEffect, useState } from "react";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import type { AccountType } from "~/shared/constants/enum";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { TransactionBankAccount } from "~/components/transaction/transaction-bank-account";
-import { ComboboxDropdown } from "~/components/ui/combobox-dropdown";
-import { formatAccountName } from "~/shared/helpers/format";
+import { Spinner } from "~/components/load-more";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Button } from "~/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { Wallet2Icon } from "lucide-react";
 
-type SelectedItem = ComboboxItem & {
+export type BankAccount = RouterOutput["bankAccount"]["get"][number];
+
+type BankAccountOption = {
   id: string;
   label: string;
   logo: string | null;
-  currency: string;
   type?: string | null;
 };
 
-type Props = {
-  placeholder: string;
-  className?: string;
-  value?: string;
-  onChange: (value: SelectedItem) => void;
+type Selected = {
+  id: string;
+  name: string;
+  logoUrl?: string | null;
+  type?: AccountType | null;
 };
 
-export function SelectAccount({ placeholder, onChange, value }: Props) {
+type Props = {
+  selected?: string;
+  onChange?: (value: Selected) => void;
+  headless?: boolean;
+  hideLoading?: boolean;
+  align?: "end" | "start";
+  className?: string;
+};
+
+function transformBankAccount(bankAccount: BankAccount): BankAccountOption {
+  return {
+    id: bankAccount.id,
+    label: bankAccount.name,
+    logo: bankAccount.logoUrl,
+  };
+}
+
+export function SelectAccount({
+  onChange,
+  selected,
+  hideLoading,
+  headless,
+  align,
+}: Props) {
+  const [open, setOpen] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
 
   const { data, isLoading } = useQuery(trpc.bankAccount.get.queryOptions({}));
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const accounts = data?.map(transformBankAccount) ?? [];
+  const filteredItems = accounts.filter((item) =>
+    item.label.toLowerCase().includes(inputValue.toLowerCase()),
+  );
+
+  const showCreate = Boolean(inputValue) && !filteredItems.length;
 
   const createBankAccountMutation = useMutation(
     trpc.bankAccount.createManualBankAccount.mutationOptions({
@@ -36,92 +85,153 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
         });
 
         if (data) {
-          onChange({
+          onChange?.({
             id: data.id,
-            label: data.name ?? "",
-            logo: null,
-            currency: data.currency,
-          });
-
-          setSelectedItem({
-            id: data.id,
-            label: data.name ?? "",
-            logo: null,
-            currency: data.currency,
+            name: data.name ?? "",
+            logoUrl: null,
           });
         }
       },
     }),
   );
 
-  useEffect(() => {
-    if (value && data) {
-      const found = data.find((d) => d.id === value);
+  const selectedAccount = useMemo(() => {
+    const account = accounts?.find((a) => a.id === selected);
+    if (!account) return undefined;
 
-      if (found) {
-        setSelectedItem({
-          id: found.id,
-          label: found.name ?? "",
-          logo: found?.logoUrl ?? null,
-          currency: found.currency,
-        });
-      }
-    }
-  }, [value, data]);
+    return {
+      id: account.id,
+      name: account.label,
+      logoUrl: account.logo,
+    } satisfies Selected;
+  }, [accounts, selected]);
 
-  if (isLoading) {
-    return null;
+  if (!selected && isLoading && !hideLoading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  const Component = (
+    <Command loop shouldFilter={false}>
+      <CommandInput
+        value={inputValue}
+        onValueChange={setInputValue}
+        placeholder={"Search category..."}
+        className="px-1"
+      />
+
+      <CommandGroup>
+        <CommandList className="max-h-[225px] overflow-auto">
+          {filteredItems.map((item) => {
+            return (
+              <CommandItem
+                disabled={createBankAccountMutation.isPending}
+                className="cursor-pointer"
+                key={item.id}
+                value={item.id}
+                onSelect={(id) => {
+                  const foundItem = accounts.find((item) => item.id === id);
+
+                  if (!foundItem) {
+                    return;
+                  }
+
+                  onChange?.({
+                    id: foundItem.id,
+                    name: foundItem.label,
+                    logoUrl: foundItem.logo,
+                  });
+                  setOpen(false);
+                }}
+              >
+                <div className="flex items-center gap-1.5">
+                  <Avatar className="size-4 rounded-none bg-transparent">
+                    <AvatarImage
+                      src={item.logo ?? undefined}
+                      alt={`${item.label} logo`}
+                    ></AvatarImage>
+                    <AvatarFallback className="rounded-none bg-transparent">
+                      <Wallet2Icon className="size-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <span>{item.label}</span>
+                </div>
+              </CommandItem>
+            );
+          })}
+
+          <CommandEmpty>{"No account found"}</CommandEmpty>
+
+          {showCreate && (
+            <CommandItem
+              key={inputValue}
+              value={inputValue}
+              onSelect={() => {
+                createBankAccountMutation.mutate({
+                  name: inputValue,
+                  balance: 0,
+                  currency: "EUR", // TODO: use default currency
+                });
+                setOpen(false);
+                setInputValue("");
+              }}
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+            >
+              <div className="flex items-center space-x-2">
+                <span>{`Create "${inputValue}"`}</span>
+              </div>
+            </CommandItem>
+          )}
+        </CommandList>
+      </CommandGroup>
+    </Command>
+  );
+
+  if (headless) {
+    return Component;
   }
 
   return (
-    <ComboboxDropdown
-      disabled={createBankAccountMutation.isPending}
-      placeholder={placeholder}
-      searchPlaceholder="Select or create account"
-      items={
-        data?.map((d) => ({
-          id: d.id,
-          label: d.name ?? "",
-          logo: d.logoUrl ?? null,
-          currency: d.currency,
-        })) ?? []
-      }
-      selectedItem={selectedItem ?? undefined}
-      onSelect={(item) => {
-        onChange(item);
-      }}
-      onCreate={(name) => {
-        createBankAccountMutation.mutate({ name, balance: 0, currency: "EUR" });
-      }}
-      renderSelectedItem={(selectedItem) => {
-        return (
-          <TransactionBankAccount
-            name={formatAccountName({
-              name: selectedItem.label,
-              currency: selectedItem?.currency,
-            })}
-            logoUrl={selectedItem?.logo ?? undefined}
-          />
-        );
-      }}
-      renderOnCreate={(value) => {
-        return (
-          <div className="flex items-center space-x-2">
-            <span>{`Create "${value}"`}</span>
-          </div>
-        );
-      }}
-      renderListItem={({ item }) => {
-        return (
-          <TransactionBankAccount
-            name={formatAccountName({
-              name: item.label,
-              currency: item?.currency,
-            })}
-            logoUrl={item.logo ?? undefined}
-          />
-        );
-      }}
-    />
+    <Popover open={open} onOpenChange={setOpen} modal>
+      <PopoverTrigger
+        asChild
+        disabled={createBankAccountMutation.isPending}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        <Button
+          variant="outline"
+          className="h-9 justify-start bg-background pl-3 text-left font-normal"
+        >
+          <Avatar className="size-4 rounded-none bg-transparent">
+            <AvatarImage
+              src={selectedAccount?.logoUrl ?? undefined}
+              alt={`${selectedAccount?.name} logo`}
+            ></AvatarImage>
+            <AvatarFallback className="rounded-none bg-transparent">
+              <Wallet2Icon className="size-4" />
+            </AvatarFallback>
+          </Avatar>
+          {selectedAccount?.name}
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent
+        className="max-w-[250px] p-0"
+        align={align}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {Component}
+      </PopoverContent>
+    </Popover>
   );
 }

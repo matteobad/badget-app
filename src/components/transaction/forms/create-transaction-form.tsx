@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { SelectAccount } from "~/components/bank-account/forms/select-account";
 import { CurrencyInput } from "~/components/custom/currency-input";
-import { AccountPicker } from "~/components/forms/account-picker";
 import { SubmitButton } from "~/components/submit-button";
 import { TagsSelect } from "~/components/tag/tags-select";
 import { TransactionAttachments } from "~/components/transaction-attachment/transaction-attachment";
@@ -239,10 +239,13 @@ export default function CreateTransactionForm() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Conto</FormLabel>
-                <AccountPicker
-                  options={accounts ?? []}
-                  value={field.value ?? undefined}
-                  onValueChange={field.onChange}
+                <SelectAccount
+                  align="start"
+                  className="w-full"
+                  selected={field.value}
+                  onChange={(account) => {
+                    field.onChange(account.id);
+                  }}
                 />
                 <FormMessage />
               </FormItem>
