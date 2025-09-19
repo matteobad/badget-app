@@ -1,3 +1,4 @@
+import type { SplitFormValues } from "~/components/transaction-split/form-context";
 import type {
   addTransactionSplitsSchema,
   deleteTransactionSplitSchema,
@@ -7,6 +8,7 @@ import type z from "zod/v4";
 import { and, desc, eq } from "drizzle-orm";
 
 import type { DBClient } from "../db";
+import { account_table } from "../db/schema/accounts";
 import {
   transaction_category_table,
   transaction_split_table,
@@ -14,20 +16,35 @@ import {
 } from "../db/schema/transactions";
 
 export async function getTransactionSplits(
-  client: DBClient,
+  db: DBClient,
   input: z.infer<typeof getTransactionSplitsSchema>,
-  orgId: string,
+  organizationId: string,
 ) {
-  const trx = await client
+  const [transaction] = await db
+    .select({
+      date: transaction_table.date,
+      amount: transaction_table.amount,
+      name: transaction_table.name,
+      currency: transaction_table.currency,
+      logoUrl: account_table.logoUrl,
+    })
+    .from(transaction_table)
+    .leftJoin(account_table, eq(account_table.id, transaction_table.accountId))
+    .where(
+      and(
+        eq(transaction_table.organizationId, organizationId),
+        eq(transaction_table.id, input.transactionId),
+      ),
+    );
+
+  if (!transaction) {
+    throw new Error("Transaction not found");
+  }
+
+  const splits = await db
     .select({
       id: transaction_split_table.id,
-      category: {
-        id: transaction_category_table.id,
-        slug: transaction_category_table.slug,
-        name: transaction_category_table.name,
-        color: transaction_category_table.color,
-        icon: transaction_category_table.icon,
-      },
+      categorySlug: transaction_category_table.slug,
       amount: transaction_split_table.amount,
       note: transaction_split_table.note,
     })
@@ -52,12 +69,31 @@ export async function getTransactionSplits(
     .where(
       and(
         eq(transaction_split_table.transactionId, input.transactionId),
-        eq(transaction_table.organizationId, orgId),
+        eq(transaction_table.organizationId, organizationId),
       ),
     )
     .orderBy(desc(transaction_split_table.amount));
 
-  return trx;
+  const subtotal = splits.reduce((tot, value) => (tot += value.amount), 0);
+
+  return {
+    transaction: {
+      id: input.transactionId,
+      date: transaction.date,
+      name: transaction.name,
+      amount: transaction.amount,
+      currency: transaction.currency,
+      logoUrl: transaction.logoUrl, // TODO: show some images
+    },
+    splits: splits.map((split) => ({
+      id: split.id,
+      amount: split.amount,
+      note: split.note ?? "",
+      category: split.categorySlug ?? undefined,
+    })),
+    remaining: transaction.amount - subtotal,
+    subtotal: subtotal,
+  } satisfies SplitFormValues;
 }
 
 export async function addTransactionSplits(
@@ -106,7 +142,7 @@ export async function addTransactionSplits(
       input.splits.map((s) => ({
         organizationId,
         transactionId: input.transactionId,
-        categorySlug: s.category?.slug,
+        categorySlug: s.categorySlug,
         amount: s.amount,
         note: s.note,
       })),

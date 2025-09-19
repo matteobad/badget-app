@@ -414,7 +414,7 @@ export function TransactionDetails() {
 
                     <SelectCategory
                       align="end"
-                      selected={data.category ?? undefined}
+                      selected={data.category?.slug}
                       onChange={async (category) => {
                         await handleTransactionCategoryUpdate(category);
                       }}

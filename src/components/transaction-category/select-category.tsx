@@ -1,5 +1,5 @@
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getColorFromName } from "~/shared/helpers/categories";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -43,11 +43,12 @@ type Selected = {
 };
 
 type Props = {
-  selected?: Selected;
-  onChange: (selected: Selected) => void;
+  selected?: string;
+  onChange?: (selected: Selected) => void;
   headless?: boolean;
   hideLoading?: boolean;
   align?: "end" | "start";
+  className?: string;
 };
 
 function transformCategory(category: Category): CategoryOption {
@@ -97,6 +98,7 @@ export function SelectCategory({
   hideLoading,
   headless,
   align,
+  className,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -126,7 +128,7 @@ export function SelectCategory({
         });
 
         if (data) {
-          onChange({
+          onChange?.({
             id: data.id,
             name: data.name,
             color: data.color,
@@ -137,8 +139,18 @@ export function SelectCategory({
     }),
   );
 
-  // @ts-expect-error - slug is not nullable
-  const selectedValue = selected ? transformCategory(selected) : undefined;
+  const selectedCategory = useMemo(() => {
+    const category = categories?.find((c) => c.slug === selected);
+    if (!category) return undefined;
+
+    return {
+      id: category.id,
+      name: category.label,
+      slug: category.slug,
+      color: category.color,
+      icon: category.icon,
+    } satisfies Selected;
+  }, [categories, selected]);
 
   if (!selected && isLoading && !hideLoading) {
     return (
@@ -173,7 +185,7 @@ export function SelectCategory({
                     return;
                   }
 
-                  onChange({
+                  onChange?.({
                     id: foundItem.id,
                     name: foundItem.label,
                     color: foundItem.color,
@@ -236,17 +248,7 @@ export function SelectCategory({
           e.stopPropagation();
         }}
       >
-        <CategoryBadge
-          category={
-            selectedValue
-              ? {
-                  name: selectedValue.label,
-                  color: selectedValue.color,
-                  icon: selectedValue.icon,
-                }
-              : undefined
-          }
-        />
+        <CategoryBadge category={selectedCategory} className={className} />
       </PopoverTrigger>
 
       <PopoverContent

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
+import { TransactionSplitDialog } from "~/components/transaction-split/transaction-split-dialog";
 import { TransactionsSearchFilter } from "~/components/transaction/filters/transactions-search-filter";
-import { TransactionSplitDialog } from "~/components/transaction/sheets/transaction-split-dialog";
 import { DataTable } from "~/components/transaction/table/data-table";
 import { Loading } from "~/components/transaction/table/loading";
 import { TransactionsActions } from "~/components/transaction/transactions-actions";
