@@ -9,8 +9,6 @@ type Props = {
 };
 
 export function TransactionsItemList({ date, transactions, disabled }: Props) {
-  console.log(date, transactions);
-
   return (
     <div>
       <div>{date}</div>
