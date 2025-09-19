@@ -1,54 +1,60 @@
-// import type { NumericFormatProps } from "react-number-format";
-// import { useState } from "react";
-// import { cn } from "~/lib/utils";
-// import { useController, useFormContext } from "react-hook-form";
+"use client";
 
-// import type { SelectCategory } from "../transaction-category/select-category";
-// import { CurrencyInput } from "../custom/currency-input";
+import type { Path } from "react-hook-form";
+import { useState } from "react";
+import { cn } from "~/lib/utils";
+import { useController, useFormContext } from "react-hook-form";
 
-// export function CategoryInput({
-//   className,
-//   name,
-//   ...props
-// }: React.ComponentProps<typeof SelectCategory> & {
-//   name: string;
-// }) {
-//   const [isFocused, setIsFocused] = useState(false);
-//   const { control } = useFormContext();
-//   const {
-//     field: { value, onChange, onBlur },
-//   } = useController({
-//     name,
-//     control,
-//   });
+import type { SplitFormValues } from "./form-context";
+import { SelectCategory } from "../transaction-category/select-category";
 
-//   const isPlaceholder = !value && !isFocused;
+type CategoryInputProps<P extends Path<SplitFormValues>> = React.ComponentProps<
+  typeof SelectCategory
+> & {
+  name: P;
+  className?: string;
+};
 
-//   return (
-//     <div className="relative font-mono">
-//       <SelectCategory
-//         selected={value}
-//         onChange={(value) => {
-//           onChange(value, { shouldValidate: true });
-//         }}
-//         onFocus={() => setIsFocused(true)}
-//         onBlur={() => {
-//           setIsFocused(false);
-//           onBlur();
-//         }}
-//         {...props}
-//         // className={cn(
-//         //   className,
-//         //   isPlaceholder && "opacity-0",
-//         //   "h-6 border-0 border-b border-transparent !bg-transparent p-0 text-xs focus:border-border",
-//         // )}
-//       />
+export function CategoryInput<P extends Path<SplitFormValues>>({
+  className,
+  name,
+  ...props
+}: CategoryInputProps<P>) {
+  const [isFocused, setIsFocused] = useState(false);
 
-//       {isPlaceholder && (
-//         <div className="pointer-events-none absolute inset-0">
-//           <div className="h-full w-full bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)]" />
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
+  const { control } = useFormContext();
+  const {
+    field: { value, onChange, onBlur },
+  } = useController({
+    name,
+    control,
+  });
+
+  const isPlaceholder = !value && !isFocused;
+
+  return (
+    <div className="relative h-6 w-full font-mono">
+      <SelectCategory
+        selected={value as string}
+        onChange={(value) => {
+          onChange(value.slug, { shouldValidate: true });
+          setIsFocused(false);
+          onBlur();
+        }}
+        className={cn(
+          className,
+          isPlaceholder && "opacity-0",
+          "h-6 w-full justify-start border-0 border-b border-transparent !bg-transparent p-0 text-xs text-ellipsis focus:border-border [&>svg]:size-3",
+        )}
+        align="end"
+        {...props}
+      />
+
+      {isPlaceholder && (
+        <div className="pointer-events-none absolute inset-0">
+          <div className="h-full w-full bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)]" />
+        </div>
+      )}
+    </div>
+  );
+}

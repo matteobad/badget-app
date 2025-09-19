@@ -17,7 +17,7 @@ import { Summary } from "./summary";
 export function SplitTransactionForm() {
   const { setParams } = useTransactionParams();
 
-  const form = useFormContext();
+  const form = useFormContext<SplitFormValues>();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -62,7 +62,6 @@ export function SplitTransactionForm() {
 
   return (
     <form
-      // @ts-expect-error types
       onSubmit={form.handleSubmit(handleSubmit)}
       className="h-full"
       onKeyDown={handleKeyDown}

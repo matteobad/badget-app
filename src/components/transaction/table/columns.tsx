@@ -297,7 +297,7 @@ const CategoryCell = memo(
       <div className="flex items-center gap-2">
         <SelectCategory
           align="start"
-          selected={transaction.category ?? undefined}
+          selected={transaction.category?.slug}
           onChange={async (category) => {
             await handleTransactionCategoryUpdate(category);
           }}

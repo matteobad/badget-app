@@ -8,6 +8,7 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import type { SplitFormValues } from "./form-context";
 import { Button } from "../ui/button";
 import { AmountInput } from "./amount-input";
+import { CategoryInput } from "./category-input";
 import { DescriptionInput } from "./description-input";
 
 export function LineItems() {
@@ -165,7 +166,7 @@ function LineItemRow({
       <DescriptionInput name={`splits.${index}.note`} />
 
       <div className="flex items-center gap-2">
-        <AmountInput name={`splits.${index}.amount`} />
+        <CategoryInput name={`splits.${index}.category`} />
       </div>
 
       <div className="text-right">
@@ -180,7 +181,7 @@ function LineItemRow({
         <Button
           type="button"
           onClick={() => handleRemove(index)}
-          className="absolute -top-[4px] -right-9 text-[#878787] opacity-0 transition-opacity group-hover:opacity-100 hover:bg-transparent"
+          className="absolute -top-[4px] -right-9 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-transparent"
           variant="ghost"
         >
           <XIcon />

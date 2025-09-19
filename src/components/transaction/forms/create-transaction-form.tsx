@@ -51,7 +51,7 @@ import { CalendarIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { type z } from "zod/v4";
+import { type z } from "zod";
 
 export default function CreateTransactionForm() {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -66,10 +66,6 @@ export default function CreateTransactionForm() {
     trpc.bankAccount.get.queryOptions({
       manual: true,
     }),
-  );
-
-  const { data: categories } = useQuery(
-    trpc.transactionCategory.get.queryOptions(),
   );
 
   // TODO: rewrite this logic with gemini
@@ -308,23 +304,7 @@ export default function CreateTransactionForm() {
                 <FormLabel>Categoria</FormLabel>
                 <SelectCategory
                   hideLoading
-                  selected={categories
-                    ?.map((category) => {
-                      if (!category) return undefined;
-
-                      const { id, name, color, slug } = category;
-                      return {
-                        id,
-                        name,
-                        color,
-                        slug,
-                      };
-                    })
-                    .filter(
-                      (category): category is NonNullable<typeof category> =>
-                        category !== undefined,
-                    )
-                    .find((category) => category.slug === field.value)}
+                  selected={field.value}
                   onChange={field.onChange}
                 />
                 <FormMessage />

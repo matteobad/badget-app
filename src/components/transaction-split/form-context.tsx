@@ -9,12 +9,12 @@ import { z } from "zod";
 const DEFAULT_SPLITS = [
   {
     note: "",
-    category: "uncategorized",
+    category: "",
     amount: 0,
   },
   {
     note: "",
-    category: "uncategorized",
+    category: "",
     amount: 0,
   },
 ];

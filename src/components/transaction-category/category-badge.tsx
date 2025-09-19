@@ -26,8 +26,10 @@ export function CategoryBadge(props: CategoryBadgeProps) {
       style={{ backgroundColor, color, borderColor }}
       {...rest}
     >
-      <DynamicIcon name={icon} />
-      <span>{category?.name ?? "Uncategorized"}</span>
+      <DynamicIcon name={icon} className="shrink-0" />
+      <span className="line-clamp-1 text-ellipsis">
+        {category?.name ?? "Uncategorized"}
+      </span>
     </Badge>
   );
 }
