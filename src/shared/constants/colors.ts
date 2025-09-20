@@ -132,14 +132,21 @@ export const CATEGORY_COLOR_MAP = {
 
 // Define available colors with their Tailwind classes and hex values
 export const DEFAULT_COLORS = [
-  { name: "Gray", value: "#6B7280" },
-  { name: "Blue", value: "#3B82F6" },
-  { name: "Teal", value: "#14B8A6" },
-  { name: "Green", value: "#10B981" },
-  { name: "Orange", value: "#F59E0B" },
-  { name: "Red", value: "#EF4444" },
-  { name: "Pink", value: "#EC4899" },
-  { name: "Purple", value: "#8B5CF6" },
+  { name: "neutral-600", value: "#525252" },
+  { name: "red-600", value: "#dc2626" },
+  { name: "orange-600", value: "#ea580c" },
+  { name: "amber-600", value: "#d97706" },
+  { name: "yellow-600", value: "#ca8a04" },
+  { name: "lime-600", value: "#65a30d" },
+  { name: "green-600", value: "#16a34a" },
+  { name: "emerald-600", value: "#059669" },
+  { name: "teal-600", value: "#0d9488" },
+  { name: "cyan-600", value: "#0891b2" },
+  { name: "sky-600", value: "#0284c7" },
+  { name: "blue-600", value: "#2563eb" },
+  { name: "indigo-600", value: "#4f46e5" },
+  { name: "fuchsia-600", value: "#c026d3" },
+  { name: "pink-600", value: "#db2777" },
 ] as const;
 
 export type ColorKey = keyof typeof DEFAULT_COLORS;

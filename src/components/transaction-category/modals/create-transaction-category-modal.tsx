@@ -69,7 +69,7 @@ export function CreateTransactionCategoriesModal({
   const newItem = {
     name: "",
     description: "",
-    color: undefined,
+    color: "#fafafa",
     icon: "circle-dashed" as IconName,
     excluded: false,
   };
@@ -122,7 +122,6 @@ export function CreateTransactionCategoriesModal({
                           <FormControl className="p-1">
                             <InputColorIcon
                               autoFocus
-                              placeholder="Name"
                               onChange={({ name, color, icon }) => {
                                 field.onChange(name);
                                 form.setValue(
@@ -131,15 +130,21 @@ export function CreateTransactionCategoriesModal({
                                 );
                                 form.setValue(`categories.${index}.icon`, icon);
                               }}
-                              defaultValue={field.value}
-                              defaultColor={form.watch(
-                                `categories.${index}.color`,
-                              )}
+                              defaultName={field.value}
+                              defaultColor={
+                                form.watch(`categories.${index}.color`) ??
+                                "#fafafa"
+                              }
+                              defaultCustomColor={
+                                form.watch(`categories.${index}.color`) ??
+                                "#fafafa"
+                              }
                               defaultIcon={
                                 form.watch(
                                   `categories.${index}.icon`,
                                 ) as IconName
                               }
+                              mode="create"
                             />
                           </FormControl>
                         </FormItem>

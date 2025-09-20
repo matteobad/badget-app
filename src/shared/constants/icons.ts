@@ -16,6 +16,7 @@ import {
   CreditCardIcon,
   DicesIcon,
   DogIcon,
+  DumbbellIcon,
   FuelIcon,
   Gamepad2Icon,
   HamburgerIcon,
@@ -135,6 +136,7 @@ export const DEFAULT_ICONS = [
   { name: "dices", icon: DicesIcon },
   { name: "award", icon: AwardIcon },
   { name: "car", icon: CarIcon },
+  { name: "dumbbell", icon: DumbbellIcon },
 ] as const;
 
 export type IconKey = (typeof DEFAULT_ICONS)[number]["name"];

@@ -74,6 +74,7 @@
     "embla-carousel-react": "^8.6.0",
     "emblor": "^1.4.8",
     "framer-motion": "12.23.13",
+    "fuse.js": "^7.1.0",
     "geist": "^1.5.1",
     "hono": "^4.7.11",
     "little-date": "^1.0.0",
