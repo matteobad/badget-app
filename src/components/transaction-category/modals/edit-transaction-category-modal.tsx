@@ -31,8 +31,8 @@ type Props = {
   isOpen: boolean;
   defaultValue: {
     name: string;
-    color: string | null;
-    icon: IconName | null;
+    color: string;
+    icon: IconName;
     description?: string | null;
     excluded?: boolean | null;
   };
@@ -63,8 +63,8 @@ export function EditCategoryModal({
     defaultValues: {
       id,
       name: defaultValue.name,
-      color: defaultValue.color ?? undefined,
-      icon: defaultValue.icon ?? undefined,
+      color: defaultValue.color,
+      icon: defaultValue.icon,
       description: defaultValue.description ?? undefined,
       excluded: defaultValue?.excluded ?? false,
     },
@@ -73,22 +73,18 @@ export function EditCategoryModal({
   function onSubmit(values: z.infer<typeof updateTransactionCategorySchema>) {
     updateCategoryMutation.mutate({
       ...values,
-      description: values.description ?? undefined,
-      color: values.color ?? undefined,
-      icon: values.icon ?? undefined,
-      excluded: values.excluded ?? false,
     });
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[455px]">
-        <DialogHeader>
+        <DialogHeader className="mb-6 p-[3px]">
           <DialogTitle>Edit Category</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-2">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="p-[3px]">
             <div className="flex flex-col space-y-2">
               <div className="flex items-center gap-4">
                 <FormField
@@ -98,17 +94,17 @@ export function EditCategoryModal({
                     <FormItem className="flex-1 space-y-1">
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <div className="relative">
+                        <div className="relative w-full">
                           <InputColorIcon
                             autoFocus
-                            placeholder="Name"
+                            mode="edit"
                             onChange={({ name, color, icon }) => {
                               field.onChange(name);
                               form.setValue("color", color);
                               form.setValue("icon", icon);
                             }}
-                            defaultValue={field.value}
-                            defaultColor={form.watch("color")}
+                            defaultName={field.value ?? ""}
+                            defaultColor={form.watch("color")!}
                             defaultIcon={form.watch("icon") as IconName}
                           />
 
@@ -143,7 +139,7 @@ export function EditCategoryModal({
                 name="excluded"
                 render={({ field }) => (
                   <FormItem className="flex-1 space-y-1">
-                    <div className="mt-4 border border-border p-3">
+                    <div className="mt-2 border border-border p-3">
                       <div className="flex items-center justify-between space-x-2">
                         <div className="space-y-1">
                           <FormLabel>Exclude from Reports</FormLabel>
@@ -165,15 +161,17 @@ export function EditCategoryModal({
               />
             </div>
 
-            <DialogFooter className="mt-8 w-full">
-              <div className="w-full space-y-4">
-                <SubmitButton
-                  isSubmitting={updateCategoryMutation.isPending}
-                  className="w-full"
-                >
-                  Save
-                </SubmitButton>
+            <DialogFooter className="mt-6 items-center !justify-between border-t-[1px] p-[3px] pt-6">
+              <div>
+                {Object.values(form.formState.errors).length > 0 && (
+                  <span className="text-sm text-destructive">
+                    Please complete the fields above.
+                  </span>
+                )}
               </div>
+              <SubmitButton isSubmitting={updateCategoryMutation.isPending}>
+                Save
+              </SubmitButton>
             </DialogFooter>
           </form>
         </Form>

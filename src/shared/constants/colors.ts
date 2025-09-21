@@ -79,57 +79,6 @@ export const CATEGORY_COLORS = [
   "#696969", // Dim Gray
 ] as const;
 
-// Comprehensive color mapping for all categories
-export const CATEGORY_COLOR_MAP = {
-  // 1. INCOME
-  income: "#14532d", // green-900
-  salary: "#166534", // green-800
-  bonus: "#15803d", // green-700
-  freelance: "#16a34a", // green-600
-  "other-income": "#22c55e", // green-500
-
-  // 2. HOUSING
-  housing: "#7c2d12", // orange-900
-  "rent-mortgage": "#9a3412", // orange-800
-  utilities: "#c2410c", // orange-700
-  maintenance: "#ea580c", // orange-600
-
-  // 3. FOOD & DRINK
-  "food-drink": "#78350f", // amber-900
-  groceries: "#92400e", // amber-800
-  restaurants: "#b45309", // amber-700
-  coffee: "#d97706", // amber-600
-
-  // 4. TRANSPORTATION
-  transport: "#0c4a6e", // sky-900
-  fuel: "#075985", // sky-800
-  "public-transport": "#0369a1", // sky-700
-  "car-maintenance": "#0284c7", // sky-600
-
-  // 5. HEALTH
-  health: "#7f1d1d", // red-900
-  doctor: "#991b1b", // red-800
-  pharmacy: "#b91c1c", // red-700
-  insurance: "#dc2626", // red-600
-
-  // 6. LEISURE
-  leisure: "#134e4a", // teal-900
-  entertainment: "#115e59", // teal-800
-  subscriptions: "#0f766e", // teal-700
-  travel: "#0d9488", // teal-600
-
-  // 7. OTHER
-  other: "#111827", // gray-900
-  gifts: "#1f2937", // gray-800
-  donations: "#374151", // gray-700
-  misc: "#4b5563", // gray-600
-
-  // 8. SYSTEM
-  uncategorized: "#404040", // neutral-700
-  transfer: "#44403c", // stone-700
-  adjustment: "#3f3f46", // zinc-700
-} as const;
-
 // Define available colors with their Tailwind classes and hex values
 export const DEFAULT_COLORS = [
   { name: "neutral-600", value: "#525252" },

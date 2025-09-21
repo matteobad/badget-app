@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SubmitButton } from "~/components/submit-button";
 import { InputColorIcon } from "~/components/transaction-category/input-color-icon";
-import { Button } from "~/components/ui/button";
 import {
   DialogContent,
   DialogDescription,
@@ -23,7 +22,7 @@ import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createManyTransactionCategorySchema } from "~/shared/validators/transaction-category.schema";
-import { MinusIcon, PlusIcon } from "lucide-react";
+import { PlusIcon, XIcon } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import z from "zod";
 
@@ -69,7 +68,7 @@ export function CreateTransactionCategoriesModal({
   const newItem = {
     name: "",
     description: "",
-    color: "#fafafa",
+    color: "#525252",
     icon: "circle-dashed" as IconName,
     excluded: false,
   };
@@ -111,7 +110,10 @@ export function CreateTransactionCategoriesModal({
 
             <div className="flex max-h-[420px] flex-col space-y-6 overflow-auto p-[3px]">
               {fields.map((field, index) => (
-                <div key={field.id} className="flex flex-col space-y-2">
+                <div
+                  key={field.id}
+                  className="group relative flex flex-col space-y-2"
+                >
                   <div className="flex items-center gap-4">
                     <FormField
                       control={form.control}
@@ -132,10 +134,6 @@ export function CreateTransactionCategoriesModal({
                               }}
                               defaultName={field.value}
                               defaultColor={
-                                form.watch(`categories.${index}.color`) ??
-                                "#fafafa"
-                              }
-                              defaultCustomColor={
                                 form.watch(`categories.${index}.color`) ??
                                 "#fafafa"
                               }
@@ -194,38 +192,33 @@ export function CreateTransactionCategoriesModal({
                       </FormItem>
                     )}
                   />
+
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        remove(fields.length - 1);
+                      }}
+                      className="absolute top-[36px] -right-6 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-transparent"
+                    >
+                      <XIcon className="size-4 text-muted-foreground" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
 
             <div className="p-[3px]">
-              <Button
-                variant="outline"
+              <button
                 type="button"
-                size="sm"
-                className="mt-6 space-x-1"
+                className="mt-4 flex w-fit cursor-pointer items-center space-x-2 font-mono text-xs text-muted-foreground"
                 onClick={() => {
                   append(newItem);
                 }}
               >
-                <PlusIcon />
-                <span>Add more</span>
-              </Button>
-
-              {fields.length > 1 && (
-                <Button
-                  variant="outline"
-                  type="button"
-                  size="sm"
-                  className="mt-6 ml-4 space-x-1"
-                  onClick={() => {
-                    remove(fields.length - 1);
-                  }}
-                >
-                  <MinusIcon />
-                  <span>Remove last</span>
-                </Button>
-              )}
+                <PlusIcon className="size-3.5" />
+                <span className="text-xs">Add item</span>
+              </button>
             </div>
 
             <DialogFooter className="mt-6 items-center !justify-between border-t-[1px] p-[3px] pt-6">

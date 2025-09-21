@@ -1,0 +1,3 @@
+ALTER TABLE "badget_transaction_table" DROP CONSTRAINT "transactions_category_slug_organization_id_fkey";
+--> statement-breakpoint
+ALTER TABLE "badget_transaction_table" ADD CONSTRAINT "transactions_category_slug_organization_id_fkey" FOREIGN KEY ("organization_id","category_slug") REFERENCES "public"."badget_transaction_category_table"("organization_id","slug") ON DELETE no action ON UPDATE no action;

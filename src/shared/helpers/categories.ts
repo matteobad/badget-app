@@ -1,6 +1,7 @@
 import type { DB_TransactionCategoryType } from "~/server/db/schema/transactions";
 
-import { CATEGORY_COLOR_MAP, CATEGORY_COLORS } from "../constants/colors";
+import { CATEGORY_COLOR_MAP } from "../constants/category";
+import { CATEGORY_COLORS } from "../constants/colors";
 import { CATEGORY_ICON_MAP } from "../constants/icons";
 
 export const colors = [
@@ -97,7 +98,7 @@ export function getRandomColor() {
 export function getCategoryColors(hex = "#606060") {
   const backgroundColor = `color-mix(in oklab, ${hex} 10%, transparent)`;
   const borderColor = `color-mix(in oklab, ${hex} 10%, transparent)`;
-  const color = hex;
+  const color = `color-mix(in oklab, ${hex} 80%, black)`;
 
   return { backgroundColor, borderColor, color };
 }

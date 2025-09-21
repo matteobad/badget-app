@@ -99,14 +99,14 @@ export function CreateSubCategoryModal({
                         <div className="relative">
                           <InputColorIcon
                             autoFocus
-                            placeholder="Name"
+                            mode="create-sub"
                             onChange={({ name, color, icon }) => {
                               field.onChange(name);
                               form.setValue("color", color);
                               form.setValue("icon", icon);
                             }}
-                            defaultValue={field.value}
-                            defaultColor={form.watch("color")}
+                            defaultName={field.value}
+                            defaultColor={form.watch("color")!}
                             defaultIcon={form.watch("icon") as IconName}
                           />
 

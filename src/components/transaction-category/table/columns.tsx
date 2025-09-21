@@ -225,7 +225,8 @@ const ActionsCell = memo(
           id={category.id}
           defaultValue={{
             ...category,
-            icon: category.icon as IconName,
+            color: category.color ?? "#525252",
+            icon: (category.icon as IconName) ?? "circle-dashed",
           }}
           isOpen={isEditOpen}
           onOpenChange={setIsEditOpen}
@@ -235,7 +236,8 @@ const ActionsCell = memo(
           isOpen={isCreateSubcategoryOpen}
           onOpenChange={setIsCreateSubcategoryOpen}
           parentId={category.id}
-          defaultColor={category.color ?? undefined}
+          defaultColor={category.color ?? "#525252"}
+          defaultIcon={(category.icon as IconName) ?? "circle-dashed"}
           defaultExcluded={category.excluded ?? undefined}
         />
       </div>
