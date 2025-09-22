@@ -20,7 +20,7 @@ export function TableRow({ row }: Props) {
   const router = useRouter();
 
   const changeSpaceMutation = useMutation(
-    trpc.user.update.mutationOptions({
+    trpc.organization.setActive.mutationOptions({
       onMutate: () => {
         setIsLoading(true);
       },
@@ -66,7 +66,7 @@ export function TableRow({ row }: Props) {
               variant="outline"
               onClick={async () => {
                 changeSpaceMutation.mutate({
-                  defaultOrganizationId: row.id,
+                  organizationId: row.id,
                 });
               }}
             >

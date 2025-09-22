@@ -1,5 +1,6 @@
 import type {
   BankAccountProvider,
+  DeleteConnectionRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
   GetAccountsResponse,
@@ -103,5 +104,14 @@ export const GoCardlessProvider: BankAccountProvider = {
     const response = await gocardlessClient.getRequisitionById({ id });
 
     return transformConnectionStatus(response);
+  },
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  async deleteConnection({ id }: DeleteConnectionRequest) {
+    if (!id) {
+      throw Error("Missing params");
+    }
+
+    return await gocardlessClient.deleteRequisitionById({ id });
   },
 };

@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import {
   createOrganization,
+  deleteOrganization,
   getSpaceById,
   updateSpaceById,
 } from "~/server/services/better-auth-service";
@@ -97,28 +98,11 @@ export const organizationRouter = createTRPCRouter({
   //     });
   //   }),
 
-  delete: protectedProcedure.input(deleteSpaceSchema).mutation(async () => {
-    // const data = await deleteTeam(db, input.teamId);
-    // if (!data) {
-    //   throw new TRPCError({
-    //     code: "INTERNAL_SERVER_ERROR",
-    //     message: "Team not found",
-    //   });
-    // }
-    // const bankConnections = await getBankConnections(db, {
-    //   teamId: data.id,
-    // });
-    // if (bankConnections.length > 0) {
-    //   await tasks.trigger("delete-team", {
-    //     teamId: input.teamId!,
-    //     connections: bankConnections.map((connection) => ({
-    //       accessToken: connection.accessToken,
-    //       provider: connection.provider,
-    //       referenceId: connection.referenceId,
-    //     })),
-    //   } satisfies DeleteTeamPayload);
-    // }
-  }),
+  delete: protectedProcedure
+    .input(deleteSpaceSchema)
+    .mutation(async ({ input }) => {
+      return await deleteOrganization(input);
+    }),
 
   // deleteMember: protectedProcedure
   //   .input(deleteTeamMemberSchema)

@@ -30,7 +30,8 @@ export interface BankAccountProvider {
   getConnectionStatus: (
     params: GetConnectionStatusRequest,
   ) => Promise<GetConnectionStatusResponse>;
-  // deleteConnection: (params: DeleteConnectionRequest) => void;
+
+  deleteConnection: (params: DeleteConnectionRequest) => void;
 }
 
 // type GetTransactionsRequest = {
@@ -109,6 +110,11 @@ export type GetInstitutionsRequest = {
 };
 
 export type GetInstitutionsResponse = Institution[];
+
+export type DeleteConnectionRequest = {
+  id: string; // GoCardLess & EnableBanking
+  accessToken?: string; // Teller & Plaid
+};
 
 const providers: Record<string, BankAccountProvider> = {
   gocardless: GoCardlessProvider,
