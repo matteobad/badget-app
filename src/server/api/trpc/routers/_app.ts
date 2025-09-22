@@ -10,6 +10,7 @@ import { institutionRouter } from "./institution";
 import { metricsRouter } from "./metrics";
 import { organizationRouter } from "./organization";
 import { preferencesRouter } from "./preferences";
+import { searchRouter } from "./search";
 import { tagRouter } from "./tag";
 import { transactionRouter } from "./transaction";
 import { transactionAttachmentRouter } from "./transaction-attachment";
@@ -39,6 +40,7 @@ export const appRouter = createTRPCRouter({
   transactionAttachment: transactionAttachmentRouter,
   transactionCategory: transactionCategoryRouter,
   transactionTag: transactionTagRouter,
+  search: searchRouter,
 });
 
 // export type definition of API

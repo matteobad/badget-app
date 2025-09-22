@@ -146,3 +146,33 @@ number-flow-react::part(fraction) {
   font-size: 0.75em;
   /* color: var(--muted-foreground); */
 }
+
+/* React colorfull */
+.color-picker .react-colorful {
+  height: 240px;
+}
+.color-picker .react-colorful__saturation {
+  border-radius: 4px 4px 0 0;
+}
+.color-picker .react-colorful__hue {
+  height: 40px;
+  border-radius: 0 0 4px 4px;
+}
+.color-picker .react-colorful__hue-pointer {
+  width: 8px;
+  height: inherit;
+}
+.color-picker .react-colorful__pointer {
+  width: 15px;
+  height: 15px;
+}
+.color-picker .react-colorful__hue {
+  height: 20px;
+}
+
+.global-search-list {
+  height: min(450px, var(--search-list-height));
+  overscroll-behavior: contain;
+  transition: 100ms ease;
+  transition-property: height;
+}

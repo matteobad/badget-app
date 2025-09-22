@@ -2,8 +2,8 @@
 // import { Trial } from "@/components/trial";
 import { ConnectionStatus } from "../bank-connection/connection-status";
 import { NavUser } from "../nav-user";
+import { OpenSearchButton } from "../search/open-search-button";
 import { MobileMenu } from "../sidebar/mobile-menu";
-import { OpenSearchButton } from "./open-search-button";
 
 export function Header() {
   return (
