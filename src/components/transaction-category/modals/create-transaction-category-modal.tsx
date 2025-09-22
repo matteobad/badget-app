@@ -22,7 +22,7 @@ import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createManyTransactionCategorySchema } from "~/shared/validators/transaction-category.schema";
-import { PlusIcon, XIcon } from "lucide-react";
+import { MinusIcon, PlusIcon } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import z from "zod";
 
@@ -192,23 +192,11 @@ export function CreateTransactionCategoriesModal({
                       </FormItem>
                     )}
                   />
-
-                  {index > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        remove(fields.length - 1);
-                      }}
-                      className="absolute top-[36px] -right-6 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-transparent"
-                    >
-                      <XIcon className="size-4 text-muted-foreground" />
-                    </button>
-                  )}
                 </div>
               ))}
             </div>
 
-            <div className="p-[3px]">
+            <div className="flex gap-6 p-[3px]">
               <button
                 type="button"
                 className="mt-4 flex w-fit cursor-pointer items-center space-x-2 font-mono text-xs text-muted-foreground"
@@ -219,6 +207,18 @@ export function CreateTransactionCategoriesModal({
                 <PlusIcon className="size-3.5" />
                 <span className="text-xs">Add item</span>
               </button>
+              {fields.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    remove(fields.length - 1);
+                  }}
+                  className="mt-4 flex w-fit cursor-pointer items-center space-x-2 font-mono text-xs text-muted-foreground"
+                >
+                  <MinusIcon className="size-4 text-muted-foreground" />
+                  <span className="text-xs">Remove item</span>
+                </button>
+              )}
             </div>
 
             <DialogFooter className="mt-6 items-center !justify-between border-t-[1px] p-[3px] pt-6">
