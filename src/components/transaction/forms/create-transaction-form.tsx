@@ -303,7 +303,7 @@ export default function CreateTransactionForm() {
                   hideLoading
                   align="start"
                   selected={field.value}
-                  onChange={field.onChange}
+                  onChange={(selected) => field.onChange(selected.slug)}
                 />
                 <FormMessage />
               </FormItem>
