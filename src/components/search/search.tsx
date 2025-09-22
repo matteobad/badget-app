@@ -63,12 +63,12 @@ interface SearchItem {
 
 function CopyButton({ path }: { path: string }) {
   const [isCopied, setIsCopied] = useState(false);
-  const [_, copy] = useCopyToClipboard();
+  const [, copy] = useCopyToClipboard();
 
   const handleCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
-    copy(`${window.location.origin}${path}`);
+    void copy(`${window.location.origin}${path}`);
     setIsCopied(true);
     setTimeout(() => {
       setIsCopied(false);
@@ -144,16 +144,16 @@ const useSearchNavigation = () => {
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setDocumentParams } = useDocumentParams();
 
-  const navigateWithParams = async (
+  const navigateWithParams = (
     params: Record<string, any>,
-    paramSetter: (params: any) => void,
+    paramSetter: (params: any) => Promise<URLSearchParams>,
   ) => {
     setOpen();
-    paramSetter(params);
+    void paramSetter(params);
     return;
   };
 
-  const navigateToPath = async (path: string) => {
+  const navigateToPath = (path: string) => {
     setOpen();
     router.push(path);
     return;
@@ -218,8 +218,8 @@ const SearchResultItemDisplay = ({
           <div className="flex w-full items-center justify-between">
             <span className="flex-grow truncate">
               {
-                (item.data?.title ||
-                  (item.data?.name as string)?.split("/").at(-1) ||
+                (item.data?.title ??
+                  (item.data?.name as string)?.split("/").at(-1) ??
                   "") as string
               }
             </span>
@@ -227,13 +227,13 @@ const SearchResultItemDisplay = ({
               <CopyButton path={`?documentId=${item.id}`} />
               <DownloadButton
                 href={`/api/download/file?path=${item.data?.path_tokens?.join("/")}&filename=${
-                  (item.data?.title ||
-                    (item.data?.name as string)?.split("/").at(-1) ||
+                  (item.data?.title ??
+                    (item.data?.name as string)?.split("/").at(-1) ??
                     "") as string
                 }`}
                 filename={
-                  (item.data?.title ||
-                    (item.data?.name as string)?.split("/").at(-1) ||
+                  (item.data?.title ??
+                    (item.data?.name as string)?.split("/").at(-1) ??
                     "") as string
                 }
               />
@@ -253,8 +253,8 @@ const SearchResultItemDisplay = ({
               <span>{(item.data?.name || "") as string}</span>
               <span className="text-xs text-muted-foreground">
                 <FormatAmount
-                  currency={item.data?.currency as string}
-                  amount={item.data?.amount as number}
+                  currency={item.data!.currency!}
+                  amount={item.data!.amount!}
                 />
               </span>
               <span className="text-xs text-muted-foreground">
@@ -357,7 +357,7 @@ export function Search() {
   });
 
   // Extract search results array from queryResult
-  const searchResults: SearchItem[] = queryResult || [];
+  const searchResults: SearchItem[] = queryResult ?? [];
 
   const combinedData = useMemo(() => {
     // Type assertion for searchResults from DB to ensure they have actions if needed,
@@ -374,9 +374,8 @@ export function Search() {
     // Group search results first
     for (const item of combinedData) {
       const groupKey = item.type || "other";
-      if (!groups[groupKey]) {
-        groups[groupKey] = [];
-      }
+      groups[groupKey] ??= [];
+
       groups[groupKey].push(item);
     }
 
@@ -390,9 +389,8 @@ export function Search() {
     // Add filtered sectionActions to their respective groups
     for (const actionItem of filteredSectionActions) {
       const groupKey = actionItem.type;
-      if (!groups[groupKey]) {
-        groups[groupKey] = [];
-      }
+      groups[groupKey] ??= [];
+
       groups[groupKey].push(actionItem);
     }
 
@@ -478,7 +476,7 @@ export function Search() {
         <CommandList ref={height} className="scrollbar-hide">
           {!isLoading && combinedData.length === 0 && debouncedSearch && (
             <CommandEmpty>
-              No results found for "{debouncedSearch}".
+              No results found for &quot;{debouncedSearch}&quot;.
             </CommandEmpty>
           )}
           {!isLoading &&
