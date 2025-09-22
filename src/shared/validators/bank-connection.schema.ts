@@ -68,7 +68,7 @@ export const reconnectGocardlessLinkSchema = z.object({
 
 // Search params for sheets
 export const connectParamsSchema = (initialCountryCode?: string) => ({
-  step: parseAsStringLiteral(["connect", "account"]),
+  step: parseAsStringLiteral(["connect", "account", "import"]),
   countryCode: parseAsString.withDefault(initialCountryCode ?? ""),
   provider: parseAsStringLiteral(Object.values(BANK_PROVIDER)),
   institution_id: parseAsString,

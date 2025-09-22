@@ -41,11 +41,11 @@ export function AddTransactionButton({ label }: { label?: string }) {
         <DropdownMenuItem
           onClick={() => {
             void setConnectParams({
-              step: null,
+              step: "import",
             });
             void setParams({
               createTransaction: null,
-              importTransaction: true,
+              hide: true,
             });
           }}
         >

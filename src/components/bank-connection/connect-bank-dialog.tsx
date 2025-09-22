@@ -155,8 +155,7 @@ export function ConnectBankDialog({
                 type="button"
                 className="underline"
                 onClick={() => {
-                  void setConnectParams({ step: null });
-                  void setTransactionParams({ importTransaction: true });
+                  void setConnectParams({ step: "import" });
                 }}
               >
                 manual import
