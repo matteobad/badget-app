@@ -25,7 +25,7 @@ export function TransactionTagFilter({
 }: Props) {
   const trpc = useTRPC();
 
-  const { data: tags, isLoading } = useQuery(trpc.tag.get.queryOptions({}));
+  const { data: tags, isLoading } = useQuery(trpc.tag.get.queryOptions());
 
   const { data: tagsCounts, isLoading: isLoadingTagsCounts } = useQuery(
     trpc.transaction.getTagsCounts.queryOptions(),
@@ -63,7 +63,7 @@ export function TransactionTagFilter({
                 })}
               >
                 <div className="flex items-center gap-2 overflow-hidden">
-                  <span className="line-clamp-1 text-sm">{item.text}</span>
+                  <span className="line-clamp-1 text-sm">{item.name}</span>
                 </div>
                 {isLoadingTagsCounts ? (
                   <LoaderCircleIcon className="size-4 animate-spin text-muted-foreground" />

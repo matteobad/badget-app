@@ -1,50 +1,88 @@
 "server-only";
 
 import type { DBClient } from "~/server/db";
-import type { DB_TagInsertType } from "~/server/db/schema/transactions";
-import type {
-  deleteTagSchema,
-  updateTagSchema,
-} from "~/shared/validators/tag.schema";
-import type z from "zod/v4";
 import { tag_table } from "~/server/db/schema/transactions";
 import { and, eq } from "drizzle-orm";
 
-export async function createTagMutation(
-  client: DBClient,
-  input: DB_TagInsertType,
-) {
-  const result = await client
+type CreateTagParams = {
+  organizationId: string;
+  name: string;
+};
+
+export const createTagMutation = async (
+  db: DBClient,
+  params: CreateTagParams,
+) => {
+  const { organizationId, name } = params;
+
+  const [result] = await db
     .insert(tag_table)
-    .values(input)
-    .onConflictDoNothing()
-    .returning();
+    .values({
+      organizationId,
+      name,
+    })
+    .returning({
+      id: tag_table.id,
+      name: tag_table.name,
+    });
 
-  return result[0];
-}
+  if (!result) {
+    throw new Error("Failed to create tag");
+  }
 
-export async function updateTagMutation(
-  client: DBClient,
-  input: z.infer<typeof updateTagSchema>,
-  orgId: string,
-) {
-  return await client
+  return result;
+};
+
+type UpdateTagParams = {
+  id: string;
+  name: string;
+  organizationId: string;
+};
+
+export const updateTagMutation = async (
+  db: DBClient,
+  params: UpdateTagParams,
+) => {
+  const { id, name, organizationId } = params;
+
+  const [result] = await db
     .update(tag_table)
-    .set(input)
-    .where(and(eq(tag_table.id, input.id), eq(tag_table.organizationId, orgId)))
-    .returning();
-}
+    .set({ name })
+    .where(
+      and(eq(tag_table.id, id), eq(tag_table.organizationId, organizationId)),
+    )
+    .returning({
+      id: tag_table.id,
+      name: tag_table.name,
+    });
 
-export async function deleteTagMutation(
-  client: DBClient,
-  input: z.infer<typeof deleteTagSchema>,
-) {
-  return await client
+  if (!result) {
+    throw new Error("Tag not found");
+  }
+
+  return result;
+};
+
+type DeleteTagParams = {
+  id: string;
+  organizationId: string;
+};
+
+export const deleteTagMutation = async (
+  db: DBClient,
+  params: DeleteTagParams,
+) => {
+  const { id, organizationId } = params;
+
+  const [result] = await db
     .delete(tag_table)
     .where(
-      and(
-        eq(tag_table.id, input.id),
-        eq(tag_table.organizationId, input.orgId),
-      ),
-    );
-}
+      and(eq(tag_table.id, id), eq(tag_table.organizationId, organizationId)),
+    )
+    .returning({
+      id: tag_table.id,
+      name: tag_table.name,
+    });
+
+  return result;
+};

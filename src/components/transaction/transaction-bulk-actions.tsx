@@ -71,7 +71,7 @@ export function BulkActions({ ids }: Props) {
   );
 
   const { data: tags } = useQuery({
-    ...trpc.tag.get.queryOptions({}),
+    ...trpc.tag.get.queryOptions(),
     enabled: ids.length > 0,
   });
 
@@ -149,7 +149,7 @@ export function BulkActions({ ids }: Props) {
                   });
                 }}
               >
-                {tag.text}
+                {tag.name}
               </DropdownMenuCheckboxItem>
             ))
           ) : (

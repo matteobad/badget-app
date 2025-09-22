@@ -1,31 +1,42 @@
 import type {
   createTagSchema,
   deleteTagSchema,
-  getTagsSchema,
+  updateTagSchema,
 } from "~/shared/validators/tag.schema";
-import type z from "zod/v4";
+import type z from "zod";
 
-import { db } from "../db";
-import { createTagMutation, deleteTagMutation } from "../domain/tag/mutations";
+import type { DBClient } from "../db";
+import {
+  createTagMutation,
+  deleteTagMutation,
+  updateTagMutation,
+} from "../domain/tag/mutations";
 import { getTagsQuery } from "../domain/tag/queries";
 
 export async function createTag(
+  db: DBClient,
   input: z.infer<typeof createTagSchema>,
   organizationId: string,
 ) {
   return await createTagMutation(db, { ...input, organizationId });
 }
 
-export async function deleteTag(
-  input: z.infer<typeof deleteTagSchema>,
-  orgId: string,
+export async function updateTag(
+  db: DBClient,
+  input: z.infer<typeof updateTagSchema>,
+  organizationId: string,
 ) {
-  return await deleteTagMutation(db, { ...input, orgId });
+  return await updateTagMutation(db, { ...input, organizationId });
 }
 
-export async function getTags(
-  input: z.infer<typeof getTagsSchema>,
-  orgId: string,
+export async function deleteTag(
+  db: DBClient,
+  input: z.infer<typeof deleteTagSchema>,
+  organizationId: string,
 ) {
-  return await getTagsQuery(input, orgId);
+  return await deleteTagMutation(db, { ...input, organizationId });
+}
+
+export async function getTags(db: DBClient, organizationId: string) {
+  return await getTagsQuery(db, { organizationId });
 }

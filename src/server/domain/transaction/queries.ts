@@ -210,8 +210,8 @@ export async function getTransactionsQuery(
         logoUrl: account_table.logoUrl,
       },
       tags: sql<
-        Array<{ id: string; text: string | null }>
-      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tag_table.id}, 'text', ${tag_table.text})) FILTER (WHERE ${tag_table.id} IS NOT NULL), '[]'::json)`.as(
+        Array<{ id: string; name: string | null }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tag_table.id}, 'name', ${tag_table.name})) FILTER (WHERE ${tag_table.id} IS NOT NULL), '[]'::json)`.as(
         "tags",
       ),
       splits: sql<
@@ -429,8 +429,8 @@ export async function getTransactionByIdQuery(id: string, orgId: string) {
         logoUrl: account_table.logoUrl,
       },
       tags: sql<
-        Array<{ id: string; text: string }>
-      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tag_table.id}, 'text', ${tag_table.text})) FILTER (WHERE ${tag_table.id} IS NOT NULL), '[]'::json)`.as(
+        Array<{ id: string; name: string }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tag_table.id}, 'name', ${tag_table.name})) FILTER (WHERE ${tag_table.id} IS NOT NULL), '[]'::json)`.as(
         "tags",
       ),
     })
@@ -509,7 +509,7 @@ export async function getTransactionTagsQuery(
   return await db
     .select({
       id: transaction_to_tag_table.tagId,
-      text: tag_table.text,
+      name: tag_table.name,
     })
     .from(transaction_to_tag_table)
     .innerJoin(tag_table, eq(transaction_to_tag_table.tagId, tag_table.id))

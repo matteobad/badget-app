@@ -313,16 +313,16 @@ const CategoryCell = memo(
 CategoryCell.displayName = "CategoryCell";
 
 const TagsCell = memo(
-  ({ tags }: { tags?: { id: string; text: string | null }[] }) => (
+  ({ tags }: { tags?: { id: string; name: string | null }[] }) => (
     <div className="relative w-full">
       <div className="scrollbar-hide flex items-center space-x-2 overflow-x-auto">
-        {tags?.map(({ id, text }) => (
+        {tags?.map(({ id, name }) => (
           <Badge
             key={id}
             variant="tag-rounded"
             className="flex-shrink-0 whitespace-nowrap"
           >
-            {text}
+            {name}
           </Badge>
         ))}
       </div>

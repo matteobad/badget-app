@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SelectAccount } from "~/components/bank-account/forms/select-account";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { SubmitButton } from "~/components/submit-button";
-import { TagsSelect } from "~/components/tag/tags-select";
 import { TransactionAttachments } from "~/components/transaction-attachment/transaction-attachment";
 import { SelectCategory } from "~/components/transaction-category/select-category";
 import {
@@ -46,7 +45,6 @@ import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createManualTransactionSchema } from "~/shared/validators/transaction.schema";
 import { format } from "date-fns";
-import { type Tag } from "emblor";
 import { CalendarIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useForm } from "react-hook-form";
@@ -54,9 +52,6 @@ import { toast } from "sonner";
 import { type z } from "zod";
 
 export default function CreateTransactionForm() {
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
-
   const { setParams } = useTransactionParams();
 
   const trpc = useTRPC();
@@ -107,7 +102,6 @@ export default function CreateTransactionForm() {
       currency: "EUR",
       accountId: accounts?.at(0)?.id,
       attachments: undefined,
-      tags: tags,
       method: "unknown",
       status: "posted",
     },
@@ -310,28 +304,6 @@ export default function CreateTransactionForm() {
                   align="start"
                   selected={field.value}
                   onChange={field.onChange}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="tags"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Tags</FormLabel>
-                <TagsSelect
-                  {...field}
-                  placeholder="Enter a tag"
-                  tags={tags}
-                  className="sm:min-w-[450px]"
-                  setTags={(newTags) => {
-                    setTags(newTags);
-                    form.setValue("tags", newTags as Tag[]);
-                  }}
-                  activeTagIndex={activeTagIndex}
-                  setActiveTagIndex={setActiveTagIndex}
                 />
                 <FormMessage />
               </FormItem>

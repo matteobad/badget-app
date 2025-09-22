@@ -327,11 +327,11 @@ export const tag_table = pgTable(
       .uuid()
       .references(() => organization_table.id, { onDelete: "cascade" })
       .notNull(),
-    text: d.text().notNull(),
+    name: d.text().notNull(),
 
     ...timestamps,
   }),
-  (t) => [unique().on(t.organizationId, t.text)],
+  (t) => [unique().on(t.organizationId, t.name)],
 );
 
 // Many-to-Many Relationship: Transactions ↔ Tags
@@ -344,6 +344,10 @@ export const transaction_to_tag_table = pgTable(
       .$defaultFn(() => createId())
       .notNull(),
 
+    organizationId: d
+      .uuid()
+      .references(() => organization_table.id, { onDelete: "cascade" })
+      .notNull(),
     transactionId: d
       .uuid()
       .notNull()

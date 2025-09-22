@@ -1,31 +1,48 @@
 "server-only";
 
 import type { DBClient } from "~/server/db";
-import type { DB_TransactionToTagInsertType } from "~/server/db/schema/transactions";
 import { transaction_to_tag_table } from "~/server/db/schema/transactions";
 import { and, eq } from "drizzle-orm";
 
-export async function createTransactionToTagMutation(
-  client: DBClient,
-  input: DB_TransactionToTagInsertType,
+type CreateTransactionTagParams = {
+  organizationId: string;
+  transactionId: string;
+  tagId: string;
+};
+
+export async function createTransactionTagMutation(
+  db: DBClient,
+  params: CreateTransactionTagParams,
 ) {
-  return await client
+  return db
     .insert(transaction_to_tag_table)
-    .values({ ...input })
-    .onConflictDoNothing()
+    .values({
+      organizationId: params.organizationId,
+      transactionId: params.transactionId,
+      tagId: params.tagId,
+    })
     .returning();
 }
 
-export async function deleteTransactionToTagMutation(
-  client: DBClient,
-  input: { tagId: string; transactionId: string },
+type DeleteTransactionTagParams = {
+  transactionId: string;
+  tagId: string;
+  organizationId: string;
+};
+
+export async function deleteTransactionTagMutation(
+  db: DBClient,
+  params: DeleteTransactionTagParams,
 ) {
-  return await client
+  const { transactionId, tagId, organizationId } = params;
+
+  return db
     .delete(transaction_to_tag_table)
     .where(
       and(
-        eq(transaction_to_tag_table.tagId, input.tagId),
-        eq(transaction_to_tag_table.transactionId, input.transactionId),
+        eq(transaction_to_tag_table.transactionId, transactionId),
+        eq(transaction_to_tag_table.tagId, tagId),
+        eq(transaction_to_tag_table.organizationId, organizationId),
       ),
     );
 }

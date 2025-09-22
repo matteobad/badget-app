@@ -141,20 +141,6 @@
   }
 }
 
-/* emblor autocomplete override */
-#radix-«Rir3rl7»
-  > div
-  > div
-  > div.scrollbar-hide.h-\[calc\(100vh-80px\)\].overflow-auto.pb-12
-  > div.mt-6.mb-2.grid.grid-cols-2.gap-4
-  > div:nth-child(2)
-  > div
-  > div
-  > div
-  > div {
-  @apply pr-1;
-}
-
 number-flow-react::part(fraction) {
   margin-left: 0.0625em;
   font-size: 0.75em;

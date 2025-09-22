@@ -20,19 +20,19 @@ import { EllipsisIcon } from "lucide-react";
 
 import type { ColumnDef } from "@tanstack/react-table";
 
-export type Tag = RouterOutput["transactionTag"]["get"][number];
+export type Tag = RouterOutput["tag"]["get"][number];
 
 export const columns: ColumnDef<Tag>[] = [
   {
     header: "Name",
-    accessorKey: "text",
+    accessorKey: "name",
     cell: ({ row }) => {
       return (
         <div className={cn("flex items-center space-x-2")}>
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="cursor-default">{row.getValue("text")}</span>
+                <span className="cursor-default">{row.getValue("name")}</span>
               </TooltipTrigger>
             </Tooltip>
           </TooltipProvider>
@@ -65,13 +65,6 @@ export const columns: ColumnDef<Tag>[] = [
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* <EditCategoryModal
-            id={row.original.id}
-            defaultValue={row.original}
-            isOpen={isEditOpen}
-            onOpenChange={setIsEditOpen}
-          /> */}
         </div>
       );
     },

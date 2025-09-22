@@ -66,8 +66,8 @@ export const processExportTask = schemaTask({
           name: account_table.name,
         },
         tags: sql<
-          Array<{ id: string; text: string | null }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tag_table.id}, 'text', ${tag_table.text})) FILTER (WHERE ${tag_table.id} IS NOT NULL), '[]'::json)`.as(
+          Array<{ id: string; name: string | null }>
+        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tag_table.id}, 'name', ${tag_table.name})) FILTER (WHERE ${tag_table.id} IS NOT NULL), '[]'::json)`.as(
           "tags",
         ),
       })
@@ -194,7 +194,7 @@ export const processExportTask = schemaTask({
 
           transaction?.bank_account?.name ?? "",
           transaction?.note ?? "",
-          transaction?.tags?.map((t) => t.text).join(", ") ?? "",
+          transaction?.tags?.map((t) => t.name).join(", ") ?? "",
         ];
       });
 

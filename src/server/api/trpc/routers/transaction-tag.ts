@@ -1,16 +1,7 @@
-import { withTransaction } from "~/server/db";
 import {
-  createTagMutation,
-  deleteTagMutation,
-} from "~/server/domain/tag/mutations";
-import { getTagByTextQuery } from "~/server/domain/tag/queries";
-import {
-  createTransactionToTagMutation,
-  deleteTransactionToTagMutation,
-} from "~/server/domain/transaction-tag/mutations";
-import { existsTransactionToTagQuery } from "~/server/domain/transaction-tag/queries";
-import { getTags } from "~/server/services/tag-service";
-import { getTagsSchema } from "~/shared/validators/tag.schema";
+  createTransactionTag,
+  deleteTransactionTag,
+} from "~/server/services/transaction-tag-service";
 import {
   createTransactionTagSchema,
   deleteTransactionTagSchema,
@@ -19,45 +10,15 @@ import {
 import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const transactionTagRouter = createTRPCRouter({
-  get: protectedProcedure.input(getTagsSchema).query(async ({ ctx, input }) => {
-    const orgId = ctx.orgId!;
-    return await getTags(input, orgId);
-  }),
-
   create: protectedProcedure
     .input(createTransactionTagSchema)
-    .mutation(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-      const inputTag = { ...input.tag, organizationId: orgId };
-
-      return await withTransaction(async (tx) => {
-        let tag = await getTagByTextQuery(tx, inputTag);
-        tag ??= await createTagMutation(tx, inputTag);
-
-        if (!tag) return tx.rollback();
-
-        await createTransactionToTagMutation(tx, {
-          tagId: tag.id,
-          transactionId: input.transactionId,
-        });
-
-        return tag;
-      });
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return createTransactionTag(db, input, orgId!);
     }),
 
   delete: protectedProcedure
     .input(deleteTransactionTagSchema)
-    .mutation(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-
-      return withTransaction(async (tx) => {
-        await deleteTransactionToTagMutation(tx, input);
-        const tagHasMoreTransactions = await existsTransactionToTagQuery(tx, {
-          tagId: input.tagId,
-        });
-        if (!tagHasMoreTransactions) {
-          await deleteTagMutation(tx, { id: input.tagId, orgId });
-        }
-      });
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return deleteTransactionTag(db, input, orgId!);
     }),
 });

@@ -157,7 +157,7 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
   const shouldFetch = isOpen || isFocused;
 
   const { data: tagsData } = useQuery({
-    ...trpc.tag.get.queryOptions({}),
+    ...trpc.tag.get.queryOptions(),
     enabled: shouldFetch || Boolean(filter.tags?.length),
   });
 
@@ -174,7 +174,7 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
   return {
     tags: tagsData?.map((tag) => ({
       id: tag.id,
-      text: tag.text,
+      text: tag.name,
     })),
     accounts: bankAccountsData?.map((bankAccount) => ({
       id: bankAccount.id,

@@ -1,6 +1,4 @@
 import type { TransactionFrequencyType } from "~/shared/constants/enum";
-import type { Tag } from "emblor";
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormatAmount } from "~/components/format-amount";
 import {
@@ -30,7 +28,7 @@ import { useScopedI18n } from "~/shared/locales/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
-import { TagsSelect } from "../tag/tags-select";
+import { SelectTags } from "../tag/forms/select-tag";
 import { TransactionAttachments } from "../transaction-attachment/transaction-attachment";
 import { SelectCategory } from "../transaction-category/select-category";
 import { SimilarTransactionsUpdateToast } from "./similar-transactions-update-toast";
@@ -38,8 +36,6 @@ import { TransactionBankAccount } from "./transaction-bank-account";
 import { TransactionShortcuts } from "./transaction-shortcuts";
 
 export function TransactionDetails() {
-  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
-
   const tScoped = useScopedI18n("transaction");
 
   const { params } = useTransactionParams();
@@ -191,7 +187,7 @@ export function TransactionDetails() {
           queryKey: trpc.transaction.get.infiniteQueryKey(),
         });
         void queryClient.invalidateQueries({
-          queryKey: trpc.tag.get.queryKey({}),
+          queryKey: trpc.tag.get.queryKey(),
         });
       },
     }),
@@ -207,7 +203,7 @@ export function TransactionDetails() {
           queryKey: trpc.transaction.get.infiniteQueryKey(),
         });
         void queryClient.invalidateQueries({
-          queryKey: trpc.tag.get.queryKey({}),
+          queryKey: trpc.tag.get.queryKey(),
         });
       },
     }),
@@ -439,35 +435,29 @@ export function TransactionDetails() {
             {tScoped("tags")}
           </Label>
 
-          <TagsSelect
+          <SelectTags
             key={data?.id + data?.tags?.length}
-            tags={data?.tags}
-            setTags={(newTags) => {
-              const tags = newTags as Tag[];
-              const prevTags = Array.isArray(data?.tags) ? data.tags : [];
-              const tagsToAdd = tags.filter(
-                (tag) => !prevTags.some((prev) => prev.id === tag.id),
-              );
-              const tagsToRemove = prevTags.filter(
-                (prev) => !tags.some((tag) => tag.id === prev.id),
-              );
-
-              for (const tag of tagsToAdd) {
+            tags={data?.tags?.map((tag) => ({
+              id: tag.id,
+              label: tag.name,
+              value: tag.name,
+            }))}
+            onSelect={(tag) => {
+              if (tag.id) {
                 createTransactionTagMutation.mutate({
-                  tag: tag,
-                  transactionId: transactionId,
-                });
-              }
-
-              for (const tag of tagsToRemove) {
-                deleteTransactionTagMutation.mutate({
                   tagId: tag.id,
-                  transactionId: transactionId,
+                  transactionId,
                 });
               }
             }}
-            activeTagIndex={activeTagIndex}
-            setActiveTagIndex={setActiveTagIndex}
+            onRemove={(tag) => {
+              if (tag.id) {
+                deleteTransactionTagMutation.mutate({
+                  tagId: tag.id,
+                  transactionId,
+                });
+              }
+            }}
           />
         </div>
       </div>

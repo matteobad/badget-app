@@ -1,25 +1,27 @@
 import type {
-  createTransactionToTagSchema,
+  createTransactionTagSchema,
   deleteTransactionTagSchema,
 } from "~/shared/validators/transaction-tag.schema";
-import type z from "zod/v4";
+import type z from "zod";
 
-import { db } from "../db";
+import type { DBClient } from "../db";
 import {
-  createTransactionToTagMutation,
-  deleteTransactionToTagMutation,
+  createTransactionTagMutation,
+  deleteTransactionTagMutation,
 } from "../domain/transaction-tag/mutations";
 
 export async function createTransactionTag(
-  input: z.infer<typeof createTransactionToTagSchema>,
-  _orgId: string,
+  db: DBClient,
+  input: z.infer<typeof createTransactionTagSchema>,
+  organizationId: string,
 ) {
-  return await createTransactionToTagMutation(db, input);
+  return await createTransactionTagMutation(db, { ...input, organizationId });
 }
 
 export async function deleteTransactionTag(
+  db: DBClient,
   input: z.infer<typeof deleteTransactionTagSchema>,
-  _orgId: string,
+  organizationId: string,
 ) {
-  return await deleteTransactionToTagMutation(db, input);
+  return await deleteTransactionTagMutation(db, { ...input, organizationId });
 }

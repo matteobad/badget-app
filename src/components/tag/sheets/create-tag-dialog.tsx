@@ -22,11 +22,11 @@ export default function CreateTagDialog() {
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="p-4">
+      <DialogContent className="p-6">
         <div className="flex h-full flex-col">
           <DialogHeader className="mb-6">
             <DialogTitle>Nuovo tag</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="sr-only">
               Inserisci il nome e le informazioni del nuovo tag che desideri
               creare.
             </DialogDescription>

@@ -37,16 +37,13 @@ export function DataTable() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data } = useSuspenseQuery(trpc.transactionTag.get.queryOptions());
+  const { data } = useSuspenseQuery(trpc.tag.get.queryOptions());
 
   const deleteTagMutation = useMutation(
     trpc.tag.delete.mutationOptions({
       onSuccess: () => {
         void queryClient.invalidateQueries({
-          queryKey: trpc.tag.get.queryKey({}),
-        });
-        void queryClient.invalidateQueries({
-          queryKey: trpc.transactionTag.get.queryKey(),
+          queryKey: trpc.tag.get.queryKey(),
         });
       },
     }),
@@ -60,7 +57,7 @@ export function DataTable() {
     getFilteredRowModel: getFilteredRowModel(),
     meta: {
       deleteTag: (id: string) => {
-        deleteTagMutation.mutate({ id, orgId: "placeholder" });
+        deleteTagMutation.mutate({ id });
       },
       expandedCategories,
       setExpandedCategories,

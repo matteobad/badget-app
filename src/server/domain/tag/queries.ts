@@ -1,43 +1,52 @@
 "server-only";
 
 import type { DBClient } from "~/server/db";
-import type { getTagsSchema } from "~/shared/validators/tag.schema";
-import type z from "zod/v4";
-import { db } from "~/server/db";
 import { tag_table } from "~/server/db/schema/transactions";
 import { and, eq } from "drizzle-orm";
 
-export async function getTagsQuery(
-  _params: z.infer<typeof getTagsSchema>,
-  orgId: string,
-) {
+export type GetTagsParams = {
+  organizationId: string;
+};
+
+export const getTagsQuery = async (db: DBClient, params: GetTagsParams) => {
+  const { organizationId } = params;
+
   const results = await db
     .select({
       id: tag_table.id,
-      text: tag_table.text,
+      name: tag_table.name,
       organizationId: tag_table.organizationId,
       createdAt: tag_table.createdAt,
     })
     .from(tag_table)
-    .where(eq(tag_table.organizationId, orgId))
-    .orderBy(tag_table.text);
+    .where(eq(tag_table.organizationId, organizationId))
+    .orderBy(tag_table.name);
 
   return results;
-}
+};
 
-export async function getTagByTextQuery(
-  client: DBClient,
-  params: { text: string; organizationId: string },
-) {
-  const results = await client
-    .select()
+type GetTagByIdParams = {
+  id: string;
+  organizationId: string;
+};
+
+export const getTagByIdQuery = async (
+  db: DBClient,
+  params: GetTagByIdParams,
+) => {
+  const { id, organizationId } = params;
+
+  const [result] = await db
+    .select({
+      id: tag_table.id,
+      name: tag_table.name,
+      organizationId: tag_table.organizationId,
+      createdAt: tag_table.createdAt,
+    })
     .from(tag_table)
     .where(
-      and(
-        eq(tag_table.text, params.text),
-        eq(tag_table.organizationId, params.organizationId),
-      ),
+      and(eq(tag_table.id, id), eq(tag_table.organizationId, organizationId)),
     );
 
-  return results[0];
-}
+  return result;
+};
