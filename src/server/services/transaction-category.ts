@@ -7,13 +7,10 @@ import type {
   updateTransactionCategorySchema,
 } from "~/shared/validators/transaction-category.schema";
 import type z from "zod";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import type { DBClient } from "../db";
-import {
-  transaction_category_table,
-  transaction_table,
-} from "../db/schema/transactions";
+import { transaction_category_table } from "../db/schema/transactions";
 import {
   ensureUniqueSlugs,
   generateCategoryEmbedding,
@@ -182,16 +179,6 @@ export async function deleteTransactionCategory(
       tx.rollback();
       throw new Error("Category not found");
     }
-
-    await tx
-      .update(transaction_table)
-      .set({ categorySlug: null })
-      .where(
-        and(
-          eq(transaction_table.categorySlug, category.slug),
-          eq(transaction_table.organizationId, organizationId),
-        ),
-      );
 
     return await deleteTransactionCategoryMutation(tx, {
       ...input,

@@ -1,28 +1,44 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  ActivityIcon,
   AlarmClockIcon,
   BabyIcon,
+  BanknoteArrowUpIcon,
   BanknoteIcon,
   BikeIcon,
   BookOpenIcon,
+  BrickWallShieldIcon,
   BriefcaseIcon,
+  BrushCleaningIcon,
   BuildingIcon,
   BusIcon,
   CalendarIcon,
+  CalendarSyncIcon,
   CarIcon,
+  CigaretteIcon,
+  CircleDashedIcon,
   ClipboardListIcon,
+  CoffeeIcon,
   CoinsIcon,
   DogIcon,
+  DrillIcon,
   DumbbellIcon,
   FilmIcon,
   FolderIcon,
+  FuelIcon,
   Gamepad2Icon,
   GiftIcon,
   GlobeIcon,
+  GoalIcon,
   GraduationCapIcon,
   HammerIcon,
+  HandCoinsIcon,
+  HandHeartIcon,
+  HandPlatterIcon,
   HeartIcon,
-  HomeIcon,
+  HospitalIcon,
+  HouseIcon,
+  HousePlugIcon,
   LaptopIcon,
   LeafIcon,
   LightbulbIcon,
@@ -32,13 +48,16 @@ import {
   MoonIcon,
   MoreHorizontalIcon,
   MusicIcon,
+  PartyPopperIcon,
   PiggyBankIcon,
   PillIcon,
   PlaneIcon,
+  RepeatIcon,
   RouterIcon,
   SchoolIcon,
   ShieldCheckIcon,
   ShirtIcon,
+  ShoppingBasketIcon,
   ShoppingCartIcon,
   SparklesIcon,
   SproutIcon,
@@ -46,6 +65,8 @@ import {
   SunIcon,
   TagIcon,
   TicketIcon,
+  TicketsIcon,
+  TreePalmIcon,
   TruckIcon,
   UsersIcon,
   UtensilsIcon,
@@ -55,29 +76,45 @@ import {
 
 // Icon set filtrabile
 export const CATEGORY_ICONS: { name: string; Icon: LucideIcon }[] = [
+  { name: "activity", Icon: ActivityIcon },
   { name: "alarm-clock", Icon: AlarmClockIcon },
   { name: "baby", Icon: BabyIcon },
   { name: "banknote", Icon: BanknoteIcon },
+  { name: "banknote-arrow-up", Icon: BanknoteArrowUpIcon },
   { name: "bike", Icon: BikeIcon },
   { name: "book-open", Icon: BookOpenIcon },
+  { name: "brick-wall-shield", Icon: BrickWallShieldIcon },
   { name: "briefcase", Icon: BriefcaseIcon },
+  { name: "brush-cleaning", Icon: BrushCleaningIcon },
   { name: "building", Icon: BuildingIcon },
   { name: "bus", Icon: BusIcon },
   { name: "calendar", Icon: CalendarIcon },
+  { name: "calendar-sync", Icon: CalendarSyncIcon },
   { name: "car", Icon: CarIcon },
+  { name: "cigarette", Icon: CigaretteIcon },
+  { name: "circle-dashed", Icon: CircleDashedIcon },
   { name: "clipboard-list", Icon: ClipboardListIcon },
   { name: "coins", Icon: CoinsIcon },
+  { name: "coffee", Icon: CoffeeIcon },
   { name: "dog", Icon: DogIcon },
+  { name: "drill", Icon: DrillIcon },
   { name: "dumbbell", Icon: DumbbellIcon },
   { name: "film", Icon: FilmIcon },
   { name: "folder", Icon: FolderIcon },
+  { name: "fuel", Icon: FuelIcon },
   { name: "gamepad-2", Icon: Gamepad2Icon },
   { name: "gift", Icon: GiftIcon },
   { name: "globe", Icon: GlobeIcon },
+  { name: "goal", Icon: GoalIcon },
   { name: "graduation-cap", Icon: GraduationCapIcon },
   { name: "hammer", Icon: HammerIcon },
+  { name: "hand-coins", Icon: HandCoinsIcon },
+  { name: "hand-heart", Icon: HandHeartIcon },
+  { name: "hand-platter", Icon: HandPlatterIcon },
   { name: "heart", Icon: HeartIcon },
-  { name: "home", Icon: HomeIcon },
+  { name: "hospital", Icon: HospitalIcon },
+  { name: "house", Icon: HouseIcon },
+  { name: "house-plug", Icon: HousePlugIcon },
   { name: "laptop", Icon: LaptopIcon },
   { name: "leaf", Icon: LeafIcon },
   { name: "lightbulb", Icon: LightbulbIcon },
@@ -87,13 +124,16 @@ export const CATEGORY_ICONS: { name: string; Icon: LucideIcon }[] = [
   { name: "moon", Icon: MoonIcon },
   { name: "more-horizontal", Icon: MoreHorizontalIcon },
   { name: "music", Icon: MusicIcon },
+  { name: "party-popper", Icon: PartyPopperIcon },
   { name: "piggy-bank", Icon: PiggyBankIcon },
   { name: "pill", Icon: PillIcon },
   { name: "plane", Icon: PlaneIcon },
+  { name: "repeat", Icon: RepeatIcon },
   { name: "router", Icon: RouterIcon },
   { name: "school", Icon: SchoolIcon },
   { name: "shield-check", Icon: ShieldCheckIcon },
   { name: "shirt", Icon: ShirtIcon },
+  { name: "shopping-basket", Icon: ShoppingBasketIcon },
   { name: "shopping-cart", Icon: ShoppingCartIcon },
   { name: "sparkles", Icon: SparklesIcon },
   { name: "sprout", Icon: SproutIcon },
@@ -101,6 +141,8 @@ export const CATEGORY_ICONS: { name: string; Icon: LucideIcon }[] = [
   { name: "sun", Icon: SunIcon },
   { name: "tag", Icon: TagIcon },
   { name: "ticket", Icon: TicketIcon },
+  { name: "tickets", Icon: TicketsIcon },
+  { name: "tree-palm", Icon: TreePalmIcon },
   { name: "truck", Icon: TruckIcon },
   { name: "users", Icon: UsersIcon },
   { name: "utensils", Icon: UtensilsIcon },
@@ -175,8 +217,8 @@ export const CATEGORY_COLOR_MAP = {
   // 6. FAMILY
   family: "#0ea5e9", // cyan-500
   school: "#22d3ee", // cyan-400
-  courses: "#67e8f9", // cyan-300
-  children: "#a5f3fc", // cyan-200
+  children: "#67e8f9", // cyan-300
+  pets: "#a5f3fc", // cyan-200
   gifts: "#cffafe", // cyan-100
 
   // 7. OTHER
@@ -188,6 +230,68 @@ export const CATEGORY_COLOR_MAP = {
 
   // 8. SYSTEM
   uncategorized: "#737373", // neutral-500
+} as const;
+
+// Comprehensive color mapping for all categories
+export const CATEGORY_ICON_MAP = {
+  // 1. INCOME
+  income: "banknote-arrow-up",
+  salary: "briefcase",
+  bonus: "goal",
+  freelance: "hand-coins",
+  "other-income": "coins",
+
+  // 2. HOUSING
+  housing: "house",
+  "rent-mortgage": "building",
+  utilities: "house-plug",
+  maintenance: "drill",
+  insurance: "shield-check",
+
+  // 3. TRANSPORTATION
+  transport: "car",
+  fuel: "fuel",
+  "car-maintenance": "wrench",
+  "public-transport": "bus",
+  "car-insurance": "brick-wall-shield",
+
+  // 4. FOOD & DRINK
+  "food-drink": "utensils",
+  groceries: "shopping-basket",
+  restaurants: "hand-platter",
+  bar: "coffee",
+  delivery: "bike",
+
+  // 5. HEALTH
+  health: "heart",
+  pharmacy: "pill",
+  doctor: "hospital",
+  sport: "dumbbell",
+  "personal-care": "activity",
+
+  // 6. LEISURE
+  leisure: "tree-palm",
+  subscriptions: "calendar-sync",
+  travel: "plane",
+  events: "tickets",
+  hobby: "party-popper",
+
+  // 6. FAMILY
+  family: "users",
+  school: "graduation-cap",
+  children: "baby",
+  pets: "cat",
+  gifts: "gift",
+
+  // 7. OTHER
+  other: "circle",
+  donations: "hand-heart",
+  unexpected: "frown",
+  misc: "brush-cleaning",
+  transfer: "repeat",
+
+  // 8. SYSTEM
+  uncategorized: "circle-dashed",
 } as const;
 
 export type CategorySuggestion = {
@@ -217,7 +321,7 @@ export const CATEGORY_SUGGESTIONS: CategorySuggestion[] = [
   // Housing
   {
     keywords: ["home", "house", "affitto", "mutuo", "abitazione", "casa"],
-    icon: HomeIcon,
+    icon: HouseIcon,
     color: "#0ea5e9",
   },
   {

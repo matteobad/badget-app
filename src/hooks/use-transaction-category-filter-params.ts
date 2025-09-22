@@ -6,9 +6,16 @@ export function useTransactionCategoryFilterParams() {
     transactionCategoryFilterParamsSchema,
   );
 
+  const clearAllFilters = () => {
+    void setFilters({
+      q: null,
+    });
+  };
+
   return {
     filters,
     setFilters,
     hasFilters: Object.values(filters).some((value) => value !== null),
+    clearAllFilters,
   };
 }

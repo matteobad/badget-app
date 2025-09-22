@@ -49,12 +49,12 @@ export function useCategorySuggestion() {
 
         console.debug("got LLM response", { object });
         return {
-          icon: object.icon ?? null,
-          color: object.color ?? null,
+          icon: object.icon ?? "circle-dashed",
+          color: object.color ?? "#737373",
         };
       } catch (e) {
         console.error("AI suggestion failed:", e);
-        return { icon: null, color: null };
+        return { icon: "circle-dashed", color: "#737373" };
       }
     },
     [],

@@ -170,12 +170,12 @@ export async function createDefaultCategoriesForSpace(
     categoriesToInsert.push({
       organizationId: params.organizationId,
       name: parent.name,
+      description: parent.description,
       slug: parent.slug,
       color: parent.color,
       icon: parent.icon,
       system: parent.system,
       excluded: parent.excluded,
-      description: undefined,
       parentId: undefined, // Parent categories have no parent
     });
   }
@@ -204,12 +204,12 @@ export async function createDefaultCategoriesForSpace(
         childCategoriesToInsert.push({
           organizationId: params.organizationId,
           name: child.name,
+          description: child.description,
           slug: child.slug,
           color: child.color,
           icon: child.icon,
           system: child.system,
           excluded: child.excluded,
-          description: undefined,
           parentId: parentId,
         });
       }

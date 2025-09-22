@@ -17,6 +17,7 @@ import {
 } from "../ui/hover-card";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { ScrollArea } from "../ui/scroll-area";
 
 type InputColorIconProps = {
   mode: CategoryMode;
@@ -140,8 +141,8 @@ export function InputColorIcon({
             <Separator />
 
             {/* Icons Section */}
-            <div className="flex flex-col gap-2 p-2">
-              <div className="grid max-h-[140px] grid-cols-6 gap-1 overflow-y-auto">
+            <ScrollArea className="flex max-h-[200px] flex-col p-2">
+              <div className="grid grid-cols-6">
                 {icons.map((iconData) => {
                   return (
                     <Button
@@ -162,7 +163,6 @@ export function InputColorIcon({
                           icon: iconData.name as IconName,
                         });
                       }}
-                      title={iconData.name}
                     >
                       <DynamicIcon
                         name={iconData.name as IconName}
@@ -172,7 +172,7 @@ export function InputColorIcon({
                   );
                 })}
               </div>
-            </div>
+            </ScrollArea>
           </div>
         </PopoverContent>
       </Popover>

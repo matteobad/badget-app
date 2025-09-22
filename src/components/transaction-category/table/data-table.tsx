@@ -21,11 +21,14 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { useTransactionCategoryFilterParams } from "~/hooks/use-transaction-category-filter-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import { CreateTransactionCategoriesModal } from "../modals/create-transaction-category-modal";
 import { columns, flattenCategories } from "./columns";
+import { CategoriesSkeleton } from "./data-table.skeleton";
+import { NoCategories, NoResults } from "./empty-states";
 import { Header } from "./table-header";
 
 export function CategoriesDataTable() {
@@ -33,6 +36,8 @@ export function CategoriesDataTable() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(),
   );
+
+  const { hasFilters } = useTransactionCategoryFilterParams();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -80,6 +85,24 @@ export function CategoriesDataTable() {
       setExpandedCategories,
     },
   });
+
+  if (!flattenedData.length && !hasFilters) {
+    return (
+      <div className="relative h-[calc(100vh-200px)] overflow-hidden px-6">
+        <NoCategories />
+        <CategoriesSkeleton isEmpty />
+      </div>
+    );
+  }
+
+  if (!flattenedData.length && hasFilters) {
+    return (
+      <div className="relative h-[calc(100vh-200px)] overflow-hidden px-6">
+        <NoResults />
+        <CategoriesSkeleton isEmpty />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">

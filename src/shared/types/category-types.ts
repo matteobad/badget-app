@@ -2,6 +2,7 @@
 export interface BaseCategory {
   slug: string;
   name: string;
+  description?: string;
   color?: string;
   icon?: string;
   system: boolean;
