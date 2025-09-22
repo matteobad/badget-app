@@ -19,7 +19,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { Wallet2Icon } from "lucide-react";
+import { ChevronsUpDownIcon, Wallet2Icon } from "lucide-react";
 
 export type BankAccount = RouterOutput["bankAccount"]["get"][number];
 
@@ -208,23 +208,32 @@ export function SelectAccount({
       >
         <Button
           variant="outline"
-          className="h-9 justify-start bg-background pl-3 text-left font-normal"
+          className="h-9 w-full justify-start bg-background pl-3 text-left font-normal"
         >
-          <Avatar className="size-4 rounded-none bg-transparent">
-            <AvatarImage
-              src={selectedAccount?.logoUrl ?? undefined}
-              alt={`${selectedAccount?.name} logo`}
-            ></AvatarImage>
-            <AvatarFallback className="rounded-none bg-transparent">
-              <Wallet2Icon className="size-4" />
-            </AvatarFallback>
-          </Avatar>
+          {selectedAccount ? (
+            <Avatar className="size-4 rounded-none bg-transparent">
+              <AvatarImage
+                src={selectedAccount?.logoUrl ?? undefined}
+                alt={`${selectedAccount?.name} logo`}
+              ></AvatarImage>
+              <AvatarFallback className="rounded-none bg-transparent">
+                <Wallet2Icon className="size-4" />
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <span className="text-muted-foreground">
+              Seleziona o crea un conto
+            </span>
+          )}
+
           {selectedAccount?.name}
+
+          <ChevronsUpDownIcon className="ml-auto size-3 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
 
       <PopoverContent
-        className="max-w-[250px] p-0"
+        className="w-(--radix-popover-trigger-width) p-0"
         align={align}
         onClick={(e) => {
           e.stopPropagation();

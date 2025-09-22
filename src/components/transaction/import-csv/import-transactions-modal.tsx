@@ -148,6 +148,7 @@ export function ImportTransactionsModal({ defaultCurrency }: Props) {
         queryKey: trpc.metrics.pathKey(),
       });
 
+      void setParams({ importTransaction: null });
       toast.success("Transactions imported successfully.");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
