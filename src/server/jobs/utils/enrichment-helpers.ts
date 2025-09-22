@@ -133,7 +133,7 @@ export function prepareUpdateData(
   // Only update categorySlug if it's currently null AND amount is not positive
   // Positive amounts are typically income and shouldn't be categorized as business expenses
   if (!transaction.categorySlug && transaction.amount <= 0) {
-    updateData.categorySlug = result.category ?? undefined;
+    updateData.categorySlug = result.category ?? "uncategorized";
   }
 
   return updateData;
