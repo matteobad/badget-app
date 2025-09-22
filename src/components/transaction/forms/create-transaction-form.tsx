@@ -96,7 +96,7 @@ export default function CreateTransactionForm() {
   const form = useForm<z.infer<typeof createManualTransactionSchema>>({
     resolver: standardSchemaResolver(createManualTransactionSchema),
     defaultValues: {
-      categorySlug: undefined,
+      categorySlug: "uncategorized",
       date: format(new Date(), "yyyy-MM-dd"),
       description: "",
       currency: "EUR",
