@@ -115,6 +115,8 @@ export function CreateSpaceForm({
               </FormLabel>
               <FormControl className="w-full">
                 <CountrySelector
+                  align="center"
+                  className="w-(--radix-popover-trigger-width)"
                   defaultValue={field.value ?? ""}
                   onSelect={(code, name) => {
                     field.onChange(name);

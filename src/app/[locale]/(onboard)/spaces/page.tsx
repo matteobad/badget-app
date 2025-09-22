@@ -70,7 +70,7 @@ export default async function Teams() {
           {organizations?.length && (
             <>
               <span className="mb-4 font-mono text-sm text-[#878787]">
-                Teams
+                Spaces
               </span>
               <div className="max-h-[260px] overflow-y-auto">
                 <SelectOrgTable data={organizations} />

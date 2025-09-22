@@ -167,7 +167,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
               (placeholder ?? "Select item...")
             )}
           </span>
-          <ChevronsUpDown className="absolute right-2 size-4 opacity-50" />
+          <ChevronsUpDown className="size-4 opacity-50" />
         </Button>
       </PopoverTrigger>
 
