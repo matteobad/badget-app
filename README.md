@@ -3,8 +3,8 @@
 ## Notes 2025-09-12
 
 - [x] create postgres trigger to manage category deletion when associated to txs
-- [ ] test default system categories
+- [x] test default system categories
 - [ ] test default system categories on newly created space
-- [ ] add more icons to default set
+- [x] add more icons to default set
 - [ ] (NTH) on sub category create generate shades
 - [ ] (NTH) on custom color picker allow value pasting

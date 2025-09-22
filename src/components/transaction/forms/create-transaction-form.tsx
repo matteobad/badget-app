@@ -307,6 +307,7 @@ export default function CreateTransactionForm() {
                 <FormLabel>Categoria</FormLabel>
                 <SelectCategory
                   hideLoading
+                  align="start"
                   selected={field.value}
                   onChange={field.onChange}
                 />

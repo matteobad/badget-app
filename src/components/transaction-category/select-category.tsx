@@ -47,6 +47,7 @@ type Props = {
   onChange?: (selected: Selected) => void;
   headless?: boolean;
   hideLoading?: boolean;
+  placeholder?: string;
   align?: "end" | "start";
   className?: string;
 };
@@ -97,6 +98,7 @@ export function SelectCategory({
   onChange,
   hideLoading,
   headless,
+  placeholder,
   align,
   className,
 }: Props) {
@@ -248,7 +250,14 @@ export function SelectCategory({
           e.stopPropagation();
         }}
       >
-        <CategoryBadge category={selectedCategory} className={className} />
+        {placeholder &&
+        (!selectedCategory || selectedCategory?.slug === "uncategorized") ? (
+          <span className="text-muted-foreground hover:text-accent-foreground">
+            {placeholder}
+          </span>
+        ) : (
+          <CategoryBadge category={selectedCategory} className={className} />
+        )}
       </PopoverTrigger>
 
       <PopoverContent

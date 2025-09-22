@@ -38,12 +38,16 @@ export function CategoryLabel(props: CategoryBadgeProps) {
   const { category } = props;
   const icon = (category?.icon ?? "circle-dashed") as IconName;
 
-  const { color } = getCategoryColors(category?.color ?? undefined);
+  // const { color } = getCategoryColors(category?.color ?? undefined);
 
   return (
-    <div className="flex items-center gap-1.5" style={{ color }}>
-      <DynamicIcon name={icon} style={{ color }} />
-      <span>{category?.name ?? "Uncategorized"}</span>
+    <div className="flex w-full items-center gap-1.5">
+      <DynamicIcon name={icon} />
+      <span className="flex-1">{category?.name ?? "Uncategorized"}</span>
+      <span
+        className="size-3"
+        style={{ backgroundColor: category?.color ?? "#737373" }}
+      ></span>
     </div>
   );
 }
