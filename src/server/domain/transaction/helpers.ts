@@ -97,7 +97,7 @@ export async function validateTransactions(
         accountId: transaction.accountId,
         amount: transaction.amount,
         date: new Date(transaction.date),
-        descriptionNormalized: normalizeDescription(transaction.description!),
+        descriptionNormalized: normalizeDescription(transaction.name),
       },
       account,
       true,
