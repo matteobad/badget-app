@@ -22,6 +22,7 @@ export const createGocardlessLinkAction = authActionClient
     const { institutionId, redirectBase, step } = parsedInput;
 
     const redirectTo = new URL(redirectBase);
+    redirectTo.pathname = "transactions";
     redirectTo.searchParams.append("step", step ?? "account");
     redirectTo.searchParams.append("provider", "gocardless");
 
@@ -92,7 +93,7 @@ export const reconnectConnectionAction = authActionClient
 
 export const reconnectGocardlessLinkAction = authActionClient
   .inputSchema(reconnectGocardlessLinkSchema)
-  .metadata({ actionName: "create-gocardless-link" })
+  .metadata({ actionName: "reconnect-gocardless-link" })
   .action(
     async ({
       parsedInput: { id, institutionId, redirectTo },
