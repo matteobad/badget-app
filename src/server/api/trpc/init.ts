@@ -34,7 +34,9 @@ export const createTRPCContext = cache(async (opts: { headers: Headers }) => {
   return {
     db,
     session: session?.session,
-    orgId: session?.session.activeOrganizationId ?? undefined,
+    orgId:
+      session?.user.defaultOrganizationId ??
+      session?.session.activeOrganizationId,
     ...opts,
   };
 });

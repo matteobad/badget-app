@@ -26,7 +26,7 @@ export const auth = betterAuth({
       locale: {
         type: "string",
         required: false,
-        defaultValue: "it",
+        defaultValue: "it-IT",
         input: true,
       },
       weekStartsOnMonday: {

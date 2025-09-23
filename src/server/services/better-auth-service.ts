@@ -6,6 +6,7 @@ import type {
 import type z from "zod";
 import { headers } from "next/headers";
 import { schedules } from "@trigger.dev/sdk";
+import { nanoid } from "nanoid";
 
 import type { DBClient } from "../db";
 import { auth } from "../../shared/helpers/better-auth/auth";
@@ -61,7 +62,7 @@ export async function createOrganization(
     const newOrg = await auth.api.createOrganization({
       body: {
         name: input.name, // required
-        slug: input.name.toLocaleLowerCase().replaceAll(" ", "-"), // required
+        slug: `org_${nanoid()}`, // required
         logo: input.logoUrl,
         userId: userId, // server-only
         keepCurrentActiveOrganization: false,

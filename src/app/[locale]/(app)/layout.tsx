@@ -24,7 +24,7 @@ export default async function AppLayout(props: PropsWithChildren) {
 
   // NOTE: These are used in the global sheets
   batchPrefetch([
-    // trpc.space.current.queryOptions(),
+    trpc.organization.current.queryOptions(),
     trpc.search.global.queryOptions({ searchTerm: "" }),
   ]);
 
