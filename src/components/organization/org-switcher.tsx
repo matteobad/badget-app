@@ -28,10 +28,7 @@ export function OrganizationSwitcher({ isExpanded = false }: Props) {
   const changeSpaceMutation = useMutation(
     trpc.organization.setActive.mutationOptions({
       onSuccess: () => {
-        // Refetch after error or success
-        void queryClient.invalidateQueries({
-          queryKey: trpc.organization.current.queryKey(),
-        });
+        void queryClient.invalidateQueries();
       },
     }),
   );
