@@ -252,7 +252,7 @@ export function SelectCategory({
       >
         {placeholder &&
         (!selectedCategory || selectedCategory?.slug === "uncategorized") ? (
-          <span className="text-muted-foreground hover:text-accent-foreground">
+          <span className="flex h-[28px] items-center text-sm text-muted-foreground hover:text-accent-foreground">
             {placeholder}
           </span>
         ) : (

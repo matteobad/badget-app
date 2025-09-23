@@ -1,8 +1,10 @@
 import { getColorFromName } from "~/shared/helpers/categories";
 import {
+  endOfYear,
   formatISO,
   startOfMonth,
   startOfYear,
+  subDays,
   subMonths,
   subYears,
 } from "date-fns";
@@ -30,19 +32,23 @@ export const options = [
     from: formatISO(subMonths(startOfMonth(new Date()), 1), {
       representation: "date",
     }),
-    to: formatISO(new Date(), { representation: "date" }),
+    to: formatISO(subDays(startOfMonth(new Date()), 1), {
+      representation: "date",
+    }),
   },
   {
     id: "this_year",
     from: formatISO(startOfYear(new Date()), { representation: "date" }),
-    to: formatISO(new Date(), { representation: "date" }),
+    to: formatISO(endOfYear(new Date()), { representation: "date" }),
   },
   {
     id: "last_year",
-    from: formatISO(subYears(startOfMonth(new Date()), 1), {
+    from: formatISO(subYears(startOfYear(new Date()), 1), {
       representation: "date",
     }),
-    to: formatISO(new Date(), { representation: "date" }),
+    to: formatISO(subYears(endOfYear(new Date()), 1), {
+      representation: "date",
+    }),
   },
 ];
 

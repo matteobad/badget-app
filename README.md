@@ -9,3 +9,5 @@
 - [ ] export success toast flickers (appers 2 time)
 - [ ] cannot delete manual/csv txs with bulk edit. Is this wanted?
 - [ ] deleting space does not remove requisition from nordigen
+- [x] widget dashboard spending (fix last month filter)
+- [x] widget dashboard transactions (fix income/outcome filter)

@@ -29,6 +29,7 @@ import {
   gte,
   inArray,
   isNull,
+  lt,
   lte,
   ne,
   or,
@@ -53,6 +54,7 @@ export async function getTransactionsQuery(
     recurring: filterRecurring,
     amount: filterAmount,
     amount_range: filterAmountRange,
+    type,
   } = params;
 
   // Always start with orgId filter
@@ -131,6 +133,14 @@ export async function getTransactionsQuery(
         );
       }
     }
+  }
+
+  // Type filter (expense/income)
+  if (type === "expense") {
+    whereConditions.push(lt(transaction_table.amount, 0));
+    // whereConditions.push(ne(transactions.categorySlug, "transfer"));
+  } else if (type === "income") {
+    whereConditions.push(gt(transaction_table.amount, 0));
   }
 
   // Accounts filter
