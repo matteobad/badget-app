@@ -233,6 +233,18 @@ export const getTransactionsSchema = z.object({
   attachments: z.enum(["include", "exclude"]).nullable().optional(),
   amount_range: z.array(z.coerce.number()).nullable().optional(),
   amount: z.array(z.string()).nullable().optional(),
+  type: z
+    .enum(["income", "expense"])
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "Transaction type to filter by. 'income' for money received, 'expense' for money spent",
+      example: "expense",
+      param: {
+        in: "query",
+      },
+    }),
 });
 
 export const generateTransactionFiltersSchema = z.object({

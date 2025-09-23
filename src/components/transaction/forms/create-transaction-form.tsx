@@ -96,7 +96,7 @@ export default function CreateTransactionForm() {
   const form = useForm<z.infer<typeof createManualTransactionSchema>>({
     resolver: standardSchemaResolver(createManualTransactionSchema),
     defaultValues: {
-      categorySlug: undefined,
+      categorySlug: "uncategorized",
       date: format(new Date(), "yyyy-MM-dd"),
       description: "",
       currency: "EUR",
@@ -303,7 +303,7 @@ export default function CreateTransactionForm() {
                   hideLoading
                   align="start"
                   selected={field.value}
-                  onChange={field.onChange}
+                  onChange={(selected) => field.onChange(selected.slug)}
                 />
                 <FormMessage />
               </FormItem>

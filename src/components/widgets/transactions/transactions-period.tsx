@@ -21,7 +21,7 @@ export function TransactionsPeriod({ type, setType, disabled }: Props) {
   const t = useI18n();
 
   return (
-    <div className="flex justify-between">
+    <div className="flex items-center justify-between">
       <div>
         <Link href="/transactions" prefetch>
           <h2 className="text-lg">Transactions</h2>
@@ -29,10 +29,13 @@ export function TransactionsPeriod({ type, setType, disabled }: Props) {
       </div>
 
       <DropdownMenu>
-        <DropdownMenuTrigger disabled={disabled}>
+        <DropdownMenuTrigger
+          disabled={disabled}
+          className="flex h-9 items-center space-x-2 border p-2 px-3 text-sm"
+        >
           <div className="flex items-center space-x-2">
             <span>{t(`transactions_period.${type}`)}</span>
-            <ChevronDownIcon />
+            <ChevronDownIcon className="size-4" />
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[130px]">

@@ -4,6 +4,7 @@ import type {
 } from "~/shared/validators/institution.schema";
 import type z from "zod/v4";
 
+import type { DBClient } from "../db";
 import { db } from "../db";
 import { updateInstitutionMutation } from "../domain/institution/mutations";
 import { getInstitutionsQuery } from "../domain/institution/queries";
@@ -15,6 +16,7 @@ export async function getInstitutions(
 }
 
 export async function updateInstitutionUsage(
+  db: DBClient,
   input: z.infer<typeof updateInstitutionUsageSchema>,
 ) {
   return await updateInstitutionMutation(db, input);

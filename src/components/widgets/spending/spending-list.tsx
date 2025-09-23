@@ -15,6 +15,8 @@ export function SpendingList({ period }: Props) {
   const selectedPeriod =
     options.find((option) => option.id === period) ?? defaultPeriod;
 
+  console.log(selectedPeriod);
+
   const { data: spending } = useSuspenseQuery(
     trpc.metrics.spending.queryOptions({
       from: selectedPeriod.from,

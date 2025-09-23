@@ -213,9 +213,9 @@ export function DataTable({
 
     if (Object.keys(rowSelection)?.length > 0) {
       if (transactions.length === 0) {
-        setCanDelete(transactions.every((t) => t.source !== "api"));
-      } else {
         setCanDelete(false);
+      } else {
+        setCanDelete(transactions.every((t) => t.source !== "api"));
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

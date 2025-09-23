@@ -59,7 +59,7 @@ const items = [
         name: "Tags",
       },
       {
-        path: "/transactions?importTransaction=true",
+        path: "/transactions?step=import",
         name: "Import",
       },
       {

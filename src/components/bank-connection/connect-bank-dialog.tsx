@@ -57,7 +57,6 @@ type SearchResultProps = {
   logo: string | null;
   provider: string;
   availableHistory: number;
-  popularity: number;
   type?: "personal" | "business";
 };
 
@@ -67,7 +66,6 @@ function SearchResult({
   logo,
   provider,
   availableHistory,
-  popularity,
   type,
 }: SearchResultProps) {
   return (
@@ -75,10 +73,10 @@ function SearchResult({
       <div className="flex items-center">
         <BankLogo src={logo} alt={name} />
 
-        <div className="ml-4 cursor-default space-y-1">
+        <div className="ml-4 cursor-default">
           <p className="text-sm leading-none font-medium">{name}</p>
           <InstitutionInfo provider={provider}>
-            <span className="text-xs text-[#878787] capitalize">
+            <span className="text-xs font-light text-muted-foreground capitalize">
               Via {formatProvider(provider)}
               {type ? ` • ${type}` : ""}
             </span>
@@ -91,7 +89,6 @@ function SearchResult({
         name={name}
         provider={provider}
         availableHistory={availableHistory}
-        popularity={popularity}
         type={type}
       />
     </div>
@@ -155,8 +152,7 @@ export function ConnectBankDialog({
                 type="button"
                 className="underline"
                 onClick={() => {
-                  void setConnectParams({ step: null });
-                  void setTransactionParams({ importTransaction: true });
+                  void setConnectParams({ step: "import" });
                 }}
               >
                 manual import
@@ -165,8 +161,9 @@ export function ConnectBankDialog({
             </DialogDescription>
 
             <div className="pt-4">
-              <div className="relative flex space-x-2">
+              <div className="flex space-x-0">
                 <Input
+                  className="border-r-0"
                   placeholder="Search your bank or financial institution..."
                   type="search"
                   onChange={(evt) =>
@@ -180,8 +177,10 @@ export function ConnectBankDialog({
                   value={query ?? ""}
                 />
 
-                <div className="absolute right-0">
+                <div className="">
                   <CountrySelector
+                    align="end"
+                    className="w-[220px]"
                     defaultValue={countryCode}
                     onSelect={(countryCode) => {
                       void setConnectParams({ countryCode });
@@ -205,7 +204,6 @@ export function ConnectBankDialog({
                       name={institution.name}
                       logo={institution.logo}
                       provider={institution.provider}
-                      popularity={institution.popularity ?? 0}
                       // GoCardLess
                       availableHistory={
                         institution.availableHistory

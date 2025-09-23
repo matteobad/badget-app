@@ -1,19 +1,21 @@
 import type { DBClient } from "~/server/db";
-import type { DB_InstitutionInsertType } from "~/server/db/schema/open-banking";
 import { institution_table } from "~/server/db/schema/open-banking";
-import { and, eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+
+type UpdateInstitutionUsageParams = {
+  id: string;
+};
 
 export async function updateInstitutionMutation(
-  client: DBClient,
-  value: Partial<DB_InstitutionInsertType>,
+  db: DBClient,
+  params: UpdateInstitutionUsageParams,
 ) {
-  const { id, ...rest } = value;
-  const [result] = await client
+  const [result] = await db
     .update(institution_table)
     .set({
-      popularity: rest.popularity,
+      popularity: sql`LEAST(${institution_table.popularity} + 1, 100)`,
     })
-    .where(and(eq(institution_table.id, id!)))
+    .where(eq(institution_table.originalId, params.id))
     .returning();
 
   return result;

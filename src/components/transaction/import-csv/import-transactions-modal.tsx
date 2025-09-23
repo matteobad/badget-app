@@ -15,7 +15,6 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { useSyncStatus } from "~/hooks/use-sync-status";
-import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { useUpload } from "~/hooks/use-upload";
 import { importTransactionsAction } from "~/server/domain/transaction/actions";
 import { useActiveOrganization } from "~/shared/helpers/better-auth/auth-client";
@@ -23,6 +22,7 @@ import { stripSpecialCharacters } from "~/shared/helpers/documents";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { ArrowLeftIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -56,9 +56,14 @@ export function ImportTransactionsModal({ defaultCurrency }: Props) {
 
   const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
-  const { params, setParams } = useTransactionParams();
+  const [params, setParams] = useQueryStates({
+    step: parseAsString,
+    accountId: parseAsString,
+    type: parseAsString,
+    hide: parseAsBoolean.withDefault(false),
+  });
 
-  const isOpen = !!params.importTransaction;
+  const isOpen = params.step === "import";
 
   const importTransactions = useAction(importTransactionsAction, {
     onSuccess: ({ data }) => {
