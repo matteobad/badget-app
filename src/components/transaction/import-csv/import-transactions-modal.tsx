@@ -33,11 +33,14 @@ import { SelectFile } from "./select-file";
 const pages = ["select-file", "confirm-import"] as const;
 
 type Props = {
-  currencies?: string[];
-  defaultCurrency?: string;
+  currencies: string[];
+  defaultCurrency: string;
 };
 
-export function ImportTransactionsModal({ defaultCurrency }: Props) {
+export function ImportTransactionsModal({
+  currencies,
+  defaultCurrency,
+}: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [runId, setRunId] = useState<string | undefined>();
@@ -238,7 +241,7 @@ export function ImportTransactionsModal({ defaultCurrency }: Props) {
                     {page === "select-file" && <SelectFile />}
                     {page === "confirm-import" && (
                       <>
-                        <FieldMapping />
+                        <FieldMapping currencies={currencies} />
 
                         <SubmitButton
                           isSubmitting={isImporting}

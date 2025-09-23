@@ -112,6 +112,7 @@
   --color-sidebar: var(--sidebar-background);
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-slide-effect: slide-effect 1.3s ease-in-out infinite;
 
   @keyframes accordion-down {
     from {
@@ -128,6 +129,18 @@
     }
     to {
       height: 0;
+    }
+  }
+
+  @keyframes slide-effect {
+    0% {
+      left: 0%;
+    }
+    50% {
+      left: calc(100% - 80px);
+    }
+    100% {
+      left: 0%;
     }
   }
 }

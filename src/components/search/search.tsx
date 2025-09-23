@@ -12,9 +12,9 @@ import { formatDate } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import {
   ArrowUpRightIcon,
-  CloudDownloadIcon,
   CopyCheckIcon,
   CopyIcon,
+  LandmarkIcon,
   Layers2Icon,
   ReceiptIcon,
 } from "lucide-react";
@@ -22,8 +22,6 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { useCopyToClipboard, useDebounceValue } from "usehooks-ts";
 
 import { FormatAmount } from "../format-amount";
-import { Spinner } from "../load-more";
-import { FilePreviewIcon } from "../transaction-attachment/file-preview-icon";
 import {
   Command,
   CommandEmpty,
@@ -43,6 +41,7 @@ interface SearchItem {
     invoice_number?: string;
     status?: string;
     amount?: number;
+    balance?: number;
     currency?: string;
     date?: string;
     display_name?: string;
@@ -86,42 +85,42 @@ function CopyButton({ path }: { path: string }) {
   );
 }
 
-function DownloadButton({
-  href,
-  filename,
-}: {
-  href: string;
-  filename?: string;
-}) {
-  const [isDownloading, setIsDownloading] = useState(false);
+// function DownloadButton({
+//   href,
+//   filename,
+// }: {
+//   href: string;
+//   filename?: string;
+// }) {
+//   const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleDownload = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+//   const handleDownload = async (e: React.MouseEvent) => {
+//     e.stopPropagation();
 
-    try {
-      setIsDownloading(true);
-      //   TODO: await downloadFile(href, filename || "download");
+//     try {
+//       setIsDownloading(true);
+//       //   TODO: await downloadFile(href, filename || "download");
 
-      // Keep spinner for 1 second
-      setTimeout(() => {
-        setIsDownloading(false);
-      }, 1000);
-    } catch (error) {
-      console.error("Download failed:", error);
-      setIsDownloading(false);
-    }
-  };
+//       // Keep spinner for 1 second
+//       setTimeout(() => {
+//         setIsDownloading(false);
+//       }, 1000);
+//     } catch (error) {
+//       console.error("Download failed:", error);
+//       setIsDownloading(false);
+//     }
+//   };
 
-  return (
-    <button type="button" onClick={handleDownload}>
-      {isDownloading ? (
-        <Spinner size={16} />
-      ) : (
-        <CloudDownloadIcon className="size-4 cursor-pointer text-primary hover:!text-primary dark:text-[#666]" />
-      )}
-    </button>
-  );
-}
+//   return (
+//     <button type="button" onClick={handleDownload}>
+//       {isDownloading ? (
+//         <Spinner size={16} />
+//       ) : (
+//         <CloudDownloadIcon className="size-4 cursor-pointer text-primary hover:!text-primary dark:text-[#666]" />
+//       )}
+//     </button>
+//   );
+// }
 
 // Helper function to format group names
 const formatGroupName = (name: string): string | null => {
@@ -130,6 +129,8 @@ const formatGroupName = (name: string): string | null => {
       return "Shortcuts";
     case "vault":
       return "Vault";
+    case "account":
+      return "Accounts";
     case "transaction":
       return "Transactions";
 
@@ -145,7 +146,9 @@ const useSearchNavigation = () => {
   const { setParams: setDocumentParams } = useDocumentParams();
 
   const navigateWithParams = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     params: Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     paramSetter: (params: any) => Promise<URLSearchParams>,
   ) => {
     setOpen();
@@ -173,9 +176,18 @@ const useSearchNavigation = () => {
       return navigateToPath(path);
     },
     // Action helpers
+    connectAccount: () => {
+      return navigateWithParams({ step: "connect" }, setTransactionParams);
+    },
     createTransaction: () => {
       return navigateWithParams(
         { createTransaction: true },
+        setTransactionParams,
+      );
+    },
+    importTransaction: () => {
+      return navigateWithParams(
+        { step: "import", hide: true },
         setTransactionParams,
       );
     },
@@ -205,38 +217,69 @@ const SearchResultItemDisplay = ({
     resultDisplay = item.title;
 
     switch (item.type) {
-      case "vault": {
-        onSelect = () => nav.navigateToDocument({ documentId: item.id });
+      // case "vault": {
+      //   onSelect = () => nav.navigateToDocument({ documentId: item.id });
+
+      //   icon = (
+      //     <FilePreviewIcon
+      //       mimetype={item.data?.metadata?.mimetype}
+      //       className="size-4 text-primary dark:text-[#666]"
+      //     />
+      //   );
+      //   resultDisplay = (
+      //     <div className="flex w-full items-center justify-between">
+      //       <span className="flex-grow truncate">
+      //         {
+      //           (item.data?.title ??
+      //             (item.data?.name as string)?.split("/").at(-1) ??
+      //             "") as string
+      //         }
+      //       </span>
+      //       <div className="invisible flex items-center gap-2 group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
+      //         <CopyButton path={`?documentId=${item.id}`} />
+      //         <DownloadButton
+      //           href={`/api/download/file?path=${item.data?.path_tokens?.join("/")}&filename=${
+      //             (item.data.title ??
+      //               (item.data.name as string)?.split("/").at(-1) ??
+      //               "") as string
+      //           }`}
+      //           filename={
+      //             (item.data?.title ??
+      //               (item.data?.name as string)?.split("/").at(-1) ??
+      //               "") as string
+      //           }
+      //         />
+      //         <ArrowUpRightIcon className="size-4 cursor-pointer text-primary hover:!text-primary dark:text-[#666]" />
+      //       </div>
+      //     </div>
+      //   );
+      //   break;
+      // }
+      case "account": {
+        onSelect = () =>
+          nav.navigateToPath(`/accounts?bankAccountId=${item.id}`);
 
         icon = (
-          <FilePreviewIcon
-            mimetype={item.data?.metadata?.mimetype}
-            className="size-4 text-primary dark:text-[#666]"
-          />
+          <LandmarkIcon className="size-4 text-primary dark:text-[#666]" />
         );
         resultDisplay = (
           <div className="flex w-full items-center justify-between">
-            <span className="flex-grow truncate">
-              {
-                (item.data?.title ??
-                  (item.data?.name as string)?.split("/").at(-1) ??
-                  "") as string
-              }
-            </span>
+            <div className="flex flex-grow items-center gap-2 truncate">
+              <span>{item.data.name ?? ""}</span>
+              <span className="text-xs text-muted-foreground">
+                <FormatAmount
+                  currency={item.data.currency!}
+                  amount={item.data.balance!}
+                />
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {item.data?.date
+                  ? formatDate(item.data.date, dateFormat)
+                  : null}
+              </span>
+            </div>
             <div className="invisible flex items-center gap-2 group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
-              <CopyButton path={`?documentId=${item.id}`} />
-              <DownloadButton
-                href={`/api/download/file?path=${item.data?.path_tokens?.join("/")}&filename=${
-                  (item.data?.title ??
-                    (item.data?.name as string)?.split("/").at(-1) ??
-                    "") as string
-                }`}
-                filename={
-                  (item.data?.title ??
-                    (item.data?.name as string)?.split("/").at(-1) ??
-                    "") as string
-                }
-              />
+              <CopyButton path={`?bankAccountId=${item.id}`} />
               <ArrowUpRightIcon className="size-4 cursor-pointer text-primary hover:!text-primary dark:text-[#666]" />
             </div>
           </div>
@@ -250,11 +293,11 @@ const SearchResultItemDisplay = ({
         resultDisplay = (
           <div className="flex w-full items-center justify-between">
             <div className="flex flex-grow items-center gap-2 truncate">
-              <span>{(item.data?.name || "") as string}</span>
+              <span>{item.data.name ?? ""}</span>
               <span className="text-xs text-muted-foreground">
                 <FormatAmount
-                  currency={item.data!.currency!}
-                  amount={item.data!.amount!}
+                  currency={item.data.currency!}
+                  amount={item.data.amount!}
                 />
               </span>
               <span className="text-xs text-muted-foreground">
@@ -325,10 +368,28 @@ export function Search() {
 
   const sectionActions: SearchItem[] = [
     {
+      id: "sc-connect-account",
+      type: "account",
+      title: "Connect account",
+      action: nav.connectAccount,
+    },
+    {
+      id: "sc-view-accounts",
+      type: "account",
+      title: "View accounts",
+      action: () => nav.navigateToPath("/accounts"),
+    },
+    {
       id: "sc-create-transaction",
       type: "transaction",
       title: "Create transaction",
       action: nav.createTransaction,
+    },
+    {
+      id: "sc-import-transaction",
+      type: "transaction",
+      title: "Import transaction",
+      action: nav.importTransaction,
     },
     {
       id: "sc-view-documents",
@@ -364,9 +425,11 @@ export function Search() {
     // or map them to include default actions. For now, assuming they come with 'type' and 'title'.
     const mappedSearchResults = searchResults.map((res) => ({
       ...res,
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       action: () => {},
     }));
     return [...mappedSearchResults];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, searchResults]);
 
   const groupedData = useMemo(() => {
@@ -395,7 +458,7 @@ export function Search() {
     }
 
     // Prioritize tracker projects when timer is running
-    const definedGroupOrder = ["vault", "transaction"];
+    const definedGroupOrder = ["vault", "account", "transaction"];
 
     const allGroupKeysInOrder: string[] = [];
     const addedKeys = new Set<string>();
@@ -423,6 +486,7 @@ export function Search() {
       }
     }
     return orderedGroups;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combinedData, debouncedSearch]);
 
   useEffect(() => {
@@ -467,7 +531,7 @@ export function Search() {
         />
         {isFetching && (
           <div className="absolute bottom-0 h-[2px] w-full overflow-hidden">
-            <div className="animate-slide-effect absolute top-[1px] h-full w-40 bg-gradient-to-r from-gray-200 via-black via-80% to-gray-200 dark:from-gray-800 dark:via-white dark:via-80% dark:to-gray-800" />
+            <div className="absolute top-[1px] h-full w-40 animate-slide-effect bg-gradient-to-r from-gray-200 via-black via-80% to-gray-200 dark:from-gray-800 dark:via-white dark:via-80% dark:to-gray-800" />
           </div>
         )}
       </div>

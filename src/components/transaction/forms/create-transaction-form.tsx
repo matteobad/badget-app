@@ -81,12 +81,20 @@ export default function CreateTransactionForm() {
       },
       onSuccess: (_data) => {
         toast.success("Transazione creata");
+
         void queryClient.invalidateQueries({
           queryKey: trpc.transaction.get.infiniteQueryKey(),
         });
+
         void queryClient.invalidateQueries({
           queryKey: trpc.transaction.getAmountRange.queryKey(),
         });
+
+        // Invalidate global search
+        void queryClient.invalidateQueries({
+          queryKey: trpc.search.global.queryKey(),
+        });
+
         form.reset();
         void setParams({ createTransaction: null });
       },

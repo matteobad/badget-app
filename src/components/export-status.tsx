@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useExportStatus } from "~/hooks/use-export-status";
 import { useExportStore } from "~/lib/stores/export";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 import { toast } from "sonner";
 
 import { Button } from "./ui/button";
@@ -25,6 +27,9 @@ export function ExportStatus() {
     exportData as ExportData,
   );
 
+  const queryClient = useQueryClient();
+  const trpc = useTRPC();
+
   useEffect(() => {
     if (status === "FAILED") {
       toast.error("Something went wrong please try again.");
@@ -46,6 +51,11 @@ export function ExportStatus() {
       // close loading toast
       toast.dismiss(loadingToastId);
       setLoadingToastId(undefined);
+
+      // Invalidate search query to refresh the results
+      void queryClient.invalidateQueries({
+        queryKey: trpc.search.global.queryKey(),
+      });
 
       toast.custom((t) => (
         <div className="p-4">

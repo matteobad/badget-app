@@ -39,7 +39,7 @@ import { Controller } from "react-hook-form";
 
 import { mappableFields, useCsvContext } from "./context";
 
-export function FieldMapping() {
+export function FieldMapping({}: { currencies: string[] }) {
   const { fileColumns, firstRows, setValue, control, watch } = useCsvContext();
   const [isStreaming, setIsStreaming] = useState(true);
 

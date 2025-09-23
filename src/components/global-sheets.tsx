@@ -1,6 +1,7 @@
 "use client";
 
 import { use } from "react";
+import { uniqueCurrencies } from "~/shared/constants/currencies";
 
 import { BankAccountSheet } from "./bank-account/sheets/bank-account-sheet";
 import CreateBankAccountSheet from "./bank-account/sheets/create-bank-account-dialog";
@@ -12,12 +13,12 @@ import CreateTransactionSheet from "./transaction/sheets/create-transaction-shee
 import TransactionSheet from "./transaction/sheets/transaction-sheet";
 
 type Props = {
-  //   currencyPromise: Promise<string>;
+  currencyPromise: Promise<string>;
   countryCodePromise: Promise<string>;
 };
 
-export function GlobalSheets({ countryCodePromise }: Props) {
-  //   const currency = use(currencyPromise);
+export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
+  const currency = use(currencyPromise);
   const countryCode = use(countryCodePromise);
 
   return (
@@ -29,7 +30,10 @@ export function GlobalSheets({ countryCodePromise }: Props) {
       <BankAccountSheet />
 
       <CreateTransactionSheet />
-      <ImportTransactionsModal />
+      <ImportTransactionsModal
+        currencies={uniqueCurrencies}
+        defaultCurrency={currency}
+      />
       <TransactionSheet />
 
       <SearchModal />
