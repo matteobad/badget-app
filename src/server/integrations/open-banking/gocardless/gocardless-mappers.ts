@@ -90,14 +90,14 @@ export const mapAccountsResponse = (
   return {
     externalId: accountId,
     name:
-      detailsData.account.name ??
-      detailsData.account.product ??
-      institutionData.name ??
+      detailsData?.account?.name ??
+      detailsData?.account?.product ??
+      institutionData?.name ??
       "No name",
     balance: balancesData.balances[0]
       ? parseFloat(balancesData.balances[0].balanceAmount.amount)
       : 0,
-    currency: detailsData.account.currency,
+    currency: detailsData?.account?.currency ?? "EUR",
     type: "asset",
     subtype: "checking",
     description: "",
