@@ -57,20 +57,16 @@ export async function createOrganization(
   userId: string,
 ) {
   try {
-    const metadata = {
-      baseCurrency: input.baseCurrency,
-      countryCode: input.countryCode,
-    };
-
     // Create organization
     const newOrg = await auth.api.createOrganization({
       body: {
         name: input.name, // required
         slug: input.name.toLocaleLowerCase().replaceAll(" ", "-"), // required
         logo: input.logoUrl,
-        metadata,
         userId: userId, // server-only
         keepCurrentActiveOrganization: false,
+        baseCurrency: input.baseCurrency,
+        countryCode: input.countryCode,
       },
       // This endpoint requires session cookies.
       headers: await headers(),
@@ -89,6 +85,14 @@ export async function createOrganization(
         headers: await headers(),
         body: {
           organizationId: newOrg.id,
+        },
+      });
+
+      // Update user active space
+      await auth.api.updateUser({
+        headers: await headers(),
+        body: {
+          defaultOrganizationId: newOrg.id,
         },
       });
     }
