@@ -51,11 +51,11 @@ export default function SignIn({ children }: PropsWithChildren) {
               <div className="absolute right-0 bottom-4 left-0 text-center">
                 <p className="font-mono text-xs leading-relaxed text-[#878787]">
                   By signing in you agree to our{" "}
-                  <Link href="https://midday.ai/terms" className="underline">
+                  <Link href="/terms" className="underline">
                     Terms of service
                   </Link>{" "}
                   &{" "}
-                  <Link href="https://midday.ai/policy" className="underline">
+                  <Link href="/policy" className="underline">
                     Privacy policy
                   </Link>
                 </p>

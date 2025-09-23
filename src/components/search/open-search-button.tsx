@@ -11,7 +11,7 @@ export function OpenSearchButton() {
   return (
     <Button
       variant="outline"
-      className="no-drag relative hidden w-full min-w-[250px] justify-start border-0 !p-0 text-sm font-normal text-muted-foreground shadow-none hover:bg-transparent sm:pr-12 md:flex md:w-40 lg:w-64"
+      className="no-drag relative hidden w-full min-w-[250px] cursor-pointer justify-start border-0 !p-0 text-sm font-normal text-muted-foreground shadow-none hover:bg-transparent sm:pr-12 md:flex md:w-40 lg:w-64"
       onClick={() => setOpen()}
     >
       <BrainCircuitIcon size={18} className="mr-2" />

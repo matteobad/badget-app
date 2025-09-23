@@ -189,3 +189,22 @@ number-flow-react::part(fraction) {
   transition: 100ms ease;
   transition-property: height;
 }
+
+/* Home page */
+.text-stroke {
+  color: white;
+  text-shadow:
+    -1px 1px 0 black,
+    1px 1px 0 black,
+    1px -1px 0 black,
+    -1px -1px 0 black;
+}
+
+.dark .text-stroke {
+  color: black;
+  text-shadow:
+    -1px 1px 0 white,
+    1px 1px 0 white,
+    1px -1px 0 white,
+    -1px -1px 0 white;
+}

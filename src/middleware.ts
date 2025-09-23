@@ -32,8 +32,11 @@ export async function middleware(request: NextRequest) {
   // 1. Not authenticated
   if (
     !sessionCookie &&
+    newUrl.pathname !== "/" &&
     newUrl.pathname !== "/sign-in" &&
-    newUrl.pathname !== "/sign-up"
+    newUrl.pathname !== "/sign-up" &&
+    newUrl.pathname !== "/privacy" &&
+    newUrl.pathname !== "/terms"
   ) {
     const url = new URL("/sign-in", request.url);
 

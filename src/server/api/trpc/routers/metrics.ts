@@ -1,6 +1,7 @@
 import {
   getExpenses,
   getFinanancialMetrics,
+  getHero,
   getNetWorth,
   getSpending,
 } from "~/server/services/metrics-service";
@@ -11,7 +12,7 @@ import {
   getSpendingSchema,
 } from "~/shared/validators/metrics.schema";
 
-import { createTRPCRouter, protectedProcedure } from "../init";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../init";
 
 export const metricsRouter = createTRPCRouter({
   expense: protectedProcedure
@@ -57,4 +58,8 @@ export const metricsRouter = createTRPCRouter({
         currency: input.currency,
       });
     }),
+
+  hero: publicProcedure.query(async ({ ctx: { db } }) => {
+    return await getHero(db);
+  }),
 });

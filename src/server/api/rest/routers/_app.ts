@@ -19,7 +19,7 @@ routers.doc("/openapi", {
     title: "GELLIFY API",
     description: "Description",
     contact: {
-      name: "Midday Support",
+      name: "Badget Support",
       email: "engineer@midday.ai",
       url: "https://midday.ai",
     },

@@ -1,6 +1,9 @@
-import { sql } from "drizzle-orm";
+import { count, sql } from "drizzle-orm";
 
 import type { DBClient } from "../db";
+import { account_table } from "../db/schema/accounts";
+import { user } from "../db/schema/auth";
+import { transaction_table } from "../db/schema/transactions";
 
 export type GetExpensesParams = {
   orgId: string;
@@ -209,4 +212,36 @@ export async function getSpending(
         percentage: Number.parseFloat(Number(item.percentage).toFixed(2)),
       }))
     : [];
+}
+
+interface HeroResultItem {
+  users: number;
+  accounts: number;
+  transactions: number;
+  transactionsValue: number;
+}
+
+export async function getHero(db: DBClient): Promise<HeroResultItem> {
+  const userCountResult = await db.select({ count: count() }).from(user);
+
+  const accountCountResult = await db
+    .select({ count: count() })
+    .from(account_table);
+
+  const transactionCountResult = await db
+    .select({ count: count() })
+    .from(transaction_table);
+
+  const transactionValueResult = await db
+    .select({
+      total: sql<number>`SUM(ABS(${transaction_table.amount}))`,
+    })
+    .from(transaction_table);
+
+  return {
+    users: userCountResult[0]?.count ?? 0,
+    accounts: accountCountResult[0]?.count ?? 0,
+    transactions: transactionCountResult[0]?.count ?? 0,
+    transactionsValue: transactionValueResult[0]?.total ?? 0,
+  };
 }
