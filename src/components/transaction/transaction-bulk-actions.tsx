@@ -197,7 +197,7 @@ export function BulkActions({ ids }: Props) {
         <TooltipTrigger asChild>
           <Button
             variant="ghost"
-            className="size-9 text-destructive hover:bg-destructive/1 hover:text-destructive"
+            className="!pointer-events-auto size-9 text-destructive hover:bg-destructive/1 hover:text-destructive"
             disabled={!canDelete}
             onClick={handleDeleteTransactions}
           >
