@@ -57,7 +57,6 @@ type SearchResultProps = {
   logo: string | null;
   provider: string;
   availableHistory: number;
-  popularity: number;
   type?: "personal" | "business";
 };
 
@@ -67,7 +66,6 @@ function SearchResult({
   logo,
   provider,
   availableHistory,
-  popularity,
   type,
 }: SearchResultProps) {
   return (
@@ -91,7 +89,6 @@ function SearchResult({
         name={name}
         provider={provider}
         availableHistory={availableHistory}
-        popularity={popularity}
         type={type}
       />
     </div>
@@ -207,7 +204,6 @@ export function ConnectBankDialog({
                       name={institution.name}
                       logo={institution.logo}
                       provider={institution.provider}
-                      popularity={institution.popularity ?? 0}
                       // GoCardLess
                       availableHistory={
                         institution.availableHistory

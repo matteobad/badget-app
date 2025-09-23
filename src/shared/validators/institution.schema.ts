@@ -7,5 +7,4 @@ export const getInstitutionsSchema = z.object({
 
 export const updateInstitutionUsageSchema = z.object({
   id: z.string(),
-  popularity: z.number().min(0).max(100),
 });

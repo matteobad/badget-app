@@ -18,7 +18,7 @@ export const institutionRouter = createTRPCRouter({
 
   updateUsage: protectedProcedure
     .input(updateInstitutionUsageSchema)
-    .mutation(async ({ input }) => {
-      return updateInstitutionUsage(input);
+    .mutation(async ({ ctx: { db }, input }) => {
+      return updateInstitutionUsage(db, input);
     }),
 });

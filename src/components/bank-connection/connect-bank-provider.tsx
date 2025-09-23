@@ -8,23 +8,17 @@ type Props = {
   name: string;
   provider: string;
   availableHistory: number;
-  popularity: number;
   type?: "personal" | "business";
 };
 
-export function ConnectBankProvider({
-  id,
-  provider,
-  availableHistory,
-  popularity,
-}: Props) {
+export function ConnectBankProvider({ id, provider, availableHistory }: Props) {
   const trpc = useTRPC();
   const updateUsageMutation = useMutation(
     trpc.institution.updateUsage.mutationOptions(),
   );
 
   const updateUsage = () => {
-    updateUsageMutation.mutate({ id, popularity: Math.max(100, popularity) });
+    updateUsageMutation.mutate({ id });
   };
 
   switch (provider) {
