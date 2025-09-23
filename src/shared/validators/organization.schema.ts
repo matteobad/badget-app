@@ -10,17 +10,11 @@ export const updateSpaceByIdSchema = z.object({
     description: "Primary contact email address for the team",
     example: "team@acme.com",
   }),
-  logoUrl: z
-    .url()
-    .refine((url) => url.includes("midday.ai"), {
-      message: "logoUrl must be a midday.ai domain URL",
-    })
-    .optional()
-    .openapi({
-      description:
-        "URL to the team's logo image. Must be hosted on midday.ai domain",
-      example: "https://cdn.midday.ai/logos/acme-corp.png",
-    }),
+  logoUrl: z.url().optional().openapi({
+    description:
+      "URL to the space's logo image. Must be hosted on badget.ai domain",
+    example: "https://cdn.badget.ai/logos/acme-corp.png",
+  }),
   baseCurrency: z.string().optional().openapi({
     description:
       "Base currency for the team in ISO 4217 format (3-letter currency code)",

@@ -38,7 +38,10 @@ export async function updateSpaceById(
 ) {
   const data = await auth.api.updateOrganization({
     body: {
-      data: params,
+      data: {
+        ...params,
+        ...(params.logoUrl ? { logo: params.logoUrl } : {}),
+      },
       organizationId,
     },
     // This endpoint requires session cookies.

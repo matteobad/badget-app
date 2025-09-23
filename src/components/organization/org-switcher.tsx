@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useActiveOrganization } from "~/shared/helpers/better-auth/auth-client";
+import { useSpaceQuery } from "~/hooks/use-space";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { PlusIcon } from "lucide-react";
@@ -18,23 +18,20 @@ type Props = {
 
 export function OrganizationSwitcher({ isExpanded = false }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const [isActive, setActive] = useState(false);
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data: activeOrganization } = useActiveOrganization();
+  const { data: activeSpace } = useSpaceQuery();
 
-  const [selectedId, setSelectedId] = useState<string | undefined>(
-    activeOrganization?.id ?? undefined,
-  );
-  const [isActive, setActive] = useState(false);
-  const [isChangingOrg, setIsChangingOrg] = useState(false);
-
-  const changeOrganizationMutation = useMutation(
+  const changeSpaceMutation = useMutation(
     trpc.organization.setActive.mutationOptions({
       onSuccess: () => {
-        void queryClient.invalidateQueries();
-        setIsChangingOrg(false);
+        // Refetch after error or success
+        void queryClient.invalidateQueries({
+          queryKey: trpc.organization.current.queryKey(),
+        });
       },
     }),
   );
@@ -43,23 +40,17 @@ export function OrganizationSwitcher({ isExpanded = false }: Props) {
     trpc.organization.list.queryOptions(),
   );
 
-  useEffect(() => {
-    if (activeOrganization) {
-      setSelectedId(activeOrganization.id);
-    }
-  }, [activeOrganization]);
-
   const sortedOrganizations =
     organizations?.sort((a, b) => {
-      if (a.id === selectedId) return -1;
-      if (b.id === selectedId) return 1;
+      if (a.id === activeSpace?.id) return -1;
+      if (b.id === activeSpace?.id) return 1;
 
       return (a.id ?? "").localeCompare(b.id ?? "");
     }) ?? [];
 
   // @ts-expect-error bad types
   useOnClickOutside(ref, () => {
-    if (!isChangingOrg) {
+    if (!changeSpaceMutation.isPending) {
       setActive(false);
     }
   });
@@ -67,16 +58,14 @@ export function OrganizationSwitcher({ isExpanded = false }: Props) {
   const toggleActive = () => setActive((prev) => !prev);
 
   const handleOrgChange = (organizationId: string) => {
-    if (organizationId === selectedId) {
+    if (organizationId === activeSpace?.id) {
       toggleActive();
       return;
     }
 
-    setIsChangingOrg(true);
-    setSelectedId(organizationId);
     setActive(false);
 
-    changeOrganizationMutation.mutate({
+    changeSpaceMutation.mutate({
       organizationId,
     });
   };

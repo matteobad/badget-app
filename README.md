@@ -7,6 +7,7 @@
 - [ ] bank account subtype column "unknown" when creted from select
 - [ ] deleting space does not remove requisition from nordigen
 - [ ] export success toast flickers (appers 2 time)
+- [ ] create transaction form auto categorization via llm
 - [x] update institution usage errors out?
 - [x] cannot delete manual/csv txs with bulk edit. Is this wanted?
 - [x] widget dashboard spending (fix last month filter)
