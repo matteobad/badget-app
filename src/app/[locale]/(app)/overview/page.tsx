@@ -1,70 +1,43 @@
 import type { Metadata } from "next";
-import type { SearchParams } from "nuqs";
-import { ChartSelectors } from "~/components/charts/chart-selector";
-import { Charts } from "~/components/charts/charts";
-import { EmptyState } from "~/components/charts/empty-state";
-import { Widgets } from "~/components/widgets/widgets";
-import {
-  batchPrefetch,
-  getQueryClient,
-  HydrateClient,
-  trpc,
-} from "~/shared/helpers/trpc/server";
-import { metricsParamsSchema } from "~/shared/validators/metrics.schema";
-import { createLoader } from "nuqs/server";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { Widgets } from "~/components/widgets";
+import { getQueryClient, HydrateClient } from "~/shared/helpers/trpc/server";
 
 export const metadata: Metadata = {
-  title: "Overview | Badget.",
+  title: "Overview | Midday",
 };
 
 type Props = {
-  searchParams: Promise<SearchParams>;
+  params: Promise<{ chatId?: string[] }>;
 };
 
 export default async function Overview(props: Props) {
+  const { chatId } = await props.params;
+
+  // Extract the first chatId if it exists
+  const currentChatId = chatId?.at(0);
+
   const queryClient = getQueryClient();
-  const searchParams = await props.searchParams;
 
-  const loadMetricsParams = createLoader(metricsParamsSchema);
-  const { from, to, currency } = loadMetricsParams(searchParams);
+  //   const chat = currentChatId
+  //     ? await queryClient.fetchQuery(
+  //         trpc.chats.get.queryOptions({ chatId: currentChatId }),
+  //       )
+  //     : null;
 
-  batchPrefetch([
-    trpc.metrics.expense.queryOptions({
-      from,
-      to,
-      currency: currency ?? undefined,
-    }),
-  ]);
-
-  // Load the data for the first visible chart
-  await Promise.all([
-    queryClient.fetchQuery(
-      trpc.bankAccount.get.queryOptions({
-        enabled: true,
-      }),
-    ),
-    queryClient.fetchQuery(
-      trpc.metrics.expense.queryOptions({
-        from,
-        to,
-        currency: currency ?? undefined,
-      }),
-    ),
-  ]);
+  //   if (currentChatId && !chat?.messages) {
+  //     redirect("/");
+  //   }
 
   return (
     <HydrateClient>
       <div className="px-6">
-        <div className="mb-4 h-[530px]">
-          <ChartSelectors />
-
-          <div className="relative mt-8">
-            <EmptyState />
-            <Charts />
-          </div>
-        </div>
-
+        {/* <ChatProvider initialMessages={chat?.messages}> */}
         <Widgets />
+
+        {/* <ChatInterface geo={geo} id={currentChatId} /> */}
+        {/* </ChatProvider> */}
       </div>
     </HydrateClient>
   );
