@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { TZDate } from "@date-fns/tz";
 import { useQuery } from "@tanstack/react-query";
 import { useCalendarDates } from "~/hooks/use-calendar-dates";
@@ -53,7 +53,10 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
     null,
   ]);
 
-  const currentTZDate = new TZDate(currentDate, "UTC");
+  const currentTZDate = useMemo(
+    () => new TZDate(currentDate, "UTC"),
+    [currentDate],
+  );
 
   const { calendarDays, firstWeek } = useCalendarDates(
     currentTZDate,
@@ -106,14 +109,14 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
   };
 
   const { data } = useQuery(
-    trpc.trackerEntries.byRange.queryOptions(getDateRange()),
+    trpc.recurringEntry.byRange.queryOptions(getDateRange()),
   );
 
   function handlePeriodChange(direction: number) {
     if (selectedView === "week") {
       const newDate =
         direction > 0 ? addWeeks(currentTZDate, 1) : subWeeks(currentTZDate, 1);
-      setParams({
+      void setParams({
         date: formatISO(
           startOfWeek(newDate, { weekStartsOn: weekStartsOnMonday ? 1 : 0 }),
           { representation: "date" },
@@ -124,7 +127,7 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
         direction > 0
           ? addMonths(currentTZDate, 1)
           : subMonths(currentTZDate, 1);
-      setParams({
+      void setParams({
         date: formatISO(newDate, { representation: "date" }),
       });
     }
@@ -138,16 +141,16 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
     enabled: !selectedDate,
   });
 
-  // @ts-expect-error
+  // @ts-expect-error types
   useOnClickOutside(ref, () => {
-    if (range && range.length === 1) setParams({ range: null });
+    if (range && range.length === 1) void setParams({ range: null });
   });
 
   const handleMouseDown = (date: TZDate) => {
     setIsDragging(true);
     const formatted = formatISO(date, { representation: "date" });
     setLocalRange([formatted, null]);
-    setParams({ selectedDate: null, range: null });
+    void setParams({ selectedDate: null, range: null });
   };
 
   const handleMouseEnter = (date: TZDate) => {
@@ -169,20 +172,24 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
       const formattedStart = formatISO(start, { representation: "date" });
       const formattedEnd = formatISO(end, { representation: "date" });
 
-      setParams({
+      void setParams({
         range: [formattedStart, formattedEnd],
         selectedDate: null,
         eventId: null,
       });
     } else if (localRange[0]) {
-      setParams({ selectedDate: localRange[0], range: null, eventId: null });
+      void setParams({
+        selectedDate: localRange[0],
+        range: null,
+        eventId: null,
+      });
     }
     setLocalRange([null, null]);
   };
 
   const handleEventClick = (eventId: string, date: TZDate) => {
     const formattedDate = formatISO(date, { representation: "date" });
-    setParams({
+    void setParams({
       selectedDate: formattedDate,
       eventId: eventId,
       range: null,
@@ -196,8 +203,8 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
     <div ref={ref}>
       <div className="mt-8">
         <CalendarHeader
-          totalDuration={data?.meta?.totalDuration}
-          selectedView={selectedView as "week" | "month"}
+          totalAmount={data?.meta?.totalAmount}
+          selectedView={selectedView}
         />
         {selectedView === "month" ? (
           <CalendarMonthView

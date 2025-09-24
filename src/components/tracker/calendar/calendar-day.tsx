@@ -1,24 +1,25 @@
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type React from "react";
 import { useCallback } from "react";
 import { TZDate } from "@date-fns/tz";
 import { cn } from "~/lib/utils";
 import { format, formatISO, isToday } from "date-fns";
 
-import { TrackerEvents } from "./tracker-events";
 import {
   checkIsFirstSelectedDate,
   checkIsInRange,
   checkIsLastSelectedDate,
-} from "./utils";
+} from "../utils";
+import { TrackerEvents } from "./tracker-events";
 
 type CalendarDayProps = {
   date: TZDate;
   currentDate: TZDate;
   selectedDate: string | null;
   dayData:
-    | RouterOutputs["trackerEntries"]["byRange"]["result"][string]
+    | RouterOutput["recurringEntry"]["byRange"]["result"][string]
     | undefined;
-  allData?: RouterOutputs["trackerEntries"]["byRange"]["result"];
+  allData?: RouterOutput["recurringEntry"]["byRange"]["result"];
   range: [string, string] | null;
   localRange: [string | null, string | null];
   isDragging: boolean;
@@ -32,7 +33,6 @@ export function CalendarDay({
   date,
   currentDate,
   selectedDate,
-  dayData,
   allData,
   range,
   localRange,
@@ -111,7 +111,6 @@ export function CalendarDay({
     >
       <div>{format(date, "d")}</div>
       <TrackerEvents
-        data={dayData ?? []}
         isToday={isToday(date)}
         allData={allData}
         currentDate={date}

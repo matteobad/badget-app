@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "~/lib/utils";
 import {
+  CalendarSyncIcon,
   CandlestickChartIcon,
   ChevronDownIcon,
   GoalIcon,
@@ -21,6 +22,7 @@ const icons = {
   "/transactions": () => <ReceiptIcon size={20} />,
   "/budgeting": () => <GoalIcon size={20} />,
   "/vault": () => <VaultIcon size={20} />,
+  "/tracker": () => <CalendarSyncIcon size={20} />,
   "/pension": () => <LeafIcon size={20} />,
   "/investments": () => <CandlestickChartIcon size={20} />,
   "/wealth": () => <WalletIcon size={20} />,
@@ -71,6 +73,10 @@ const items = [
   {
     path: "/budgeting",
     name: "Budgeting",
+  },
+  {
+    path: "/tracker",
+    name: "Tracker",
   },
   // {
   //   path: "/pension",

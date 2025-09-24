@@ -10,6 +10,7 @@ import { institutionRouter } from "./institution";
 import { metricsRouter } from "./metrics";
 import { organizationRouter } from "./organization";
 import { preferencesRouter } from "./preferences";
+import { recurringEntryRouter } from "./recurring-entry";
 import { searchRouter } from "./search";
 import { tagRouter } from "./tag";
 import { transactionRouter } from "./transaction";
@@ -36,6 +37,7 @@ export const appRouter = createTRPCRouter({
   tag: tagRouter,
   preferences: preferencesRouter,
   budget: budgetRouter,
+  recurringEntry: recurringEntryRouter,
   transaction: transactionRouter,
   transactionAttachment: transactionAttachmentRouter,
   transactionCategory: transactionCategoryRouter,

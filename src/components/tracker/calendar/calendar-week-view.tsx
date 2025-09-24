@@ -1,22 +1,18 @@
 "use client";
 
-import { memo, useEffect, useMemo, useState } from "react";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import { memo, useMemo } from "react";
 import { TZDate } from "@date-fns/tz";
 import { useUserQuery } from "~/hooks/use-user";
 import { cn } from "~/lib/utils";
-import { secondsToHoursAndMinutes } from "~/shared/helpers/format";
-import {
-  createSafeDate,
-  formatHour,
-  getSlotFromDate,
-} from "~/shared/helpers/tracker";
+import { createSafeDate, getSlotFromDate } from "~/shared/helpers/tracker";
 import { format } from "date-fns";
 
 type CalendarWeekViewProps = {
   weekDays: TZDate[];
   currentDate: TZDate;
   selectedDate: string | null;
-  data: RouterOutputs["trackerEntries"]["byRange"]["result"] | undefined;
+  data: RouterOutput["recurringEntry"]["byRange"]["result"] | undefined;
   range: [string, string] | null;
   localRange: [string | null, string | null];
   isDragging: boolean;
@@ -28,20 +24,14 @@ type CalendarWeekViewProps = {
 };
 
 const SLOT_HEIGHT = 6.5;
-const HOUR_HEIGHT = 26; // Fill the available height (600px - header) / 24 hours ≈ 26px
-
-// Optimized: Memoize hours array to prevent recreation
-const hours = Array.from({ length: 25 }, (_, i) => i); // 0-24 for cleaner display
+const HOUR_HEIGHT = 100; // Fill the available height (600px - header) / 24 hours ≈ 26px
 
 type ProcessedEntry = {
   event: NonNullable<
-    RouterOutputs["trackerEntries"]["byRange"]["result"]
+    RouterOutput["recurringEntry"]["byRange"]["result"]
   >[string][number];
   eventIndex: string | number;
-  displayStartSlot: number;
-  displayEndSlot: number;
-  isContinuation: boolean;
-  spansMidnight: boolean;
+  displaySlot: number;
   isFromCurrentDay: boolean;
 };
 
@@ -61,8 +51,8 @@ const eventsOverlap = (
   event2: ProcessedEntry,
 ): boolean => {
   return (
-    event1.displayStartSlot < event2.displayEndSlot &&
-    event2.displayStartSlot < event1.displayEndSlot
+    event1.displaySlot < event2.displaySlot &&
+    event2.displaySlot < event1.displaySlot
   );
 };
 
@@ -77,15 +67,11 @@ const calculateEventPositions = (
 
   // Sort events by start time, then by duration (longer events first)
   const sortedEntries = [...entries].sort((a, b) => {
-    if (a.displayStartSlot !== b.displayStartSlot) {
-      return a.displayStartSlot - b.displayStartSlot;
+    if (a.displaySlot !== b.displaySlot) {
+      return a.displaySlot - b.displaySlot;
     }
     // If start times are the same, put longer events first
-    return (
-      b.displayEndSlot -
-      b.displayStartSlot -
-      (a.displayEndSlot - a.displayStartSlot)
-    );
+    return b.displaySlot - -a.displaySlot;
   });
 
   // Build overlap groups using a more robust algorithm
@@ -145,14 +131,10 @@ const calculateEventPositions = (
 
       // Sort group by start time for proper stacking order
       const sortedGroup = [...group].sort((a, b) => {
-        if (a.displayStartSlot !== b.displayStartSlot) {
-          return a.displayStartSlot - b.displayStartSlot;
+        if (a.displaySlot !== b.displaySlot) {
+          return a.displaySlot - b.displaySlot;
         }
-        return (
-          b.displayEndSlot -
-          b.displayStartSlot -
-          (a.displayEndSlot - a.displayStartSlot)
-        );
+        return b.displaySlot - -a.displaySlot;
       });
 
       sortedGroup.forEach((entry, index) => {
@@ -200,218 +182,66 @@ const DayEntries = memo(
     handleMouseEnter,
     handleMouseUp,
     onEventClick,
-    currentTime,
   }: {
     day: TZDate;
-    data: RouterOutputs["trackerEntries"]["byRange"]["result"] | undefined;
-    user: any;
+    data: RouterOutput["recurringEntry"]["byRange"]["result"] | undefined;
+    user: RouterOutput["user"]["me"] | undefined;
     handleMouseDown: (date: TZDate) => void;
     handleMouseEnter: (date: TZDate) => void;
     handleMouseUp: () => void;
     onEventClick?: (eventId: string, date: TZDate) => void;
-    currentTime: Date;
   }) => {
     // Memoize the processed entries to prevent recalculation on every render
     const positionedEntries = useMemo(() => {
       const currentDayStr = format(day, "yyyy-MM-dd");
-      const dayData = data?.[currentDayStr] || [];
+      const dayData = data?.[currentDayStr] ?? [];
       const allEntries: ProcessedEntry[] = [];
 
       // Add entries for current day
       dayData.forEach((event, eventIndex) => {
-        const startDate = createSafeDate(event.start);
-        const endDate = createSafeDate(event.stop);
+        const date = createSafeDate(event.date);
 
         // Convert UTC times to user timezone for display slot calculation
-        const displayTimezone = user?.timezone || "UTC";
-        let startSlot: number;
-        let originalEndSlot: number;
+        const displayTimezone = user?.timezone ?? "UTC";
+        let dateSlot: number;
 
         if (displayTimezone !== "UTC") {
           try {
-            const startInUserTz = new TZDate(startDate, displayTimezone);
-            const endInUserTz = new TZDate(endDate, displayTimezone);
-            startSlot = getSlotFromDate(startInUserTz);
-            originalEndSlot = getSlotFromDate(endInUserTz);
+            const dateInUserTz = new TZDate(date, displayTimezone);
+            dateSlot = getSlotFromDate(dateInUserTz);
           } catch {
             // Fallback with timezone parameter if timezone conversion fails
-            startSlot = getSlotFromDate(startDate, displayTimezone);
-            originalEndSlot = getSlotFromDate(endDate, displayTimezone);
+            dateSlot = getSlotFromDate(date, displayTimezone);
           }
         } else {
-          startSlot = getSlotFromDate(startDate, displayTimezone);
-          originalEndSlot = getSlotFromDate(endDate, displayTimezone);
-        }
-
-        // Check if this entry spans midnight by comparing actual dates in user timezone
-        let startDateStr: string;
-        let endDateStr: string;
-
-        if (displayTimezone !== "UTC") {
-          try {
-            // Convert UTC times to user timezone for proper midnight detection
-            const startInUserTz = new TZDate(startDate, displayTimezone);
-            const endInUserTz = new TZDate(endDate, displayTimezone);
-
-            startDateStr = format(startInUserTz, "yyyy-MM-dd");
-            endDateStr = format(endInUserTz, "yyyy-MM-dd");
-          } catch {
-            // Fallback to UTC if timezone conversion fails
-            startDateStr = format(startDate, "yyyy-MM-dd");
-            endDateStr = format(endDate, "yyyy-MM-dd");
-          }
-        } else {
-          startDateStr = format(startDate, "yyyy-MM-dd");
-          endDateStr = format(endDate, "yyyy-MM-dd");
-        }
-
-        const spansMidnight = startDateStr !== endDateStr;
-
-        let displayStartSlot = startSlot;
-        let displayEndSlot = originalEndSlot;
-        let isContinuation = false;
-
-        // Check if this is a running timer (no stop time)
-        const isRunningTimer = !event.stop || event.stop === null;
-
-        if (isRunningTimer) {
-          // Calculate current time slot for running timer
-          const currentSlot = getSlotFromDate(currentTime, displayTimezone);
-          displayEndSlot = Math.max(startSlot + 1, currentSlot); // At least 1 slot minimum
-        } else {
-          // Always show entries stored under the current date
-          if (event.date === currentDayStr) {
-            // This entry was created on this date - show it as the primary display
-            if (spansMidnight || originalEndSlot < startSlot) {
-              // For midnight-spanning entries or entries that wrap around, extend to end of day
-              displayEndSlot = 96; // End of day (extends to midnight)
-            }
-            // Keep the original start slot even if it appears to be from "yesterday" due to timezone
-            // This ensures the entry is visible on the day it was created
-          } else if (spansMidnight && endDateStr === currentDayStr) {
-            // This is a continuation from a previous day
-            // Show the continuation part (from midnight to end time)
-            displayStartSlot = 0; // Start of day (midnight)
-            displayEndSlot = originalEndSlot; // Original end time converted to user timezone
-            isContinuation = true;
-          } else {
-            // This entry doesn't belong to this day - skip it
-            return;
-          }
+          dateSlot = getSlotFromDate(date, displayTimezone);
         }
 
         allEntries.push({
           event,
           eventIndex,
-          displayStartSlot,
-          displayEndSlot,
-          isContinuation,
-          spansMidnight,
+          displaySlot: dateSlot,
           isFromCurrentDay: true,
         });
       });
 
-      // Check previous day for entries that continue into current day
-      const userTimezone = user?.timezone || "UTC";
-
-      // Simple previous day calculation using the date string directly
-      const parts = currentDayStr.split("-").map(Number);
-      const year = parts[0]!;
-      const month = parts[1]!;
-      const dayNum = parts[2]!;
-      const previousDateObj = new Date(year, month - 1, dayNum - 1); // month is 0-indexed in JS Date
-      const previousDayStr = format(previousDateObj, "yyyy-MM-dd");
-
-      const previousDayData =
-        (data && previousDayStr && data[previousDayStr]) || [];
-
-      previousDayData.forEach((event: any, eventIndex: number) => {
-        const startDate = createSafeDate(event.start);
-        const endDate = createSafeDate(event.stop);
-
-        // Convert to user timezone to check if it spans midnight in their local time
-        // userTimezone already declared above
-        let startDateStr: string;
-        let endDateStr: string;
-
-        if (userTimezone !== "UTC") {
-          try {
-            const startInUserTz = new TZDate(startDate, userTimezone);
-            const endInUserTz = new TZDate(endDate, userTimezone);
-
-            startDateStr = format(startInUserTz, "yyyy-MM-dd");
-            endDateStr = format(endInUserTz, "yyyy-MM-dd");
-          } catch {
-            // Fallback to UTC if timezone conversion fails
-            startDateStr = format(startDate, "yyyy-MM-dd");
-            endDateStr = format(endDate, "yyyy-MM-dd");
-          }
-        } else {
-          startDateStr = format(startDate, "yyyy-MM-dd");
-          endDateStr = format(endDate, "yyyy-MM-dd");
-        }
-
-        const spansMidnight = startDateStr !== endDateStr;
-
-        // If this entry from previous day ends on current day
-        if (spansMidnight && endDateStr === currentDayStr) {
-          // Convert UTC to user timezone for continuation slot calculation
-          let originalEndSlot: number;
-          if (userTimezone !== "UTC") {
-            try {
-              const endInUserTz = new TZDate(endDate, userTimezone);
-              originalEndSlot = getSlotFromDate(endInUserTz);
-            } catch {
-              originalEndSlot = getSlotFromDate(endDate, userTimezone);
-            }
-          } else {
-            originalEndSlot = getSlotFromDate(endDate, userTimezone);
-          }
-
-          allEntries.push({
-            event,
-            eventIndex: `prev-${eventIndex}`,
-            displayStartSlot: 0, // Start of day
-            displayEndSlot: originalEndSlot,
-            isContinuation: true,
-            spansMidnight,
-            isFromCurrentDay: false,
-          });
-        }
-      });
-
       // Calculate positions for overlapping events
       return calculateEventPositions(allEntries);
-    }, [day, data, user?.timezone, currentTime]);
+    }, [day, data, user?.timezone]);
 
     return (
       <>
         {positionedEntries.map((entry) => {
-          const top = entry.displayStartSlot * SLOT_HEIGHT;
-          const height = Math.max(
-            (entry.displayEndSlot - entry.displayStartSlot) * SLOT_HEIGHT,
-            20,
-          );
-
-          // Check if this is a running timer
-          const isRunningTimer = !entry.event.stop || entry.event.stop === null;
+          const top = 0;
+          const height = SLOT_HEIGHT;
 
           const handleEventClick = () => {
-            if (entry.isContinuation) {
-              // If this is a continuation entry, select the previous day (original day)
-              // Don't select the event for split events, just navigate to the day
-              const previousDay = new Date(day);
-              previousDay.setDate(previousDay.getDate() - 1);
-              const previousDayTZ = new TZDate(previousDay, "UTC");
-              handleMouseDown(previousDayTZ);
+            // Normal event click behavior - select the event if we have onEventClick
+            if (onEventClick) {
+              onEventClick(entry.event.id, day);
             } else {
-              // Normal event click behavior - select the event if we have onEventClick
-              if (onEventClick) {
-                onEventClick(entry.event.id, day);
-              } else {
-                // Fallback to just selecting the day
-                handleMouseDown(day);
-              }
+              // Fallback to just selecting the day
+              handleMouseDown(day);
             }
           };
 
@@ -441,94 +271,17 @@ const DayEntries = memo(
               }}
               onMouseDown={handleEventClick}
               onMouseEnter={() => {
-                if (entry.spansMidnight) {
-                  const allParts = document.querySelectorAll(
-                    `[data-event-id="${entry.event.id}"]`,
-                  );
-                  for (const part of allParts) {
-                    part.classList.add("!bg-[#E8E8E8]", "dark:!bg-[#252525]");
-                  }
-                }
                 handleMouseEnter(day);
               }}
-              onMouseLeave={() => {
-                if (entry.spansMidnight) {
-                  const allParts = document.querySelectorAll(
-                    `[data-event-id="${entry.event.id}"]`,
-                  );
-                  for (const part of allParts) {
-                    part.classList.remove(
-                      "!bg-[#E8E8E8]",
-                      "dark:!bg-[#252525]",
-                    );
-                  }
-                }
-              }}
+              // onMouseLeave={() => {}}
               onMouseUp={handleMouseUp}
               data-event-id={entry.event.id}
             >
               <div className="flex items-center gap-1 truncate leading-tight font-medium">
-                {/* Subtle green dot indicator for running timers */}
-                {isRunningTimer && (
-                  <span className="relative flex h-1 w-1 flex-shrink-0">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
-                    <span className="relative inline-flex h-1 w-1 rounded-full bg-green-500" />
-                  </span>
-                )}
                 <span className="truncate">
-                  {entry.event.trackerProject?.name || "No Project"}
-                  {entry.spansMidnight && entry.isFromCurrentDay && " →"}
-                  {entry.isContinuation && " ←"}
+                  {entry.event.name || "No Project"}
                 </span>
-                {height <= 40 && height > 16 && (
-                  <span className="flex-shrink-0 font-normal text-[#878787] dark:text-[#606060]">
-                    {" ("}
-                    {isRunningTimer
-                      ? secondsToHoursAndMinutes(
-                          Math.max(
-                            0,
-                            Math.round(
-                              (currentTime.getTime() -
-                                createSafeDate(entry.event.start).getTime()) /
-                                1000,
-                            ),
-                          ),
-                        )
-                      : secondsToHoursAndMinutes(
-                          entry.spansMidnight || entry.isContinuation
-                            ? (entry.displayEndSlot - entry.displayStartSlot) *
-                                15 *
-                                60 // Use slot-based calculation for split events
-                            : (entry.event.duration ?? 0), // Use original duration for normal events
-                        )}
-                    {")"}
-                  </span>
-                )}
               </div>
-              {height > 40 && (
-                <div className="truncate text-[#878787] dark:text-[#606060]">
-                  (
-                  {isRunningTimer
-                    ? secondsToHoursAndMinutes(
-                        Math.max(
-                          0,
-                          Math.round(
-                            (currentTime.getTime() -
-                              createSafeDate(entry.event.start).getTime()) /
-                              1000,
-                          ),
-                        ),
-                      )
-                    : secondsToHoursAndMinutes(
-                        entry.spansMidnight || entry.isContinuation
-                          ? (entry.displayEndSlot - entry.displayStartSlot) *
-                              15 *
-                              60 // Use slot-based calculation for split events
-                          : (entry.event.duration ?? 0), // Use original duration for normal events
-                      )}
-                  )
-                </div>
-              )}
             </div>
           );
         })}
@@ -551,42 +304,15 @@ export const CalendarWeekView = memo(
     onEventClick,
   }: CalendarWeekViewProps) => {
     const { data: user } = useUserQuery();
-    const is24Hour = user?.timeFormat === 24;
-
-    // State to force re-render for running timers
-    const [currentTime, setCurrentTime] = useState(new Date());
-
-    // Update current time every 5 seconds for running timers
-    useEffect(() => {
-      // Check if any running timers exist across all days
-      const hasRunningTimers =
-        data &&
-        Object.values(data).some((dayData) =>
-          dayData.some((event) => !event.stop || event.stop === null),
-        );
-
-      if (hasRunningTimers) {
-        const interval = setInterval(() => {
-          setCurrentTime(new Date());
-        }, 5000); // Update every 5 seconds for better visual feedback
-
-        return () => clearInterval(interval);
-      }
-    }, [data]);
 
     return (
       <div className="flex flex-col border border-b-0 border-border">
         <div
-          className="grid gap-px border-b border-border bg-border"
+          className="grid-col grid gap-px border-b border-border bg-border"
           style={{
-            gridTemplateColumns: is24Hour
-              ? "55px repeat(7, 1fr)"
-              : "80px repeat(7, 1fr)",
+            gridTemplateColumns: "repeat(7, 1fr)",
           }}
         >
-          {/* Empty space above time column */}
-          <div className="bg-background px-2 py-4" />
-
           {/* Day headers - name and date on same row */}
           {weekDays.map((day) => (
             <div
@@ -612,28 +338,9 @@ export const CalendarWeekView = memo(
         <div
           className="grid flex-1 gap-px bg-border"
           style={{
-            gridTemplateColumns: is24Hour
-              ? "55px repeat(7, 1fr)"
-              : "80px repeat(7, 1fr)",
+            gridTemplateColumns: "repeat(7, 1fr)",
           }}
         >
-          {/* Time labels column */}
-          <div className="bg-background">
-            {hours.slice(0, -1).map(
-              (
-                hour, // Remove the last hour (24) to avoid duplication
-              ) => (
-                <div
-                  key={hour}
-                  className="flex items-center justify-center border-b border-border font-mono text-[12px] text-[#878787]"
-                  style={{ height: `${HOUR_HEIGHT}px` }}
-                >
-                  {hour < 24 && formatHour(hour, user?.timeFormat)}
-                </div>
-              ),
-            )}
-          </div>
-
           {/* Days columns */}
           {weekDays.map((day) => {
             const dayKey = format(day, "yyyy-MM-dd");
@@ -641,28 +348,24 @@ export const CalendarWeekView = memo(
             return (
               <div key={dayKey} className="relative bg-background">
                 {/* Hour grid lines */}
-                {hours.slice(0, -1).map((hour) => {
-                  return (
-                    <div
-                      key={`${dayKey}-${hour}`}
-                      className={cn(
-                        "group relative cursor-pointer border-b border-border transition-colors hover:bg-muted/10",
-                      )}
-                      style={{ height: `${HOUR_HEIGHT}px` }}
-                      onMouseDown={() => handleMouseDown(day)}
-                      onMouseEnter={() => handleMouseEnter(day)}
-                      onMouseUp={handleMouseUp}
-                    >
-                      {/* Hour hover indicator */}
-                      <div className="pointer-events-none absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100" />
+                <div
+                  key={`${dayKey}`}
+                  className={cn(
+                    "group relative cursor-pointer border-b border-border transition-colors hover:bg-muted/10",
+                  )}
+                  style={{ height: `${HOUR_HEIGHT}px` }}
+                  onMouseDown={() => handleMouseDown(day)}
+                  onMouseEnter={() => handleMouseEnter(day)}
+                  onMouseUp={handleMouseUp}
+                >
+                  {/* Hour hover indicator */}
+                  <div className="pointer-events-none absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100" />
 
-                      {/* Time indicator on hover */}
-                      <div className="pointer-events-none absolute top-0.5 left-1 rounded bg-background/80 px-1 font-mono text-xs text-muted-foreground opacity-0 group-hover:opacity-100">
-                        {formatHour(hour, user?.timeFormat)}
-                      </div>
-                    </div>
-                  );
-                })}
+                  {/* Time indicator on hover */}
+                  <div className="pointer-events-none absolute top-0.5 left-1 rounded bg-background/80 px-1 font-mono text-xs text-muted-foreground opacity-0 group-hover:opacity-100">
+                    {/* {formatHour(hour, user?.timeFormat)} */}
+                  </div>
+                </div>
 
                 {/* Events for this day */}
                 <DayEntries
@@ -673,7 +376,6 @@ export const CalendarWeekView = memo(
                   handleMouseEnter={handleMouseEnter}
                   handleMouseUp={handleMouseUp}
                   onEventClick={onEventClick}
-                  currentTime={currentTime}
                 />
               </div>
             );

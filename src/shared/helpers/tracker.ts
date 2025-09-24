@@ -2,46 +2,26 @@ import { tz } from "@date-fns/tz";
 import { utc, UTCDate } from "@date-fns/utc";
 import {
   addDays,
-  addMinutes,
-  addSeconds,
   differenceInSeconds,
   eachDayOfInterval,
   format,
   isValid,
   parse,
   parseISO,
-  setHours,
-  setMinutes,
 } from "date-fns";
 
 export const NEW_EVENT_ID = "new-event";
-
-// API Response type from the router
-type ApiTrackerRecord =
-  RouterOutputs["trackerEntries"]["byDate"]["data"][number];
 
 // Internal tracker record type with consistent Date handling
 export interface TrackerRecord {
   id: string;
   date: string | null;
   description: string | null;
-  duration: number | null;
-  start: Date;
-  stop: Date;
+  amount: number | null;
   user: {
     id: string;
     fullName: string | null;
     avatarUrl: string | null;
-  } | null;
-  trackerProject: {
-    id: string;
-    name: string;
-    currency: string | null;
-    rate: number | null;
-    customer: {
-      id: string;
-      name: string;
-    } | null;
   } | null;
 }
 
@@ -52,7 +32,7 @@ export const createSafeDate = (
   dateInput: string | Date | null | undefined,
   fallback?: Date,
 ): Date => {
-  if (!dateInput) return fallback || new UTCDate();
+  if (!dateInput) return fallback ?? new UTCDate();
 
   if (typeof dateInput === "string") {
     // Try parseISO first (handles ISO 8601 formats)
@@ -71,10 +51,10 @@ export const createSafeDate = (
       console.warn("Date parsing failed:", error);
     }
 
-    return fallback || new UTCDate();
+    return fallback ?? new UTCDate();
   }
 
-  return isValid(dateInput) ? dateInput : fallback || new UTCDate();
+  return isValid(dateInput) ? dateInput : (fallback ?? new UTCDate());
 };
 
 /**
@@ -198,11 +178,7 @@ export const calculateDuration = (
 /**
  * Format hour with timezone support
  */
-export const formatHour = (
-  hour: number,
-  timeFormat?: number | null,
-  timezone?: string,
-) => {
+export const formatHour = (hour: number, timeFormat?: number | null) => {
   // Create a simple date with the hour - no timezone conversion needed for labels
   const date = new Date(2024, 0, 1, hour, 0, 0, 0); // Use arbitrary date, just set the hour
   return format(date, timeFormat === 12 ? "hh:mm a" : "HH:mm");
@@ -224,107 +200,34 @@ export const createNewEvent = (
       const createTZDate = tz(timezone);
       const tzBaseDate = createTZDate(baseDate);
 
-      const startDate = setMinutes(
-        setHours(tzBaseDate, Math.floor(slot / 4)),
-        (slot % 4) * 15,
-      );
-      const endDate = addMinutes(startDate, 15);
-
       return {
         id: NEW_EVENT_ID,
         date: format(tzBaseDate, "yyyy-MM-dd"),
         description: null,
-        duration: 15 * 60, // 15 minutes in seconds
-        start: new Date(startDate.getTime()),
-        stop: new Date(endDate.getTime()),
+        amount: 0,
         user: null,
-        trackerProject: selectedProjectId
-          ? {
-              id: selectedProjectId,
-              name: "",
-              currency: null,
-              rate: null,
-              customer: null,
-            }
-          : null,
       };
     } catch (error) {
       console.warn("Timezone event creation failed:", error);
     }
   }
 
-  // Fallback to UTC creation
-  const startDate = setMinutes(
-    setHours(baseDate, Math.floor(slot / 4)),
-    (slot % 4) * 15,
-  );
-  const endDate = addMinutes(startDate, 15);
-
   return {
     id: NEW_EVENT_ID,
-    date: format(startDate, "yyyy-MM-dd"),
+    date: selectedDate ?? null,
     description: null,
-    duration: 15 * 60, // 15 minutes in seconds
-    start: startDate,
-    stop: endDate,
+    amount: 0, // 15 minutes in seconds
     user: null,
-    trackerProject: selectedProjectId
-      ? {
-          id: selectedProjectId,
-          name: "",
-          currency: null,
-          rate: null,
-          customer: null,
-        }
-      : null,
-  };
-};
-
-// Tracker record transformation
-export const transformApiRecord = (
-  apiRecord: ApiTrackerRecord,
-  selectedDate: string | null,
-): TrackerRecord => {
-  const start = apiRecord.start
-    ? parseISO(apiRecord.start)
-    : parseISO(`${apiRecord.date || selectedDate}T09:00:00`);
-
-  const stop = apiRecord.stop
-    ? parseISO(apiRecord.stop)
-    : addSeconds(start, apiRecord.duration || 0);
-
-  return {
-    id: apiRecord.id,
-    date: apiRecord.date,
-    description: apiRecord.description,
-    duration: apiRecord.duration,
-    start: isValid(start) ? start : new Date(),
-    stop: isValid(stop)
-      ? stop
-      : addMinutes(isValid(start) ? start : new Date(), 15),
-    user: apiRecord.user,
-    trackerProject: apiRecord.trackerProject
-      ? {
-          id: apiRecord.trackerProject.id,
-          name: apiRecord.trackerProject.name || "",
-          currency: apiRecord.trackerProject.currency,
-          rate: apiRecord.trackerProject.rate,
-          customer: apiRecord.trackerProject.customer,
-        }
-      : null,
   };
 };
 
 export const updateEventTime = (
   event: TrackerRecord,
-  start: Date,
-  stop: Date,
+  date: Date,
 ): TrackerRecord => {
   return {
     ...event,
-    start: isValid(start) ? start : event.start,
-    stop: isValid(stop) ? stop : event.stop,
-    duration: calculateDuration(start, stop),
+    date: format(date, "yyyy-MM-dd"),
   };
 };
 
@@ -378,11 +281,9 @@ export const isValidDateString = (dateStr: string): boolean => {
 export const convertToFormData = (record: TrackerRecord) => {
   return {
     id: record.id === NEW_EVENT_ID ? undefined : record.id,
-    start: formatTimeFromDate(record.start),
-    stop: formatTimeFromDate(record.stop),
-    projectId: record.trackerProject?.id || "",
-    description: record.description || "",
-    duration: calculateDuration(record.start, record.stop),
+    date: record.date,
+    description: record.description ?? "",
+    amount: record.amount,
   };
 };
 
@@ -425,9 +326,9 @@ export const convertFromFormData = (
     start: startDate.toISOString(),
     stop: stopDate.toISOString(),
     dates,
-    assignedId: formData.assignedId || null,
+    assignedId: formData.assignedId ?? null,
     projectId: formData.projectId,
-    description: formData.description || null,
+    description: formData.description ?? null,
     duration: duration,
   };
 };
