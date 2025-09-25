@@ -58,9 +58,11 @@ export function WidgetsHeader({ isCustomizing, onToggle }: Props) {
       <div>
         <h1 className="mb-1 font-serif text-[30px] leading-normal">
           <span>{greeting} </span>
-          <span className="text-[#666666]">{user?.name?.split(" ")[0]},</span>
+          <span className="text-muted-foreground">
+            {user?.name?.split(" ")[0]},
+          </span>
         </h1>
-        <p className="text-[14px] text-[#666666]">
+        <p className="text-[14px] text-muted-foreground">
           here's a quick look at how things are going.
         </p>
       </div>

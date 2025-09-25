@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { move } from "@dnd-kit/helpers";
 import {
   DragDropProvider,
   KeyboardSensor,
@@ -8,7 +9,6 @@ import {
 } from "@dnd-kit/react";
 import { cn } from "~/lib/utils";
 
-import { Separator } from "../ui/separator";
 import { DashboardWidget } from "./dashboard-widget";
 import { DroppableGrid } from "./droppable";
 import { SortableItem } from "./sortable-item";
@@ -21,10 +21,10 @@ interface Widget {
 
 const initialWidgets: Widget[] = [
   {
-    id: "income",
+    id: "insights",
   },
   {
-    id: "cash-runway",
+    id: "income",
   },
   {
     id: "profit-analysis",
@@ -109,6 +109,9 @@ export function Widgets() {
             console.log("Drop position:", operation.position.current);
           }
         }}
+        onDragOver={(event) => {
+          setWidgets((items) => move(items, event));
+        }}
       >
         <DroppableGrid id="active">
           <div
@@ -121,10 +124,14 @@ export function Widgets() {
               return (
                 <React.Fragment key={widget.id}>
                   <SortableItem key={widget.id} id={widget.id} index={index}>
-                    <DashboardWidget widget={widget} />
+                    <DashboardWidget
+                      widget={widget}
+                      className={index > 7 ? "opacity-60" : "opacity-100"}
+                      isEditMode={isEditMode}
+                    />
                   </SortableItem>
                   {index === 7 && (
-                    <div className="border-t border-dashed md:col-span-2 lg:col-span-4" />
+                    <div className="my-2 border-t border-dashed md:col-span-2 lg:col-span-4" />
                   )}
                 </React.Fragment>
               );

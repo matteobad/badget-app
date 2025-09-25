@@ -1,3 +1,5 @@
+import { cn } from "~/lib/utils";
+
 import { IncomeWidget } from "./income/income-widget";
 import { Widget, WidgetHeader, WidgetProvider, WidgetTitle } from "./widget";
 
@@ -6,9 +8,15 @@ type DashboardWidgetProps = {
     id: string;
     settings?: { period?: "month" };
   };
+  className?: string;
+  isEditMode: boolean;
 };
 
-export function DashboardWidget({ widget }: DashboardWidgetProps) {
+export function DashboardWidget({
+  widget,
+  className,
+  isEditMode,
+}: DashboardWidgetProps) {
   const renderContent = () => {
     switch (widget.id) {
       case "income":
@@ -16,16 +24,27 @@ export function DashboardWidget({ widget }: DashboardWidgetProps) {
 
       default:
         return (
-          <Widget className="">
-            <WidgetHeader>
-              <WidgetTitle className="flex items-center gap-3">
-                {widget.id}
-              </WidgetTitle>
-            </WidgetHeader>
-          </Widget>
+          <WidgetProvider>
+            <Widget className="">
+              <WidgetHeader>
+                <WidgetTitle className="flex items-center gap-3">
+                  {widget.id}
+                </WidgetTitle>
+              </WidgetHeader>
+            </Widget>
+          </WidgetProvider>
         );
     }
   };
 
-  return <WidgetProvider>{renderContent()}</WidgetProvider>;
+  return (
+    <div
+      className={cn(className, {
+        "[&_[data-slot=widget-settings-trigger]]:opacity-0": isEditMode,
+        "[&_[data-slot=widget-action]]:!text-muted-foreground/60": isEditMode,
+      })}
+    >
+      {renderContent()}
+    </div>
+  );
 }

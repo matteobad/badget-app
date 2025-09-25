@@ -9,15 +9,14 @@ interface Props {
 
 export function SortableItem({ id, index, children }: Props) {
   const sortable = useSortable({
+    disabled: id === "insights",
     id,
     index,
   });
 
   return (
     <div ref={sortable.ref} data-id={index}>
-      <div className="flex items-start justify-between">
-        <div className="flex-1">{children}</div>
-      </div>
+      {children}
     </div>
   );
 }

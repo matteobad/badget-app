@@ -11,9 +11,17 @@ type Props = {
 
 export function Customize({ isCustomizing, onToggle }: Props) {
   return (
-    <Button variant="outline" className="space-x-2" onClick={onToggle}>
+    <Button
+      variant="outline"
+      className="space-x-2"
+      onClick={(e) => {
+        e.preventDefault();
+        onToggle();
+      }}
+      type="button"
+    >
       <span>{isCustomizing ? "Save" : "Customize"}</span>
-      <LayoutGridIcon size={16} className="text-[#666]" />
+      <LayoutGridIcon size={16} className="text-muted-foreground" />
     </Button>
   );
 }
