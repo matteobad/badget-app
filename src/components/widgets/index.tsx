@@ -9,6 +9,7 @@ import {
 } from "@dnd-kit/react";
 import { cn } from "~/lib/utils";
 
+import { SuggestedActions } from "../suggested-actions";
 import { DashboardWidget } from "./dashboard-widget";
 import { DroppableGrid } from "./droppable";
 import { SortableItem } from "./sortable-item";
@@ -75,7 +76,7 @@ export function Widgets() {
   const [isEditMode, setIsEditMode] = useState(false);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="relative flex flex-col gap-4 bg-background">
       <WidgetsHeader
         isCustomizing={isEditMode}
         onToggle={() => setIsEditMode(!isEditMode)}
@@ -88,11 +89,11 @@ export function Widgets() {
           // Optionally prevent dragging
           if (!isEditMode) event.preventDefault();
         }}
-        onDragStart={(event, manager) => {
+        onDragStart={(event) => {
           const { operation } = event;
           console.log(`Started dragging ${operation.source?.id}`);
         }}
-        onDragEnd={(event, manager) => {
+        onDragEnd={(event) => {
           const { operation, canceled } = event;
           const { source, target } = operation;
 
@@ -116,7 +117,7 @@ export function Widgets() {
         <DroppableGrid id="active">
           <div
             className={cn(
-              "grid max-h-[400px] grid-cols-1 gap-6 overflow-hidden px-6 pt-4 md:grid-cols-2 lg:grid-cols-4",
+              "-mx-1 grid max-h-[400px] grid-cols-1 gap-6 overflow-hidden px-1 pt-4 md:grid-cols-2 lg:grid-cols-4",
               { "max-h-auto [&>[role=button]]:animate-shake": isEditMode },
             )}
           >
@@ -139,6 +140,8 @@ export function Widgets() {
           </div>
         </DroppableGrid>
       </DragDropProvider>
+
+      <SuggestedActions />
     </div>
   );
 }

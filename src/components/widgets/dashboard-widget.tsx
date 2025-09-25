@@ -6,7 +6,7 @@ import { Widget, WidgetHeader, WidgetProvider, WidgetTitle } from "./widget";
 type DashboardWidgetProps = {
   widget: {
     id: string;
-    settings?: { period?: "month" };
+    settings?: any; // can we type this?
   };
   className?: string;
   isEditMode: boolean;
@@ -20,7 +20,7 @@ export function DashboardWidget({
   const renderContent = () => {
     switch (widget.id) {
       case "income":
-        return <IncomeWidget />;
+        return <IncomeWidget settings={widget.settings} />;
 
       default:
         return (

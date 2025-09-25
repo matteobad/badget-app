@@ -4,6 +4,7 @@ import { assetRouter } from "./asset";
 import { bankAccountRouter } from "./bank-account";
 import { bankConnectionRouter } from "./bank-connection";
 import { budgetRouter } from "./budget";
+import { chatRouter } from "./chat";
 import { documentsRouter } from "./document";
 import { documentTagsRouter } from "./document-tag";
 import { institutionRouter } from "./institution";
@@ -24,6 +25,7 @@ import { userRouter } from "./user";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+  chat: chatRouter,
   user: userRouter,
   organization: organizationRouter,
   metrics: metricsRouter,

@@ -47,10 +47,10 @@ export default async function AppLayout(props: PropsWithChildren) {
       <div className="relative">
         <Sidebar />
 
-        <div className="pb-8 md:ml-[70px]">
+        <div className="pb-4 md:ml-[70px]">
           <Header />
 
-          {props.children}
+          <div className="px-6">{props.children}</div>
         </div>
 
         <ExportStatus />

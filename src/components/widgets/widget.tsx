@@ -26,10 +26,7 @@ function WidgetProvider({
   defaultOpen = false,
   open: openProp,
   onOpenChange: setOpenProp,
-  className,
-  style,
   children,
-  ...props
 }: React.ComponentProps<"div"> & {
   defaultOpen?: boolean;
   open?: boolean;

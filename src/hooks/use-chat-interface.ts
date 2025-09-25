@@ -8,8 +8,8 @@ export function useChatInterface() {
   const getInitialChatId = () => {
     const segments = pathname.split("/").filter(Boolean);
     const potentialChatId =
-      segments.length === 1 ? segments[0] : segments[1] || null;
-    return potentialChatId || null;
+      segments.length === 1 ? segments[0] : (segments[1] ?? null);
+    return potentialChatId ?? null;
   };
 
   const [chatId, setChatIdState] = useState<string | null>(getInitialChatId);
@@ -23,8 +23,8 @@ export function useChatInterface() {
     // - segments[1] if locale exists (e.g., /en/chatId)
     // For simplicity, let's assume if there's only 1 segment, it's the chatId
     const potentialChatId =
-      segments.length === 1 ? segments[0] : segments[1] || null;
-    setChatIdState(potentialChatId || null);
+      segments.length === 1 ? segments[0] : (segments[1] ?? null);
+    setChatIdState(potentialChatId ?? null);
   }, [pathname]);
 
   // Listen to popstate events for browser back/forward
@@ -32,8 +32,8 @@ export function useChatInterface() {
     const handlePopState = () => {
       const segments = window.location.pathname.split("/").filter(Boolean);
       const potentialChatId =
-        segments.length === 1 ? segments[0] : segments[1] || null;
-      setChatIdState(potentialChatId || null);
+        segments.length === 1 ? segments[0] : (segments[1] ?? null);
+      setChatIdState(potentialChatId ?? null);
     };
 
     window.addEventListener("popstate", handlePopState);

@@ -1,10 +1,8 @@
 "use client";
 
-import { Button } from "~/components/ui/button";
 import { useSpaceQuery } from "~/hooks/use-space";
-import { useUserQuery } from "~/hooks/use-user";
 import { formatAmount } from "~/shared/helpers/format";
-import { CogIcon, SettingsIcon, TrendingUpIcon } from "lucide-react";
+import { TrendingUpIcon } from "lucide-react";
 
 import {
   Widget,
@@ -19,8 +17,18 @@ import {
   WidgetTitle,
 } from "../widget";
 
-export function IncomeWidget() {
+type Props = {
+  settings: {
+    period: "month";
+    type: "gross" | "net";
+  };
+};
+
+export function IncomeWidget({ settings }: Props) {
   const { data: space } = useSpaceQuery();
+
+  // TODO: get income from trpc procedure with settings params
+  // or get all and filter on client ?
 
   return (
     <WidgetProvider>

@@ -8,7 +8,7 @@ import { Customize } from "./customize";
 
 function getTimeBasedGreeting(timezone?: string): string {
   const userTimezone =
-    timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
   const now = new TZDate(new Date(), userTimezone);
   const hour = now.getHours();
 
@@ -54,7 +54,7 @@ export function WidgetsHeader({ isCustomizing, onToggle }: Props) {
   }, [user?.timezone]);
 
   return (
-    <div className="flex items-center justify-between p-6 pb-0">
+    <div className="flex items-center justify-between pt-6">
       <div>
         <h1 className="mb-1 font-serif text-[30px] leading-normal">
           <span>{greeting} </span>
@@ -63,7 +63,7 @@ export function WidgetsHeader({ isCustomizing, onToggle }: Props) {
           </span>
         </h1>
         <p className="text-[14px] text-muted-foreground">
-          here's a quick look at how things are going.
+          here&apos;s a quick look at how things are going.
         </p>
       </div>
 

@@ -28,7 +28,7 @@ export function SuggestedActions() {
 
     setChatId(chatId);
 
-    sendMessage({
+    void sendMessage({
       role: "user",
       parts: [{ type: "text", text: params.text }],
       metadata: {
