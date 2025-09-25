@@ -113,6 +113,7 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-slide-effect: slide-effect 1.3s ease-in-out infinite;
+  --animate-shake: shake 0.3s ease-in-out infinite;
 
   @keyframes accordion-down {
     from {
@@ -141,6 +142,15 @@
     }
     100% {
       left: 0%;
+    }
+  }
+
+  @keyframes shake {
+    0% {
+      transform: rotate(-0.5deg);
+    }
+    50% {
+      transform: rotate(0.5deg);
     }
   }
 }

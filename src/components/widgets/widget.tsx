@@ -104,7 +104,7 @@ function Widget({
       <div
         data-slot="widget-container"
         className={cn(
-          "group flex h-full w-full flex-col gap-4 border bg-card py-4 text-card-foreground transition-colors",
+          "group flex h-full min-h-44 w-full flex-col gap-4 border bg-card py-4 text-card-foreground transition-colors",
           "group-data-[state=view]:hover:cursor-pointer group-data-[state=view]:hover:border-accent-foreground/20 group-data-[state=view]:hover:bg-accent/40",
           className,
         )}

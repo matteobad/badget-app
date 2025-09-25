@@ -25,7 +25,12 @@ function getTimeBasedGreeting(timezone?: string): string {
   return "Night";
 }
 
-export function WidgetsHeader() {
+type Props = {
+  isCustomizing: boolean;
+  onToggle: () => void;
+};
+
+export function WidgetsHeader({ isCustomizing, onToggle }: Props) {
   const { data: user } = useUserQuery();
   const [greeting, setGreeting] = useState(() =>
     getTimeBasedGreeting(user?.timezone ?? undefined),
@@ -49,7 +54,7 @@ export function WidgetsHeader() {
   }, [user?.timezone]);
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between p-6 pb-0">
       <div>
         <h1 className="mb-1 font-serif text-[30px] leading-normal">
           <span>{greeting} </span>
@@ -61,7 +66,7 @@ export function WidgetsHeader() {
       </div>
 
       <div className="flex items-center space-x-4">
-        <Customize />
+        <Customize isCustomizing={isCustomizing} onToggle={onToggle} />
         {/* <ChatHistory /> */}
       </div>
     </div>

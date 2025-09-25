@@ -32,13 +32,11 @@ export default async function Overview(props: Props) {
 
   return (
     <HydrateClient>
-      <div className="px-6">
-        {/* <ChatProvider initialMessages={chat?.messages}> */}
-        <Widgets />
+      {/* <ChatProvider initialMessages={chat?.messages}> */}
+      <Widgets />
 
-        {/* <ChatInterface geo={geo} id={currentChatId} /> */}
-        {/* </ChatProvider> */}
-      </div>
+      {/* <ChatInterface geo={geo} id={currentChatId} /> */}
+      {/* </ChatProvider> */}
     </HydrateClient>
   );
 }
