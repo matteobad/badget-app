@@ -16,6 +16,7 @@ import {
   WidgetSettingsTrigger,
   WidgetTitle,
 } from "../widget";
+import { IncomeWidgetSettingsForm } from "./income-widget-settings-form";
 
 type Props = {
   settings: {
@@ -51,7 +52,10 @@ export function IncomeWidget({ settings }: Props) {
             })}
           </span>
         </WidgetContent>
-        <WidgetSettings>Settings di prova</WidgetSettings>
+
+        <WidgetSettings>
+          <IncomeWidgetSettingsForm {...settings} />
+        </WidgetSettings>
 
         <WidgetFooter>
           <WidgetAction>View income trends</WidgetAction>
