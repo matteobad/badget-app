@@ -101,7 +101,7 @@ function Widget({
       <div
         data-slot="widget-container"
         className={cn(
-          "group flex h-full min-h-44 w-full flex-col gap-3 border bg-card py-4 text-card-foreground transition-colors",
+          "group flex h-full min-h-44 w-full flex-col gap-1 border bg-card py-4 text-card-foreground transition-colors",
           "group-data-[state=view]:hover:cursor-pointer group-data-[state=view]:hover:border-accent-foreground/20 group-data-[state=view]:hover:bg-accent/40",
           className,
         )}
@@ -198,7 +198,7 @@ function WidgetContent({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="widget-content"
       className={cn(
-        "block flex-1 px-4",
+        "block flex-1 px-4 pb-1",
         "group-data-[state=edit]:hidden", // di default tutti nascosti in edit
         className,
       )}

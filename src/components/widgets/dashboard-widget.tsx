@@ -1,5 +1,6 @@
 import { cn } from "~/lib/utils";
 
+import { CategoryBreakdownWidget } from "./category-breakdown/category-breakdown-widget";
 import { IncomeWidget } from "./income/income-widget";
 import { Widget, WidgetHeader, WidgetProvider, WidgetTitle } from "./widget";
 
@@ -20,7 +21,9 @@ export function DashboardWidget({
   const renderContent = () => {
     switch (widget.id) {
       case "income":
-        return <IncomeWidget settings={widget.settings} />;
+        return <IncomeWidget {...widget.settings} />;
+      case "category-expenses":
+        return <CategoryBreakdownWidget {...widget.settings} />;
 
       default:
         return (

@@ -28,7 +28,7 @@ const initialWidgets: Widget[] = [
     id: "income",
   },
   {
-    id: "profit-analysis",
+    id: "category-expenses",
   },
   {
     id: "file-management",
