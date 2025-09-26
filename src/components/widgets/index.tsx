@@ -40,7 +40,7 @@ const initialWidgets: Widget[] = [
     id: "net-worth",
   },
   {
-    id: "software-costs",
+    id: "recurring",
   },
   {
     id: "forecast",

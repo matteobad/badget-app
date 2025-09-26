@@ -4,6 +4,7 @@ import { CategoryExpensesWidget } from "./category-expenses/category-expenses-wi
 import { IncomeWidget } from "./income/income-widget";
 import { MonthlySpendingWidget } from "./monthly-spending/monthly-spending-widget";
 import { NetWorthWidget } from "./net-worth/net-worth-widget";
+import { RecurringWidget } from "./recurring/recurring-widget";
 import { UncategorizedWidget } from "./uncategorized-widget/uncategorized-widget";
 import { Widget, WidgetHeader, WidgetProvider, WidgetTitle } from "./widget";
 
@@ -31,6 +32,8 @@ export function DashboardWidget({
         return <MonthlySpendingWidget {...widget.settings} />;
       case "net-worth":
         return <NetWorthWidget {...widget.settings} />;
+      case "recurring":
+        return <RecurringWidget {...widget.settings} />;
       case "uncategorized":
         return <UncategorizedWidget {...widget.settings} />;
 

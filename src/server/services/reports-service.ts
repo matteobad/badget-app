@@ -153,6 +153,48 @@ export async function getCategoryExpenses(
   };
 }
 
+export type GetRecurringParams = {
+  organizationId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+export async function getRecurring(db: DBClient, params: GetRecurringParams) {
+  const { organizationId, from, to, currency } = params;
+
+  const [result] = await db
+    .select({
+      recurring:
+        sql`sum(case when ${transaction_table.recurring} = true then ${transaction_table.amount} else 0 end) * -1`.mapWith(
+          Number,
+        ),
+      total: sql`sum(${transaction_table.amount}) * -1`.mapWith(Number),
+    })
+    .from(transaction_table)
+    .where(
+      and(
+        eq(transaction_table.organizationId, organizationId),
+        gte(transaction_table.date, from),
+        lte(transaction_table.date, to),
+        lt(transaction_table.amount, 0), // spese → negative
+        not(transaction_table.internal), // spese → incluse
+      ),
+    );
+
+  return {
+    summary: {
+      // income: 0, TODO: to calculate percentage
+      currency,
+    },
+    meta: {
+      type: "recurring",
+      currency,
+    },
+    result,
+  };
+}
+
 export type GetUncategorizedParams = {
   organizationId: string;
   from: string;
