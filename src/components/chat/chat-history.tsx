@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { formatDistanceToNow } from "date-fns";
-import { DeleteIcon, MenuIcon, SearchIcon } from "lucide-react";
+import { DeleteIcon, MenuIcon, SearchIcon, TrashIcon } from "lucide-react";
 import { useDebounceCallback } from "usehooks-ts";
 
 import { Button } from "../ui/button";
@@ -109,7 +109,7 @@ export function ChatHistory() {
   );
 
   const handleChatSelect = (chatId: string) => {
-    router.push(`/${chatId}`);
+    router.push(`/overview/${chatId}`);
     setIsOpen(false);
   };
 
@@ -170,17 +170,16 @@ export function ChatHistory() {
                         </div>
                       </div>
                     </button>
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon"
                       onClick={(e) => handleDeleteChat(e, chat.id)}
-                      className="rounded-sm p-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-destructive/10"
+                      className="opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-destructive/10"
                       title="Delete chat"
                     >
-                      <DeleteIcon
-                        size={14}
-                        className="text-muted-foreground hover:text-destructive"
-                      />
-                    </button>
+                      <TrashIcon className="size-3.5 text-muted-foreground hover:text-destructive" />
+                    </Button>
                   </div>
                 ))}
               </div>
