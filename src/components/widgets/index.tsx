@@ -7,6 +7,7 @@ import {
   KeyboardSensor,
   PointerSensor,
 } from "@dnd-kit/react";
+import { useChatInterface } from "~/hooks/use-chat-interface";
 import { cn } from "~/lib/utils";
 
 import { SuggestedActions } from "../suggested-actions";
@@ -68,6 +69,12 @@ const initialWidgets: Widget[] = [
 export function Widgets() {
   const [widgets, setWidgets] = useState<Widget[]>(initialWidgets);
   const [isEditMode, setIsEditMode] = useState(false);
+
+  const { isChatPage } = useChatInterface();
+
+  if (isChatPage) {
+    return null;
+  }
 
   return (
     <div className="relative flex flex-col gap-4 bg-background">

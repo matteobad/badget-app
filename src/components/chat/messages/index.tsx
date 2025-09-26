@@ -4,6 +4,21 @@ import { Fragment } from "react";
 import { useChatMessages, useChatStatus } from "@ai-sdk-tools/store";
 import { useUserQuery } from "~/hooks/use-user";
 
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "../conversation";
+import {
+  Message,
+  MessageAvatar,
+  MessageContent,
+  ThinkingMessage,
+} from "../message";
+import { Response } from "../response";
+import { WebSearchSources } from "../web-search-sources";
+import { MessageActions } from "./messages-actions";
+
 export function Messages() {
   const messages = useChatMessages();
   const status = useChatStatus();
@@ -31,8 +46,8 @@ export function Messages() {
 
                             {message.role === "user" && user && (
                               <MessageAvatar
-                                src={user.avatarUrl!}
-                                name={user.fullName!}
+                                src={user.image!}
+                                name={user.name}
                               />
                             )}
                           </Message>

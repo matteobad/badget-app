@@ -3,8 +3,22 @@
 import { useState } from "react";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { useMutation } from "@tanstack/react-query";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { motion } from "framer-motion";
+import {
+  CopyCheckIcon,
+  CopyIcon,
+  RefreshCwIcon,
+  ThumbsDownIcon,
+  ThumbsUpIcon,
+} from "lucide-react";
 
 interface MessageActionsProps {
   messageId: string;
@@ -105,9 +119,9 @@ export function MessageActions({
                 className="flex h-6 w-6 items-center justify-center transition-colors duration-200 hover:bg-muted"
               >
                 {copied ? (
-                  <Icons.Check className="size-3.5 duration-200 animate-in zoom-in-50" />
+                  <CopyCheckIcon className="size-3.5 duration-200 animate-in zoom-in-50" />
                 ) : (
-                  <Icons.Copy className="size-3 text-muted-foreground hover:text-foreground" />
+                  <CopyIcon className="size-3 text-muted-foreground hover:text-foreground" />
                 )}
               </button>
             </TooltipTrigger>
@@ -132,7 +146,7 @@ export function MessageActions({
                 onClick={handleRegenerate}
                 className="flex h-6 w-6 items-center justify-center transition-colors duration-200 hover:bg-muted"
               >
-                <Icons.Refresh className="size-3.5 text-muted-foreground hover:text-foreground" />
+                <RefreshCwIcon className="size-3.5 text-muted-foreground hover:text-foreground" />
               </button>
             </TooltipTrigger>
             <TooltipContent className="px-2 py-1 text-xs">
@@ -161,7 +175,7 @@ export function MessageActions({
                     "cursor-not-allowed opacity-50",
                 )}
               >
-                <Icons.ThumbUp
+                <ThumbsUpIcon
                   className={cn(
                     "h-3 w-3",
                     feedbackGiven === "positive"
@@ -201,7 +215,7 @@ export function MessageActions({
                     "cursor-not-allowed opacity-50",
                 )}
               >
-                <Icons.ThumbDown
+                <ThumbsDownIcon
                   className={cn(
                     "h-3 w-3",
                     feedbackGiven === "negative"

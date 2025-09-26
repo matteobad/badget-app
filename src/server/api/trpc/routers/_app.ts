@@ -5,6 +5,7 @@ import { bankAccountRouter } from "./bank-account";
 import { bankConnectionRouter } from "./bank-connection";
 import { budgetRouter } from "./budget";
 import { chatRouter } from "./chat";
+import { chatFeedbackRouter } from "./chat-feedback";
 import { documentsRouter } from "./document";
 import { documentTagsRouter } from "./document-tag";
 import { institutionRouter } from "./institution";
@@ -27,6 +28,7 @@ import { userRouter } from "./user";
  */
 export const appRouter = createTRPCRouter({
   chat: chatRouter,
+  chatFeedback: chatFeedbackRouter,
   user: userRouter,
   organization: organizationRouter,
   metrics: metricsRouter,

@@ -1,34 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AnimatedNumber } from "~/components/animated-number";
-import { Progress } from "~/components/ui/progress";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { endOfMonth, format, startOfMonth } from "date-fns";
-import { ReceiptIcon, TrendingUpIcon } from "lucide-react";
+import { ReceiptIcon } from "lucide-react";
 
 import {
   Widget,
   WidgetAction,
   WidgetContent,
-  WidgetDescription,
   WidgetFooter,
   WidgetHeader,
   WidgetProvider,
-  WidgetSettings,
-  WidgetSettingsTrigger,
   WidgetTitle,
 } from "../widget";
-import { IncomeWidgetSettingsForm } from "./income-widget-settings-form";
 
 export function UncategorizedWidget() {
   const { data: space } = useSpaceQuery();
 
-  // TODO: get income from trpc procedure with settings params
-  // or get all and filter on client ?
   const trpc = useTRPC();
 
   const { data, isLoading } = useQuery(

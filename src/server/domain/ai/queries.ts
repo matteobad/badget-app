@@ -1,4 +1,5 @@
 import type { DBClient } from "~/server/db";
+import { chat_message_table, chat_table } from "~/server/db/schema/chats";
 import { and, desc, eq, ilike } from "drizzle-orm";
 
 import type { UIChatMessage } from "./types";
@@ -6,12 +7,17 @@ import type { UIChatMessage } from "./types";
 export const getChatById = async (
   db: DBClient,
   chatId: string,
-  teamId: string,
+  organizationId: string,
 ) => {
   const [chat] = await db
     .select()
-    .from(chats)
-    .where(and(eq(chats.id, chatId), eq(chats.teamId, teamId)))
+    .from(chat_table)
+    .where(
+      and(
+        eq(chat_table.id, chatId),
+        eq(chat_table.organizationId, organizationId),
+      ),
+    )
     .limit(1);
 
   if (!chat) {
@@ -21,11 +27,14 @@ export const getChatById = async (
   // Get all messages for this chat
   const messages = await db
     .select()
-    .from(chatMessages)
+    .from(chat_message_table)
     .where(
-      and(eq(chatMessages.chatId, chatId), eq(chatMessages.teamId, teamId)),
+      and(
+        eq(chat_message_table.chatId, chatId),
+        eq(chat_message_table.organizationId, organizationId),
+      ),
     )
-    .orderBy(chatMessages.createdAt);
+    .orderBy(chat_message_table.createdAt);
 
   return {
     ...chat,
@@ -33,29 +42,32 @@ export const getChatById = async (
   };
 };
 
-export const getChatsByTeam = async (
+export const getChatsBySpace = async (
   db: DBClient,
-  teamId: string,
+  organizationId: string,
   userId: string,
   limit = 50,
   search?: string,
 ) => {
-  const baseConditions = [eq(chats.teamId, teamId), eq(chats.userId, userId)];
+  const baseConditions = [
+    eq(chat_table.organizationId, organizationId),
+    eq(chat_table.userId, userId),
+  ];
 
   if (search) {
-    baseConditions.push(ilike(chats.title, `%${search}%`));
+    baseConditions.push(ilike(chat_table.title, `%${search}%`));
   }
 
   return await db
     .select({
-      id: chats.id,
-      title: chats.title,
-      createdAt: chats.createdAt,
-      updatedAt: chats.updatedAt,
+      id: chat_table.id,
+      title: chat_table.title,
+      createdAt: chat_table.createdAt,
+      updatedAt: chat_table.updatedAt,
     })
-    .from(chats)
+    .from(chat_table)
     .where(and(...baseConditions))
-    .orderBy(desc(chats.updatedAt))
+    .orderBy(desc(chat_table.updatedAt))
     .limit(limit);
 };
 
@@ -63,22 +75,22 @@ export const saveChat = async (
   db: DBClient,
   data: {
     chatId: string;
-    teamId: string;
+    organizationId: string;
     userId: string;
     title?: string | null;
   },
 ) => {
   const [chat] = await db
-    .insert(chats)
+    .insert(chat_table)
     .values({
       id: data.chatId,
-      teamId: data.teamId,
+      organizationId: data.organizationId,
       userId: data.userId,
       title: data.title,
       updatedAt: new Date(),
     })
     .onConflictDoUpdate({
-      target: chats.id,
+      target: chat_table.id,
       set: {
         ...(data.title && { title: data.title }),
         updatedAt: new Date(),
@@ -93,16 +105,16 @@ export const saveChatMessage = async (
   db: DBClient,
   data: {
     chatId: string;
-    teamId: string;
+    organizationId: string;
     userId: string;
     message: UIChatMessage;
   },
 ) => {
   const [message] = await db
-    .insert(chatMessages)
+    .insert(chat_message_table)
     .values({
       chatId: data.chatId,
-      teamId: data.teamId,
+      organizationId: data.organizationId,
       userId: data.userId,
       content: data.message,
     })
@@ -114,9 +126,14 @@ export const saveChatMessage = async (
 export const deleteChat = async (
   db: DBClient,
   chatId: string,
-  teamId: string,
+  organizationId: string,
 ) => {
   await db
-    .delete(chats)
-    .where(and(eq(chats.id, chatId), eq(chats.teamId, teamId)));
+    .delete(chat_table)
+    .where(
+      and(
+        eq(chat_table.id, chatId),
+        eq(chat_table.organizationId, organizationId),
+      ),
+    );
 };

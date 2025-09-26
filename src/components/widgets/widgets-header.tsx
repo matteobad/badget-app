@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { TZDate } from "@date-fns/tz";
 import { useUserQuery } from "~/hooks/use-user";
 
+import { ChatHistory } from "../chat/chat-history";
 import { Customize } from "./customize";
 
 function getTimeBasedGreeting(timezone?: string): string {
@@ -69,7 +70,7 @@ export function WidgetsHeader({ isCustomizing, onToggle }: Props) {
 
       <div className="flex items-center space-x-4">
         <Customize isCustomizing={isCustomizing} onToggle={onToggle} />
-        {/* <ChatHistory /> */}
+        <ChatHistory />
       </div>
     </div>
   );

@@ -1,4 +1,9 @@
 import {
+  deleteChat,
+  getChatById,
+  getChatsBySpace,
+} from "~/server/domain/ai/queries";
+import {
   deleteChatSchema,
   getChatSchema,
   listChatsSchema,
@@ -9,23 +14,25 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 export const chatRouter = createTRPCRouter({
   list: protectedProcedure
     .input(listChatsSchema)
-    .query(async ({ ctx, input }) => {
-      return getChatsByTeam(
-        ctx.db,
-        ctx.teamId!,
-        ctx.session.user.id,
+    .query(async ({ ctx: { db, orgId, session }, input }) => {
+      return getChatsBySpace(
+        db,
+        orgId!,
+        session!.userId,
         input.limit,
         input.search,
       );
     }),
 
-  get: protectedProcedure.input(getChatSchema).query(async ({ ctx, input }) => {
-    return getChatById(ctx.db, input.chatId, ctx.teamId!);
-  }),
+  get: protectedProcedure
+    .input(getChatSchema)
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      return getChatById(db, input.chatId, orgId!);
+    }),
 
   delete: protectedProcedure
     .input(deleteChatSchema)
-    .mutation(async ({ ctx, input }) => {
-      return deleteChat(ctx.db, input.chatId, ctx.teamId!);
+    .mutation(async ({ ctx: { db, orgId }, input }) => {
+      return deleteChat(db, input.chatId, orgId!);
     }),
 });

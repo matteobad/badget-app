@@ -12,6 +12,7 @@ import { DefaultChatTransport, generateId } from "ai";
 import type { Geo } from "@vercel/functions";
 import { ChatHeader } from "./chat-header";
 import { ChatInput } from "./chat-input";
+import { Messages } from "./messages";
 
 type Props = {
   id?: string | null;
@@ -31,29 +32,12 @@ export function ChatInterface({ id, geo }: Props) {
   // Generate a consistent chat ID - use provided ID or generate one
   const chatId = useMemo(() => providedId ?? generateId(), [providedId]);
 
-  const authenticatedFetch = useMemo(
-    () =>
-      Object.assign(
-        async (url: RequestInfo | URL, requestOptions?: RequestInit) => {
-          return fetch(url, {
-            ...requestOptions,
-            headers: {
-              ...requestOptions?.headers,
-              "Content-Type": "application/json",
-            },
-          });
-        },
-      ),
-    [],
-  );
-
   useChat<UIChatMessage>({
     id: chatId,
     enableBatching: true,
     experimental_throttle: 50,
     transport: new DefaultChatTransport({
-      api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
-      fetch: authenticatedFetch,
+      api: "/api/chat",
       prepareSendMessagesRequest({ messages }) {
         return {
           body: {
@@ -78,10 +62,10 @@ export function ChatInterface({ id, geo }: Props) {
           isCanvasVisible && "pr-[603px]",
         )}
       >
-        {/* <ChatHeader /> */}
+        <ChatHeader />
 
         <div className="relative w-full">
-          {/* <Messages /> */}
+          <Messages />
           <ChatInput />
         </div>
       </div>
@@ -93,7 +77,7 @@ export function ChatInterface({ id, geo }: Props) {
           config={{
             streamCapture: {
               enabled: true,
-              endpoint: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
+              endpoint: "/api/chat",
               autoConnect: true,
             },
           }}

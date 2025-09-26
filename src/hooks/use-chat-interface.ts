@@ -7,9 +7,16 @@ export function useChatInterface() {
   // Initialize state immediately from pathname to avoid blink on refresh
   const getInitialChatId = () => {
     const segments = pathname.split("/").filter(Boolean);
-    const potentialChatId =
-      segments.length === 1 ? segments[0] : (segments[1] ?? null);
-    return potentialChatId ?? null;
+    // Possibili strutture:
+    // - /overview → nessun chatId
+    // - /overview/[chatId]
+    // - /[locale]/overview → nessun chatId
+    // - /[locale]/overview/[chatId]
+    const overviewIndex = segments.indexOf("overview");
+    if (overviewIndex !== -1 && segments.length > overviewIndex + 1) {
+      return segments[overviewIndex + 1] ?? null;
+    }
+    return null;
   };
 
   const [chatId, setChatIdState] = useState<string | null>(getInitialChatId);
@@ -17,13 +24,11 @@ export function useChatInterface() {
   // Extract chatId from pathname
   useEffect(() => {
     const segments = pathname.split("/").filter(Boolean);
-
-    // If we have segments, the chatId is either:
-    // - segments[0] if no locale (e.g., /chatId)
-    // - segments[1] if locale exists (e.g., /en/chatId)
-    // For simplicity, let's assume if there's only 1 segment, it's the chatId
+    const overviewIndex = segments.indexOf("overview");
     const potentialChatId =
-      segments.length === 1 ? segments[0] : (segments[1] ?? null);
+      overviewIndex !== -1 && segments.length > overviewIndex + 1
+        ? segments[overviewIndex + 1]
+        : null;
     setChatIdState(potentialChatId ?? null);
   }, [pathname]);
 
@@ -31,8 +36,11 @@ export function useChatInterface() {
   useEffect(() => {
     const handlePopState = () => {
       const segments = window.location.pathname.split("/").filter(Boolean);
+      const overviewIndex = segments.indexOf("overview");
       const potentialChatId =
-        segments.length === 1 ? segments[0] : (segments[1] ?? null);
+        overviewIndex !== -1 && segments.length > overviewIndex + 1
+          ? segments[overviewIndex + 1]
+          : null;
       setChatIdState(potentialChatId ?? null);
     };
 
@@ -46,8 +54,10 @@ export function useChatInterface() {
   const setChatId = (id: string) => {
     // Preserve the locale in the URL
     const segments = pathname.split("/").filter(Boolean);
-    const locale = segments[0];
-    const newPath = locale ? `/${locale}/${id}` : `/${id}`;
+    const hasLocale = segments.length > 0 && segments[0] !== "overview"; // primo segmento è locale
+    const locale = hasLocale ? segments[0] : null;
+
+    const newPath = locale ? `/${locale}/overview/${id}` : `/overview/${id}`;
 
     window.history.pushState({}, "", newPath);
     setChatIdState(id);

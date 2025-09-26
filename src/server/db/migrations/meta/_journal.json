@@ -127,6 +127,13 @@
       "when": 1758547580119,
       "tag": "0017_first_purple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1758893338012,
+      "tag": "0018_panoramic_kid_colt",
+      "breakpoints": true
     }
   ]
 }

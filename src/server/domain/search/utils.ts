@@ -48,7 +48,7 @@ const schema = z.object({
   currency: z
     .string()
     .optional()
-    .describe("The currency code to filter by (e.g., 'USD', 'EUR')."),
+    .describe("The currency code to filter by (e.g., 'EUR', 'USD')."),
   language: z
     .string()
     .describe(

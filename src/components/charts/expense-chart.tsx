@@ -44,7 +44,7 @@ export function ExpenseChart({ disabled }: Props) {
         <h1 className="font-mono text-4xl">
           <AnimatedNumber
             value={data?.summary?.averageExpense ?? 0}
-            currency={data?.summary?.currency ?? "USD"}
+            currency={data?.summary?.currency ?? "EUR"}
           />
         </h1>
 

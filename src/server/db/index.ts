@@ -8,6 +8,7 @@ import ws from "ws";
 
 import * as accounts from "./schema/accounts";
 import * as auth from "./schema/auth";
+import * as chats from "./schema/chats";
 import * as documents from "./schema/documents";
 import * as openBanking from "./schema/open-banking";
 import * as preferences from "./schema/preferences";
@@ -42,6 +43,7 @@ const pool = new Pool({ connectionString });
 export const schema = {
   ...auth,
   ...accounts,
+  ...chats,
   ...documents,
   ...openBanking,
   ...transactions,
