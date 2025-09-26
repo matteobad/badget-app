@@ -1,7 +1,8 @@
 import { cn } from "~/lib/utils";
 
-import { CategoryBreakdownWidget } from "./category-breakdown/category-breakdown-widget";
+import { CategoryExpensesWidget } from "./category-expenses/category-expenses-widget";
 import { IncomeWidget } from "./income/income-widget";
+import { UncategorizedWidget } from "./uncategorized-widget/uncategorized-widget";
 import { Widget, WidgetHeader, WidgetProvider, WidgetTitle } from "./widget";
 
 type DashboardWidgetProps = {
@@ -23,7 +24,9 @@ export function DashboardWidget({
       case "income":
         return <IncomeWidget {...widget.settings} />;
       case "category-expenses":
-        return <CategoryBreakdownWidget {...widget.settings} />;
+        return <CategoryExpensesWidget {...widget.settings} />;
+      case "uncategorized":
+        return <UncategorizedWidget {...widget.settings} />;
 
       default:
         return (

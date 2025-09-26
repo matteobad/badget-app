@@ -1,4 +1,16 @@
-import { and, asc, desc, eq, gt, gte, lt, lte, not, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  gte,
+  lt,
+  lte,
+  not,
+  sql,
+} from "drizzle-orm";
 
 import type { DBClient } from "../db";
 import {
@@ -107,6 +119,48 @@ export async function getCategoryExpenses(
     },
     meta: {
       type: "category-expenses",
+      currency,
+    },
+    result,
+  };
+}
+
+export type GetUncategorizedParams = {
+  organizationId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+export async function getUncategorized(
+  db: DBClient,
+  params: GetUncategorizedParams,
+) {
+  const { organizationId, from, to, currency } = params;
+
+  // TODO: consider splits
+  const [result] = await db
+    .select({
+      total: sql`sum(${transaction_table.amount}) * -1`.mapWith(Number),
+      count: count(transaction_table.id),
+    })
+    .from(transaction_table)
+    .where(
+      and(
+        eq(transaction_table.organizationId, organizationId),
+        gte(transaction_table.date, from),
+        lte(transaction_table.date, to),
+        eq(transaction_table.categorySlug, "uncategorized"), // spese non categorizzate
+      ),
+    );
+
+  return {
+    summary: {
+      // income: 0, TODO: to calculate percentage
+      currency,
+    },
+    meta: {
+      type: "uncategorized",
       currency,
     },
     result,

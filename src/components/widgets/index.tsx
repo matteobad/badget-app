@@ -31,7 +31,7 @@ const initialWidgets: Widget[] = [
     id: "category-expenses",
   },
   {
-    id: "file-management",
+    id: "uncategorized",
   },
   {
     id: "outstanding-vat",
