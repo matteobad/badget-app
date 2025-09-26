@@ -62,6 +62,46 @@ export async function getIncomes(db: DBClient, params: GetIncomesParams) {
   };
 }
 
+export type GetMonthlySpendingParams = {
+  organizationId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+export async function getMonthlySpending(
+  db: DBClient,
+  params: GetIncomesParams,
+) {
+  const { organizationId, from, to, currency } = params;
+
+  const [result] = await db
+    .select({
+      spending: sql`sum(${transaction_table.amount}) * -1`.mapWith(Number),
+    })
+    .from(transaction_table)
+    .where(
+      and(
+        eq(transaction_table.organizationId, organizationId),
+        gte(transaction_table.date, from),
+        lte(transaction_table.date, to),
+        lt(transaction_table.amount, 0),
+      ),
+    );
+
+  return {
+    summary: {
+      amount: result?.spending ?? 0,
+      currency,
+    },
+    meta: {
+      type: "monthly-spending",
+      currency,
+    },
+    result,
+  };
+}
+
 export type GetCategoryExpensesParams = {
   organizationId: string;
   from: string;

@@ -34,9 +34,6 @@ const initialWidgets: Widget[] = [
     id: "uncategorized",
   },
   {
-    id: "outstanding-vat",
-  },
-  {
     id: "monthly-spending",
   },
   {
