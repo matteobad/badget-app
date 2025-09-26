@@ -1,16 +1,4 @@
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  gt,
-  gte,
-  lt,
-  lte,
-  not,
-  sql,
-} from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, lt, lte, not, sql } from "drizzle-orm";
 
 import type { DBClient } from "../db";
 import {
@@ -204,5 +192,56 @@ export async function getUncategorized(
       currency,
     },
     result,
+  };
+}
+
+type GetNetWorthParams = {
+  organizationId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+type FinancialMetricsResultItem = {
+  date: string;
+  assets: string;
+  liabilities: string;
+  net_worth: string;
+  currency: string;
+};
+
+export async function getNetWorth(db: DBClient, params: GetNetWorthParams) {
+  const { organizationId, from, to, currency } = params;
+
+  const result = await db.execute(
+    sql`SELECT * FROM ${sql.raw("get_financial_metrics")}(${organizationId}, ${from}, ${to})`,
+  );
+
+  const rawData = result.rows as unknown as FinancialMetricsResultItem[];
+
+  const netWorth =
+    rawData && rawData.length > 0
+      ? parseFloat(rawData[rawData.length - 1]?.net_worth ?? "0")
+      : 0;
+
+  return {
+    summary: {
+      netWorth: Math.abs(netWorth),
+      currency: rawData?.at(0)?.currency ?? currency,
+    },
+    meta: {
+      type: "net_worth",
+      currency: rawData?.at(0)?.currency ?? currency,
+    },
+    result: rawData?.map((item) => {
+      const value = Number.parseFloat(
+        Number.parseFloat(item.net_worth || "0").toFixed(2),
+      );
+      return {
+        date: item.date,
+        value: value,
+        currency: item.currency,
+      };
+    }),
   };
 }

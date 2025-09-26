@@ -3,6 +3,7 @@ import { cn } from "~/lib/utils";
 import { CategoryExpensesWidget } from "./category-expenses/category-expenses-widget";
 import { IncomeWidget } from "./income/income-widget";
 import { MonthlySpendingWidget } from "./monthly-spending/monthly-spending-widget";
+import { NetWorthWidget } from "./net-worth/net-worth-widget";
 import { UncategorizedWidget } from "./uncategorized-widget/uncategorized-widget";
 import { Widget, WidgetHeader, WidgetProvider, WidgetTitle } from "./widget";
 
@@ -28,6 +29,8 @@ export function DashboardWidget({
         return <CategoryExpensesWidget {...widget.settings} />;
       case "monthly-spending":
         return <MonthlySpendingWidget {...widget.settings} />;
+      case "net-worth":
+        return <NetWorthWidget {...widget.settings} />;
       case "uncategorized":
         return <UncategorizedWidget {...widget.settings} />;
 

@@ -50,10 +50,12 @@ export function UncategorizedWidget() {
 
         <WidgetContent className="flex flex-col gap-2">
           <div className="text-sm">
-            <span className="text-muted-foreground">You currently have </span>
-            <span>{data?.result?.count ?? 0} uncategorized transaction </span>
+            <span className="text-muted-foreground">You have </span>
+            <span className="font-medium">
+              {data?.result?.count ?? 0} uncategorized transaction{" "}
+            </span>
             <span className="text-muted-foreground">for a total of </span>
-            <span>
+            <span className="font-medium">
               {formatAmount({
                 amount: data?.result?.total ?? 0,
                 currency:

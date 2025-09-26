@@ -37,7 +37,7 @@ const initialWidgets: Widget[] = [
     id: "monthly-spending",
   },
   {
-    id: "revenue-year",
+    id: "net-worth",
   },
   {
     id: "software-costs",
