@@ -50,6 +50,64 @@ export async function getIncomes(db: DBClient, params: GetIncomesParams) {
   };
 }
 
+export type GetIncomeAnalysisParams = {
+  organizationId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+export async function getIncomeAnalysis(
+  db: DBClient,
+  params: GetIncomeAnalysisParams,
+) {
+  const { organizationId, from, to, currency } = params;
+
+  const result = await db
+    .select({
+      month: sql<Date>`date_trunc('month', ${transaction_table.date})`,
+      income: sql`
+      sum(case when ${transaction_table.amount} > 0 then ${transaction_table.amount} else 0 end)
+    `.mapWith(Number),
+      expenses: sql`
+      sum(case when ${transaction_table.amount} < 0 then abs(${transaction_table.amount}) else 0 end)
+    `.mapWith(Number),
+    })
+    .from(transaction_table)
+    .where(
+      and(
+        eq(transaction_table.organizationId, organizationId),
+        gte(transaction_table.date, from),
+        lte(transaction_table.date, to),
+        not(transaction_table.internal),
+      ),
+    )
+    .groupBy(sql`date_trunc('month', ${transaction_table.date})`)
+    .orderBy(sql`date_trunc('month', ${transaction_table.date})`);
+
+  // Compute average delta (savings = income - expenses) over the result set
+  let averageSavings = 0;
+  if (result && result.length > 0) {
+    const totalDelta = result.reduce(
+      (sum, row) => sum + ((row.income ?? 0) - (row.expenses ?? 0)),
+      0,
+    );
+    averageSavings = totalDelta / result.length;
+  }
+
+  return {
+    summary: {
+      averageSavings, // grossIncome: grossIncome,
+      currency,
+    },
+    meta: {
+      type: "income-analysis",
+      currency,
+    },
+    result,
+  };
+}
+
 export type GetMonthlySpendingParams = {
   organizationId: string;
   from: string;

@@ -1,6 +1,7 @@
 import { cn } from "~/lib/utils";
 
 import { CategoryExpensesWidget } from "./category-expenses/category-expenses-widget";
+import { IncomeAnalysisWidget } from "./income-analysis/income-analysis-widget";
 import { IncomeWidget } from "./income/income-widget";
 import { MonthlySpendingWidget } from "./monthly-spending/monthly-spending-widget";
 import { NetWorthWidget } from "./net-worth/net-worth-widget";
@@ -24,10 +25,12 @@ export function DashboardWidget({
 }: DashboardWidgetProps) {
   const renderContent = () => {
     switch (widget.id) {
-      case "income":
-        return <IncomeWidget {...widget.settings} />;
       case "category-expenses":
         return <CategoryExpensesWidget {...widget.settings} />;
+      case "income":
+        return <IncomeWidget {...widget.settings} />;
+      case "income-analysis":
+        return <IncomeAnalysisWidget {...widget.settings} />;
       case "monthly-spending":
         return <MonthlySpendingWidget {...widget.settings} />;
       case "net-worth":

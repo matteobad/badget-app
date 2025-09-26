@@ -43,10 +43,7 @@ const initialWidgets: Widget[] = [
     id: "recurring",
   },
   {
-    id: "forecast",
-  },
-  {
-    id: "category-expenses",
+    id: "income-analysis",
   },
   {
     id: "taxes",

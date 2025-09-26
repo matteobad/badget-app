@@ -1,5 +1,6 @@
 import {
   getCategoryExpenses,
+  getIncomeAnalysis,
   getIncomes,
   getMonthlySpending,
   getNetWorth,
@@ -8,6 +9,7 @@ import {
 } from "~/server/services/reports-service";
 import {
   getCategoryExpensesSchema,
+  getIncomeAnalysisSchema,
   getIncomesSchema,
   getMonthlySpendingSchema,
   getNetWorthSchema,
@@ -22,6 +24,12 @@ export const reportsRouter = createTRPCRouter({
     .input(getIncomesSchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
       return getIncomes(db, { ...input, organizationId: orgId! });
+    }),
+
+  getIncomeAnalysis: protectedProcedure
+    .input(getIncomeAnalysisSchema)
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      return getIncomeAnalysis(db, { ...input, organizationId: orgId! });
     }),
 
   getMonthlySpending: protectedProcedure
