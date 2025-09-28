@@ -1,5 +1,8 @@
 import type { InferUITools } from "ai";
 
+// import { google } from "@ai-sdk/google";
+
+import { getBalancesTool } from "./tools/descriptive/get-balances-tool";
 import { getIncomeTool } from "./tools/descriptive/get-income-tool";
 // import { getContext } from "./context";
 import { getTransactionsTool } from "./tools/descriptive/get-transactions";
@@ -13,6 +16,7 @@ export const createToolRegistry = () => {
     // getBurnRateAnalysis: getBurnRateAnalysisTool,
     getTransactions: getTransactionsTool,
     getIncome: getIncomeTool,
+    getBalances: getBalancesTool,
     // google_search: google.tools.googleSearch({
     // searchContextSize: "medium",
     // userLocation: {

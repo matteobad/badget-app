@@ -8,6 +8,7 @@ import { useChatStore } from "~/lib/stores/chat";
 import { cn } from "~/lib/utils";
 
 import type { PromptInputMessage } from "../ui/prompt-input";
+import { SuggestedActionsButton } from "../suggested-actions-button";
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -22,6 +23,7 @@ import {
 import { CommandMenu } from "./command-menu";
 import { FollowupQuestions } from "./followup-questions";
 import { RecordButton } from "./record-button";
+import { WebSearchButton } from "./web-search-button";
 
 export function ChatInput() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -193,17 +195,14 @@ export function ChatInput() {
                   handleKeyDown(e);
                 }}
                 value={input}
-                placeholder={
-                  isWebSearch
-                    ? "Search the web"
-                    : "Ask anything or press ´/´ for commands..."
-                }
+                placeholder={isWebSearch ? "Search the web" : "Ask anything"}
               />
             </PromptInputBody>
             <PromptInputToolbar>
               <PromptInputTools>
                 <PromptInputActionAddAttachments />
-                {/* <WebSearchButton /> */}
+                <SuggestedActionsButton />
+                <WebSearchButton />
               </PromptInputTools>
 
               <PromptInputTools>
