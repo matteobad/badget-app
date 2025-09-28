@@ -1,5 +1,6 @@
 import { suggestedActionsCache } from "~/server/cache/suggested-actions-cache";
 import { getSuggestedActionsSchema } from "~/shared/validators/suggested-actions.schema";
+import { endOfMonth, startOfMonth } from "date-fns";
 
 import { createTRPCRouter, protectedProcedure } from "../init";
 
@@ -18,6 +19,14 @@ const SUGGESTED_ACTIONS_CONFIG = [
     toolParams: {
       pageSize: 10,
       sort: ["date", "desc"],
+    },
+  },
+  {
+    id: "current-income",
+    toolName: "getIncome",
+    toolParams: {
+      from: startOfMonth(new Date()),
+      to: endOfMonth(new Date()),
     },
   },
   {

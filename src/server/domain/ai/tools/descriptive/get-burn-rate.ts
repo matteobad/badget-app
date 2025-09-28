@@ -1,10 +1,10 @@
 import { formatAmount } from "~/shared/helpers/format";
 import { tool } from "ai";
 
-import { followupQuestionsArtifact } from "../artifacts/followup-questions";
-import { getContext } from "../context";
-import { generateFollowupQuestions } from "../utils/generate-followup-questions";
-import { getBurnRateSchema } from "./schema";
+import { followupQuestionsArtifact } from "../../artifacts/followup-questions";
+import { getContext } from "../../context";
+import { generateFollowupQuestions } from "../../utils/generate-followup-questions";
+import { getBurnRateSchema } from "../schema";
 
 export const getBurnRateTool = tool({
   description:

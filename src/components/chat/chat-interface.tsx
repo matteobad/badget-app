@@ -10,6 +10,7 @@ import { cn } from "~/lib/utils";
 import { DefaultChatTransport, generateId } from "ai";
 
 import type { Geo } from "@vercel/functions";
+import { Canvas } from "../canvas/canvas";
 import { ChatHeader } from "./chat-header";
 import { ChatInput } from "./chat-input";
 import { Messages } from "./messages";
@@ -70,7 +71,7 @@ export function ChatInterface({ id, geo }: Props) {
         </div>
       </div>
 
-      {/* <Canvas /> */}
+      <Canvas />
 
       {process.env.NODE_ENV === "development" && (
         <AIDevtools

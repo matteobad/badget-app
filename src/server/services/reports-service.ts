@@ -6,6 +6,68 @@ import {
   transaction_table,
 } from "../db/schema/transactions";
 
+type GetIncomeParams = {
+  organizationId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+export async function getIncome(db: DBClient, params: GetIncomeParams) {
+  const { organizationId, from, to, currency } = params;
+
+  // Query base: transazioni positive
+  const incomeTransactions = await db
+    .select({
+      id: transaction_table.id,
+      name: transaction_table.name,
+      amount: transaction_table.amount,
+      date: transaction_table.date,
+      category: transaction_table.categorySlug,
+    })
+    .from(transaction_table)
+    .where(
+      and(
+        eq(transaction_table.organizationId, organizationId),
+        gte(transaction_table.date, from),
+        lte(transaction_table.date, to),
+        gt(transaction_table.amount, 0),
+      ),
+    );
+
+  if (incomeTransactions.length === 0) {
+    return { total: 0, sources: [] };
+  }
+
+  // Calcolo totale
+  const total = incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
+
+  // Raggruppo per categoria (o account, o payee: dipende da UX)
+  const grouped: Record<string, { name: string; amount: number }> = {};
+
+  for (const tx of incomeTransactions) {
+    const key = tx.category ?? "uncategorized";
+    if (!grouped[key]) {
+      grouped[key] = { name: key, amount: 0 };
+    }
+    grouped[key].amount += tx.amount;
+  }
+
+  // Trasformo in array e calcolo % sul totale
+  const sources = Object.values(grouped)
+    .map((g) => ({
+      name: g.name,
+      amount: g.amount,
+      percentage: Math.round((g.amount / total) * 100),
+    }))
+    .sort((a, b) => b.amount - a.amount);
+
+  return {
+    total,
+    sources,
+  };
+}
+
 export type GetIncomesParams = {
   organizationId: string;
   from: string;

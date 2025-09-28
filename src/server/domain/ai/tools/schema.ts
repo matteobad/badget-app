@@ -102,11 +102,6 @@ export const getTransactionsSchema = z.object({
     .describe(
       "Array of bank account IDs to filter transactions by specific accounts",
     ),
-  assignees: z
-    .array(z.string())
-    .nullable()
-    .optional()
-    .describe("Array of user IDs to filter transactions by assigned users"),
   type: z
     .enum(["income", "expense"])
     .nullable()

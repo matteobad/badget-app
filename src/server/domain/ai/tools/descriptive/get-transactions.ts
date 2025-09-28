@@ -3,8 +3,8 @@ import { formatAmount, formatDate } from "~/shared/helpers/format";
 import { getUrl } from "~/shared/helpers/get-url";
 import { tool } from "ai";
 
-import { getContext } from "../context";
-import { getTransactionsSchema } from "./schema";
+import { getContext } from "../../context";
+import { getTransactionsSchema } from "../schema";
 
 export const getTransactionsTool = tool({
   description:

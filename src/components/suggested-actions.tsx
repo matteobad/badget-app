@@ -6,7 +6,12 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { FlameIcon, ReceiptIcon, ShapesIcon } from "lucide-react";
+import {
+  BanknoteArrowUpIcon,
+  FlameIcon,
+  ReceiptIcon,
+  ShapesIcon,
+} from "lucide-react";
 
 import { Skeleton } from "./ui/skeleton";
 
@@ -79,6 +84,11 @@ export function SuggestedActions() {
       icon: ReceiptIcon,
       title: "Latest transactions",
       description: "Show me my latest transactions",
+    },
+    "current-income": {
+      icon: BanknoteArrowUpIcon,
+      title: "Income",
+      description: "Show me current month income",
     },
     "expenses-breakdown": {
       icon: ShapesIcon,
