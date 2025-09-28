@@ -8,14 +8,14 @@ interface Props {
 }
 
 export function SortableItem({ id, index, children }: Props) {
-  const sortable = useSortable({
+  const { ref, isDragging } = useSortable({
     disabled: id === "insights",
     id,
     index,
   });
 
   return (
-    <div ref={sortable.ref} data-id={index}>
+    <div ref={ref} data-id={index} data-dragging={isDragging}>
       {children}
     </div>
   );

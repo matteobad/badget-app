@@ -18,7 +18,6 @@ import { toast } from "sonner";
 
 import { Skeleton } from "../ui/skeleton";
 import { DashboardWidget } from "./dashboard-widget";
-import { DroppableGrid } from "./droppable";
 import { SortableItem } from "./sortable-item";
 
 type Widget = RouterOutput["preferences"]["getUserWidgets"][number];
@@ -93,38 +92,36 @@ export function WidgetsGrid() {
           // Access rich data
           console.log("Source data:", source?.data);
           console.log("Drop position:", operation.position.current);
+          updateUserWidgets.mutate({ widgets });
         }
       }}
       onDragOver={(event) => {
         setWidgets((items) => move(items, event));
-        updateUserWidgets.mutate({ widgets });
       }}
     >
-      <DroppableGrid id="active">
-        <div
-          className={cn(
-            "-mx-1 grid max-h-[400px] grid-cols-1 gap-6 overflow-hidden px-1 pt-4 md:grid-cols-2 lg:grid-cols-4",
-            { "max-h-auto [&>[role=button]]:animate-shake": isEditMode },
-          )}
-        >
-          {widgets?.map((widget, index) => {
-            return (
-              <React.Fragment key={widget.id}>
-                <SortableItem key={widget.id} id={widget.id} index={index}>
-                  <DashboardWidget
-                    widget={widget}
-                    className={index > 7 ? "opacity-60" : "opacity-100"}
-                    isEditMode={isEditMode}
-                  />
-                </SortableItem>
-                {index === 7 && (
-                  <div className="my-2 border-t border-dashed md:col-span-2 lg:col-span-4" />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
-      </DroppableGrid>
+      <div
+        className={cn(
+          "-mx-1 grid max-h-[400px] grid-cols-1 gap-6 overflow-hidden px-1 pt-4 md:grid-cols-2 lg:grid-cols-4",
+          { "max-h-auto [&>[role=button]>div]:animate-shake": isEditMode },
+        )}
+      >
+        {widgets?.map((widget, index) => {
+          return (
+            <React.Fragment key={widget.id}>
+              <SortableItem id={widget.id} index={index}>
+                <DashboardWidget
+                  widget={widget}
+                  className={index > 7 ? "opacity-60" : "opacity-100"}
+                  isEditMode={isEditMode}
+                />
+              </SortableItem>
+              {index === 7 && (
+                <div className="my-2 border-t border-dashed md:col-span-2 lg:col-span-4" />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
     </DragDropProvider>
   );
 }

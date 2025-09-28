@@ -1,7 +1,7 @@
 "use client";
 
 import { useWidgetParams } from "~/hooks/use-widget-params";
-import { LayoutGridIcon } from "lucide-react";
+import { CheckIcon, LayoutGridIcon } from "lucide-react";
 
 import { Button } from "../ui/button";
 
@@ -16,12 +16,16 @@ export function Customize() {
       className="space-x-2"
       onClick={(e) => {
         e.preventDefault();
-        void setParams({ isEditing: !isEditing });
+        void setParams({ isEditing: isEditing ? null : true });
       }}
       type="button"
     >
       <span>{isEditing ? "Save" : "Customize"}</span>
-      <LayoutGridIcon size={16} className="text-muted-foreground" />
+      {isEditing ? (
+        <CheckIcon size={16} className="text-muted-foreground" />
+      ) : (
+        <LayoutGridIcon size={16} className="text-muted-foreground" />
+      )}
     </Button>
   );
 }
