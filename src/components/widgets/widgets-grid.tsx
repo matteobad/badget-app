@@ -1,8 +1,9 @@
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import React, { useEffect, useState } from "react";
-import { move } from "@dnd-kit/helpers";
+import { swap } from "@dnd-kit/helpers";
 import {
   DragDropProvider,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
 } from "@dnd-kit/react";
@@ -37,6 +38,7 @@ export function WidgetsGridSkeleton() {
 
 export function WidgetsGrid() {
   const [widgets, setWidgets] = useState<Widget[]>([]);
+  const [draggegWidget, setDraggedWidget] = useState<Widget>({ id: "widget" });
 
   const { params } = useWidgetParams();
   const isEditMode = !!params.isEditing;
@@ -75,9 +77,15 @@ export function WidgetsGrid() {
       }}
       onDragStart={(event) => {
         const { operation } = event;
+        const id = operation.source?.id;
         console.log(`Started dragging ${operation.source?.id}`);
+        const draggedItem = widgets.find((w) => w.id === id);
+
+        if (draggedItem) setDraggedWidget(draggedItem);
       }}
       onDragEnd={(event) => {
+        setDraggedWidget({ id: "widget" });
+
         const { operation, canceled } = event;
         const { source, target } = operation;
 
@@ -92,11 +100,13 @@ export function WidgetsGrid() {
           // Access rich data
           console.log("Source data:", source?.data);
           console.log("Drop position:", operation.position.current);
-          updateUserWidgets.mutate({ widgets });
+          const newWidgets = swap(widgets, event);
+          setWidgets(newWidgets);
+          updateUserWidgets.mutate({ widgets: newWidgets });
         }
       }}
       onDragOver={(event) => {
-        setWidgets((items) => move(items, event));
+        event.preventDefault();
       }}
     >
       <div
@@ -111,7 +121,11 @@ export function WidgetsGrid() {
               <SortableItem id={widget.id} index={index}>
                 <DashboardWidget
                   widget={widget}
-                  className={index > 7 ? "opacity-60" : "opacity-100"}
+                  className={cn("transition-opacity", {
+                    "opacity-60": index > 7,
+                    "shadow-lg": widget.id === draggegWidget.id && isEditMode,
+                    "hover:shadow-lg": isEditMode,
+                  })}
                   isEditMode={isEditMode}
                 />
               </SortableItem>
@@ -122,6 +136,19 @@ export function WidgetsGrid() {
           );
         })}
       </div>
+
+      {/* TODO: disable animation of first render */}
+      <DragOverlay>
+        {(_source) => (
+          <DashboardWidget
+            className={cn("opacity-80 shadow-lg", {
+              hidden: draggegWidget.id === "widget",
+            })}
+            widget={draggegWidget}
+            isEditMode={true}
+          />
+        )}
+      </DragOverlay>
     </DragDropProvider>
   );
 }

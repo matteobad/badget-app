@@ -6,6 +6,7 @@ import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { AIDevtools } from "@ai-sdk-tools/devtools";
 import { useChat } from "@ai-sdk-tools/store";
 import { useChatInterface } from "~/hooks/use-chat-interface";
+import { useWidgetParams } from "~/hooks/use-widget-params";
 import { cn } from "~/lib/utils";
 import { DefaultChatTransport, generateId } from "ai";
 
@@ -26,6 +27,7 @@ export function ChatInterface({ id, geo }: Props) {
   });
   const isCanvasVisible = !!current;
   const { isHome, isChatPage, chatId: routeChatId } = useChatInterface();
+  const { params } = useWidgetParams();
 
   // Use provided id, or get from route, or generate new one
   const providedId = id ?? routeChatId;
@@ -52,6 +54,10 @@ export function ChatInterface({ id, geo }: Props) {
       },
     }),
   });
+
+  if (params.isEditing) {
+    return null;
+  }
 
   return (
     <div className="relative z-10 h-full w-full overflow-hidden">

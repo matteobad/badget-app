@@ -12,6 +12,11 @@ export function SortableItem({ id, index, children }: Props) {
     disabled: id === "insights",
     id,
     index,
+    transition: {
+      duration: 0, // Animation duration in ms
+      easing: "cubic-bezier(0.25, 1, 0.5, 1)", // Animation easing
+      idle: false, // Whether to animate when no drag is in progress
+    },
   });
 
   return (

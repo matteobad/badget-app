@@ -92,7 +92,6 @@ export async function getIncomes(db: DBClient, params: GetIncomesParams) {
         eq(transaction_table.organizationId, organizationId),
         gte(transaction_table.date, from),
         lte(transaction_table.date, to),
-        gt(transaction_table.amount, 0),
       ),
     );
 

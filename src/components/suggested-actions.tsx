@@ -4,6 +4,7 @@ import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useChatInterface } from "~/hooks/use-chat-interface";
+import { useWidgetParams } from "~/hooks/use-widget-params";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import {
@@ -36,6 +37,8 @@ export function SuggestedActionsSkeleton() {
 export function SuggestedActions() {
   const { sendMessage } = useChatActions();
   const { setChatId } = useChatInterface();
+  const { params } = useWidgetParams();
+
   const chatId = useChatId();
   const trpc = useTRPC();
 
@@ -98,6 +101,10 @@ export function SuggestedActions() {
   };
 
   const suggestedActions = suggestedActionsData.actions;
+
+  if (params.isEditing) {
+    return null;
+  }
 
   return (
     <div className="flex w-full items-center justify-center px-6 py-4">

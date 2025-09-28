@@ -1,3 +1,4 @@
+import type { Dispatch, SetStateAction } from "react";
 import * as React from "react";
 import { cn } from "~/lib/utils";
 import { SettingsIcon } from "lucide-react";
@@ -13,8 +14,12 @@ type WidgetContextProps = {
   state: "view" | "edit";
   open: boolean;
   setOpen: (open: boolean) => void;
+  settings: WidgetSettings;
+  draftSettings: WidgetSettings;
+  setDraftSettings: Dispatch<SetStateAction<WidgetSettings>>;
   openSettings: () => void;
   saveSettings: () => void;
+  cancelSettings: () => void;
 };
 
 const WidgetContext = React.createContext<WidgetContextProps | null>(null);
@@ -29,61 +34,60 @@ function useWidget() {
 }
 
 function WidgetProvider({
+  id,
   defaultOpen = false,
   open: openProp,
   onOpenChange: setOpenProp,
+  settings: settingsProp,
   onSettingsChange: setSettingsProp,
   children,
-}: React.ComponentProps<"div"> & {
+}: React.PropsWithChildren<{
+  id: string;
   defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onSettingsChange?: () => void;
-}) {
-  // This is the internal state of the sidebar.
-  // We use openProp and setOpenProp for control from outside the component.
+  settings?: WidgetSettings;
+  onSettingsChange?: (id: string, settings: WidgetSettings) => void;
+}>) {
+  // open state (controlled/uncontrolled)
   const [_open, _setOpen] = React.useState(defaultOpen);
   const open = openProp ?? _open;
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
-      const openState = typeof value === "function" ? value(open) : value;
-      if (setOpenProp) {
-        setOpenProp(openState);
-      } else {
-        _setOpen(openState);
-      }
+      const next = typeof value === "function" ? value(open) : value;
+      setOpenProp?.(next) ?? _setOpen(next);
     },
-    [setOpenProp, open],
+    [open, setOpenProp],
   );
 
-  // Helper to toggle the sidebar.
+  // settings state (controlled/uncontrolled)
+  const [_settings, _setSettings] = React.useState<WidgetSettings>({});
+  const settings = settingsProp ?? _settings;
+  const setSettings = settingsProp ? () => {} : _setSettings;
+
+  // draft state for editing
+  const [draftSettings, setDraftSettings] =
+    React.useState<WidgetSettings>(settings);
+
+  // Open settings panel
   const openSettings = React.useCallback(() => {
-    setOpen(() => true);
-  }, [setOpen]);
+    setDraftSettings(settings);
+    setOpen(true);
+  }, [settings, setOpen]);
 
-  // Helper to save widget settings.
+  // Save settings
   const saveSettings = React.useCallback(() => {
-    setSettingsProp?.();
-  }, [setSettingsProp]);
+    setOpen(false);
+    setSettingsProp?.(id, draftSettings);
+    setSettings(draftSettings);
+  }, [id, draftSettings, setSettingsProp, setSettings]);
 
-  // Adds a keyboard shortcut to open the widget settings.
-  // React.useEffect(() => {
-  //   const handleKeyDown = (event: KeyboardEvent) => {
-  //     if (
-  //       event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
-  //       (event.metaKey || event.ctrlKey)
-  //     ) {
-  //       event.preventDefault();
-  //       openSettings();
-  //     }
-  //   };
+  // Cancel editing
+  const cancelSettings = React.useCallback(() => {
+    setOpen(false);
+    setDraftSettings(settings);
+  }, [settings, setOpen]);
 
-  //   window.addEventListener("keydown", handleKeyDown);
-  //   return () => window.removeEventListener("keydown", handleKeyDown);
-  // }, [openSettings]);
-
-  // We add a state so that we can do data-state="expanded" or "collapsed".
-  // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? "edit" : "view";
 
   const contextValue = React.useMemo<WidgetContextProps>(
@@ -91,10 +95,24 @@ function WidgetProvider({
       state,
       open,
       setOpen,
+      settings,
+      draftSettings,
+      setDraftSettings,
       openSettings,
       saveSettings,
+      cancelSettings,
     }),
-    [state, open, setOpen, saveSettings],
+    [
+      state,
+      open,
+      settings,
+      draftSettings,
+      setOpen,
+      setDraftSettings,
+      openSettings,
+      saveSettings,
+      cancelSettings,
+    ],
   );
 
   return (
@@ -182,24 +200,28 @@ function WidgetAction({
   children,
   ...props
 }: React.ComponentProps<"div">) {
-  const { open, saveSettings } = useWidget();
+  const { open, saveSettings, cancelSettings } = useWidget();
 
   return (
     <div
       data-slot="widget-action"
       className={cn(
-        "flex w-full text-xs text-muted-foreground/60 transition-colors",
-        "group-hover:group-data-[state=view]:text-accent-foreground", // action accent on widget hover
-        "group-data-[state=edit]:hover:text-accent-foreground", // in edit mode accent save button on hover
-        "group-data-[state=edit]:justify-end", // in edit mode align save button on the right
+        "flex w-full gap-2 text-xs text-muted-foreground/60",
+        "group-hover:group-data-[state=view]:text-accent-foreground",
+        "group-data-[state=edit]:justify-end",
         className,
       )}
       {...props}
     >
       {open ? (
-        <button type="button" onClick={saveSettings}>
-          Save
-        </button>
+        <>
+          <button type="button" onClick={cancelSettings}>
+            Cancel
+          </button>
+          <button type="button" onClick={saveSettings} className="font-medium">
+            Save
+          </button>
+        </>
       ) : (
         children
       )}

@@ -1,4 +1,7 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "~/lib/utils";
+import { useTRPC } from "~/shared/helpers/trpc/client";
+import { toast } from "sonner";
 
 import { CategoryExpensesWidget } from "./category-expenses/category-expenses-widget";
 import { IncomeAnalysisWidget } from "./income-analysis/income-analysis-widget";
@@ -23,34 +26,55 @@ export function DashboardWidget({
   className,
   isEditMode,
 }: DashboardWidgetProps) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const updateUserWidgetMutation = useMutation(
+    trpc.preferences.updateUserWidget.mutationOptions({
+      onError: (error) => {
+        toast.error(error.message);
+      },
+      onSuccess: () => {
+        void queryClient.invalidateQueries({
+          queryKey: trpc.preferences.getUserWidgets.queryKey(),
+        });
+      },
+    }),
+  );
+
+  const handleSettingsChange = (id: string, newSettings: any) => {
+    updateUserWidgetMutation.mutate({
+      id: "income",
+      settings: newSettings,
+    });
+  };
+
   const renderContent = () => {
     switch (widget.id) {
       case "category-expenses":
-        return <CategoryExpensesWidget {...widget.settings} />;
+        return <CategoryExpensesWidget />;
       case "income":
-        return <IncomeWidget {...widget.settings} />;
+        return <IncomeWidget />;
       case "income-analysis":
-        return <IncomeAnalysisWidget {...widget.settings} />;
+        return <IncomeAnalysisWidget />;
       case "monthly-spending":
-        return <MonthlySpendingWidget {...widget.settings} />;
+        return <MonthlySpendingWidget />;
       case "net-worth":
-        return <NetWorthWidget {...widget.settings} />;
+        return <NetWorthWidget />;
       case "recurring":
-        return <RecurringWidget {...widget.settings} />;
+        return <RecurringWidget />;
       case "uncategorized":
-        return <UncategorizedWidget {...widget.settings} />;
+        return <UncategorizedWidget />;
 
       default:
         return (
-          <WidgetProvider>
-            <Widget className="">
-              <WidgetHeader>
-                <WidgetTitle className="flex items-center gap-3">
-                  {widget.id}
-                </WidgetTitle>
-              </WidgetHeader>
-            </Widget>
-          </WidgetProvider>
+          <Widget>
+            <WidgetHeader>
+              <WidgetTitle className="flex items-center gap-3">
+                {widget.id}
+              </WidgetTitle>
+            </WidgetHeader>
+          </Widget>
         );
     }
   };
@@ -62,7 +86,13 @@ export function DashboardWidget({
         "[&_[data-slot=widget-action]]:!text-muted-foreground/60": isEditMode,
       })}
     >
-      {renderContent()}
+      <WidgetProvider
+        id={widget.id}
+        settings={widget.settings}
+        onSettingsChange={handleSettingsChange}
+      >
+        {renderContent()}
+      </WidgetProvider>
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import type { Dispatch, SetStateAction } from "react";
 import {
   Select,
   SelectContent,
@@ -7,22 +6,18 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
-type WidgetSettings = {
-  period?: string;
-  type?: string;
-};
+import { useWidget } from "../widget";
 
-type Props = {
-  settings: WidgetSettings;
-  setSettings: Dispatch<SetStateAction<WidgetSettings>>;
-};
+export function IncomeWidgetSettings() {
+  const { draftSettings, setDraftSettings } = useWidget();
 
-export function IncomeWidgetSettingsForm({ settings, setSettings }: Props) {
   return (
     <div className="flex w-full flex-col gap-2">
       <Select
-        onValueChange={(value) => setSettings({ ...settings, period: value })}
-        defaultValue={settings?.period ?? "month"}
+        onValueChange={(value) =>
+          setDraftSettings({ ...draftSettings, period: value })
+        }
+        defaultValue={draftSettings?.period ?? "month"}
       >
         <SelectTrigger className="w-full" size="sm">
           <SelectValue placeholder="Periodo" />
@@ -34,8 +29,10 @@ export function IncomeWidgetSettingsForm({ settings, setSettings }: Props) {
       </Select>
 
       <Select
-        onValueChange={(value) => setSettings({ ...settings, type: value })}
-        defaultValue={settings?.type ?? "gross"}
+        onValueChange={(value) =>
+          setDraftSettings({ ...draftSettings, type: value })
+        }
+        defaultValue={draftSettings?.type ?? "gross"}
       >
         <SelectTrigger className="w-full" size="sm">
           <SelectValue placeholder="Type" />

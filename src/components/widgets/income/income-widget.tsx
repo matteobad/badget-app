@@ -1,44 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatedNumber } from "~/components/animated-number";
+import { Skeleton } from "~/components/ui/skeleton";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import { TrendingUpIcon } from "lucide-react";
-import { toast } from "sonner";
 
 import {
+  useWidget,
   Widget,
   WidgetAction,
   WidgetContent,
   WidgetDescription,
   WidgetFooter,
   WidgetHeader,
-  WidgetProvider,
   WidgetSettings,
   WidgetSettingsTrigger,
   WidgetTitle,
 } from "../widget";
-import { IncomeWidgetSettingsForm } from "./income-widget-settings-form";
+import { IncomeWidgetSettings } from "./income-widget-settings-form";
 
-type Props = {
-  defaultSettings: {
-    period?: "month";
-    type?: "gross" | "net";
-  };
-};
-
-export function IncomeWidget(props: Props) {
-  const [settings, setSettings] = useState(props.defaultSettings);
+export function IncomeWidget() {
   const [amount, setAmount] = useState(0);
   const { data: space } = useSpaceQuery();
 
-  // TODO: get income from trpc procedure with settings params
-  // or get all and filter on client ?
+  const { settings } = useWidget();
+
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery(
     trpc.reports.getIncomes.queryOptions({
@@ -47,25 +38,7 @@ export function IncomeWidget(props: Props) {
     }),
   );
 
-  const updateUserWidgetMutation = useMutation(
-    trpc.preferences.updateUserWidget.mutationOptions({
-      onError: (error) => {
-        toast.error(error.message);
-      },
-      onSuccess: () => {
-        void queryClient.invalidateQueries({
-          queryKey: trpc.preferences.getUserWidgets.queryKey(),
-        });
-      },
-    }),
-  );
-
-  const handleSettingsSave = () => {
-    updateUserWidgetMutation.mutate({
-      id: "income",
-      settings,
-    });
-  };
+  console.log(data);
 
   useEffect(() => {
     if (data) {
@@ -75,41 +48,41 @@ export function IncomeWidget(props: Props) {
           : data.summary.netIncome,
       );
     }
-  }, [data]);
+  }, [data, settings?.type]);
 
   return (
-    <WidgetProvider onSettingsChange={handleSettingsSave}>
-      <Widget>
-        <WidgetHeader>
-          <WidgetTitle className="flex items-center gap-3">
-            <TrendingUpIcon className="size-4 text-muted-foreground" />
-            Income this month
-          </WidgetTitle>
-          <WidgetDescription>Income</WidgetDescription>
+    <Widget>
+      <WidgetHeader>
+        <WidgetTitle className="flex items-center gap-3">
+          <TrendingUpIcon className="size-4 text-muted-foreground" />
+          Income this month
+        </WidgetTitle>
+        <WidgetDescription>Income</WidgetDescription>
+        <WidgetSettingsTrigger />
+      </WidgetHeader>
 
-          <WidgetSettingsTrigger />
-        </WidgetHeader>
-
-        <WidgetContent className="flex items-end">
-          <span className="font-mono text-2xl font-medium">
+      {/* View mode */}
+      <WidgetContent className="flex items-end">
+        <span className="font-mono text-2xl font-medium">
+          {isLoading ? (
+            <Skeleton className="h-[30px] w-[150px]" />
+          ) : (
             <AnimatedNumber
               value={amount}
               currency={data?.summary.currency ?? space?.baseCurrency ?? "EUR"}
             />
-          </span>
-        </WidgetContent>
+          )}
+        </span>
+      </WidgetContent>
 
-        <WidgetSettings>
-          <IncomeWidgetSettingsForm
-            settings={settings}
-            setSettings={setSettings}
-          />
-        </WidgetSettings>
+      {/* Edit mode */}
+      <WidgetSettings>
+        <IncomeWidgetSettings />
+      </WidgetSettings>
 
-        <WidgetFooter>
-          <WidgetAction>View income trends</WidgetAction>
-        </WidgetFooter>
-      </Widget>
-    </WidgetProvider>
+      <WidgetFooter>
+        <WidgetAction>View income trends</WidgetAction>
+      </WidgetFooter>
+    </Widget>
   );
 }
