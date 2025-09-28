@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatedNumber } from "~/components/animated-number";
 import { useSpaceQuery } from "~/hooks/use-space";
-import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import { TrendingUpIcon } from "lucide-react";
+import { toast } from "sonner";
 
 import {
   Widget,
@@ -24,18 +24,21 @@ import {
 import { IncomeWidgetSettingsForm } from "./income-widget-settings-form";
 
 type Props = {
-  period?: "month";
-  type?: "gross" | "net";
+  defaultSettings: {
+    period?: "month";
+    type?: "gross" | "net";
+  };
 };
 
 export function IncomeWidget(props: Props) {
-  const { period = "month", type = "gross" } = props;
+  const [settings, setSettings] = useState(props.defaultSettings);
   const [amount, setAmount] = useState(0);
   const { data: space } = useSpaceQuery();
 
   // TODO: get income from trpc procedure with settings params
   // or get all and filter on client ?
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery(
     trpc.reports.getIncomes.queryOptions({
@@ -44,16 +47,38 @@ export function IncomeWidget(props: Props) {
     }),
   );
 
+  const updateUserWidgetMutation = useMutation(
+    trpc.preferences.updateUserWidget.mutationOptions({
+      onError: (error) => {
+        toast.error(error.message);
+      },
+      onSuccess: () => {
+        void queryClient.invalidateQueries({
+          queryKey: trpc.preferences.getUserWidgets.queryKey(),
+        });
+      },
+    }),
+  );
+
+  const handleSettingsSave = () => {
+    updateUserWidgetMutation.mutate({
+      id: "income",
+      settings,
+    });
+  };
+
   useEffect(() => {
     if (data) {
       setAmount(
-        type === "gross" ? data.summary.grossIncome : data.summary.netIncome,
+        settings?.type === "gross"
+          ? data.summary.grossIncome
+          : data.summary.netIncome,
       );
     }
   }, [data]);
 
   return (
-    <WidgetProvider>
+    <WidgetProvider onSettingsChange={handleSettingsSave}>
       <Widget>
         <WidgetHeader>
           <WidgetTitle className="flex items-center gap-3">
@@ -75,7 +100,10 @@ export function IncomeWidget(props: Props) {
         </WidgetContent>
 
         <WidgetSettings>
-          <IncomeWidgetSettingsForm {...props} />
+          <IncomeWidgetSettingsForm
+            settings={settings}
+            setSettings={setSettings}
+          />
         </WidgetSettings>
 
         <WidgetFooter>

@@ -1,23 +1,44 @@
 "use client";
 
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { cn } from "~/lib/utils";
-import { endOfMonth, subMonths } from "date-fns";
-import {
-  BarChartIcon,
-  HeartPulseIcon,
-  ReceiptEuroIcon,
-  ShapesIcon,
-  TagIcon,
-} from "lucide-react";
+import { useTRPC } from "~/shared/helpers/trpc/client";
+import { FlameIcon, ReceiptIcon, ShapesIcon } from "lucide-react";
 
-import { Button } from "./ui/button";
+import { Skeleton } from "./ui/skeleton";
+
+type SuggestedAction =
+  RouterOutput["suggestedActions"]["list"]["actions"][number];
+
+export function SuggestedActionsSkeleton() {
+  return (
+    <div className="flex w-full items-center justify-center px-6 py-4">
+      <div className="flex gap-3">
+        {Array.from({ length: 6 }, (_, i) => (
+          <Skeleton
+            key={`suggested-skeleton-${Date.now()}-${i}`}
+            className="h-10 w-24"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function SuggestedActions() {
   const { sendMessage } = useChatActions();
   const { setChatId } = useChatInterface();
   const chatId = useChatId();
+  const trpc = useTRPC();
+
+  const { data: suggestedActionsData } = useSuspenseQuery(
+    trpc.suggestedActions.list.queryOptions({
+      limit: 6,
+    }),
+  );
 
   const handleToolCall = (params: {
     toolName: string;
@@ -28,7 +49,7 @@ export function SuggestedActions() {
 
     setChatId(chatId);
 
-    void sendMessage({
+    sendMessage({
       role: "user",
       parts: [{ type: "text", text: params.text }],
       metadata: {
@@ -40,113 +61,70 @@ export function SuggestedActions() {
     });
   };
 
-  const SUGGESTED_ACTIONS = [
+  // UI configuration based on action ID
+  const uiConfig: Record<
+    string,
     {
-      id: "revenue",
-      title: "Revenue",
-      icon: BarChartIcon,
-      onClick: () => {
-        handleToolCall({
-          toolName: "getRevenue",
-          toolParams: {
-            from: subMonths(new Date(), 12).toISOString(),
-            to: endOfMonth(new Date()).toISOString(),
-            currency: "SEK",
-            showCanvas: true,
-          },
-          text: "Get my revenue data",
-        });
-      },
+      icon: React.ComponentType<any>;
+      title: string;
+      description: string;
+    }
+  > = {
+    "get-burn-rate-analysis": {
+      icon: FlameIcon,
+      title: "Burn rate analysis",
+      description: "Analyze my burn rate",
     },
-    {
-      id: "burn-rate",
-      title: "Burn rate",
-      icon: HeartPulseIcon,
-      onClick: () => {
-        handleToolCall({
-          toolName: "getBurnRate",
-          toolParams: {
-            showCanvas: true,
-          },
-          text: "Analyze my burn rate",
-        });
-      },
-    },
-    {
-      id: "expenses",
-      title: "Expenses",
-      icon: TagIcon,
-      onClick: () => {
-        handleToolCall({
-          toolName: "getExpenses",
-          toolParams: {
-            showCanvas: true,
-          },
-          text: "Get my expenses data",
-        });
-      },
-    },
-    {
-      id: "new-task",
-      title: "New task",
-      icon: ShapesIcon,
-      onClick: () => {
-        handleToolCall({
-          toolName: "newTask",
-          toolParams: {},
-          text: "New task",
-        });
-      },
-    },
-    {
-      id: "health-report",
-      title: "Health report",
-      icon: HeartPulseIcon,
-      onClick: () => {
-        handleToolCall({
-          toolName: "healthReport",
-          toolParams: {},
-          text: "Health report",
-        });
-      },
-    },
-    {
-      id: "latest-transactions",
+    "latest-transactions": {
+      icon: ReceiptIcon,
       title: "Latest transactions",
-      icon: ReceiptEuroIcon,
-      onClick: () => {
-        handleToolCall({
-          toolName: "getTransactions",
-          toolParams: {
-            pageSize: 10,
-            sort: ["date", "desc"],
-          },
-          text: "Show me my latest transactions",
-        });
-      },
+      description: "Show me my latest transactions",
     },
-  ];
+    "expenses-breakdown": {
+      icon: ShapesIcon,
+      title: "Expense Breakdown",
+      description: "Show me my expense breakdown",
+    },
+  };
+
+  const suggestedActions = suggestedActionsData.actions;
 
   return (
     <div className="flex w-full items-center justify-center px-6 py-4">
       <div className="scrollbar-hide flex gap-3 overflow-x-auto">
-        {SUGGESTED_ACTIONS.map((action) => {
-          const Icon = action.icon;
+        {suggestedActions.map((action: SuggestedAction) => {
+          const config = uiConfig[action.id];
+          const Icon = config?.icon;
+          const title = config?.title || action.id;
+          const description =
+            config?.description || `Execute ${action.toolName}`;
+
           return (
-            <Button
+            <button
               key={action.id}
               type="button"
-              variant="outline"
               className={cn(
-                "flex min-w-fit items-center gap-3 px-4 py-3",
-                "font-regular text-sm text-foreground",
-                "whitespace-nowrap",
+                "border border-[#e6e6e6] dark:border-[#1d1d1d]",
+                "hover:border-[#d0d0d0] hover:bg-[#f7f7f7]",
+                "dark:hover:border-[#2a2a2a] dark:hover:bg-[#131313]",
+                "flex cursor-pointer items-center gap-2 px-3 py-2",
+                "min-w-fit whitespace-nowrap transition-all duration-300",
               )}
-              onClick={action.onClick}
+              onClick={() => {
+                handleToolCall({
+                  toolName: action.toolName,
+                  toolParams: action.toolParams,
+                  text: description,
+                });
+              }}
             >
-              <Icon className="h-4 w-4 text-muted-foreground" />
-              {action.title}
-            </Button>
+              {Icon && (
+                <Icon className="h-4 w-4 text-[#707070] dark:text-[#666666]" />
+              )}
+              <span className="text-[12px] font-medium text-black dark:text-white">
+                {title}
+              </span>
+            </button>
           );
         })}
       </div>

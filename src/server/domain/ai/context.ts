@@ -1,4 +1,4 @@
-import type { ChatUserContext } from "~/server/chat-cache";
+import type { ChatUserContext } from "~/server/cache/chat-cache";
 import type { DBClient } from "~/server/db";
 import { createTypedContext } from "@ai-sdk-tools/artifacts";
 

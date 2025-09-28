@@ -10,10 +10,10 @@ export const toolDisplayConfig = {
     displayText: "Getting Burn Rate Data",
     icon: TrendingUpIcon,
   },
-  web_search: {
-    displayText: "Searching the Web",
-    icon: SearchIcon,
-  },
+  // google_search: {
+  //   displayText: "Searching the Web",
+  //   icon: SearchIcon,
+  // },
 } as const;
 
 export type SupportedToolName = keyof typeof toolDisplayConfig;

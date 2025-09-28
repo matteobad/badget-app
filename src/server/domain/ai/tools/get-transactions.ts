@@ -78,7 +78,7 @@ export const getTransactionsTool = tool({
           name: transaction.name,
           amount: formattedAmount,
           date: formatDate(transaction.date),
-          category: transaction.category?.name || "Uncategorized",
+          category: transaction.category?.name ?? "Uncategorized",
         };
       });
 

@@ -134,6 +134,13 @@
       "when": 1758893338012,
       "tag": "0018_panoramic_kid_colt",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1758912787375,
+      "tag": "0019_talented_sumo",
+      "breakpoints": true
     }
   ]
 }

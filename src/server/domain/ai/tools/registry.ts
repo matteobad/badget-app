@@ -23,6 +23,20 @@ export const toolMetadata = {
       /*"getBurnRate", "getBurnRateAnalysis", "getExpenses"*/
     ],
   },
+  getExpensesBreakdown: {
+    name: "getExpensesBreakdown",
+    title: "Expenses Breakdown",
+    description:
+      "Retrieve and analyze financial expenses with advanced filtering, search, and sorting capabilities",
+    relatedTools: ["getTransactions"],
+  },
+  getForecast: {
+    name: "getForecast",
+    title: "Forecast",
+    description:
+      "Retrieve and analyze financial forecast with advanced filtering, search, and sorting capabilities",
+    relatedTools: ["getTransactions"],
+  },
 } as const;
 
 export type ToolName = keyof typeof toolMetadata;

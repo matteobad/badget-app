@@ -1,26 +1,26 @@
 "use client";
 
+import { useWidgetParams } from "~/hooks/use-widget-params";
 import { LayoutGridIcon } from "lucide-react";
 
 import { Button } from "../ui/button";
 
-type Props = {
-  isCustomizing: boolean;
-  onToggle: () => void;
-};
+export function Customize() {
+  const { params, setParams } = useWidgetParams();
 
-export function Customize({ isCustomizing, onToggle }: Props) {
+  const isEditing = !!params.isEditing;
+
   return (
     <Button
       variant="outline"
       className="space-x-2"
       onClick={(e) => {
         e.preventDefault();
-        onToggle();
+        void setParams({ isEditing: !isEditing });
       }}
       type="button"
     >
-      <span>{isCustomizing ? "Save" : "Customize"}</span>
+      <span>{isEditing ? "Save" : "Customize"}</span>
       <LayoutGridIcon size={16} className="text-muted-foreground" />
     </Button>
   );

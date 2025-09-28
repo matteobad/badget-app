@@ -1,4 +1,4 @@
-import type { ChatUserContext } from "~/server/chat-cache";
+import type { ChatUserContext } from "~/server/cache/chat-cache";
 import { google } from "@ai-sdk/google";
 import { TZDate } from "@date-fns/tz";
 import { generateObject } from "ai";
@@ -29,7 +29,7 @@ export const generateTitle = async ({
       return null;
     }
 
-    const userTimezone = timezone || "UTC";
+    const userTimezone = timezone ?? "UTC";
     const tzDate = new TZDate(new Date(), userTimezone);
 
     const titleResult = await generateObject({

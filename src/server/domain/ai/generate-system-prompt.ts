@@ -1,4 +1,4 @@
-import type { ChatUserContext } from "~/server/chat-cache";
+import type { ChatUserContext } from "~/server/cache/chat-cache";
 import { TZDate } from "@date-fns/tz";
 
 import { safeValue } from "./utils/safe-value";
@@ -88,7 +88,7 @@ export const generateSystemPrompt = (
   // Force web search if requested
   if (webSearch) {
     prompt +=
-      "\n\nIMPORTANT: The user has specifically requested web search for this query. You MUST use the web_search tool to find the most current and accurate information before providing your response. Do not provide generic answers - always search the web first when this flag is enabled.";
+      "\n\nIMPORTANT: The user has specifically requested web search for this query. You MUST use the google_search tool to find the most current and accurate information before providing your response. Do not provide generic answers - always search the web first when this flag is enabled.";
   }
 
   return prompt;

@@ -4,11 +4,17 @@ import { SettingsIcon } from "lucide-react";
 
 import { Button } from "../ui/button";
 
+type WidgetSettings = {
+  period?: string;
+  type?: string;
+};
+
 type WidgetContextProps = {
   state: "view" | "edit";
   open: boolean;
   setOpen: (open: boolean) => void;
   openSettings: () => void;
+  saveSettings: () => void;
 };
 
 const WidgetContext = React.createContext<WidgetContextProps | null>(null);
@@ -26,11 +32,13 @@ function WidgetProvider({
   defaultOpen = false,
   open: openProp,
   onOpenChange: setOpenProp,
+  onSettingsChange: setSettingsProp,
   children,
 }: React.ComponentProps<"div"> & {
   defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onSettingsChange?: () => void;
 }) {
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -52,6 +60,11 @@ function WidgetProvider({
   const openSettings = React.useCallback(() => {
     setOpen(() => true);
   }, [setOpen]);
+
+  // Helper to save widget settings.
+  const saveSettings = React.useCallback(() => {
+    setSettingsProp?.();
+  }, [setSettingsProp]);
 
   // Adds a keyboard shortcut to open the widget settings.
   // React.useEffect(() => {
@@ -79,8 +92,9 @@ function WidgetProvider({
       open,
       setOpen,
       openSettings,
+      saveSettings,
     }),
-    [state, open, setOpen, openSettings],
+    [state, open, setOpen, saveSettings],
   );
 
   return (
@@ -168,7 +182,7 @@ function WidgetAction({
   children,
   ...props
 }: React.ComponentProps<"div">) {
-  const { open, setOpen } = useWidget();
+  const { open, saveSettings } = useWidget();
 
   return (
     <div
@@ -183,7 +197,7 @@ function WidgetAction({
       {...props}
     >
       {open ? (
-        <button type="button" onClick={() => setOpen(false)}>
+        <button type="button" onClick={saveSettings}>
           Save
         </button>
       ) : (

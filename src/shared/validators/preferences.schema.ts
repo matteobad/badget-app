@@ -33,3 +33,19 @@ export const assignAccountToGroupSchema = z.object({
 export type AccountGroupInput = z.infer<typeof accountGroupSchema>;
 export type PreferencesInput = z.infer<typeof preferencesSchema>;
 export type PreferencesUpdateInput = z.infer<typeof updatePreferencesSchema>;
+
+const userWidgetSchema = z.object({
+  id: z.string(),
+  settings: z
+    .object({
+      period: z.string().optional(),
+      type: z.string().optional(),
+    })
+    .optional(),
+});
+
+export const updateUserWidgetsSchema = z.object({
+  widgets: z.array(userWidgetSchema),
+});
+
+export const updateUserWidgetSchema = userWidgetSchema;

@@ -311,6 +311,6 @@ export const useChatStore = create<ChatState>()((set, get) => ({
 
   selectCurrentCommand: () => {
     const { filteredCommands, selectedCommandIndex } = get();
-    return filteredCommands[selectedCommandIndex] || null;
+    return filteredCommands[selectedCommandIndex] ?? null;
   },
 }));

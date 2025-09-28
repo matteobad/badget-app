@@ -1,6 +1,6 @@
-import type { ChatUserContext } from "~/server/chat-cache";
+import type { ChatUserContext } from "~/server/cache/chat-cache";
 import type { DBClient } from "~/server/db";
-import { chatCache } from "~/server/chat-cache";
+import { chatCache } from "~/server/cache/chat-cache";
 import { getSpaceById } from "~/server/services/better-auth-service";
 import { getUserById } from "~/server/services/user-service";
 import { HTTPException } from "hono/http-exception";

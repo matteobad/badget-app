@@ -6,6 +6,7 @@ import { geolocation } from "@vercel/functions";
 import { ChatInterface } from "~/components/chat/chat-interface";
 import { Widgets } from "~/components/widgets";
 import {
+  batchPrefetch,
   getQueryClient,
   HydrateClient,
   trpc,
@@ -31,6 +32,12 @@ export default async function Overview(props: Props) {
   });
 
   const queryClient = getQueryClient();
+
+  // prefetch user widget preferences and settings
+  batchPrefetch([
+    trpc.preferences.getUserWidgets.queryOptions(),
+    trpc.suggestedActions.list.queryOptions({ limit: 6 }),
+  ]);
 
   const chat = currentChatId
     ? await queryClient.fetchQuery(

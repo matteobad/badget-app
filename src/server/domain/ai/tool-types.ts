@@ -1,5 +1,4 @@
 import type { InferUITools } from "ai";
-import { google } from "@ai-sdk/google";
 
 // import { getContext } from "./context";
 import { getTransactionsTool } from "./tools/get-transactions";
@@ -12,7 +11,7 @@ export const createToolRegistry = () => {
     // getBurnRate: getBurnRateTool,
     // getBurnRateAnalysis: getBurnRateAnalysisTool,
     getTransactions: getTransactionsTool,
-    // web_search: google.tools.googleSearch({
+    // google_search: google.tools.googleSearch({
     // searchContextSize: "medium",
     // userLocation: {
     //   type: "approximate",

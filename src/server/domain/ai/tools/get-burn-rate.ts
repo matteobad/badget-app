@@ -53,7 +53,7 @@ export const getBurnRateTool = tool({
       // Calculate basic metrics from burn rate data
       const currentMonthlyBurn =
         burnRateData.length > 0
-          ? burnRateData[burnRateData.length - 1]?.value || 0
+          ? (burnRateData[burnRateData.length - 1]?.value ?? 0)
           : 0;
 
       // Get the highest spending category (first item is highest)
@@ -67,11 +67,11 @@ export const getBurnRateTool = tool({
               percentage: 0,
             };
 
-      const highestCategoryPercentage = highestCategory?.percentage || 0;
+      const highestCategoryPercentage = highestCategory?.percentage ?? 0;
 
       // Calculate burn rate change for metrics
       const burnRateStartValue =
-        burnRateData.length > 0 ? burnRateData[0]?.value || 0 : 0;
+        burnRateData.length > 0 ? (burnRateData[0]?.value ?? 0) : 0;
       const burnRateEndValue = currentMonthlyBurn;
       const burnRateChangePercentage =
         burnRateStartValue > 0
@@ -93,7 +93,7 @@ export const getBurnRateTool = tool({
           locale: context.user.locale ?? undefined,
         }),
         runway: runway,
-        topCategory: highestCategory?.name || "Uncategorized",
+        topCategory: highestCategory?.name ?? "Uncategorized",
         topCategoryPercentage: highestCategoryPercentage,
         burnRateChange: burnRateChangePercentage,
         burnRateChangePeriod: burnRateChangePeriod,
@@ -122,7 +122,7 @@ export const getBurnRateTool = tool({
         context: "burn_rate",
       });
 
-      followupStream.complete();
+      await followupStream.complete();
     } catch (error) {
       console.error(error);
       throw error;

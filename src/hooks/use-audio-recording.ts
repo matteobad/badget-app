@@ -144,7 +144,7 @@ export function useAudioRecording(): UseAudioRecordingReturn {
         const data = await response.json();
 
         if (!data.success) {
-          throw new Error(data.error || "Transcription failed");
+          throw new Error(data.error ?? "Transcription failed");
         }
 
         return data.text;
