@@ -118,17 +118,14 @@ export async function getIncomes(db: DBClient, params: GetIncomesParams) {
   };
 }
 
-export type GetIncomeAnalysisParams = {
+export type GetSavingsParams = {
   organizationId: string;
   from: string;
   to: string;
   currency?: string;
 };
 
-export async function getIncomeAnalysis(
-  db: DBClient,
-  params: GetIncomeAnalysisParams,
-) {
+export async function getSavings(db: DBClient, params: GetSavingsParams) {
   const { organizationId, from, to, currency } = params;
 
   const result = await db
@@ -142,34 +139,44 @@ export async function getIncomeAnalysis(
     `.mapWith(Number),
     })
     .from(transaction_table)
+    .leftJoin(
+      transaction_category_table,
+      and(
+        eq(
+          transaction_category_table.organizationId,
+          transaction_table.organizationId,
+        ),
+        eq(transaction_category_table.slug, transaction_table.categorySlug),
+      ),
+    )
     .where(
       and(
         eq(transaction_table.organizationId, organizationId),
         gte(transaction_table.date, from),
         lte(transaction_table.date, to),
         not(transaction_table.internal),
+        not(transaction_category_table.excluded),
       ),
     )
     .groupBy(sql`date_trunc('month', ${transaction_table.date})`)
     .orderBy(sql`date_trunc('month', ${transaction_table.date})`);
 
   // Compute average delta (savings = income - expenses) over the result set
-  let averageSavings = 0;
+  let savings = 0;
   if (result && result.length > 0) {
-    const totalDelta = result.reduce(
+    savings = result.reduce(
       (sum, row) => sum + ((row.income ?? 0) - (row.expenses ?? 0)),
       0,
     );
-    averageSavings = totalDelta / result.length;
   }
 
   return {
     summary: {
-      averageSavings, // grossIncome: grossIncome,
+      savings, // grossIncome: grossIncome,
       currency,
     },
     meta: {
-      type: "income-analysis",
+      type: "savings",
       currency,
     },
     result,

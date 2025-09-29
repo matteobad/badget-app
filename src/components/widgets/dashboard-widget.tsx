@@ -4,11 +4,11 @@ import { useTRPC } from "~/shared/helpers/trpc/client";
 import { toast } from "sonner";
 
 import { CategoryExpensesWidget } from "./category-expenses/category-expenses-widget";
-import { IncomeAnalysisWidget } from "./income-analysis/income-analysis-widget";
 import { IncomeWidget } from "./income/income-widget";
 import { MonthlySpendingWidget } from "./monthly-spending/monthly-spending-widget";
 import { NetWorthWidget } from "./net-worth/net-worth-widget";
 import { RecurringWidget } from "./recurring/recurring-widget";
+import { SavingsWidget } from "./savings/savings-widget";
 import { UncategorizedTransactionsWidget } from "./uncategorized-transactions/uncategorized-transactions-widget";
 import { Widget, WidgetHeader, WidgetProvider, WidgetTitle } from "./widget";
 
@@ -63,8 +63,8 @@ export function DashboardWidget({
         return <RecurringWidget />;
       case "uncategorized-transactions":
         return <UncategorizedTransactionsWidget />;
-      case "income-analysis":
-        return <IncomeAnalysisWidget />;
+      case "savings":
+        return <SavingsWidget />;
 
       default:
         return (

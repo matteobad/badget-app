@@ -89,11 +89,16 @@ export function StyledTooltip({
   payload,
   label,
   formatter,
+  labelFormatter,
 }: {
   active?: boolean;
   payload?: any[];
   label?: string;
   formatter?: (value: any, name: string) => [string, string];
+  // TODO: do better than this
+  labelFormatter?: React.ComponentProps<
+    typeof RechartsPrimitive.Tooltip
+  >["labelFormatter"];
 }) {
   if (active && payload && payload.length) {
     return (
@@ -105,7 +110,9 @@ export function StyledTooltip({
           boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <p className="mb-1 text-gray-500 dark:text-[#666666]">{label}</p>
+        <p className="mb-1 text-gray-500 capitalize dark:text-[#666666]">
+          {labelFormatter ? labelFormatter(label, payload) : label}
+        </p>
         {payload.map((entry, index) => {
           const value = typeof entry.value === "number" ? entry.value : 0;
           const [formattedValue, name] = formatter
@@ -115,9 +122,12 @@ export function StyledTooltip({
           return (
             <p
               key={`${entry.dataKey}-${index}`}
-              className="text-black dark:text-white"
+              className="flex w-full justify-between gap-4 text-black dark:text-white"
             >
-              {name}: {formattedValue}
+              <span>{name}:</span>
+              <span className="text-right font-mono tabular-nums">
+                {formattedValue}
+              </span>
             </p>
           );
         })}

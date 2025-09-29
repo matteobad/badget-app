@@ -23,7 +23,7 @@ export const INITIAL_WIDGETS: Widget[] = [
     id: "uncategorized-transactions",
   },
   {
-    id: "income-analysis",
+    id: "savings",
   },
   {
     id: "average-expenses",
