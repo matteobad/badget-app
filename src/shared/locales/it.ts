@@ -56,6 +56,13 @@ export default {
       title: "Spese per categoria",
       action: "Vedi grafico dettagliato",
     },
+    "recurring-tracker": {
+      title: "Costi fissi",
+      action: "Vedi dettaglio spese ricorrenti",
+      content: {
+        label: "Spese ricorrenti questo mese",
+      },
+    },
   },
 
   auth: {

@@ -56,6 +56,13 @@ export default {
       title: "Category expenses",
       action: "See detailed graph",
     },
+    "recurring-tracker": {
+      title: "Fixed costs",
+      action: "See recurring details",
+      content: {
+        label: "Recurring this month",
+      },
+    },
   },
 
   auth: {

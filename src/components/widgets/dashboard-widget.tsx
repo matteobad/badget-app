@@ -51,20 +51,20 @@ export function DashboardWidget({
 
   const renderContent = () => {
     switch (widget.id) {
-      case "category-expenses":
-        return <CategoryExpensesWidget />;
-      case "income":
-        return <IncomeWidget />;
-      case "income-analysis":
-        return <IncomeAnalysisWidget />;
-      case "monthly-spending":
-        return <MonthlySpendingWidget />;
       case "net-worth":
         return <NetWorthWidget />;
-      case "recurring":
+      case "income":
+        return <IncomeWidget />;
+      case "monthly-spending":
+        return <MonthlySpendingWidget />;
+      case "category-expenses":
+        return <CategoryExpensesWidget />;
+      case "recurring-tracker":
         return <RecurringWidget />;
       case "uncategorized":
         return <UncategorizedWidget />;
+      case "income-analysis":
+        return <IncomeAnalysisWidget />;
 
       default:
         return (
