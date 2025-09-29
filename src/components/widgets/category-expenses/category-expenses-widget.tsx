@@ -1,11 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "~/components/ui/skeleton";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { useScopedI18n } from "~/shared/locales/client";
 import { endOfMonth, format, startOfMonth } from "date-fns";
-import { ShapesIcon, TrendingUpIcon } from "lucide-react";
+import { ShapesIcon } from "lucide-react";
 
 import {
   Widget,
@@ -13,15 +15,36 @@ import {
   WidgetContent,
   WidgetFooter,
   WidgetHeader,
-  WidgetProvider,
   WidgetTitle,
 } from "../widget";
 
+function CategoryExpensesWidgetSkeleton() {
+  return (
+    <>
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-3 w-[110px]" />
+        <Skeleton className="h-3 w-[100px]" />
+        <Skeleton className="h-3 w-[20px]" />
+      </div>
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-3 w-[110px]" />
+        <Skeleton className="h-3 w-[70]" />
+        <Skeleton className="h-3 w-[20px]" />
+      </div>
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-3 w-[110px]" />
+        <Skeleton className="h-3 w-[50px]" />
+        <Skeleton className="h-3 w-[20px]" />
+      </div>
+    </>
+  );
+}
+
 export function CategoryExpensesWidget() {
+  const tCategoryExpenses = useScopedI18n("widgets.category-expenses");
+
   const { data: space } = useSpaceQuery();
 
-  // TODO: get income from trpc procedure with settings params
-  // or get all and filter on client ?
   const trpc = useTRPC();
 
   const { data, isLoading } = useQuery(
@@ -34,17 +57,20 @@ export function CategoryExpensesWidget() {
   const higherValue = data?.result[0]?.total ?? 1;
 
   return (
-    <WidgetProvider>
-      <Widget>
-        <WidgetHeader>
-          <WidgetTitle className="flex items-center gap-3">
-            <ShapesIcon className="size-4 text-muted-foreground" />
-            Category expenses
-          </WidgetTitle>
-        </WidgetHeader>
+    <Widget>
+      <WidgetHeader>
+        <WidgetTitle className="flex items-center gap-3">
+          <ShapesIcon className="size-4 text-muted-foreground" />
+          {tCategoryExpenses("title")}
+        </WidgetTitle>
+      </WidgetHeader>
 
-        <WidgetContent className="flex flex-col gap-2">
-          {data?.result.map((item) => {
+      {/* View mode */}
+      <WidgetContent className="flex flex-col gap-2">
+        {isLoading ? (
+          <CategoryExpensesWidgetSkeleton />
+        ) : (
+          data?.result.map((item) => {
             return (
               <div className="flex items-center gap-4">
                 <span className="line-clamp-1 w-[110px] shrink-0 text-xs text-muted-foreground">
@@ -69,13 +95,13 @@ export function CategoryExpensesWidget() {
                 </div>
               </div>
             );
-          })}
-        </WidgetContent>
+          })
+        )}
+      </WidgetContent>
 
-        <WidgetFooter>
-          <WidgetAction>See detailed graph</WidgetAction>
-        </WidgetFooter>
-      </Widget>
-    </WidgetProvider>
+      <WidgetFooter>
+        <WidgetAction>{tCategoryExpenses("action")}</WidgetAction>
+      </WidgetFooter>
+    </Widget>
   );
 }

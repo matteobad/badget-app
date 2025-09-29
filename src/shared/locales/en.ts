@@ -52,6 +52,10 @@ export default {
       description: "Spending this month",
       action: "Vedi spese più impattanti",
     },
+    "category-expenses": {
+      title: "Category expenses",
+      action: "See detailed graph",
+    },
   },
 
   auth: {
