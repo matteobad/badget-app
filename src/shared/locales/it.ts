@@ -28,6 +28,11 @@ export default {
   },
 
   widgets: {
+    header: {
+      subtitle: "ecco una rapida panoramica di come stanno andando le cose.",
+      customize: "Personalizza",
+      save: "Salva",
+    },
     "net-worth": {
       title: "Patrimonio netto",
       description: {

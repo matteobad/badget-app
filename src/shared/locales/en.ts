@@ -28,6 +28,11 @@ export default {
   },
 
   widgets: {
+    header: {
+      subtitle: "here's a quick look at how things are going.",
+      customize: "Customize",
+      save: "Save",
+    },
     "net-worth": {
       title: "Net worth",
       description: {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { TZDate } from "@date-fns/tz";
 import { useUserQuery } from "~/hooks/use-user";
+import { useScopedI18n } from "~/shared/locales/client";
 
 import { ChatHistory } from "../chat/chat-history";
 import { Customize } from "./customize";
@@ -27,6 +28,8 @@ function getTimeBasedGreeting(timezone?: string): string {
 }
 
 export function WidgetsHeader() {
+  const tHeader = useScopedI18n("widgets.header");
+
   const { data: user } = useUserQuery();
 
   const [greeting, setGreeting] = useState(() =>
@@ -60,7 +63,7 @@ export function WidgetsHeader() {
           </span>
         </h1>
         <p className="text-[14px] text-muted-foreground">
-          here&apos;s a quick look at how things are going.
+          {tHeader("subtitle")}
         </p>
       </div>
 

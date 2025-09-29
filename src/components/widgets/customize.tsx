@@ -1,11 +1,14 @@
 "use client";
 
 import { useWidgetParams } from "~/hooks/use-widget-params";
+import { useScopedI18n } from "~/shared/locales/client";
 import { CheckIcon, LayoutGridIcon } from "lucide-react";
 
 import { Button } from "../ui/button";
 
 export function Customize() {
+  const tHeader = useScopedI18n("widgets.header");
+
   const { params, setParams } = useWidgetParams();
 
   const isEditing = !!params.isEditing;
@@ -20,7 +23,7 @@ export function Customize() {
       }}
       type="button"
     >
-      <span>{isEditing ? "Save" : "Customize"}</span>
+      <span>{isEditing ? tHeader("save") : tHeader("customize")}</span>
       {isEditing ? (
         <CheckIcon size={16} className="text-muted-foreground" />
       ) : (
