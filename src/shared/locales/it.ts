@@ -47,6 +47,11 @@ export default {
       description: "Entrate",
       action: "Vedi andamenti entrate",
     },
+    "monthly-spending": {
+      title: "Spese mensili",
+      description: "Spese questo mese",
+      action: "Vedi spese più impattanti",
+    },
   },
 
   auth: {

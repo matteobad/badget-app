@@ -107,7 +107,7 @@ export function SuggestedActions() {
   }
 
   return (
-    <div className="flex w-full items-center justify-center px-6 py-4">
+    <div className="flex w-full items-center justify-center px-6 pb-4">
       <div className="scrollbar-hide flex gap-3 overflow-x-auto">
         {suggestedActions.map((action: SuggestedAction) => {
           const config = uiConfig[action.id];

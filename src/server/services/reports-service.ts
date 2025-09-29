@@ -194,12 +194,24 @@ export async function getMonthlySpending(
       spending: sql`sum(${transaction_table.amount}) * -1`.mapWith(Number),
     })
     .from(transaction_table)
+    .leftJoin(
+      transaction_category_table,
+      and(
+        eq(
+          transaction_category_table.organizationId,
+          transaction_table.organizationId,
+        ),
+        eq(transaction_category_table.slug, transaction_table.categorySlug),
+      ),
+    )
     .where(
       and(
         eq(transaction_table.organizationId, organizationId),
         gte(transaction_table.date, from),
         lte(transaction_table.date, to),
+        eq(transaction_table.internal, false),
         lt(transaction_table.amount, 0),
+        eq(transaction_category_table.excluded, false),
       ),
     );
 

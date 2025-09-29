@@ -6,6 +6,7 @@ import type { ChartConfig } from "../ui/chart";
 import type { BaseChartProps } from "./chart-utils";
 import { ChartContainer } from "../ui/chart";
 import { StyledTooltip } from "./base-charts";
+import { useChartMargin } from "./chart-utils";
 
 interface NetWorthData {
   date: string;
@@ -41,13 +42,20 @@ export function NetWorthChart({
   height,
   className = "",
 }: NetWorthChartProps) {
+  // Calculate margin using the utility hook
+  // const { marginLeft } = useChartMargin(data, "amount", tickFormatter);
+
   return (
     <ChartContainer
       config={chartConfig}
       className={cn("w-full", className)}
       style={{ height }}
     >
-      <AreaChart accessibilityLayer data={data}>
+      <AreaChart
+        accessibilityLayer
+        data={data}
+        margin={{ left: -8, right: -8, top: 12 }}
+      >
         <CartesianGrid
           strokeOpacity="0"
           vertical={false}

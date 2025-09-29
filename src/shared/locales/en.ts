@@ -47,6 +47,11 @@ export default {
       description: "Income",
       action: "View income trends",
     },
+    "monthly-spending": {
+      title: "Expenses this month",
+      description: "Spending this month",
+      action: "Vedi spese più impattanti",
+    },
   },
 
   auth: {

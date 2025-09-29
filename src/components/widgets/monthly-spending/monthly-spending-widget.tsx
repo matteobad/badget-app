@@ -2,10 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { AnimatedNumber } from "~/components/animated-number";
+import { Skeleton } from "~/components/ui/skeleton";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { useScopedI18n } from "~/shared/locales/client";
 import { endOfMonth, format, startOfMonth } from "date-fns";
-import { BanknoteArrowDownIcon } from "lucide-react";
+import { TrendingDownIcon } from "lucide-react";
 
 import {
   Widget,
@@ -14,14 +16,12 @@ import {
   WidgetDescription,
   WidgetFooter,
   WidgetHeader,
-  WidgetProvider,
-  WidgetSettingsTrigger,
   WidgetTitle,
 } from "../widget";
 
-type Props = {};
+export function MonthlySpendingWidget() {
+  const tMonthlySpending = useScopedI18n("widgets.monthly-spending");
 
-export function MonthlySpendingWidget(props: Props) {
   const { data: space } = useSpaceQuery();
 
   const trpc = useTRPC();
@@ -33,34 +33,33 @@ export function MonthlySpendingWidget(props: Props) {
     }),
   );
 
-  const hasSettings = Object.keys(props).length > 0;
-
   return (
-    <WidgetProvider>
-      <Widget>
-        <WidgetHeader>
-          <WidgetTitle className="flex items-center gap-3">
-            <BanknoteArrowDownIcon className="size-4 text-muted-foreground" />
-            Monthly spending
-          </WidgetTitle>
-          <WidgetDescription>Spending this month</WidgetDescription>
+    <Widget>
+      <WidgetHeader>
+        <WidgetTitle className="flex items-center gap-3">
+          <TrendingDownIcon className="size-4 text-muted-foreground" />
+          {tMonthlySpending("title")}
+        </WidgetTitle>
+        <WidgetDescription>{tMonthlySpending("description")}</WidgetDescription>
+      </WidgetHeader>
 
-          {hasSettings && <WidgetSettingsTrigger {...props} />}
-        </WidgetHeader>
-
-        <WidgetContent className="flex items-end">
-          <span className="font-mono text-2xl font-medium">
+      {/* View mode */}
+      <WidgetContent className="flex items-end">
+        <span className="font-mono text-2xl font-medium">
+          {isLoading ? (
+            <Skeleton className="h-[30px] w-[150px]" />
+          ) : (
             <AnimatedNumber
               value={data?.result?.spending ?? 0}
               currency={data?.summary.currency ?? space?.baseCurrency ?? "EUR"}
             />
-          </span>
-        </WidgetContent>
+          )}
+        </span>
+      </WidgetContent>
 
-        <WidgetFooter>
-          <WidgetAction>See biggest cost</WidgetAction>
-        </WidgetFooter>
-      </Widget>
-    </WidgetProvider>
+      <WidgetFooter>
+        <WidgetAction>{tMonthlySpending("action")}</WidgetAction>
+      </WidgetFooter>
+    </Widget>
   );
 }
