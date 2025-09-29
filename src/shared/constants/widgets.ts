@@ -5,42 +5,39 @@ export const INITIAL_WIDGETS: Widget[] = [
     id: "insights",
   },
   {
+    id: "net-worth",
+  },
+  {
     id: "income",
-  },
-  {
-    id: "category-expenses",
-  },
-  {
-    id: "uncategorized",
   },
   {
     id: "monthly-spending",
   },
   {
-    id: "net-worth",
+    id: "category-expenses",
   },
   {
-    id: "recurring",
+    id: "recurring-tracker",
+  },
+  {
+    id: "uncategorized-transactions",
   },
   {
     id: "income-analysis",
   },
   {
-    id: "taxes",
+    id: "average-expenses",
   },
   {
-    id: "top-customers",
-  },
-  {
-    id: "profit-margin",
+    id: "biggest-transactions",
   },
   {
     id: "cash-flow",
   },
   {
-    id: "growth-rate",
+    id: "savings-rate",
   },
   {
-    id: "payroll",
+    id: "account-balances",
   },
 ] as const;

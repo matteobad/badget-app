@@ -40,6 +40,8 @@ const userWidgetSchema = z.object({
     .object({
       period: z.string().optional(),
       type: z.string().optional(),
+      from: z.string().optional(),
+      to: z.string().optional(),
     })
     .optional(),
 });

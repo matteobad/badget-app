@@ -38,8 +38,6 @@ export function IncomeWidget() {
     }),
   );
 
-  console.log(data);
-
   useEffect(() => {
     if (data) {
       setAmount(

@@ -44,7 +44,7 @@ export function DashboardWidget({
 
   const handleSettingsChange = (id: string, newSettings: any) => {
     updateUserWidgetMutation.mutate({
-      id: "income",
+      id: id,
       settings: newSettings,
     });
   };

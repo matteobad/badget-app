@@ -2,12 +2,12 @@
 
 import type * as React from "react";
 import * as RechartsPrimitive from "recharts";
+
 import { commonChartConfig } from "./chart-utils";
 
 // Base Chart Wrapper with common styling
 export function BaseChart({
   data,
-
   margin = { top: 5, right: 5, left: -20, bottom: 5 },
   children,
 }: {
@@ -98,7 +98,7 @@ export function StyledTooltip({
   if (active && payload && payload.length) {
     return (
       <div
-        className="p-2 text-[10px] font-sans border bg-white dark:bg-[#0c0c0c] border-gray-200 dark:border-[#1d1d1d] text-black dark:text-white"
+        className="border border-gray-200 bg-white p-2 font-sans text-[10px] text-black dark:border-[#1d1d1d] dark:bg-[#0c0c0c] dark:text-white"
         style={{
           borderRadius: "0px",
           fontFamily: commonChartConfig.fontFamily,
@@ -141,18 +141,18 @@ export function ChartLegend({
   }[];
 }) {
   return (
-    <div className="flex items-center justify-between mb-4">
-      <h4 className="text-[18px] font-normal font-serif text-black dark:text-white">
+    <div className="mb-4 flex items-center justify-between">
+      <h4 className="font-serif text-[18px] font-normal text-black dark:text-white">
         {title}
       </h4>
-      <div className="flex gap-4 items-center">
+      <div className="flex items-center gap-4">
         {items.map((item, index) => (
           <div
             key={`legend-${item.label}-${index}`}
-            className="flex gap-2 items-center"
+            className="flex items-center gap-2"
           >
             <div
-              className="w-2 h-2"
+              className="h-2 w-2"
               style={{
                 background:
                   item.type === "solid"

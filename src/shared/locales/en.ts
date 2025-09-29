@@ -27,6 +27,23 @@ export default {
     placeholder: "Select timezone",
   },
 
+  widgets: {
+    "net-worth": {
+      title: "Net worth",
+      description: {
+        part_1: "Your",
+        part_2: "net worth is {value}",
+      },
+      action: "See trend",
+      settings: {
+        "1M": "1 Mese",
+        "3M": "3 Mesi",
+        "6M": "6 Mesi",
+        "1Y": "1 Anno",
+      },
+    },
+  },
+
   auth: {
     signin_title: "Welcome to Badget.",
     signin_subtitle: "New here or coming back? Choose how you want to continue",

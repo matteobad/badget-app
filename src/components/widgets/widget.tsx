@@ -8,6 +8,8 @@ import { Button } from "../ui/button";
 type WidgetSettings = {
   period?: string;
   type?: string;
+  from?: string;
+  to?: string;
 };
 
 type WidgetContextProps = {
@@ -206,7 +208,7 @@ function WidgetAction({
     <div
       data-slot="widget-action"
       className={cn(
-        "flex w-full gap-2 text-xs text-muted-foreground/60",
+        "flex w-full gap-4 text-xs text-muted-foreground/60",
         "group-hover:group-data-[state=view]:text-accent-foreground",
         "group-data-[state=edit]:justify-end",
         className,

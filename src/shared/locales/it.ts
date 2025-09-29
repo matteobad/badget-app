@@ -27,6 +27,23 @@ export default {
     placeholder: "Select timezone",
   },
 
+  widgets: {
+    "net-worth": {
+      title: "Patrimonio netto",
+      description: {
+        part_1: "Il tuo",
+        part_2: "patrimonio netto è {value}",
+      },
+      action: "Vedi andamento",
+      settings: {
+        "1M": "1 Mese",
+        "3M": "3 Mesi",
+        "6M": "6 Mesi",
+        "1Y": "1 Anno",
+      },
+    },
+  },
+
   auth: {
     signin_title: "Benvenuto in Badget.",
     signin_subtitle: "Nuovo qui o stai tornando? Scegli come vuoi continuare",
