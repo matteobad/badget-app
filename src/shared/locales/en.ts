@@ -42,6 +42,11 @@ export default {
         "1Y": "1 Anno",
       },
     },
+    income: {
+      title: "Income this month",
+      description: "Income",
+      action: "View income trends",
+    },
   },
 
   auth: {

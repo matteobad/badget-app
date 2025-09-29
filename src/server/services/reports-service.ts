@@ -80,27 +80,34 @@ export async function getIncomes(db: DBClient, params: GetIncomesParams) {
 
   const [result] = await db
     .select({
-      grossIncome:
-        sql`sum(case when ${transaction_table.amount} > 0 then ${transaction_table.amount} else 0 end)`.mapWith(
-          Number,
-        ),
-      netIncome: sql`sum(${transaction_table.amount})`.mapWith(Number),
+      income: sql`sum(${transaction_table.amount})`.mapWith(Number),
     })
     .from(transaction_table)
+    .leftJoin(
+      transaction_category_table,
+      and(
+        eq(
+          transaction_category_table.organizationId,
+          transaction_table.organizationId,
+        ),
+        eq(transaction_category_table.slug, transaction_table.categorySlug),
+      ),
+    )
     .where(
       and(
         eq(transaction_table.organizationId, organizationId),
         gte(transaction_table.date, from),
         lte(transaction_table.date, to),
+        eq(transaction_table.internal, false),
+        gt(transaction_table.amount, 0),
+        eq(transaction_category_table.excluded, false),
       ),
     );
 
-  const netIncome = result?.netIncome ?? 0;
-  const grossIncome = result?.grossIncome ?? 0;
+  const grossIncome = result?.income ?? 0;
 
   return {
     summary: {
-      netIncome: netIncome,
       grossIncome: grossIncome,
       currency,
     },

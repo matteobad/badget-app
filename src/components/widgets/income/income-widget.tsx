@@ -1,62 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatedNumber } from "~/components/animated-number";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { useScopedI18n } from "~/shared/locales/client";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import { TrendingUpIcon } from "lucide-react";
 
 import {
-  useWidget,
   Widget,
   WidgetAction,
   WidgetContent,
   WidgetDescription,
   WidgetFooter,
   WidgetHeader,
-  WidgetSettings,
-  WidgetSettingsTrigger,
   WidgetTitle,
 } from "../widget";
-import { IncomeWidgetSettings } from "./income-widget-settings-form";
 
 export function IncomeWidget() {
-  const [amount, setAmount] = useState(0);
-  const { data: space } = useSpaceQuery();
+  const tIncome = useScopedI18n("widgets.income");
 
-  const { settings } = useWidget();
+  const { data: space } = useSpaceQuery();
 
   const trpc = useTRPC();
 
-  const { data, isLoading } = useQuery(
+  const { data: income, isLoading } = useQuery(
     trpc.reports.getIncomes.queryOptions({
       from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
       to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
     }),
   );
 
-  useEffect(() => {
-    if (data) {
-      setAmount(
-        settings?.type === "gross"
-          ? data.summary.grossIncome
-          : data.summary.netIncome,
-      );
-    }
-  }, [data, settings?.type]);
-
   return (
     <Widget>
       <WidgetHeader>
         <WidgetTitle className="flex items-center gap-3">
           <TrendingUpIcon className="size-4 text-muted-foreground" />
-          Income this month
+          {tIncome("title")}
         </WidgetTitle>
-        <WidgetDescription>Income</WidgetDescription>
-        <WidgetSettingsTrigger />
+        <WidgetDescription>{tIncome("description")}</WidgetDescription>
       </WidgetHeader>
 
       {/* View mode */}
@@ -66,20 +50,17 @@ export function IncomeWidget() {
             <Skeleton className="h-[30px] w-[150px]" />
           ) : (
             <AnimatedNumber
-              value={amount}
-              currency={data?.summary.currency ?? space?.baseCurrency ?? "EUR"}
+              value={income?.summary.grossIncome ?? 0}
+              currency={
+                income?.summary.currency ?? space?.baseCurrency ?? "EUR"
+              }
             />
           )}
         </span>
       </WidgetContent>
 
-      {/* Edit mode */}
-      <WidgetSettings>
-        <IncomeWidgetSettings />
-      </WidgetSettings>
-
       <WidgetFooter>
-        <WidgetAction>View income trends</WidgetAction>
+        <WidgetAction>{tIncome("action")}</WidgetAction>
       </WidgetFooter>
     </Widget>
   );

@@ -42,6 +42,11 @@ export default {
         "1Y": "1 Anno",
       },
     },
+    income: {
+      title: "Entrate questo mese",
+      description: "Entrate",
+      action: "Vedi andamenti entrate",
+    },
   },
 
   auth: {
