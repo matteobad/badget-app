@@ -33,11 +33,13 @@ export default async function Overview(props: Props) {
 
   const queryClient = getQueryClient();
 
+  // Fetch widget preferences directly for initial data (no prefetch needed)
+  const widgetPreferences = await queryClient.fetchQuery(
+    trpc.widgets.getWidgetPreferences.queryOptions(),
+  );
+
   // prefetch user widget preferences and settings
-  batchPrefetch([
-    trpc.preferences.getUserWidgets.queryOptions(),
-    trpc.suggestedActions.list.queryOptions({ limit: 6 }),
-  ]);
+  batchPrefetch([trpc.suggestedActions.list.queryOptions({ limit: 6 })]);
 
   const chat = currentChatId
     ? await queryClient.fetchQuery(
@@ -52,7 +54,7 @@ export default async function Overview(props: Props) {
   return (
     <HydrateClient>
       <ChatProvider initialMessages={chat?.messages}>
-        <Widgets />
+        <Widgets initialPreferences={widgetPreferences} />
 
         <ChatInterface geo={geo} id={currentChatId} />
       </ChatProvider>

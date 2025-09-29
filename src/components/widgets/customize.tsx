@@ -1,30 +1,34 @@
 "use client";
 
-import { useWidgetParams } from "~/hooks/use-widget-params";
+import { usePathname } from "next/navigation";
 import { useScopedI18n } from "~/shared/locales/client";
 import { CheckIcon, LayoutGridIcon } from "lucide-react";
 
 import { Button } from "../ui/button";
+import { useIsCustomizing, useWidgetActions } from "./widget-provider";
 
 export function Customize() {
   const tHeader = useScopedI18n("widgets.header");
 
-  const { params, setParams } = useWidgetParams();
+  const pathname = usePathname();
+  const isCustomizing = useIsCustomizing();
+  const { setIsCustomizing } = useWidgetActions();
 
-  const isEditing = !!params.isEditing;
+  const isOnRootPath = pathname === "/overview" || pathname === "";
+
+  if (!isOnRootPath) {
+    return null;
+  }
 
   return (
     <Button
       variant="outline"
       className="space-x-2"
-      onClick={(e) => {
-        e.preventDefault();
-        void setParams({ isEditing: isEditing ? null : true });
-      }}
+      onClick={() => setIsCustomizing(!isCustomizing)}
       type="button"
     >
-      <span>{isEditing ? tHeader("save") : tHeader("customize")}</span>
-      {isEditing ? (
+      <span>{isCustomizing ? tHeader("save") : tHeader("customize")}</span>
+      {isCustomizing ? (
         <CheckIcon size={16} className="text-muted-foreground" />
       ) : (
         <LayoutGridIcon size={16} className="text-muted-foreground" />

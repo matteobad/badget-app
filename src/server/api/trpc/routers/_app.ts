@@ -21,6 +21,7 @@ import { transactionAttachmentRouter } from "./transaction-attachment";
 import { transactionCategoryRouter } from "./transaction-category";
 import { transactionTagRouter } from "./transaction-tag";
 import { userRouter } from "./user";
+import { widgetsRouter } from "./widgets";
 
 /**
  * This is the primary router for your server.
@@ -31,6 +32,7 @@ export const appRouter = createTRPCRouter({
   chat: chatRouter,
   chatFeedback: chatFeedbackRouter,
   suggestedActions: suggestedActionsRouter,
+  widgets: widgetsRouter,
   user: userRouter,
   organization: organizationRouter,
   metrics: metricsRouter,

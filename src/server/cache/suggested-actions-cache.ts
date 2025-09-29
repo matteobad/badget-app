@@ -58,13 +58,13 @@ export const suggestedActionsCache = {
     };
 
     // Update individual action cache
-    await redis.set(key, updatedUsage);
+    await redis.set(key, updatedUsage, { ex: userContextCacheTTL });
 
     // Update summary cache
     const currentSummary =
       (await redis.get<Record<string, SuggestedActionUsage>>(summaryKey)) || {};
     currentSummary[actionId] = updatedUsage;
-    await redis.set(summaryKey, currentSummary);
+    await redis.set(summaryKey, currentSummary, { ex: userContextCacheTTL });
   },
 
   // Clear usage for a specific action
@@ -82,7 +82,7 @@ export const suggestedActionsCache = {
     const currentSummary =
       (await redis.get<Record<string, SuggestedActionUsage>>(summaryKey)) || {};
     delete currentSummary[actionId];
-    await redis.set(summaryKey, currentSummary);
+    await redis.set(summaryKey, currentSummary, { ex: userContextCacheTTL });
   },
 
   // Clear all usage for a user in a team

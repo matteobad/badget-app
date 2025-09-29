@@ -1,71 +1,134 @@
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import React, { useEffect, useState } from "react";
-import { swap } from "@dnd-kit/helpers";
+import React, { useRef, useState } from "react";
+import { arrayMove } from "@dnd-kit/helpers";
 import {
   DragDropProvider,
   DragOverlay,
   KeyboardSensor,
   PointerSensor,
 } from "@dnd-kit/react";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import { useWidgetParams } from "~/hooks/use-widget-params";
-import { cn } from "~/lib/utils";
+import { useSortable } from "@dnd-kit/react/sortable";
+import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { toast } from "sonner";
+import { useOnClickOutside } from "usehooks-ts";
 
-import { Skeleton } from "../ui/skeleton";
-import { DashboardWidget } from "./dashboard-widget";
-import { SortableItem } from "./sortable-item";
+import { AccountBalancesWidget } from "./account-balances-widget";
+import { CashFlowWidget } from "./cash-flow-widget";
+import { CategoryExpensesWidget } from "./category-expenses-widget";
+import { Insights } from "./insight";
+import { MonthlyIncomeWidget } from "./monthly-income-widget";
+import { MonthlySpendingWidget } from "./monthly-spending-widget";
+import { NetWorthWidget } from "./net-worth-widget";
+import { RecurringTrackerWidget } from "./recurring-tracker-widget";
+import { SavingsWidget } from "./savings-widget";
+import { UncategorizedTransactionsWidget } from "./uncategorized-transactions-widget";
+import {
+  useAvailableWidgets,
+  useIsCustomizing,
+  usePrimaryWidgets,
+  useWidgetActions,
+} from "./widget-provider";
 
-type Widget = RouterOutput["preferences"]["getUserWidgets"][number];
+type WidgetPreferences = RouterOutput["widgets"]["getWidgetPreferences"];
+type WidgetType = WidgetPreferences["primaryWidgets"][number];
 
-export function WidgetsGridSkeleton() {
+// Sortable Card Component
+function SortableCard({
+  id,
+  index,
+  children,
+  className,
+  customizeMode,
+  wiggleClass,
+}: {
+  id: string;
+  index: number;
+  children: React.ReactNode;
+  className: string;
+  customizeMode: boolean;
+  wiggleClass?: string;
+}) {
+  const { ref, isDragging } = useSortable({
+    id,
+    index,
+    // transition: {
+    //   duration: 0, // Animation duration in ms
+    //   easing: "cubic-bezier(0.25, 1, 0.5, 1)", // Animation easing
+    //   idle: false, // Whether to animate when no drag is in progress
+    // },
+  });
+
   return (
-    <div className="grid max-h-[400px] grid-cols-1 gap-6 overflow-hidden pt-4 md:grid-cols-2 lg:grid-cols-4">
-      {Array.from(new Array(8), (_) => (
-        <div className="flex h-full min-h-44 w-full flex-col justify-between gap-1 border bg-card p-4">
-          <Skeleton className="h-4 w-[100px]" />
-          <Skeleton className="h-4 w-[80px]" />
-        </div>
-      ))}
+    <div
+      ref={ref}
+      data-id={index}
+      data-dragging={isDragging}
+      className={`${className} ${wiggleClass || ""} ${
+        isDragging
+          ? "z-50 scale-105 opacity-100 shadow-[0_4px_12px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
+          : ""
+      } relative`}
+    >
+      {children}
     </div>
   );
 }
 
+// Widget mapping to components
+const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
+  "cash-flow": CashFlowWidget,
+  "net-worth": NetWorthWidget,
+  "monthly-income": MonthlyIncomeWidget,
+  "monthly-spending": MonthlySpendingWidget,
+  "category-expenses": CategoryExpensesWidget,
+  "recurring-tracker": RecurringTrackerWidget,
+  "uncategorized-transactions": UncategorizedTransactionsWidget,
+  savings: SavingsWidget,
+  "account-balances": AccountBalancesWidget,
+};
+
 export function WidgetsGrid() {
-  const [widgets, setWidgets] = useState<Widget[]>([]);
-  const [draggegWidget, setDraggedWidget] = useState<Widget>({ id: "widget" });
-
-  const { params } = useWidgetParams();
-  const isEditMode = !!params.isEditing;
-
-  const queryClient = useQueryClient();
   const trpc = useTRPC();
+  const [activeId, setActiveId] = useState<any | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null!);
 
-  const { data } = useSuspenseQuery(
-    trpc.preferences.getUserWidgets.queryOptions(),
-  );
+  const isCustomizing = useIsCustomizing();
+  const primaryWidgets = usePrimaryWidgets();
+  const availableWidgets = useAvailableWidgets();
+  const { setIsCustomizing } = useWidgetActions();
 
-  const updateUserWidgets = useMutation(
-    trpc.preferences.updateUserWidgets.mutationOptions({
-      onError: (error) => {
-        toast.error(error.message);
+  const {
+    reorderPrimaryWidgets,
+    moveToAvailable,
+    moveToPrimary,
+    swapWithLastPrimary,
+    setSaving,
+  } = useWidgetActions();
+
+  // Handle click outside to disable customizing
+  useOnClickOutside(gridRef, (event) => {
+    if (isCustomizing) {
+      // Don't close if clicking on element with data-no-close
+      const target = event.target as Element;
+      if (!target.closest("[data-no-close]")) {
+        setIsCustomizing(false);
+      }
+    }
+  });
+
+  // Auto-save when primary widgets change
+  const updatePreferencesMutation = useMutation(
+    trpc.widgets.updateWidgetPreferences.mutationOptions({
+      onMutate: () => {
+        setSaving(true);
       },
-      onSuccess: () => {
-        void queryClient.invalidateQueries({
-          queryKey: trpc.preferences.getUserWidgets.queryKey(),
-        });
+      onSettled: () => {
+        setSaving(false);
       },
     }),
   );
 
-  useEffect(() => {
-    if (data) setWidgets(data);
-  }, [data]);
+  const WidgetComponent = WIDGET_COMPONENTS[activeId as WidgetType];
 
   return (
     <DragDropProvider
@@ -73,81 +136,174 @@ export function WidgetsGrid() {
       sensors={[PointerSensor, KeyboardSensor]}
       onBeforeDragStart={(event) => {
         // Optionally prevent dragging
-        if (!isEditMode) event.preventDefault();
+        if (!isCustomizing) event.preventDefault();
       }}
       onDragStart={(event) => {
         const { operation } = event;
         const id = operation.source?.id;
-        console.log(`Started dragging ${operation.source?.id}`);
-        const draggedItem = widgets.find((w) => w.id === id);
-
-        if (draggedItem) setDraggedWidget(draggedItem);
+        console.log(`Started dragging ${id}`);
+        setActiveId(id);
       }}
       onDragEnd={(event) => {
-        setDraggedWidget({ id: "widget" });
-
         const { operation, canceled } = event;
         const { source, target } = operation;
 
-        if (canceled) {
-          // Replaces onDragCancel
-          console.log(`Cancelled dragging ${source?.id}`);
+        if (!source || !target) {
+          setActiveId(null);
           return;
         }
 
-        if (target) {
-          console.log(`Dropped ${source?.id} over ${target.id}`);
-          // Access rich data
-          console.log("Source data:", source?.data);
-          console.log("Drop position:", operation.position.current);
-          const newWidgets = swap(widgets, event);
-          setWidgets(newWidgets);
-          updateUserWidgets.mutate({ widgets: newWidgets });
+        if (canceled) {
+          // Replaces onDragCancel
+          console.log(`Cancelled dragging ${source.id}`);
+          return;
         }
+
+        console.log(`Dropped ${source.id} over ${target.id}`);
+        // Access rich data
+        console.log("Source data:", source.data);
+        console.log("Drop position:", operation.position.current);
+
+        const activeId = source.id as WidgetType;
+        const overId = target.id as WidgetType;
+
+        // Find which section the active widget is in
+        const activeInPrimary = primaryWidgets.includes(activeId);
+        const activeInAvailable = availableWidgets.includes(activeId);
+        const overInPrimary = primaryWidgets.includes(overId);
+        const overInAvailable = availableWidgets.includes(overId);
+
+        // Reordering within primary
+        if (activeInPrimary && overInPrimary) {
+          const activeIndex = primaryWidgets.indexOf(activeId);
+          const overIndex = primaryWidgets.indexOf(overId);
+
+          if (activeIndex !== overIndex) {
+            const newOrder = arrayMove(primaryWidgets, activeIndex, overIndex);
+            reorderPrimaryWidgets(newOrder);
+            setTimeout(() => {
+              updatePreferencesMutation.mutate({ primaryWidgets: newOrder });
+            }, 100);
+          }
+        }
+        // Moving from available to primary
+        else if (activeInAvailable && overInPrimary) {
+          const overIndex = primaryWidgets.indexOf(overId);
+          const insertIndex =
+            overIndex >= 0 ? overIndex : primaryWidgets.length;
+
+          if (primaryWidgets.length >= 7) {
+            // Swap with last primary widget
+            swapWithLastPrimary(activeId, insertIndex);
+            const newPrimary = [...primaryWidgets.slice(0, -1)];
+            newPrimary.splice(insertIndex, 0, activeId);
+
+            setTimeout(() => {
+              updatePreferencesMutation.mutate({ primaryWidgets: newPrimary });
+            }, 100);
+          } else {
+            // Insert at the specific position where dropped
+            const newPrimary = [...primaryWidgets];
+            newPrimary.splice(insertIndex, 0, activeId);
+
+            moveToPrimary(activeId, newPrimary);
+
+            setTimeout(() => {
+              updatePreferencesMutation.mutate({ primaryWidgets: newPrimary });
+            }, 100);
+          }
+        }
+        // Moving from primary to available
+        else if (activeInPrimary && overInAvailable) {
+          moveToAvailable(activeId);
+          const newPrimary = primaryWidgets.filter((w) => w !== activeId);
+          setTimeout(() => {
+            updatePreferencesMutation.mutate({ primaryWidgets: newPrimary });
+          }, 100);
+        }
+
+        setActiveId(null);
       }}
       onDragOver={(event) => {
         event.preventDefault();
       }}
     >
-      <div
-        className={cn(
-          "-mx-1 grid max-h-[400px] grid-cols-1 gap-6 overflow-hidden px-1 pt-4 md:grid-cols-2 lg:grid-cols-4",
-          { "max-h-auto [&>[role=button]>div]:animate-shake": isEditMode },
+      <div ref={gridRef} className="space-y-8">
+        {/* Primary Widgets */}
+        {isCustomizing ? (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Insights />
+            {primaryWidgets.map((widgetType, index) => {
+              const WidgetComponent = WIDGET_COMPONENTS[widgetType];
+              const wiggleClass = "animate-shake";
+
+              return (
+                <SortableCard
+                  key={widgetType}
+                  id={widgetType}
+                  index={index}
+                  className="relative cursor-grab active:cursor-grabbing"
+                  customizeMode={isCustomizing}
+                  wiggleClass={wiggleClass}
+                >
+                  <WidgetComponent />
+                </SortableCard>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Insights />
+
+            {primaryWidgets.map((widgetType) => {
+              const WidgetComponent = WIDGET_COMPONENTS[widgetType];
+              return <WidgetComponent key={widgetType} />;
+            })}
+          </div>
         )}
-      >
-        {widgets?.map((widget, index) => {
-          return (
-            <React.Fragment key={widget.id}>
-              <SortableItem id={widget.id} index={index}>
-                <DashboardWidget
-                  widget={widget}
-                  className={cn("transition-opacity", {
-                    "opacity-60": index > 7,
-                    "shadow-lg": widget.id === draggegWidget.id && isEditMode,
-                    "hover:shadow-lg": isEditMode,
-                  })}
-                  isEditMode={isEditMode}
-                />
-              </SortableItem>
-              {index === 7 && (
-                <div className="my-2 border-t border-dashed md:col-span-2 lg:col-span-4" />
-              )}
-            </React.Fragment>
-          );
-        })}
+
+        {/* Separator and Available Widgets (shown when customizing) */}
+        {isCustomizing && availableWidgets.length > 0 && (
+          <>
+            {/* Visual Separator */}
+            <div className="my-8">
+              <div className="border-t border-dashed border-border" />
+            </div>
+
+            {/* Available Widgets - Draggable */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {availableWidgets.map((widgetType, index) => {
+                const WidgetComponent = WIDGET_COMPONENTS[widgetType];
+                const wiggleClass = "animate-shake";
+
+                return (
+                  <SortableCard
+                    key={widgetType}
+                    id={widgetType}
+                    index={index}
+                    className="cursor-grab opacity-60 hover:opacity-70 active:cursor-grabbing"
+                    customizeMode={isCustomizing}
+                    wiggleClass={wiggleClass}
+                  >
+                    <WidgetComponent />
+                  </SortableCard>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
 
       {/* TODO: disable animation of first render */}
       <DragOverlay>
-        {(_source) => (
-          <DashboardWidget
-            className={cn("opacity-80 shadow-lg", {
-              hidden: draggegWidget.id === "widget",
-            })}
-            widget={draggegWidget}
-            isEditMode={true}
-          />
-        )}
+        {(_source) =>
+          activeId ? (
+            <div className="transform-gpu cursor-grabbing bg-background opacity-90 shadow-[0_4px_12px_rgba(0,0,0,0.15)] will-change-transform dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)]">
+              {" "}
+              <WidgetComponent />
+            </div>
+          ) : null
+        }
       </DragOverlay>
     </DragDropProvider>
   );

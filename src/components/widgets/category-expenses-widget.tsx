@@ -9,14 +9,7 @@ import { useScopedI18n } from "~/shared/locales/client";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import { ShapesIcon } from "lucide-react";
 
-import {
-  Widget,
-  WidgetAction,
-  WidgetContent,
-  WidgetFooter,
-  WidgetHeader,
-  WidgetTitle,
-} from "../widget";
+import { BaseWidget } from "./base";
 
 function CategoryExpensesWidgetSkeleton() {
   return (
@@ -56,23 +49,26 @@ export function CategoryExpensesWidget() {
 
   const higherValue = data?.result[0]?.total ?? 1;
 
-  return (
-    <Widget>
-      <WidgetHeader>
-        <WidgetTitle className="flex items-center gap-3">
-          <ShapesIcon className="size-4 text-muted-foreground" />
-          {tCategoryExpenses("title")}
-        </WidgetTitle>
-      </WidgetHeader>
+  const handleClick = () => {
+    // TODO: Navigate to cash flow analysis page
+    console.log("View cash flow analysis clicked");
+  };
 
-      {/* View mode */}
-      <WidgetContent className="flex flex-col gap-2">
+  return (
+    <BaseWidget
+      title={tCategoryExpenses("title")}
+      description={""}
+      icon={<ShapesIcon className="size-4 text-muted-foreground" />}
+      actions={tCategoryExpenses("action")}
+      onClick={handleClick}
+    >
+      <div className="flex flex-1 flex-col gap-2">
         {isLoading ? (
           <CategoryExpensesWidgetSkeleton />
         ) : (
           data?.result.map((item) => {
             return (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4" key={item.category}>
                 <span className="line-clamp-1 w-[110px] shrink-0 text-xs text-muted-foreground">
                   {item.categoryName}
                 </span>
@@ -97,11 +93,7 @@ export function CategoryExpensesWidget() {
             );
           })
         )}
-      </WidgetContent>
-
-      <WidgetFooter>
-        <WidgetAction>{tCategoryExpenses("action")}</WidgetAction>
-      </WidgetFooter>
-    </Widget>
+      </div>
+    </BaseWidget>
   );
 }

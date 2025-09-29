@@ -7,6 +7,7 @@ import { useScopedI18n } from "~/shared/locales/client";
 
 import { ChatHistory } from "../chat/chat-history";
 import { Customize } from "./customize";
+import { useIsCustomizing } from "./widget-provider";
 
 function getTimeBasedGreeting(timezone?: string): string {
   const userTimezone =
@@ -31,6 +32,7 @@ export function WidgetsHeader() {
   const tHeader = useScopedI18n("widgets.header");
 
   const { data: user } = useUserQuery();
+  const isCustomizing = useIsCustomizing();
 
   const [greeting, setGreeting] = useState(() =>
     getTimeBasedGreeting(user?.timezone ?? undefined),
@@ -54,7 +56,7 @@ export function WidgetsHeader() {
   }, [user?.timezone]);
 
   return (
-    <div className="flex items-center justify-between pt-6">
+    <div className="mb-8 flex items-start justify-between">
       <div>
         <h1 className="mb-1 font-serif text-[30px] leading-normal">
           <span>{greeting} </span>
@@ -63,11 +65,13 @@ export function WidgetsHeader() {
           </span>
         </h1>
         <p className="text-[14px] text-muted-foreground">
-          {tHeader("subtitle")}
+          {isCustomizing
+            ? "drag and drop to arrange your perfect dashboard."
+            : "here's a quick look at how things are going."}
         </p>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4" data-no-close>
         <Customize />
         <ChatHistory />
       </div>
