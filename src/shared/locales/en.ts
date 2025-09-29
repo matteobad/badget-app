@@ -63,6 +63,15 @@ export default {
         label: "Recurring this month",
       },
     },
+    "uncategorized-transactions": {
+      title: "Uncategorized transactions",
+      description: {
+        part_1: "You have ",
+        part_2: "{count} uncategorized transactions ",
+        part_3: " for a total of ",
+      },
+      action: "See all uncategorized",
+    },
   },
 
   auth: {

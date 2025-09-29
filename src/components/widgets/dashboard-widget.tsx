@@ -9,7 +9,7 @@ import { IncomeWidget } from "./income/income-widget";
 import { MonthlySpendingWidget } from "./monthly-spending/monthly-spending-widget";
 import { NetWorthWidget } from "./net-worth/net-worth-widget";
 import { RecurringWidget } from "./recurring/recurring-widget";
-import { UncategorizedWidget } from "./uncategorized-widget/uncategorized-widget";
+import { UncategorizedTransactionsWidget } from "./uncategorized-transactions/uncategorized-transactions-widget";
 import { Widget, WidgetHeader, WidgetProvider, WidgetTitle } from "./widget";
 
 type DashboardWidgetProps = {
@@ -61,8 +61,8 @@ export function DashboardWidget({
         return <CategoryExpensesWidget />;
       case "recurring-tracker":
         return <RecurringWidget />;
-      case "uncategorized":
-        return <UncategorizedWidget />;
+      case "uncategorized-transactions":
+        return <UncategorizedTransactionsWidget />;
       case "income-analysis":
         return <IncomeAnalysisWidget />;
 

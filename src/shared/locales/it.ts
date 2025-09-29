@@ -63,6 +63,15 @@ export default {
         label: "Spese ricorrenti questo mese",
       },
     },
+    "uncategorized-transactions": {
+      title: "Transazioni non categorizzate",
+      description: {
+        part_1: "Hai ",
+        part_2: "{count} transazioni non categorizzate ",
+        part_3: " per un totale di ",
+      },
+      action: "Vedi tutte",
+    },
   },
 
   auth: {
