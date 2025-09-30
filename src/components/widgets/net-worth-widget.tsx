@@ -1,5 +1,6 @@
 "use client";
 
+import { UTCDate } from "@date-fns/utc";
 import { useQuery } from "@tanstack/react-query";
 import { NetWorthChart } from "~/components/charts/net-worth-chart";
 import { useSpaceQuery } from "~/hooks/use-space";
@@ -92,8 +93,8 @@ export function NetWorthWidget() {
 
   const { data } = useQuery({
     ...trpc.widgets.getNetWorth.queryOptions({
-      from: startOfMonth(new Date()).toISOString(),
-      to: endOfMonth(new Date()).toISOString(),
+      from: startOfMonth(new UTCDate(new Date())).toISOString(),
+      to: endOfMonth(new UTCDate(new Date())).toISOString(),
       currency: space?.baseCurrency ?? undefined,
     }),
     ...WIDGET_POLLING_CONFIG,

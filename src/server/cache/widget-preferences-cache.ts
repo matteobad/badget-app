@@ -11,7 +11,7 @@ export const WIDGET = {
   MONTHLY_INCOME: "monthly-income",
   MONTHLY_SPENDING: "monthly-spending",
   NET_WORTH: "net-worth",
-  REDCURRING_TRACKER: "recurring-tracker",
+  REDCURRING_EXPENSES: "recurring-expenses",
   SAVINGS: "savings",
   UNCATEGORIZED_TRANSACTIONS: "uncategorized-transactions",
 } as const;
@@ -29,7 +29,7 @@ export const DEFAULT_WIDGET_ORDER: WidgetType[] = [
   "monthly-income",
   "monthly-spending",
   "net-worth",
-  "recurring-tracker",
+  "recurring-expenses",
   "uncategorized-transactions",
   "savings",
 ];

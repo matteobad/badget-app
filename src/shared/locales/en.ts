@@ -78,9 +78,9 @@ export default {
       description: "Income",
       action: "View income trends",
     },
-    "recurring-tracker": {
-      title: "Fixed costs",
-      action: "See recurring details",
+    "recurring-expenses": {
+      title: "Recurring expenses",
+      action: "View all recurring",
       content: {
         label: "Recurring this month",
       },

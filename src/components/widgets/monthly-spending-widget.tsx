@@ -59,14 +59,12 @@ export function MonthlySpendingWidget() {
       actions={tScoped("action")}
     >
       <div className="flex flex-1 items-end gap-2">
-        {spending && spending.totalSpending > 0 && (
-          <span className="text-2xl">
-            <AnimatedNumber
-              value={spending.totalSpending}
-              currency={spending.currency}
-            />
-          </span>
-        )}
+        <span className="text-2xl">
+          <AnimatedNumber
+            value={spending?.totalSpending ?? 0}
+            currency={spending?.currency ?? space?.baseCurrency ?? "EUR"}
+          />
+        </span>
       </div>
     </BaseWidget>
   );

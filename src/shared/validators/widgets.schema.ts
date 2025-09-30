@@ -76,6 +76,12 @@ export const getCategoryExpensesSchema = z.object({
   currency: z.string().optional(),
 });
 
+export const getRecurringExpensesSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  currency: z.string().optional(),
+});
+
 export const widgetTypeSchema = z.enum(WIDGET);
 
 export const widgetPreferencesSchema = z.object({

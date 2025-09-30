@@ -4,6 +4,7 @@ import type {
   getCategoryExpensesSchema,
   getMonthlyIncomeSchema,
   getMonthlySpendingSchema,
+  getRecurringExpensesSchema,
 } from "~/shared/validators/widgets.schema";
 import type z from "zod";
 import { and, count, desc, eq, gt, gte, lt, lte, not, sql } from "drizzle-orm";
@@ -18,6 +19,7 @@ import {
   getCashFlowQuery,
   getExpensesQuery,
   getIncomeQuery,
+  getRecurringExpensesQuery,
   getSpendingQuery,
 } from "../domain/reports/queries";
 
@@ -166,6 +168,25 @@ export async function getCategorySpendingForPeriod(
     currency,
     spendingCategories,
   };
+}
+
+// recurring-expenses widget
+export async function getRecurringForPeriod(
+  db: DBClient,
+  params: z.infer<typeof getRecurringExpensesSchema>,
+  organizationId: string,
+) {
+  const { from, to, currency: inputCurrency } = params;
+
+  // Use existing getExpenses function for the specified period
+  const recurringExpenses = await getRecurringExpensesQuery(db, {
+    organizationId,
+    from,
+    to,
+    currency: inputCurrency,
+  });
+
+  return recurringExpenses;
 }
 
 export type GetSavingsParams = {

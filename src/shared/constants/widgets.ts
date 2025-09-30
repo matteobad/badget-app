@@ -17,7 +17,7 @@ export const INITIAL_WIDGETS: Widget[] = [
     id: "category-expenses",
   },
   {
-    id: "recurring-tracker",
+    id: "recurring-expenses",
   },
   {
     id: "uncategorized-transactions",

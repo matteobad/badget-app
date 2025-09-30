@@ -5,6 +5,7 @@ import {
   getCategorySpendingForPeriod,
   getCombinedAccountBalance,
   getIncomeForPeriod,
+  getRecurringForPeriod,
   getSpendingForPeriod,
 } from "~/server/services/reports-service";
 import {
@@ -14,6 +15,7 @@ import {
   getMonthlyIncomeSchema,
   getMonthlySpendingSchema,
   getNetWorthSchema,
+  getRecurringExpensesSchema,
   updateWidgetPreferencesSchema,
 } from "~/shared/validators/widgets.schema";
 
@@ -99,6 +101,16 @@ export const widgetsRouter = createTRPCRouter({
             currency: input.currency,
           },
         },
+      };
+    }),
+
+  getRecurringExpenses: protectedProcedure
+    .input(getRecurringExpensesSchema)
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      const recurringExpenses = await getRecurringForPeriod(db, input, orgId!);
+
+      return {
+        result: recurringExpenses,
       };
     }),
 

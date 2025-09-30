@@ -78,9 +78,9 @@ export default {
       description: "Entrate",
       action: "Vedi andamenti entrate",
     },
-    "recurring-tracker": {
-      title: "Costi fissi",
-      action: "Vedi dettaglio spese ricorrenti",
+    "recurring-expenses": {
+      title: "Spese ricorrenti",
+      action: "Vedi spese ricorrenti",
       content: {
         label: "Spese ricorrenti questo mese",
       },

@@ -45,14 +45,12 @@ export function MonthlyIncomeWidget() {
       onClick={handleClick}
     >
       <div className="flex flex-1 items-end gap-2">
-        {income && income.totalIncome > 0 && (
-          <span className="text-2xl">
-            <AnimatedNumber
-              value={income.totalIncome}
-              currency={income.currency}
-            />
-          </span>
-        )}
+        <span className="text-2xl">
+          <AnimatedNumber
+            value={income?.totalIncome ?? 0}
+            currency={income?.currency ?? space?.baseCurrency ?? "EUR"}
+          />
+        </span>
       </div>
     </BaseWidget>
   );

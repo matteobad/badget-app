@@ -19,7 +19,7 @@ import { Insights } from "./insight";
 import { MonthlyIncomeWidget } from "./monthly-income-widget";
 import { MonthlySpendingWidget } from "./monthly-spending-widget";
 import { NetWorthWidget } from "./net-worth-widget";
-import { RecurringTrackerWidget } from "./recurring-tracker-widget";
+import { RecurringExpensesWidget } from "./recurring-expenses-widget";
 import { SavingsWidget } from "./savings-widget";
 import { UncategorizedTransactionsWidget } from "./uncategorized-transactions-widget";
 import {
@@ -82,7 +82,7 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "monthly-income": MonthlyIncomeWidget,
   "monthly-spending": MonthlySpendingWidget,
   "net-worth": NetWorthWidget,
-  "recurring-tracker": RecurringTrackerWidget,
+  "recurring-expenses": RecurringExpensesWidget,
   savings: SavingsWidget,
   "uncategorized-transactions": UncategorizedTransactionsWidget,
 };
