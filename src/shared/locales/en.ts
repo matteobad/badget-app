@@ -48,8 +48,7 @@ export default {
     },
     "category-expenses": {
       title: "Category expenses",
-      "description#zero": "Non hai movimenti nel periodo selezionato",
-      "description#other": "You have expenses in {count} categories",
+      description: "No expenses tracked yet",
       action: "See detailed graph",
     },
     "monthly-spending": {

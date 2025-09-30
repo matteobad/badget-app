@@ -74,6 +74,7 @@ export const getCategoryExpensesSchema = z.object({
   from: z.string(),
   to: z.string(),
   currency: z.string().optional(),
+  limit: z.number().optional().default(5),
 });
 
 export const getRecurringExpensesSchema = z.object({

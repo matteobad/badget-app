@@ -53,6 +53,18 @@ export function formatAmount({
   }).format(amount);
 }
 
+export function formatCompactAmount(amount: number): string {
+  const absAmount = Math.abs(amount);
+  if (absAmount >= 1000000) {
+    return `${(absAmount / 1000000).toFixed(1)}m`;
+  }
+  if (absAmount >= 1000) {
+    return `${(absAmount / 1000).toFixed(1)}k`;
+  }
+  // Always show in normal notation
+  return `${absAmount.toFixed(0)}€`;
+}
+
 export function secondsToHoursAndMinutes(seconds: number) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);

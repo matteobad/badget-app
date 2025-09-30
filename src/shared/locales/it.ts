@@ -48,8 +48,7 @@ export default {
     },
     "category-expenses": {
       title: "Spese per categoria",
-      "description#zero": "Non hai movimenti nel periodo selezionato",
-      "description#other": "Hai spese in {count} categorie. Ecco le prime 3",
+      description: "Non hai movimenti nel periodo selezionato",
       action: "Vedi grafico dettagliato",
     },
     "monthly-spending": {

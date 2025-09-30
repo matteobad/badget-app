@@ -5,14 +5,23 @@ const widgetPreferencesCachePrefix = "widget-preferences";
 const widgetPreferencesCacheTTL = 30 * 24 * 60 * 60; // 30 days TTL
 
 export const WIDGET = {
+  // Critical financial health (default primary widgets)
   ACCOUNT_BALANCES: "account-balances",
   CASH_FLOW: "cash-flow",
+  NET_WORTH: "net-worth",
+  SAVINGS: "savings",
+  // PROFIT_ANALYSIS: "profit-analysis",
+  // REVENUE_FORECAST: "revenue-forecast",
+  // REVENUE_SUMMARY: "revenue-summary",
+  // GROWTH_RATE: "growth-rate",
+
+  // Expenses & spending
   CATEGORY_EXPENSES: "category-expenses",
   MONTHLY_INCOME: "monthly-income",
   MONTHLY_SPENDING: "monthly-spending",
-  NET_WORTH: "net-worth",
   REDCURRING_EXPENSES: "recurring-expenses",
-  SAVINGS: "savings",
+
+  // Misc
   UNCATEGORIZED_TRANSACTIONS: "uncategorized-transactions",
 } as const;
 export type WidgetType = (typeof WIDGET)[keyof typeof WIDGET];

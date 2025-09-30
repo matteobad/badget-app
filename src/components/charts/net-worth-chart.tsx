@@ -75,7 +75,7 @@ const CustomTooltip = ({
 
 export function NetWorthChart({
   data,
-  height = 320,
+  height = 260,
   currency = "EUR",
   locale,
   showXAxis,

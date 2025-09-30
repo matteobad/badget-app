@@ -1,104 +1,100 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { UTCDate } from "@date-fns/utc";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "~/components/ui/skeleton";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
-import { formatAmount } from "~/shared/helpers/format";
+import { formatCompactAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
-import { endOfMonth, startOfMonth } from "date-fns";
+import { endOfMonth, format, startOfMonth } from "date-fns";
 import { ShapesIcon } from "lucide-react";
 
 import { BaseWidget } from "./base";
 
-function CategoryExpensesWidgetSkeleton() {
-  return (
-    <>
-      <div className="flex items-center gap-4">
-        <Skeleton className="h-3 w-[110px]" />
-        <Skeleton className="h-3 w-[100px]" />
-        <Skeleton className="h-3 w-[20px]" />
-      </div>
-      <div className="flex items-center gap-4">
-        <Skeleton className="h-3 w-[110px]" />
-        <Skeleton className="h-3 w-[70]" />
-        <Skeleton className="h-3 w-[20px]" />
-      </div>
-      <div className="flex items-center gap-4">
-        <Skeleton className="h-3 w-[110px]" />
-        <Skeleton className="h-3 w-[50px]" />
-        <Skeleton className="h-3 w-[20px]" />
-      </div>
-    </>
-  );
-}
-
 export function CategoryExpensesWidget() {
   const tScoped = useScopedI18n("widgets.category-expenses");
+  const trpc = useTRPC();
+  const router = useRouter();
 
   const { data: space } = useSpaceQuery();
 
-  const trpc = useTRPC();
+  const now = new Date();
+  const from = format(startOfMonth(now), "yyyy-MM-dd");
+  const to = format(endOfMonth(now), "yyyy-MM-dd");
 
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     ...trpc.widgets.getCategoryExpenses.queryOptions({
       from: startOfMonth(new UTCDate(new Date())).toISOString(),
       to: endOfMonth(new UTCDate(new Date())).toISOString(),
+      currency: space?.baseCurrency ?? "EUR",
+      limit: 3,
     }),
     ...WIDGET_POLLING_CONFIG,
   });
 
-  const spendingCategories = data?.result.spendingCategories ?? [];
-  const categoriesCount = spendingCategories?.length ?? 0;
-  const higherValue = spendingCategories[0]?.amount ?? 1;
+  const categoryData = data?.result;
+  const categories = categoryData?.result.categories ?? [];
+  const maxAmount = categories[0]?.amount || 0;
 
-  const handleClick = () => {
-    // TODO: Navigate to cash flow analysis page
-    console.log("View cash flow analysis clicked");
+  const hasCategories = categoryData && categories.length > 0;
+
+  const handleViewCategories = () => {
+    if (!hasCategories) return;
+    router.push(
+      `/transactions?categories=${categories.map((category) => category.slug).join(",")}&start=${from}&end=${to}`,
+    );
   };
 
   return (
     <BaseWidget
       title={tScoped("title")}
-      description={tScoped("description", { count: categoriesCount })}
-      icon={<ShapesIcon className="size-4 text-muted-foreground" />}
-      actions={tScoped("action")}
-      onClick={handleClick}
-    >
-      <div className="flex flex-1 flex-col justify-end gap-1 pb-2">
-        {isLoading ? (
-          <CategoryExpensesWidgetSkeleton />
-        ) : (
-          spendingCategories.slice(0, 3).map((category) => {
-            return (
-              <div className="flex items-center gap-4" key={category.slug}>
-                <span className="line-clamp-1 w-[110px] shrink-0 text-xs text-muted-foreground">
-                  {category.name}
-                </span>
-                <div className="flex h-3 w-full items-center gap-2">
-                  <span
-                    className="h-3"
-                    style={{
-                      backgroundColor: category.color ?? "#fafafa",
-                      width: `${(category.amount * 100) / higherValue}%`,
-                    }}
-                  ></span>
-                  <span className="font-mono text-xs">
-                    {formatAmount({
-                      amount: category.amount,
-                      currency:
-                        category.currency ?? space?.baseCurrency ?? "EUR",
-                      maximumFractionDigits: 0,
-                    })}
+      description={
+        hasCategories ? (
+          <div className="flex w-full flex-col gap-2">
+            {categories.map((category, index) => {
+              const percentage =
+                maxAmount > 0 ? (category.amount / maxAmount) * 100 : 0;
+
+              const barColor =
+                index === 0
+                  ? "bg-primary"
+                  : index === 1
+                    ? "bg-[#A0A0A0]"
+                    : "bg-[#606060]";
+
+              return (
+                <div key={category.slug} className="flex items-center gap-3">
+                  <span className="w-[110px] shrink-0 truncate text-xs text-[#878787]">
+                    {category.name}
                   </span>
+                  <div className="flex flex-1 items-center gap-2">
+                    <div
+                      className="h-2 transition-all duration-300"
+                      style={{ width: `${percentage}%` }}
+                    >
+                      <div className={`h-full ${barColor}`} />
+                    </div>
+                    <span className="shrink-0 text-xs tabular-nums">
+                      {formatCompactAmount(category.amount)}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-    </BaseWidget>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="py-8">
+            <p className="text-sm text-muted-foreground">
+              {tScoped("description")}
+            </p>
+          </div>
+        )
+      }
+      icon={<ShapesIcon className="size-4" />}
+      onClick={hasCategories ? handleViewCategories : undefined}
+      actions={hasCategories ? tScoped("action") : undefined}
+    />
   );
 }

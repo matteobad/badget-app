@@ -145,28 +145,29 @@ export async function getCategorySpendingForPeriod(
   params: z.infer<typeof getCategoryExpensesSchema>,
   organizationId: string,
 ) {
-  const { from, to, currency: inputCurrency } = params;
+  const { from, to, currency: inputCurrency, limit } = params;
 
-  // Get top spending category for the specified period using existing getSpending function
-  const spendingCategories = await getSpendingQuery(db, {
+  const categoryExpenses = await getSpendingQuery(db, {
     organizationId,
     from,
     to,
     currency: inputCurrency,
   });
 
-  // Calculate total spending across all months in the period
-  const totalSpending = spendingCategories.reduce(
-    (sum, item) => sum + item.amount,
-    0,
-  );
+  // Get top N categories by amount
+  const topCategories = categoryExpenses
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, limit || 5);
 
-  const currency = inputCurrency ?? "EUR";
+  const totalAmount = topCategories.reduce((sum, cat) => sum + cat.amount, 0);
 
   return {
-    totalSpending: Math.round(totalSpending * 100) / 100,
-    currency,
-    spendingCategories,
+    result: {
+      categories: topCategories,
+      totalAmount,
+      currency: topCategories[0]?.currency ?? inputCurrency ?? "EUR",
+      totalCategories: categoryExpenses.length,
+    },
   };
 }
 
