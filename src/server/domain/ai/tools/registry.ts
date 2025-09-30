@@ -1,5 +1,12 @@
 // Tool metadata for title generation and UI display
 export const toolMetadata = {
+  getNetWorthAnalysis: {
+    name: "getNetWorthAnalysis",
+    title: "Net Worth Analysis",
+    description:
+      "Generate comprehensive net worth analysis with interactive visualizations, trends, assets, and liabilities insights",
+    relatedTools: ["getNetWorth", "getTransactions"],
+  },
   getBurnRateAnalysis: {
     name: "getBurnRateAnalysis",
     title: "Burn Rate Analysis",
@@ -19,37 +26,21 @@ export const toolMetadata = {
     title: "Transactions",
     description:
       "Retrieve and analyze financial transactions with advanced filtering, search, and sorting capabilities",
-    relatedTools: [
-      /*"getBurnRate", "getBurnRateAnalysis", "getExpenses"*/
-    ],
-  },
-  getIncome: {
-    name: "getIncome",
-    title: "Income",
-    description:
-      "Retrieve and analyze income over a given period, highlighting total income, main sources, and trends. Use this tool when users ask about salary, revenue, or other income streams.",
-    relatedTools: ["getTransactions"],
-  },
-  getBalances: {
-    name: "getBalances",
-    title: "Balances",
-    description:
-      "Retrieve current account balances, including breakdown by account and total net balance. Use this tool when users ask about available cash, bank account status, or liquidity.",
-    relatedTools: ["getTransactions"],
+    relatedTools: ["getBurnRate", "getBurnRateAnalysis", "getExpenses"],
   },
   getExpensesBreakdown: {
     name: "getExpensesBreakdown",
     title: "Expenses Breakdown",
     description:
       "Retrieve and analyze financial expenses with advanced filtering, search, and sorting capabilities",
-    relatedTools: ["getTransactions"],
+    relatedTools: ["getBurnRate", "getBurnRateAnalysis", "getTransactions"],
   },
   getForecast: {
     name: "getForecast",
     title: "Forecast",
     description:
       "Retrieve and analyze financial forecast with advanced filtering, search, and sorting capabilities",
-    relatedTools: ["getTransactions"],
+    relatedTools: ["getBurnRate", "getBurnRateAnalysis", "getTransactions"],
   },
 } as const;
 

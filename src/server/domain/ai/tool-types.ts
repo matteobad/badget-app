@@ -1,22 +1,26 @@
 import type { InferUITools } from "ai";
 
+import { getBurnRateAnalysisTool } from "./tools/get-burn-rate-analysis-tool";
+import { getBurnRateTool } from "./tools/get-burn-rate-tool";
 // import { google } from "@ai-sdk/google";
 
-import { getBalancesTool } from "./tools/descriptive/get-balances-tool";
-import { getIncomeTool } from "./tools/descriptive/get-income-tool";
+import { getExpensesBreakdownTool } from "./tools/get-expenses-breakdown-tool";
+import { getForecastTool } from "./tools/get-forecast-tool";
+import { getNetWorthAnalysisTool } from "./tools/get-net-worth-analysis-tool";
 // import { getContext } from "./context";
-import { getTransactionsTool } from "./tools/descriptive/get-transactions";
+import { getTransactionsTool } from "./tools/get-transactions-tool";
 
 // Tool registry function - this creates the actual tool implementations
 export const createToolRegistry = () => {
   // const context = getContext();
 
   return {
-    // getBurnRate: getBurnRateTool,
-    // getBurnRateAnalysis: getBurnRateAnalysisTool,
+    getBurnRate: getBurnRateTool,
+    getBurnRateAnalysis: getBurnRateAnalysisTool,
+    getNetWorthAnalysis: getNetWorthAnalysisTool,
     getTransactions: getTransactionsTool,
-    getIncome: getIncomeTool,
-    getBalances: getBalancesTool,
+    getExpensesBreakdown: getExpensesBreakdownTool,
+    getForecast: getForecastTool,
     // google_search: google.tools.googleSearch({
     // searchContextSize: "medium",
     // userLocation: {

@@ -117,9 +117,9 @@ export async function getNetWorth(
         Number.parseFloat(item.net_worth || "0").toFixed(2),
       );
       return {
-        date: item.date,
-        value: value,
-        currency: item.currency,
+        month: item.date,
+        amount: value,
+        average: 0,
       };
     }),
   };

@@ -7,8 +7,8 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 // Define the static suggested actions configuration
 const SUGGESTED_ACTIONS_CONFIG = [
   {
-    id: "get-burn-rate-analysis",
-    toolName: "getBurnRateAnalysis",
+    id: "get-net-worth-analysis",
+    toolName: "getNetWorthAnalysis",
     toolParams: {
       showCanvas: true,
     },

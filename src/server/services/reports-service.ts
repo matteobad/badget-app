@@ -482,9 +482,19 @@ export async function getNetWorth(db: DBClient, params: GetNetWorthParams) {
       ? parseFloat(rawData[rawData.length - 1]?.net_worth ?? "0")
       : 0;
 
+  // Compute average net worth over the period
+  const averageNetWorth =
+    rawData && rawData.length > 0
+      ? rawData.reduce(
+          (sum, item) => sum + parseFloat(item.net_worth ?? "0"),
+          0,
+        ) / rawData.length
+      : 0;
+
   return {
     summary: {
-      netWorth: Math.abs(netWorth),
+      netWorth: netWorth,
+      averageNetWorth: averageNetWorth,
       currency: rawData?.at(0)?.currency ?? currency,
     },
     meta: {
@@ -497,7 +507,8 @@ export async function getNetWorth(db: DBClient, params: GetNetWorthParams) {
       );
       return {
         date: item.date,
-        value: value,
+        amount: value,
+        average: averageNetWorth,
         currency: item.currency,
       };
     }),

@@ -1,10 +1,10 @@
 import { widgetPreferencesCache } from "~/server/cache/widget-preferences-cache";
-import { getNetWorth } from "~/server/services/metrics-service";
 import {
   getCashFlow,
   getCategorySpendingForPeriod,
   getCombinedAccountBalance,
   getIncomeForPeriod,
+  getNetWorth,
   getRecurringForPeriod,
   getSpendingForPeriod,
 } from "~/server/services/reports-service";
@@ -39,7 +39,7 @@ export const widgetsRouter = createTRPCRouter({
     .input(getNetWorthSchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
       return await getNetWorth(db, {
-        orgId: orgId!,
+        organizationId: orgId!,
         from: input.from,
         to: input.to,
         currency: input.currency,

@@ -1,8 +1,10 @@
 "use client";
 
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { UTCDate } from "@date-fns/utc";
 import { useQuery } from "@tanstack/react-query";
 import { NetWorthChart } from "~/components/charts/net-worth-chart";
+import { useChatInterface } from "~/hooks/use-chat-interface";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { formatAmount } from "~/shared/helpers/format";
@@ -86,6 +88,11 @@ export function NetWorthWidgetSettings() {
 }
 
 export function NetWorthWidget() {
+  const { sendMessage } = useChatActions();
+  const { setChatId } = useChatInterface();
+
+  const chatId = useChatId();
+
   const tNetWorth = useScopedI18n("widgets.net-worth");
 
   const { data: space } = useSpaceQuery();
@@ -101,8 +108,22 @@ export function NetWorthWidget() {
   });
 
   const handleViewAnalysis = () => {
-    // TODO: Navigate to cash flow analysis page
-    console.log("View net worth analysis clicked");
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: "Analyze my net worth" }],
+      metadata: {
+        toolCall: {
+          toolName: "getNetWorthAnalysis",
+          toolParams: {
+            showCanvas: true,
+          },
+        },
+      },
+    });
   };
 
   return (
@@ -117,7 +138,7 @@ export function NetWorthWidget() {
           <span className="font-medium text-primary">
             {tNetWorth("description.part_2", {
               value: formatAmount({
-                amount: data?.summary?.currentNetWorth ?? 0,
+                amount: data?.summary?.netWorth ?? 0,
                 currency:
                   data?.summary.currency ?? space?.baseCurrency ?? "EUR",
               }),
@@ -130,10 +151,13 @@ export function NetWorthWidget() {
     >
       {/* View mode */}
       <NetWorthChart
+        className="pt-2"
         data={data?.result ?? []}
         height={70}
         showAnimation={true}
         showLegend={false}
+        showXAxis={false}
+        showYAxis={false}
       />
 
       {/* Edit mode */}

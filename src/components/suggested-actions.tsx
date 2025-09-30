@@ -76,10 +76,10 @@ export function SuggestedActions() {
       description: string;
     }
   > = {
-    "get-burn-rate-analysis": {
+    "get-net-worth-analysis": {
       icon: FlameIcon,
-      title: "Burn rate analysis",
-      description: "Analyze my burn rate",
+      title: "Net Worth analysis",
+      description: "Analyze my net worth",
     },
     "latest-transactions": {
       icon: ReceiptIcon,
