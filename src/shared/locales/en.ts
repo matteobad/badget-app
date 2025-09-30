@@ -52,6 +52,13 @@ export default {
       "description#other": " ",
       action: "See detailed graph",
     },
+    "monthly-spending": {
+      title: "Uscite",
+      description: "{category} makes up ${percentage}% of your spending",
+      description_empty: "No expenses recorded this month",
+      description_default: "Track your monthly expenses",
+      action: "Vedi tutte le spese",
+    },
     "net-worth": {
       title: "Net worth",
       description: {
@@ -71,12 +78,6 @@ export default {
       description: "Income",
       action: "View income trends",
     },
-    "monthly-spending": {
-      title: "Expenses this month",
-      description: "Spending this month",
-      action: "Vedi spese più impattanti",
-    },
-
     "recurring-tracker": {
       title: "Fixed costs",
       action: "See recurring details",

@@ -1,28 +1,31 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { UTCDate } from "@date-fns/utc";
 import { useQuery } from "@tanstack/react-query";
+import { useSpaceQuery } from "~/hooks/use-space";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
-import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { endOfMonth, format, startOfMonth } from "date-fns";
-import { ReceiptIcon } from "lucide-react";
+import { useScopedI18n } from "~/shared/locales/client";
+import { endOfMonth, startOfMonth } from "date-fns";
+import { TrendingDownIcon } from "lucide-react";
 
+import { AnimatedNumber } from "../animated-number";
 import { BaseWidget } from "./base";
 
 export function MonthlySpendingWidget() {
+  const tScoped = useScopedI18n("widgets.monthly-spending");
+
   const trpc = useTRPC();
   const router = useRouter();
 
-  // Calculate current month range
-  const now = new Date();
-  const currentMonthStart = startOfMonth(now);
-  const currentMonthEnd = endOfMonth(now);
+  const { data: space } = useSpaceQuery();
 
   const { data } = useQuery({
     ...trpc.widgets.getMonthlySpending.queryOptions({
-      from: format(currentMonthStart, "yyyy-MM-dd"),
-      to: format(currentMonthEnd, "yyyy-MM-dd"),
+      from: startOfMonth(new UTCDate(new Date())).toISOString(),
+      to: endOfMonth(new UTCDate(new Date())).toISOString(),
+      currency: space?.baseCurrency ?? "EUR",
     }),
     ...WIDGET_POLLING_CONFIG,
   });
@@ -31,37 +34,38 @@ export function MonthlySpendingWidget() {
 
   const getDescription = () => {
     if (!spending || spending.totalSpending === 0) {
-      return "No expenses recorded this month";
+      return tScoped("description_empty");
     }
 
     if (spending.topCategory) {
+      const topCategory = spending.topCategory.name;
       const percentage = spending.topCategory.percentage.toFixed(0);
-      return `${spending.topCategory.name} makes up ${percentage}% of your spending`;
+      return tScoped("description", { category: topCategory, percentage });
     }
 
-    return "Track your monthly expenses";
+    return tScoped("description_default");
   };
 
-  const handleSeeExpenses = () => {
+  const handleClick = () => {
     router.push("/transactions?type=expense");
   };
 
   return (
     <BaseWidget
-      title="Monthly Spending"
-      icon={<ReceiptIcon className="size-4" />}
+      title={tScoped("title")}
+      icon={<TrendingDownIcon className="size-4" />}
       description={getDescription()}
-      onClick={handleSeeExpenses}
-      actions="See biggest cost"
+      onClick={handleClick}
+      actions={tScoped("action")}
     >
       <div className="flex flex-1 items-end gap-2">
         {spending && spending.totalSpending > 0 && (
-          <p className="text-2xl">
-            {formatAmount({
-              amount: spending.totalSpending,
-              currency: spending.currency,
-            })}
-          </p>
+          <span className="text-2xl">
+            <AnimatedNumber
+              value={spending.totalSpending}
+              currency={spending.currency}
+            />
+          </span>
         )}
       </div>
     </BaseWidget>

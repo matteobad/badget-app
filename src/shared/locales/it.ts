@@ -52,6 +52,13 @@ export default {
       "description#other": " ",
       action: "Vedi grafico dettagliato",
     },
+    "monthly-spending": {
+      title: "Uscite questo mese",
+      description: "{category} rappresenta il {percentage}% delle tue uscite",
+      description_empty: "Nessuna spesa registrata questo mese",
+      description_default: "Tieni traccia delle tue spese mensili",
+      action: "Vedi tutte le spese",
+    },
     "net-worth": {
       title: "Patrimonio netto",
       description: {
@@ -70,11 +77,6 @@ export default {
       title: "Entrate questo mese",
       description: "Entrate",
       action: "Vedi andamenti entrate",
-    },
-    "monthly-spending": {
-      title: "Spese mensili",
-      description: "Spese questo mese",
-      action: "Vedi spese più impattanti",
     },
     "recurring-tracker": {
       title: "Costi fissi",

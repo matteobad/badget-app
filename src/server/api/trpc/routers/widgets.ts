@@ -43,12 +43,7 @@ export const widgetsRouter = createTRPCRouter({
   getMonthlySpending: protectedProcedure
     .input(getMonthlySpendingSchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
-      const spending = await getSpendingForPeriod(db, {
-        organizationId: orgId!,
-        from: input.from,
-        to: input.to,
-        currency: input.currency,
-      });
+      const spending = await getSpendingForPeriod(db, input, orgId!);
 
       return {
         result: spending,
