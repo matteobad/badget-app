@@ -1,12 +1,10 @@
 import {
-  getNetWorth,
   getRecurring,
   getSavings,
   getUncategorized,
 } from "~/server/services/reports-service";
 import {
   getIncomeAnalysisSchema,
-  getNetWorthSchema,
   getRecurringSchema,
   getUncategorizedSchema,
 } from "~/shared/validators/reports.schema";
@@ -18,12 +16,6 @@ export const reportsRouter = createTRPCRouter({
     .input(getIncomeAnalysisSchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
       return getSavings(db, { ...input, organizationId: orgId! });
-    }),
-
-  getNetWorth: protectedProcedure
-    .input(getNetWorthSchema)
-    .query(async ({ ctx: { db, orgId }, input }) => {
-      return getNetWorth(db, { ...input, organizationId: orgId! });
     }),
 
   getRecurring: protectedProcedure
