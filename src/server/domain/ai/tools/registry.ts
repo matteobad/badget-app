@@ -7,13 +7,6 @@ export const toolMetadata = {
       "Generate comprehensive net worth analysis with interactive visualizations, trends, assets, and liabilities insights",
     relatedTools: ["getNetWorth", "getTransactions"],
   },
-  getBurnRateAnalysis: {
-    name: "getBurnRateAnalysis",
-    title: "Burn Rate Analysis",
-    description:
-      "Generate comprehensive burn rate analysis with interactive visualizations, spending trends, runway projections, and actionable insights",
-    relatedTools: ["getBurnRate", "getTransactions", "getExpenses"],
-  },
   getBurnRate: {
     name: "getBurnRate",
     title: "Burn Rate",
@@ -26,21 +19,21 @@ export const toolMetadata = {
     title: "Transactions",
     description:
       "Retrieve and analyze financial transactions with advanced filtering, search, and sorting capabilities",
-    relatedTools: ["getBurnRate", "getBurnRateAnalysis", "getExpenses"],
+    relatedTools: ["getNetWorth", "getNetWorthAnalysis", "getExpenses"],
   },
   getExpensesBreakdown: {
     name: "getExpensesBreakdown",
     title: "Expenses Breakdown",
     description:
       "Retrieve and analyze financial expenses with advanced filtering, search, and sorting capabilities",
-    relatedTools: ["getBurnRate", "getBurnRateAnalysis", "getTransactions"],
+    relatedTools: ["getNetWorth", "getNetWorthAnalysis", "getTransactions"],
   },
   getForecast: {
     name: "getForecast",
     title: "Forecast",
     description:
       "Retrieve and analyze financial forecast with advanced filtering, search, and sorting capabilities",
-    relatedTools: ["getBurnRate", "getBurnRateAnalysis", "getTransactions"],
+    relatedTools: ["getNetWorth", "getNetWorthAnalysis", "getTransactions"],
   },
 } as const;
 

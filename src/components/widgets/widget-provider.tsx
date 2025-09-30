@@ -8,8 +8,6 @@ import { devtools } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 import { createStore } from "zustand/vanilla";
 
-import type { inferRouterOutputs } from "@trpc/server";
-
 type WidgetPreferences = RouterOutput["widgets"]["getWidgetPreferences"];
 type WidgetType = WidgetPreferences["primaryWidgets"][number];
 
@@ -42,9 +40,9 @@ interface WidgetState {
 export const createWidgetStore = (initialPreferences?: WidgetPreferences) => {
   const initialState = {
     isCustomizing: false,
-    primaryWidgets: initialPreferences?.primaryWidgets || ([] as WidgetType[]),
+    primaryWidgets: initialPreferences?.primaryWidgets ?? ([] as WidgetType[]),
     availableWidgets:
-      initialPreferences?.availableWidgets || ([] as WidgetType[]),
+      initialPreferences?.availableWidgets ?? ([] as WidgetType[]),
     isSaving: false,
   };
 
@@ -173,9 +171,7 @@ export const WidgetProvider = ({
 }: WidgetProviderProps) => {
   const storeRef = useRef<WidgetStoreApi | null>(null);
 
-  if (storeRef.current === null) {
-    storeRef.current = createWidgetStore(initialPreferences);
-  }
+  storeRef.current ??= createWidgetStore(initialPreferences);
 
   return (
     <WidgetStoreContext.Provider value={storeRef.current}>

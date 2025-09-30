@@ -91,7 +91,7 @@ export function PromptInputAttachment({
     >
       {data.mediaType?.startsWith("image/") && data.url ? (
         <img
-          alt={data.filename || "attachment"}
+          alt={data.filename ?? "attachment"}
           className="size-full object-cover"
           height={56}
           src={data.url}

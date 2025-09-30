@@ -70,7 +70,7 @@ export async function getCashFlowQuery(
           isNull(transaction_table.categorySlug),
           isNull(transaction_category_table.excluded),
           eq(transaction_category_table.excluded, false),
-        )!,
+        ),
       ),
     );
 
@@ -151,7 +151,7 @@ export async function getIncomeQuery(db: DBClient, params: GetIncomeParams) {
           isNull(transaction_table.categorySlug),
           isNull(transaction_category_table.excluded),
           eq(transaction_category_table.excluded, false),
-        )!,
+        ),
       ),
     )
     .groupBy(sql`DATE_TRUNC('month', ${transaction_table.date})`)
@@ -165,7 +165,7 @@ export async function getIncomeQuery(db: DBClient, params: GetIncomeParams) {
   // Step 6: Generate complete results for all months in the series
   const rawData: IncomeResultItem[] = monthSeries.map((monthStart) => {
     const monthKey = format(monthStart, "yyyy-MM-dd");
-    const monthData = dataMap.get(monthKey) || {
+    const monthData = dataMap.get(monthKey) ?? {
       value: 0,
       recurringValue: 0,
     };
@@ -281,7 +281,7 @@ export async function getExpensesQuery(
           isNull(transaction_table.categorySlug),
           isNull(transaction_category_table.excluded),
           eq(transaction_category_table.excluded, false),
-        )!,
+        ),
       ),
     )
     .groupBy(sql`DATE_TRUNC('month', ${transaction_table.date})`)
@@ -298,7 +298,7 @@ export async function getExpensesQuery(
   // Step 6: Generate complete results for all months in the series
   const rawData: ExpensesResultItem[] = monthSeries.map((monthStart) => {
     const monthKey = format(monthStart, "yyyy-MM-dd");
-    const monthData = dataMap.get(monthKey) || {
+    const monthData = dataMap.get(monthKey) ?? {
       value: 0,
       recurringValue: 0,
     };
@@ -407,11 +407,11 @@ export async function getSpendingQuery(
           isNull(transaction_table.categorySlug),
           isNull(transaction_category_table.excluded),
           eq(transaction_category_table.excluded, false),
-        )!,
+        ),
       ),
     );
 
-  const totalAmount = Math.abs(totalAmountResult[0]?.total || 0);
+  const totalAmount = Math.abs(totalAmountResult[0]?.total ?? 0);
 
   // Step 3: Get all spending data in a single aggregated query (MAJOR PERF WIN)
   const spendingConditions = [
@@ -445,7 +445,7 @@ export async function getSpendingQuery(
         or(
           isNull(transaction_category_table.excluded),
           eq(transaction_category_table.excluded, false),
-        )!,
+        ),
       ),
     )
     .groupBy(
@@ -460,10 +460,10 @@ export async function getSpendingQuery(
           totalAmount !== 0 ? (item.amount / totalAmount) * 100 : 0;
         return {
           name: item.name,
-          slug: item.slug || "unknown",
+          slug: item.slug ?? "unknown",
           amount: item.amount,
           currency: inputCurrency ?? "EUR",
-          color: item.color || "#606060",
+          color: item.color ?? "#606060",
           percentage:
             percentage > 1
               ? Math.round(percentage)
@@ -555,7 +555,7 @@ export async function getRecurringExpensesQuery(
 
   for (const expense of recurringExpenses) {
     const amount = Number(expense.amount);
-    const frequency = (expense.frequency || "irregular") as
+    const frequency = (expense.frequency ?? "irregular") as
       | "weekly"
       | "monthly"
       | "annually"
@@ -592,7 +592,7 @@ export async function getRecurringExpensesQuery(
   const expenses: RecurringExpenseItem[] = recurringExpenses.map((exp) => ({
     name: exp.name,
     amount: Number(Number(exp.amount).toFixed(2)),
-    frequency: (exp.frequency || "irregular") as
+    frequency: (exp.frequency ?? "irregular") as
       | "weekly"
       | "monthly"
       | "annually"

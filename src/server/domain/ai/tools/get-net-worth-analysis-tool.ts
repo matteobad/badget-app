@@ -123,7 +123,7 @@ Example format: "I'm analyzing your net worth data for [period] to show your net
       // Calculate basic metrics from burn rate data
       const currentNetWorth =
         netWorthData.length > 0
-          ? netWorthData[netWorthData.length - 1]?.amount || 0
+          ? (netWorthData[netWorthData.length - 1]?.amount ?? 0)
           : 0;
 
       const averageNetWorth =
@@ -140,7 +140,7 @@ Example format: "I'm analyzing your net worth data for [period] to show your net
       const daySeries = eachDayOfInterval({ start: fromDate, end: toDate });
 
       const dailyData = daySeries.map((date, index) => {
-        const value = netWorthData[index]?.amount || 0;
+        const value = netWorthData[index]?.amount ?? 0;
 
         return {
           date: format(date, "yyyy-MM-dd"),
@@ -168,7 +168,7 @@ Example format: "I'm analyzing your net worth data for [period] to show your net
 
       // Calculate burn rate change for metrics
       const netWorthStartValue =
-        netWorthData.length > 0 ? netWorthData[0]?.amount || 0 : 0;
+        netWorthData.length > 0 ? (netWorthData[0]?.amount ?? 0) : 0;
       const netWorthEndValue = currentNetWorth;
       const netWorthChange = currentNetWorth - netWorthStartValue;
       const netWorthChangePercentage =
@@ -280,7 +280,7 @@ Provide a concise 2-sentence summary and 2-3 brief recommendations.`,
         .filter((line) => line.trim().length > 0);
 
       const summaryText =
-        lines[0] ||
+        lines[0] ??
         `Current net worth: ${formatAmount({
           amount: currentNetWorth,
           currency: targetCurrency,
@@ -386,7 +386,7 @@ Your net worth has {trend} by {netWorthChangePercentage}% over the last ${netWor
         context: "net_worth_analysis",
       });
 
-      followupStream.complete();
+      void followupStream.complete();
 
       // Yield the final response with forceStop flag
       // Always stop for analysis tool since canvas is complete

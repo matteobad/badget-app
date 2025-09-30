@@ -31,7 +31,7 @@ export const suggestedActionsCache = {
     const summaryKey = `${suggestedActionsCachePrefix}${organizationId}:${userId}:summary`;
     const summary =
       await redis.get<Record<string, SuggestedActionUsage>>(summaryKey);
-    return summary || {};
+    return summary ?? {};
   },
 
   // Increment usage for a specific action
@@ -44,7 +44,7 @@ export const suggestedActionsCache = {
     const summaryKey = `${organizationId}:${userId}:summary`;
 
     // Get current usage
-    const currentUsage = (await redis.get<SuggestedActionUsage>(key)) || {
+    const currentUsage = (await redis.get<SuggestedActionUsage>(key)) ?? {
       actionId,
       count: 0,
       lastUsed: new Date(),
@@ -62,7 +62,7 @@ export const suggestedActionsCache = {
 
     // Update summary cache
     const currentSummary =
-      (await redis.get<Record<string, SuggestedActionUsage>>(summaryKey)) || {};
+      (await redis.get<Record<string, SuggestedActionUsage>>(summaryKey)) ?? {};
     currentSummary[actionId] = updatedUsage;
     await redis.set(summaryKey, currentSummary, { ex: userContextCacheTTL });
   },
@@ -80,7 +80,7 @@ export const suggestedActionsCache = {
 
     // Update summary
     const currentSummary =
-      (await redis.get<Record<string, SuggestedActionUsage>>(summaryKey)) || {};
+      (await redis.get<Record<string, SuggestedActionUsage>>(summaryKey)) ?? {};
     delete currentSummary[actionId];
     await redis.set(summaryKey, currentSummary, { ex: userContextCacheTTL });
   },
@@ -92,7 +92,7 @@ export const suggestedActionsCache = {
   ): Promise<void> => {
     const summaryKey = `${suggestedActionsCachePrefix}${organizationId}:${userId}:summary`;
     const summary =
-      (await redis.get<Record<string, SuggestedActionUsage>>(summaryKey)) || {};
+      (await redis.get<Record<string, SuggestedActionUsage>>(summaryKey)) ?? {};
 
     // Delete all individual action caches
     for (const actionId of Object.keys(summary)) {

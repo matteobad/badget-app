@@ -30,7 +30,7 @@ export function UncategorizedTransactionsWidget() {
 
   const trpc = useTRPC();
 
-  const { data, isLoading } = useQuery(
+  const { data } = useQuery(
     trpc.reports.getUncategorized.queryOptions({
       from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
       to: format(endOfMonth(new Date()), "yyyy-MM-dd"),

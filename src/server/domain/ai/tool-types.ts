@@ -1,6 +1,5 @@
 import type { InferUITools } from "ai";
 
-import { getBurnRateAnalysisTool } from "./tools/get-burn-rate-analysis-tool";
 import { getBurnRateTool } from "./tools/get-burn-rate-tool";
 // import { google } from "@ai-sdk/google";
 
@@ -16,7 +15,6 @@ export const createToolRegistry = () => {
 
   return {
     getBurnRate: getBurnRateTool,
-    getBurnRateAnalysis: getBurnRateAnalysisTool,
     getNetWorthAnalysis: getNetWorthAnalysisTool,
     getTransactions: getTransactionsTool,
     getExpensesBreakdown: getExpensesBreakdownTool,

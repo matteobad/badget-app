@@ -2,7 +2,6 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
-import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
 import { LandmarkIcon } from "lucide-react";

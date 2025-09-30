@@ -74,7 +74,7 @@ export function SavingsWidgetSettings() {
         <SelectContent>
           {Object.values(PERIOD).map((period) => {
             return (
-              <SelectItem value={period}>
+              <SelectItem value={period} key={period}>
                 {tAverageSavingsSettings(period)}
               </SelectItem>
             );
@@ -91,7 +91,7 @@ export function SavingsWidget() {
   const { data: space } = useSpaceQuery();
   const trpc = useTRPC();
 
-  const { data: savingsData, isLoading } = useQuery(
+  const { data: savingsData } = useQuery(
     trpc.reports.getSavings.queryOptions({
       from: format(subMonths(new Date(), 5), "yyyy-MM-dd"),
       to: format(new Date(), "yyyy-MM-dd"),

@@ -3,7 +3,6 @@
 import { UTCDate } from "@date-fns/utc";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatedNumber } from "~/components/animated-number";
-import { Skeleton } from "~/components/ui/skeleton";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -20,7 +19,7 @@ export function MonthlyIncomeWidget() {
 
   const trpc = useTRPC();
 
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     ...trpc.widgets.getMonthlyIncome.queryOptions({
       from: startOfMonth(new UTCDate(new Date())).toISOString(),
       to: endOfMonth(new UTCDate(new Date())).toISOString(),

@@ -63,7 +63,7 @@ function SortableCard({
       ref={ref}
       data-id={index}
       data-dragging={isDragging}
-      className={`${className} ${wiggleClass || ""} ${
+      className={`${className} ${wiggleClass ?? ""} ${
         isDragging
           ? "z-50 scale-105 opacity-100 shadow-[0_4px_12px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
           : ""

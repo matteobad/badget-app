@@ -55,7 +55,7 @@ export const suggestedActionsRouter = createTRPCRouter({
           id: action.id,
           toolName: action.toolName,
           toolParams: action.toolParams,
-          usageCount: usage?.count || 0,
+          usageCount: usage?.count ?? 0,
           lastUsed: usage?.lastUsed ? new Date(usage.lastUsed) : null,
         };
       })

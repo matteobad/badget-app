@@ -7,7 +7,7 @@ import type {
   getRecurringExpensesSchema,
 } from "~/shared/validators/widgets.schema";
 import type z from "zod";
-import { and, count, desc, eq, gt, gte, lt, lte, not, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, lt, lte, not, sql } from "drizzle-orm";
 
 import type { DBClient } from "../db";
 import {
@@ -122,7 +122,7 @@ export async function getSpendingForPeriod(
     currency: inputCurrency,
   });
 
-  const topCategory = spendingCategories[0] || null;
+  const topCategory = spendingCategories[0] ?? null;
 
   return {
     totalSpending: Math.round(totalSpending * 100) / 100,

@@ -76,7 +76,7 @@ export function NetWorthWidgetSettings() {
         <SelectContent>
           {Object.values(PERIOD).map((period) => {
             return (
-              <SelectItem value={period}>
+              <SelectItem value={period} key={period}>
                 {tNetWorthSettings(period)}
               </SelectItem>
             );

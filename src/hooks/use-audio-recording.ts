@@ -91,7 +91,7 @@ export function useAudioRecording(): UseAudioRecordingReturn {
       // Set up auto-stop timer for 1 minute limit
       recordingTimerRef.current = setTimeout(() => {
         console.log("Recording automatically stopped after 1 minute");
-        stopRecording();
+        void stopRecording();
       }, MAX_RECORDING_TIME);
     } catch (error) {
       console.error("Error starting audio recording:", error);

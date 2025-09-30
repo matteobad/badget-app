@@ -55,7 +55,7 @@ export function SuggestedActions() {
 
     setChatId(chatId);
 
-    sendMessage({
+    void sendMessage({
       role: "user",
       parts: [{ type: "text", text: params.text }],
       metadata: {
@@ -106,9 +106,9 @@ export function SuggestedActions() {
         {suggestedActions.map((action: SuggestedAction) => {
           const config = uiConfig[action.id];
           const Icon = config?.icon;
-          const title = config?.title || action.id;
+          const title = config?.title ?? action.id;
           const description =
-            config?.description || `Execute ${action.toolName}`;
+            config?.description ?? `Execute ${action.toolName}`;
 
           return (
             <button

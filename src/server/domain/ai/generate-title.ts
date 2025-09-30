@@ -15,13 +15,11 @@ type Params = Omit<ChatUserContext, "organizationId" | "userId"> & {
 
 export const generateTitle = async ({
   message,
-  organizationName,
   country,
   fullName,
   baseCurrency,
   city,
   timezone,
-  countryCode,
 }: Params) => {
   try {
     // If the message is too short, return "New Chat"
@@ -103,7 +101,7 @@ export function extractTextContent(messages: UIChatMessage[]): string {
   return messages
     .map((msg) => {
       const textPart = msg.parts?.find((part: any) => part.type === "text");
-      return (textPart as any)?.text || "";
+      return (textPart as any)?.text ?? "";
     })
     .join(" ")
     .trim();

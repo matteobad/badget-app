@@ -3,7 +3,7 @@
 import type React from "react";
 import { useChatStore } from "~/lib/stores/chat";
 import { cn } from "~/lib/utils";
-import { BoltIcon, ZapIcon } from "lucide-react";
+import { ZapIcon } from "lucide-react";
 
 export function SuggestedActionsButton() {
   const { showCommands, setShowCommands } = useChatStore();

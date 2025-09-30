@@ -1,7 +1,6 @@
 import type { UIChatMessage } from "~/server/domain/ai/types";
 import { index } from "drizzle-orm/pg-core";
 
-import { timestamps } from "../utils";
 import { pgTable } from "./_table";
 import { organization, user } from "./auth";
 
