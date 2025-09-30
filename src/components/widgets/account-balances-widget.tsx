@@ -7,6 +7,7 @@ import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
 import { LandmarkIcon } from "lucide-react";
 
+import { AnimatedNumber } from "../animated-number";
 import { BaseWidget } from "./base";
 
 export function AccountBalancesWidget() {
@@ -78,12 +79,7 @@ export function AccountBalancesWidget() {
     >
       <div className="flex flex-1 items-end gap-2">
         <span className="text-2xl">
-          {formatAmount({
-            currency,
-            amount: totalBalance,
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          })}
+          <AnimatedNumber value={totalBalance} currency={currency} />
         </span>
       </div>
     </BaseWidget>

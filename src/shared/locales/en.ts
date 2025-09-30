@@ -46,6 +46,12 @@ export default {
       "description#other": "Comparison between income and expenses",
       action: "View analysis",
     },
+    "category-expenses": {
+      title: "Category expenses",
+      "description#zero": "Non hai movimenti nel periodo selezionato",
+      "description#other": " ",
+      action: "See detailed graph",
+    },
     "net-worth": {
       title: "Net worth",
       description: {
@@ -70,10 +76,7 @@ export default {
       description: "Spending this month",
       action: "Vedi spese più impattanti",
     },
-    "category-expenses": {
-      title: "Category expenses",
-      action: "See detailed graph",
-    },
+
     "recurring-tracker": {
       title: "Fixed costs",
       action: "See recurring details",

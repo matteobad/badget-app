@@ -1,8 +1,10 @@
 "use client";
 
+import { UTCDate } from "@date-fns/utc";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useSpaceQuery } from "~/hooks/use-space";
+import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
@@ -34,19 +36,21 @@ function CategoryExpensesWidgetSkeleton() {
 }
 
 export function CategoryExpensesWidget() {
-  const tCategoryExpenses = useScopedI18n("widgets.category-expenses");
+  const tScoped = useScopedI18n("widgets.category-expenses");
 
   const { data: space } = useSpaceQuery();
 
   const trpc = useTRPC();
 
-  const { data, isLoading } = useQuery(
-    trpc.reports.getCategoryExpenses.queryOptions({
-      from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
-      to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
+  const { data, isLoading } = useQuery({
+    ...trpc.reports.getCategoryExpenses.queryOptions({
+      from: startOfMonth(new UTCDate(new Date())).toISOString(),
+      to: endOfMonth(new UTCDate(new Date())).toISOString(),
     }),
-  );
+    ...WIDGET_POLLING_CONFIG,
+  });
 
+  const categoryCount = data?.result.length ?? 0;
   const higherValue = data?.result[0]?.total ?? 1;
 
   const handleClick = () => {
@@ -56,10 +60,10 @@ export function CategoryExpensesWidget() {
 
   return (
     <BaseWidget
-      title={tCategoryExpenses("title")}
-      description={""}
+      title={tScoped("title")}
+      description={tScoped("description", { count: categoryCount })}
       icon={<ShapesIcon className="size-4 text-muted-foreground" />}
-      actions={tCategoryExpenses("action")}
+      actions={tScoped("action")}
       onClick={handleClick}
     >
       <div className="flex flex-1 flex-col gap-2">

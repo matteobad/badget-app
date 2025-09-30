@@ -8,6 +8,7 @@ import { useScopedI18n } from "~/shared/locales/client";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { ScaleIcon } from "lucide-react";
 
+import { AnimatedNumber } from "../animated-number";
 import { BaseWidget } from "./base";
 
 export function CashFlowWidget() {
@@ -44,12 +45,10 @@ export function CashFlowWidget() {
     >
       <div className="flex flex-1 items-end gap-2">
         <span className="text-2xl">
-          {formatAmount({
-            amount: data?.result.netCashFlow ?? 0,
-            currency: data?.result.currency ?? space?.baseCurrency ?? "EUR",
-            maximumFractionDigits: 0,
-            minimumFractionDigits: 0,
-          })}
+          <AnimatedNumber
+            value={data?.result.netCashFlow ?? 0}
+            currency={data?.result.currency ?? space?.baseCurrency ?? "EUR"}
+          />
         </span>
       </div>
     </BaseWidget>

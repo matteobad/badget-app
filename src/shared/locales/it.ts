@@ -46,6 +46,12 @@ export default {
       "description#other": "Confronto tra entrate e spese",
       action: "Approfondisci l’andamento",
     },
+    "category-expenses": {
+      title: "Spese per categoria",
+      "description#zero": "Non hai movimenti nel periodo selezionato",
+      "description#other": " ",
+      action: "Vedi grafico dettagliato",
+    },
     "net-worth": {
       title: "Patrimonio netto",
       description: {
@@ -69,10 +75,6 @@ export default {
       title: "Spese mensili",
       description: "Spese questo mese",
       action: "Vedi spese più impattanti",
-    },
-    "category-expenses": {
-      title: "Spese per categoria",
-      action: "Vedi grafico dettagliato",
     },
     "recurring-tracker": {
       title: "Costi fissi",
