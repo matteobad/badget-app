@@ -40,6 +40,12 @@ export default {
       "description#other": "Combined balance from {count} accounts",
       action: "View accounts",
     },
+    "cash-flow": {
+      title: "Cash flow",
+      "description#zero": "No movements for selected period",
+      "description#other": "Comparison between income and expenses",
+      action: "View analysis",
+    },
     "net-worth": {
       title: "Net worth",
       description: {

@@ -1,5 +1,6 @@
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { useSpaceQuery } from "~/hooks/use-space";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -14,18 +15,22 @@ export function AccountBalancesWidget() {
   const trpc = useTRPC();
   const router = useRouter();
 
+  const { data: space } = useSpaceQuery();
+
   // Fetch combined account balances
   const { data } = useQuery({
-    ...trpc.widgets.getAccountBalances.queryOptions(),
+    ...trpc.widgets.getAccountBalances.queryOptions({
+      currency: space?.baseCurrency ?? "EUR",
+    }),
     ...WIDGET_POLLING_CONFIG,
   });
 
   const balanceData = data?.result;
   const totalBalance = balanceData?.totalBalance ?? 0;
-  const currency = balanceData?.currency ?? "EUR";
+  const currency = balanceData?.currency ?? space?.baseCurrency ?? "EUR";
   const accountCount = balanceData?.accountCount ?? 0;
 
-  const handleOpenAccounts = () => {
+  const handleClick = () => {
     router.push("/accounts");
   };
 
@@ -68,7 +73,7 @@ export function AccountBalancesWidget() {
       title={tScoped("title")}
       icon={<LandmarkIcon className="size-4" />}
       description={tScoped("description", { count: accountCount })}
-      onClick={handleOpenAccounts}
+      onClick={handleClick}
       actions={tScoped("action")}
     >
       <div className="flex flex-1 items-end gap-2">

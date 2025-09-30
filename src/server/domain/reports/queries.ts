@@ -19,18 +19,16 @@ export async function getCashFlowQuery(
   db: DBClient,
   params: GetCashFlowParams,
 ) {
+  // TODO: handle currency conversion when specified by user
   const { organizationId, from, to, period = "monthly", currency } = params;
-
-  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
-  const toDate = endOfMonth(new UTCDate(parseISO(to)));
 
   // Build query conditions
   const conditions = [
     eq(transaction_table.organizationId, organizationId),
     eq(transaction_table.internal, false),
     ne(transaction_table.status, "excluded"),
-    gte(transaction_table.date, format(fromDate, "yyyy-MM-dd")),
-    lte(transaction_table.date, format(toDate, "yyyy-MM-dd")),
+    gte(transaction_table.date, from),
+    lte(transaction_table.date, to),
   ];
 
   // Get all transactions with category exclusion

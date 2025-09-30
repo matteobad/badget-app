@@ -40,6 +40,12 @@ export default {
       "description#other": "Saldo totale di {count} conti",
       action: "Vedi conti",
     },
+    "cash-flow": {
+      title: "Flusso di cassa",
+      "description#zero": "Non hai movimenti nel periodo selezionato",
+      "description#other": "Confronto tra entrate e spese",
+      action: "Approfondisci l’andamento",
+    },
     "net-worth": {
       title: "Patrimonio netto",
       description: {
