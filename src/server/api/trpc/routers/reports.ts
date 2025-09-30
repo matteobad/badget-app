@@ -1,11 +1,9 @@
 import {
-  getRecurring,
   getSavings,
   getUncategorized,
 } from "~/server/services/reports-service";
 import {
   getIncomeAnalysisSchema,
-  getRecurringSchema,
   getUncategorizedSchema,
 } from "~/shared/validators/reports.schema";
 
@@ -16,12 +14,6 @@ export const reportsRouter = createTRPCRouter({
     .input(getIncomeAnalysisSchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
       return getSavings(db, { ...input, organizationId: orgId! });
-    }),
-
-  getRecurring: protectedProcedure
-    .input(getRecurringSchema)
-    .query(async ({ ctx: { db, orgId }, input }) => {
-      return getRecurring(db, { ...input, organizationId: orgId! });
     }),
 
   getUncategorized: protectedProcedure

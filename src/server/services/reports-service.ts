@@ -15,13 +15,11 @@ import {
   transaction_table,
 } from "../db/schema/transactions";
 import { getCombinedAccountBalanceQuery } from "../domain/bank-account/queries";
-import {
-  getCashFlowQuery,
-  getExpensesQuery,
-  getIncomeQuery,
-  getRecurringExpensesQuery,
-  getSpendingQuery,
-} from "../domain/reports/queries";
+import { getCashFlowQuery } from "../domain/reports/get-cash-flow-query";
+import { getExpensesQuery } from "../domain/reports/get-expenses-query";
+import { getIncomeQuery } from "../domain/reports/get-income-query";
+import { getRecurringExpensesQuery } from "../domain/reports/get-recurring-expenses-query";
+import { getSpendingQuery } from "../domain/reports/get-spending-query";
 
 // account-balances widget
 export async function getCombinedAccountBalance(
@@ -249,163 +247,6 @@ export async function getSavings(db: DBClient, params: GetSavingsParams) {
     },
     meta: {
       type: "savings",
-      currency,
-    },
-    result,
-  };
-}
-
-export type GetMonthlySpendingParams = {
-  organizationId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
-
-export async function getMonthlySpending(
-  db: DBClient,
-  params: GetMonthlySpendingParams,
-) {
-  const { organizationId, from, to, currency } = params;
-
-  const [result] = await db
-    .select({
-      spending: sql`sum(${transaction_table.amount}) * -1`.mapWith(Number),
-    })
-    .from(transaction_table)
-    .leftJoin(
-      transaction_category_table,
-      and(
-        eq(
-          transaction_category_table.organizationId,
-          transaction_table.organizationId,
-        ),
-        eq(transaction_category_table.slug, transaction_table.categorySlug),
-      ),
-    )
-    .where(
-      and(
-        eq(transaction_table.organizationId, organizationId),
-        gte(transaction_table.date, from),
-        lte(transaction_table.date, to),
-        eq(transaction_table.internal, false),
-        lt(transaction_table.amount, 0),
-        eq(transaction_category_table.excluded, false),
-      ),
-    );
-
-  return {
-    summary: {
-      amount: result?.spending ?? 0,
-      currency,
-    },
-    meta: {
-      type: "monthly-spending",
-      currency,
-    },
-    result,
-  };
-}
-
-export type GetCategoryExpensesParams = {
-  organizationId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
-
-export async function getCategoryExpenses(
-  db: DBClient,
-  params: GetCategoryExpensesParams,
-) {
-  const { organizationId, from, to, currency } = params;
-
-  // TODO: consider splits
-  const result = await db
-    .select({
-      category: transaction_table.categorySlug,
-      categoryColor: transaction_category_table.color,
-      categoryName: transaction_category_table.name,
-      total: sql`sum(${transaction_table.amount}) * -1`.mapWith(Number),
-    })
-    .from(transaction_table)
-    .leftJoin(
-      transaction_category_table,
-      and(
-        eq(
-          transaction_category_table.organizationId,
-          transaction_table.organizationId,
-        ),
-        eq(transaction_category_table.slug, transaction_table.categorySlug),
-      ),
-    )
-    .where(
-      and(
-        eq(transaction_table.organizationId, organizationId),
-        gte(transaction_table.date, from),
-        lte(transaction_table.date, to),
-        lt(transaction_table.amount, 0), // spese → negative
-        not(transaction_table.internal), // spese → incluse
-        not(transaction_category_table.excluded), // categorie → incluse
-      ),
-    )
-    .groupBy(
-      transaction_table.categorySlug,
-      transaction_category_table.color,
-      transaction_category_table.name,
-    )
-    .orderBy(desc(sql`sum(${transaction_table.amount}) * -1`))
-    .limit(3);
-
-  return {
-    summary: {
-      // income: 0, TODO: to calculate percentage
-      currency,
-    },
-    meta: {
-      type: "category-expenses",
-      currency,
-    },
-    result,
-  };
-}
-
-export type GetRecurringParams = {
-  organizationId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
-
-export async function getRecurring(db: DBClient, params: GetRecurringParams) {
-  const { organizationId, from, to, currency } = params;
-
-  const [result] = await db
-    .select({
-      recurring:
-        sql`sum(case when ${transaction_table.recurring} = true then ${transaction_table.amount} else 0 end) * -1`.mapWith(
-          Number,
-        ),
-      total: sql`sum(${transaction_table.amount}) * -1`.mapWith(Number),
-    })
-    .from(transaction_table)
-    .where(
-      and(
-        eq(transaction_table.organizationId, organizationId),
-        gte(transaction_table.date, from),
-        lte(transaction_table.date, to),
-        lt(transaction_table.amount, 0), // spese → negative
-        not(transaction_table.internal), // spese → incluse
-      ),
-    );
-
-  return {
-    summary: {
-      // income: 0, TODO: to calculate percentage
-      currency,
-    },
-    meta: {
-      type: "recurring",
       currency,
     },
     result,
