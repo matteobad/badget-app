@@ -1,6 +1,8 @@
 import type {
   getAccountBalancesSchema,
   getCashFlowSchema,
+  getCategoryExpensesSchema,
+  getMonthlyIncomeSchema,
   getMonthlySpendingSchema,
 } from "~/shared/validators/widgets.schema";
 import type z from "zod";
@@ -15,6 +17,7 @@ import { getCombinedAccountBalanceQuery } from "../domain/bank-account/queries";
 import {
   getCashFlowQuery,
   getExpensesQuery,
+  getIncomeQuery,
   getSpendingQuery,
 } from "../domain/reports/queries";
 
@@ -55,7 +58,37 @@ export async function getCashFlow(
   };
 }
 
-// expenses widget
+// monthly-income widget
+export async function getIncomeForPeriod(
+  db: DBClient,
+  params: z.infer<typeof getMonthlyIncomeSchema>,
+  organizationId: string,
+) {
+  const { from, to, currency: inputCurrency } = params;
+
+  // Use existing getExpenses function for the specified period
+  const incomeData = await getIncomeQuery(db, {
+    organizationId,
+    from,
+    to,
+    currency: inputCurrency,
+  });
+
+  // Calculate total income across all months in the period
+  const totalIncome = incomeData.result.reduce(
+    (sum, item) => sum + item.total,
+    0,
+  );
+
+  const currency = incomeData.meta.currency ?? inputCurrency ?? "EUR";
+
+  return {
+    totalIncome: Math.round(totalIncome * 100) / 100,
+    currency,
+  };
+}
+
+// monthly-expenses widget
 export async function getSpendingForPeriod(
   db: DBClient,
   params: z.infer<typeof getMonthlySpendingSchema>,
@@ -104,115 +137,34 @@ export async function getSpendingForPeriod(
   };
 }
 
-type GetIncomeParams = {
-  organizationId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
+// category-expenses widget
+export async function getCategorySpendingForPeriod(
+  db: DBClient,
+  params: z.infer<typeof getCategoryExpensesSchema>,
+  organizationId: string,
+) {
+  const { from, to, currency: inputCurrency } = params;
 
-export async function getIncome(db: DBClient, params: GetIncomeParams) {
-  const { organizationId, from, to, currency } = params;
+  // Get top spending category for the specified period using existing getSpending function
+  const spendingCategories = await getSpendingQuery(db, {
+    organizationId,
+    from,
+    to,
+    currency: inputCurrency,
+  });
 
-  // Query base: transazioni positive
-  const incomeTransactions = await db
-    .select({
-      id: transaction_table.id,
-      name: transaction_table.name,
-      amount: transaction_table.amount,
-      date: transaction_table.date,
-      category: transaction_table.categorySlug,
-    })
-    .from(transaction_table)
-    .where(
-      and(
-        eq(transaction_table.organizationId, organizationId),
-        gte(transaction_table.date, from),
-        lte(transaction_table.date, to),
-        gt(transaction_table.amount, 0),
-      ),
-    );
+  // Calculate total spending across all months in the period
+  const totalSpending = spendingCategories.reduce(
+    (sum, item) => sum + item.amount,
+    0,
+  );
 
-  if (incomeTransactions.length === 0) {
-    return { total: 0, sources: [] };
-  }
-
-  // Calcolo totale
-  const total = incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
-
-  // Raggruppo per categoria (o account, o payee: dipende da UX)
-  const grouped: Record<string, { name: string; amount: number }> = {};
-
-  for (const tx of incomeTransactions) {
-    const key = tx.category ?? "uncategorized";
-    if (!grouped[key]) {
-      grouped[key] = { name: key, amount: 0 };
-    }
-    grouped[key].amount += tx.amount;
-  }
-
-  // Trasformo in array e calcolo % sul totale
-  const sources = Object.values(grouped)
-    .map((g) => ({
-      name: g.name,
-      amount: g.amount,
-      percentage: Math.round((g.amount / total) * 100),
-    }))
-    .sort((a, b) => b.amount - a.amount);
+  const currency = inputCurrency ?? "EUR";
 
   return {
-    total,
-    sources,
-  };
-}
-
-export type GetIncomesParams = {
-  organizationId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
-
-export async function getIncomes(db: DBClient, params: GetIncomesParams) {
-  const { organizationId, from, to, currency } = params;
-
-  const [result] = await db
-    .select({
-      income: sql`sum(${transaction_table.amount})`.mapWith(Number),
-    })
-    .from(transaction_table)
-    .leftJoin(
-      transaction_category_table,
-      and(
-        eq(
-          transaction_category_table.organizationId,
-          transaction_table.organizationId,
-        ),
-        eq(transaction_category_table.slug, transaction_table.categorySlug),
-      ),
-    )
-    .where(
-      and(
-        eq(transaction_table.organizationId, organizationId),
-        gte(transaction_table.date, from),
-        lte(transaction_table.date, to),
-        eq(transaction_table.internal, false),
-        gt(transaction_table.amount, 0),
-        eq(transaction_category_table.excluded, false),
-      ),
-    );
-
-  const grossIncome = result?.income ?? 0;
-
-  return {
-    summary: {
-      grossIncome: grossIncome,
-      currency,
-    },
-    meta: {
-      type: "income",
-      currency,
-    },
+    totalSpending: Math.round(totalSpending * 100) / 100,
+    currency,
+    spendingCategories,
   };
 }
 
@@ -290,7 +242,7 @@ export type GetMonthlySpendingParams = {
 
 export async function getMonthlySpending(
   db: DBClient,
-  params: GetIncomesParams,
+  params: GetMonthlySpendingParams,
 ) {
   const { organizationId, from, to, currency } = params;
 

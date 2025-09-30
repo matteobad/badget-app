@@ -2,12 +2,16 @@ import { widgetPreferencesCache } from "~/server/cache/widget-preferences-cache"
 import { getNetWorth } from "~/server/services/metrics-service";
 import {
   getCashFlow,
+  getCategorySpendingForPeriod,
   getCombinedAccountBalance,
+  getIncomeForPeriod,
   getSpendingForPeriod,
 } from "~/server/services/reports-service";
 import {
   getAccountBalancesSchema,
   getCashFlowSchema,
+  getCategoryExpensesSchema,
+  getMonthlyIncomeSchema,
   getMonthlySpendingSchema,
   getNetWorthSchema,
   updateWidgetPreferencesSchema,
@@ -40,6 +44,24 @@ export const widgetsRouter = createTRPCRouter({
       });
     }),
 
+  getMonthlyIncome: protectedProcedure
+    .input(getMonthlyIncomeSchema)
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      const income = await getIncomeForPeriod(db, input, orgId!);
+
+      return {
+        result: income,
+        toolCall: {
+          toolName: "getIncomeAnalysis",
+          toolParams: {
+            from: input.from,
+            to: input.to,
+            currency: input.currency,
+          },
+        },
+      };
+    }),
+
   getMonthlySpending: protectedProcedure
     .input(getMonthlySpendingSchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
@@ -47,6 +69,28 @@ export const widgetsRouter = createTRPCRouter({
 
       return {
         result: spending,
+        toolCall: {
+          toolName: "getSpendingAnalysis",
+          toolParams: {
+            from: input.from,
+            to: input.to,
+            currency: input.currency,
+          },
+        },
+      };
+    }),
+
+  getCategoryExpenses: protectedProcedure
+    .input(getCategoryExpensesSchema)
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      const categorySpending = await getCategorySpendingForPeriod(
+        db,
+        input,
+        orgId!,
+      );
+
+      return {
+        result: categorySpending,
         toolCall: {
           toolName: "getSpendingAnalysis",
           toolParams: {

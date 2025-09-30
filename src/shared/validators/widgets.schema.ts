@@ -58,7 +58,19 @@ export const getAccountBalancesSchema = z
   })
   .optional();
 
+export const getMonthlyIncomeSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  currency: z.string().optional(),
+});
+
 export const getMonthlySpendingSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  currency: z.string().optional(),
+});
+
+export const getCategoryExpensesSchema = z.object({
   from: z.string(),
   to: z.string(),
   currency: z.string().optional(),
