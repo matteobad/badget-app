@@ -76,15 +76,15 @@ function SortableCard({
 
 // Widget mapping to components
 const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
+  "account-balances": AccountBalancesWidget,
   "cash-flow": CashFlowWidget,
-  "net-worth": NetWorthWidget,
+  "category-expenses": CategoryExpensesWidget,
   "monthly-income": MonthlyIncomeWidget,
   "monthly-spending": MonthlySpendingWidget,
-  "category-expenses": CategoryExpensesWidget,
+  "net-worth": NetWorthWidget,
   "recurring-tracker": RecurringTrackerWidget,
-  "uncategorized-transactions": UncategorizedTransactionsWidget,
   savings: SavingsWidget,
-  "account-balances": AccountBalancesWidget,
+  "uncategorized-transactions": UncategorizedTransactionsWidget,
 };
 
 export function WidgetsGrid() {

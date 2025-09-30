@@ -1,8 +1,10 @@
 import { widgetPreferencesCache } from "~/server/cache/widget-preferences-cache";
-import { getCombinedAccountBalance } from "~/server/domain/bank-account/queries";
-import { getCashFlow } from "~/server/domain/widgets/queries";
 import { getNetWorth } from "~/server/services/metrics-service";
-import { getSpendingForPeriod } from "~/server/services/reports-service";
+import {
+  getCashFlow,
+  getCombinedAccountBalance,
+  getSpendingForPeriod,
+} from "~/server/services/reports-service";
 import {
   getAccountBalancesSchema,
   getCashFlowSchema,
@@ -15,25 +17,16 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const widgetsRouter = createTRPCRouter({
   // Widgets data
+  getAccountBalances: protectedProcedure
+    .input(getAccountBalancesSchema)
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      return await getCombinedAccountBalance(db, input, orgId!);
+    }),
+
   getCashFlow: protectedProcedure
     .input(getCashFlowSchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
-      const cashFlowData = await getCashFlow(db, {
-        organizationId: orgId!,
-        from: input.from,
-        to: input.to,
-        currency: input.currency,
-        period: input.period,
-      });
-
-      return {
-        result: {
-          netCashFlow: cashFlowData.summary.netCashFlow,
-          currency: cashFlowData.summary.currency,
-          period: cashFlowData.summary.period,
-          meta: cashFlowData.meta,
-        },
-      };
+      return await getCashFlow(db, input, orgId!);
     }),
 
   getNetWorth: protectedProcedure
@@ -45,19 +38,6 @@ export const widgetsRouter = createTRPCRouter({
         to: input.to,
         currency: input.currency,
       });
-    }),
-
-  getAccountBalances: protectedProcedure
-    .input(getAccountBalancesSchema)
-    .query(async ({ ctx: { db, orgId }, input }) => {
-      const accountBalances = await getCombinedAccountBalance(db, {
-        organizationId: orgId!,
-        currency: input.currency,
-      });
-
-      return {
-        result: accountBalances,
-      };
     }),
 
   getMonthlySpending: protectedProcedure

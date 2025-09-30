@@ -3,17 +3,20 @@ import { useQuery } from "@tanstack/react-query";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { useScopedI18n } from "~/shared/locales/client";
 import { LandmarkIcon } from "lucide-react";
 
 import { BaseWidget } from "./base";
 
 export function AccountBalancesWidget() {
+  const tScoped = useScopedI18n("widgets.account-balances");
+
   const trpc = useTRPC();
   const router = useRouter();
 
   // Fetch combined account balances
   const { data } = useQuery({
-    ...trpc.widgets.getAccountBalances.queryOptions({}),
+    ...trpc.widgets.getAccountBalances.queryOptions(),
     ...WIDGET_POLLING_CONFIG,
   });
 
@@ -26,69 +29,57 @@ export function AccountBalancesWidget() {
     router.push("/accounts");
   };
 
-  const getDescription = () => {
-    if (accountCount === 0) {
-      return "No accounts connected";
-    }
+  // const getAccountTypeBreakdown = () => {
+  //   if (!balanceData?.accountBreakdown) return null;
 
-    if (accountCount === 1) {
-      return "Combined balance from 1 account";
-    }
+  //   // Group accounts by type and calculate totals
+  //   const typeBreakdown = balanceData.accountBreakdown.reduce(
+  //     (acc, account) => {
+  //       const type = account.type;
+  //       if (!acc[type]) {
+  //         acc[type] = { count: 0, balance: 0 };
+  //       }
+  //       acc[type].count += 1;
+  //       acc[type].balance += account.convertedBalance;
+  //       return acc;
+  //     },
+  //     {} as Record<string, { count: number; balance: number }>,
+  //   );
 
-    return `Combined balance from ${accountCount} accounts`;
-  };
+  //   // Get the primary account type (highest balance)
+  //   const primaryType = Object.entries(typeBreakdown).sort(
+  //     ([, a], [, b]) => b.balance - a.balance,
+  //   )[0];
 
-  const getAccountTypeBreakdown = () => {
-    if (!balanceData?.accountBreakdown) return null;
+  //   if (!primaryType) return null;
 
-    // Group accounts by type and calculate totals
-    const typeBreakdown = balanceData.accountBreakdown.reduce(
-      (acc, account) => {
-        const type = account.type;
-        if (!acc[type]) {
-          acc[type] = { count: 0, balance: 0 };
-        }
-        acc[type].count += 1;
-        acc[type].balance += account.convertedBalance;
-        return acc;
-      },
-      {} as Record<string, { count: number; balance: number }>,
-    );
+  //   const [type, data] = primaryType;
+  //   const typeLabel = type === "depository" ? "checking/savings" : type;
 
-    // Get the primary account type (highest balance)
-    const primaryType = Object.entries(typeBreakdown).sort(
-      ([, a], [, b]) => b.balance - a.balance,
-    )[0];
+  //   if (data.count === 1) {
+  //     return `${typeLabel} account`;
+  //   }
 
-    if (!primaryType) return null;
-
-    const [type, data] = primaryType;
-    const typeLabel = type === "depository" ? "checking/savings" : type;
-
-    if (data.count === 1) {
-      return `${typeLabel} account`;
-    }
-
-    return `${data.count} ${typeLabel} accounts`;
-  };
+  //   return `${data.count} ${typeLabel} accounts`;
+  // };
 
   return (
     <BaseWidget
-      title="Account Balances"
+      title={tScoped("title")}
       icon={<LandmarkIcon className="size-4" />}
-      description={getDescription()}
+      description={tScoped("description", { count: accountCount })}
       onClick={handleOpenAccounts}
-      actions="View accounts"
+      actions={tScoped("action")}
     >
       <div className="flex flex-1 items-end gap-2">
-        <h2 className="text-2xl font-normal">
+        <span className="text-2xl">
           {formatAmount({
             currency,
             amount: totalBalance,
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
           })}
-        </h2>
+        </span>
       </div>
     </BaseWidget>
   );

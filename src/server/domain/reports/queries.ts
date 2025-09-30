@@ -1,38 +1,11 @@
 import type { DBClient } from "~/server/db";
 import { UTCDate } from "@date-fns/utc";
-import { organization } from "~/server/db/schema/auth";
 import {
   transaction_category_table,
   transaction_table,
 } from "~/server/db/schema/transactions";
 import { endOfMonth, format, parseISO, startOfMonth } from "date-fns";
 import { and, eq, gte, isNull, lte, ne, or, sql } from "drizzle-orm";
-
-async function getTargetCurrency(
-  db: DBClient,
-  organizationId: string,
-  inputCurrency?: string,
-): Promise<string | null> {
-  if (inputCurrency) return inputCurrency;
-
-  // TODO: Check cache
-  // const cached = teamCurrencyCache.get(teamId);
-  // if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-  //   return cached.currency;
-  // }
-
-  // Fetch from database
-  const [space] = await db
-    .select({ baseCurrency: organization.baseCurrency })
-    .from(organization)
-    .where(eq(organization.id, organizationId))
-    .limit(1);
-
-  const currency = space?.baseCurrency ?? null;
-  // teamCurrencyCache.set(teamId, { currency, timestamp: Date.now() });
-
-  return currency;
-}
 
 export type GetCashFlowParams = {
   organizationId: string;
@@ -42,24 +15,14 @@ export type GetCashFlowParams = {
   period?: "monthly" | "quarterly";
 };
 
-export async function getCashFlow(db: DBClient, params: GetCashFlowParams) {
-  const {
-    organizationId,
-    from,
-    to,
-    currency: inputCurrency,
-    period = "monthly",
-  } = params;
+export async function getCashFlowQuery(
+  db: DBClient,
+  params: GetCashFlowParams,
+) {
+  const { organizationId, from, to, period = "monthly", currency } = params;
 
   const fromDate = startOfMonth(new UTCDate(parseISO(from)));
   const toDate = endOfMonth(new UTCDate(parseISO(to)));
-
-  // Get target currency
-  const targetCurrency = await getTargetCurrency(
-    db,
-    organizationId,
-    inputCurrency,
-  );
 
   // Build query conditions
   const conditions = [
@@ -95,17 +58,17 @@ export async function getCashFlow(db: DBClient, params: GetCashFlowParams) {
       ),
     );
 
-  const netCashFlow = Number(result[0]?.totalAmount || 0);
+  const netCashFlow = Number(result[0]?.totalAmount ?? 0);
 
   return {
     summary: {
       netCashFlow: Number(netCashFlow.toFixed(2)),
-      currency: targetCurrency || "EUR",
+      currency: currency ?? "EUR",
       period,
     },
     meta: {
       type: "cash_flow",
-      currency: targetCurrency || "EUR",
+      currency: currency ?? "EUR",
       period: {
         from,
         to,

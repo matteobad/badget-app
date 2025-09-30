@@ -33,6 +33,13 @@ export default {
       customize: "Personalizza",
       save: "Salva",
     },
+    "account-balances": {
+      title: "Saldo conti",
+      "description#zero": "Nessun conto collegato",
+      "description#one": "Saldo totale di 1 conto",
+      "description#other": "Saldo totale di {count} conti",
+      action: "Vedi conti",
+    },
     "net-worth": {
       title: "Patrimonio netto",
       description: {

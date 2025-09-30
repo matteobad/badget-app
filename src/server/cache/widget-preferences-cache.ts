@@ -4,16 +4,18 @@ import { redis } from "../redis";
 const widgetPreferencesCachePrefix = "widget-preferences";
 const widgetPreferencesCacheTTL = 30 * 24 * 60 * 60; // 30 days TTL
 
-export type WidgetType =
-  | "cash-flow"
-  | "net-worth"
-  | "monthly-income"
-  | "monthly-spending"
-  | "category-expenses"
-  | "recurring-tracker"
-  | "uncategorized-transactions"
-  | "savings"
-  | "account-balances";
+export const WIDGET = {
+  ACCOUNT_BALANCES: "account-balances",
+  CASH_FLOW: "cash-flow",
+  CATEGORY_EXPENSES: "category-expenses",
+  MONTHLY_INCOME: "monthly-income",
+  MONTHLY_SPENDING: "monthly-spending",
+  NET_WORTH: "net-worth",
+  REDCURRING_TRACKER: "recurring-tracker",
+  SAVINGS: "savings",
+  UNCATEGORIZED_TRANSACTIONS: "uncategorized-transactions",
+} as const;
+export type WidgetType = (typeof WIDGET)[keyof typeof WIDGET];
 
 export interface WidgetPreferences {
   primaryWidgets: WidgetType[]; // Up to 7 widgets in order
@@ -21,15 +23,15 @@ export interface WidgetPreferences {
 }
 
 export const DEFAULT_WIDGET_ORDER: WidgetType[] = [
+  "account-balances",
   "cash-flow",
-  "net-worth",
+  "category-expenses",
   "monthly-income",
   "monthly-spending",
-  "category-expenses",
+  "net-worth",
   "recurring-tracker",
   "uncategorized-transactions",
   "savings",
-  "account-balances",
 ];
 
 export const DEFAULT_WIDGET_PREFERENCES: WidgetPreferences = {

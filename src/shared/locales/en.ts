@@ -33,6 +33,13 @@ export default {
       customize: "Customize",
       save: "Save",
     },
+    "account-balances": {
+      title: "Account balances",
+      "description#zero": "No accounts connected",
+      "description#one": "Combined balance from 1 account",
+      "description#other": "Combined balance from {count} accounts",
+      action: "View accounts",
+    },
     "net-worth": {
       title: "Net worth",
       description: {

@@ -76,76 +76,41 @@ export type GetCombinedAccountBalanceParams = {
   currency?: string;
 };
 
-export async function getCombinedAccountBalance(
+export async function getCombinedAccountBalanceQuery(
   db: DBClient,
   params: GetCombinedAccountBalanceParams,
 ) {
-  const { organizationId, currency: targetCurrency } = params;
-
-  // Get team's base currency if no target currency specified
-  let baseCurrency = targetCurrency;
-  if (!baseCurrency) {
-    const team = await db
-      .select({ baseCurrency: organization.baseCurrency })
-      .from(organization)
-      .where(eq(organization.id, organizationId))
-      .limit(1);
-
-    baseCurrency = team[0]?.baseCurrency ?? "EUR";
-  }
+  // TODO: handle currency conversion when specified
+  const { organizationId, currency } = params;
 
   // Get all enabled bank accounts with their balances
-  const accounts = await db.query.account_table.findMany({
-    where: and(
-      eq(account_table.organizationId, organizationId),
-      eq(account_table.enabled, true),
-    ),
-    columns: {
-      id: true,
-      name: true,
-      currency: true,
-      balance: true,
-      type: true,
-      logoUrl: true,
-    },
-  });
+  const accounts = await db
+    .select({
+      id: account_table.id,
+      name: account_table.name,
+      currency: account_table.currency,
+      balance: account_table.balance,
+      type: account_table.type,
+      subtype: account_table.subtype,
+      logoUrl: account_table.logoUrl,
+    })
+    .from(account_table)
+    .where(
+      and(
+        eq(account_table.organizationId, organizationId),
+        eq(account_table.enabled, true),
+      ),
+    );
 
-  let totalBalance = 0;
-  const accountBreakdown: Array<{
-    id: string;
-    name: string;
-    originalBalance: number;
-    originalCurrency: string;
-    convertedBalance: number;
-    convertedCurrency: string;
-    type: string;
-    logoUrl?: string;
-  }> = [];
-
-  for (const account of accounts) {
-    const balance = Number(account.balance) || 0;
-    const accountCurrency: string = account.currency || baseCurrency;
-
-    let convertedBalance = balance;
-
-    totalBalance += convertedBalance;
-
-    accountBreakdown.push({
-      id: account.id,
-      name: account.name || "Unknown Account",
-      originalBalance: balance,
-      originalCurrency: accountCurrency,
-      convertedBalance,
-      convertedCurrency: baseCurrency,
-      type: account.type || "depository",
-      logoUrl: account.logoUrl || undefined,
-    });
-  }
+  const totalBalance = accounts.reduce(
+    (tot, account) => (tot += account.balance),
+    0,
+  );
 
   return {
     totalBalance: Math.round(totalBalance * 100) / 100,
-    currency: baseCurrency,
+    currency,
     accountCount: accounts.length,
-    accountBreakdown,
+    accountBreakdown: accounts,
   };
 }

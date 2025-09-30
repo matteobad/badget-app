@@ -1,3 +1,8 @@
+import type {
+  getAccountBalancesSchema,
+  getCashFlowSchema,
+} from "~/shared/validators/widgets.schema";
+import type z from "zod";
 import { UTCDate } from "@date-fns/utc";
 import {
   eachMonthOfInterval,
@@ -29,6 +34,45 @@ import {
   transaction_category_table,
   transaction_table,
 } from "../db/schema/transactions";
+import { getCombinedAccountBalanceQuery } from "../domain/bank-account/queries";
+import { getCashFlowQuery } from "../domain/reports/queries";
+
+// account-balances widget
+export async function getCombinedAccountBalance(
+  db: DBClient,
+  params: z.infer<typeof getAccountBalancesSchema>,
+  organizationId: string,
+) {
+  const accountBalances = await getCombinedAccountBalanceQuery(db, {
+    organizationId,
+    ...params,
+  });
+
+  return {
+    result: accountBalances,
+  };
+}
+
+// cash-flow widget
+export async function getCashFlow(
+  db: DBClient,
+  params: z.infer<typeof getCashFlowSchema>,
+  organizationId: string,
+) {
+  const cashFlowData = await getCashFlowQuery(db, {
+    organizationId,
+    ...params,
+  });
+
+  return {
+    result: {
+      netCashFlow: cashFlowData.summary.netCashFlow,
+      currency: cashFlowData.summary.currency,
+      period: cashFlowData.summary.period,
+      meta: cashFlowData.meta,
+    },
+  };
+}
 
 async function getTargetCurrency(
   db: DBClient,

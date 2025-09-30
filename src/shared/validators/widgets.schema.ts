@@ -1,3 +1,4 @@
+import { WIDGET } from "~/server/cache/widget-preferences-cache";
 import { z } from "zod";
 
 // export const getRunwaySchema = z.object({
@@ -51,9 +52,11 @@ export const getNetWorthSchema = z.object({
   currency: z.string().optional(),
 });
 
-export const getAccountBalancesSchema = z.object({
-  currency: z.string().optional(),
-});
+export const getAccountBalancesSchema = z
+  .object({
+    currency: z.string().optional(),
+  })
+  .optional();
 
 export const getMonthlySpendingSchema = z.object({
   from: z.string(),
@@ -61,17 +64,7 @@ export const getMonthlySpendingSchema = z.object({
   currency: z.string().optional(),
 });
 
-export const widgetTypeSchema = z.enum([
-  "cash-flow",
-  "net-worth",
-  "monthly-income",
-  "monthly-spending",
-  "category-expenses",
-  "recurring-tracker",
-  "uncategorized-transactions",
-  "savings",
-  "account-balances",
-]);
+export const widgetTypeSchema = z.enum(WIDGET);
 
 export const widgetPreferencesSchema = z.object({
   primaryWidgets: z.array(widgetTypeSchema).max(7),
