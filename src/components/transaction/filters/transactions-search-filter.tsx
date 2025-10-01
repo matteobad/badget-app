@@ -404,8 +404,6 @@ export function TransactionsSearchFilter() {
           <Calendar
             mode="range"
             autoFocus
-            // toDate={new Date()}
-            hidden={{ after: new Date() }}
             selected={{
               from: filter.start ? new Date(filter.start) : undefined,
               to: filter.end ? new Date(filter.end) : undefined,
