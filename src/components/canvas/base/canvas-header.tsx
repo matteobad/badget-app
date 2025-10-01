@@ -68,7 +68,7 @@ export function CanvasHeader({
           </p>
         )}
       </div>
-      <div className="mb-4 flex justify-end">
+      <div className="flex justify-end">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button

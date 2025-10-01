@@ -112,7 +112,7 @@ export function NetWorthCanvas() {
             >
               <NetWorthChart
                 data={netWorthData}
-                height={260}
+                height={320}
                 showLegend={false}
                 currency={data?.currency || "EUR"}
                 locale={user?.locale ?? undefined}

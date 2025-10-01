@@ -39,12 +39,15 @@ export function CanvasChart({
   return (
     <div className={cn("mb-6", className)}>
       {/* Chart Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <h4 className="font-serif text-[18px] font-normal text-black dark:text-white">
+      <div className="mb-4 flex items-center justify-between gap-8">
+        <h4 className="font-serif text-[18px] font-normal whitespace-nowrap text-black dark:text-white">
           {title}
         </h4>
         {legend && (
-          <div className="flex items-center gap-4" data-hide-in-pdf="true">
+          <div
+            className="flex h-7 items-center gap-4 overflow-x-auto"
+            data-hide-in-pdf="true"
+          >
             {legend.items.map((item, index) => {
               const getSquareClasses = (type: string, color?: string) => {
                 const baseColor = color || "#707070";
@@ -83,7 +86,7 @@ export function CanvasChart({
                     className={getSquareClasses(item.type, item.color)}
                     style={getSquareStyle(item.type, item.color)}
                   />
-                  <span className="text-[12px] leading-none text-[#707070] dark:text-[#666666]">
+                  <span className="text-xs leading-none whitespace-nowrap text-muted-foreground">
                     {item.label}
                   </span>
                 </div>

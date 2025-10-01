@@ -1,33 +1,34 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { UTCDate } from "@date-fns/utc";
 import { useQuery } from "@tanstack/react-query";
+import { useChatInterface } from "~/hooks/use-chat-interface";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { formatCompactAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
-import { endOfMonth, format, startOfMonth } from "date-fns";
+import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { ShapesIcon } from "lucide-react";
 
 import { BaseWidget } from "./base";
 
 export function CategoryExpensesWidget() {
+  const { sendMessage } = useChatActions();
+  const { setChatId } = useChatInterface();
+
+  const chatId = useChatId();
+
   const tScoped = useScopedI18n("widgets.category-expenses");
   const trpc = useTRPC();
-  const router = useRouter();
 
   const { data: space } = useSpaceQuery();
 
-  const now = new Date();
-  const from = format(startOfMonth(now), "yyyy-MM-dd");
-  const to = format(endOfMonth(now), "yyyy-MM-dd");
-
   const { data } = useQuery({
     ...trpc.widgets.getCategoryExpenses.queryOptions({
-      from: startOfMonth(new UTCDate(new Date())).toISOString(),
-      to: endOfMonth(new UTCDate(new Date())).toISOString(),
+      from: subMonths(startOfMonth(new UTCDate(new Date())), 1).toISOString(),
+      to: subMonths(endOfMonth(new UTCDate(new Date())), 1).toISOString(),
       currency: space?.baseCurrency ?? "EUR",
       limit: 3,
     }),
@@ -40,11 +41,22 @@ export function CategoryExpensesWidget() {
 
   const hasCategories = categoryData && categories.length > 0;
 
-  const handleViewCategories = () => {
-    if (!hasCategories) return;
-    router.push(
-      `/transactions?categories=${categories.map((category) => category.slug).join(",")}&start=${from}&end=${to}`,
-    );
+  const handleClick = () => {
+    if (!chatId || !data?.toolCall) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: "Category expenses breakdown" }],
+      metadata: {
+        toolCall: data?.toolCall,
+      },
+    });
+
+    // router.push(
+    //   `/transactions?categories=${categories.map((category) => category.slug).join(",")}&start=${from}&end=${to}`,
+    // );
   };
 
   return (
@@ -91,7 +103,7 @@ export function CategoryExpensesWidget() {
         )
       }
       icon={<ShapesIcon className="size-4" />}
-      onClick={hasCategories ? handleViewCategories : undefined}
+      onClick={hasCategories ? handleClick : undefined}
       actions={hasCategories ? tScoped("action") : undefined}
     />
   );

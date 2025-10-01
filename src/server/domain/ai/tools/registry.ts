@@ -25,8 +25,8 @@ export const toolMetadata = {
     name: "getExpensesBreakdown",
     title: "Expenses Breakdown",
     description:
-      "Retrieve and analyze financial expenses with advanced filtering, search, and sorting capabilities",
-    relatedTools: ["getNetWorth", "getNetWorthAnalysis", "getTransactions"],
+      "Generate an expenses breakdown with visualizations, category analysis, and insights on spending distribution",
+    relatedTools: ["getTransactions"],
   },
   getForecast: {
     name: "getForecast",

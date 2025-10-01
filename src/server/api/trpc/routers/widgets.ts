@@ -89,11 +89,12 @@ export const widgetsRouter = createTRPCRouter({
       return {
         result: categorySpending,
         toolCall: {
-          toolName: "getSpendingAnalysis",
+          toolName: "getExpensesBreakdown",
           toolParams: {
             from: input.from,
             to: input.to,
             currency: input.currency,
+            showCanvas: true,
           },
         },
       };

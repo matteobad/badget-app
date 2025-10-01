@@ -29,7 +29,7 @@ export function Canvas() {
       return <RunwayCanvas />;
     case "cash-flow-canvas":
       return <CashFlowCanvas />;
-    case "category-expenses-canvas":
+    case "expenses-breakdown":
       return <CategoryExpensesCanvas />;
     case "health-report-canvas":
       return <HealthReportCanvas />;

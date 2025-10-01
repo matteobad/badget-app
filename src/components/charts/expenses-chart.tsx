@@ -8,6 +8,8 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+
+import type { BaseChartProps } from "./chart-utils";
 import {
   BaseChart,
   ChartLegend,
@@ -16,7 +18,6 @@ import {
   StyledXAxis,
   StyledYAxis,
 } from "./base-charts";
-import type { BaseChartProps } from "./chart-utils";
 
 interface ExpenseData {
   month: string;
@@ -52,7 +53,7 @@ const pieTooltipFormatter = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0];
     return (
-      <div className="p-2 bg-white dark:bg-[#0c0c0c] border border-gray-200 dark:border-[#1d1d1d] text-black dark:text-white text-xs">
+      <div className="border border-gray-200 bg-white p-2 text-xs text-black dark:border-[#1d1d1d] dark:bg-[#0c0c0c] dark:text-white">
         <p className="mb-1 text-gray-500 dark:text-[#666666]">
           {data.payload.name}
         </p>
@@ -88,22 +89,26 @@ export function ExpensesChart({
 
         {/* Pie Chart */}
         <div className="relative" style={{ height }}>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            className="bg-[radial-gradient(circle,#00000015_1px,transparent_1px)] bg-[size:12px_12px] bg-repeat"
+          >
             <PieChart>
               <Pie
                 data={categoryData}
                 cx="50%"
                 cy="50%"
-                outerRadius={80}
                 fill="hsl(var(--foreground))"
                 dataKey="value"
+                innerRadius={60}
               >
                 {categoryData.map((entry) => (
                   <Cell key={`cell-${entry.name}`} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip content={pieTooltipFormatter} />
-              <Legend />
+              {/* <Legend /> */}
             </PieChart>
           </ResponsiveContainer>
         </div>

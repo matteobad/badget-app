@@ -88,7 +88,7 @@ export function HealthReportCanvas() {
             ],
           }}
           isLoading={isLoading}
-          height="16rem"
+          height="20rem"
         >
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={healthTrendData}>
