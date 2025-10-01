@@ -93,6 +93,13 @@ export const getVaultActivitySchema = z.object({
   limit: z.number().optional().default(5),
 });
 
+export const getIncomeForecastSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  forecastMonths: z.number().min(1).max(24).default(6),
+  currency: z.string().optional(),
+});
+
 export const widgetTypeSchema = z.enum(WIDGET);
 
 export const widgetPreferencesSchema = z.object({

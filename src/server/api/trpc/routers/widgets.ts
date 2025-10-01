@@ -10,6 +10,7 @@ import {
   getExpensesByCategory,
   getExpensesByMonth,
   getIncomeByMonth,
+  getIncomeForecast,
   getNetWorthTrend,
   getSavingsByMonth,
 } from "~/server/services/reports-service";
@@ -18,6 +19,7 @@ import {
   getAccountBalancesSchema,
   getCashFlowSchema,
   getCategoryExpensesSchema,
+  getIncomeForecastSchema,
   getMonthlyIncomeSchema,
   getMonthlySpendingSchema,
   getNetWorthSchema,
@@ -157,6 +159,26 @@ export const widgetsRouter = createTRPCRouter({
     .input(getVaultActivitySchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
       return getRecentDocuments(db, input, orgId!);
+    }),
+
+  getIncomeForecast: protectedProcedure
+    .input(getIncomeForecastSchema)
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      const data = await getIncomeForecast(db, input, orgId!);
+
+      return {
+        result: data,
+        // TODO: implement tool
+        // toolCall: {
+        //   toolName: "getIncomeForecast",
+        //   toolParams: {
+        //     from: input.from,
+        //     to: input.to,
+        //     currency: input.currency,
+        //     showCanvas: true,
+        //   },
+        // },
+      };
     }),
 
   // Preferences

@@ -10,7 +10,7 @@ export const WIDGET = {
   CASH_FLOW: "cash-flow",
   NET_WORTH: "net-worth",
   SAVING_ANALYSIS: "saving-analysis",
-  // REVENUE_FORECAST: "revenue-forecast",
+  INCOME_FORECAST: "income-forecast",
   // REVENUE_SUMMARY: "revenue-summary",
   // GROWTH_RATE: "growth-rate",
 
@@ -42,6 +42,7 @@ export const DEFAULT_WIDGET_ORDER: WidgetType[] = [
   "recurring-expenses",
   "uncategorized-transactions",
   "recent-documents",
+  "income-forecast",
 ];
 
 export const DEFAULT_WIDGET_PREFERENCES: WidgetPreferences = {

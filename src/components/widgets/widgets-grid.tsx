@@ -15,6 +15,7 @@ import { useOnClickOutside } from "usehooks-ts";
 import { AccountBalancesWidget } from "./account-balances-widget";
 import { CashFlowWidget } from "./cash-flow-widget";
 import { CategoryExpensesWidget } from "./category-expenses-widget";
+import { IncomeForecastWidget } from "./income-forecast-widget";
 import { Insights } from "./insight";
 import { MonthlyIncomeWidget } from "./monthly-income-widget";
 import { MonthlySpendingWidget } from "./monthly-spending-widget";
@@ -87,6 +88,7 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "saving-analysis": SavingAnalysisWidget,
   "uncategorized-transactions": UncategorizedTransactionsWidget,
   "recent-documents": RecentDocumentsWidget,
+  "income-forecast": IncomeForecastWidget,
 };
 
 export function WidgetsGrid() {
