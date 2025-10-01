@@ -9,8 +9,7 @@ export const WIDGET = {
   ACCOUNT_BALANCES: "account-balances",
   CASH_FLOW: "cash-flow",
   NET_WORTH: "net-worth",
-  SAVINGS: "savings",
-  // PROFIT_ANALYSIS: "profit-analysis",
+  SAVING_ANALYSIS: "saving-analysis",
   // REVENUE_FORECAST: "revenue-forecast",
   // REVENUE_SUMMARY: "revenue-summary",
   // GROWTH_RATE: "growth-rate",
@@ -34,13 +33,13 @@ export interface WidgetPreferences {
 export const DEFAULT_WIDGET_ORDER: WidgetType[] = [
   "account-balances",
   "cash-flow",
+  "net-worth",
+  "saving-analysis",
   "category-expenses",
   "monthly-income",
   "monthly-spending",
-  "net-worth",
   "recurring-expenses",
   "uncategorized-transactions",
-  "savings",
 ];
 
 export const DEFAULT_WIDGET_PREFERENCES: WidgetPreferences = {

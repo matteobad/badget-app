@@ -93,18 +93,10 @@ export default {
       },
       action: "Vedi tutte",
     },
-    savings: {
-      title: "Risparmi",
-      description: {
-        part_1: "Hai risparmiato ",
-        part_2: "{value} in {count} mesi",
-      },
+    "saving-analysis": {
+      title: "Analisi risparmi",
+      description: "Il tuo risparmio medio durante {count} mesi è di",
       action: "Vedi analisi di dettaglio",
-      settings: {
-        "3M": "3 Mesi",
-        "6M": "6 Mesi",
-        "1Y": "1 Anno",
-      },
     },
   },
 

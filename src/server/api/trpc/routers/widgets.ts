@@ -10,6 +10,7 @@ import {
   getExpensesByMonth,
   getIncomeByMonth,
   getNetWorthTrend,
+  getSavingsByMonth,
 } from "~/server/services/reports-service";
 import { getUncategorizedSchema } from "~/shared/validators/reports.schema";
 import {
@@ -20,6 +21,7 @@ import {
   getMonthlySpendingSchema,
   getNetWorthSchema,
   getRecurringExpensesSchema,
+  getSavingAnalysisSchema,
   updateWidgetPreferencesSchema,
 } from "~/shared/validators/widgets.schema";
 
@@ -42,7 +44,40 @@ export const widgetsRouter = createTRPCRouter({
   getNetWorth: protectedProcedure
     .input(getNetWorthSchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
-      return await getNetWorthTrend(db, input, orgId!);
+      const data = await getNetWorthTrend(db, input, orgId!);
+
+      return {
+        result: data,
+        toolCall: {
+          toolName: "getNetWorthAnalysis",
+          toolParams: {
+            from: input.from,
+            to: input.to,
+            currency: input.currency,
+            showCanvas: true,
+          },
+        },
+      };
+    }),
+
+  getSavingAnalysis: protectedProcedure
+    .input(getSavingAnalysisSchema)
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      const data = await getSavingsByMonth(db, input, orgId!);
+
+      return {
+        result: data,
+        // TODO: implement tool
+        // toolCall: {
+        //   toolName: "getSavingAnalysis",
+        //   toolParams: {
+        //     from: input.from,
+        //     to: input.to,
+        //     currency: input.currency,
+        //     showCanvas: true,
+        //   },
+        // },
+      };
     }),
 
   getMonthlyIncome: protectedProcedure
@@ -84,10 +119,10 @@ export const widgetsRouter = createTRPCRouter({
   getCategoryExpenses: protectedProcedure
     .input(getCategoryExpensesSchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
-      const categorySpending = await getExpensesByCategory(db, input, orgId!);
+      const data = await getExpensesByCategory(db, input, orgId!);
 
       return {
-        result: categorySpending,
+        result: data,
         toolCall: {
           toolName: "getExpensesBreakdown",
           toolParams: {

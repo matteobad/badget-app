@@ -93,18 +93,10 @@ export default {
       },
       action: "See all uncategorized",
     },
-    savings: {
-      title: "Savings",
-      description: {
-        part_1: "Your saved ",
-        part_2: "{value} in {count} month ",
-      },
+    "saving-analysis": {
+      title: "Saving analysis",
+      description: "Your average savings during {count} months is",
       action: "See detailed analysis",
-      settings: {
-        "3M": "3 Mesi",
-        "6M": "6 Mesi",
-        "1Y": "1 Anno",
-      },
     },
   },
 

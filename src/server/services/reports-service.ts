@@ -4,6 +4,7 @@ import type {
   getMonthlyIncomeSchema,
   getMonthlySpendingSchema,
   getNetWorthSchema,
+  getSavingAnalysisSchema,
 } from "~/shared/validators/widgets.schema";
 import type z from "zod";
 import { and, eq, gte, lte, not, sql } from "drizzle-orm";
@@ -63,6 +64,79 @@ export async function getNetWorthTrend(
   });
 
   return netWorthData;
+}
+
+export async function getSavingsByMonth(
+  db: DBClient,
+  params: z.infer<typeof getSavingAnalysisSchema>,
+  organizationId: string,
+) {
+  const { from, to, currency } = params;
+
+  const result = await db
+    .select({
+      month: sql<Date>`date_trunc('month', ${transaction_table.date})`,
+      saving: sql`sum(${transaction_table.amount})`.mapWith(Number),
+      income:
+        sql`ABS(sum(case when ${transaction_table.amount} > 0 then ${transaction_table.amount} else 0 end))`.mapWith(
+          Number,
+        ),
+      expenses:
+        sql`ABS(sum(case when ${transaction_table.amount} < 0 then ${transaction_table.amount} else 0 end))`.mapWith(
+          Number,
+        ),
+    })
+    .from(transaction_table)
+    .leftJoin(
+      transaction_category_table,
+      and(
+        eq(
+          transaction_category_table.organizationId,
+          transaction_table.organizationId,
+        ),
+        eq(transaction_category_table.slug, transaction_table.categorySlug),
+      ),
+    )
+    .where(
+      and(
+        eq(transaction_table.organizationId, organizationId),
+        gte(transaction_table.date, from),
+        lte(transaction_table.date, to),
+        not(transaction_table.internal),
+        not(transaction_category_table.excluded),
+      ),
+    )
+    .groupBy(sql`date_trunc('month', ${transaction_table.date})`)
+    .orderBy(sql`date_trunc('month', ${transaction_table.date})`);
+
+  // Compute total savings (savings = income - expenses) over the result set
+  const totalSavings = result.reduce(
+    (sum, row) => sum + ((row.income ?? 0) - (row.expenses ?? 0)),
+    0,
+  );
+
+  // Compute average delta (savings = income - expenses) over the result set
+  let averageSavings = 0;
+  if (result && result.length > 0) {
+    averageSavings =
+      result.reduce(
+        (sum, row) => sum + ((row.income ?? 0) - (row.expenses ?? 0)),
+        0,
+      ) / result.length;
+  }
+
+  return {
+    summary: {
+      totalSavings,
+      averageSavings,
+      currency,
+    },
+    meta: {
+      type: "saving-analysis",
+      currency,
+    },
+    result,
+  };
 }
 
 export async function getIncomeByMonth(
@@ -170,70 +244,5 @@ export async function getExpensesByCategory(
       currency: topCategories[0]?.currency ?? inputCurrency ?? "EUR",
       totalCategories: categoryExpenses.length,
     },
-  };
-}
-
-export type GetSavingsParams = {
-  organizationId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
-
-export async function getSavings(db: DBClient, params: GetSavingsParams) {
-  const { organizationId, from, to, currency } = params;
-
-  const result = await db
-    .select({
-      month: sql<Date>`date_trunc('month', ${transaction_table.date})`,
-      income: sql`
-      sum(case when ${transaction_table.amount} > 0 then ${transaction_table.amount} else 0 end)
-    `.mapWith(Number),
-      expenses: sql`
-      sum(case when ${transaction_table.amount} < 0 then abs(${transaction_table.amount}) else 0 end)
-    `.mapWith(Number),
-    })
-    .from(transaction_table)
-    .leftJoin(
-      transaction_category_table,
-      and(
-        eq(
-          transaction_category_table.organizationId,
-          transaction_table.organizationId,
-        ),
-        eq(transaction_category_table.slug, transaction_table.categorySlug),
-      ),
-    )
-    .where(
-      and(
-        eq(transaction_table.organizationId, organizationId),
-        gte(transaction_table.date, from),
-        lte(transaction_table.date, to),
-        not(transaction_table.internal),
-        not(transaction_category_table.excluded),
-      ),
-    )
-    .groupBy(sql`date_trunc('month', ${transaction_table.date})`)
-    .orderBy(sql`date_trunc('month', ${transaction_table.date})`);
-
-  // Compute average delta (savings = income - expenses) over the result set
-  let savings = 0;
-  if (result && result.length > 0) {
-    savings = result.reduce(
-      (sum, row) => sum + ((row.income ?? 0) - (row.expenses ?? 0)),
-      0,
-    );
-  }
-
-  return {
-    summary: {
-      savings, // grossIncome: grossIncome,
-      currency,
-    },
-    meta: {
-      type: "savings",
-      currency,
-    },
-    result,
   };
 }

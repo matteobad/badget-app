@@ -39,6 +39,12 @@ import { z } from "zod";
 //   revenueType: z.enum(["gross", "net"]).optional().default("net"),
 // });
 
+export const getAccountBalancesSchema = z
+  .object({
+    currency: z.string().optional(),
+  })
+  .optional();
+
 export const getCashFlowSchema = z.object({
   from: z.string(),
   to: z.string(),
@@ -52,11 +58,11 @@ export const getNetWorthSchema = z.object({
   currency: z.string().optional(),
 });
 
-export const getAccountBalancesSchema = z
-  .object({
-    currency: z.string().optional(),
-  })
-  .optional();
+export const getSavingAnalysisSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  currency: z.string().optional(),
+});
 
 export const getMonthlyIncomeSchema = z.object({
   from: z.string(),

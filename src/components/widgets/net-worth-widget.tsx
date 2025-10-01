@@ -109,7 +109,7 @@ export function NetWorthWidget() {
   });
 
   const handleViewAnalysis = () => {
-    if (!chatId) return;
+    if (!chatId || !data?.toolCall) return;
 
     setChatId(chatId);
 
@@ -117,12 +117,7 @@ export function NetWorthWidget() {
       role: "user",
       parts: [{ type: "text", text: "Analyze my net worth" }],
       metadata: {
-        toolCall: {
-          toolName: "getNetWorthAnalysis",
-          toolParams: {
-            showCanvas: true,
-          },
-        },
+        toolCall: data?.toolCall,
       },
     });
   };
@@ -139,9 +134,11 @@ export function NetWorthWidget() {
           <span className="font-medium text-primary">
             {tNetWorth("description.part_2", {
               value: formatAmount({
-                amount: data?.summary?.netWorth ?? 0,
+                amount: data?.result?.summary?.netWorth ?? 0,
                 currency:
-                  data?.summary.currency ?? space?.baseCurrency ?? "EUR",
+                  data?.result?.summary?.currency ??
+                  space?.baseCurrency ??
+                  "EUR",
               }),
             })}
           </span>
@@ -153,7 +150,7 @@ export function NetWorthWidget() {
       {/* View mode */}
       <NetWorthChart
         className="pt-2"
-        data={data?.result ?? []}
+        data={data?.result?.result ?? []}
         height={70}
         showAnimation={true}
         showLegend={false}

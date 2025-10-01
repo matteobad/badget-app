@@ -12,7 +12,6 @@ import { institutionRouter } from "./institution";
 import { metricsRouter } from "./metrics";
 import { organizationRouter } from "./organization";
 import { preferencesRouter } from "./preferences";
-import { reportsRouter } from "./reports";
 import { searchRouter } from "./search";
 import { suggestedActionsRouter } from "./suggested-actions";
 import { tagRouter } from "./tag";
@@ -36,7 +35,6 @@ export const appRouter = createTRPCRouter({
   user: userRouter,
   organization: organizationRouter,
   metrics: metricsRouter,
-  reports: reportsRouter,
   asset: assetRouter,
   institution: institutionRouter,
   bankConnection: bankConnectionRouter,

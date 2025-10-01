@@ -20,7 +20,7 @@ import { MonthlyIncomeWidget } from "./monthly-income-widget";
 import { MonthlySpendingWidget } from "./monthly-spending-widget";
 import { NetWorthWidget } from "./net-worth-widget";
 import { RecurringExpensesWidget } from "./recurring-expenses-widget";
-import { SavingsWidget } from "./savings-widget";
+import { SavingAnalysisWidget } from "./saving-analysis-widget";
 import { UncategorizedTransactionsWidget } from "./uncategorized-transactions-widget";
 import {
   useAvailableWidgets,
@@ -83,7 +83,7 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "monthly-spending": MonthlySpendingWidget,
   "net-worth": NetWorthWidget,
   "recurring-expenses": RecurringExpensesWidget,
-  savings: SavingsWidget,
+  "saving-analysis": SavingAnalysisWidget,
   "uncategorized-transactions": UncategorizedTransactionsWidget,
 };
 
