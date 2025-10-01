@@ -9,6 +9,7 @@ import { useTRPC } from "~/shared/helpers/trpc/client";
 import {
   BanknoteArrowUpIcon,
   FlameIcon,
+  LineChartIcon,
   ReceiptIcon,
   ShapesIcon,
 } from "lucide-react";
@@ -77,24 +78,24 @@ export function SuggestedActions() {
     }
   > = {
     "get-net-worth-analysis": {
-      icon: FlameIcon,
+      icon: LineChartIcon,
       title: "Net Worth analysis",
-      description: "Analyze my net worth",
+      description: "Analizza il mio patrimonio netto",
     },
     "latest-transactions": {
       icon: ReceiptIcon,
       title: "Latest transactions",
-      description: "Show me my latest transactions",
+      description: "Mostrami le ultime transazioni",
     },
     "current-income": {
       icon: BanknoteArrowUpIcon,
-      title: "Income",
-      description: "Show me current month income",
+      title: "Saving Analysis",
+      description: "Analizza i risparmi nel tempo",
     },
     "expenses-breakdown": {
       icon: ShapesIcon,
       title: "Expense Breakdown",
-      description: "Show me my expense breakdown",
+      description: "Mostrami le spese per categorie",
     },
   };
 

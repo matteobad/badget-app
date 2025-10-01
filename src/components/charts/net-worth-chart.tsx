@@ -96,7 +96,7 @@ export function NetWorthChart({
           <ComposedChart
             accessibilityLayer
             data={data}
-            margin={{ top: 0, right: 6, left: -marginLeft, bottom: 0 }}
+            margin={{ top: 2, right: 6, left: -marginLeft, bottom: 0 }}
           >
             <defs>
               <pattern
