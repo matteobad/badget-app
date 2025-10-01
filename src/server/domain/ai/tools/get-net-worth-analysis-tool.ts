@@ -1,5 +1,5 @@
 import { google } from "@ai-sdk/google";
-import { getNetWorth } from "~/server/services/reports-service";
+import { getNetWorthTrend } from "~/server/services/reports-service";
 import { formatAmount } from "~/shared/helpers/format";
 import { generateText, smoothStream, streamText, tool } from "ai";
 import { eachDayOfInterval, endOfDay, format, startOfDay } from "date-fns";
@@ -78,11 +78,15 @@ Example format: "I'm analyzing your net worth data for [period] to show your net
 
       // Run all database queries in parallel for maximum performance
       const [netWorth, assets, liabilities] = await Promise.all([
-        getNetWorth(context.db, {
-          organizationId: context.user.organizationId,
-          from,
-          to,
-        }),
+        getNetWorthTrend(
+          context.db,
+          {
+            from,
+            to,
+            currency: currency ?? undefined,
+          },
+          context.user.organizationId,
+        ),
         getAssetsQuery(context.db, {
           organizationId: context.user.organizationId,
         }),

@@ -1,65 +1,71 @@
 import type {
-  getAccountBalancesSchema,
   getCashFlowSchema,
   getCategoryExpensesSchema,
   getMonthlyIncomeSchema,
   getMonthlySpendingSchema,
-  getRecurringExpensesSchema,
+  getNetWorthSchema,
 } from "~/shared/validators/widgets.schema";
 import type z from "zod";
-import { and, count, desc, eq, gte, lt, lte, not, sql } from "drizzle-orm";
+import { and, eq, gte, lte, not, sql } from "drizzle-orm";
 
 import type { DBClient } from "../db";
 import {
   transaction_category_table,
   transaction_table,
 } from "../db/schema/transactions";
-import { getCombinedAccountBalanceQuery } from "../domain/bank-account/queries";
-import { getCashFlowQuery } from "../domain/reports/get-cash-flow-query";
-import { getExpensesQuery } from "../domain/reports/get-expenses-query";
-import { getIncomeQuery } from "../domain/reports/get-income-query";
-import { getRecurringExpensesQuery } from "../domain/reports/get-recurring-expenses-query";
-import { getSpendingQuery } from "../domain/reports/get-spending-query";
+import { getNetWorthQuery } from "../domain/bank-account/queries";
+import {
+  getExpensesByCategoryQuery,
+  getExpensesQuery,
+  getIncomeQuery,
+  getTransactionsInPeriodQuery,
+} from "../domain/transaction/queries";
 
-// account-balances widget
-export async function getCombinedAccountBalance(
-  db: DBClient,
-  params: z.infer<typeof getAccountBalancesSchema>,
-  organizationId: string,
-) {
-  const accountBalances = await getCombinedAccountBalanceQuery(db, {
-    organizationId,
-    ...params,
-  });
-
-  return {
-    result: accountBalances,
-  };
-}
-
-// cash-flow widget
 export async function getCashFlow(
   db: DBClient,
   params: z.infer<typeof getCashFlowSchema>,
   organizationId: string,
 ) {
-  const cashFlowData = await getCashFlowQuery(db, {
+  const { from, to, currency: inputCurrency } = params;
+
+  const transactionsData = await getTransactionsInPeriodQuery(db, {
     organizationId,
-    ...params,
+    from,
+    to,
   });
 
+  // Calculate total income across all months in the period
+  const netCashFlow = transactionsData.reduce(
+    (sum, item) => sum + item.amount,
+    0,
+  );
+
+  const currency = inputCurrency ?? "EUR";
+
   return {
-    result: {
-      netCashFlow: cashFlowData.summary.netCashFlow,
-      currency: cashFlowData.summary.currency,
-      period: cashFlowData.summary.period,
-      meta: cashFlowData.meta,
-    },
+    netCashFlow,
+    currency,
   };
 }
 
-// monthly-income widget
-export async function getIncomeForPeriod(
+export async function getNetWorthTrend(
+  db: DBClient,
+  params: z.infer<typeof getNetWorthSchema>,
+  organizationId: string,
+) {
+  const { from, to, currency: inputCurrency } = params;
+
+  const netWorthData = await getNetWorthQuery(db, {
+    organizationId,
+    from,
+    to,
+    currency: inputCurrency,
+  });
+
+  return netWorthData;
+}
+
+export async function getIncomeByMonth(
   db: DBClient,
   params: z.infer<typeof getMonthlyIncomeSchema>,
   organizationId: string,
@@ -88,8 +94,7 @@ export async function getIncomeForPeriod(
   };
 }
 
-// monthly-expenses widget
-export async function getSpendingForPeriod(
+export async function getExpensesByMonth(
   db: DBClient,
   params: z.infer<typeof getMonthlySpendingSchema>,
   organizationId: string,
@@ -113,7 +118,7 @@ export async function getSpendingForPeriod(
   const currency = expensesData.meta.currency ?? inputCurrency ?? "EUR";
 
   // Get top spending category for the specified period using existing getSpending function
-  const spendingCategories = await getSpendingQuery(db, {
+  const spendingCategories = await getExpensesByCategoryQuery(db, {
     organizationId,
     from,
     to,
@@ -137,15 +142,14 @@ export async function getSpendingForPeriod(
   };
 }
 
-// category-expenses widget
-export async function getCategorySpendingForPeriod(
+export async function getExpensesByCategory(
   db: DBClient,
   params: z.infer<typeof getCategoryExpensesSchema>,
   organizationId: string,
 ) {
   const { from, to, currency: inputCurrency, limit } = params;
 
-  const categoryExpenses = await getSpendingQuery(db, {
+  const categoryExpenses = await getExpensesByCategoryQuery(db, {
     organizationId,
     from,
     to,
@@ -167,25 +171,6 @@ export async function getCategorySpendingForPeriod(
       totalCategories: categoryExpenses.length,
     },
   };
-}
-
-// recurring-expenses widget
-export async function getRecurringForPeriod(
-  db: DBClient,
-  params: z.infer<typeof getRecurringExpensesSchema>,
-  organizationId: string,
-) {
-  const { from, to, currency: inputCurrency } = params;
-
-  // Use existing getExpenses function for the specified period
-  const recurringExpenses = await getRecurringExpensesQuery(db, {
-    organizationId,
-    from,
-    to,
-    currency: inputCurrency,
-  });
-
-  return recurringExpenses;
 }
 
 export type GetSavingsParams = {
@@ -250,109 +235,5 @@ export async function getSavings(db: DBClient, params: GetSavingsParams) {
       currency,
     },
     result,
-  };
-}
-
-export type GetUncategorizedParams = {
-  organizationId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
-
-export async function getUncategorized(
-  db: DBClient,
-  params: GetUncategorizedParams,
-) {
-  const { organizationId, from, to, currency } = params;
-
-  // TODO: consider splits
-  const [result] = await db
-    .select({
-      total: sql`sum(${transaction_table.amount}) * -1`.mapWith(Number),
-      count: count(transaction_table.id),
-    })
-    .from(transaction_table)
-    .where(
-      and(
-        eq(transaction_table.organizationId, organizationId),
-        gte(transaction_table.date, from),
-        lte(transaction_table.date, to),
-        eq(transaction_table.categorySlug, "uncategorized"), // spese non categorizzate
-      ),
-    );
-
-  return {
-    summary: {
-      // income: 0, TODO: to calculate percentage
-      currency,
-    },
-    meta: {
-      type: "uncategorized",
-      currency,
-    },
-    result,
-  };
-}
-
-type GetNetWorthParams = {
-  organizationId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
-
-type FinancialMetricsResultItem = {
-  date: string;
-  assets: string;
-  liabilities: string;
-  net_worth: string;
-  currency: string;
-};
-
-export async function getNetWorth(db: DBClient, params: GetNetWorthParams) {
-  const { organizationId, from, to, currency } = params;
-
-  const result = await db.execute(
-    sql`SELECT * FROM ${sql.raw("get_financial_metrics")}(${organizationId}, ${from}, ${to})`,
-  );
-
-  const rawData = result.rows as unknown as FinancialMetricsResultItem[];
-
-  const netWorth =
-    rawData && rawData.length > 0
-      ? parseFloat(rawData[rawData.length - 1]?.net_worth ?? "0")
-      : 0;
-
-  // Compute average net worth over the period
-  const averageNetWorth =
-    rawData && rawData.length > 0
-      ? rawData.reduce(
-          (sum, item) => sum + parseFloat(item.net_worth ?? "0"),
-          0,
-        ) / rawData.length
-      : 0;
-
-  return {
-    summary: {
-      netWorth: netWorth,
-      averageNetWorth: averageNetWorth,
-      currency: rawData?.at(0)?.currency ?? currency,
-    },
-    meta: {
-      type: "net_worth",
-      currency: rawData?.at(0)?.currency ?? currency,
-    },
-    result: rawData?.map((item) => {
-      const value = Number.parseFloat(
-        Number.parseFloat(item.net_worth || "0").toFixed(2),
-      );
-      return {
-        date: item.date,
-        amount: value,
-        average: averageNetWorth,
-        currency: item.currency,
-      };
-    }),
   };
 }

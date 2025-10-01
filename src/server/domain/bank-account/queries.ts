@@ -4,7 +4,7 @@ import type { DBClient } from "~/server/db";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { institution_table } from "~/server/db/schema/open-banking";
-import { and, asc, desc, eq, getTableColumns } from "drizzle-orm";
+import { and, asc, desc, eq, getTableColumns, sql } from "drizzle-orm";
 
 type GetBankAccountsQuery = {
   connectionId?: string;
@@ -209,4 +209,69 @@ export async function getLiabilitiesQuery(
   }));
 
   return liabilitiesWithPercentage;
+}
+
+type GetNetWorthParams = {
+  organizationId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+type FinancialMetricsResultItem = {
+  date: string;
+  assets: string;
+  liabilities: string;
+  net_worth: string;
+  currency: string;
+};
+
+export async function getNetWorthQuery(
+  db: DBClient,
+  params: GetNetWorthParams,
+) {
+  const { organizationId, from, to, currency } = params;
+
+  const result = await db.execute(
+    sql`SELECT * FROM ${sql.raw("get_financial_metrics")}(${organizationId}, ${from}, ${to})`,
+  );
+
+  const rawData = result.rows as unknown as FinancialMetricsResultItem[];
+
+  const netWorth =
+    rawData && rawData.length > 0
+      ? parseFloat(rawData[rawData.length - 1]?.net_worth ?? "0")
+      : 0;
+
+  // Compute average net worth over the period
+  const averageNetWorth =
+    rawData && rawData.length > 0
+      ? rawData.reduce(
+          (sum, item) => sum + parseFloat(item.net_worth ?? "0"),
+          0,
+        ) / rawData.length
+      : 0;
+
+  return {
+    summary: {
+      netWorth: netWorth,
+      averageNetWorth: averageNetWorth,
+      currency: rawData?.at(0)?.currency ?? currency,
+    },
+    meta: {
+      type: "net_worth",
+      currency: rawData?.at(0)?.currency ?? currency,
+    },
+    result: rawData?.map((item) => {
+      const value = Number.parseFloat(
+        Number.parseFloat(item.net_worth || "0").toFixed(2),
+      );
+      return {
+        date: item.date,
+        amount: value,
+        average: averageNetWorth,
+        currency: item.currency,
+      };
+    }),
+  };
 }

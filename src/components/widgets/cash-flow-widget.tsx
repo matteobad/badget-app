@@ -37,7 +37,7 @@ export function CashFlowWidget() {
       title={tScoped("title")}
       icon={<ScaleIcon className="size-4" />}
       description={tScoped("description", {
-        count: data?.result.netCashFlow ?? 0,
+        count: data?.netCashFlow ?? 0,
       })}
       actions={tScoped("action")}
       onClick={handleClick}
@@ -45,8 +45,8 @@ export function CashFlowWidget() {
       <div className="flex flex-1 items-end gap-2">
         <span className="text-2xl">
           <AnimatedNumber
-            value={data?.result.netCashFlow ?? 0}
-            currency={data?.result.currency ?? space?.baseCurrency ?? "EUR"}
+            value={data?.netCashFlow ?? 0}
+            currency={data?.currency ?? space?.baseCurrency ?? "EUR"}
           />
         </span>
       </div>

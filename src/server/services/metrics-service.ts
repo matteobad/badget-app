@@ -1,74 +1,73 @@
+import type { getUncategorizedSchema } from "~/shared/validators/reports.schema";
+import type {
+  getAccountBalancesSchema,
+  getRecurringExpensesSchema,
+} from "~/shared/validators/widgets.schema";
+import type z from "zod";
 import { count, sql } from "drizzle-orm";
 
 import type { DBClient } from "../db";
 import { account_table } from "../db/schema/accounts";
 import { user } from "../db/schema/auth";
 import { transaction_table } from "../db/schema/transactions";
+import { getCombinedAccountBalanceQuery } from "../domain/bank-account/queries";
+import {
+  getRecurringExpensesQuery,
+  getUncategorizedTransactionsQuery,
+} from "../domain/transaction/queries";
 
-export type GetExpensesParams = {
-  orgId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
-
-interface ExpensesResultItem {
-  value: string;
-  date: string;
-  currency: string;
-  recurring_value?: number;
-}
-
-export async function getExpenses(db: DBClient, params: GetExpensesParams) {
-  const { orgId, from, to, currency: inputCurrency } = params;
-
-  const result = await db.execute(
-    sql`SELECT * FROM ${sql.raw("get_expenses")}(${orgId}, ${from}, ${to}, ${inputCurrency ?? null})`,
-  );
-
-  const rawData = result.rows as unknown as ExpensesResultItem[];
-
-  const averageExpense =
-    rawData && rawData.length > 0
-      ? Number(
-          (
-            rawData.reduce(
-              (sum, item) => sum + Number.parseFloat(item.value ?? "0"),
-              0,
-            ) / rawData.length
-          ).toFixed(2),
-        )
-      : 0;
+export async function getCombinedAccountBalance(
+  db: DBClient,
+  params: z.infer<typeof getAccountBalancesSchema>,
+  organizationId: string,
+) {
+  const accountBalances = await getCombinedAccountBalanceQuery(db, {
+    organizationId,
+    ...params,
+  });
 
   return {
-    summary: {
-      averageExpense: Math.abs(averageExpense),
-      currency: rawData?.at(0)?.currency ?? inputCurrency,
-    },
-    meta: {
-      type: "expense",
-      currency: rawData?.at(0)?.currency ?? inputCurrency,
-    },
-    result: rawData?.map((item) => {
-      const value = Number.parseFloat(
-        Number.parseFloat(item.value || "0").toFixed(2),
-      );
-      const recurring = Number.parseFloat(
-        Number.parseFloat(
-          item.recurring_value !== undefined
-            ? String(item.recurring_value)
-            : "0",
-        ).toFixed(2),
-      );
-      return {
-        date: item.date,
-        value: Math.abs(value),
-        currency: item.currency,
-        recurring: Math.abs(recurring),
-        total: Math.abs(value + recurring),
-      };
-    }),
+    result: accountBalances,
   };
+}
+
+export async function getRecurringExpenses(
+  db: DBClient,
+  params: z.infer<typeof getRecurringExpensesSchema>,
+  organizationId: string,
+) {
+  const { from, to, currency: inputCurrency } = params;
+
+  // Use existing getExpenses function for the specified period
+  const recurringExpenses = await getRecurringExpensesQuery(db, {
+    organizationId,
+    from,
+    to,
+    currency: inputCurrency,
+  });
+
+  return recurringExpenses;
+}
+
+export async function getUncategorizedTransactions(
+  db: DBClient,
+  params: z.infer<typeof getUncategorizedSchema>,
+  organizationId: string,
+) {
+  const { from, to, currency: inputCurrency } = params;
+
+  // Use existing getExpenses function for the specified period
+  const uncategorizedTransactions = await getUncategorizedTransactionsQuery(
+    db,
+    {
+      organizationId,
+      from,
+      to,
+      currency: inputCurrency,
+    },
+  );
+
+  return uncategorizedTransactions;
 }
 
 type GetFinancialMetricsParams = {
@@ -85,45 +84,6 @@ type FinancialMetricsResultItem = {
   net_worth: string;
   currency: string;
 };
-
-export async function getNetWorth(
-  db: DBClient,
-  params: GetFinancialMetricsParams,
-) {
-  const { orgId, from, to, currency: inputCurrency } = params;
-
-  const result = await db.execute(
-    sql`SELECT * FROM ${sql.raw("get_financial_metrics")}(${orgId}, ${from}, ${to})`,
-  );
-
-  const rawData = result.rows as unknown as FinancialMetricsResultItem[];
-
-  const currentNetWorth =
-    rawData && rawData.length > 0
-      ? parseFloat(rawData[rawData.length - 1]?.net_worth ?? "0")
-      : 0;
-
-  return {
-    summary: {
-      currentNetWorth: Math.abs(currentNetWorth),
-      currency: rawData?.at(0)?.currency ?? inputCurrency,
-    },
-    meta: {
-      type: "net_worth",
-      currency: rawData?.at(0)?.currency ?? inputCurrency,
-    },
-    result: rawData?.map((item) => {
-      const value = Number.parseFloat(
-        Number.parseFloat(item.net_worth || "0").toFixed(2),
-      );
-      return {
-        month: item.date,
-        amount: value,
-        average: 0,
-      };
-    }),
-  };
-}
 
 export async function getFinanancialMetrics(
   db: DBClient,
@@ -174,44 +134,6 @@ export async function getFinanancialMetrics(
       };
     }),
   };
-}
-
-export type GetSpendingParams = {
-  orgId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
-
-interface SpendingResultItem {
-  name: string;
-  slug: string;
-  amount: number;
-  currency: string;
-  color: string;
-  icon: string | null;
-  percentage: number;
-}
-
-export async function getSpending(
-  db: DBClient,
-  params: GetSpendingParams,
-): Promise<SpendingResultItem[]> {
-  const { orgId, from, to, currency: inputCurrency } = params;
-
-  const result = await db.execute(
-    sql`SELECT * FROM ${sql.raw("get_spending")}(${orgId}, ${from}, ${to}, ${inputCurrency ?? null})`,
-  );
-
-  const rawData = result.rows as unknown as SpendingResultItem[];
-
-  return Array.isArray(rawData)
-    ? rawData.map((item) => ({
-        ...item,
-        amount: Number.parseFloat(Number(item.amount).toFixed(2)),
-        percentage: Number.parseFloat(Number(item.percentage).toFixed(2)),
-      }))
-    : [];
 }
 
 interface HeroResultItem {

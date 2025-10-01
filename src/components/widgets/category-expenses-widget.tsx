@@ -85,11 +85,9 @@ export function CategoryExpensesWidget() {
             })}
           </div>
         ) : (
-          <div className="py-8">
-            <p className="text-sm text-muted-foreground">
-              {tScoped("description")}
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            {tScoped("description")}
+          </p>
         )
       }
       icon={<ShapesIcon className="size-4" />}

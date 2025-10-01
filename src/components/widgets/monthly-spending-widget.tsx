@@ -22,7 +22,7 @@ export function MonthlySpendingWidget() {
   const { data: space } = useSpaceQuery();
 
   const { data } = useQuery({
-    ...trpc.widgets.getMonthlySpending.queryOptions({
+    ...trpc.widgets.getMonthlyExpenses.queryOptions({
       from: startOfMonth(new UTCDate(new Date())).toISOString(),
       to: endOfMonth(new UTCDate(new Date())).toISOString(),
       currency: space?.baseCurrency ?? "EUR",

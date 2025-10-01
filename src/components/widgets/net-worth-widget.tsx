@@ -13,6 +13,7 @@ import { useScopedI18n } from "~/shared/locales/client";
 import {
   endOfMonth,
   formatISO,
+  startOfDay,
   startOfMonth,
   subMonths,
   subYears,
@@ -100,8 +101,8 @@ export function NetWorthWidget() {
 
   const { data } = useQuery({
     ...trpc.widgets.getNetWorth.queryOptions({
-      from: startOfMonth(new UTCDate(new Date())).toISOString(),
-      to: endOfMonth(new UTCDate(new Date())).toISOString(),
+      from: subMonths(startOfDay(new UTCDate(new Date())), 1).toISOString(),
+      to: startOfDay(new UTCDate(new Date())).toISOString(),
       currency: space?.baseCurrency ?? undefined,
     }),
     ...WIDGET_POLLING_CONFIG,
