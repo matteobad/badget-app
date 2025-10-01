@@ -2,7 +2,7 @@ import { SecondaryMenu } from "~/components/layouts/secondary-menu";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="max-w-[800px] p-6">
+    <div className="max-w-[800px] py-6">
       <SecondaryMenu
         items={[
           { path: "/account", label: "General" },

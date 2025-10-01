@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
-import { useMetricsParams } from "~/hooks/use-metrics-params";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createManualBankAccountSchema } from "~/shared/validators/bank-account.schema";
 import { useForm } from "react-hook-form";
@@ -30,7 +29,6 @@ import { AccountTypeSelect } from "./account-type-select";
 
 export default function CreateBankAccountForm() {
   const { setParams } = useBankAccountParams();
-  const { params } = useMetricsParams();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -42,12 +40,6 @@ export default function CreateBankAccountForm() {
       },
       onSuccess: (_data) => {
         toast.success("Bank Account created");
-        void queryClient.invalidateQueries({
-          queryKey: trpc.metrics.financialMetrics.queryKey({
-            from: params.from,
-            to: params.to,
-          }),
-        });
         void queryClient.invalidateQueries({
           queryKey: trpc.asset.get.queryKey(),
         });

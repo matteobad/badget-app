@@ -14,7 +14,7 @@ export default async function CategoriesPage() {
   prefetch(trpc.transactionCategory.get.queryOptions());
 
   return (
-    <div className="max-w-screen-lg p-6">
+    <div className="max-w-screen-lg py-6">
       <HydrateClient>
         <ErrorBoundary fallback={<ErrorFallback />}>
           <Suspense fallback={<CategoriesSkeleton />}>

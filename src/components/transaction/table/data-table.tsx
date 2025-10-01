@@ -264,7 +264,7 @@ export function DataTable({
   }
 
   return (
-    <div className="relative px-6">
+    <div className="relative">
       <TooltipProvider delayDuration={20}>
         <Tooltip>
           <div className="w-full">

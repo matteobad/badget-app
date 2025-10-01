@@ -15,7 +15,7 @@ export default async function TagsPage() {
   prefetch(trpc.tag.get.queryOptions());
 
   return (
-    <div className="flex max-w-screen-lg flex-col gap-4 p-6">
+    <div className="flex max-w-screen-lg flex-col gap-4 py-6">
       <header className="flex items-center justify-between">
         <TagsSearchFilter />
         <TagsActions />
