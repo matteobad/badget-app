@@ -2,6 +2,7 @@ import type { getUncategorizedSchema } from "~/shared/validators/reports.schema"
 import type {
   getAccountBalancesSchema,
   getRecurringExpensesSchema,
+  getVaultActivitySchema,
 } from "~/shared/validators/widgets.schema";
 import type z from "zod";
 import { count, sql } from "drizzle-orm";
@@ -11,6 +12,7 @@ import { account_table } from "../db/schema/accounts";
 import { user } from "../db/schema/auth";
 import { transaction_table } from "../db/schema/transactions";
 import { getCombinedAccountBalanceQuery } from "../domain/bank-account/queries";
+import { getRecentDocumentsQuery } from "../domain/documents/queries";
 import {
   getRecurringExpensesQuery,
   getUncategorizedTransactionsQuery,
@@ -68,6 +70,19 @@ export async function getUncategorizedTransactions(
   );
 
   return uncategorizedTransactions;
+}
+
+export async function getRecentDocuments(
+  db: DBClient,
+  params: z.infer<typeof getVaultActivitySchema>,
+  organizationId: string,
+) {
+  const recentDocuments = await getRecentDocumentsQuery(db, {
+    organizationId,
+    ...params,
+  });
+
+  return { result: recentDocuments };
 }
 
 interface HeroResultItem {

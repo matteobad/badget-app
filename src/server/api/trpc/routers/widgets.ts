@@ -1,6 +1,7 @@
 import { widgetPreferencesCache } from "~/server/cache/widget-preferences-cache";
 import {
   getCombinedAccountBalance,
+  getRecentDocuments,
   getRecurringExpenses,
   getUncategorizedTransactions,
 } from "~/server/services/metrics-service";
@@ -22,6 +23,7 @@ import {
   getNetWorthSchema,
   getRecurringExpensesSchema,
   getSavingAnalysisSchema,
+  getVaultActivitySchema,
   updateWidgetPreferencesSchema,
 } from "~/shared/validators/widgets.schema";
 
@@ -149,6 +151,12 @@ export const widgetsRouter = createTRPCRouter({
     .input(getUncategorizedSchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
       return getUncategorizedTransactions(db, input, orgId!);
+    }),
+
+  getVaultActivity: protectedProcedure
+    .input(getVaultActivitySchema)
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      return getRecentDocuments(db, input, orgId!);
     }),
 
   // Preferences

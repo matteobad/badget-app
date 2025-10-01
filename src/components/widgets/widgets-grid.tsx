@@ -19,6 +19,7 @@ import { Insights } from "./insight";
 import { MonthlyIncomeWidget } from "./monthly-income-widget";
 import { MonthlySpendingWidget } from "./monthly-spending-widget";
 import { NetWorthWidget } from "./net-worth-widget";
+import { RecentDocumentsWidget } from "./recent-documents-widget";
 import { RecurringExpensesWidget } from "./recurring-expenses-widget";
 import { SavingAnalysisWidget } from "./saving-analysis-widget";
 import { UncategorizedTransactionsWidget } from "./uncategorized-transactions-widget";
@@ -85,6 +86,7 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "recurring-expenses": RecurringExpensesWidget,
   "saving-analysis": SavingAnalysisWidget,
   "uncategorized-transactions": UncategorizedTransactionsWidget,
+  "recent-documents": RecentDocumentsWidget,
 };
 
 export function WidgetsGrid() {

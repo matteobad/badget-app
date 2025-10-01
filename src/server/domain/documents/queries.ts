@@ -1,8 +1,10 @@
 import type { DBClient } from "~/server/db";
 import type { SQL } from "drizzle-orm/sql/sql";
+import { user } from "~/server/db/schema/auth";
 import {
   document_table,
   document_tag_assignment_table,
+  document_tag_table,
 } from "~/server/db/schema/documents";
 import { transaction_attachment_table } from "~/server/db/schema/transactions";
 import { buildSearchQuery } from "~/server/db/utils";
@@ -397,4 +399,58 @@ export async function updateDocumentProcessingStatus(
     .set({ processingStatus })
     .where(eq(document_table.id, id))
     .returning({ id: document_table.id });
+}
+
+export type GetRecentDocumentsParams = {
+  organizationId: string;
+  limit?: number;
+};
+
+export async function getRecentDocumentsQuery(
+  db: DBClient,
+  params: GetRecentDocumentsParams,
+) {
+  const { organizationId, limit = 5 } = params;
+
+  const data = await db.query.document_table.findMany({
+    where: and(
+      eq(document_table.organizationId, organizationId),
+      not(like(document_table.name, "%.folderPlaceholder")),
+    ),
+    columns: {
+      id: true,
+      name: true,
+      title: true,
+      createdAt: true,
+      processingStatus: true,
+      tag: true,
+    },
+    with: {
+      documentTagAssignments: {
+        with: {
+          documentTag: {
+            columns: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
+      },
+      user: {
+        columns: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+    },
+    limit,
+    orderBy: desc(document_table.createdAt),
+  });
+
+  return {
+    data,
+    total: data.length,
+  };
 }

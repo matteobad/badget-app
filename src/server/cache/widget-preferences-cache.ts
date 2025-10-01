@@ -22,6 +22,7 @@ export const WIDGET = {
 
   // Misc
   UNCATEGORIZED_TRANSACTIONS: "uncategorized-transactions",
+  RECENT_DOCUMENTS: "recent-documents",
 } as const;
 export type WidgetType = (typeof WIDGET)[keyof typeof WIDGET];
 
@@ -40,6 +41,7 @@ export const DEFAULT_WIDGET_ORDER: WidgetType[] = [
   "monthly-spending",
   "recurring-expenses",
   "uncategorized-transactions",
+  "recent-documents",
 ];
 
 export const DEFAULT_WIDGET_PREFERENCES: WidgetPreferences = {

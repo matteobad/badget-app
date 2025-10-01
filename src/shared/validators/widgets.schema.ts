@@ -89,6 +89,10 @@ export const getRecurringExpensesSchema = z.object({
   currency: z.string().optional(),
 });
 
+export const getVaultActivitySchema = z.object({
+  limit: z.number().optional().default(5),
+});
+
 export const widgetTypeSchema = z.enum(WIDGET);
 
 export const widgetPreferencesSchema = z.object({
