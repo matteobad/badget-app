@@ -19,15 +19,7 @@ import { columns } from "./columns";
 import { NoResults } from "./empty-states";
 import { Loading } from "./loading";
 
-export function DataTable({
-  data,
-  draggable,
-  onRowDragStart,
-}: {
-  data: RouterOutput["asset"]["get"];
-  draggable?: boolean;
-  onRowDragStart?: (accountId: string) => void;
-}) {
+export function DataTable({ data }: { data: RouterOutput["asset"]["get"] }) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
 
@@ -80,29 +72,17 @@ export function DataTable({
 
   return (
     <div className="w-full">
-      <Table className="border-t">
+      <Table className="border-y">
         {/* Transaction Rows */}
         <TableBody>
           {table.getFilteredRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              draggable={draggable}
-              onDragStart={() => {
-                if (draggable && onRowDragStart) {
-                  onRowDragStart(row.original.id);
-                }
-              }}
-            >
+            <TableRow key={row.id}>
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
                   key={cell.id}
                   className={cn(
                     cell.column.columnDef.meta?.className,
                     "border-x py-3",
-                    {
-                      "border-l-0": index === 0,
-                      "border-r-0": index === 3,
-                    },
                   )}
                   onClick={() => {
                     if (cell.column.id !== "actions") {

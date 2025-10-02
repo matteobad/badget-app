@@ -11,7 +11,6 @@ import { documentTagsRouter } from "./document-tag";
 import { institutionRouter } from "./institution";
 import { metricsRouter } from "./metrics";
 import { organizationRouter } from "./organization";
-import { preferencesRouter } from "./preferences";
 import { searchRouter } from "./search";
 import { suggestedActionsRouter } from "./suggested-actions";
 import { tagRouter } from "./tag";
@@ -42,7 +41,6 @@ export const appRouter = createTRPCRouter({
   documents: documentsRouter,
   documentTags: documentTagsRouter,
   tag: tagRouter,
-  preferences: preferencesRouter,
   budget: budgetRouter,
   transaction: transactionRouter,
   transactionAttachment: transactionAttachmentRouter,

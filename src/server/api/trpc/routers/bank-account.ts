@@ -1,3 +1,4 @@
+import { accountPreferencesCache } from "~/server/cache/account-preferences-cache";
 import {
   createManualBankAccount,
   deleteBankAccount,
@@ -11,6 +12,7 @@ import {
   deleteBankAccountSchema,
   getBankAccountByIdSchema,
   getBankAccountsSchema,
+  updateAccountPreferencesSchema,
   updateBankAccountBalanceSchema,
   updateBankAccountSchema,
 } from "~/shared/validators/bank-account.schema";
@@ -54,5 +56,27 @@ export const bankAccountRouter = createTRPCRouter({
     .input(deleteBankAccountSchema)
     .mutation(async ({ ctx: { db, orgId }, input }) => {
       return deleteBankAccount(db, input, orgId!);
+    }),
+
+  // Preferences
+  getAccountPreferences: protectedProcedure.query(
+    async ({ ctx: { orgId, session } }) => {
+      const preferences = await accountPreferencesCache.getAccountPreferences(
+        orgId!,
+        session!.userId,
+      );
+      return preferences;
+    },
+  ),
+
+  updateAccountPreferences: protectedProcedure
+    .input(updateAccountPreferencesSchema)
+    .mutation(async ({ ctx: { orgId, session }, input }) => {
+      const preferences = await accountPreferencesCache.updatePrimaryWidgets(
+        orgId!,
+        session!.userId,
+        input.primaryWidgets,
+      );
+      return preferences;
     }),
 });

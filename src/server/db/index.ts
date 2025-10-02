@@ -12,7 +12,6 @@ import * as chats from "./schema/chats";
 import * as documents from "./schema/documents";
 import * as notifications from "./schema/notifications";
 import * as openBanking from "./schema/open-banking";
-import * as preferences from "./schema/preferences";
 import * as transactions from "./schema/transactions";
 
 let connectionString = env.DATABASE_URL;
@@ -48,7 +47,6 @@ export const schema = {
   ...documents,
   ...openBanking,
   ...transactions,
-  ...preferences,
   ...notifications,
 };
 

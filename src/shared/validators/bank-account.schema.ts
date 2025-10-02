@@ -164,6 +164,11 @@ export const updateBankAccountBalanceSchema = z
     },
   });
 
+// Preferences
+export const updateAccountPreferencesSchema = z.object({
+  primaryWidgets: z.array(z.string()),
+});
+
 // Search params for sheets
 export const bankAccountParamsSchema = {
   bankAccountId: parseAsString,
