@@ -1,15 +1,10 @@
 import type { PropsWithChildren } from "react";
-import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { ExportStatus } from "~/components/export-status";
 import { GlobalSheets } from "~/components/global-sheets";
 import { Header } from "~/components/layouts/header";
 import { Sidebar } from "~/components/sidebar/sidebar";
 import { TimezoneDetector } from "~/components/timezone-detector";
-import {
-  getCountryCode,
-  getCurrency,
-} from "~/server/services/location-service";
 import {
   batchPrefetch,
   getQueryClient,
@@ -19,8 +14,6 @@ import {
 
 export default async function AppLayout(props: PropsWithChildren) {
   const queryClient = getQueryClient();
-  const currencyPromise = getCurrency();
-  const countryCodePromise = getCountryCode();
 
   // NOTE: These are used in the global sheets
   batchPrefetch([
@@ -55,13 +48,7 @@ export default async function AppLayout(props: PropsWithChildren) {
 
         <ExportStatus />
 
-        <Suspense>
-          {/* Global Sheets here */}
-          <GlobalSheets
-            currencyPromise={currencyPromise}
-            countryCodePromise={countryCodePromise}
-          />
-        </Suspense>
+        <GlobalSheets />
 
         <TimezoneDetector />
       </div>

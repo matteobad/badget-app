@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useConnectParams } from "~/hooks/use-connect-params";
+import { useSpaceQuery } from "~/hooks/use-space";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useDebounceValue } from "usehooks-ts";
@@ -95,22 +96,19 @@ function SearchResult({
   );
 }
 
-type ConnectTransactionsModalProps = {
-  countryCode: string;
-};
-
-export function ConnectBankDialog({
-  countryCode: initialCountryCode,
-}: ConnectTransactionsModalProps) {
+export function ConnectBankDialog() {
   const trpc = useTRPC();
   const router = useRouter();
+
+  const { data: space } = useSpaceQuery();
+  const spaceCountryCode = space?.countryCode ?? "";
 
   const {
     countryCode,
     search: query,
     step,
     setParams: setConnectParams,
-  } = useConnectParams(initialCountryCode);
+  } = useConnectParams(spaceCountryCode);
   const { setParams: setTransactionParams } = useTransactionParams();
 
   const isOpen = step === "connect";

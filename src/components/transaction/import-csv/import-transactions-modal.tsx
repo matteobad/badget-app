@@ -14,9 +14,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { useSpaceQuery } from "~/hooks/use-space";
 import { useSyncStatus } from "~/hooks/use-sync-status";
 import { useUpload } from "~/hooks/use-upload";
 import { importTransactionsAction } from "~/server/domain/transaction/actions";
+import { uniqueCurrencies } from "~/shared/constants/currencies";
 import { useActiveOrganization } from "~/shared/helpers/better-auth/auth-client";
 import { stripSpecialCharacters } from "~/shared/helpers/documents";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -32,15 +34,10 @@ import { SelectFile } from "./select-file";
 
 const pages = ["select-file", "confirm-import"] as const;
 
-type Props = {
-  currencies: string[];
-  defaultCurrency: string;
-};
+export function ImportTransactionsModal() {
+  const { data: space } = useSpaceQuery();
+  const defaultCurrency = space?.baseCurrency ?? "EUR";
 
-export function ImportTransactionsModal({
-  currencies,
-  defaultCurrency,
-}: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [runId, setRunId] = useState<string | undefined>();
@@ -241,7 +238,7 @@ export function ImportTransactionsModal({
                     {page === "select-file" && <SelectFile />}
                     {page === "confirm-import" && (
                       <>
-                        <FieldMapping currencies={currencies} />
+                        <FieldMapping currencies={uniqueCurrencies} />
 
                         <SubmitButton
                           isSubmitting={isImporting}
