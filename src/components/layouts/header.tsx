@@ -1,7 +1,7 @@
-// import { NotificationCenter } from "@/components/notification-center";
 // import { Trial } from "@/components/trial";
 import { ConnectionStatus } from "../bank-connection/connection-status";
 import { NavUser } from "../nav-user";
+import { NotificationCenter } from "../notifications/notification-center";
 import { OpenSearchButton } from "../search/open-search-button";
 import { MobileMenu } from "../sidebar/mobile-menu";
 
@@ -12,10 +12,10 @@ export function Header() {
 
       <OpenSearchButton />
 
-      <div className="ml-auto flex space-x-2">
+      <div className="ml-auto flex space-x-4">
         {/* <Trial /> */}
         <ConnectionStatus />
-        {/* <NotificationCenter /> */}
+        <NotificationCenter />
         <NavUser />
       </div>
     </header>

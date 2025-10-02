@@ -1,4 +1,4 @@
-import type { NotificationChannel } from "./queries";
+import type { NotificationChannel } from "./notification-settings-queries";
 
 export interface NotificationType {
   type: string;

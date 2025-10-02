@@ -27,6 +27,26 @@ export default {
     placeholder: "Select timezone",
   },
 
+  notifications: {
+    categories: {
+      transactions: "Transazioni",
+    },
+    transactions_created: {
+      name: "Nuove transazioni",
+      description:
+        "Ricevi una notifica quando vengono importate nuove transazioni",
+      "title#one": "Nuova transazione da {name} {amount} il {date}",
+      "title#other": "{count} nuove transazioni aggiunte",
+      "title_many#other": "{count} transazioni importate",
+      single_transaction: "Nuova transazione da {name} {amount} il {date}",
+    },
+    default: {
+      title: "Nuova attività rilevata",
+    },
+    archive_button: "Archivia notifica",
+    time_ago: "{time} fa",
+  },
+
   widgets: {
     header: {
       subtitle: "ecco una rapida panoramica di come stanno andando le cose.",

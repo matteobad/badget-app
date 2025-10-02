@@ -10,7 +10,7 @@ import { documentsRouter } from "./document";
 import { documentTagsRouter } from "./document-tag";
 import { institutionRouter } from "./institution";
 import { metricsRouter } from "./metrics";
-// import { notificationsRouter } from "./notification";
+import { notificationsRouter } from "./notification";
 import { notificationSettingsRouter } from "./notification-settings";
 import { organizationRouter } from "./organization";
 import { searchRouter } from "./search";
@@ -36,7 +36,7 @@ export const appRouter = createTRPCRouter({
   user: userRouter,
   organization: organizationRouter,
   metrics: metricsRouter,
-  // notifications: notificationsRouter,
+  notifications: notificationsRouter,
   notificationSettings: notificationSettingsRouter,
   asset: assetRouter,
   institution: institutionRouter,

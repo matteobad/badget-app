@@ -27,6 +27,25 @@ export default {
     placeholder: "Select timezone",
   },
 
+  notifications: {
+    categories: {
+      transactions: "Transactions",
+    },
+    transactions_created: {
+      name: "New Transactions",
+      description: "Get notified when new transactions are imported",
+      "title#one": "New transaction from {name} {amount} on {date}",
+      "title#other": "{count} new transactions added",
+      "title_many#other": "{count} transactions imported",
+      single_transaction: "New transaction from {name} {amount} on {date}",
+    },
+    default: {
+      title: "New activity detected",
+    },
+    archive_button: "Archive notification",
+    time_ago: "{time} ago",
+  },
+
   widgets: {
     header: {
       subtitle: "here's a quick look at how things are going.",
