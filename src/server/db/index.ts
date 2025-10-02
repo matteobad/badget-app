@@ -10,6 +10,7 @@ import * as accounts from "./schema/accounts";
 import * as auth from "./schema/auth";
 import * as chats from "./schema/chats";
 import * as documents from "./schema/documents";
+import * as notifications from "./schema/notifications";
 import * as openBanking from "./schema/open-banking";
 import * as preferences from "./schema/preferences";
 import * as transactions from "./schema/transactions";
@@ -48,6 +49,7 @@ export const schema = {
   ...openBanking,
   ...transactions,
   ...preferences,
+  ...notifications,
 };
 
 // Drizzle supports both HTTP and WebSocket clients. Choose the one that fits your needs:

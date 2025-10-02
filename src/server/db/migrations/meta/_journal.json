@@ -141,6 +141,13 @@
       "when": 1758912787375,
       "tag": "0019_talented_sumo",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1759396506619,
+      "tag": "0020_groovy_blade",
+      "breakpoints": true
     }
   ]
 }

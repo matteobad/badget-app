@@ -1,6 +1,5 @@
 import type { InferUITools } from "ai";
 
-import { getBurnRateTool } from "./tools/get-burn-rate-tool";
 // import { google } from "@ai-sdk/google";
 
 import { getExpensesBreakdownTool } from "./tools/get-expenses-breakdown-tool";
@@ -14,7 +13,6 @@ export const createToolRegistry = () => {
   // const context = getContext();
 
   return {
-    getBurnRate: getBurnRateTool,
     getNetWorthAnalysis: getNetWorthAnalysisTool,
     getTransactions: getTransactionsTool,
     getExpensesBreakdown: getExpensesBreakdownTool,

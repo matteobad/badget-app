@@ -150,6 +150,11 @@ export const auth = betterAuth({
               input: true,
               required: false,
             },
+            exportSettings: {
+              type: "json",
+              input: true,
+              required: false,
+            },
           },
         },
       },

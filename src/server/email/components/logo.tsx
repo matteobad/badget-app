@@ -1,6 +1,7 @@
 import { Img, Section } from "@react-email/components";
+import { getUrl } from "~/shared/helpers/get-url";
 
-const baseUrl = getEmailUrl();
+const baseUrl = getUrl();
 
 export function Logo() {
   // CSS-blended version for automatic dark mode adaptation

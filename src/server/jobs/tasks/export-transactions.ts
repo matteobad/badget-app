@@ -197,17 +197,17 @@ export const exportTransactionsTask = schemaTask({
       downloadLink = uploadedFile.downloadUrl;
     }
 
-    // Create activity for completed export
-    await tasks.trigger("notification", {
-      type: "transactions_exported",
-      organizationId,
-      transactionCount: transactionIds.length,
-      locale: locale,
-      dateFormat: dateFormat || "yyyy-MM-dd",
-      downloadLink,
-      accountantEmail: settings.accountantEmail,
-      sendEmail: settings.sendEmail,
-    });
+    // TODO: send email with export link
+    // await tasks.trigger("notification", {
+    //   type: "transactions_exported",
+    //   organizationId,
+    //   transactionCount: transactionIds.length,
+    //   locale: locale,
+    //   dateFormat: dateFormat || "yyyy-MM-dd",
+    //   downloadLink,
+    //   accountantEmail: settings.accountantEmail,
+    //   sendEmail: settings.sendEmail,
+    // });
 
     return {
       fileName,

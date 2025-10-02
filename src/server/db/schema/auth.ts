@@ -1,4 +1,11 @@
-import { boolean, integer, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  jsonb,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 import { numericCasted } from "../utils";
 import { pgTable } from "./_table";
@@ -119,6 +126,9 @@ export const organization = pgTable("organization", {
   email: text("email"),
   createdAt: timestamp("created_at").notNull(),
   metadata: text("metadata"),
+
+  // custom
+  exportSettings: jsonb("export_settings"),
 });
 
 export const member = pgTable("member", {

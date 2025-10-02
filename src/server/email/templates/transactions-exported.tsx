@@ -7,6 +7,14 @@ import {
   Text,
 } from "@react-email/components";
 
+import { Button } from "../components/button";
+import { Logo } from "../components/logo";
+import {
+  EmailThemeProvider,
+  getEmailInlineStyles,
+  getEmailThemeClasses,
+} from "../components/theme";
+
 interface Props {
   accountantEmail: string;
   teamName: string;
