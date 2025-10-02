@@ -6,7 +6,7 @@ import { sendSupportSchema } from "~/shared/validators/support.schema";
 import { addYears } from "date-fns";
 
 import type { VisibilityState } from "@tanstack/react-table";
-import { resend } from "./emails/resend";
+import { resend } from "./email/resend";
 
 // Server action to submit feedback
 export const submitFeedbackAction = authActionClient

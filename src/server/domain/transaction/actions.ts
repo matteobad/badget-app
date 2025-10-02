@@ -112,16 +112,18 @@ export const exportTransactionsAction = authActionClient
   .metadata({ actionName: "export-transactions" })
   .action(
     async ({
-      parsedInput: { transactionIds, dateFormat, locale },
-      ctx: { orgId },
+      parsedInput: { transactionIds, dateFormat, locale, exportSettings },
+      ctx: { orgId, userId },
     }) => {
       const event = await tasks.trigger<typeof exportTransactionsTask>(
         "export-transactions",
         {
           organizationId: orgId,
+          userId,
           locale,
           transactionIds,
           dateFormat,
+          exportSettings,
         },
       );
 

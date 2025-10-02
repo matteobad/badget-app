@@ -1,5 +1,5 @@
 import { writeToString } from "@fast-csv/format";
-import { metadata, schemaTask } from "@trigger.dev/sdk";
+import { metadata, schemaTask, tasks } from "@trigger.dev/sdk";
 import { put } from "@vercel/blob";
 import {
   BlobReader,
@@ -8,6 +8,8 @@ import {
   Uint8ArrayReader,
   ZipWriter,
 } from "@zip.js/zip.js";
+import { db } from "~/server/db";
+import { document_table } from "~/server/db/schema/documents";
 import { format } from "date-fns";
 import xlsx from "node-xlsx";
 import z from "zod";
@@ -41,9 +43,19 @@ export const exportTransactionsTask = schemaTask({
   id: "export-transactions",
   schema: z.object({
     organizationId: z.uuid(),
+    userId: z.uuid(),
     locale: z.string(),
     dateFormat: z.string().nullable().optional(),
     transactionIds: z.array(z.uuid()),
+    exportSettings: z
+      .object({
+        csvDelimiter: z.string(),
+        includeCSV: z.boolean(),
+        includeXLSX: z.boolean(),
+        sendEmail: z.boolean(),
+        accountantEmail: z.string().optional(),
+      })
+      .optional(),
   }),
   maxDuration: 300,
   queue: {
@@ -52,10 +64,26 @@ export const exportTransactionsTask = schemaTask({
   machine: {
     preset: "small-1x",
   },
-  run: async ({ locale, transactionIds, dateFormat, organizationId }) => {
+  run: async ({
+    organizationId,
+    userId,
+    locale,
+    transactionIds,
+    dateFormat,
+    exportSettings,
+  }) => {
     const filePath = `export-${format(new Date(), dateFormat ?? "yyyy-MM-dd")}`;
     const path = `${organizationId}/exports`;
     const fileName = `${filePath}.zip`;
+
+    // Use export settings with defaults
+    const settings = {
+      csvDelimiter: exportSettings?.csvDelimiter ?? ",",
+      includeCSV: exportSettings?.includeCSV ?? true,
+      includeXLSX: exportSettings?.includeXLSX ?? true,
+      sendEmail: exportSettings?.sendEmail ?? false,
+      accountantEmail: exportSettings?.accountantEmail,
+    };
 
     metadata.set("progress", 20);
 
@@ -95,28 +123,38 @@ export const exportTransactionsTask = schemaTask({
       r.ok ? r.output.attachments : [],
     );
 
-    const csv = await writeToString(rows, {
-      headers: columns.map((c) => c.label),
-    });
-
-    const data = [
-      columns.map((c) => c.label), // Header row
-      ...rows.map((row) => row.map((cell) => cell ?? "")),
-    ];
-
-    const buffer = xlsx.build([
-      {
-        name: "Transactions",
-        data,
-        options: {},
-      },
-    ]);
-
     const zipFileWriter = new BlobWriter("application/zip");
     const zipWriter = new ZipWriter(zipFileWriter);
 
-    await zipWriter.add("transactions.csv", new TextReader(csv));
-    await zipWriter.add("transactions.xlsx", new Uint8ArrayReader(buffer));
+    // Add CSV if enabled
+    if (settings.includeCSV) {
+      const csv = await writeToString(rows, {
+        headers: columns.map((c) => c.label),
+        delimiter: settings.csvDelimiter,
+      });
+      zipWriter.add("transactions.csv", new TextReader(csv));
+    }
+
+    // Add XLSX if enabled
+    if (settings.includeXLSX) {
+      const data = [
+        columns.map((c) => c.label), // Header row
+        ...rows.map((row) => row.map((cell) => cell ?? "")),
+      ];
+
+      const buffer = xlsx.build([
+        {
+          name: "Transactions",
+          data,
+          options: {},
+        },
+      ]);
+
+      zipWriter.add("transactions.xlsx", new Uint8ArrayReader(buffer));
+    }
+
+    // await zipWriter.add("transactions.csv", new TextReader(csv));
+    // await zipWriter.add("transactions.xlsx", new Uint8ArrayReader(buffer));
 
     metadata.set("progress", 90);
 
@@ -143,13 +181,33 @@ export const exportTransactionsTask = schemaTask({
 
     metadata.set("progress", 100);
 
-    // TODO: Update the documents to completed (it's a zip file)
-    // await supabase
-    //   .from("documents")
-    //   .update({
-    //     processing_status: "completed",
-    //   })
-    //   .eq("name", fullPath);
+    // Update the documents to completed (it's a zip file)
+    await db.insert(document_table).values({
+      organizationId,
+      processingStatus: "completed",
+      date: format(new Date(), "yyyy-MM-dd"),
+      name: fullPath,
+      tag: "export",
+    });
+
+    // If email is enabled, create a short link for the export
+    let downloadLink: string | undefined;
+    if (settings.sendEmail && settings.accountantEmail) {
+      // TODO: Create a signed URL valid for 7 days
+      downloadLink = uploadedFile.downloadUrl;
+    }
+
+    // Create activity for completed export
+    await tasks.trigger("notification", {
+      type: "transactions_exported",
+      organizationId,
+      transactionCount: transactionIds.length,
+      locale: locale,
+      dateFormat: dateFormat || "yyyy-MM-dd",
+      downloadLink,
+      accountantEmail: settings.accountantEmail,
+      sendEmail: settings.sendEmail,
+    });
 
     return {
       fileName,

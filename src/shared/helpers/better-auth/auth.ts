@@ -2,7 +2,7 @@
 
 import { db } from "~/server/db";
 import { getUserByIdQuery } from "~/server/domain/user/queries";
-import { resend } from "~/server/emails/resend";
+import { resend } from "~/server/email/resend";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";

@@ -211,6 +211,15 @@ export const exportTransactionsSchema = z.object({
   transactionIds: z.array(z.string()),
   dateFormat: z.string().optional(),
   locale: z.string().optional().default("en"),
+  exportSettings: z
+    .object({
+      csvDelimiter: z.string(),
+      includeCSV: z.boolean(),
+      includeXLSX: z.boolean(),
+      sendEmail: z.boolean(),
+      accountantEmail: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type CSVRow = Record<string, string | null>;
