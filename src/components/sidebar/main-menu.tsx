@@ -107,7 +107,7 @@ const items = [
       { path: "/settings", name: "General" },
       // { path: "/settings/billing", name: "Billing" },
       { path: "/settings/accounts", name: "Bank Connections" },
-      // { path: "/settings/notifications", name: "Notifications" },
+      { path: "/settings/notifications", name: "Notifications" },
     ],
   },
 ];
