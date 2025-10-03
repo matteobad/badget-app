@@ -1,5 +1,5 @@
 import { env } from "~/env";
-import { redis } from "~/server/redis";
+import { redis } from "~/server/cache/redis";
 
 import type {
   GC_AccessTokenResponse,

@@ -1,4 +1,4 @@
-import { redis } from "../redis";
+import { redis } from "./redis";
 
 // Redis-based cache for chat data shared across all server instances
 const suggestedActionsCachePrefix = "suggested-actions";
