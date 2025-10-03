@@ -5,9 +5,9 @@ import { Resend } from "resend";
 
 import type { DBClient } from "../db";
 import type { EmailInput } from "../domain/notification/base";
+import { resend } from "../../lib/resend";
+import TransactionsExportedEmail from "../../shared/emails/emails/transactions-exported";
 import { shouldSendNotification } from "../domain/notification/notification-settings-queries";
-import { resend } from "../email/resend";
-import TransactionsExportedEmail from "../email/templates/transactions-exported";
 
 export class EmailService {
   private client: Resend;

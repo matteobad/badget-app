@@ -1,7 +1,4 @@
 import { Img, Section } from "@react-email/components";
-import { getUrl } from "~/shared/helpers/get-url";
-
-const baseUrl = getUrl();
 
 export function Logo() {
   // CSS-blended version for automatic dark mode adaptation
@@ -34,10 +31,10 @@ export function Logo() {
         `}</style>
 
       <Img
-        src={`${baseUrl}/email/logo.png`}
+        src={`/email/logo.png`}
         width="40"
         height="40"
-        alt="Midday"
+        alt="Badget"
         className="logo-blend mx-auto my-0 block"
       />
     </Section>

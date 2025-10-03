@@ -20,6 +20,7 @@ export const env = createEnv({
     GOCARDLESS_SECRET_ID: z.string().min(1),
     GOCARDLESS_SECRET_KEY: z.string().min(1),
     RESEND_API_KEY: z.string().min(1),
+    RESEND_AUDIENCE_ID: z.string().min(1),
   },
 
   /**
@@ -43,6 +44,7 @@ export const env = createEnv({
     GOCARDLESS_SECRET_ID: process.env.GOCARDLESS_SECRET_ID,
     GOCARDLESS_SECRET_KEY: process.env.GOCARDLESS_SECRET_KEY,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
+    RESEND_AUDIENCE_ID: process.env.RESEND_AUDIENCE_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -22,6 +22,7 @@
     "ui-add": "pnpm dlx shadcn@latest add && prettier src --write --list-different",
     "webhook": "ngrok http --url=suitable-malamute-logical.ngrok-free.app 3000",
     "dev": "next dev --turbopack",
+    "email:dev": "email dev --dir ./src/shared/emails/emails",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "eslint .",
@@ -129,6 +130,7 @@
     "@electric-sql/pglite": "^0.3.8",
     "@eslint/eslintrc": "^3.3.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "@react-email/preview-server": "4.2.12",
     "@tailwindcss/postcss": "^4.1.13",
     "@trigger.dev/build": "4.0.2",
     "@types/bun": "^1.2.22",
@@ -153,8 +155,5 @@
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
-  },
-  "ct3aMetadata": {
-    "initVersion": "7.35.0"
   }
 }

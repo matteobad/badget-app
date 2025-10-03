@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { signOut } from "~/shared/helpers/better-auth/auth-client";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import {
   AlertDialog,
@@ -36,13 +37,9 @@ export function DeleteAccount() {
   const deleteUserMutation = useMutation(
     trpc.user.delete.mutationOptions({
       onSuccess: async () => {
-        await signOut({
-          fetchOptions: {
-            onSuccess: () => {
-              router.push("/sign-in"); // redirect to login page
-            },
-          },
-        });
+        toast.info(
+          "A confirmation email has been sent to your address. Please check your inbox to confirm account deletion.",
+        );
       },
     }),
   );
