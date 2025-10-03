@@ -236,7 +236,7 @@ export async function getExpensesByCategory(
   // Get top N categories by amount
   const topCategories = categoryExpenses
     .sort((a, b) => b.amount - a.amount)
-    .slice(0, limit || 5);
+    .slice(0, limit ?? 5);
 
   const totalAmount = topCategories.reduce((sum, cat) => sum + cat.amount, 0);
 
@@ -287,12 +287,12 @@ export async function getIncomeForecast(
     currency: item.currency,
   }));
 
-  const currency = historical[0]?.currency || inputCurrency || "EUR";
+  const currency = historical[0]?.currency ?? inputCurrency ?? "EUR";
 
   // 2. Se pochi dati → fallback a media semplice
   if (historical.length < 3) {
     const avgValue =
-      historical.reduce((s, i) => s + i.value, 0) / (historical.length || 1);
+      historical.reduce((s, i) => s + i.value, 0) / (historical.length ?? 1);
     const lastValue = historical[historical.length - 1]?.value ?? avgValue;
 
     const forecast: IncomeForecastDataPoint[] = [];
@@ -312,7 +312,7 @@ export async function getIncomeForecast(
 
     return {
       summary: {
-        nextMonthProjection: forecast[0]?.value || 0,
+        nextMonthProjection: forecast[0]?.value ?? 0,
         totalProjectedIncome: forecast.reduce((s, i) => s + i.value, 0),
         currency,
         forecastStartDate: forecast[0]?.date,
@@ -335,14 +335,14 @@ export async function getIncomeForecast(
   // 3. Rimozione outlier (IQR)
   const values = historical.map((i) => i.value);
   const sorted = [...values].sort((a, b) => a - b);
-  const q1 = sorted[Math.floor(sorted.length * 0.25)] || 0;
-  const q3 = sorted[Math.floor(sorted.length * 0.75)] || 0;
+  const q1 = sorted[Math.floor(sorted.length * 0.25)] ?? 0;
+  const q3 = sorted[Math.floor(sorted.length * 0.75)] ?? 0;
   const iqr = q3 - q1;
   const lowerBound = q1 - 1.5 * iqr;
   const upperBound = q3 + 1.5 * iqr;
 
   const cleaned = historical.map((item, idx) => {
-    const isOutlier = item.value < lowerBound || item.value > upperBound;
+    const isOutlier = item.value < lowerBound ?? item.value > upperBound;
     const isRecent = idx >= historical.length - 3;
     return { ...item, isOutlier: isOutlier && !isRecent };
   });
@@ -357,11 +357,11 @@ export async function getIncomeForecast(
     }
   }
   const avgGrowthRate =
-    growthRates.reduce((s, r) => s + r, 0) / (growthRates.length || 1);
+    growthRates.reduce((s, r) => s + r, 0) / (growthRates.length ?? 1);
 
   // 5. Exponential smoothing baseline
   const alpha = 0.3;
-  let smoothed = historical[0]?.value || 0;
+  let smoothed = historical[0]?.value ?? 0;
   for (let i = 1; i < historical.length; i++) {
     smoothed = alpha * historical[i]!.value + (1 - alpha) * smoothed;
   }
@@ -387,7 +387,7 @@ export async function getIncomeForecast(
   // 7. Output finale
   return {
     summary: {
-      nextMonthProjection: forecast[0]?.value || 0,
+      nextMonthProjection: forecast[0]?.value ?? 0,
       avgMonthlyGrowthRate: Number((avgGrowthRate * 100).toFixed(2)),
       totalProjectedIncome: forecast.reduce((s, i) => s + i.value, 0),
       peakMonth: forecast.reduce((max, cur) =>

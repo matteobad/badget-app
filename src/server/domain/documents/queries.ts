@@ -1,10 +1,8 @@
 import type { DBClient } from "~/server/db";
 import type { SQL } from "drizzle-orm/sql/sql";
-import { user } from "~/server/db/schema/auth";
 import {
   document_table,
   document_tag_assignment_table,
-  document_tag_table,
 } from "~/server/db/schema/documents";
 import { transaction_attachment_table } from "~/server/db/schema/transactions";
 import { buildSearchQuery } from "~/server/db/utils";

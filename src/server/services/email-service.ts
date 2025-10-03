@@ -132,10 +132,10 @@ export class EmailService {
     }
 
     // Use explicit 'to' field if provided, otherwise default to user email
-    const recipients = email.to || [email.user.email];
+    const recipients = email.to ?? [email.user.email];
 
     const payload: CreateEmailOptions = {
-      from: email.from || "Midday <middaybot@midday.ai>",
+      from: email.from ?? "Badget <middaybot@midday.ai>",
       to: recipients,
       subject: email.subject,
       html,
