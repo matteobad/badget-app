@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import type { PropsWithChildren } from "react";
+import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+import { ConsentBanner } from "~/components/consent-banner";
+import { isEU } from "~/server/services/location-service";
+import { Cookies } from "~/shared/constants/cookies";
 import { RocketIcon } from "lucide-react";
 import backgroundDark from "public/assets/bg-login-dark.jpg";
 import backgroundLight from "public/assets/bg-login.jpg";
@@ -10,7 +14,11 @@ export const metadata: Metadata = {
   title: "Login | Badget.",
 };
 
-export default function SignIn({ children }: PropsWithChildren) {
+export default async function Layout({ children }: PropsWithChildren) {
+  const cookieStore = await cookies();
+  const showTrackingConsent =
+    (await isEU()) && !cookieStore.has(Cookies.TrackingConsent);
+
   return (
     <div className="h-screen p-2">
       {/* Header - Logo */}
@@ -66,7 +74,7 @@ export default function SignIn({ children }: PropsWithChildren) {
       </div>
 
       {/* Consent Banner */}
-      {/* {showTrackingConsent && <ConsentBanner />} */}
+      {showTrackingConsent && <ConsentBanner />}
     </div>
   );
 }

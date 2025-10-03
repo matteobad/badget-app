@@ -1,12 +1,27 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { authActionClient } from "~/lib/safe-action";
+import { actionClient, authActionClient } from "~/lib/safe-action";
+import { Cookies } from "~/shared/constants/cookies";
 import { sendSupportSchema } from "~/shared/validators/support.schema";
 import { addYears } from "date-fns";
+import { z } from "zod";
 
 import type { VisibilityState } from "@tanstack/react-table";
 import { resend } from "../lib/resend";
+
+export const trackingConsentAction = actionClient
+  .inputSchema(z.boolean())
+  .metadata({ actionName: "tracking-consent" })
+  .action(async ({ parsedInput: value }) => {
+    (await cookies()).set({
+      name: Cookies.TrackingConsent,
+      value: value ? "1" : "0",
+      expires: addYears(new Date(), 1),
+    });
+
+    return value;
+  });
 
 // Server action to submit feedback
 export const submitFeedbackAction = authActionClient
