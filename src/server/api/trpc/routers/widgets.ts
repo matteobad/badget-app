@@ -26,6 +26,7 @@ import {
   getRecurringExpensesSchema,
   getSavingAnalysisSchema,
   getVaultActivitySchema,
+  updateWidgetConfigSchema,
   updateWidgetPreferencesSchema,
 } from "~/shared/validators/widgets.schema";
 
@@ -42,7 +43,16 @@ export const widgetsRouter = createTRPCRouter({
   getCashFlow: protectedProcedure
     .input(getCashFlowSchema)
     .query(async ({ ctx: { db, orgId }, input }) => {
-      return await getCashFlow(db, input, orgId!);
+      const cashFlowData = await getCashFlow(db, input, orgId!);
+
+      return {
+        result: {
+          netCashFlow: cashFlowData.summary.netCashFlow,
+          currency: cashFlowData.summary.currency,
+          period: cashFlowData.summary.period,
+          meta: cashFlowData.meta,
+        },
+      };
     }),
 
   getNetWorth: protectedProcedure
@@ -199,6 +209,18 @@ export const widgetsRouter = createTRPCRouter({
         orgId!,
         session!.userId,
         input.primaryWidgets,
+      );
+      return preferences;
+    }),
+
+  updateWidgetConfig: protectedProcedure
+    .input(updateWidgetConfigSchema)
+    .mutation(async ({ ctx: { orgId, session }, input }) => {
+      const preferences = await widgetPreferencesCache.updateWidgetConfig(
+        orgId!,
+        session!.userId,
+        input.widgetType,
+        input.config,
       );
       return preferences;
     }),

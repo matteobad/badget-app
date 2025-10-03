@@ -62,7 +62,7 @@ export default {
     },
     "cash-flow": {
       title: "Flusso di cassa",
-      "description#zero": "Non hai movimenti nel periodo selezionato",
+      "description#zero": "Non hai movimenti",
       "description#other": "Confronto tra entrate e spese",
       action: "Approfondisci l’andamento",
     },
@@ -117,6 +117,19 @@ export default {
       title: "Analisi risparmi",
       description: "Il tuo risparmio medio durante {count} mesi è di",
       action: "Vedi analisi di dettaglio",
+    },
+    settings: {
+      widget_action: {
+        save: "Salva",
+        cancel: "Annulla",
+      },
+      widget_period: {
+        fiscal_ytd: "Fiscal YTD",
+        fiscal_year: "Fiscal Year",
+        current_quarter: "Current Quarter",
+        trailing_12: "Ultimi 12 Mesi",
+        current_month: "Mese corrente",
+      },
     },
   },
 

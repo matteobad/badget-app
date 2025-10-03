@@ -61,7 +61,7 @@ export default {
     },
     "cash-flow": {
       title: "Cash flow",
-      "description#zero": "No movements for selected period",
+      "description#zero": "No movements",
       "description#other": "Comparison between income and expenses",
       action: "View analysis",
     },
@@ -116,6 +116,19 @@ export default {
       title: "Saving analysis",
       description: "Your average savings during {count} months is",
       action: "See detailed analysis",
+    },
+    settings: {
+      widget_action: {
+        save: "Save",
+        cancel: "Cancel",
+      },
+      widget_period: {
+        fiscal_ytd: "Fiscal YTD",
+        fiscal_year: "Fiscal Year",
+        current_quarter: "Current Quarter",
+        trailing_12: "Last 12 Months",
+        current_month: "Current Month",
+      },
     },
   },
 

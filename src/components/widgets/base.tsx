@@ -1,5 +1,6 @@
 import { useLongPress } from "~/hooks/use-long-press";
 import { cn } from "~/lib/utils";
+import { SettingsIcon } from "lucide-react";
 
 import { useIsCustomizing, useWidgetActions } from "./widget-provider";
 
@@ -10,6 +11,7 @@ interface BaseWidgetProps {
   actions: React.ReactNode;
   icon: React.ReactNode;
   children?: React.ReactNode;
+  onConfigure?: () => void;
 }
 
 export function BaseWidget({
@@ -19,6 +21,7 @@ export function BaseWidget({
   description,
   actions,
   icon,
+  onConfigure,
 }: BaseWidgetProps) {
   const isCustomizing = useIsCustomizing();
   const { setIsCustomizing } = useWidgetActions();
@@ -46,6 +49,22 @@ export function BaseWidget({
               {title}
             </h3>
           </div>
+          {onConfigure && !isCustomizing && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onConfigure();
+              }}
+              onMouseDown={(e) => {
+                // to prevent widget click handler
+                e.stopPropagation();
+              }}
+              className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary"
+            >
+              <SettingsIcon className="size-4" />
+            </button>
+          )}
         </div>
 
         {typeof description === "string" ? (
@@ -56,7 +75,7 @@ export function BaseWidget({
       </div>
 
       <div className="flex flex-1">{children}</div>
-      <span className="text-xs text-[#666666] transition-colors duration-300 group-hover:text-primary">
+      <span className="text-xs text-muted-foreground transition-colors duration-300 group-hover:text-primary">
         {actions}
       </span>
     </div>

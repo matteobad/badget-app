@@ -26,9 +26,24 @@ export const WIDGET = {
 } as const;
 export type WidgetType = (typeof WIDGET)[keyof typeof WIDGET];
 
+export type WidgetPeriod =
+  | "fiscal_ytd"
+  | "fiscal_year"
+  | "current_quarter"
+  | "trailing_12"
+  | "current_month";
+
+export type RevenueType = "net" | "gross";
+
+export interface WidgetConfig {
+  period?: WidgetPeriod;
+  revenueType?: RevenueType;
+}
+
 export interface WidgetPreferences {
   primaryWidgets: WidgetType[]; // Up to 7 widgets in order
   availableWidgets: WidgetType[]; // Remaining widgets not in primary
+  widgetConfigs?: Record<string, WidgetConfig>; // key is widgetType
 }
 
 export const DEFAULT_WIDGET_ORDER: WidgetType[] = [
@@ -75,12 +90,40 @@ export const widgetPreferencesCache = {
       (widget) => !DEFAULT_WIDGET_ORDER.includes(widget),
     );
 
-    // If there are missing or extra widgets, return default preferences
+    // Handle migrations when widgets are added or removed
     if (missingWidgets.length > 0 || extraWidgets.length > 0) {
-      console.warn(
-        `Invalid widget preferences for space ${organizationId}, user ${userId}. Returning defaults.`,
+      console.info(
+        `Migrating widget preferences for organization ${organizationId}, user ${userId}. Missing: ${missingWidgets.join(", ") || "none"}, Extra: ${extraWidgets.join(", ") || "none"}`,
       );
-      return DEFAULT_WIDGET_PREFERENCES;
+
+      // Remove deprecated widgets from both lists
+      const migratedPrimaryWidgets = preferences.primaryWidgets.filter(
+        (widget) => !extraWidgets.includes(widget),
+      );
+
+      const migratedAvailableWidgets = preferences.availableWidgets.filter(
+        (widget) => !extraWidgets.includes(widget),
+      );
+
+      // Add new widgets to available widgets (they can be moved to primary by the user)
+      const updatedAvailableWidgets = [
+        ...migratedAvailableWidgets,
+        ...missingWidgets,
+      ];
+
+      const migratedPreferences: WidgetPreferences = {
+        primaryWidgets: migratedPrimaryWidgets,
+        availableWidgets: updatedAvailableWidgets,
+      };
+
+      // Save the migrated preferences
+      await widgetPreferencesCache.setWidgetPreferences(
+        organizationId,
+        userId,
+        migratedPreferences,
+      );
+
+      return migratedPreferences;
     }
 
     return preferences;
@@ -154,6 +197,9 @@ export const widgetPreferencesCache = {
       throw new Error("Primary widgets cannot exceed 7");
     }
 
+    const currentPreferences =
+      await widgetPreferencesCache.getWidgetPreferences(organizationId, userId);
+
     // Calculate available widgets (all widgets not in primary)
     const availableWidgets = DEFAULT_WIDGET_ORDER.filter(
       (widget) => !newPrimaryWidgets.includes(widget),
@@ -162,6 +208,32 @@ export const widgetPreferencesCache = {
     const newPreferences: WidgetPreferences = {
       primaryWidgets: newPrimaryWidgets,
       availableWidgets,
+      widgetConfigs: currentPreferences.widgetConfigs,
+    };
+
+    await widgetPreferencesCache.setWidgetPreferences(
+      organizationId,
+      userId,
+      newPreferences,
+    );
+    return newPreferences;
+  },
+
+  updateWidgetConfig: async (
+    organizationId: string,
+    userId: string,
+    widgetType: WidgetType,
+    config: WidgetConfig,
+  ): Promise<WidgetPreferences> => {
+    const currentPreferences =
+      await widgetPreferencesCache.getWidgetPreferences(organizationId, userId);
+
+    const newPreferences: WidgetPreferences = {
+      ...currentPreferences,
+      widgetConfigs: {
+        ...(currentPreferences.widgetConfigs || {}),
+        [widgetType]: config,
+      },
     };
 
     await widgetPreferencesCache.setWidgetPreferences(

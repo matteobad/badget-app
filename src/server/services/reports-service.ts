@@ -30,7 +30,7 @@ export async function getCashFlow(
   params: z.infer<typeof getCashFlowSchema>,
   organizationId: string,
 ) {
-  const { from, to, currency: inputCurrency } = params;
+  const { from, to, currency: inputCurrency, period } = params;
 
   const transactionsData = await getTransactionsInPeriodQuery(db, {
     organizationId,
@@ -47,8 +47,19 @@ export async function getCashFlow(
   const currency = inputCurrency ?? "EUR";
 
   return {
-    netCashFlow,
-    currency,
+    summary: {
+      netCashFlow: Number(netCashFlow.toFixed(2)),
+      currency,
+      period,
+    },
+    meta: {
+      type: "cash_flow",
+      currency,
+      period: {
+        from,
+        to,
+      },
+    },
   };
 }
 
@@ -342,7 +353,7 @@ export async function getIncomeForecast(
   const upperBound = q3 + 1.5 * iqr;
 
   const cleaned = historical.map((item, idx) => {
-    const isOutlier = item.value < lowerBound ?? item.value > upperBound;
+    const isOutlier = item.value < lowerBound || item.value > upperBound;
     const isRecent = idx >= historical.length - 3;
     return { ...item, isOutlier: isOutlier && !isRecent };
   });

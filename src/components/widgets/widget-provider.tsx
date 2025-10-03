@@ -1,6 +1,7 @@
 "use client";
 
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import type { WidgetConfig } from "~/server/cache/widget-preferences-cache";
 import type { ReactNode } from "react";
 import { createContext, useContext, useRef } from "react";
 import { useStore } from "zustand";
@@ -18,6 +19,7 @@ interface WidgetState {
   // Widget State
   primaryWidgets: WidgetType[];
   availableWidgets: WidgetType[];
+  widgetConfigs: Record<string, WidgetConfig>;
 
   // Loading States
   isSaving: boolean;
@@ -43,6 +45,7 @@ export const createWidgetStore = (initialPreferences?: WidgetPreferences) => {
     primaryWidgets: initialPreferences?.primaryWidgets ?? ([] as WidgetType[]),
     availableWidgets:
       initialPreferences?.availableWidgets ?? ([] as WidgetType[]),
+    widgetConfigs: initialPreferences?.widgetConfigs || {},
     isSaving: false,
   };
 
@@ -59,6 +62,7 @@ export const createWidgetStore = (initialPreferences?: WidgetPreferences) => {
             {
               primaryWidgets: preferences.primaryWidgets,
               availableWidgets: preferences.availableWidgets,
+              widgetConfigs: preferences.widgetConfigs || {},
             },
             false,
             "setWidgetPreferences",
@@ -213,3 +217,6 @@ export const useWidgetActions = () =>
       setSaving: state.setSaving,
     })),
   );
+
+export const useWidgetConfig = (widgetType: WidgetType) =>
+  useWidgetStore((state) => state.widgetConfigs[widgetType]);
