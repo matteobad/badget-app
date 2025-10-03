@@ -93,7 +93,7 @@ export function CashFlowWidget() {
         onClick={handleClick}
         onConfigure={() => setIsConfiguring(true)}
       >
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-1 items-end gap-2">
           <h2 className="text-2xl font-normal">
             {data &&
               formatCashFlow(
