@@ -1,7 +1,15 @@
 import type { ChatUserContext } from "~/server/cache/chat-cache";
+import type { InferUITools, UIMessage } from "ai";
+import { google } from "@ai-sdk/google";
 import { TZDate } from "@date-fns/tz";
+import { Experimental_Agent as Agent, stepCountIs } from "ai";
 
+import { getExpensesBreakdownTool } from "./domains/expenses/tools/get-expenses-breakdown-tool";
+import { getForecastTool } from "./domains/expenses/tools/get-forecast-tool";
+import { getNetWorthAnalysisTool } from "./domains/expenses/tools/get-net-worth-analysis-tool";
+import { getTransactionsTool } from "./domains/expenses/tools/get-transactions-tool";
 import { safeValue } from "./utils/safe-value";
+import { shouldForceStop } from "./utils/streaming-utils";
 
 const generateBasePrompt = (userContext: ChatUserContext) => {
   const userTimezone = userContext.timezone ?? "UTC";
@@ -93,3 +101,45 @@ export const generateSystemPrompt = (
 
   return prompt;
 };
+
+export const mainAgent = new Agent({
+  model: google("gemini-2.5-flash"),
+  temperature: 0.7,
+  stopWhen: (step) => {
+    // Stop if we've reached 10 steps (original condition)
+    if (stepCountIs(10)(step)) return true;
+    // Force stop if any tool has completed its full streaming response
+    return shouldForceStop(step);
+  },
+  tools: {
+    getNetWorthAnalysis: getNetWorthAnalysisTool,
+    getTransactions: getTransactionsTool,
+    getExpensesBreakdown: getExpensesBreakdownTool,
+    getForecast: getForecastTool,
+  },
+});
+
+// Define message metadata type
+export type ChatMessageMetadata = {
+  webSearch?: boolean;
+  toolCall?: {
+    toolName: string;
+    toolParams: Record<string, any>;
+  };
+};
+
+export type ChatMessageDataParts = {
+  title: {
+    title: string;
+  };
+};
+
+// Define UITools
+type ChatMessageTools = InferUITools<typeof mainAgent.tools>;
+
+// Define the UI chat message type with proper metadata and tool typing
+export type UIChatMessage = UIMessage<
+  ChatMessageMetadata,
+  ChatMessageDataParts,
+  ChatMessageTools
+>;

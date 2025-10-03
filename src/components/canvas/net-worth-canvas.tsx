@@ -2,8 +2,8 @@
 
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { useUserQuery } from "~/hooks/use-user";
-import { netWorthArtifact } from "~/server/domain/ai/artifacts/net-worth-artifact";
 import { formatAmount } from "~/shared/helpers/format";
+import { netWorthArtifact } from "~/shared/validators/artifacts/net-worth-artifact";
 
 import { NetWorthChart } from "../charts/net-worth-chart";
 import { BaseCanvas } from "./base/base-canvas";

@@ -1,7 +1,7 @@
 import { artifact } from "@ai-sdk-tools/artifacts";
 import { z } from "zod";
 
-import { toastSchema } from "../tools/schema";
+import { toastSchema } from "./schema";
 
 export const cashFlowArtifact = artifact(
   "cash-flow",

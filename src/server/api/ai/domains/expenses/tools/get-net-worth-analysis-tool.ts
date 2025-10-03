@@ -1,20 +1,53 @@
 import { google } from "@ai-sdk/google";
-import { getNetWorthTrend } from "~/server/services/reports-service";
-import { formatAmount } from "~/shared/helpers/format";
-import { generateText, smoothStream, streamText, tool } from "ai";
-import { eachDayOfInterval, endOfDay, format, startOfDay } from "date-fns";
-
 import {
   getAssetsQuery,
   getLiabilitiesQuery,
-} from "../../bank-account/queries";
-import { followupQuestionsArtifact } from "../artifacts/followup-questions";
-import { netWorthArtifact } from "../artifacts/net-worth-artifact"; // nuovo artifact da creare
+} from "~/server/domain/bank-account/queries";
+import { getNetWorthTrend } from "~/server/services/reports-service";
+import { formatAmount } from "~/shared/helpers/format";
+import { followupQuestionsArtifact } from "~/shared/validators/artifacts/followup-questions";
+import { netWorthArtifact } from "~/shared/validators/artifacts/net-worth-artifact";
+import { generateText, smoothStream, streamText, tool } from "ai";
+import {
+  eachDayOfInterval,
+  endOfDay,
+  endOfMonth,
+  format,
+  startOfDay,
+  startOfMonth,
+  subMonths,
+} from "date-fns";
+import z from "zod";
 
-import { getContext } from "../context";
-import { generateFollowupQuestions } from "../utils/generate-followup-questions";
-import { safeValue } from "../utils/safe-value";
-import { getNetWorthSchema } from "./schema"; // nuovo schema da creare
+import { getContext } from "../../../context";
+import { safeValue } from "../../../utils/safe-value";
+import { generateFollowupQuestions } from "../../followup-questions/agent";
+
+export const getNetWorthSchema = z.object({
+  from: z
+    .string()
+    .default(() => startOfMonth(subMonths(new Date(), 12)).toISOString())
+    .describe(
+      "The start date when to retrieve data from. Defaults to 12 months ago. Return ISO-8601 format.",
+    ),
+  to: z
+    .string()
+    .default(() => endOfMonth(new Date()).toISOString())
+    .describe(
+      "The end date when to retrieve data from. Defaults to end of current month. Return ISO-8601 format.",
+    ),
+  currency: z
+    .string()
+    .describe("Optional currency code (e.g., 'EUR', 'USD').")
+    .nullable()
+    .optional(),
+  showCanvas: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Whether to show detailed visual analytics. Use true for in-depth analysis requests, trends, breakdowns, or when user asks for charts/visuals. Use false for simple questions or quick answers.",
+    ),
+});
 
 export const getNetWorthAnalysisTool = tool({
   description:
@@ -381,6 +414,7 @@ Your net worth has {trend} by {netWorthChangePercentage}% over the last ${netWor
       // Generate follow-up questions based on the analysis output
       const followups = await generateFollowupQuestions(
         "getNetWorthAnalysis",
+        this.description ?? "",
         completeMessage,
       );
 

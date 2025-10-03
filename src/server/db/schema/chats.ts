@@ -1,4 +1,4 @@
-import type { UIChatMessage } from "~/server/domain/ai/types";
+import type { UIChatMessage } from "~/server/api/ai/main-agent";
 import { index } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./_table";

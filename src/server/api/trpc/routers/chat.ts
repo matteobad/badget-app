@@ -2,7 +2,7 @@ import {
   deleteChat,
   getChatById,
   getChatsBySpace,
-} from "~/server/domain/ai/queries";
+} from "~/server/domain/chat/queries";
 import {
   deleteChatSchema,
   getChatSchema,

@@ -1,4 +1,4 @@
-import type { UIChatMessage } from "~/server/domain/ai/types";
+import type { UIChatMessage } from "~/server/api/ai/main-agent";
 import { z } from "@hono/zod-openapi";
 
 // Create a Zod schema that validates UIChatMessage structure

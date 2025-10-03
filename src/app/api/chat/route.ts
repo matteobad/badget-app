@@ -1,34 +1,24 @@
-import type { ChatMessageMetadata } from "~/server/domain/ai/types";
 import { unauthorized } from "next/navigation";
 import { NextResponse } from "next/server";
-import { google } from "@ai-sdk/google";
+import { setContext } from "~/server/api/ai/context";
+import { chatTitleAgent } from "~/server/api/ai/domains/chat-title/agent";
+import { generateSystemPrompt, mainAgent } from "~/server/api/ai/main-agent";
+import { extractTextContent } from "~/server/api/ai/utils/extract-text-content";
+import { getUserContext } from "~/server/api/ai/utils/get-user-context";
+import { hasEnoughContent } from "~/server/api/ai/utils/has-enough-content";
 import { db } from "~/server/db";
-import { chatTitleArtifact } from "~/server/domain/ai/artifacts/chat-title";
-import { setContext } from "~/server/domain/ai/context";
-import { generateSystemPrompt } from "~/server/domain/ai/generate-system-prompt";
-import {
-  extractTextContent,
-  generateTitle,
-  hasEnoughContent,
-} from "~/server/domain/ai/generate-title";
 import {
   getChatById,
   saveChat,
   saveChatMessage,
-} from "~/server/domain/ai/queries";
-import { createToolRegistry } from "~/server/domain/ai/tool-types";
-import { formatToolCallTitle } from "~/server/domain/ai/utils/format-tool-call-title";
-import { getUserContext } from "~/server/domain/ai/utils/get-user-context";
-import { shouldForceStop } from "~/server/domain/ai/utils/streaming-utils";
+} from "~/server/domain/chat/queries";
 import { auth } from "~/shared/helpers/better-auth/auth";
+import { chatTitleArtifact } from "~/shared/validators/artifacts/chat-title";
 import { chatRequestSchema } from "~/shared/validators/chat.schema";
 import {
   convertToModelMessages,
   createUIMessageStream,
   createUIMessageStreamResponse,
-  smoothStream,
-  stepCountIs,
-  streamText,
   validateUIMessages,
 } from "ai";
 import { HTTPException } from "hono/http-exception";
@@ -74,7 +64,7 @@ export async function POST(req: Request) {
     ]);
 
     // Check if this is a forced tool call message
-    const messageMetadata = message.metadata as ChatMessageMetadata;
+    const messageMetadata = message.metadata;
     const isToolCallMessage = messageMetadata?.toolCall;
 
     const isWebSearchMessage = messageMetadata?.webSearch;
@@ -119,26 +109,12 @@ export async function POST(req: Request) {
 
     if (shouldGenerateTitle) {
       try {
-        let messageContent: string;
-
-        if (isToolCallMessage) {
-          const { toolName } = messageMetadata.toolCall!;
-          // Generate a descriptive title for tool calls using registry metadata
-          messageContent = formatToolCallTitle(toolName);
-        } else {
-          // Use combined text from all messages for better context
-          messageContent = extractTextContent(allMessages);
-        }
-
-        generatedTitle = await generateTitle({
-          message: messageContent,
-          organizationName: userContext.organizationName,
-          fullName: userContext.fullName,
-          country: userContext.country,
-          baseCurrency: userContext.baseCurrency,
-          city: userContext.city,
-          timezone: userContext.timezone,
+        // Use combined text from all messages for better context
+        const result = await chatTitleAgent.generate({
+          prompt: extractTextContent(allMessages),
         });
+
+        generatedTitle = result.text;
 
         console.info({
           msg: "Chat title generated",
@@ -220,29 +196,17 @@ export async function POST(req: Request) {
             titleStream.complete();
           }
 
-          const result = streamText({
-            model: google("gemini-2.5-pro"),
-            system: generateSystemPrompt(
-              userContext,
-              isToolCallMessage,
-              isWebSearchMessage,
-            ),
-            messages: convertToModelMessages(originalMessages),
-            temperature: 0.7,
-            stopWhen: (step) => {
-              // Stop if we've reached 10 steps (original condition)
-              if (stepCountIs(10)(step)) {
-                return true;
-              }
+          // Generate system prompt with context
+          const systemPrompt = generateSystemPrompt(
+            userContext,
+            isToolCallMessage,
+            isWebSearchMessage,
+          );
 
-              // Force stop if any tool has completed its full streaming response
-              return shouldForceStop(step);
-            },
-            experimental_transform: smoothStream({ chunking: "word" }),
-            tools: createToolRegistry(),
-            onError: (error) => {
-              console.error(error);
-            },
+          // Stream result
+          const result = mainAgent.stream({
+            system: systemPrompt,
+            messages: convertToModelMessages(originalMessages),
           });
 
           result.consumeStream();

@@ -2,8 +2,8 @@
 
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { useUserQuery } from "~/hooks/use-user";
-import { expensesBreakdownArtifact } from "~/server/domain/ai/artifacts/expenses-breakdown";
 import { formatAmount } from "~/shared/helpers/format";
+import { expensesBreakdownArtifact } from "~/shared/validators/artifacts/expenses-breakdown";
 
 import { ExpensesChart } from "../charts";
 import { BaseCanvas } from "./base/base-canvas";

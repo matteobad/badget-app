@@ -1,10 +1,10 @@
 import { artifact } from "@ai-sdk-tools/artifacts";
 import { z } from "zod";
 
-import { toastSchema } from "../tools/schema";
+import { toastSchema } from "./schema";
 
-export const netWorthArtifact = artifact(
-  "net-worth",
+export const expensesBreakdownArtifact = artifact(
+  "expenses-breakdown",
   z.object({
     // Processing stage
     stage: z.enum([
@@ -22,11 +22,12 @@ export const netWorthArtifact = artifact(
     // Chart data (available at chart_ready stage)
     chart: z
       .object({
-        dailyData: z.array(
+        categoryData: z.array(
           z.object({
-            date: z.string(),
+            name: z.string(),
             amount: z.number(),
-            average: z.number(),
+            percentage: z.number(),
+            color: z.string(),
           }),
         ),
       })
@@ -35,19 +36,19 @@ export const netWorthArtifact = artifact(
     // Core metrics (available at metrics_ready stage)
     metrics: z
       .object({
-        currentNetWorth: z.number(),
-        averageNetWorth: z.number(),
-        netWorthChange: z.number(),
-        netWorthChangePercentage: z.number(),
-        topAsset: z.object({
+        total: z.number(),
+        topCategory: z.object({
           name: z.string(),
           percentage: z.number(),
           amount: z.number(),
         }),
-        topLiability: z.object({
-          name: z.string(),
-          percentage: z.number(),
+        recurringExpenses: z.object({
           amount: z.number(),
+          percentage: z.number(),
+        }),
+        uncategorizedTransactions: z.object({
+          amount: z.number(),
+          percentage: z.number(),
         }),
       })
       .optional(),
@@ -55,12 +56,6 @@ export const netWorthArtifact = artifact(
     // Analysis data (available at analysis_ready stage)
     analysis: z
       .object({
-        netWorthChange: z.object({
-          percentage: z.number(),
-          period: z.string(),
-          startValue: z.number(),
-          endValue: z.number(),
-        }),
         summary: z.string(),
         recommendations: z.array(z.string()),
       })

@@ -5,7 +5,7 @@ import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { useChatStore } from "~/lib/stores/chat";
-import { followupQuestionsArtifact } from "~/server/domain/ai/artifacts/followup-questions";
+import { followupQuestionsArtifact } from "~/shared/validators/artifacts/followup-questions";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { Button } from "../ui/button";

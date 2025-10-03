@@ -1,14 +1,41 @@
 import { google } from "@ai-sdk/google";
 import { getExpensesByCategory } from "~/server/services/reports-service";
 import { formatAmount } from "~/shared/helpers/format";
+import { expensesBreakdownArtifact } from "~/shared/validators/artifacts/expenses-breakdown";
+import { followupQuestionsArtifact } from "~/shared/validators/artifacts/followup-questions";
 import { generateText, smoothStream, streamText, tool } from "ai";
+import { endOfMonth, startOfMonth, subMonths } from "date-fns";
+import { z } from "zod";
 
-import { expensesBreakdownArtifact } from "../artifacts/expenses-breakdown";
-import { followupQuestionsArtifact } from "../artifacts/followup-questions";
-import { getContext } from "../context";
-import { generateFollowupQuestions } from "../utils/generate-followup-questions";
-import { safeValue } from "../utils/safe-value";
-import { getExpensesBreakdownSchema } from "./schema";
+import { getContext } from "../../../context";
+import { safeValue } from "../../../utils/safe-value";
+import { generateFollowupQuestions } from "../../followup-questions/agent";
+
+export const getExpensesBreakdownSchema = z.object({
+  from: z
+    .string()
+    .default(() => startOfMonth(subMonths(new Date(), 12)).toISOString())
+    .describe(
+      "The start date when to retrieve data from. Defaults to 12 months ago. Return ISO-8601 format.",
+    ),
+  to: z
+    .string()
+    .default(() => endOfMonth(new Date()).toISOString())
+    .describe(
+      "The end date when to retrieve data from. Defaults to end of current month. Return ISO-8601 format.",
+    ),
+  currency: z
+    .string()
+    .describe("Optional currency code (e.g., 'USD', 'SEK').")
+    .nullable()
+    .optional(),
+  showCanvas: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Whether to show detailed visual analytics. Use true for in-depth analysis requests, trends, breakdowns, or when user asks for charts/visuals. Use false for simple questions or quick answers.",
+    ),
+});
 
 export const getExpensesBreakdownTool = tool({
   description:
@@ -275,6 +302,7 @@ export const getExpensesBreakdownTool = tool({
       // Generate follow-up questions based on the analysis output
       const followups = await generateFollowupQuestions(
         "getExpensesBreakdown",
+        this.description ?? "",
         completeMessage,
       );
 

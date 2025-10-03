@@ -1,6 +1,6 @@
 "use client";
 
-import type { UIChatMessage } from "~/server/domain/ai/types";
+import type { UIChatMessage } from "~/server/api/ai/main-agent";
 import { useMemo } from "react";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { AIDevtools } from "@ai-sdk-tools/devtools";

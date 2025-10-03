@@ -1,6 +1,5 @@
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 
-import { BurnRateCanvas } from "./burn-rate-canvas";
 import { CashFlowCanvas } from "./cash-flow-canvas";
 import { CategoryExpensesCanvas } from "./category-expenses-canvas";
 import { HealthReportCanvas } from "./health-report-canvas";
@@ -17,8 +16,6 @@ export function Canvas() {
   });
 
   switch (current?.type) {
-    case "burn-rate":
-      return <BurnRateCanvas />;
     case "net-worth":
       return <NetWorthCanvas />;
     case "revenue-canvas":

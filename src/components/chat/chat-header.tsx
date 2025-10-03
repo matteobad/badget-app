@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { cn } from "~/lib/utils";
-import { chatTitleArtifact } from "~/server/domain/ai/artifacts/chat-title";
+import { chatTitleArtifact } from "~/shared/validators/artifacts/chat-title";
 import { ArrowLeftIcon } from "lucide-react";
 
 import { Button } from "../ui/button";
