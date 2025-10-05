@@ -46,7 +46,7 @@ export const activity_table = pgTable(
 
     type: activityTypeEnum().notNull(),
     priority: d.smallint().default(5), // 1-3 = notifications, 4-10 = insights only
-    groupId: d.uuid("group_id"), // Group related activities together (e.g., same business event across multiple users)
+    groupId: d.uuid(), // Group related activities together (e.g., same business event across multiple users)
     source: activitySourceEnum().notNull(), // Source of the activity
     metadata: d.jsonb().notNull(), // All the data
     status: activityStatusEnum().default("unread").notNull(), // Simple lifecycle (only for notifications)

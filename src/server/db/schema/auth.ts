@@ -42,9 +42,6 @@ export const user = pgTable("user", {
   dateFormat: text("date_format"),
 });
 
-export type DB_UserType = typeof user.$inferSelect;
-export type DB_UserInsertType = typeof user.$inferInsert;
-
 export const session = pgTable("session", {
   id: uuid("id").defaultRandom().primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
@@ -156,3 +153,8 @@ export const invitation = pgTable("invitation", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
 });
+
+export type DB_UserType = typeof user.$inferSelect;
+export type DB_UserInsertType = typeof user.$inferInsert;
+export type DB_SpaceType = typeof organization.$inferSelect;
+export type DB_SpaceInsertType = typeof organization.$inferInsert;

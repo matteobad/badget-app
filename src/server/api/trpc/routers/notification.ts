@@ -2,7 +2,7 @@ import {
   getActivities,
   updateActivityStatus,
   updateAllActivitiesStatus,
-} from "~/server/domain/notification/activity-queries";
+} from "~/server/domain/activity/queries";
 import {
   getNotificationsSchema,
   updateAllNotificationsStatusSchema,

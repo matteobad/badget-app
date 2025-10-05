@@ -1,4 +1,4 @@
-import type { NotificationChannel } from "./notification-settings-queries";
+import type { NotificationChannel } from "../../domain/notification-settings/queries";
 
 export interface NotificationType {
   type: string;
@@ -9,13 +9,6 @@ export interface NotificationType {
 }
 
 export const allNotificationTypes: NotificationType[] = [
-  {
-    type: "transactions_created",
-    channels: ["in_app", "email"],
-    showInSettings: true,
-    category: "transactions",
-    order: 2,
-  },
   {
     type: "transactions_exported",
     channels: ["in_app", "email"],

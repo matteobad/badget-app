@@ -1,11 +1,24 @@
+import type { DB_SpaceType, DB_UserType } from "~/server/db/schema/auth";
 import type { CreateEmailOptions } from "resend";
 import { z } from "zod";
 
-export interface TeamContext {
+import type { CreateActivityInput } from "./schemas";
+
+export interface SpaceContext {
   id: string;
   name: string;
   inboxId: string;
 }
+
+export type UserData = {
+  id: string;
+  full_name?: string;
+  email: string;
+  locale?: string;
+  avatar_url?: string;
+  organization_id: string;
+  role?: "admin" | "owner" | "member";
+};
 
 export interface NotificationHandler<T = any> {
   schema: z.ZodSchema<T>;
@@ -15,25 +28,16 @@ export interface NotificationHandler<T = any> {
     from?: string;
     replyTo?: string;
   };
+  createActivity: (data: T, user: UserData) => CreateActivityInput;
   createEmail?: (
     data: T,
     user: UserData,
-    team: TeamContext,
+    space: SpaceContext,
   ) => Partial<CreateEmailOptions> & {
     data: Record<string, any>;
     template?: string;
-    emailType: "customer" | "team" | "owners"; // Explicit: customer emails go to external recipients, team emails go to all team members, owners emails go to team owners only
+    emailType: "user" | "space" | "owners"; // Explicit: customer emails go to external recipients, team emails go to all team members, owners emails go to team owners only
   };
-}
-
-export interface UserData {
-  id: string;
-  full_name?: string;
-  email: string;
-  locale?: string;
-  avatar_url?: string;
-  team_id: string;
-  role?: "owner" | "member";
 }
 
 // Combine template data with all Resend options using intersection type
@@ -62,11 +66,11 @@ export interface NotificationResult {
 // Common schemas
 export const userSchema = z.object({
   id: z.uuid(),
-  full_name: z.string(),
+  name: z.string(),
   email: z.email(),
   locale: z.string().optional(),
-  avatar_url: z.string().optional(),
-  team_id: z.uuid(),
+  image: z.string().optional(),
+  defaultOrganizationId: z.uuid(),
   role: z.enum(["owner", "member"]).optional(),
 });
 

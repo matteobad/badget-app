@@ -11,7 +11,7 @@ import {
   getNotificationSettingsQuery,
   getUserNotificationPreferencesQuery,
   upsertNotificationSettingMutation,
-} from "../domain/notification/notification-settings-queries";
+} from "../domain/notification-settings/queries";
 
 export async function getNotificationSettings(
   db: DBClient,

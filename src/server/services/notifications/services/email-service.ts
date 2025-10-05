@@ -1,19 +1,18 @@
+import type { DBClient } from "~/server/db";
 import type { CreateEmailOptions } from "resend";
+import { shouldSendNotification } from "~/server/domain/notification-settings/queries";
+import TransactionsExportedEmail from "~/shared/emails/emails/transactions-exported";
 import { nanoid } from "nanoid";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Resend } from "resend";
 
-import type { DBClient } from "../db";
-import type { EmailInput } from "../domain/notification/base";
-import { resend } from "../../lib/resend";
-import TransactionsExportedEmail from "../../shared/emails/emails/transactions-exported";
-import { shouldSendNotification } from "../domain/notification/notification-settings-queries";
+import type { EmailInput } from "../base";
 
 export class EmailService {
   private client: Resend;
 
   constructor(private db: DBClient) {
-    this.client = resend;
+    this.client = new Resend(process.env.RESEND_API_KEY!);
   }
 
   async sendBulk(emails: EmailInput[], notificationType: string) {
@@ -106,7 +105,7 @@ export class EmailService {
         const shouldSend = await shouldSendNotification(
           this.db,
           email.user.id,
-          email.user.team_id,
+          email.user.defaultOrganizationId,
           notificationType,
           "email",
         );
@@ -132,10 +131,10 @@ export class EmailService {
     }
 
     // Use explicit 'to' field if provided, otherwise default to user email
-    const recipients = email.to ?? [email.user.email];
+    const recipients = email.to || [email.user.email];
 
     const payload: CreateEmailOptions = {
-      from: email.from ?? "Badget <middaybot@midday.ai>",
+      from: email.from || "Midday <middaybot@midday.ai>",
       to: recipients,
       subject: email.subject,
       html,
