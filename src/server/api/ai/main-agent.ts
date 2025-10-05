@@ -4,9 +4,11 @@ import { google } from "@ai-sdk/google";
 import { TZDate } from "@date-fns/tz";
 import { Experimental_Agent as Agent, stepCountIs } from "ai";
 
-import { getExpensesBreakdownTool } from "./domains/expenses/tools/get-expenses-breakdown-tool";
-import { getForecastTool } from "./domains/expenses/tools/get-forecast-tool";
-import { getNetWorthAnalysisTool } from "./domains/expenses/tools/get-net-worth-analysis-tool";
+import { getAccountsTool } from "./domains/expenses/tools/get-accounts-tool";
+import { getDocumentsTool } from "./domains/expenses/tools/get-documents-tool";
+import { getInstitutionsTool } from "./domains/expenses/tools/get-institutions-tool";
+import { getTransacationsCategoriesTool } from "./domains/expenses/tools/get-transactions-categories-tool";
+import { getTransacationsTagsTool } from "./domains/expenses/tools/get-transactions-tags-tool";
 import { getTransactionsTool } from "./domains/expenses/tools/get-transactions-tool";
 import { safeValue } from "./utils/safe-value";
 import { shouldForceStop } from "./utils/streaming-utils";
@@ -112,10 +114,15 @@ export const mainAgent = new Agent({
     return shouldForceStop(step);
   },
   tools: {
-    getNetWorthAnalysis: getNetWorthAnalysisTool,
+    // getNetWorthAnalysis: getNetWorthAnalysisTool,
+    getAccounts: getAccountsTool,
+    // getDocuments: getDocumentsTool,
+    getInstitutions: getInstitutionsTool,
     getTransactions: getTransactionsTool,
-    getExpensesBreakdown: getExpensesBreakdownTool,
-    getForecast: getForecastTool,
+    getTransactionsCategories: getTransacationsCategoriesTool,
+    getTransactionsTags: getTransacationsTagsTool,
+    // getExpensesBreakdown: getExpensesBreakdownTool,
+    // getForecast: getForecastTool,
   },
 });
 

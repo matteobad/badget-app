@@ -1,6 +1,9 @@
+// import { cached } from "@ai-sdk-tools/cache";
 import { getTransactions } from "~/server/services/transaction-service";
-import { formatAmount, formatDate } from "~/shared/helpers/format";
-import { getUrl } from "~/shared/helpers/get-url";
+import {
+  TRANSACTION_FREQUENCY,
+  TRANSACTION_STATUS,
+} from "~/shared/constants/enum";
 import { tool } from "ai";
 import z from "zod";
 
@@ -37,11 +40,11 @@ export const getTransactionsSchema = z.object({
       "Search query string to filter transactions by name, description, or other text fields",
     ),
   statuses: z
-    .array(z.enum(["pending", "completed", "archived", "posted", "excluded"]))
+    .array(z.enum(TRANSACTION_STATUS))
     .nullable()
     .optional()
     .describe(
-      "Array of transaction statuses to filter by. Available statuses: 'pending', 'completed', 'archived', 'posted', 'excluded'",
+      "Array of transaction statuses to filter by. Available statuses: 'posted', 'pending', 'excluded', 'completed', 'archived'",
     ),
   attachments: z
     .enum(["include", "exclude"])
@@ -55,7 +58,7 @@ export const getTransactionsSchema = z.object({
     .nullable()
     .optional()
     .describe(
-      "Array of category slugs to filter transactions by specific categories",
+      "Array of category slugs to filter transactions by specific categories.",
     ),
   tags: z
     .array(z.string())
@@ -91,11 +94,11 @@ export const getTransactionsSchema = z.object({
       "End date (inclusive) for filtering transactions in ISO 8601 format",
     ),
   recurring: z
-    .array(z.enum(["weekly", "monthly", "annually", "irregular", "all"]))
+    .array(z.enum(TRANSACTION_FREQUENCY))
     .nullable()
     .optional()
     .describe(
-      "Array of recurring frequency values to filter by. Available frequencies: 'weekly', 'monthly', 'annually', 'irregular', 'all'",
+      "Array of recurring frequency values to filter by. Available frequencies: 'weekly', 'biweekly', 'monthly', 'semi_monthly', 'annually', 'irregular', 'all'",
     ),
   amountRange: z
     .array(z.number().nullable())
@@ -121,129 +124,53 @@ export const getTransactionsSchema = z.object({
 
 export const getTransactionsTool = tool({
   description:
-    "Retrieve and analyze financial transactions with advanced filtering, search, and sorting capabilities. Use this tool when users ask about specific transactions, want to see recent activity, search for particular payments, or need transaction data for analysis.",
+    "Query the transaction table to retrieve financial transactions based on various filters such as date, amount, account, category, status, and more. Use this tool to search, filter, and analyze transaction records for reporting or user inquiries.",
   inputSchema: getTransactionsSchema,
-  execute: async function* ({
-    cursor,
-    sort,
-    pageSize = 10,
-    q,
-    statuses,
-    attachments,
-    categories,
-    tags,
-    accounts,
-    type,
-    start,
-    end,
-    recurring,
-    amountRange,
-    amount,
-    currency,
-  }) {
+  execute: async function (input) {
     try {
       const context = getContext();
 
       // Prepare parameters for the database query
       const params = {
         organizationId: context.user.organizationId,
-        cursor: cursor ?? null,
-        sort: sort ?? null,
-        pageSize,
-        q: q ?? null,
-        statuses: statuses ?? null,
-        attachments: attachments ?? null,
-        categories: categories ?? null,
-        tags: tags ?? null,
-        accounts: accounts ?? null,
-        type: type ?? null,
-        start: start ?? null,
-        end: end ?? null,
-        recurring: recurring ?? null,
+        cursor: input?.cursor ?? null,
+        sort: input?.sort ?? null,
+        pageSize: input?.pageSize ?? 10,
+        q: input?.q ?? null,
+        statuses: input?.statuses ?? null,
+        attachments: input?.attachments ?? null,
+        categories: input?.categories ?? null,
+        tags: input?.tags ?? null,
+        accounts: input?.accounts ?? null,
+        type: input?.type ?? null,
+        start: input?.start ?? null,
+        end: input?.end ?? null,
+        recurring: input?.recurring ?? null,
         amount_range:
-          amountRange?.filter((val): val is number => val !== null) ?? null,
-        amount: amount ?? null,
+          input?.amountRange?.filter((val): val is number => val !== null) ??
+          null,
+        amount: input?.amount ?? null,
+        currency: input?.currency ?? null,
       };
 
       // Get transactions from database
       const result = await getTransactions(params, context.user.organizationId);
 
-      // Early return if no data
-      if (result.data.length === 0) {
-        yield { text: "No transactions found matching your criteria." };
-      }
-
-      // Get the target currency for display
-      const targetCurrency = currency ?? context.user.baseCurrency ?? "EUR";
-
-      // Format transactions for markdown display
-      const formattedTransactions = result.data.map((transaction) => {
-        const formattedAmount = formatAmount({
-          amount: transaction.amount,
-          currency: transaction.currency || targetCurrency,
-          locale: context.user.locale ?? undefined,
-        });
-
-        return {
-          id: transaction.id,
-          name: transaction.name,
-          amount: formattedAmount,
-          date: formatDate(transaction.date),
-          category: transaction.category?.name ?? "Uncategorized",
-        };
-      });
-
-      // Calculate summary statistics
-      const totalAmount = result.data.reduce((sum, t) => sum + t.amount, 0);
-
-      const incomeAmount = result.data
-        .filter((t) => t.amount > 0)
-        .reduce((sum, t) => sum + t.amount, 0);
-
-      const expenseAmount = Math.abs(
-        result.data
-          .filter((t) => t.amount < 0)
-          .reduce((sum, t) => sum + t.amount, 0),
-      );
-
-      const formattedTotalAmount = formatAmount({
-        amount: totalAmount,
-        currency: targetCurrency,
-        locale: context.user.locale ?? undefined,
-      });
-
-      const formattedIncomeAmount = formatAmount({
-        amount: incomeAmount,
-        currency: targetCurrency,
-        locale: context.user.locale ?? undefined,
-      });
-
-      const formattedExpenseAmount = formatAmount({
-        amount: expenseAmount,
-        currency: targetCurrency,
-        locale: context.user.locale ?? undefined,
-      });
-
-      // Table format
-      const response = `**${result.data.length} transactions** | Net: ${formattedTotalAmount} | Income: ${formattedIncomeAmount} | Expenses: ${formattedExpenseAmount}
-
-| Date | Name | Amount | Category |
-|------|------|--------|--------|
-${formattedTransactions
-  .map((tx) => `| ${tx.date} | ${tx.name} | ${tx.amount} | ${tx.category} |`)
-  .join("\n")}`;
-
-      // Return the data with link
-      yield {
-        text: response,
-        link: {
-          text: "View all transactions",
-          url: `${getUrl()}/transactions}`,
-        },
-      };
+      return result;
     } catch (error) {
       console.error(error);
       throw error;
     }
   },
 });
+
+// First call: 2s API request
+// Next calls: <1ms from cache ⚡
+
+// Works with streaming tools + artifacts
+// const burnRateAnalysis = cached(getTransactionsTool, {
+//   ttl: 10 * 60 * 1000, // 10 minutes
+//   onHit: (key) => console.log(`Cache hit for ${key}`),
+//   onMiss: (key) => console.log(`Cache miss for ${key}`),
+// });
+// Caches complete data: yields + charts + metrics
