@@ -1,5 +1,5 @@
 import { writeToString } from "@fast-csv/format";
-import { metadata, schemaTask, tasks } from "@trigger.dev/sdk";
+import { metadata, schemaTask } from "@trigger.dev/sdk";
 import { put } from "@vercel/blob";
 import {
   BlobReader,
@@ -10,6 +10,7 @@ import {
 } from "@zip.js/zip.js";
 import { db } from "~/server/db";
 import { document_table } from "~/server/db/schema/documents";
+import { Notifications } from "~/server/services/notifications";
 import { format } from "date-fns";
 import xlsx from "node-xlsx";
 import z from "zod";
@@ -181,14 +182,17 @@ export const exportTransactionsTask = schemaTask({
 
     metadata.set("progress", 100);
 
-    // Update the documents to completed (it's a zip file)
-    await db.insert(document_table).values({
-      organizationId,
-      processingStatus: "completed",
-      date: format(new Date(), "yyyy-MM-dd"),
-      name: fullPath,
-      tag: "export",
-    });
+    // TODO: Update the documents to completed (it's a zip file)
+    // await db
+    //   .insert(document_table)
+    //   .values({
+    //     organizationId,
+    //     processingStatus: "completed",
+    //     date: format(new Date(), "yyyy-MM-dd"),
+    //     name: fullPath,
+    //     tag: "export",
+    //   })
+    //   .onConflictDoNothing();
 
     // If email is enabled, create a short link for the export
     let downloadLink: string | undefined;
@@ -198,6 +202,15 @@ export const exportTransactionsTask = schemaTask({
     }
 
     // TODO: send email with export link
+    const notifications = new Notifications(db);
+    return notifications.create("transactions_exported", organizationId, {
+      transactionCount: transactionIds.length,
+      locale: locale,
+      dateFormat: dateFormat || "yyyy-MM-dd",
+      downloadLink,
+      accountantEmail: settings.accountantEmail,
+      sendEmail: settings.sendEmail,
+    });
     // await tasks.trigger("notification", {
     //   type: "transactions_exported",
     //   organizationId,

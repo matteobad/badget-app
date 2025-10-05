@@ -5,7 +5,7 @@ export const transactionsExported: NotificationHandler = {
   schema: transactionsExportedSchema,
 
   createActivity: (data, user) => ({
-    organizationId: user.defaultOrganizationId,
+    organizationId: user.organization_id,
     type: "transactions_exported",
     source: "system",
     priority: 7,
@@ -20,7 +20,7 @@ export const transactionsExported: NotificationHandler = {
 
   createEmail: (data, user, team) => ({
     template: "transactions-exported",
-    emailType: "customer" as const,
+    emailType: "user" as const,
     replyTo: user.email,
     to: data.accountantEmail ? [data.accountantEmail] : [],
     subject: `Transaction Export from ${team.name}`,

@@ -105,7 +105,7 @@ export class EmailService {
         const shouldSend = await shouldSendNotification(
           this.db,
           email.user.id,
-          email.user.defaultOrganizationId,
+          email.user.organization_id,
           notificationType,
           "email",
         );

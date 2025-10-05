@@ -1,4 +1,3 @@
-import type { DB_SpaceType, DB_UserType } from "~/server/db/schema/auth";
 import type { CreateEmailOptions } from "resend";
 import { z } from "zod";
 
@@ -7,7 +6,6 @@ import type { CreateActivityInput } from "./schemas";
 export interface SpaceContext {
   id: string;
   name: string;
-  inboxId: string;
 }
 
 export type UserData = {

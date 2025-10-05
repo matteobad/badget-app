@@ -14,11 +14,11 @@ export type CreateActivityInput = z.infer<typeof createActivitySchema>;
 
 export const userSchema = z.object({
   id: z.uuid(),
-  name: z.string(),
+  full_name: z.string(),
   email: z.email(),
   locale: z.string().optional(),
-  avatarUrl: z.string().optional(),
-  organizationId: z.uuid(),
+  avatar_url: z.string().optional(),
+  organization_id: z.uuid(),
   role: z.enum(["owner", "member"]).optional(),
 });
 

@@ -41,7 +41,7 @@ export class Notifications {
   ): UserData[] {
     return spaceMembers.map((member) => ({
       id: member.id,
-      name: member.user.name ?? undefined,
+      full_name: member.user.name ?? undefined,
       avatar_url: member.user.image ?? undefined,
       email: member.user.email ?? "",
       locale: "en",
@@ -58,7 +58,7 @@ export class Notifications {
     options?: NotificationOptions,
   ) {
     const activityPromises = await Promise.all(
-      validatedData.users.map(async (user: UserData) => {
+      validatedData.users.map(async (user) => {
         const activityInput = handler.createActivity(validatedData, user);
 
         // Check if user wants in-app notifications for this type
@@ -101,7 +101,7 @@ export class Notifications {
     handler: any,
     validatedData: NotificationTypes[T],
     user: UserData,
-    teamContext: { id: string; name: string; inboxId: string },
+    teamContext: { id: string; name: string },
     options?: NotificationOptions,
   ): EmailInput {
     // Create email input using handler's createEmail function
@@ -202,9 +202,8 @@ export class Notifications {
 
         // Check the email type to determine behavior
         const teamContext = {
-          id: spaceInfo?.id || "",
-          name: spaceInfo?.name || "Space",
-          inboxId: spaceInfo?.inboxId || "",
+          id: spaceInfo?.id ?? "",
+          name: spaceInfo?.name ?? "Space",
         };
         const sampleEmail = handler.createEmail(
           validatedData,
