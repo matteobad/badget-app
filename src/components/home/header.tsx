@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "~/lib/utils";
@@ -12,6 +13,8 @@ import {
   RocketIcon,
   VaultIcon,
 } from "lucide-react";
+import logoDark from "public/logo-dark.svg";
+import logoLight from "public/logo-light.svg";
 
 import {
   Accordion,
@@ -123,7 +126,23 @@ export function Header() {
       <nav className="bg-opacity-70 relative z-20 flex h-[50px] items-center border border-border bg-[#FFFFFF] px-4 backdrop-blur-xl backdrop-filter dark:bg-[#121212]">
         <Link href="/">
           <span className="sr-only">Badget Logo</span>
-          <RocketIcon className="size-6" />
+
+          <Image
+            src={logoDark}
+            alt="Logo"
+            className="object-cover dark:hidden"
+            priority
+            width={24}
+            height={24}
+          />
+          <Image
+            src={logoLight}
+            alt="Logo"
+            className="hidden object-cover dark:block"
+            priority
+            width={24}
+            height={24}
+          />
         </Link>
 
         <ul className="mx-3 hidden space-x-2 text-sm font-medium md:flex">

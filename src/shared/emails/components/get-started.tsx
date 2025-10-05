@@ -6,7 +6,7 @@ export function GetStarted() {
   return (
     <Section className="mt-[50px] mb-[50px] text-center">
       {/* TODO: create a custom page to track events */}
-      <Button href="https://badget-app-eight.vercel.app/">Get started</Button>
+      <Button href="https://badget.xyz/">Get started</Button>
     </Section>
   );
 }

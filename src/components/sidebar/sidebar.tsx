@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "~/lib/utils";
-import { RocketIcon } from "lucide-react";
+import logoDark from "public/logo-dark.svg";
+import logoLight from "public/logo-light.svg";
 
 import { OrganizationSwitcher } from "../organization/org-switcher";
-// import { TeamDropdown } from "./team-dropdown";
 import { MainMenu } from "./main-menu";
 
 export function Sidebar() {
@@ -29,7 +30,22 @@ export function Sidebar() {
         )}
       >
         <Link href="/" className="absolute left-[22px] transition-none">
-          <RocketIcon className="size-6" />
+          <Image
+            src={logoDark}
+            alt="Logo"
+            className="object-cover dark:hidden"
+            priority
+            width={28}
+            height={28}
+          />
+          <Image
+            src={logoLight}
+            alt="Logo"
+            className="hidden object-cover dark:block"
+            priority
+            width={28}
+            height={28}
+          />
         </Link>
       </div>
 

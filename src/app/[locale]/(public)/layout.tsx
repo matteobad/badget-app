@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { Header } from "~/components/home/header";
 
-const baseUrl = "https://badget-app-eight.vercel.app/";
+const baseUrl = "https://badget.xyz/";
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
