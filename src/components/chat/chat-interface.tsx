@@ -1,10 +1,10 @@
 "use client";
 
 import type { UIChatMessage } from "~/server/api/ai/main-agent";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { AIDevtools } from "@ai-sdk-tools/devtools";
-import { useChat } from "@ai-sdk-tools/store";
+import { useChat, useChatActions } from "@ai-sdk-tools/store";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { cn } from "~/lib/utils";
 import { DefaultChatTransport, generateId } from "ai";
@@ -26,12 +26,26 @@ export function ChatInterface({ id, geo }: Props) {
   });
   const isCanvasVisible = !!current;
   const { isHome, isChatPage, chatId: routeChatId } = useChatInterface();
+  const { setMessages } = useChatActions();
+  const prevChatIdRef = useRef<string | null>(routeChatId);
 
   // Use provided id, or get from route, or generate new one
   const providedId = id ?? routeChatId;
 
   // Generate a consistent chat ID - use provided ID or generate one
   const chatId = useMemo(() => providedId ?? generateId(), [providedId]);
+
+  // Clear messages when navigating back from a chat to home
+  useEffect(() => {
+    const prevChatId = prevChatIdRef.current;
+
+    if (prevChatId && !routeChatId) {
+      // Navigated from chat to home - reset messages
+      setMessages([]);
+    }
+
+    prevChatIdRef.current = routeChatId;
+  }, [routeChatId, setMessages]);
 
   useChat<UIChatMessage>({
     id: chatId,
