@@ -15,7 +15,7 @@ type CreateActivityParams = {
   status?: (typeof activityStatusEnum.enumValues)[number];
   priority?: number;
   groupId?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 };
 
 export async function createActivity(

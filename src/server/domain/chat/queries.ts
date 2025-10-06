@@ -37,7 +37,7 @@ export const getChatById = async (
 
   return {
     ...chat,
-    messages: messages.map((m: any) => m.content),
+    messages: messages.map((m) => m.content),
   };
 };
 

@@ -1,5 +1,6 @@
 "use client";
 
+import type { CommandSuggestion } from "~/lib/stores/chat";
 import { useEffect, useRef } from "react";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { useChatInterface } from "~/hooks/use-chat-interface";
@@ -23,7 +24,7 @@ export function CommandMenu() {
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
 
-  const handleCommandExecution = (command: any) => {
+  const handleCommandExecution = (command: CommandSuggestion) => {
     if (!chatId) return;
 
     setChatId(chatId);

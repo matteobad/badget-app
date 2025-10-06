@@ -1,6 +1,7 @@
 import type { UIChatMessage } from "~/server/api/ai/main-agent";
 import { z } from "@hono/zod-openapi";
 
+/* eslint-disable */
 // Create a Zod schema that validates UIChatMessage structure
 const messageSchema = z
   .custom<UIChatMessage>((val) => {
@@ -39,6 +40,7 @@ const messageSchema = z
       content: "Hello, can you help me with my finances?",
     },
   });
+/* eslint-enable */
 
 export const chatRequestSchema = z.object({
   id: z.string().openapi({

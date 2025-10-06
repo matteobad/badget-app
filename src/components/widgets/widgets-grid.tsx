@@ -92,7 +92,7 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
 
 export function WidgetsGrid() {
   const trpc = useTRPC();
-  const [activeId, setActiveId] = useState<any | null>(null);
+  const [activeId, setActiveId] = useState<WidgetType | null>(null);
   const gridRef = useRef<HTMLDivElement>(null!);
 
   const isCustomizing = useIsCustomizing();
@@ -145,7 +145,7 @@ export function WidgetsGrid() {
         const { operation } = event;
         const id = operation.source?.id;
         console.log(`Started dragging ${id}`);
-        setActiveId(id);
+        setActiveId(id as WidgetType);
       }}
       onDragEnd={(event) => {
         const { operation, canceled } = event;

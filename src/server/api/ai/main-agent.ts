@@ -77,7 +77,7 @@ export const generateSystemPrompt = (
   userContext: ChatUserContext,
   forcedToolCall?: {
     toolName: string;
-    toolParams: Record<string, any>;
+    toolParams: Record<string, unknown>;
   },
   webSearch?: boolean,
 ) => {
@@ -130,7 +130,7 @@ export type ChatMessageMetadata = {
   webSearch?: boolean;
   toolCall?: {
     toolName: string;
-    toolParams: Record<string, any>;
+    toolParams: Record<string, unknown>;
   };
 };
 

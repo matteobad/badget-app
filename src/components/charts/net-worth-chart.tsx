@@ -36,10 +36,17 @@ const CustomTooltip = ({
   label,
   currency = "USD",
   locale,
-}: any) => {
+}: {
+  active?: boolean;
+  payload?: { payload: NetWorthData }[];
+  label?: string;
+  currency?: string;
+  locale?: string;
+}) => {
+  console.log(active, payload, label, currency, locale);
   if (active && Array.isArray(payload) && payload.length > 0) {
-    const current = payload[0]?.value;
-    const average = payload[1]?.value;
+    const current = payload[0]?.payload.amount;
+    const average = payload[0]?.payload.average;
 
     // Format amounts using proper currency formatting
     const formatCurrency = (amount: number) =>

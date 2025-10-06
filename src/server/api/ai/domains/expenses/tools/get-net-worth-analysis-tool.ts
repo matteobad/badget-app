@@ -424,7 +424,7 @@ Your net worth has {trend} by {netWorthChangePercentage}% over the last ${netWor
         context: "net_worth_analysis",
       });
 
-      followupStream.complete();
+      await followupStream.complete();
 
       // Yield the final response with forceStop flag
       // Always stop for analysis tool since canvas is complete

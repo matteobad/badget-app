@@ -63,6 +63,7 @@ export async function getUserContext({
       msg: "Failed to cache user context",
       userId,
       organizationId,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       error: err.message,
     });
   });

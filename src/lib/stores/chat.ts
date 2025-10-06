@@ -115,7 +115,7 @@ export interface CommandSuggestion {
   command: string;
   title: string;
   toolName: string;
-  toolParams: Record<string, any>;
+  toolParams: Record<string, unknown>;
   keywords: string[];
 }
 

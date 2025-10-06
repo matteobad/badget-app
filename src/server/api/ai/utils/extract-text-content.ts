@@ -8,8 +8,8 @@ import type { UIChatMessage } from "../main-agent";
 export function extractTextContent(messages: UIChatMessage[]): string {
   return messages
     .map((msg) => {
-      const textPart = msg.parts?.find((part: any) => part.type === "text");
-      return (textPart as any)?.text ?? "";
+      const textPart = msg.parts?.find((part) => part.type === "text");
+      return textPart?.text ?? "";
     })
     .join(" ")
     .trim();

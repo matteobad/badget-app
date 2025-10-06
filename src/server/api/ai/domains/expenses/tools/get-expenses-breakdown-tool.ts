@@ -307,7 +307,7 @@ export const getExpensesBreakdownTool = tool({
       );
 
       // Stream follow-up questions artifact
-      followupQuestionsArtifact
+      await followupQuestionsArtifact
         .stream({
           questions: followups,
           context: "expenses_breakdown",
