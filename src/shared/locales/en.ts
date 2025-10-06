@@ -53,7 +53,14 @@ export default {
 
   widgets: {
     header: {
-      subtitle: "here's a quick look at how things are going.",
+      greetings: {
+        morning: "Morning",
+        aftenoon: "Afternoon",
+        evening: "Evening",
+        night: "Night",
+      },
+      message_default: "here's a quick look at how things are going.",
+      message_customize: "drag and drop to arrange your perfect dashboard.",
       customize: "Customize",
       save: "Save",
     },

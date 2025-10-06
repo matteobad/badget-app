@@ -54,7 +54,16 @@ export default {
 
   widgets: {
     header: {
-      subtitle: "ecco una rapida panoramica di come stanno andando le cose.",
+      greetings: {
+        morning: "Buongiorno",
+        aftenoon: "Ciao",
+        evening: "Hey",
+        night: "Ciao",
+      },
+      message_default:
+        "ecco una rapida panoramica di come stanno andando le cose.",
+      message_customize:
+        "trascina e rilascia per organizzare la tua dashboard perfetta.",
       customize: "Personalizza",
       save: "Salva",
     },

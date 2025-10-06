@@ -1,35 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { TZDate } from "@date-fns/tz";
 import { useUserQuery } from "~/hooks/use-user";
+import { useScopedI18n } from "~/shared/locales/client";
 
 import { ChatHistory } from "../chat/chat-history";
 import { Customize } from "./customize";
 import { useIsCustomizing } from "./widget-provider";
 
-function getTimeBasedGreeting(timezone?: string): string {
-  const userTimezone =
-    timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const now = new TZDate(new Date(), userTimezone);
-  const hour = now.getHours();
-
-  if (hour >= 5 && hour < 12) {
-    return "Morning";
-  }
-  if (hour >= 12 && hour < 17) {
-    return "Afternoon";
-  }
-  if (hour >= 17 && hour < 21) {
-    return "Evening";
-  }
-
-  return "Night";
-}
-
 export function WidgetsHeader() {
+  const t = useScopedI18n("widgets.header");
+
   const { data: user } = useUserQuery();
   const isCustomizing = useIsCustomizing();
+
+  const getTimeBasedGreeting = useCallback(
+    (timezone?: string): string => {
+      const userTimezone =
+        timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const now = new TZDate(new Date(), userTimezone);
+      const hour = now.getHours();
+
+      if (hour >= 5 && hour < 12) {
+        return t("greetings.morning");
+      }
+      if (hour >= 12 && hour < 17) {
+        return t("greetings.aftenoon");
+      }
+      if (hour >= 17 && hour < 21) {
+        return t("greetings.evening");
+      }
+
+      return t("greetings.night");
+    },
+    [t],
+  );
 
   const [greeting, setGreeting] = useState(() =>
     getTimeBasedGreeting(user?.timezone ?? undefined),
@@ -50,7 +56,7 @@ export function WidgetsHeader() {
     ); // 5 minutes
 
     return () => clearInterval(interval);
-  }, [user?.timezone]);
+  }, [user?.timezone, getTimeBasedGreeting]);
 
   return (
     <div className="mb-8 flex items-start justify-between">
@@ -62,9 +68,7 @@ export function WidgetsHeader() {
           </span>
         </h1>
         <p className="text-[14px] text-muted-foreground">
-          {isCustomizing
-            ? "drag and drop to arrange your perfect dashboard."
-            : "here's a quick look at how things are going."}
+          {isCustomizing ? t("message_customize") : t("message_default")}
         </p>
       </div>
 
