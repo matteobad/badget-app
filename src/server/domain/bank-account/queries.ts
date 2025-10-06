@@ -1,43 +1,88 @@
 "server-only";
 
 import type { DBClient } from "~/server/db";
+import type { AccountSubtype, AccountType } from "~/shared/constants/enum";
+import type { SQL } from "drizzle-orm";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { institution_table } from "~/server/db/schema/open-banking";
-import { and, asc, desc, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, asc, desc, eq, getTableColumns, or, sql } from "drizzle-orm";
 
 type GetBankAccountsQuery = {
+  q?: string;
+  type?: AccountType;
+  subtype?: AccountSubtype;
   connectionId?: string;
   enabled?: boolean;
   manual?: boolean;
-  orgId?: string;
+  organizationId: string;
 };
 
-export async function getBankAccountsQuery(params: GetBankAccountsQuery) {
-  const { orgId, connectionId, enabled, manual } = params;
+export async function getBankAccountsQuery(
+  db: DBClient,
+  params: GetBankAccountsQuery,
+) {
+  const { q, type, subtype, organizationId, connectionId, enabled, manual } =
+    params;
 
-  const where = [];
+  // Always start with orgId filter
+  const whereConditions: (SQL | undefined)[] = [
+    eq(account_table.organizationId, organizationId),
+  ];
 
-  if (orgId) {
-    where.push(eq(account_table.organizationId, orgId));
+  // Search query filter (name, description)
+  if (q) {
+    const nameCondition = sql`${account_table.name} ILIKE '%' || ${q} || '%'`;
+    const descriptionCondition = sql`${account_table.description} ILIKE '%' || ${q} || '%'`;
+    whereConditions.push(or(nameCondition, descriptionCondition));
+  }
+
+  // Type filter (asset/liability)
+  if (type) {
+    whereConditions.push(eq(account_table.type, type));
+  }
+
+  // Subtype filter (cash/checking/savings...)
+  if (subtype) {
+    whereConditions.push(eq(account_table.subtype, subtype));
   }
 
   if (connectionId) {
-    where.push(eq(account_table.connectionId, connectionId));
+    whereConditions.push(eq(account_table.connectionId, connectionId));
   }
 
-  if (manual) {
-    where.push(eq(account_table.manual, manual));
+  // Manual filter
+  if (typeof manual === "boolean") {
+    whereConditions.push(eq(account_table.manual, manual));
   }
 
+  // Enabled filter
   if (typeof enabled === "boolean") {
-    where.push(eq(account_table.enabled, enabled));
+    whereConditions.push(eq(account_table.enabled, enabled));
   }
 
   const results = await db
-    .select()
+    .select({
+      id: account_table.id,
+      name: account_table.name,
+      description: account_table.description,
+      type: account_table.type,
+      subtype: account_table.subtype,
+      balance: account_table.balance,
+      currency: account_table.currency,
+      enabled: account_table.enabled,
+      manual: account_table.manual,
+      institution: {
+        name: institution_table.name,
+        logo: institution_table.logo,
+      },
+    })
     .from(account_table)
-    .where(and(...where))
+    .leftJoin(
+      institution_table,
+      eq(institution_table.id, account_table.institutionId),
+    )
+    .where(and(...whereConditions))
     .orderBy(asc(account_table.createdAt), desc(account_table.name));
 
   return results;

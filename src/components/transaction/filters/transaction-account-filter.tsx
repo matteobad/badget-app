@@ -67,7 +67,7 @@ export function TransactionAccountFilter({
               >
                 <div className="line-clamp-1 flex items-center gap-2 overflow-hidden">
                   <BankLogo
-                    src={item.logoUrl}
+                    src={item.institution?.logo ?? ""}
                     alt={`${item.name} logo`}
                     size={20}
                   />

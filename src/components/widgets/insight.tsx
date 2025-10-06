@@ -10,6 +10,7 @@ export function Insights() {
     <div className="relative">
       {Array.from({ length: 5 }).map((_, i) => (
         <BaseWidget
+          key={i}
           className={cn("absolute flex h-[200px] w-full bg-accent", {
             "rotate-1": i % 2 === 0,
             "-rotate-1": i % 2 !== 0,

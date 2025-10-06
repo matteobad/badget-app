@@ -49,8 +49,6 @@ export function ChatInterface({ id, geo }: Props) {
 
   useChat<UIChatMessage>({
     id: chatId,
-    enableBatching: true,
-    experimental_throttle: 50,
     transport: new DefaultChatTransport({
       api: "/api/chat",
       prepareSendMessagesRequest({ messages }) {

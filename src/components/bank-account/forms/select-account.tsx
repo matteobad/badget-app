@@ -50,7 +50,7 @@ function transformBankAccount(bankAccount: BankAccount): BankAccountOption {
   return {
     id: bankAccount.id,
     label: bankAccount.name,
-    logo: bankAccount.logoUrl,
+    logo: bankAccount.institution?.logo ?? "",
   };
 }
 

@@ -22,9 +22,8 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 export const bankAccountRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getBankAccountsSchema)
-    .query(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-      return await getBankAccounts(input, orgId);
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      return await getBankAccounts(db, input, orgId!);
     }),
 
   getById: protectedProcedure

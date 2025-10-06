@@ -7,17 +7,20 @@ import {
 import { parseAsBoolean, parseAsString } from "nuqs/server";
 
 export const getBankAccountsSchema = z.object({
-  id: z
-    .string()
-    .optional()
-    .openapi({
-      description: "GoCardLess reference id",
-      param: {
-        name: "id",
-        in: "query",
-      },
-      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    }),
+  q: z.string().optional().openapi({
+    description:
+      "Search query for filtering bank accounts by name or description.",
+    example: "Revolut",
+  }),
+  type: z.enum(ACCOUNT_TYPE).optional().openapi({
+    description: "Filter bank accounts by their type (e.g., asset, liability).",
+    example: "asset",
+  }),
+  subtype: z.enum(ACCOUNT_SUBTYPE).optional().openapi({
+    description:
+      "Filter bank accounts by their subtype (e.g., checking, savings).",
+    example: "checking",
+  }),
   provider: z
     .enum(BANK_PROVIDER)
     .openapi({

@@ -25,10 +25,11 @@ import {
 } from "./balance-snapshots-service";
 
 export async function getBankAccounts(
+  db: DBClient,
   input: z.infer<typeof getBankAccountsSchema>,
-  orgId: string,
+  organizationId: string,
 ) {
-  return await getBankAccountsQuery({ ...input, orgId });
+  return await getBankAccountsQuery(db, { ...input, organizationId });
 }
 
 export async function getBankAccountById(

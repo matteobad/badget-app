@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@ai-sdk-tools/artifacts": "0.7.0-beta.3",
-    "@ai-sdk-tools/cache": "^0.4.0-beta.5",
+    "@ai-sdk-tools/cache": "^0.6.0",
     "@ai-sdk-tools/devtools": "beta",
     "@ai-sdk-tools/store": "0.7.0-beta.4",
     "@ai-sdk/google": "^2.0.17",
