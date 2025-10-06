@@ -12,6 +12,7 @@ interface BaseWidgetProps {
   icon: React.ReactNode;
   children?: React.ReactNode;
   onConfigure?: () => void;
+  className?: string;
 }
 
 export function BaseWidget({
@@ -22,6 +23,7 @@ export function BaseWidget({
   actions,
   icon,
   onConfigure,
+  className,
 }: BaseWidgetProps) {
   const isCustomizing = useIsCustomizing();
   const { setIsCustomizing } = useWidgetActions();
@@ -38,6 +40,7 @@ export function BaseWidget({
       className={cn(
         "group flex h-[200px] flex-col justify-between gap-2 border p-4 transition-all duration-300 dark:border-[#1d1d1d] dark:bg-[#0c0c0c] dark:hover:border-[#222222] dark:hover:bg-[#0f0f0f]",
         !isCustomizing && "cursor-pointer",
+        className,
       )}
       {...longPressHandlers}
     >

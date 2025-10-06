@@ -27,6 +27,11 @@ export default {
     placeholder: "Select timezone",
   },
 
+  chat: {
+    placeholder_ask: "Ask anything",
+    placeholder_web: "Search the web",
+  },
+
   notifications: {
     categories: {
       transactions: "Transactions",

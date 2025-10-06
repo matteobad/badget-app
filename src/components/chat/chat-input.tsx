@@ -6,6 +6,7 @@ import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { useChatStore } from "~/lib/stores/chat";
 import { cn } from "~/lib/utils";
+import { useScopedI18n } from "~/shared/locales/client";
 
 import type { PromptInputMessage } from "../ui/prompt-input";
 import { SuggestedActionsButton } from "../suggested-actions-button";
@@ -26,6 +27,7 @@ import { RecordButton } from "./record-button";
 import { WebSearchButton } from "./web-search-button";
 
 export function ChatInput() {
+  const t = useScopedI18n("chat");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const status = useChatStatus();
@@ -195,7 +197,9 @@ export function ChatInput() {
                   handleKeyDown(e);
                 }}
                 value={input}
-                placeholder={isWebSearch ? "Search the web" : "Ask anything"}
+                placeholder={
+                  isWebSearch ? t("placeholder_web") : t("placeholder_ask")
+                }
               />
             </PromptInputBody>
             <PromptInputToolbar>
