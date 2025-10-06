@@ -97,7 +97,7 @@ export function useAudioRecording(): UseAudioRecordingReturn {
       console.error("Error starting audio recording:", error);
       throw error;
     }
-  }, [stopRecording]);
+  }, [stopRecording, MAX_RECORDING_TIME]);
 
   const transcribeAudio = useCallback(
     async (audioBlob: Blob): Promise<string> => {

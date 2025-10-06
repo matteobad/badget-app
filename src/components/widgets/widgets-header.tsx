@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { TZDate } from "@date-fns/tz";
 import { useUserQuery } from "~/hooks/use-user";
-import { useScopedI18n } from "~/shared/locales/client";
 
 import { ChatHistory } from "../chat/chat-history";
 import { Customize } from "./customize";
@@ -29,8 +28,6 @@ function getTimeBasedGreeting(timezone?: string): string {
 }
 
 export function WidgetsHeader() {
-  const tHeader = useScopedI18n("widgets.header");
-
   const { data: user } = useUserQuery();
   const isCustomizing = useIsCustomizing();
 

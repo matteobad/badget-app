@@ -1159,7 +1159,7 @@ export async function getTransactionsInPeriodQuery(
   params: GetTransactionsInPeriodParams,
 ) {
   // TODO: handle currency conversion when specified by user
-  const { organizationId, from, to, period = "monthly", currency } = params;
+  const { organizationId, from, to } = params;
 
   // Build query conditions
   const conditions = [

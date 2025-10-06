@@ -98,7 +98,7 @@ export function CashFlowWidget() {
             {data &&
               formatCashFlow(
                 data.result.netCashFlow ?? 0,
-                data.result.currency!,
+                data.result.currency,
               )}
           </h2>
         </div>

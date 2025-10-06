@@ -11,7 +11,7 @@ export function BaseCanvas({ children }: { children: React.ReactNode }) {
   });
   const isCanvasVisible = !!current;
 
-  // @ts-ignore TODO: fix this
+  // @ts-expect-error TODO: fix this
   const toastData = current?.payload?.toast;
 
   return (

@@ -217,7 +217,7 @@ export const getExpensesBreakdownTool = tool({
         .filter((line) => line.trim().length > 0);
 
       const summaryText =
-        lines[0] ||
+        lines[0] ??
         `Total expenses: ${formatAmount({
           amount: total,
           currency: targetCurrency,

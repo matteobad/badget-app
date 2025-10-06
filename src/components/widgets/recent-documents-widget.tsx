@@ -42,7 +42,7 @@ export function RecentDocumentsWidget() {
 
       if (hasClassification) {
         const classification =
-          doc.documentTagAssignments[0]?.documentTag?.name || "document";
+          doc.documentTagAssignments[0]?.documentTag?.name ?? "document";
         return `1 file automatically categorized as ${classification.toLowerCase()} ${timeAgo}`;
       }
 
@@ -92,22 +92,6 @@ export function RecentDocumentsWidget() {
 
     // For more than 2 classifications, show first two with "and others"
     return `${classifiedDocs.length} files automatically categorized as ${classificationArray[0]}, ${classificationArray[1]} and others`;
-  };
-
-  const getRecentFileName = () => {
-    if (documents.length === 0) return null;
-
-    const recentDoc = documents[0];
-    const fileName = recentDoc?.name || recentDoc?.title;
-
-    if (!fileName) return null;
-
-    // Truncate long file names
-    if (fileName.length > 25) {
-      return `${fileName.substring(0, 22)}...`;
-    }
-
-    return fileName;
   };
 
   return (

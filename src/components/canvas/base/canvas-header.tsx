@@ -8,7 +8,6 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
 import { MoreVerticalIcon } from "lucide-react";
-import { useTheme } from "next-themes";
 
 import { Skeleton } from "./skeleton";
 
@@ -27,8 +26,6 @@ export function CanvasHeader({
   actions,
   className,
 }: CanvasHeaderProps) {
-  const { theme } = useTheme();
-
   const handleDownloadReport = async () => {
     try {
       console.log("TODO download");

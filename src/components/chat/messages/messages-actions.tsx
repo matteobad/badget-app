@@ -43,7 +43,7 @@ export function MessageActions({
   );
 
   const handleRegenerate = () => {
-    regenerate?.();
+    void regenerate?.();
   };
 
   const handlePositive = () => {

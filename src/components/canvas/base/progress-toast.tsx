@@ -211,7 +211,7 @@ export function ProgressToast({
                 </motion.div>
                 <div>
                   <p className="text-[12px] leading-[17px] text-black dark:text-white">
-                    {completedMessage || "Analysis complete"}
+                    {completedMessage ?? "Analysis complete"}
                   </p>
                 </div>
               </div>
@@ -222,7 +222,7 @@ export function ProgressToast({
                     {/* Loading Spinner */}
                     <Spinner size={16} className="text-[#878787]" />
                     <span className="text-[12px] leading-[17px] text-black dark:text-white">
-                      {displayedLabel || "Processing..."}
+                      {displayedLabel ?? "Processing..."}
                     </span>
                   </div>
                   <span className="text-[12px] leading-[17px] text-[#707070] dark:text-[#666666]">
@@ -231,7 +231,7 @@ export function ProgressToast({
                 </div>
                 <div className="pl-6">
                   <span className="text-[12px] leading-[17px] text-[#707070] dark:text-[#666666]">
-                    {displayedDescription || "Computing"}
+                    {displayedDescription ?? "Computing"}
                   </span>
                 </div>
               </div>

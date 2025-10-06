@@ -24,7 +24,7 @@ const handleTransactionsCreated: NotificationDescriptionHandler = (
   user,
   t,
 ) => {
-  const count = metadata?.count || metadata?.transactionCount || 1;
+  const count = metadata?.count ?? metadata?.transactionCount ?? 1;
   const transaction = metadata?.transaction;
 
   // For single transactions, show rich details
@@ -33,10 +33,10 @@ const handleTransactionsCreated: NotificationDescriptionHandler = (
       formatAmount({
         currency: transaction.currency,
         amount: transaction.amount,
-        locale: user?.locale || "it-IT",
+        locale: user?.locale ?? "it-IT",
       }) ?? `${transaction.amount} ${transaction.currency}`;
 
-    const userDateFormat = user?.dateFormat || "dd/MM/yyyy";
+    const userDateFormat = user?.dateFormat ?? "dd/MM/yyyy";
     const formattedDate = format(new Date(transaction.date), userDateFormat);
 
     return t("notifications.transactions_created.single_transaction", {

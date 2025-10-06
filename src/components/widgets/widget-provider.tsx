@@ -45,7 +45,7 @@ export const createWidgetStore = (initialPreferences?: WidgetPreferences) => {
     primaryWidgets: initialPreferences?.primaryWidgets ?? ([] as WidgetType[]),
     availableWidgets:
       initialPreferences?.availableWidgets ?? ([] as WidgetType[]),
-    widgetConfigs: initialPreferences?.widgetConfigs || {},
+    widgetConfigs: initialPreferences?.widgetConfigs ?? {},
     isSaving: false,
   };
 
@@ -62,7 +62,7 @@ export const createWidgetStore = (initialPreferences?: WidgetPreferences) => {
             {
               primaryWidgets: preferences.primaryWidgets,
               availableWidgets: preferences.availableWidgets,
-              widgetConfigs: preferences.widgetConfigs || {},
+              widgetConfigs: preferences.widgetConfigs ?? {},
             },
             false,
             "setWidgetPreferences",

@@ -166,10 +166,10 @@ export function ChartLegend({
               style={{
                 background:
                   item.type === "solid"
-                    ? item.color || "#000000"
+                    ? (item.color ?? "#000000")
                     : item.type === "pattern"
                       ? "repeating-linear-gradient(45deg, #666666, #666666 1px, transparent 1px, transparent 2px)"
-                      : item.color || "#666666",
+                      : (item.color ?? "#666666"),
                 borderRadius: "0",
               }}
             />

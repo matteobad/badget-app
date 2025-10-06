@@ -38,7 +38,7 @@ export function NotificationCenter() {
     if (isOpen && hasUnseenNotifications) {
       markAllMessagesAsSeen();
     }
-  }, [hasUnseenNotifications, isOpen]);
+  }, [hasUnseenNotifications, isOpen, markAllMessagesAsSeen]);
 
   return (
     <Popover onOpenChange={setOpen} open={isOpen}>

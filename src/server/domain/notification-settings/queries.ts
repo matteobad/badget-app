@@ -2,7 +2,7 @@ import type { DBClient } from "~/server/db";
 import { notification_settings_table } from "~/server/db/schema/notifications";
 import { and, eq } from "drizzle-orm";
 
-import { getUserSettingsNotificationTypes } from "../../services/notifications/notification-types";
+import { getUserSettingsNotificationTypes } from "./notification-types";
 
 export type NotificationChannel = "in_app" | "email" | "push";
 

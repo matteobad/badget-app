@@ -77,7 +77,7 @@ export function DataTable({ data }: { data: RouterOutput["asset"]["get"] }) {
         <TableBody>
           {table.getFilteredRowModel().rows.map((row) => (
             <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell, index) => (
+              {row.getVisibleCells().map((cell) => (
                 <TableCell
                   key={cell.id}
                   className={cn(

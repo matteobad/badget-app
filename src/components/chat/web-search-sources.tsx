@@ -35,7 +35,6 @@ function extractDomainFromUrl(url: string): string {
 
 export const WebSearchSources = ({
   sources: providedSources,
-  showSourceCount = true,
   className,
 }: WebSearchSourcesProps) => {
   const [animatedSources, setAnimatedSources] = useState<WebSearchSource[]>([]);
@@ -123,7 +122,7 @@ const WebSearchSourceAvatar = ({
   zIndex = 0,
   index = 0,
 }: WebSearchSourceAvatarProps) => {
-  const domain = source.domain || extractDomainFromUrl(source.url || "");
+  const domain = source.domain ?? extractDomainFromUrl(source.url ?? "");
 
   return (
     <Tooltip delayDuration={100}>
@@ -156,7 +155,7 @@ const WebSearchSourceAvatar = ({
               alt={`${domain} logo`}
             />
             <AvatarFallback className="bg-background text-[10px] font-medium text-muted-foreground">
-              {domain.split(".")[0]?.charAt(0).toUpperCase() || ""}
+              {domain.split(".")[0]?.charAt(0).toUpperCase() ?? ""}
             </AvatarFallback>
           </Avatar>
         </motion.div>

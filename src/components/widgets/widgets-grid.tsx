@@ -40,7 +40,6 @@ function SortableCard({
   index,
   children,
   className,
-  customizeMode,
   wiggleClass,
 }: {
   id: string;

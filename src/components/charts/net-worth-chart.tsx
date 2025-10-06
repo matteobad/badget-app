@@ -2,7 +2,6 @@ import { cn } from "~/lib/utils";
 import { formatAmount } from "~/shared/helpers/format";
 import {
   Area,
-  AreaChart,
   CartesianGrid,
   ComposedChart,
   Line,
@@ -12,10 +11,7 @@ import {
   YAxis,
 } from "recharts";
 
-import type { ChartConfig } from "../ui/chart";
 import type { BaseChartProps } from "./chart-utils";
-import { ChartContainer } from "../ui/chart";
-import { StyledTooltip } from "./base-charts";
 import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
 
 interface NetWorthData {

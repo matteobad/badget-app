@@ -79,7 +79,7 @@ export function NotificationSetting({
       },
       onSettled: () => {
         // Always refetch after error or success to ensure we have the latest data
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: trpc.notificationSettings.getAll.queryKey(),
         });
       },

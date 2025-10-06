@@ -67,7 +67,7 @@ export function IncomeForecastWidget() {
 
   const nextMonthProjection = data?.result.summary.nextMonthProjection ?? 0;
   const currency =
-    data?.result.summary.currency || space?.baseCurrency || "EUR";
+    data?.result.summary.currency ?? space?.baseCurrency ?? "EUR";
 
   return (
     <BaseWidget

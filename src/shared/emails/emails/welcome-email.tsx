@@ -59,18 +59,18 @@ export const WelcomeEmail = ({ fullName = "" }: Props) => {
             className={themeClasses.text}
             style={{ color: lightStyles.text.color }}
           >
-            Welcome to Badget! I'm Matteo, one of the founders.
+            Welcome to Badget! I&apos;m Matteo, one of the founders.
             <br />
             <br />
             We created Badget to make personal finance simple, clear, and
-            stress-free. Managing money often feels complicated—we’ve been there
-            ourselves—so we built Badget to give you control and peace of mind
-            over your budgets, savings, and goals.
+            stress-free. Managing money often feels complicated—we&apos;ve been
+            there ourselves—so we built Badget to give you control and peace of
+            mind over your budgets, savings, and goals.
             <br />
             <br />
             Take your time to explore Badget at your own pace. You can connect
             your accounts, set up your first budget, or just start by tracking
-            your spending—it’s entirely up to you.
+            your spending—it&apos;s entirely up to you.
             <br />
             <br />
             If you ever need a hand, just hit reply—we’re always one message

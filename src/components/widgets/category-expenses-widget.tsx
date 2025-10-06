@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
-import { UTCDate } from "@date-fns/utc";
 import { useQuery } from "@tanstack/react-query";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { useSpaceQuery } from "~/hooks/use-space";
@@ -11,7 +10,7 @@ import { formatCompactAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { getWidgetPeriodDates } from "~/shared/helpers/widget-period";
 import { useScopedI18n } from "~/shared/locales/client";
-import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import { format } from "date-fns";
 import { ShapesIcon } from "lucide-react";
 
 import { BaseWidget } from "./base";
@@ -49,7 +48,7 @@ export function CategoryExpensesWidget() {
 
   const categoryData = data?.result;
   const categories = categoryData?.result.categories ?? [];
-  const maxAmount = categories[0]?.amount || 0;
+  const maxAmount = categories[0]?.amount ?? 0;
 
   const hasCategories = categoryData && categories.length > 0;
 
@@ -58,7 +57,7 @@ export function CategoryExpensesWidget() {
 
     setChatId(chatId);
 
-    sendMessage({
+    void sendMessage({
       role: "user",
       parts: [{ type: "text", text: "Category expenses breakdown" }],
       metadata: {

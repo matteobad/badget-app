@@ -57,7 +57,7 @@ export function CanvasGrid({
           "grid-cols-4": config.columns === 4,
         })}
       >
-        {displayItems.map((item, index) => (
+        {displayItems.map((item) => (
           <div
             key={item.id}
             className="border border-[#e6e6e6] bg-white p-3 dark:border-[#1d1d1d] dark:bg-[#0c0c0c]"

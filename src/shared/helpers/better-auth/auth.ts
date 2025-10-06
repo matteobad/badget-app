@@ -5,7 +5,6 @@ import { env } from "~/env";
 import { resend } from "~/lib/resend";
 import { db } from "~/server/db";
 import { getUserByIdQuery } from "~/server/domain/user/queries";
-import { deleteOrganization } from "~/server/services/better-auth-service";
 import WelcomeEmail from "~/shared/emails/emails/welcome-email";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";

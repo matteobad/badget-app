@@ -75,7 +75,7 @@ export function AverageSavingsChart({
 
         <Tooltip
           content={<StyledTooltip formatter={netAverageSavingsFormatter} />}
-          labelFormatter={(label) => {
+          labelFormatter={(label: number | string) => {
             if (!label) return "";
             const date = new Date(label); // funziona se label è timestamp (ms) o stringa ISO
             return date.toLocaleDateString("it-IT", {

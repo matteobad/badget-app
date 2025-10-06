@@ -15,7 +15,6 @@ export function CommandMenu() {
     filteredCommands,
     selectedCommandIndex,
     showCommands,
-    handleCommandSelect,
     resetCommandState,
     setInput,
   } = useChatStore();
@@ -29,7 +28,7 @@ export function CommandMenu() {
 
     setChatId(chatId);
 
-    sendMessage({
+    void sendMessage({
       role: "user",
       parts: [{ type: "text", text: command.title }],
       metadata: {

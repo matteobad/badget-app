@@ -5,7 +5,6 @@ import { TZDate } from "@date-fns/tz";
 import { Experimental_Agent as Agent, stepCountIs } from "ai";
 
 import { getAccountsTool } from "./domains/expenses/tools/get-accounts-tool";
-import { getDocumentsTool } from "./domains/expenses/tools/get-documents-tool";
 import { getInstitutionsTool } from "./domains/expenses/tools/get-institutions-tool";
 import { getTransacationsCategoriesTool } from "./domains/expenses/tools/get-transactions-categories-tool";
 import { getTransacationsTagsTool } from "./domains/expenses/tools/get-transactions-tags-tool";

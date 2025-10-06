@@ -104,8 +104,8 @@ export function ChatInput() {
       setChatId(chatId);
     }
 
-    sendMessage({
-      text: message.text || "Sent with attachments",
+    void sendMessage({
+      text: message.text ?? "Sent with attachments",
       files: processedFiles,
       metadata: {
         webSearch: isWebSearch,
@@ -151,7 +151,7 @@ export function ChatInput() {
 
                       setChatId(chatId);
 
-                      sendMessage({
+                      void sendMessage({
                         role: "user",
                         parts: [{ type: "text", text: selectedCommand.title }],
                         metadata: {
@@ -177,7 +177,7 @@ export function ChatInput() {
                         setChatId(chatId);
                       }
 
-                      sendMessage({
+                      void sendMessage({
                         text: input,
                         files: [],
                         metadata: {

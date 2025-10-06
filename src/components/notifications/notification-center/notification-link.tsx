@@ -41,7 +41,7 @@ export function NotificationLink({
       switch (activityType) {
         case "transactions_created":
           if (metadata?.recordId) {
-            setTransactionParams({ transactionId: recordId! });
+            void setTransactionParams({ transactionId: recordId! });
           } else if (metadata?.dateRange) {
             router.push(
               `/transactions?start=${metadata.dateRange.from}&end=${metadata.dateRange.to}`,

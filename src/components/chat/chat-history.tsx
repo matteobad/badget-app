@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { formatDistanceToNow } from "date-fns";
-import { DeleteIcon, MenuIcon, SearchIcon, TrashIcon } from "lucide-react";
+import { MenuIcon, SearchIcon, TrashIcon } from "lucide-react";
 import { useDebounceCallback } from "usehooks-ts";
 
 import { Button } from "../ui/button";
@@ -98,7 +98,7 @@ export function ChatHistory() {
       },
       onSettled: () => {
         // Refetch after error or success
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: trpc.chat.list.queryKey({
             limit: 20,
             search: searchQuery || undefined,
@@ -161,7 +161,7 @@ export function ChatHistory() {
                     >
                       <div className="flex flex-col gap-1">
                         <div className="line-clamp-1 text-sm font-medium">
-                          {chat.title || "New chat"}
+                          {chat.title ?? "New chat"}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {formatDistanceToNow(chat.updatedAt, {

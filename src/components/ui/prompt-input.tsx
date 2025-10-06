@@ -180,7 +180,7 @@ export const PromptInputActionAddAttachments = ({
       variant="ghost"
       size="icon"
       type="button"
-      // @ts-expect-error
+      // @ts-expect-error investigate
       onClick={attachments.openFileDialog}
       className="size-6 text-muted-foreground"
       {...props}

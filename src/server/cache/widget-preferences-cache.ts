@@ -231,7 +231,7 @@ export const widgetPreferencesCache = {
     const newPreferences: WidgetPreferences = {
       ...currentPreferences,
       widgetConfigs: {
-        ...(currentPreferences.widgetConfigs || {}),
+        ...(currentPreferences.widgetConfigs ?? {}),
         [widgetType]: config,
       },
     };

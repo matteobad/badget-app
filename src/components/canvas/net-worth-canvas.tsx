@@ -54,7 +54,7 @@ export function NetWorthCanvas() {
               amount: data.metrics.averageNetWorth || 0,
               locale: user?.locale,
             }) || (data.metrics.averageNetWorth || 0).toLocaleString(),
-          subtitle: `Over last ${data.chart?.dailyData?.length || 0} days`,
+          subtitle: `Over last ${data.chart?.dailyData?.length ?? 0} days`,
         },
         {
           id: "highest-asset",

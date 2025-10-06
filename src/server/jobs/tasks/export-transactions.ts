@@ -8,9 +8,6 @@ import {
   Uint8ArrayReader,
   ZipWriter,
 } from "@zip.js/zip.js";
-import { db } from "~/server/db";
-import { document_table } from "~/server/db/schema/documents";
-import { Notifications } from "~/server/services/notifications";
 import { format } from "date-fns";
 import xlsx from "node-xlsx";
 import z from "zod";
@@ -67,7 +64,6 @@ export const exportTransactionsTask = schemaTask({
   },
   run: async ({
     organizationId,
-    userId,
     locale,
     transactionIds,
     dateFormat,
@@ -133,7 +129,7 @@ export const exportTransactionsTask = schemaTask({
         headers: columns.map((c) => c.label),
         delimiter: settings.csvDelimiter,
       });
-      zipWriter.add("transactions.csv", new TextReader(csv));
+      await zipWriter.add("transactions.csv", new TextReader(csv));
     }
 
     // Add XLSX if enabled
@@ -151,7 +147,7 @@ export const exportTransactionsTask = schemaTask({
         },
       ]);
 
-      zipWriter.add("transactions.xlsx", new Uint8ArrayReader(buffer));
+      await zipWriter.add("transactions.xlsx", new Uint8ArrayReader(buffer));
     }
 
     // await zipWriter.add("transactions.csv", new TextReader(csv));
@@ -202,15 +198,6 @@ export const exportTransactionsTask = schemaTask({
     }
 
     // TODO: send email with export link
-    const notifications = new Notifications(db);
-    return notifications.create("transactions_exported", organizationId, {
-      transactionCount: transactionIds.length,
-      locale: locale,
-      dateFormat: dateFormat || "yyyy-MM-dd",
-      downloadLink,
-      accountantEmail: settings.accountantEmail,
-      sendEmail: settings.sendEmail,
-    });
     // await tasks.trigger("notification", {
     //   type: "transactions_exported",
     //   organizationId,
@@ -225,7 +212,7 @@ export const exportTransactionsTask = schemaTask({
     return {
       fileName,
       filePath,
-      downloadUrl: uploadedFile.downloadUrl,
+      downloadUrl: downloadLink,
       totalItems: rows.length,
     };
   },

@@ -97,8 +97,8 @@ export const GetStartedEmail = ({ fullName = "" }: Props) => {
             className={`text-[14px] ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            Let us know if you have any thoughts or feedback—we'd love to hear
-            from you. Just hit reply.
+            Let us know if you have any thoughts or feedback—we&apos;d love to
+            hear from you. Just hit reply.
           </Text>
           <br />
           <Text

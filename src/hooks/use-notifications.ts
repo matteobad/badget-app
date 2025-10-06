@@ -5,8 +5,6 @@ import { useCallback, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
-import { useUserQuery } from "./use-user";
-
 // Infer types from tRPC router
 type NotificationsList = RouterOutput["notifications"]["list"];
 type NotificationsData = NotificationsList["data"];
@@ -30,7 +28,6 @@ export function getMetadataProperty(activity: Activity, key: string): any {
 export function useNotifications() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { data: user } = useUserQuery();
 
   const {
     data: activitiesData,
@@ -127,7 +124,7 @@ export function useNotifications() {
                 if (!old?.data)
                   return {
                     data: [notificationToMove!],
-                    meta: old?.meta || {
+                    meta: old?.meta ?? {
                       cursor: null,
                       hasPreviousPage: false,
                       hasNextPage: false,
@@ -230,7 +227,7 @@ export function useNotifications() {
                 if (!old?.data)
                   return {
                     data: notificationsToMove,
-                    meta: old?.meta || {
+                    meta: old?.meta ?? {
                       cursor: null,
                       hasPreviousPage: false,
                       hasNextPage: false,
@@ -282,8 +279,8 @@ export function useNotifications() {
   );
 
   // Return notification activities directly without transformation
-  const notifications = activitiesData?.data || [];
-  const archivedNotifications = archivedActivitiesData?.data || [];
+  const notifications = activitiesData?.data ?? [];
+  const archivedNotifications = archivedActivitiesData?.data ?? [];
 
   // Mark a single message as read (archived)
   const markMessageAsRead = useCallback(

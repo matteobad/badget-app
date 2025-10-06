@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { signOut } from "~/shared/helpers/better-auth/auth-client";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";

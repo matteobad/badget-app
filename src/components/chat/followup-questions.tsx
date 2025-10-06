@@ -23,7 +23,7 @@ export function FollowupQuestions() {
     if (chatId) {
       setChatId(chatId);
 
-      sendMessage({
+      void sendMessage({
         role: "user",
         parts: [{ type: "text", text: question }],
       });
@@ -43,7 +43,7 @@ export function FollowupQuestions() {
     } else {
       setIsVisible(false);
     }
-  }, [data]);
+  }, [data, status]);
 
   if (!data?.questions || data.questions.length === 0) {
     return null;

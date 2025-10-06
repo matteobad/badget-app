@@ -10,14 +10,7 @@ import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
-import {
-  endOfMonth,
-  formatISO,
-  startOfDay,
-  startOfMonth,
-  subMonths,
-  subYears,
-} from "date-fns";
+import { startOfDay, subMonths } from "date-fns";
 import { LineChartIcon } from "lucide-react";
 
 import {
@@ -35,26 +28,6 @@ const PERIOD = {
   "6M": "6M",
   "1Y": "1Y",
 } as const;
-type PeriodType = (typeof PERIOD)[keyof typeof PERIOD];
-
-const options: Record<PeriodType, { from: string; to: string }> = {
-  "1M": {
-    from: formatISO(subMonths(new Date(), 1), { representation: "date" }),
-    to: formatISO(new Date(), { representation: "date" }),
-  },
-  "3M": {
-    from: formatISO(subMonths(new Date(), 3), { representation: "date" }),
-    to: formatISO(new Date(), { representation: "date" }),
-  },
-  "6M": {
-    from: formatISO(subMonths(new Date(), 6), { representation: "date" }),
-    to: formatISO(new Date(), { representation: "date" }),
-  },
-  "1Y": {
-    from: formatISO(subYears(new Date(), 1), { representation: "date" }),
-    to: formatISO(new Date(), { representation: "date" }),
-  },
-};
 
 export function NetWorthWidgetSettings() {
   const tNetWorthSettings = useScopedI18n("widgets.net-worth.settings");
@@ -113,7 +86,7 @@ export function NetWorthWidget() {
 
     setChatId(chatId);
 
-    sendMessage({
+    void sendMessage({
       role: "user",
       parts: [{ type: "text", text: "Analyze my net worth" }],
       metadata: {

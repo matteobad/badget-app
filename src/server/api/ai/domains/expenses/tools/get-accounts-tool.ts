@@ -1,6 +1,4 @@
 import { getBankAccounts } from "~/server/services/bank-account-service";
-import { formatAmount } from "~/shared/helpers/format";
-import { getUrl } from "~/shared/helpers/get-url";
 import { tool } from "ai";
 import z from "zod";
 

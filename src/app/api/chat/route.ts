@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 
     const isWebSearchMessage = messageMetadata?.webSearch;
 
-    const previousMessagesList = previousMessages?.messages || [];
+    const previousMessagesList = previousMessages?.messages ?? [];
     const allMessagesForValidation = [...previousMessagesList, message];
 
     // Check if any message has blob URLs or data URLs (which would cause validateUIMessages to fail)
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
         (part: any) =>
           part.type === "file" &&
           typeof part.url === "string" &&
-          (part.url.startsWith("blob:") || part.url.startsWith("data:")),
+          (part.url.startsWith("blob:") ?? part.url.startsWith("data:")),
       ),
     );
 
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
     let generatedTitle: string | null = null;
 
     // Generate title if conversation has enough combined content
-    const allMessages = [...(previousMessages?.messages || []), message];
+    const allMessages = [...(previousMessages?.messages ?? []), message];
     const shouldGenerateTitle = needsTitle && hasEnoughContent(allMessages);
 
     if (shouldGenerateTitle) {
@@ -146,7 +146,6 @@ export async function POST(req: Request) {
               chatId: id,
               organizationId,
               userId,
-              // @ts-ignore
               message: responseMessage,
             });
           } else {
@@ -165,7 +164,6 @@ export async function POST(req: Request) {
                 chatId: id,
                 organizationId,
                 userId,
-                // @ts-ignore
                 message: userMessage,
               });
             }

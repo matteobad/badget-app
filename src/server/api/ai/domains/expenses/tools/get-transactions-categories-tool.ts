@@ -1,4 +1,3 @@
-import { db } from "~/server/db";
 import { getTransactionCategories } from "~/server/services/transaction-category";
 import { tool } from "ai";
 import z from "zod";

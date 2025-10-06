@@ -152,8 +152,8 @@ export function ExportTransactionsModal({
                 <DialogTitle>Export Transactions</DialogTitle>
                 <DialogDescription>
                   Export <NumberFlow value={totalSelected} /> selected
-                  transactions with your preferred settings. You'll be notified
-                  when ready.
+                  transactions with your preferred settings. You&apos;ll be
+                  notified when ready.
                 </DialogDescription>
               </DialogHeader>
 

@@ -65,16 +65,14 @@ export function NotificationSettings() {
       // Skip if no settings remain after filtering
       if (filteredSettings.length === 0) return acc;
 
-      const category = notificationType.category || "other";
-      const order = notificationType.order || 999;
+      const category = notificationType.category ?? "other";
+      const order = notificationType.order ?? 999;
 
-      if (!acc[category]) {
-        acc[category] = {
-          category,
-          order,
-          notifications: [],
-        };
-      }
+      acc[category] ??= {
+        category,
+        order,
+        notifications: [],
+      };
 
       // Get display info from i18n translations
       const displayInfo = getNotificationDisplayInfoWithFallback(
@@ -110,7 +108,7 @@ export function NotificationSettings() {
   );
 
   // Sort categories by order, then by name
-  const sortedCategories = Object.values(groupedNotifications || {}).sort(
+  const sortedCategories = Object.values(groupedNotifications ?? {}).sort(
     (a, b) => {
       if (a.order !== b.order) {
         return a.order - b.order;

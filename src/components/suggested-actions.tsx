@@ -8,7 +8,6 @@ import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import {
   BanknoteArrowUpIcon,
-  FlameIcon,
   LineChartIcon,
   ReceiptIcon,
   ShapesIcon,

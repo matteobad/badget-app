@@ -50,7 +50,7 @@ export function CanvasChart({
           >
             {legend.items.map((item, index) => {
               const getSquareClasses = (type: string, color?: string) => {
-                const baseColor = color || "#707070";
+                const baseColor = color ?? "#707070";
 
                 switch (type) {
                   case "solid":
@@ -65,7 +65,7 @@ export function CanvasChart({
               };
 
               const getSquareStyle = (type: string, color?: string) => {
-                const baseColor = color || "#707070";
+                const baseColor = color ?? "#707070";
 
                 switch (type) {
                   case "pattern":
