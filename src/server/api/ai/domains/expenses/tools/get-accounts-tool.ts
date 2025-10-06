@@ -85,7 +85,7 @@ export const getAccountsTool = cached(
       - they want only active/inactive, manual, or connected accounts,
       - or they ask about available account types or balances.
 
-      Never use this tool to get transactions or budgets.
+      Never use this tool to get transactions or historical balances.
 
       Returns a structured list of accounts, ideal for display in tables or cards.
       Each item includes id, name, type, subtype, balance, currency, and metadata.
