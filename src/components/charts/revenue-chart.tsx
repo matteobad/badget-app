@@ -27,7 +27,7 @@ interface RevenueChartProps extends BaseChartProps {
 
 // Custom formatter for revenue tooltip
 const revenueTooltipFormatter = (
-  value: any,
+  value: number,
   name: string,
 ): [string, string] => {
   const formattedValue = `$${value.toLocaleString()}`;

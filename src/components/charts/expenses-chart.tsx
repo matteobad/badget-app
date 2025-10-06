@@ -33,7 +33,7 @@ interface ExpensesChartProps extends BaseChartProps {
 
 // Custom formatter for expenses tooltip
 const expensesTooltipFormatter = (
-  value: any,
+  value: number,
   name: string,
 ): [string, string] => {
   const formattedValue = `$${value.toLocaleString()}`;

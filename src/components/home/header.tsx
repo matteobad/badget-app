@@ -128,7 +128,7 @@ export function Header() {
           <span className="sr-only">Badget Logo</span>
 
           <Image
-            src={logoDark}
+            src={logoDark as string}
             alt="Logo"
             className="object-cover dark:hidden"
             priority
@@ -136,7 +136,7 @@ export function Header() {
             height={24}
           />
           <Image
-            src={logoLight}
+            src={logoLight as string}
             alt="Logo"
             className="hidden object-cover dark:block"
             priority

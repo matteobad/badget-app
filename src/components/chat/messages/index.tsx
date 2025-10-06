@@ -79,9 +79,8 @@ export function Messages() {
                           <Fragment key={`${message.id}-${i}`}>
                             <Message from={message.role}>
                               <MessageContent>
-                                <Response>
-                                  {(part as any)?.output?.text}
-                                </Response>
+                                {/* @ts-expect-error bad types */}
+                                <Response>{part?.output?.text}</Response>
                               </MessageContent>
                             </Message>
                           </Fragment>

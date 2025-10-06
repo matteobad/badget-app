@@ -27,7 +27,10 @@ interface ProfitChartProps extends BaseChartProps {
 }
 
 // Custom formatter for profit tooltip
-const profitTooltipFormatter = (value: any, name: string): [string, string] => {
+const profitTooltipFormatter = (
+  value: number,
+  name: string,
+): [string, string] => {
   const formattedValue = `$${value.toLocaleString()}`;
   const displayName =
     name === "profit" ? "Profit" : name === "expenses" ? "Expenses" : "Revenue";

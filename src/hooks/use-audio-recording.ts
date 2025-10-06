@@ -115,19 +115,16 @@ export function useAudioRecording(): UseAudioRecordingReturn {
 
         // Get authenticated session
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/transcription`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              audio: base64Audio,
-              mimeType: audioBlob.type,
-            }),
+        const response = await fetch("/transcription", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify({
+            audio: base64Audio,
+            mimeType: audioBlob.type,
+          }),
+        });
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -141,13 +138,17 @@ export function useAudioRecording(): UseAudioRecordingReturn {
           );
         }
 
-        const data = await response.json();
+        const data = (await response.json()) as {
+          success: boolean;
+          error?: string;
+          text?: string;
+        };
 
         if (!data.success) {
           throw new Error(data.error ?? "Transcription failed");
         }
 
-        return data.text;
+        return data.text!;
       } catch (error) {
         console.error("Error transcribing audio:", error);
         throw error;

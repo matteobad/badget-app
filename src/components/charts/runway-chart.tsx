@@ -27,7 +27,10 @@ interface RunwayChartProps extends BaseChartProps {
 }
 
 // Custom formatter for runway tooltip
-const runwayTooltipFormatter = (value: any, name: string): [string, string] => {
+const runwayTooltipFormatter = (
+  value: number,
+  name: string,
+): [string, string] => {
   const formattedValue = `$${value.toLocaleString()}`;
   const displayName =
     name === "cashRemaining"

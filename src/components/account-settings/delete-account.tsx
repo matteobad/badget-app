@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { Loader2 } from "lucide-react";
@@ -31,7 +30,6 @@ import { Label } from "../ui/label";
 
 export function DeleteAccount() {
   const trpc = useTRPC();
-  const router = useRouter();
 
   const deleteUserMutation = useMutation(
     trpc.user.delete.mutationOptions({

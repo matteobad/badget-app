@@ -8,7 +8,7 @@ interface NotificationUser {
 }
 
 interface NotificationMetadata {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export function getNotificationDescription(

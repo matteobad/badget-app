@@ -1,6 +1,6 @@
 import { useLongPress } from "~/hooks/use-long-press";
 import { cn } from "~/lib/utils";
-import { SettingsIcon } from "lucide-react";
+import { GripVerticalIcon, SettingsIcon } from "lucide-react";
 
 import { useIsCustomizing, useWidgetActions } from "./widget-provider";
 
@@ -62,8 +62,11 @@ export function BaseWidget({
               }}
               className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary"
             >
-              <SettingsIcon className="size-4" />
+              <SettingsIcon className="size-3.5" />
             </button>
+          )}
+          {isCustomizing && (
+            <GripVerticalIcon className="size-3.5 text-muted-foreground" />
           )}
         </div>
 
