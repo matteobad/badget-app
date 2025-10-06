@@ -1,15 +1,28 @@
 "server-only";
 
 import type { DBClient } from "~/server/db";
+import type { SQL } from "drizzle-orm";
 import { tag_table } from "~/server/db/schema/transactions";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export type GetTagsParams = {
+  q?: string;
   organizationId: string;
 };
 
 export const getTagsQuery = async (db: DBClient, params: GetTagsParams) => {
-  const { organizationId } = params;
+  const { q, organizationId } = params;
+
+  // Always start with orgId filter
+  const whereConditions: (SQL | undefined)[] = [
+    eq(tag_table.organizationId, organizationId),
+  ];
+
+  // Search query filter (name)
+  if (q) {
+    const nameCondition = sql`${tag_table.name} ILIKE '%' || ${q} || '%'`;
+    whereConditions.push(nameCondition);
+  }
 
   const results = await db
     .select({
@@ -19,7 +32,7 @@ export const getTagsQuery = async (db: DBClient, params: GetTagsParams) => {
       createdAt: tag_table.createdAt,
     })
     .from(tag_table)
-    .where(eq(tag_table.organizationId, organizationId))
+    .where(and(...whereConditions))
     .orderBy(tag_table.name);
 
   return results;

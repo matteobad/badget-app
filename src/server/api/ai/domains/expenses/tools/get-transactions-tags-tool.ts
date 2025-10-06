@@ -2,33 +2,56 @@ import { getTags } from "~/server/services/tag-service";
 import { tool } from "ai";
 import z from "zod";
 
+import { cached } from "../../../cache";
 import { getContext } from "../../../context";
 
-const getTransactionsTagsSchema = z.object({
-  // q: z.string().optional().describe("Search query for transaction tags"),
+// Input schema
+const toolInputSchema = z.object({
+  q: z
+    .string()
+    .optional()
+    .describe("Search query for filtering transactions tags by name."),
 });
 
-export const getTransacationsTagsTool = tool({
-  description:
-    "Search and retrieve transaction tags from the database. Use this tool when a user asks for a list of tags, wants to find a tag by name, or needs information about available transaction tags for organizing or analyzing.",
-  inputSchema: getTransactionsTagsSchema,
-  execute: async function ({}) {
-    try {
+// Output schema
+const toolOutputSchema = z.object({
+  id: z.string().describe("Unique identifier of the tag."),
+  name: z.string().describe("Name of the tag."),
+});
+
+export const getTransacationsTagsTool = cached(
+  tool({
+    description: `
+    Retrieves transactions tags of the current user.
+
+    Use this tool when:
+    - the user asks to list, search, or view their transactions tags,
+    - they mention transactions tags by name (e.g. “transactions tagged X”),
+
+    Never use this tool to get accounts, transactions or categories.
+
+    Returns a structured list of tags, ideal for display in tables or cards.
+    Each item includes id, name.
+  `,
+    inputSchema: toolInputSchema,
+    outputSchema: toolOutputSchema,
+    execute: async function (input) {
       const context = getContext();
 
-      // Prepare parameters for the database query
-      // const params = {
-      //   q: q ?? null,
-      // };
+      try {
+        // Get accounts from database
+        const result = await getTags(
+          context.db,
+          input,
+          context.user.organizationId,
+        );
 
-      // Get accounts from database
-      const result = await getTags(context.db, context.user.organizationId);
-
-      // Early return if no data
-      return result;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  },
-});
+        // Return validated output
+        return toolOutputSchema.parse(result ?? []);
+      } catch (error) {
+        console.error("getTransactionsTagsTool error:", error);
+        throw new Error("Failed to retrieve transactions tags.");
+      }
+    },
+  }),
+);

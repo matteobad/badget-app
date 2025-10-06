@@ -93,9 +93,9 @@ export const getAccountsTool = cached(
     inputSchema: getAccountsSchema,
     outputSchema: z.array(bankAccountSchema),
     execute: async function (input) {
-      try {
-        const context = getContext();
+      const context = getContext();
 
+      try {
         // Get accounts from database
         const result = await getBankAccounts(
           context.db,

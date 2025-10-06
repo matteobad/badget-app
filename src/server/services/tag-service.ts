@@ -37,6 +37,10 @@ export async function deleteTag(
   return await deleteTagMutation(db, { ...input, organizationId });
 }
 
-export async function getTags(db: DBClient, organizationId: string) {
+export async function getTags(
+  db: DBClient,
+  input: z.infer<typeof getTagsQuery>,
+  organizationId: string,
+) {
   return await getTagsQuery(db, { organizationId });
 }

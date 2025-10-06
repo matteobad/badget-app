@@ -7,15 +7,18 @@ import {
 import {
   createTagSchema,
   deleteTagSchema,
+  getTagsSchema,
   updateTagSchema,
 } from "~/shared/validators/tag.schema";
 
 import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const tagRouter = createTRPCRouter({
-  get: protectedProcedure.query(async ({ ctx: { db, orgId } }) => {
-    return await getTags(db, orgId!);
-  }),
+  get: protectedProcedure
+    .input(getTagsSchema)
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      return await getTags(db, input, orgId!);
+    }),
 
   create: protectedProcedure
     .input(createTagSchema)

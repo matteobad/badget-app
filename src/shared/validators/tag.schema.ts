@@ -43,7 +43,11 @@ export const deleteTagSchema = z
   })
   .openapi("DeleteTag");
 
-export const getTagsSchema = z.object().optional();
+export const getTagsSchema = z
+  .object({
+    q: z.string().optional(),
+  })
+  .optional();
 
 export const getTransactionTagsSchema = z.object({
   transactionId: z.cuid2(),
