@@ -19,14 +19,7 @@ export const transactionFilterParamsSchema = {
   recurring: parseAsArrayOf(
     parseAsStringLiteral(["all", "weekly", "monthly", "annually"] as const),
   ),
-  statuses: parseAsArrayOf(
-    parseAsStringLiteral([
-      "completed",
-      "uncompleted",
-      "archived",
-      "excluded",
-    ] as const),
-  ),
+  type: parseAsStringLiteral(["income", "expense"] as const),
 };
 
 export function useTransactionFilterParams() {

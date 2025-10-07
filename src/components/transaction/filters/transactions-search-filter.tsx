@@ -41,7 +41,7 @@ import { TransactionAccountFilter } from "./transaction-account-filter";
 import { TransactionAmountFilter } from "./transaction-amount-filter";
 import { TransactionTagFilter } from "./transaction-tag-filter";
 
-type StatusFilter = "completed" | "uncompleted" | "archived" | "excluded";
+type TypeFilter = "income" | "expense";
 type AttachmentFilter = "include" | "exclude";
 type RecurringFilter = "all" | "weekly" | "monthly" | "annually";
 
@@ -89,11 +89,9 @@ const PLACEHOLDERS = [
   "Revolut this month",
 ];
 
-const statusFilters: FilterItem<StatusFilter>[] = [
-  { id: "completed", name: "Completed" },
-  { id: "uncompleted", name: "Uncompleted" },
-  { id: "archived", name: "Archived" },
-  { id: "excluded", name: "Excluded" },
+const typeFilters: FilterItem<TypeFilter>[] = [
+  { id: "income", name: "Income" },
+  { id: "expense", name: "Expenses" },
 ];
 
 const attachmentsFilters: FilterItem<AttachmentFilter>[] = [
@@ -385,7 +383,7 @@ export function TransactionsSearchFilter() {
           onRemove={setFilter}
           categories={categories}
           accounts={accounts}
-          statusFilters={statusFilters}
+          typeFilters={typeFilters}
           attachmentsFilters={attachmentsFilters}
           tags={tags}
           recurringFilters={recurringFilters}

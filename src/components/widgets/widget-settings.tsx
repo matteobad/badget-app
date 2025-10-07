@@ -27,11 +27,14 @@ interface WidgetSettingsProps {
 }
 
 const periodOptions: WidgetPeriod[] = [
-  "fiscal_ytd",
-  "fiscal_year",
-  "current_quarter",
-  "trailing_12",
-  "current_month",
+  "this_month",
+  "last_month",
+  "this_week",
+  "last_week",
+  "this_year",
+  "last_3_months",
+  "last_6_months",
+  "last_12_months",
 ];
 
 export function WidgetSettings({
@@ -43,14 +46,14 @@ export function WidgetSettings({
 }: WidgetSettingsProps) {
   const t = useScopedI18n("widgets.settings");
   const [period, setPeriod] = useState<WidgetPeriod | undefined>(
-    config?.period ?? "fiscal_ytd",
+    config?.period ?? "this_month",
   );
   const [revenueType, setRevenueType] = useState<RevenueType | undefined>(
     config?.revenueType ?? "net",
   );
 
   const getPeriodLabel = (p: WidgetPeriod) => {
-    return t(`widget_period.${p}` as "widget_period.fiscal_ytd");
+    return t(`widget_period.${p}`);
   };
 
   const handleSave = () => {

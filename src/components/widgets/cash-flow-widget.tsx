@@ -28,9 +28,9 @@ export function CashFlowWidget() {
     useConfigurableWidget("cash-flow");
 
   const { from, to } = useMemo(() => {
-    const period = config?.period ?? "current_month";
-    return getWidgetPeriodDates(period, 1);
-  }, [config?.period]);
+    const period = config?.period ?? "this_month";
+    return getWidgetPeriodDates(period, 1, user?.weekStartsOnMonday ? 1 : 0);
+  }, [config?.period, user?.weekStartsOnMonday]);
 
   const { data } = useQuery({
     ...trpc.widgets.getCashFlow.queryOptions({
@@ -41,6 +41,13 @@ export function CashFlowWidget() {
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  const getTitle = () => {
+    const periodLabel = tWidgetSettings(
+      `widget_period.${config?.period ?? "this_month"}`,
+    );
+    return `${tCashFlow("title")} ${periodLabel}`;
+  };
 
   const handleClick = () => {
     // TODO: Navigate to cash flow analysis page
@@ -59,10 +66,6 @@ export function CashFlowWidget() {
     return `${sign}${formatted}`;
   };
 
-  const periodLabel = tWidgetSettings(
-    `widget_period.${config?.period ?? "current_month"}`,
-  );
-
   return (
     <ConfigurableWidget
       isConfiguring={isConfiguring}
@@ -77,15 +80,14 @@ export function CashFlowWidget() {
       }
     >
       <BaseWidget
-        title={tCashFlow("title")}
+        title={getTitle()}
         icon={<ScaleIcon className="size-4" />}
         description={
           <div className="flex flex-col gap-1">
             <p className="text-sm text-[#666666]">
               {tCashFlow("description", {
                 count: data?.result.netCashFlow ?? 0,
-              })}{" "}
-              · {periodLabel}
+              })}
             </p>
           </div>
         }

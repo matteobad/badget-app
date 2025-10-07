@@ -8,6 +8,7 @@ type Props = {
   minimumFractionDigits?: number;
   maximumFractionDigits?: number;
   locale?: string;
+  animated?: boolean;
 };
 
 export function AnimatedNumber({
@@ -16,9 +17,11 @@ export function AnimatedNumber({
   minimumFractionDigits,
   maximumFractionDigits,
   locale,
+  animated = true,
 }: Props) {
   return (
     <NumberFlow
+      animated={animated}
       value={value}
       format={{
         style: "currency",

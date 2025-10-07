@@ -21,6 +21,7 @@ import { getNetWorthQuery } from "../domain/bank-account/queries";
 import {
   getExpensesByCategoryQuery,
   getExpensesQuery,
+  getIncomeByCategoryQuery,
   getIncomeQuery,
   getTransactionsInPeriodQuery,
 } from "../domain/transaction/queries";
@@ -176,9 +177,28 @@ export async function getIncomeByMonth(
 
   const currency = incomeData.meta.currency ?? inputCurrency ?? "EUR";
 
+  // Get top spending category for the specified period using existing getSpending function
+  const incomeCategories = await getIncomeByCategoryQuery(db, {
+    organizationId,
+    from,
+    to,
+    currency: inputCurrency,
+  });
+
+  const topCategory = incomeCategories[0] ?? null;
+
   return {
     totalIncome: Math.round(totalIncome * 100) / 100,
     currency,
+    topCategory: topCategory
+      ? {
+          name: topCategory.name,
+          amount:
+            Math.round(((totalIncome * topCategory.percentage) / 100) * 100) /
+            100,
+          percentage: topCategory.percentage,
+        }
+      : null,
   };
 }
 

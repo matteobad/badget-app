@@ -7,7 +7,7 @@ import { useScopedI18n } from "~/shared/locales/client";
 import { LandmarkIcon } from "lucide-react";
 
 import { AnimatedNumber } from "../animated-number";
-import { BaseWidget } from "./base";
+import { BaseWidget, WidgetSkeleton } from "./base";
 
 export function AccountBalancesWidget() {
   const tScoped = useScopedI18n("widgets.account-balances");
@@ -18,7 +18,7 @@ export function AccountBalancesWidget() {
   const { data: space } = useSpaceQuery();
 
   // Fetch combined account balances
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getAccountBalances.queryOptions({
       currency: space?.baseCurrency ?? "EUR",
     }),
@@ -68,17 +68,27 @@ export function AccountBalancesWidget() {
   //   return `${data.count} ${typeLabel} accounts`;
   // };
 
+  if (isLoading) {
+    return <WidgetSkeleton />;
+  }
+
   return (
     <BaseWidget
       title={tScoped("title")}
       icon={<LandmarkIcon className="size-4" />}
-      description={tScoped("description", { count: accountCount })}
-      onClick={handleClick}
-      actions={tScoped("action")}
+      description={data && tScoped("description", { count: accountCount })}
+      onClick={data && handleClick}
+      actions={data && tScoped("action")}
     >
       <div className="flex flex-1 items-end gap-2">
         <span className="text-2xl">
-          <AnimatedNumber value={totalBalance} currency={currency} />
+          {data && (
+            <AnimatedNumber
+              animated={false}
+              value={totalBalance}
+              currency={currency}
+            />
+          )}
         </span>
       </div>
     </BaseWidget>

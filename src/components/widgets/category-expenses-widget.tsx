@@ -5,6 +5,7 @@ import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { useQuery } from "@tanstack/react-query";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { useSpaceQuery } from "~/hooks/use-space";
+import { useUserQuery } from "~/hooks/use-user";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { formatCompactAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -28,13 +29,15 @@ export function CategoryExpensesWidget() {
   const trpc = useTRPC();
 
   const { data: space } = useSpaceQuery();
+  const { data: user } = useUserQuery();
+
   const { config, isConfiguring, setIsConfiguring, saveConfig } =
     useConfigurableWidget("category-expenses");
 
   const { from, to } = useMemo(() => {
-    const period = config?.period ?? "current_month";
-    return getWidgetPeriodDates(period, 1);
-  }, [config?.period]);
+    const period = config?.period ?? "this_month";
+    return getWidgetPeriodDates(period, 1, user?.weekStartsOnMonday ? 1 : 0);
+  }, [config?.period, user?.weekStartsOnMonday]);
 
   const { data } = useQuery({
     ...trpc.widgets.getCategoryExpenses.queryOptions({

@@ -27,11 +27,14 @@ export const WIDGET = {
 export type WidgetType = (typeof WIDGET)[keyof typeof WIDGET];
 
 export type WidgetPeriod =
-  | "fiscal_ytd"
-  | "fiscal_year"
-  | "current_quarter"
-  | "trailing_12"
-  | "current_month";
+  | "this_month"
+  | "last_month"
+  | "this_week"
+  | "last_week"
+  | "this_year"
+  | "last_3_months"
+  | "last_6_months"
+  | "last_12_months";
 
 export type RevenueType = "net" | "gross";
 

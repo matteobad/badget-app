@@ -1,13 +1,17 @@
 import type { WidgetPeriod } from "~/server/cache/widget-preferences-cache";
+import type { Day } from "date-fns";
+import { UTCDate } from "@date-fns/utc";
 import {
   endOfMonth,
-  endOfQuarter,
+  endOfWeek,
+  format,
   startOfMonth,
-  startOfQuarter,
+  startOfWeek,
   subMonths,
+  subWeeks,
 } from "date-fns";
 
-import { getFiscalYearDates, getFiscalYearToDate } from "./fiscal-year";
+import { getFiscalYearToDate } from "./fiscal-year";
 
 interface DateRange {
   from: string; // ISO string
@@ -20,67 +24,91 @@ interface DateRange {
 export function getWidgetPeriodDates(
   period: WidgetPeriod | undefined,
   fiscalYearStartMonth: number | null | undefined,
-  referenceDate = new Date(),
+  weekStartsOn: Day = 1,
+  referenceDate = new UTCDate(new Date()),
 ): DateRange {
   switch (period) {
-    case "fiscal_ytd": {
+    case "this_month": {
+      const from = startOfMonth(referenceDate);
+      const to = endOfMonth(referenceDate);
+      return {
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
+      };
+    }
+
+    case "last_month": {
+      const from = subMonths(startOfMonth(referenceDate), 1);
+      const to = subMonths(endOfMonth(referenceDate), 1);
+      return {
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
+      };
+    }
+
+    case "this_week": {
+      const from = startOfWeek(referenceDate, { weekStartsOn });
+      const to = endOfWeek(referenceDate, { weekStartsOn });
+      return {
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
+      };
+    }
+
+    case "last_week": {
+      const from = subWeeks(startOfWeek(referenceDate, { weekStartsOn }), 1);
+      const to = subWeeks(endOfWeek(referenceDate, { weekStartsOn }), 1);
+      return {
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
+      };
+    }
+
+    case "this_year": {
       const { from, to } = getFiscalYearToDate(
         fiscalYearStartMonth,
         referenceDate,
       );
       return {
-        from: from.toISOString(),
-        to: to.toISOString(),
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
       };
     }
 
-    case "fiscal_year": {
-      const { from, to } = getFiscalYearDates(
-        fiscalYearStartMonth,
-        referenceDate,
-      );
-      return {
-        from: from.toISOString(),
-        to: to.toISOString(),
-      };
-    }
-
-    case "current_quarter": {
-      const from = startOfQuarter(referenceDate);
-      const to = endOfQuarter(referenceDate);
-      return {
-        from: from.toISOString(),
-        to: to.toISOString(),
-      };
-    }
-
-    case "trailing_12": {
-      const to = endOfMonth(referenceDate);
-      const from = startOfMonth(subMonths(to, 11));
-      return {
-        from: from.toISOString(),
-        to: to.toISOString(),
-      };
-    }
-
-    case "current_month": {
-      const from = startOfMonth(referenceDate);
+    case "last_3_months": {
+      const from = subMonths(startOfMonth(referenceDate), 2);
       const to = endOfMonth(referenceDate);
       return {
-        from: from.toISOString(),
-        to: to.toISOString(),
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
+      };
+    }
+
+    case "last_6_months": {
+      const from = subMonths(startOfMonth(referenceDate), 5);
+      const to = endOfMonth(referenceDate);
+      return {
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
+      };
+    }
+
+    case "last_12_months": {
+      const from = subMonths(startOfMonth(referenceDate), 11);
+      const to = endOfMonth(referenceDate);
+      return {
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
       };
     }
 
     default: {
-      // Default to fiscal YTD
-      const { from, to } = getFiscalYearToDate(
-        fiscalYearStartMonth,
-        referenceDate,
-      );
+      // Default to this month
+      const from = startOfMonth(referenceDate);
+      const to = endOfMonth(referenceDate);
       return {
-        from: from.toISOString(),
-        to: to.toISOString(),
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
       };
     }
   }

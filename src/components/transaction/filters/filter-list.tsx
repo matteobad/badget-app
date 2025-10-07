@@ -29,14 +29,10 @@ type FilterKey =
   | "amount_range"
   | "attachments"
   | "recurring"
-  | "statuses"
   | "categories"
   | "tags"
   | "accounts"
-  | "customers"
-  | "assignees"
-  | "owners"
-  | "status";
+  | "type";
 
 type FilterValue = {
   start: string;
@@ -44,14 +40,10 @@ type FilterValue = {
   amount_range: string;
   attachments: string;
   recurring: string[];
-  statuses: string[];
   categories: string[];
   tags: string[];
   accounts: string[];
-  customers: string[];
-  assignees: string[];
-  owners: string[];
-  status: string;
+  type: string;
 };
 
 interface FilterValueProps {
@@ -65,9 +57,7 @@ interface Props {
   onRemove: (filters: Record<string, null>) => void;
   categories?: { id: string; name: string; slug: string | null }[];
   accounts?: { id: string; name: string; currency: string }[];
-  members?: { id: string; name: string }[];
-  customers?: { id: string; name: string }[];
-  statusFilters?: { id: string; name: string }[];
+  typeFilters?: { id: string; name: string }[];
   attachmentsFilters?: { id: string; name: string }[];
   recurringFilters?: { id: string; name: string }[];
   tags?: { id: string; text: string; slug?: string }[];
@@ -81,7 +71,7 @@ export function FilterList({
   categories,
   accounts,
   tags,
-  statusFilters,
+  typeFilters,
   attachmentsFilters,
   recurringFilters,
   amountRange,
@@ -126,21 +116,10 @@ export function FilterList({
           .join(", ");
       }
 
-      case "statuses": {
-        const statusesValue = value as FilterValue["statuses"];
-        if (!statusesValue) return null;
-        return statusesValue
-          .map(
-            (status) =>
-              statusFilters?.find((filter) => filter.id === status)?.name,
-          )
-          .join(", ");
-      }
-
-      case "status": {
-        const statusValue = value as FilterValue["status"];
-        if (!statusValue) return null;
-        return statusFilters?.find((filter) => filter.id === statusValue)?.name;
+      case "type": {
+        const typeValue = value as FilterValue["type"];
+        if (!typeValue) return null;
+        return typeFilters?.find((filter) => filter.id === typeValue)?.name;
       }
 
       case "categories": {

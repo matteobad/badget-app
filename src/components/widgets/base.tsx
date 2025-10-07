@@ -2,6 +2,7 @@ import { useLongPress } from "~/hooks/use-long-press";
 import { cn } from "~/lib/utils";
 import { GripVerticalIcon, SettingsIcon } from "lucide-react";
 
+import { Skeleton } from "../ui/skeleton";
 import { useIsCustomizing, useWidgetActions } from "./widget-provider";
 
 interface BaseWidgetProps {
@@ -48,7 +49,7 @@ export function BaseWidget({
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">{icon}</span>
-            <h3 className="text-xs font-medium text-muted-foreground">
+            <h3 className="text-xs font-medium text-muted-foreground lowercase first-letter:uppercase">
               {title}
             </h3>
           </div>
@@ -84,6 +85,24 @@ export function BaseWidget({
       <span className="text-xs text-muted-foreground transition-colors duration-300 group-hover:text-primary">
         {actions}
       </span>
+    </div>
+  );
+}
+
+export function WidgetSkeleton() {
+  return (
+    <div className="group flex h-[200px] flex-col justify-between gap-2 border p-4 transition-all duration-300 dark:border-[#1d1d1d] dark:bg-[#0c0c0c] dark:hover:border-[#222222] dark:hover:bg-[#0f0f0f]">
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Skeleton className="size-4" />
+            <Skeleton className="h-3 w-[120px]" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-1" />
+      <Skeleton className="h-3 w-[100px]" />
     </div>
   );
 }

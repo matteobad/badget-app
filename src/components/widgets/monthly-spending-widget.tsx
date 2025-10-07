@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useSpaceQuery } from "~/hooks/use-space";
+import { useUserQuery } from "~/hooks/use-user";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { getWidgetPeriodDates } from "~/shared/helpers/widget-period";
@@ -11,28 +12,31 @@ import { useScopedI18n } from "~/shared/locales/client";
 import { format } from "date-fns";
 import { TrendingDownIcon } from "lucide-react";
 
-import { FormatAmount } from "../format-amount";
-import { BaseWidget } from "./base";
+import { AnimatedNumber } from "../animated-number";
+import { BaseWidget, WidgetSkeleton } from "./base";
 import { ConfigurableWidget } from "./configurable-widget";
 import { useConfigurableWidget } from "./use-configurable-widget";
 import { WidgetSettings } from "./widget-settings";
 
 export function MonthlySpendingWidget() {
-  const tScoped = useScopedI18n("widgets.monthly-spending");
+  const tSpending = useScopedI18n("widgets.monthly-spending");
+  const tWidgetSettings = useScopedI18n("widgets.settings");
 
   const trpc = useTRPC();
   const router = useRouter();
 
   const { data: space } = useSpaceQuery();
-  const { config, isConfiguring, setIsConfiguring, saveConfig } =
+  const { data: user } = useUserQuery();
+
+  const { config, isConfiguring, setIsConfiguring, saveConfig, isUpdating } =
     useConfigurableWidget("monthly-spending");
 
   const { from, to } = useMemo(() => {
-    const period = config?.period ?? "current_month";
-    return getWidgetPeriodDates(period, 1);
-  }, [config?.period]);
+    const period = config?.period ?? "this_month";
+    return getWidgetPeriodDates(period, 1, user?.weekStartsOnMonday ? 1 : 0);
+  }, [config?.period, user?.weekStartsOnMonday]);
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getMonthlyExpenses.queryOptions({
       from: format(from, "yyyy-MM-dd"),
       to: format(to, "yyyy-MM-dd"),
@@ -43,23 +47,34 @@ export function MonthlySpendingWidget() {
 
   const spending = data?.result;
 
+  const getTitle = () => {
+    const periodLabel = tWidgetSettings(
+      `widget_period.${config?.period ?? "this_month"}`,
+    );
+    return `${tSpending("title")} ${periodLabel}`;
+  };
+
   const getDescription = () => {
     if (!spending || spending.totalSpending === 0) {
-      return tScoped("description_empty");
+      return tSpending("description_empty");
     }
 
     if (spending.topCategory) {
       const topCategory = spending.topCategory.name;
       const percentage = spending.topCategory.percentage.toFixed(0);
-      return tScoped("description", { category: topCategory, percentage });
+      return tSpending("description", { category: topCategory, percentage });
     }
 
-    return tScoped("description_default");
+    return tSpending("description_default");
   };
 
   const handleClick = () => {
-    router.push("/transactions?type=expense");
+    router.push(`/transactions?type=expense&start=${from}&end=${to}`);
   };
+
+  if (isLoading || isUpdating) {
+    return <WidgetSkeleton />;
+  }
 
   return (
     <ConfigurableWidget
@@ -75,22 +90,23 @@ export function MonthlySpendingWidget() {
       }
     >
       <BaseWidget
-        title={tScoped("title")}
+        title={getTitle()}
         icon={<TrendingDownIcon className="size-4" />}
-        description={getDescription()}
+        description={data && getDescription()}
+        onClick={data && handleClick}
+        actions={data && tSpending("action")}
         onConfigure={() => setIsConfiguring(true)}
-        onClick={handleClick}
-        actions={tScoped("action")}
       >
         <div className="flex flex-1 items-end gap-2">
-          {spending && spending.totalSpending > 0 && (
-            <p className="text-2xl">
-              <FormatAmount
-                amount={spending.totalSpending}
+          <span className="text-2xl">
+            {spending && (
+              <AnimatedNumber
+                animated={false}
+                value={spending.totalSpending}
                 currency={spending.currency}
               />
-            </p>
-          )}
+            )}
+          </span>
         </div>
       </BaseWidget>
     </ConfigurableWidget>
