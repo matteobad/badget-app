@@ -9,10 +9,9 @@ import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
-import { endOfMonth, format, startOfMonth } from "date-fns";
 import { CircleDashed } from "lucide-react";
 
-import { BaseWidget } from "./base";
+import { BaseWidget, WidgetSkeleton } from "./base";
 
 export function UncategorizedTransactionsSkeleton() {
   return (
@@ -34,7 +33,7 @@ export function UncategorizedTransactionsWidget() {
   const trpc = useTRPC();
   const router = useRouter();
 
-  const { data } = useQuery(
+  const { data, isLoading } = useQuery(
     trpc.widgets.getUncategorized.queryOptions({
       currency: space?.baseCurrency ?? "EUR",
       ...WIDGET_POLLING_CONFIG,
@@ -73,6 +72,10 @@ export function UncategorizedTransactionsWidget() {
   const handleClick = () => {
     router.push(`/transactions?categories=uncategorized`);
   };
+
+  if (isLoading) {
+    return <WidgetSkeleton />;
+  }
 
   return (
     <BaseWidget

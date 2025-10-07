@@ -115,10 +115,14 @@ export default {
     },
     "recurring-expenses": {
       title: "Spese ricorrenti",
-      action: "Vedi spese ricorrenti",
-      content: {
-        label: "Spese ricorrenti questo mese",
+      description: {
+        part_1: "Hai ",
+        part_2: "{count} transazioni ricorrenti ",
+        part_3: " per un totale di ",
       },
+      month: "mese",
+      description_empty: "Non hai spese ricorrenti",
+      action: "Vedi spese ricorrenti",
     },
     "uncategorized-transactions": {
       title: "Transazioni non categorizzate",

@@ -1713,10 +1713,9 @@ export type GetRecurringExpensesParams = {
 interface RecurringExpenseItem {
   name: string;
   amount: number;
-  frequency: "weekly" | "monthly" | "annually" | "irregular";
+  frequency: TransactionFrequencyType;
   categoryName: string | null;
   categorySlug: string | null;
-  lastDate: string;
 }
 
 export async function getRecurringExpensesQuery(
@@ -1735,16 +1734,16 @@ export async function getRecurringExpensesQuery(
     lt(transaction_table.amount, 0), // Expenses only
   ];
 
+  // TODO: group by name won't work if name are different between entries
   // Get all recurring expenses grouped by name and frequency
   const recurringExpenses = await db
     .select({
       name: transaction_table.name,
+      date: transaction_table.date,
       frequency: transaction_table.frequency,
       categoryName: transaction_category_table.name,
       categorySlug: transaction_category_table.slug,
-      amount: sql<number>`AVG(ABS(${transaction_table.amount}))`,
-      count: sql<number>`COUNT(*)::int`,
-      lastDate: sql<string>`MAX(${transaction_table.date})`,
+      amount: sql<number>`ABS(${transaction_table.amount})`,
     })
     .from(transaction_table)
     .leftJoin(
@@ -1755,14 +1754,7 @@ export async function getRecurringExpensesQuery(
       ),
     )
     .where(and(...conditions))
-    .groupBy(
-      transaction_table.name,
-      transaction_table.frequency,
-      transaction_category_table.name,
-      transaction_category_table.slug,
-    )
-    .orderBy(sql`AVG(ABS(${transaction_table.amount})) DESC`)
-    .limit(10);
+    .orderBy(desc(transaction_table.date));
 
   // Calculate totals by frequency
   const frequencyTotals = {
@@ -1776,11 +1768,8 @@ export async function getRecurringExpensesQuery(
 
   for (const expense of recurringExpenses) {
     const amount = Number(expense.amount);
-    const frequency = (expense.frequency ?? "irregular") as
-      | "weekly"
-      | "monthly"
-      | "annually"
-      | "irregular";
+    const frequency = (expense.frequency ??
+      "irregular") as TransactionFrequencyType;
 
     // Convert all to monthly equivalent for comparison
     let monthlyEquivalent = 0;
@@ -1813,26 +1802,27 @@ export async function getRecurringExpensesQuery(
   const expenses: RecurringExpenseItem[] = recurringExpenses.map((exp) => ({
     name: exp.name,
     amount: Number(Number(exp.amount).toFixed(2)),
-    frequency: (exp.frequency ?? "irregular") as
-      | "weekly"
-      | "monthly"
-      | "annually"
-      | "irregular",
+    frequency: (exp.frequency ?? "irregular") as TransactionFrequencyType,
     categoryName: exp.categoryName,
     categorySlug: exp.categorySlug,
-    lastDate: exp.lastDate,
   }));
+
+  // Calculate the total of all recurring expenses
+  const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
 
   return {
     summary: {
-      totalMonthlyEquivalent: Number(totalRecurringAmount.toFixed(2)),
-      totalExpenses: recurringExpenses.length,
+      totalMonthlyEquivalent: Number(
+        (totalRecurringAmount / recurringExpenses.length).toFixed(2),
+      ),
+      totalExpensesAmount: total,
+      totalExpensesCount: recurringExpenses.length,
       currency,
       byFrequency: {
-        weekly: Number((frequencyTotals.weekly || 0).toFixed(2)),
-        monthly: Number((frequencyTotals.monthly || 0).toFixed(2)),
-        annually: Number((frequencyTotals.annually || 0).toFixed(2)),
-        irregular: Number((frequencyTotals.irregular || 0).toFixed(2)),
+        weekly: Number(frequencyTotals.weekly.toFixed(2)),
+        monthly: Number(frequencyTotals.monthly.toFixed(2)),
+        annually: Number(frequencyTotals.annually.toFixed(2)),
+        irregular: Number(frequencyTotals.irregular.toFixed(2)),
       },
     },
     expenses,

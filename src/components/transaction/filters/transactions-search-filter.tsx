@@ -474,17 +474,24 @@ export function TransactionsSearchFilter() {
         </FilterMenuItem>
 
         <FilterMenuItem icon={Repeat1Icon} label="Recurring">
-          {recurringFilters.map(({ id, name }) => (
-            <FilterCheckboxItem
-              key={id}
-              id={id}
-              name={name}
-              checked={filter?.recurring?.includes(id)}
-              onCheckedChange={() =>
-                updateArrayFilter(id, filter.recurring, setFilter, "recurring")
-              }
-            />
-          ))}
+          <div className="max-h-[280px] w-[200px] p-1">
+            {recurringFilters.map(({ id, name }) => (
+              <FilterCheckboxItem
+                key={id}
+                id={id}
+                name={name}
+                checked={filter?.recurring?.includes(id)}
+                onCheckedChange={() =>
+                  updateArrayFilter(
+                    id,
+                    filter.recurring,
+                    setFilter,
+                    "recurring",
+                  )
+                }
+              />
+            ))}
+          </div>
         </FilterMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

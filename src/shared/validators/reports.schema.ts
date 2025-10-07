@@ -49,5 +49,4 @@ export const getUncategorizedSchema = z
       example: "USD",
     }),
   })
-  .optional()
   .openapi("getUncategorizedSchema");

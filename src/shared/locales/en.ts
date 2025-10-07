@@ -112,10 +112,14 @@ export default {
     },
     "recurring-expenses": {
       title: "Recurring expenses",
-      action: "View all recurring",
-      content: {
-        label: "Recurring this month",
+      description: {
+        part_1: "You have ",
+        part_2: "{count} uncategorized transactions ",
+        part_3: " for a total of ",
       },
+      month: "month",
+      description_empty: "No recurring expenses",
+      action: "View all recurring",
     },
     "uncategorized-transactions": {
       title: "Uncategorized transactions",
