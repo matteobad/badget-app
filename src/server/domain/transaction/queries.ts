@@ -1845,8 +1845,8 @@ export async function getRecurringExpensesQuery(
 
 export type GetUncategorizedTransactionsParams = {
   organizationId: string;
-  from: string;
-  to: string;
+  from?: string;
+  to?: string;
   currency?: string;
 };
 
@@ -1856,6 +1856,17 @@ export async function getUncategorizedTransactionsQuery(
 ) {
   const { organizationId, from, to, currency } = params;
 
+  const conditions = [
+    eq(transaction_table.organizationId, organizationId),
+    or(
+      eq(transaction_table.categorySlug, "uncategorized"),
+      isNull(transaction_table.categorySlug),
+    ),
+  ];
+
+  if (from) conditions.push(gte(transaction_table.date, from));
+  if (to) conditions.push(lte(transaction_table.date, to));
+
   // TODO: consider splits
   const [result] = await db
     .select({
@@ -1863,14 +1874,7 @@ export async function getUncategorizedTransactionsQuery(
       count: count(transaction_table.id),
     })
     .from(transaction_table)
-    .where(
-      and(
-        eq(transaction_table.organizationId, organizationId),
-        gte(transaction_table.date, from),
-        lte(transaction_table.date, to),
-        eq(transaction_table.categorySlug, "uncategorized"), // spese non categorizzate
-      ),
-    );
+    .where(and(...conditions));
 
   return {
     summary: {

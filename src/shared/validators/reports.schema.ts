@@ -36,11 +36,11 @@ export const getMonthlySpendingSchema = z
 
 export const getUncategorizedSchema = z
   .object({
-    from: z.string().openapi({
+    from: z.string().optional().openapi({
       description: "Start date (ISO 8601 format)",
       example: "2023-01-01",
     }),
-    to: z.string().openapi({
+    to: z.string().optional().openapi({
       description: "End date (ISO 8601 format)",
       example: "2023-12-31",
     }),
@@ -49,4 +49,5 @@ export const getUncategorizedSchema = z
       example: "USD",
     }),
   })
+  .optional()
   .openapi("getUncategorizedSchema");

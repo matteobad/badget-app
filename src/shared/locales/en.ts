@@ -124,6 +124,7 @@ export default {
         part_2: "{count} uncategorized transactions ",
         part_3: " for a total of ",
       },
+      description_empty: "Great! All of your transactions are categorized",
       action: "See all uncategorized",
     },
     "saving-analysis": {

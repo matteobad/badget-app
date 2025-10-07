@@ -127,6 +127,7 @@ export default {
         part_2: "{count} transazioni non categorizzate ",
         part_3: " per un totale di ",
       },
+      description_empty: "Ottimo! Tutte le transazioni sono categorizzate",
       action: "Vedi tutte",
     },
     "saving-analysis": {
