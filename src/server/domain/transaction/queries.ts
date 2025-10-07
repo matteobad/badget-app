@@ -19,6 +19,7 @@ import {
   transaction_table,
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
+import { buildSearchQuery } from "~/server/db/utils";
 import {
   eachMonthOfInterval,
   endOfMonth,
@@ -88,11 +89,13 @@ export async function getTransactionsQuery(
     if (!Number.isNaN(numericQ)) {
       whereConditions.push(sql`${transaction_table.amount} = ${numericQ}`);
     } else {
-      // const searchQuery = buildSearchQuery(q);
-      // const ftsCondition = sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`;
+      const searchQuery = buildSearchQuery(q);
+      const ftsCondition = sql`to_tsquery('english', ${searchQuery}) @@ ${transaction_table.ftsVector}`;
       const nameCondition = sql`${transaction_table.name} ILIKE '%' || ${q} || '%'`;
       const descriptionCondition = sql`${transaction_table.description} ILIKE '%' || ${q} || '%'`;
-      whereConditions.push(or(nameCondition, descriptionCondition));
+      whereConditions.push(
+        or(ftsCondition, nameCondition, descriptionCondition),
+      );
     }
   }
 

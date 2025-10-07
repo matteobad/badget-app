@@ -4,11 +4,11 @@ import { google } from "@ai-sdk/google";
 import { TZDate } from "@date-fns/tz";
 import { Experimental_Agent as Agent, stepCountIs } from "ai";
 
-import { getAccountsTool } from "./domains/expenses/tools/get-accounts-tool";
-import { getInstitutionsTool } from "./domains/expenses/tools/get-institutions-tool";
-import { getTransacationsCategoriesTool } from "./domains/expenses/tools/get-transactions-categories-tool";
-import { getTransacationsTagsTool } from "./domains/expenses/tools/get-transactions-tags-tool";
-import { getTransactionsTool } from "./domains/expenses/tools/get-transactions-tool";
+import { getAccountsTool } from "./domains/accounts/tools/get-accounts-tool";
+import { getInstitutionsTool } from "./domains/accounts/tools/get-institutions-tool";
+import { getTransacationsCategoriesTool } from "./domains/transactions/tools/get-transactions-categories-tool";
+import { getTransacationsTagsTool } from "./domains/transactions/tools/get-transactions-tags-tool";
+import { getTransactionsTool } from "./domains/transactions/tools/get-transactions-tool";
 import { safeValue } from "./utils/safe-value";
 import { shouldForceStop } from "./utils/streaming-utils";
 

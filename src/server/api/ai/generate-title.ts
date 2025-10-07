@@ -1,48 +1,16 @@
 import type { ChatUserContext } from "~/server/cache/chat-cache";
 import { google } from "@ai-sdk/google";
 import { TZDate } from "@date-fns/tz";
-import { Experimental_Agent as Agent, generateObject } from "ai";
+import { generateObject } from "ai";
 import { z } from "zod";
 
-import { safeValue } from "../../utils/safe-value";
+import { safeValue } from "./utils/safe-value";
 
 const MIN_CONTEXT_LENGTH = 10;
 
 type Params = Omit<ChatUserContext, "organizationId" | "userId"> & {
   message: string;
 };
-
-export const chatTitleAgent = new Agent({
-  model: google("gemini-2.5-flash-lite"),
-  temperature: 0.2,
-  system: `
-    You will generate a short, natural title based on the user's message.
-    - Keep titles under 50 characters
-    - Use natural, conversational language that sounds like what a user would say
-    - Avoid technical jargon or formal business terms
-    - Make titles simple, clear, and personal
-    - Return only the title, nothing else
-
-    Examples of good natural titles:
-    - "Recent spending"
-    - "Groceries this month"
-    - "Budget check"
-    - "Savings progress"
-    - "My expenses today"
-    - "Vacation fund"
-    - "Bills overview"
-    - "Monthly budget"
-    - "Spending trends"
-    - "Bank balances"
-
-    Avoid these patterns:
-    - "Advanced financial analysis"
-    - "Comprehensive spending report"
-    - "Detailed reconciliation overview"
-    - "Sophisticated metrics"
-    - "Complex financial insights"
-  `,
-});
 
 export const generateTitle = async ({
   message,

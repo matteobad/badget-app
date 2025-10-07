@@ -1,11 +1,12 @@
 import { unauthorized } from "next/navigation";
 import { NextResponse } from "next/server";
 import { setContext } from "~/server/api/ai/context";
-import { chatTitleAgent } from "~/server/api/ai/domains/chat-title/agent";
+import { generateTitle } from "~/server/api/ai/generate-title";
 import { generateSystemPrompt, mainAgent } from "~/server/api/ai/main-agent";
 import { extractTextContent } from "~/server/api/ai/utils/extract-text-content";
 import { getUserContext } from "~/server/api/ai/utils/get-user-context";
 import { hasEnoughContent } from "~/server/api/ai/utils/has-enough-content";
+import { suggestedActionsCache } from "~/server/cache/suggested-actions-cache";
 import { db } from "~/server/db";
 import {
   getChatById,
@@ -67,6 +68,38 @@ export async function POST(req: Request) {
     const messageMetadata = message.metadata;
     const isToolCallMessage = messageMetadata?.toolCall;
 
+    // Track suggested action usage if this is a tool call from suggested actions
+    if (isToolCallMessage && messageMetadata?.toolCall) {
+      const { toolName } = messageMetadata.toolCall;
+
+      // Map tool names to suggested action IDs
+      // This is a simple mapping - you might want to make this more sophisticated
+      const toolNameToActionId: Record<string, string> = {
+        getBurnRate: "burn-rate", // Could be multiple actions that use this tool
+        getBurnRateAnalysis: "health-report",
+        getTransactions: "latest-transactions",
+      };
+
+      // Try to find matching action ID for this tool
+      // For now, we'll use a heuristic based on the tool name
+      const possibleActionId = toolNameToActionId[toolName];
+      if (possibleActionId) {
+        // Increment usage asynchronously (don't block the response)
+        suggestedActionsCache
+          .incrementUsage(organizationId, userId, possibleActionId)
+          .catch((error) => {
+            console.error({
+              msg: "Failed to track suggested action usage",
+              userId,
+              organizationId,
+              toolName,
+              actionId: possibleActionId,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          });
+      }
+    }
+
     const isWebSearchMessage = messageMetadata?.webSearch;
 
     const previousMessagesList = previousMessages?.messages ?? [];
@@ -109,12 +142,18 @@ export async function POST(req: Request) {
 
     if (shouldGenerateTitle) {
       try {
-        // Use combined text from all messages for better context
-        const result = await chatTitleAgent.generate({
-          prompt: extractTextContent(allMessages),
-        });
+        const messageContent = extractTextContent(allMessages);
 
-        generatedTitle = result.text;
+        // Use combined text from all messages for better context
+        generatedTitle = await generateTitle({
+          message: messageContent,
+          organizationName: userContext.organizationName,
+          fullName: userContext.fullName,
+          country: userContext.country,
+          baseCurrency: userContext.baseCurrency,
+          city: userContext.city,
+          timezone: userContext.timezone,
+        });
 
         console.info({
           msg: "Chat title generated",

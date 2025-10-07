@@ -8,8 +8,8 @@ import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { z } from "zod";
 
 import { getContext } from "../../../context";
+import { generateFollowupQuestions } from "../../../utils/generate-followup-questions";
 import { safeValue } from "../../../utils/safe-value";
-import { generateFollowupQuestions } from "../../followup-questions/agent";
 
 export const getExpensesBreakdownSchema = z.object({
   from: z
