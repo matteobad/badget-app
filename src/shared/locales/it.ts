@@ -99,10 +99,8 @@ export default {
     },
     "net-worth": {
       title: "Patrimonio netto",
-      description: {
-        part_1: "Il tuo",
-        part_2: "patrimonio netto è {value}",
-      },
+      description:
+        "<b>Hai {value}</b>. Una variazione del <b>{percentage}</b> rispetto al periodo",
       action: "Vedi andamento",
       settings: {
         "1M": "1 Mese",

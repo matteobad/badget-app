@@ -297,10 +297,32 @@ export async function getNetWorthQuery(
         ) / rawData.length
       : 0;
 
+  // Compute delta percentage between start and end net worth and return as a positive or negative number (e.g., 10 or -15)
+  let deltaNetWorth = 0;
+  if (rawData && rawData.length > 1) {
+    const startNetWorth = parseFloat(rawData[0]?.net_worth ?? "0");
+    const endNetWorth = parseFloat(
+      rawData[rawData.length - 1]?.net_worth ?? "0",
+    );
+    let percentChange = 0;
+    if (startNetWorth !== 0) {
+      percentChange =
+        ((endNetWorth - startNetWorth) / Math.abs(startNetWorth)) * 100;
+    } else {
+      // If start is zero, avoid division by zero; show 0 or 100% if end is not zero
+      percentChange = endNetWorth !== 0 ? 100 : 0;
+    }
+    deltaNetWorth = Math.round(percentChange);
+  } else if (rawData && rawData.length === 1) {
+    // If only one data point, delta is 0
+    deltaNetWorth = 0;
+  }
+
   return {
     summary: {
       netWorth: netWorth,
       averageNetWorth: averageNetWorth,
+      deltaNetWorth: deltaNetWorth,
       currency: rawData?.at(0)?.currency ?? currency,
     },
     meta: {

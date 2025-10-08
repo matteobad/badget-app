@@ -108,6 +108,7 @@ export interface BaseChartProps {
   height?: number;
   className?: string;
   showAnimation?: boolean;
+  showTooltip?: boolean;
 }
 
 // Sample data generators for development

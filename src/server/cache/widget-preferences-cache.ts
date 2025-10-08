@@ -63,9 +63,24 @@ export const DEFAULT_WIDGET_ORDER: WidgetType[] = [
   "income-forecast",
 ];
 
+export const DEFAULT_WIDGET_CONFIGS: Record<string, WidgetConfig> = {
+  "account-balances": {},
+  "cash-flow": { period: "this_month" },
+  "net-worth": { period: "last_3_months" },
+  "saving-analysis": { period: "last_6_months" },
+  "category-expenses": { period: "this_month" },
+  "monthly-income": { period: "this_month" },
+  "monthly-spending": { period: "this_month" },
+  "recurring-expenses": {},
+  "uncategorized-transactions": {},
+  "recent-documents": {},
+  "income-forecast": {},
+};
+
 export const DEFAULT_WIDGET_PREFERENCES: WidgetPreferences = {
   primaryWidgets: DEFAULT_WIDGET_ORDER.slice(0, 7), // First 7 widgets
   availableWidgets: DEFAULT_WIDGET_ORDER.slice(7), // Remaining widget(s)
+  widgetConfigs: DEFAULT_WIDGET_CONFIGS,
 };
 
 export const widgetPreferencesCache = {

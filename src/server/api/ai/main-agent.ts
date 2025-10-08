@@ -6,6 +6,8 @@ import { Experimental_Agent as Agent, stepCountIs } from "ai";
 
 import { getAccountsTool } from "./domains/accounts/tools/get-accounts-tool";
 import { getInstitutionsTool } from "./domains/accounts/tools/get-institutions-tool";
+import { getExpensesBreakdownTool } from "./domains/reports/tools/get-expenses-breakdown-tool";
+import { getNetWorthAnalysisTool } from "./domains/reports/tools/get-net-worth-analysis-tool";
 import { getTransacationsCategoriesTool } from "./domains/transactions/tools/get-transactions-categories-tool";
 import { getTransacationsTagsTool } from "./domains/transactions/tools/get-transactions-tags-tool";
 import { getTransactionsTool } from "./domains/transactions/tools/get-transactions-tool";
@@ -113,15 +115,16 @@ export const mainAgent = new Agent({
     return shouldForceStop(step);
   },
   tools: {
-    // getNetWorthAnalysis: getNetWorthAnalysisTool,
     getAccounts: getAccountsTool,
     // getDocuments: getDocumentsTool,
     getInstitutions: getInstitutionsTool,
     getTransactions: getTransactionsTool,
     getTransactionsCategories: getTransacationsCategoriesTool,
     getTransactionsTags: getTransacationsTagsTool,
-    // getExpensesBreakdown: getExpensesBreakdownTool,
     // getForecast: getForecastTool,
+    // reposts tools
+    getNetWorthAnalysis: getNetWorthAnalysisTool,
+    getExpensesBreakdown: getExpensesBreakdownTool,
   },
 });
 

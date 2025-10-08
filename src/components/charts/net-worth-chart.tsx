@@ -84,6 +84,8 @@ export function NetWorthChart({
   showXAxis,
   showYAxis,
   className = "",
+  showAnimation,
+  showTooltip = true,
 }: NetWorthChartProps) {
   // Use the compact tick formatter
   const tickFormatter = createCompactTickFormatter();
@@ -171,10 +173,12 @@ export function NetWorthChart({
               dataKey="amount"
             />
 
-            <Tooltip
-              content={<CustomTooltip currency={currency} locale={locale} />}
-              wrapperStyle={{ zIndex: 9999 }}
-            />
+            {showTooltip && (
+              <Tooltip
+                content={<CustomTooltip currency={currency} locale={locale} />}
+                wrapperStyle={{ zIndex: 9999 }}
+              />
+            )}
 
             <Area
               type="monotone"
@@ -182,7 +186,7 @@ export function NetWorthChart({
               stroke="url(#lineGradient)"
               strokeWidth={2}
               fill="url(#netWorthPattern)"
-              isAnimationActive={true}
+              isAnimationActive={showAnimation}
             />
             <Line
               type="monotone"

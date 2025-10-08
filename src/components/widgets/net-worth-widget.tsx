@@ -1,65 +1,23 @@
 "use client";
 
+import { useMemo } from "react";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
-import { UTCDate } from "@date-fns/utc";
 import { useQuery } from "@tanstack/react-query";
 import { NetWorthChart } from "~/components/charts/net-worth-chart";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { useSpaceQuery } from "~/hooks/use-space";
+import { useUserQuery } from "~/hooks/use-user";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { getWidgetPeriodDates } from "~/shared/helpers/widget-period";
 import { useScopedI18n } from "~/shared/locales/client";
-import { startOfDay, subMonths } from "date-fns";
 import { LineChartIcon } from "lucide-react";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import { BaseWidget } from "./base";
-
-const PERIOD = {
-  "1M": "1M",
-  "3M": "3M",
-  "6M": "6M",
-  "1Y": "1Y",
-} as const;
-
-export function NetWorthWidgetSettings() {
-  const tNetWorthSettings = useScopedI18n("widgets.net-worth.settings");
-
-  // const { draftSettings, setDraftSettings } = useWidget();
-
-  return (
-    <div className="flex w-full flex-col gap-2">
-      <Select
-      // onValueChange={(value) => {
-      //   const newPeriod = value as PeriodType;
-      //   const option = options[newPeriod] ?? options["1M"];
-      //   setDraftSettings({ ...draftSettings, period: newPeriod, ...option });
-      // }}
-      // defaultValue={draftSettings?.period ?? PERIOD["1M"]}
-      >
-        <SelectTrigger className="w-full" size="sm">
-          <SelectValue placeholder="Periodo" />
-        </SelectTrigger>
-        <SelectContent>
-          {Object.values(PERIOD).map((period) => {
-            return (
-              <SelectItem value={period} key={period}>
-                {tNetWorthSettings(period)}
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
+import { BaseWidget, WidgetSkeleton } from "./base";
+import { ConfigurableWidget } from "./configurable-widget";
+import { useConfigurableWidget } from "./use-configurable-widget";
+import { WidgetSettings } from "./widget-settings";
 
 export function NetWorthWidget() {
   const { sendMessage } = useChatActions();
@@ -68,18 +26,66 @@ export function NetWorthWidget() {
   const chatId = useChatId();
 
   const tNetWorth = useScopedI18n("widgets.net-worth");
+  const tSettings = useScopedI18n("widgets.settings");
 
-  const { data: space } = useSpaceQuery();
   const trpc = useTRPC();
 
-  const { data } = useQuery({
+  const { data: space } = useSpaceQuery();
+  const { data: user } = useUserQuery();
+
+  const { config, isConfiguring, setIsConfiguring, saveConfig, isUpdating } =
+    useConfigurableWidget("net-worth");
+
+  const { from, to } = useMemo(() => {
+    const period = config?.period ?? "last_3_months";
+    return getWidgetPeriodDates(period, 1, user?.weekStartsOnMonday ? 1 : 0);
+  }, [config?.period, user?.weekStartsOnMonday]);
+
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getNetWorth.queryOptions({
-      from: subMonths(startOfDay(new UTCDate(new Date())), 1).toISOString(),
-      to: startOfDay(new UTCDate(new Date())).toISOString(),
-      currency: space?.baseCurrency ?? undefined,
+      from,
+      to,
+      currency: space?.baseCurrency ?? "EUR",
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  const netWorthData = data?.result;
+
+  const getTitle = () => {
+    const periodLabel = tSettings(
+      `widget_period.${config?.period ?? "this_month"}`,
+    );
+    return `${tNetWorth("title")} ${periodLabel}`;
+  };
+
+  const getDescription = () => {
+    const value = formatAmount({
+      amount: netWorthData?.summary.netWorth ?? 0,
+      currency: "EUR",
+      maximumFractionDigits: 0,
+    });
+    const percentage =
+      typeof netWorthData?.summary.deltaNetWorth === "number"
+        ? new Intl.NumberFormat(undefined, {
+            signDisplay: "always",
+            maximumFractionDigits: 0,
+            minimumFractionDigits: 0,
+          }).format(netWorthData.summary.deltaNetWorth) + "%"
+        : undefined;
+
+    return (
+      <div
+        className="text-sm [&>b]:font-medium"
+        dangerouslySetInnerHTML={{
+          __html: tNetWorth("description", {
+            value,
+            percentage,
+          }),
+        }}
+      />
+    );
+  };
 
   const handleViewAnalysis = () => {
     if (!chatId || !data?.toolCall) return;
@@ -95,44 +101,44 @@ export function NetWorthWidget() {
     });
   };
 
-  return (
-    <BaseWidget
-      title={tNetWorth("title")}
-      icon={<LineChartIcon className="size-4 text-muted-foreground" />}
-      description={
-        <div className="text-sm">
-          <span className="text-muted-foreground">
-            {tNetWorth("description.part_1")}{" "}
-          </span>
-          <span className="font-medium text-primary">
-            {tNetWorth("description.part_2", {
-              value: formatAmount({
-                amount: data?.result?.summary?.netWorth ?? 0,
-                currency:
-                  data?.result?.summary?.currency ??
-                  space?.baseCurrency ??
-                  "EUR",
-              }),
-            })}
-          </span>
-        </div>
-      }
-      actions={tNetWorth("action")}
-      onClick={handleViewAnalysis}
-    >
-      {/* View mode */}
-      <NetWorthChart
-        className="pt-2"
-        data={data?.result?.result ?? []}
-        height={70}
-        showAnimation={true}
-        showLegend={false}
-        showXAxis={false}
-        showYAxis={false}
-      />
+  if (isLoading || isUpdating) {
+    return <WidgetSkeleton />;
+  }
 
-      {/* Edit mode */}
-      {/* <NetWorthWidgetSettings /> */}
-    </BaseWidget>
+  return (
+    <ConfigurableWidget
+      isConfiguring={isConfiguring}
+      settings={
+        <WidgetSettings
+          config={config}
+          onSave={saveConfig}
+          onCancel={() => setIsConfiguring(false)}
+          showPeriod
+          showRevenueType={false}
+        />
+      }
+    >
+      <BaseWidget
+        title={getTitle()}
+        icon={<LineChartIcon className="size-4 text-muted-foreground" />}
+        description={getDescription()}
+        actions={data && tNetWorth("action")}
+        onClick={data && handleViewAnalysis}
+        onConfigure={() => setIsConfiguring(true)}
+      >
+        <div className="flex flex-1 items-end gap-2">
+          <NetWorthChart
+            className="pb-2 [&_svg]:cursor-pointer"
+            data={netWorthData?.result ?? []}
+            height={56}
+            showAnimation={false}
+            showLegend={false}
+            showXAxis={false}
+            showYAxis={false}
+            showTooltip={false}
+          />
+        </div>
+      </BaseWidget>
+    </ConfigurableWidget>
   );
 }

@@ -96,10 +96,8 @@ export default {
     },
     "net-worth": {
       title: "Net worth",
-      description: {
-        part_1: "Your",
-        part_2: "net worth is {value}",
-      },
+      description:
+        "<b>You have {value}</b>. A <b>{percentage}</b> delta from previous period",
       action: "See trend",
       settings: {
         "1M": "1 Mese",

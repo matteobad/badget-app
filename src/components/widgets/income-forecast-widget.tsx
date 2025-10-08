@@ -96,6 +96,7 @@ export function IncomeForecastWidget() {
                     stroke="var(--foreground)"
                     strokeWidth={2}
                     dot={false}
+                    isAnimationActive={false}
                   />
                 </LineChart>
               </ResponsiveContainer>

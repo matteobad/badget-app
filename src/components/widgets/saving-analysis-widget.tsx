@@ -102,7 +102,11 @@ export function SavingAnalysisWidget() {
                     strokeDasharray="3 3"
                     strokeWidth={1}
                   />
-                  <Bar dataKey="saving" maxBarSize={8} />
+                  <Bar
+                    dataKey="saving"
+                    maxBarSize={8}
+                    isAnimationActive={false}
+                  />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
