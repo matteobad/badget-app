@@ -48,8 +48,8 @@ export const widgetsRouter = createTRPCRouter({
       return {
         result: {
           netCashFlow: cashFlowData.summary.netCashFlow,
+          count: cashFlowData.summary.count,
           currency: cashFlowData.summary.currency,
-          period: cashFlowData.summary.period,
           meta: cashFlowData.meta,
         },
       };

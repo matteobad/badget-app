@@ -11,7 +11,7 @@ const data = [...Array(40)].map((_, i) => ({ id: i.toString() }));
 
 export function Loading({ isEmpty }: { isEmpty?: boolean }) {
   return (
-    <div className="w-full px-6">
+    <div className="w-full">
       <div
         className={cn("overflow-x-auto", !isEmpty && "border border-border")}
       >

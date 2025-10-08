@@ -77,7 +77,7 @@ export default {
     "cash-flow": {
       title: "Flusso di cassa",
       "description#zero": "Non hai movimenti",
-      "description#other": "Confronto tra entrate e spese",
+      "description#other": "Bilancio di {count} transazioni",
       action: "Approfondisci l’andamento",
     },
     "category-expenses": {

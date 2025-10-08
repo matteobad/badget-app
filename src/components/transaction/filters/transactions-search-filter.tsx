@@ -26,6 +26,7 @@ import { generateTransactionFiltersSchema } from "~/shared/validators/transactio
 import { formatISO } from "date-fns";
 import {
   CalendarIcon,
+  ChartSplineIcon,
   EuroIcon,
   FilterIcon,
   LandmarkIcon,
@@ -44,6 +45,8 @@ import { TransactionTagFilter } from "./transaction-tag-filter";
 type TypeFilter = "income" | "expense";
 type AttachmentFilter = "include" | "exclude";
 type RecurringFilter = "all" | "weekly" | "monthly" | "annually";
+type StatusFilter = "completed" | "uncompleted" | "archived" | "excluded";
+type ReportsFilter = "included" | "excluded";
 
 interface BaseFilterItem {
   name: string;
@@ -79,6 +82,7 @@ const defaultSearch = {
   recurring: null,
   tags: null,
   amount_range: null,
+  reports: null,
 };
 
 const PLACEHOLDERS = [
@@ -87,6 +91,13 @@ const PLACEHOLDERS = [
   "From Google without receipt",
   "Search or filter",
   "Revolut this month",
+];
+
+const statusFilters: FilterItem<StatusFilter>[] = [
+  { id: "completed", name: "Completed" },
+  { id: "uncompleted", name: "Uncompleted" },
+  { id: "archived", name: "Archived" },
+  { id: "excluded", name: "Excluded" },
 ];
 
 const typeFilters: FilterItem<TypeFilter>[] = [
@@ -104,6 +115,11 @@ const recurringFilters: FilterItem<RecurringFilter>[] = [
   { id: "weekly", name: "Weekly recurring" },
   { id: "monthly", name: "Monthly recurring" },
   { id: "annually", name: "Annually recurring" },
+];
+
+const reportsFilters: FilterItem<ReportsFilter>[] = [
+  { id: "included", name: "Included in reports" },
+  { id: "excluded", name: "Excluded from reports" },
 ];
 
 // Reusable components
@@ -384,10 +400,12 @@ export function TransactionsSearchFilter() {
           categories={categories}
           accounts={accounts}
           typeFilters={typeFilters}
+          statusFilters={statusFilters}
           attachmentsFilters={attachmentsFilters}
           tags={tags}
           recurringFilters={recurringFilters}
           amountRange={getAmountRange()}
+          reportsFilters={reportsFilters}
         />
       </div>
 
@@ -427,6 +445,24 @@ export function TransactionsSearchFilter() {
         <FilterMenuItem icon={EuroIcon} label="Amount">
           <div className="w-[280px] p-4">
             <TransactionAmountFilter />
+          </div>
+        </FilterMenuItem>
+
+        <FilterMenuItem icon={ChartSplineIcon} label="Reports">
+          <div className="max-h-[280px] w-[200px] p-1">
+            {reportsFilters.map(({ id, name }) => (
+              <FilterCheckboxItem
+                key={id}
+                id={id}
+                name={name}
+                checked={filter?.reports === id}
+                onCheckedChange={() => {
+                  setFilter({
+                    reports: id,
+                  });
+                }}
+              />
+            ))}
           </div>
         </FilterMenuItem>
 

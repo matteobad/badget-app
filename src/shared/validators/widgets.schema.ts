@@ -49,7 +49,6 @@ export const getCashFlowSchema = z.object({
   from: z.string(),
   to: z.string(),
   currency: z.string().optional(),
-  period: z.enum(["monthly", "quarterly"]).optional().default("monthly"),
 });
 
 export const getNetWorthSchema = z.object({

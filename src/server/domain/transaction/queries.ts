@@ -56,6 +56,8 @@ export async function getTransactionsQuery(
     cursor,
     pageSize = 40,
     q,
+    statuses,
+    attachments,
     categories: filterCategories,
     tags: filterTags,
     accounts: filterAccounts,
@@ -65,6 +67,7 @@ export async function getTransactionsQuery(
     amount: filterAmount,
     amount_range: filterAmountRange,
     type,
+    reports,
   } = params;
 
   // Always start with orgId filter
@@ -97,6 +100,44 @@ export async function getTransactionsQuery(
         or(ftsCondition, nameCondition, descriptionCondition),
       );
     }
+  }
+
+  // Status filtering - simplified logic using direct EXISTS subqueries
+  if (statuses?.includes("uncompleted") || attachments === "exclude") {
+    // Transaction is NOT fulfilled (no attachments AND status is not completed) AND status is not excluded
+    whereConditions.push(
+      sql`NOT (EXISTS (SELECT 1 FROM ${transaction_attachment_table} WHERE ${eq(transaction_attachment_table.transactionId, transaction_table.id)} AND ${eq(transaction_attachment_table.organizationId, orgId)}) OR ${transaction_table.status} = 'completed') AND ${transaction_table.status} != 'excluded'`,
+    );
+  } else if (statuses?.includes("completed") || attachments === "include") {
+    // Transaction is fulfilled (has attachments OR status is completed)
+    whereConditions.push(
+      sql`(EXISTS (SELECT 1 FROM ${transaction_attachment_table} WHERE ${eq(transaction_attachment_table.transactionId, transaction_table.id)} AND ${eq(transaction_attachment_table.organizationId, orgId)}) OR ${transaction_table.status} = 'completed')`,
+    );
+  } else if (statuses?.includes("excluded")) {
+    whereConditions.push(eq(transaction_table.status, "excluded"));
+  } else if (statuses?.includes("archived")) {
+    whereConditions.push(eq(transaction_table.status, "archived"));
+  } else {
+    // Default: pending, posted, or completed
+    whereConditions.push(
+      inArray(transaction_table.status, ["pending", "posted", "completed"]),
+    );
+  }
+
+  // Reports filtering
+  if (reports === "excluded") {
+    whereConditions.push(
+      or(
+        eq(transaction_table.internal, true),
+        eq(transaction_category_table.excluded, true),
+      ),
+    );
+  }
+  if (reports === "included") {
+    whereConditions.push(
+      eq(transaction_table.internal, false),
+      eq(transaction_category_table.excluded, false),
+    );
   }
 
   // Categories filter

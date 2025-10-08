@@ -254,6 +254,7 @@ export const getTransactionsSchema = z.object({
         in: "query",
       },
     }),
+  reports: z.enum(["included", "excluded"]).nullable().optional(),
 });
 
 export const generateTransactionFiltersSchema = z.object({

@@ -27,23 +27,27 @@ type FilterKey =
   | "start"
   | "end"
   | "amount_range"
+  | "statuses"
   | "attachments"
   | "recurring"
   | "categories"
   | "tags"
   | "accounts"
-  | "type";
+  | "type"
+  | "reports";
 
 type FilterValue = {
   start: string;
   end: string;
   amount_range: string;
+  statuses: string[];
   attachments: string;
   recurring: string[];
   categories: string[];
   tags: string[];
   accounts: string[];
   type: string;
+  reports: string;
 };
 
 interface FilterValueProps {
@@ -62,6 +66,8 @@ interface Props {
   recurringFilters?: { id: string; name: string }[];
   tags?: { id: string; text: string; slug?: string }[];
   amountRange?: [number, number];
+  statusFilters?: { id: string; name: string }[];
+  reportsFilters?: { id: string; name: string }[];
 }
 
 export function FilterList({
@@ -75,6 +81,7 @@ export function FilterList({
   attachmentsFilters,
   recurringFilters,
   amountRange,
+  reportsFilters,
 }: Props) {
   const renderFilter = ({ key, value }: FilterValueProps) => {
     switch (key) {
@@ -97,6 +104,12 @@ export function FilterList({
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })}`;
+      }
+
+      case "reports": {
+        const reportValue = value as FilterValue["reports"];
+        return reportsFilters?.find((filter) => filter.id === reportValue)
+          ?.name;
       }
 
       case "attachments": {
@@ -198,7 +211,7 @@ export function FilterList({
                   className="group flex h-9 items-center space-x-1 rounded-none bg-secondary px-2 font-normal text-[#878787] hover:bg-secondary"
                   onClick={() => handleOnRemove(filterKey)}
                 >
-                  <XIcon className="w-0 scale-0 transition-all group-hover:w-4 group-hover:scale-100" />
+                  <XIcon className="size-0 scale-0 transition-all group-hover:size-4 group-hover:scale-100" />
                   <span>
                     {renderFilter({
                       key: filterKey,

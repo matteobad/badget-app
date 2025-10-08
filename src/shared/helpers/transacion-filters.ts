@@ -13,6 +13,7 @@ export type TransactionFilters = {
   amount?: string[] | null;
   recurring?: ("all" | "weekly" | "monthly" | "annually")[] | null;
   statuses?: ("completed" | "uncompleted" | "archived" | "excluded")[] | null;
+  reports?: "included" | "excluded" | null;
 };
 
 // Generic filter state type

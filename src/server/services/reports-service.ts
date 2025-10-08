@@ -31,7 +31,7 @@ export async function getCashFlow(
   params: z.infer<typeof getCashFlowSchema>,
   organizationId: string,
 ) {
-  const { from, to, currency: inputCurrency, period } = params;
+  const { from, to, currency: inputCurrency } = params;
 
   const transactionsData = await getTransactionsInPeriodQuery(db, {
     organizationId,
@@ -50,8 +50,8 @@ export async function getCashFlow(
   return {
     summary: {
       netCashFlow: Number(netCashFlow.toFixed(2)),
+      count: transactionsData.length,
       currency,
-      period,
     },
     meta: {
       type: "cash_flow",

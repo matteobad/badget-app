@@ -20,6 +20,15 @@ export const transactionFilterParamsSchema = {
     parseAsStringLiteral(["all", "weekly", "monthly", "annually"] as const),
   ),
   type: parseAsStringLiteral(["income", "expense"] as const),
+  statuses: parseAsArrayOf(
+    parseAsStringLiteral([
+      "completed",
+      "uncompleted",
+      "archived",
+      "excluded",
+    ] as const),
+  ),
+  reports: parseAsStringLiteral(["excluded", "included"] as const),
 };
 
 export function useTransactionFilterParams() {

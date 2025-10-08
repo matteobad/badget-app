@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { useUserQuery } from "~/hooks/use-user";
@@ -7,10 +8,9 @@ import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { getWidgetPeriodDates } from "~/shared/helpers/widget-period";
 import { useScopedI18n } from "~/shared/locales/client";
-import { format } from "date-fns";
 import { ScaleIcon } from "lucide-react";
 
-import { BaseWidget } from "./base";
+import { BaseWidget, WidgetSkeleton } from "./base";
 import { ConfigurableWidget } from "./configurable-widget";
 import { useConfigurableWidget } from "./use-configurable-widget";
 import { WidgetSettings } from "./widget-settings";
@@ -20,11 +20,12 @@ export function CashFlowWidget() {
   const tCashFlow = useScopedI18n("widgets.cash-flow");
 
   const trpc = useTRPC();
+  const router = useRouter();
 
   const { data: space } = useSpaceQuery();
   const { data: user } = useUserQuery();
 
-  const { config, isConfiguring, setIsConfiguring, saveConfig } =
+  const { config, isConfiguring, setIsConfiguring, saveConfig, isUpdating } =
     useConfigurableWidget("cash-flow");
 
   const { from, to } = useMemo(() => {
@@ -32,12 +33,11 @@ export function CashFlowWidget() {
     return getWidgetPeriodDates(period, 1, user?.weekStartsOnMonday ? 1 : 0);
   }, [config?.period, user?.weekStartsOnMonday]);
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getCashFlow.queryOptions({
-      from: format(from, "yyyy-MM-dd"),
-      to: format(to, "yyyy-MM-dd"),
+      from,
+      to,
       currency: space?.baseCurrency ?? "EUR",
-      period: "monthly",
     }),
     ...WIDGET_POLLING_CONFIG,
   });
@@ -50,8 +50,7 @@ export function CashFlowWidget() {
   };
 
   const handleClick = () => {
-    // TODO: Navigate to cash flow analysis page
-    console.log("View cash flow analysis clicked");
+    router.push(`/transactions?reports=included&start=${from}&end=${to}`);
   };
 
   const formatCashFlow = (amount: number, currency: string) => {
@@ -65,6 +64,10 @@ export function CashFlowWidget() {
     });
     return `${sign}${formatted}`;
   };
+
+  if (isLoading || isUpdating) {
+    return <WidgetSkeleton />;
+  }
 
   return (
     <ConfigurableWidget
@@ -86,23 +89,23 @@ export function CashFlowWidget() {
           <div className="flex flex-col gap-1">
             <p className="text-sm text-[#666666]">
               {tCashFlow("description", {
-                count: data?.result.netCashFlow ?? 0,
+                count: data?.result.count ?? 0,
               })}
             </p>
           </div>
         }
-        actions={tCashFlow("action")}
-        onClick={handleClick}
+        actions={data && tCashFlow("action")}
+        onClick={data && handleClick}
         onConfigure={() => setIsConfiguring(true)}
       >
         <div className="flex flex-1 items-end gap-2">
-          <h2 className="text-2xl font-normal">
+          <span className="text-2xl">
             {data &&
               formatCashFlow(
                 data.result.netCashFlow ?? 0,
                 data.result.currency,
               )}
-          </h2>
+          </span>
         </div>
       </BaseWidget>
     </ConfigurableWidget>
