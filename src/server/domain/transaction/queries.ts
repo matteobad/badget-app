@@ -5,8 +5,7 @@ import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import type { getTransactionTagsSchema } from "~/shared/validators/tag.schema";
 import type { getTransactionsSchema } from "~/shared/validators/transaction.schema";
 import type { SQL } from "drizzle-orm";
-import type z from "zod/v4";
-import { UTCDate } from "@date-fns/utc";
+import type z from "zod";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { connection_table } from "~/server/db/schema/open-banking";
@@ -20,13 +19,7 @@ import {
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
 import { buildSearchQuery } from "~/server/db/utils";
-import {
-  eachMonthOfInterval,
-  endOfMonth,
-  format,
-  parseISO,
-  startOfMonth,
-} from "date-fns";
+import { eachMonthOfInterval, format } from "date-fns";
 import {
   and,
   asc,
@@ -1259,19 +1252,16 @@ export type GetIncomeParams = {
 export async function getIncomeQuery(db: DBClient, params: GetIncomeParams) {
   const { organizationId, from, to, currency: inputCurrency } = params;
 
-  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
-  const toDate = endOfMonth(new UTCDate(parseISO(to)));
-
   // Step 2: Generate month series for complete results
-  const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
+  const monthSeries = eachMonthOfInterval({ start: from, end: to });
 
   // Step 3: Build the main query conditions
   const conditions = [
     eq(transaction_table.organizationId, organizationId),
     ne(transaction_table.status, "excluded"),
     eq(transaction_table.internal, false),
-    gte(transaction_table.date, format(fromDate, "yyyy-MM-dd")),
-    lte(transaction_table.date, format(toDate, "yyyy-MM-dd")),
+    gte(transaction_table.date, from),
+    lte(transaction_table.date, to),
     gt(transaction_table.amount, 0),
   ];
 
@@ -1383,19 +1373,16 @@ export async function getExpensesQuery(
 ) {
   const { organizationId, from, to, currency: inputCurrency } = params;
 
-  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
-  const toDate = endOfMonth(new UTCDate(parseISO(to)));
-
   // Step 2: Generate month series for complete results
-  const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
+  const monthSeries = eachMonthOfInterval({ start: from, end: to });
 
   // Step 3: Build the main query conditions
   const conditions = [
     eq(transaction_table.organizationId, organizationId),
     ne(transaction_table.status, "excluded"),
     eq(transaction_table.internal, false),
-    gte(transaction_table.date, format(fromDate, "yyyy-MM-dd")),
-    lte(transaction_table.date, format(toDate, "yyyy-MM-dd")),
+    gte(transaction_table.date, from),
+    lte(transaction_table.date, to),
     lt(transaction_table.amount, 0),
   ];
 
@@ -1526,15 +1513,12 @@ export async function getIncomeByCategoryQuery(
 ): Promise<SpendingResultItem[]> {
   const { organizationId, from, to, currency: inputCurrency } = params;
 
-  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
-  const toDate = endOfMonth(new UTCDate(parseISO(to)));
-
   // Step 2: Calculate total spending amount for percentage calculations
   const totalAmountConditions = [
     eq(transaction_table.organizationId, organizationId),
     eq(transaction_table.internal, false),
-    gte(transaction_table.date, format(fromDate, "yyyy-MM-dd")),
-    lte(transaction_table.date, format(toDate, "yyyy-MM-dd")),
+    gte(transaction_table.date, from),
+    lte(transaction_table.date, to),
     gt(transaction_table.amount, 0),
   ];
 
@@ -1567,8 +1551,8 @@ export async function getIncomeByCategoryQuery(
   const incomeConditions = [
     eq(transaction_table.organizationId, organizationId),
     eq(transaction_table.internal, false),
-    gte(transaction_table.date, format(fromDate, "yyyy-MM-dd")),
-    lte(transaction_table.date, format(toDate, "yyyy-MM-dd")),
+    gte(transaction_table.date, from),
+    lte(transaction_table.date, to),
     gt(transaction_table.amount, 0),
     isNotNull(transaction_table.categorySlug), // Only categorized transactions
   ];
@@ -1638,15 +1622,12 @@ export async function getExpensesByCategoryQuery(
 ): Promise<SpendingResultItem[]> {
   const { organizationId, from, to, currency: inputCurrency } = params;
 
-  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
-  const toDate = endOfMonth(new UTCDate(parseISO(to)));
-
   // Step 2: Calculate total spending amount for percentage calculations
   const totalAmountConditions = [
     eq(transaction_table.organizationId, organizationId),
     eq(transaction_table.internal, false),
-    gte(transaction_table.date, format(fromDate, "yyyy-MM-dd")),
-    lte(transaction_table.date, format(toDate, "yyyy-MM-dd")),
+    gte(transaction_table.date, from),
+    lte(transaction_table.date, to),
     lt(transaction_table.amount, 0),
   ];
 
@@ -1679,8 +1660,8 @@ export async function getExpensesByCategoryQuery(
   const spendingConditions = [
     eq(transaction_table.organizationId, organizationId),
     eq(transaction_table.internal, false),
-    gte(transaction_table.date, format(fromDate, "yyyy-MM-dd")),
-    lte(transaction_table.date, format(toDate, "yyyy-MM-dd")),
+    gte(transaction_table.date, from),
+    lte(transaction_table.date, to),
     lt(transaction_table.amount, 0),
     isNotNull(transaction_table.categorySlug), // Only categorized transactions
   ];
