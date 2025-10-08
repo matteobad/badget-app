@@ -2,17 +2,20 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { useScopedI18n } from "~/shared/locales/client";
 import { formatDistanceToNow } from "date-fns";
 import { VaultIcon } from "lucide-react";
 
-import { BaseWidget } from "./base";
+import { BaseWidget, WidgetSkeleton } from "./base";
 
 export function RecentDocumentsWidget() {
+  const t = useScopedI18n("widgets.recent-documents");
+
   const trpc = useTRPC();
   const router = useRouter();
 
   // Fetch recent document activity
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getVaultActivity.queryOptions({ limit: 3 }),
     ...WIDGET_POLLING_CONFIG,
   });
@@ -24,9 +27,9 @@ export function RecentDocumentsWidget() {
     router.push("/vault");
   };
 
-  const getActivityMessage = () => {
+  const getDescription = () => {
     if (totalDocuments === 0) {
-      return "No documents yet";
+      return t("description_empty");
     }
 
     if (totalDocuments === 1) {
@@ -94,13 +97,17 @@ export function RecentDocumentsWidget() {
     return `${classifiedDocs.length} files automatically categorized as ${classificationArray[0]}, ${classificationArray[1]} and others`;
   };
 
+  if (isLoading) {
+    return <WidgetSkeleton />;
+  }
+
   return (
     <BaseWidget
-      title="File Management"
+      title={t("title")}
       icon={<VaultIcon className="size-4" />}
-      description={getActivityMessage()}
-      onClick={handleOpenVault}
-      actions="View files"
+      description={data && getDescription()}
+      onClick={data && handleOpenVault}
+      actions={data && t("action")}
     />
   );
 }

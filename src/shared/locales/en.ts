@@ -89,6 +89,11 @@ export default {
       description_default: "Track your expenses",
       action: "View all expenses",
     },
+    "recent-documents": {
+      title: "File management",
+      description_empty: "No documents yet",
+      action: "Go to vault",
+    },
     "net-worth": {
       title: "Net worth",
       description: {

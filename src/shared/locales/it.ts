@@ -92,6 +92,11 @@ export default {
       description_default: "Tieni traccia delle tue spese",
       action: "Vedi tutte le spese",
     },
+    "recent-documents": {
+      title: "Documenti",
+      description_empty: "Non hai caricato documenti",
+      action: "Apri il vault",
+    },
     "net-worth": {
       title: "Patrimonio netto",
       description: {
