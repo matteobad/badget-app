@@ -1,13 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
-import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSpaceQuery } from "~/hooks/use-space";
-import { useTRPC } from "~/shared/helpers/trpc/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { PlusIcon } from "lucide-react";
+import Link from "next/link";
+import { useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
+import { useSpaceQuery } from "~/hooks/use-space";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";

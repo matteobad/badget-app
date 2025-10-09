@@ -1,8 +1,8 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useDocumentParams } from "~/hooks/use-document-params";
 import { cn } from "~/lib/utils";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 
 import { FilePreview } from "../transaction-attachment/file-preview";
 import { Skeleton } from "../ui/skeleton";

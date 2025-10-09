@@ -1,5 +1,5 @@
-import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
+import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 interface PortalProps extends React.ComponentPropsWithoutRef<typeof Slot> {

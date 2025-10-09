@@ -1,13 +1,13 @@
 "use client";
 
-import type { Activity } from "~/hooks/use-notifications";
+import { formatDistanceToNow } from "date-fns";
+import { ArchiveIcon, BellIcon, ReceiptIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import type { Activity } from "~/hooks/use-notifications";
 import { getMetadata, getMetadataProperty } from "~/hooks/use-notifications";
 import { useUserQuery } from "~/hooks/use-user";
 import { cn } from "~/lib/utils";
 import { useI18n } from "~/shared/locales/client";
-import { formatDistanceToNow } from "date-fns";
-import { ArchiveIcon, BellIcon, ReceiptIcon } from "lucide-react";
 
 import { getNotificationDescription } from "./notification-descriptions";
 import { NotificationLink } from "./notification-link";

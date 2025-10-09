@@ -1,14 +1,14 @@
+import { capitalCase } from "change-case";
+import { isValid, parse as parseDate, parseISO } from "date-fns";
+import { nanoid } from "nanoid";
+import type z from "zod";
 import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
 import type { NormalizedTx } from "~/server/domain/transaction/utils";
-import type { importTransactionSchema } from "~/shared/validators/transaction.schema";
-import type z from "zod";
 import {
   calculateFingerprint,
   normalizeDescription,
 } from "~/server/domain/transaction/utils";
-import { capitalCase } from "change-case";
-import { isValid, parse as parseDate, parseISO } from "date-fns";
-import { nanoid } from "nanoid";
+import type { importTransactionSchema } from "~/shared/validators/transaction.schema";
 
 export type ImportTransactionType = z.infer<typeof importTransactionSchema>;
 
@@ -79,7 +79,7 @@ export function parseDateValue(date: string) {
   }
 
   // If the date includes a time, we don't need to remove the time.
-  const value = date.includes("T") ? date : date.replace(/[^0-9-\.\/]/g, "");
+  const value = date.includes("T") ? date : date.replace(/[^0-9-./]/g, "");
 
   try {
     const parsedDate = parseISO(value);

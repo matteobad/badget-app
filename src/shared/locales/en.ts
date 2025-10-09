@@ -84,7 +84,7 @@ export default {
     },
     "monthly-spending": {
       title: "Expenses",
-      description: "{category} makes up ${percentage}% of your spending",
+      description: "{category} makes up {percentage}% of your spending",
       description_empty: "No expenses recorded",
       description_default: "Track your expenses",
       action: "View all expenses",

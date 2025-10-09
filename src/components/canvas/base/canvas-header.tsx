@@ -1,5 +1,6 @@
 "use client";
 
+import { MoreVerticalIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,7 +8,6 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
-import { MoreVerticalIcon } from "lucide-react";
 
 import { Skeleton } from "./skeleton";
 

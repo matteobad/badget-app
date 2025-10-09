@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "~/lib/utils";
 import { TrendingUpIcon } from "lucide-react";
+import { cn } from "~/lib/utils";
 
 import { TextShimmer } from "./text-shimmer";
 

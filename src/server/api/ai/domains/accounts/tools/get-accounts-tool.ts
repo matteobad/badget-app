@@ -1,7 +1,7 @@
-import { getBankAccounts } from "~/server/services/bank-account-service";
-import { ACCOUNT_SUBTYPE, ACCOUNT_TYPE } from "~/shared/constants/enum";
 import { tool } from "ai";
 import z from "zod";
+import { getBankAccounts } from "~/server/services/bank-account-service";
+import { ACCOUNT_SUBTYPE, ACCOUNT_TYPE } from "~/shared/constants/enum";
 
 import { cached } from "../../../cache";
 import { getContext } from "../../../context";
@@ -92,7 +92,7 @@ export const getAccountsTool = cached(
     `,
     inputSchema: getAccountsSchema,
     outputSchema: z.array(bankAccountSchema),
-    execute: async function (input) {
+    execute: async (input) => {
       const context = getContext();
 
       try {

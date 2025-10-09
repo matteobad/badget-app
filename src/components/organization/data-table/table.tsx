@@ -1,20 +1,17 @@
 "use client";
 
-import * as React from "react";
-import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import type { ColumnFiltersState } from "@tanstack/react-table";
 import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useState } from "react";
 import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-
-import type { ColumnFiltersState } from "@tanstack/react-table";
-// import { columns } from "./columns";
 import { DataTableHeader } from "./table-header";
 
 export function DataTable() {

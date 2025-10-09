@@ -1,19 +1,19 @@
 "use server";
 
-import type { exportTransactionsTask } from "~/server/jobs/tasks/export-transactions";
-import type { importTransactionsTask } from "~/server/jobs/tasks/import-transactions";
 import { google } from "@ai-sdk/google";
 import { createStreamableValue } from "@ai-sdk/rsc";
 import { parse } from "@fast-csv/parse";
 import { tasks } from "@trigger.dev/sdk";
+import { streamObject } from "ai";
+import { z } from "zod";
 import { authActionClient } from "~/lib/safe-action";
+import type { exportTransactionsTask } from "~/server/jobs/tasks/export-transactions";
+import type { importTransactionsTask } from "~/server/jobs/tasks/import-transactions";
 import {
   exportTransactionsSchema,
   importTransactionSchema,
   parseTransactionCSVSchema,
 } from "~/shared/validators/transaction.schema";
-import { streamObject } from "ai";
-import { z } from "zod";
 
 export async function generateCsvMapping(
   fieldColumns: string[],
@@ -76,6 +76,7 @@ export const parseTransactionsCSVAction = authActionClient
       const stream = parse({ headers: true, maxRows })
         .on("error", (error) => reject(error))
         // .on("headers", (headerList) => (headers = headerList as string[]))
+        // biome-ignore lint/suspicious/noAssignInExpressions: fix me
         .on("data", (row) => (firstRow = row as Record<string, string>))
         .on("end", (rowCount: number) => {
           console.log(`Parsed ${rowCount} rows`);

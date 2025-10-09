@@ -1,10 +1,10 @@
 import { headers } from "next/headers";
-import { auth } from "~/shared/helpers/better-auth/auth";
 import {
   createSafeActionClient,
   DEFAULT_SERVER_ERROR_MESSAGE,
 } from "next-safe-action";
 import { z } from "zod/v4";
+import { auth } from "~/shared/helpers/better-auth/auth";
 
 // This is our base client.
 // Here we define a middleware that logs the result of the action execution.

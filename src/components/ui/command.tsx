@@ -1,6 +1,7 @@
 "use client";
 
-import * as React from "react";
+import { Command as CommandPrimitive } from "cmdk";
+import type * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +10,6 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { cn } from "~/lib/utils";
-import { Command as CommandPrimitive } from "cmdk";
 
 function Command({
   className,

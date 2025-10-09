@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { useCallback } from "react";
 import { HorizontalPagination } from "~/components/horizontal-pagination";
 import { Button } from "~/components/ui/button";
@@ -8,7 +9,6 @@ import { TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { useSortParams } from "~/hooks/use-sort-params";
 import { useStickyColumns } from "~/hooks/use-sticky-columns";
 import { cn } from "~/lib/utils";
-import { ArrowDown, ArrowUp } from "lucide-react";
 
 interface TableColumn {
   id: string;

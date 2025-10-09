@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
+import { useInView } from "react-intersection-observer";
 import { useDocumentFilterParams } from "~/hooks/use-document-filter-params";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { useInView } from "react-intersection-observer";
 
 import { LoadMore } from "../load-more";
 import { NoResults } from "./empty-states";

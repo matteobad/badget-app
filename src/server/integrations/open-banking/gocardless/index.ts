@@ -6,8 +6,8 @@ import type {
   GetAccountsResponse,
   GetConnectionStatusRequest,
   GetConnectionStatusResponse,
+  GetTransactionsRequest,
 } from "..";
-import { type GetTransactionsRequest } from "..";
 import { gocardlessClient } from "./gocardless-api";
 import {
   mapAccountsRequest,

@@ -1,11 +1,11 @@
 import { google } from "@ai-sdk/google";
+import { generateText, smoothStream, streamText, tool } from "ai";
+import { endOfMonth, startOfMonth, subMonths } from "date-fns";
+import { z } from "zod";
 import { getExpensesByCategory } from "~/server/services/reports-service";
 import { formatAmount } from "~/shared/helpers/format";
 import { expensesBreakdownArtifact } from "~/shared/validators/artifacts/expenses-breakdown";
 import { followupQuestionsArtifact } from "~/shared/validators/artifacts/followup-questions";
-import { generateText, smoothStream, streamText, tool } from "ai";
-import { endOfMonth, startOfMonth, subMonths } from "date-fns";
-import { z } from "zod";
 
 import { getContext } from "../../../context";
 import { generateFollowupQuestions } from "../../../utils/generate-followup-questions";

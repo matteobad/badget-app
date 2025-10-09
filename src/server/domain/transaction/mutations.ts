@@ -1,6 +1,14 @@
 "server-only";
 
+import { and, eq, inArray, ne } from "drizzle-orm";
+import type z from "zod";
 import type { DBClient, TXType } from "~/server/db";
+import { db } from "~/server/db";
+import {
+  transaction_embeddings_table,
+  transaction_table,
+  transaction_to_tag_table,
+} from "~/server/db/schema/transactions";
 import type {
   TransactionFrequencyType,
   TransactionStatusType,
@@ -9,14 +17,6 @@ import type {
   createTransactionSchema,
   deleteTransactionSchema,
 } from "~/shared/validators/transaction.schema";
-import type z from "zod";
-import { db } from "~/server/db";
-import {
-  transaction_embeddings_table,
-  transaction_table,
-  transaction_to_tag_table,
-} from "~/server/db/schema/transactions";
-import { and, eq, inArray, ne } from "drizzle-orm";
 
 export async function createTransactionMutation(
   tx: TXType,
@@ -42,7 +42,7 @@ type UpdateTransactionData = {
 };
 
 export async function updateTransactionMutation(
-  client: DBClient,
+  db: DBClient,
   params: UpdateTransactionData,
 ) {
   const { id, organizationId, ...dataToUpdate } = params;

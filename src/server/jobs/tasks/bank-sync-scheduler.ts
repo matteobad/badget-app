@@ -1,7 +1,7 @@
 import { logger, schedules } from "@trigger.dev/sdk";
+import { eq } from "drizzle-orm";
 import { db } from "~/server/db";
 import { connection_table } from "~/server/db/schema/open-banking";
-import { eq } from "drizzle-orm";
 
 import { syncConnection } from "./sync-connection";
 

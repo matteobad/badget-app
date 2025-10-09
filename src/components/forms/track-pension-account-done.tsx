@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { Button } from "~/components/ui/button";
 import confetti from "canvas-confetti";
 import { PartyPopperIcon } from "lucide-react";
+import { useEffect } from "react";
+import { Button } from "~/components/ui/button";
 
 export function TrackPensionAccountDone() {
   useEffect(() => {

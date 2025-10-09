@@ -1,7 +1,7 @@
+import { and, desc, eq, ilike } from "drizzle-orm";
 import type { UIChatMessage } from "~/server/api/ai/main-agent";
 import type { DBClient } from "~/server/db";
 import { chat_message_table, chat_table } from "~/server/db/schema/chats";
-import { and, desc, eq, ilike } from "drizzle-orm";
 
 export const getChatById = async (
   db: DBClient,

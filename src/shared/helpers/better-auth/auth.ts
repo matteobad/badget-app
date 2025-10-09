@@ -1,16 +1,16 @@
 "server-only";
 
 import { render } from "@react-email/components";
-import { env } from "~/env";
-import { resend } from "~/lib/resend";
-import { db } from "~/server/db";
-import { getUserByIdQuery } from "~/server/domain/user/queries";
-import WelcomeEmail from "~/shared/emails/emails/welcome-email";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { admin, organization, twoFactor, username } from "better-auth/plugins";
 import { passkey } from "better-auth/plugins/passkey";
+import { env } from "~/env";
+import { resend } from "~/lib/resend";
+import { db } from "~/server/db";
+import { getUserByIdQuery } from "~/server/domain/user/queries";
+import WelcomeEmail from "~/shared/emails/emails/welcome-email";
 
 export const auth = betterAuth({
   advanced: {

@@ -1,10 +1,10 @@
-import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
+import { VaultIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
-import { formatDistanceToNow } from "date-fns";
-import { VaultIcon } from "lucide-react";
 
 import { BaseWidget, WidgetSkeleton } from "./base";
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { formatAmount } from "~/shared/helpers/format";
 import {
   Area,
   CartesianGrid,
@@ -11,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { formatAmount } from "~/shared/helpers/format";
 
 import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
 

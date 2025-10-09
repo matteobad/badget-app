@@ -1,9 +1,23 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import type { AccountSubtype } from "~/shared/constants/enum";
-import { memo, useCallback, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
+import {
+  ArchiveIcon,
+  Building2,
+  CreditCard,
+  HandIcon,
+  LinkIcon,
+  MoreHorizontalIcon,
+  Percent,
+  ReceiptEuroIcon,
+  ReceiptTextIcon,
+  SquarePenIcon,
+  TrashIcon,
+  Wallet2Icon,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import { memo, useCallback, useState } from "react";
 import { FormatAmount } from "~/components/format-amount";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
@@ -21,25 +35,10 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import type { AccountSubtype } from "~/shared/constants/enum";
 import { formatDate } from "~/shared/helpers/format";
 import { useScopedI18n } from "~/shared/locales/client";
-import { format } from "date-fns";
-import {
-  ArchiveIcon,
-  Building2,
-  CreditCard,
-  HandIcon,
-  LinkIcon,
-  MoreHorizontalIcon,
-  Percent,
-  ReceiptEuroIcon,
-  ReceiptTextIcon,
-  SquarePenIcon,
-  TrashIcon,
-  Wallet2Icon,
-} from "lucide-react";
-
-import type { ColumnDef } from "@tanstack/react-table";
 import EditBankAccountDialog from "../sheets/edit-bank-account-dialog";
 import { AccountInfoTooltips } from "./account-info-tooltips";
 

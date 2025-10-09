@@ -1,15 +1,15 @@
-import type { UpdateTransactionEnrichmentParams } from "~/server/domain/transaction/queries";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { logger, schemaTask } from "@trigger.dev/sdk";
+import { generateObject } from "ai";
+import { z } from "zod/v4";
 import { db } from "~/server/db";
-import { getCategoriesForEnrichment } from "~/server/domain/transaction-category/queries";
+import type { UpdateTransactionEnrichmentParams } from "~/server/domain/transaction/queries";
 import {
   getTransactionsForEnrichment,
   markTransactionsAsEnriched,
   updateTransactionEnrichments,
 } from "~/server/domain/transaction/queries";
-import { generateObject } from "ai";
-import { z } from "zod/v4";
+import { getCategoriesForEnrichment } from "~/server/domain/transaction-category/queries";
 
 import {
   generateEnrichmentPrompt,

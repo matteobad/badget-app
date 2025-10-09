@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { readStreamableValue } from "@ai-sdk/rsc";
+import { capitalCase } from "change-case";
+import { ArrowRightIcon, InfoIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Controller } from "react-hook-form";
 import { SelectAccount } from "~/components/bank-account/forms/select-account";
 import { Spinner } from "~/components/load-more";
 import {
@@ -33,13 +36,10 @@ import {
   parseDateValue,
 } from "~/server/jobs/utils/import-transactions";
 import { formatAmount } from "~/shared/helpers/format";
-import { capitalCase } from "change-case";
-import { ArrowRightIcon, InfoIcon } from "lucide-react";
-import { Controller } from "react-hook-form";
 
 import { mappableFields, useCsvContext } from "./context";
 
-export function FieldMapping({}: { currencies: string[] }) {
+export function FieldMapping(_: { currencies: string[] }) {
   const { fileColumns, firstRows, setValue, control, watch } = useCsvContext();
   const [isStreaming, setIsStreaming] = useState(true);
 
@@ -52,7 +52,6 @@ export function FieldMapping({}: { currencies: string[] }) {
 
         for await (const partialObject of readStreamableValue(object)) {
           if (partialObject) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             for (const [field, value] of Object.entries(partialObject)) {
               if (
                 Object.keys(mappableFields).includes(field) &&

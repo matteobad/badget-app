@@ -1,8 +1,8 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import { useChatInterface } from "~/hooks/use-chat-interface";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 
 import {
   SuggestedActions,

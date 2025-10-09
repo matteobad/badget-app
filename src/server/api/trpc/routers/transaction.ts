@@ -1,3 +1,5 @@
+// import { categorizeUserTransaction } from "~/utils/categorization";
+import { z } from "zod/v4";
 import { getSimilarTransactions } from "~/server/domain/transaction/queries";
 import {
   createManualTransaction,
@@ -20,11 +22,6 @@ import {
   getTransactionSplits,
 } from "~/server/services/transaction-split-service";
 import {
-  addTransactionSplitsSchema,
-  deleteTransactionSplitSchema,
-  getTransactionSplitsSchema,
-} from "~/shared/validators/transaction-split.schema";
-import {
   createManualTransactionSchema,
   createTransferSchema,
   deleteManyTransactionsSchema,
@@ -35,8 +32,11 @@ import {
   updateTransactionSchema,
   updateTransactionsSchema,
 } from "~/shared/validators/transaction.schema";
-// import { categorizeUserTransaction } from "~/utils/categorization";
-import { z } from "zod/v4";
+import {
+  addTransactionSplitsSchema,
+  deleteTransactionSplitSchema,
+  getTransactionSplitsSchema,
+} from "~/shared/validators/transaction-split.schema";
 
 import { createTRPCRouter, protectedProcedure } from "../init";
 

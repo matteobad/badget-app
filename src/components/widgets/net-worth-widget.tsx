@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { useQuery } from "@tanstack/react-query";
+import { LineChartIcon } from "lucide-react";
+import { useMemo } from "react";
 import { NetWorthChart } from "~/components/charts/net-worth-chart";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { useSpaceQuery } from "~/hooks/use-space";
@@ -12,7 +13,6 @@ import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { getWidgetPeriodDates } from "~/shared/helpers/widget-period";
 import { useScopedI18n } from "~/shared/locales/client";
-import { LineChartIcon } from "lucide-react";
 
 import { BaseWidget, WidgetSkeleton } from "./base";
 import { ConfigurableWidget } from "./configurable-widget";
@@ -67,16 +67,17 @@ export function NetWorthWidget() {
     });
     const percentage =
       typeof netWorthData?.summary.deltaNetWorth === "number"
-        ? new Intl.NumberFormat(undefined, {
+        ? `${new Intl.NumberFormat(undefined, {
             signDisplay: "always",
             maximumFractionDigits: 0,
             minimumFractionDigits: 0,
-          }).format(netWorthData.summary.deltaNetWorth) + "%"
+          }).format(netWorthData.summary.deltaNetWorth)}%`
         : undefined;
 
     return (
       <div
         className="text-sm [&>b]:font-medium"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: needed for bold text
         dangerouslySetInnerHTML={{
           __html: tNetWorth("description", {
             value,

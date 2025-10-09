@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { ChevronDown } from "lucide-react";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useI18n } from "~/shared/locales/client";
-import { ChevronDown } from "lucide-react";
 
 import {
   Accordion,

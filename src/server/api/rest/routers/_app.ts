@@ -1,7 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
-import { checkHealth } from "~/server/services/health-service";
 import { secureHeaders } from "hono/secure-headers";
+import { checkHealth } from "~/server/services/health-service";
 
 import { protectedMiddleware } from "../init";
 import { budgetRouter } from "./budget";

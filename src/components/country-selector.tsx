@@ -1,8 +1,8 @@
+import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import * as React from "react";
 import { useEffect } from "react";
 import { cn } from "~/lib/utils";
 import { countryFlags } from "~/shared/constants/countries";
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 
 import { Button } from "./ui/button";
 import {

@@ -1,6 +1,6 @@
+import { getSessionCookie } from "better-auth/cookies";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { getSessionCookie } from "better-auth/cookies";
 import { createI18nMiddleware } from "next-international/middleware";
 
 import { defaultLocale, locales } from "./shared/locales/config";

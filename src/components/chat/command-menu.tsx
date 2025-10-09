@@ -1,12 +1,12 @@
 "use client";
 
-import type { CommandSuggestion } from "~/lib/stores/chat";
-import { useEffect, useRef } from "react";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
+import { ForwardIcon } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { useChatInterface } from "~/hooks/use-chat-interface";
+import type { CommandSuggestion } from "~/lib/stores/chat";
 import { useChatStore } from "~/lib/stores/chat";
 import { cn } from "~/lib/utils";
-import { ForwardIcon } from "lucide-react";
 
 import { AnimatedSizeContainer } from "../ui/animated-size-component";
 

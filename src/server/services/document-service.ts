@@ -1,6 +1,6 @@
-import type { getDocumentsSchema } from "~/shared/validators/documents.schema";
 import type z from "zod";
 import { getDocuments as getDocumentsQuery } from "~/server/domain/documents/queries";
+import type { getDocumentsSchema } from "~/shared/validators/documents.schema";
 
 import type { DBClient } from "../db";
 

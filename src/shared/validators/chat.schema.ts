@@ -1,5 +1,5 @@
-import type { UIChatMessage } from "~/server/api/ai/main-agent";
 import { z } from "@hono/zod-openapi";
+import type { UIChatMessage } from "~/server/api/ai/main-agent";
 
 /* eslint-disable */
 // Create a Zod schema that validates UIChatMessage structure

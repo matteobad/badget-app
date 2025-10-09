@@ -1,6 +1,6 @@
+import { eq, sql } from "drizzle-orm";
 import type { DBClient } from "~/server/db";
 import { institution_table } from "~/server/db/schema/open-banking";
-import { eq, sql } from "drizzle-orm";
 
 type UpdateInstitutionUsageParams = {
   id: string;

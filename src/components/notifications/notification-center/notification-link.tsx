@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 
 const SUPPORTED_NOTIFICATION_TYPES = ["transactions_created"];

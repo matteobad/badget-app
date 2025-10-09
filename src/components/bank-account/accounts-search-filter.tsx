@@ -1,10 +1,10 @@
 "use client";
 
+import { SearchIcon } from "lucide-react";
 import { useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { Input } from "~/components/ui/input";
 import { useBankAccountFilterParams } from "~/hooks/use-bank-account-filter-params";
-import { SearchIcon } from "lucide-react";
-import { useHotkeys } from "react-hotkeys-hook";
 
 // Static data
 const defaultSearch = {

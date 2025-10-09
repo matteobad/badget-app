@@ -1,6 +1,5 @@
-import type { WidgetPeriod } from "~/server/cache/widget-preferences-cache";
-import type { Day } from "date-fns";
 import { UTCDate } from "@date-fns/utc";
+import type { Day } from "date-fns";
 import {
   endOfMonth,
   endOfWeek,
@@ -10,6 +9,7 @@ import {
   subMonths,
   subWeeks,
 } from "date-fns";
+import type { WidgetPeriod } from "~/server/cache/widget-preferences-cache";
 
 import { getFiscalYearToDate } from "./fiscal-year";
 

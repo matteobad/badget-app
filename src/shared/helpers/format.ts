@@ -1,3 +1,4 @@
+import type { TZDate } from "@date-fns/tz";
 import {
   differenceInDays,
   differenceInMonths,
@@ -5,8 +6,6 @@ import {
   isSameYear,
   startOfDay,
 } from "date-fns";
-
-import type { TZDate } from "@date-fns/tz";
 
 export function formatSize(bytes: number): string {
   const units = ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte"];

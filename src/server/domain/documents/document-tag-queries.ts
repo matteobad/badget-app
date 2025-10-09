@@ -1,6 +1,6 @@
+import { and, eq, sql } from "drizzle-orm";
 import type { DBClient } from "~/server/db";
 import { document_tag_table } from "~/server/db/schema/documents";
-import { and, eq, sql } from "drizzle-orm";
 
 export const getDocumentTags = async (db: DBClient, organizationId: string) => {
   return db.query.document_tag_table.findMany({

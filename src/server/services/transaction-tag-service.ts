@@ -1,8 +1,8 @@
+import type z from "zod";
 import type {
   createTransactionTagSchema,
   deleteTransactionTagSchema,
 } from "~/shared/validators/transaction-tag.schema";
-import type z from "zod";
 
 import type { DBClient } from "../db";
 import {

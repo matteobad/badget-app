@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { Loader2, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { signUp } from "~/shared/helpers/better-auth/auth-client";
-import { Loader2, X } from "lucide-react";
-import { toast } from "sonner";
 
 export function SignUp() {
   const [firstName, setFirstName] = useState("");

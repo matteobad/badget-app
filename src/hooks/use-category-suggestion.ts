@@ -1,11 +1,11 @@
-import type { BaseColor } from "~/shared/constants/category";
-import { useCallback } from "react";
 import { google } from "@ai-sdk/google";
-import { BASE_COLORS, CATEGORY_SUGGESTIONS } from "~/shared/constants/category";
 import { generateObject } from "ai";
 import Fuse from "fuse.js";
 import { iconNames } from "lucide-react/dynamic";
+import { useCallback } from "react";
 import z from "zod";
+import type { BaseColor } from "~/shared/constants/category";
+import { BASE_COLORS, CATEGORY_SUGGESTIONS } from "~/shared/constants/category";
 
 const fuse = new Fuse(CATEGORY_SUGGESTIONS, {
   keys: ["keywords"],

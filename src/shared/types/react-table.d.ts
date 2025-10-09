@@ -1,9 +1,9 @@
 // TODO: Remove this import once we have a better way to type the table meta
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// biome-ignore lint: disable biome
 import type { RouterOutputs } from "@/trpc/client";
 
 declare module "@tanstack/react-table" {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // biome-ignore lint: disable biome
   interface TableMeta<TData extends RowData> {
     // Transaction table meta
     dateFormat?: string | null;
@@ -28,7 +28,7 @@ declare module "@tanstack/react-table" {
     deleteTag?: (id: string) => void;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // biome-ignore lint: disable biome
   interface ColumnMeta<TData extends RowData, TValue> {
     className?: string;
   }

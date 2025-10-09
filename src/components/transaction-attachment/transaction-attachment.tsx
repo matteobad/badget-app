@@ -1,15 +1,15 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { toast } from "sonner";
 import { useUpload } from "~/hooks/use-upload";
 import { cn } from "~/lib/utils";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useActiveOrganization } from "~/shared/helpers/better-auth/auth-client";
 import { stripSpecialCharacters } from "~/shared/helpers/documents";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { useDropzone } from "react-dropzone";
-import { toast } from "sonner";
 
 import type { Attachment } from "./attachment-item";
 import { AttachmentItem } from "./attachment-item";

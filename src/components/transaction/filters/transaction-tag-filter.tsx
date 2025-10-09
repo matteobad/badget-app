@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { LoaderCircleIcon } from "lucide-react";
 import { Spinner } from "~/components/load-more";
 import {
   Command,
@@ -10,7 +11,6 @@ import {
 } from "~/components/ui/command";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { LoaderCircleIcon } from "lucide-react";
 
 type Props = {
   selected?: string[] | null;

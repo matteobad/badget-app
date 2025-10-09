@@ -1,12 +1,11 @@
 "use client";
 
-import type { Path } from "react-hook-form";
 import { useState } from "react";
-import { cn } from "~/lib/utils";
+import type { Path } from "react-hook-form";
 import { useController, useFormContext } from "react-hook-form";
-
-import type { SplitFormValues } from "./form-context";
+import { cn } from "~/lib/utils";
 import { Input } from "../ui/input";
+import type { SplitFormValues } from "./form-context";
 
 type DescriptionInputProps<P extends Path<SplitFormValues>> =
   React.ComponentProps<typeof Input> & {

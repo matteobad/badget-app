@@ -1,8 +1,8 @@
 "use client";
 
+import { GridIcon, ListIcon } from "lucide-react";
 import { useDocumentParams } from "~/hooks/use-document-params";
 import { cn } from "~/lib/utils";
-import { GridIcon, ListIcon } from "lucide-react";
 
 import { Button } from "../ui/button";
 

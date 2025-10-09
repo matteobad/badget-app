@@ -1,5 +1,5 @@
-import type { db } from "~/server/db";
 import type { MiddlewareHandler } from "hono";
+import type { db } from "~/server/db";
 
 // import { withAuth } from "./middleware/auth";
 import { withDatabase } from "./middleware/db";

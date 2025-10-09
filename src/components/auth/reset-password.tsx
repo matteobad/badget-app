@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { resetPassword } from "~/shared/helpers/better-auth/auth-client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod/v4";
+import { resetPassword } from "~/shared/helpers/better-auth/auth-client";
 
 import { SubmitButton } from "../submit-button";
 import {

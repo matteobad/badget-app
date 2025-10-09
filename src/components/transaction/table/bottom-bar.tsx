@@ -1,5 +1,7 @@
 "use client";
 
+import { motion } from "framer-motion";
+import { InfoIcon } from "lucide-react";
 import { useMemo } from "react";
 import {
   Tooltip,
@@ -9,8 +11,6 @@ import {
 } from "~/components/ui/tooltip";
 import { formatAmount } from "~/shared/helpers/format";
 import { useI18n } from "~/shared/locales/client";
-import { motion } from "framer-motion";
-import { InfoIcon } from "lucide-react";
 
 type Transaction = {
   amount: number;

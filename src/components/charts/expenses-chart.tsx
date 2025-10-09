@@ -1,8 +1,6 @@
 "use client";
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-
-import type { BaseChartProps } from "./chart-utils";
 import {
   BaseChart,
   ChartLegend,
@@ -11,6 +9,7 @@ import {
   StyledXAxis,
   StyledYAxis,
 } from "./base-charts";
+import type { BaseChartProps } from "./chart-utils";
 
 interface ExpenseData {
   month: string;

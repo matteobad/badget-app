@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
-import React from "react";
-import { ResetPassword } from "~/components/auth/reset-password";
 import { createLoader, parseAsString } from "nuqs/server";
+import { ResetPassword } from "~/components/auth/reset-password";
 
 export const metadata: Metadata = {
   title: "Reset Password | Badget.",

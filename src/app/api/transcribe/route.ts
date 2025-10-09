@@ -1,10 +1,10 @@
-import { unauthorized } from "next/navigation";
-import { NextResponse } from "next/server";
 import { openai } from "@ai-sdk/openai";
-import { auth } from "~/shared/helpers/better-auth/auth";
 import { experimental_transcribe as transcribe } from "ai";
 import { HTTPException } from "hono/http-exception";
+import { unauthorized } from "next/navigation";
+import { NextResponse } from "next/server";
 import { z } from "zod";
+import { auth } from "~/shared/helpers/better-auth/auth";
 
 const transcriptionRequestSchema = z.object({
   audio: z.string().describe("Base64 encoded audio data"),

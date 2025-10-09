@@ -6,9 +6,9 @@ import type {
   Variant,
   Variants,
 } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import { cn } from "~/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
 
 export type PresetType = "blur" | "fade-in-blur" | "scale" | "fade" | "slide";
 

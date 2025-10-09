@@ -1,7 +1,7 @@
 "use client";
 
-import { useUserQuery } from "~/hooks/use-user";
 import { Loader2 } from "lucide-react";
+import { useUserQuery } from "~/hooks/use-user";
 
 import { AvatarUpload } from "../avatar-upload";
 import {

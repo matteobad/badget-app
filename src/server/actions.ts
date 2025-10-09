@@ -1,13 +1,12 @@
 "use server";
 
+import type { VisibilityState } from "@tanstack/react-table";
+import { addYears } from "date-fns";
 import { cookies } from "next/headers";
+import { z } from "zod";
 import { actionClient, authActionClient } from "~/lib/safe-action";
 import { Cookies } from "~/shared/constants/cookies";
 import { sendSupportSchema } from "~/shared/validators/support.schema";
-import { addYears } from "date-fns";
-import { z } from "zod";
-
-import type { VisibilityState } from "@tanstack/react-table";
 import { resend } from "../lib/resend";
 
 export const trackingConsentAction = actionClient

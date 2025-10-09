@@ -1,16 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { useMutation } from "@tanstack/react-query";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
-import { cn } from "~/lib/utils";
-import { useTRPC } from "~/shared/helpers/trpc/client";
 import { motion } from "framer-motion";
 import {
   CopyCheckIcon,
@@ -19,6 +10,15 @@ import {
   ThumbsDownIcon,
   ThumbsUpIcon,
 } from "lucide-react";
+import { useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 
 interface MessageActionsProps {
   messageId: string;

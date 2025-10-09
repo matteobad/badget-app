@@ -1,10 +1,10 @@
 import "dotenv/config";
 
 import { neon, neonConfig, Pool } from "@neondatabase/serverless";
-import { env } from "~/env";
 import { drizzle as drizzleHttp } from "drizzle-orm/neon-http";
 import { drizzle as drizzleWs } from "drizzle-orm/neon-serverless";
 import ws from "ws";
+import { env } from "~/env";
 
 import * as accounts from "./schema/accounts";
 import * as auth from "./schema/auth";

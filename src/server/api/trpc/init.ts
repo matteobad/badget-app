@@ -6,11 +6,12 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { cache } from "react";
+
 import { initTRPC } from "@trpc/server";
-import { auth } from "~/shared/helpers/better-auth/auth";
+import { cache } from "react";
 import superjson from "superjson";
 import { ZodError } from "zod/v4";
+import { auth } from "~/shared/helpers/better-auth/auth";
 
 import { db } from "../../db";
 import { authMiddleware } from "./middleware/auth";

@@ -1,11 +1,11 @@
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis } from "recharts";
 import { cn } from "~/lib/utils";
 import { formatAmount } from "~/shared/helpers/format";
-import { Bar, BarChart, CartesianGrid, Tooltip, XAxis } from "recharts";
 
 import type { ChartConfig } from "../ui/chart";
-import type { BaseChartProps } from "./chart-utils";
 import { ChartContainer } from "../ui/chart";
 import { StyledTooltip } from "./base-charts";
+import type { BaseChartProps } from "./chart-utils";
 
 interface AverageSavingsData {
   month: Date;

@@ -1,14 +1,14 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useBankAccountParams } from "~/hooks/use-bank-account-params";
-import { cn } from "~/lib/utils";
-import { getInitials } from "~/shared/helpers/format";
-import { useTRPC } from "~/shared/helpers/trpc/client";
 import { Loader2, MoreHorizontal } from "lucide-react";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
+import { useId, useState } from "react";
+import { useBankAccountParams } from "~/hooks/use-bank-account-params";
+import { cn } from "~/lib/utils";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import { getInitials } from "~/shared/helpers/format";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import { FormatAmount } from "../format-amount";
 import {
@@ -41,6 +41,7 @@ type Props = {
 };
 
 export function BankAccount({ data }: Props) {
+  const deleteInputId = useId();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [value, setValue] = useState("");
@@ -158,11 +159,11 @@ export function BankAccount({ data }: Props) {
             </AlertDialogHeader>
 
             <div className="mt-2 flex flex-col gap-2">
-              <Label htmlFor="confirm-delete">
+              <Label htmlFor={deleteInputId}>
                 Type <span className="font-medium">DELETE</span> to confirm.
               </Label>
               <Input
-                id="confirm-delete"
+                id={deleteInputId}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
               />

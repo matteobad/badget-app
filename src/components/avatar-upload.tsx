@@ -1,12 +1,12 @@
 "use client";
 
-import { forwardRef, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2, UserCircleIcon } from "lucide-react";
+import { forwardRef, useRef, useState } from "react";
 import { useUpload } from "~/hooks/use-upload";
 import { cn } from "~/lib/utils";
 import { stripSpecialCharacters } from "~/shared/helpers/documents";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { Loader2, UserCircleIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 

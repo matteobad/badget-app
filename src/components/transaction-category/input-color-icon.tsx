@@ -1,14 +1,14 @@
-import type { CategoryMode } from "~/hooks/use-category-form";
+import { PlusIcon } from "lucide-react";
 import type { IconName } from "lucide-react/dynamic";
+import { DynamicIcon } from "lucide-react/dynamic";
 import { useState } from "react";
+import { HexColorPicker } from "react-colorful";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
+import type { CategoryMode } from "~/hooks/use-category-form";
 import { useCategoryForm } from "~/hooks/use-category-form";
 import { cn } from "~/lib/utils";
 import { getCategoryColors } from "~/shared/helpers/categories";
-import { PlusIcon } from "lucide-react";
-import { DynamicIcon } from "lucide-react/dynamic";
-import { HexColorPicker } from "react-colorful";
 
 import {
   HoverCard,
@@ -85,9 +85,9 @@ export function InputColorIcon({
           <div className="">
             {/* Colors Section */}
             <div className="grid grid-cols-6 items-center justify-center gap-4 p-4">
-              {colorOptions.map((color, index) => (
+              {colorOptions.map((color) => (
                 <Button
-                  key={index}
+                  key={color}
                   variant="ghost"
                   d
                   className={cn("size-4 p-0 outline-offset-2", {

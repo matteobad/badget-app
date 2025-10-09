@@ -1,9 +1,22 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { useQuery } from "@tanstack/react-query";
+import { formatISO } from "date-fns";
+import type { LucideIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  ChartSplineIcon,
+  EuroIcon,
+  FilterIcon,
+  LandmarkIcon,
+  Repeat1Icon,
+  SearchIcon,
+  ShapesIcon,
+  TagsIcon,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { SelectCategory } from "~/components/transaction-category/select-category";
 import { Calendar } from "~/components/ui/calendar";
 import {
@@ -23,19 +36,6 @@ import { useTransactionFilterParamsWithPersistence } from "~/hooks/use-transacti
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { generateTransactionFiltersSchema } from "~/shared/validators/transaction.schema";
-import { formatISO } from "date-fns";
-import {
-  CalendarIcon,
-  ChartSplineIcon,
-  EuroIcon,
-  FilterIcon,
-  LandmarkIcon,
-  Repeat1Icon,
-  SearchIcon,
-  ShapesIcon,
-  TagsIcon,
-} from "lucide-react";
-import { useHotkeys } from "react-hotkeys-hook";
 
 import { FilterList } from "./filter-list";
 import { TransactionAccountFilter } from "./transaction-account-filter";

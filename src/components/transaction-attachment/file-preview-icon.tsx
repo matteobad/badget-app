@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "~/lib/utils";
 import { FileIcon, FileTextIcon, FolderArchiveIcon } from "lucide-react";
+import { cn } from "~/lib/utils";
 
 type Props = {
   mimetype?: string | null;

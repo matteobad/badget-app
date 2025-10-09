@@ -1,16 +1,15 @@
 "use client";
 
-import { useCallback } from "react";
 import { Reorder, useDragControls } from "framer-motion";
 import { GripVerticalIcon, PlusIcon, XIcon } from "lucide-react";
 import { nanoid } from "nanoid";
+import { useCallback } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-
-import type { SplitFormValues } from "./form-context";
 import { Button } from "../ui/button";
 import { AmountInput } from "./amount-input";
 import { CategoryInput } from "./category-input";
 import { DescriptionInput } from "./description-input";
+import type { SplitFormValues } from "./form-context";
 
 export function LineItems() {
   const { control, watch, getFieldState, setValue } =

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { ErrorFallback } from "~/components/error-fallback";
 import { CategoriesDataTable } from "~/components/transaction-category/table/data-table";
 import { CategoriesSkeleton } from "~/components/transaction-category/table/data-table.skeleton";
 import { HydrateClient, prefetch, trpc } from "~/shared/helpers/trpc/server";
-import { ErrorBoundary } from "react-error-boundary";
 
 export const metadata: Metadata = {
   title: "Categories | Badget.",

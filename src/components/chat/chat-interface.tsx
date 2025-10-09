@@ -1,15 +1,14 @@
 "use client";
 
-import type { UIChatMessage } from "~/server/api/ai/main-agent";
-import { useEffect, useMemo, useRef } from "react";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { AIDevtools } from "@ai-sdk-tools/devtools";
 import { useChat, useChatActions } from "@ai-sdk-tools/store";
+import type { Geo } from "@vercel/functions";
+import { DefaultChatTransport, generateId } from "ai";
+import { useEffect, useMemo, useRef } from "react";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { cn } from "~/lib/utils";
-import { DefaultChatTransport, generateId } from "ai";
-
-import type { Geo } from "@vercel/functions";
+import type { UIChatMessage } from "~/server/api/ai/main-agent";
 import { Canvas } from "../canvas/canvas";
 import { ChatHeader } from "./chat-header";
 import { ChatInput } from "./chat-input";

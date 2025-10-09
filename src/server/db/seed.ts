@@ -1,8 +1,6 @@
 import "dotenv/config";
 
 import { reset, seed } from "drizzle-seed";
-
-import { db, schema } from ".";
 import {
   ACCOUNT_TYPE,
   BANK_PROVIDER,
@@ -11,6 +9,7 @@ import {
   TRANSACTION_METHOD,
   TRANSACTION_STATUS,
 } from "../../shared/constants/enum";
+import { db, schema } from ".";
 import { categoriesIds, categoriesMap } from "./data/categories";
 
 async function main() {

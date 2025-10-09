@@ -1,7 +1,7 @@
 "use client";
 
-import { useSearchStore } from "~/lib/stores/search";
 import { SearchIcon } from "lucide-react";
+import { useSearchStore } from "~/lib/stores/search";
 
 import { Button } from "../ui/button";
 

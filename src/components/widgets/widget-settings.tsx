@@ -1,11 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import type {
   RevenueType,
   WidgetConfig,
   WidgetPeriod,
 } from "~/server/cache/widget-preferences-cache";
-import { useState } from "react";
 import { useScopedI18n } from "~/shared/locales/client";
 
 import { Button } from "../ui/button";

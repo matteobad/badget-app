@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
-import { handleUpload } from "@vercel/blob/client";
-
 import type { HandleUploadBody } from "@vercel/blob/client";
+import { handleUpload } from "@vercel/blob/client";
+import { NextResponse } from "next/server";
 
 // Use-case: uploading images for blog posts
 export async function POST(request: Request): Promise<NextResponse> {
@@ -38,14 +37,14 @@ export async function POST(request: Request): Promise<NextResponse> {
 
         console.log("blob upload completed", blob, tokenPayload);
 
-        try {
-          // Run any logic after the file upload completed,
-          // If you've already validated the user and authorization prior, you can
-          // safely update your database
-        } catch (error) {
-          console.error("Could not update post", { error });
-          throw new Error("Could not update post");
-        }
+        // try {
+        //   // Run any logic after the file upload completed,
+        //   // If you've already validated the user and authorization prior, you can
+        //   // safely update your database
+        // } catch (error) {
+        //   console.error("Could not update post", { error });
+        //   throw new Error("Could not update post");
+        // }
       },
     });
 

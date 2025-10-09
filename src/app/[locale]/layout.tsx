@@ -1,17 +1,17 @@
 import "~/globals.css";
 
-import type { Metadata } from "next";
-import { type ReactElement } from "react";
-import { Lora } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
+import type { Metadata } from "next";
+import { Lora } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import type { ReactElement } from "react";
 import { Toaster } from "~/components/ui/sonner";
 import { cn } from "~/lib/utils";
 import { TRPCReactProvider } from "~/shared/helpers/trpc/client";
 import { I18nProviderClient } from "~/shared/locales/client";
-import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { TailwindIndicator } from "../../components/tailwind-indicator";
 import { ThemeProvider } from "../../components/theme-provider";

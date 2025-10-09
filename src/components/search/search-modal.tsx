@@ -1,7 +1,7 @@
 "use client";
 
-import { useSearchStore } from "~/lib/stores/search";
 import { useHotkeys } from "react-hotkeys-hook";
+import { useSearchStore } from "~/lib/stores/search";
 
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import { Search } from "./search";

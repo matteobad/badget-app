@@ -1,8 +1,8 @@
 "use client";
 
 import type { dynamicIconImports } from "lucide-react/dynamic";
-import { cn } from "~/lib/utils";
 import { DynamicIcon } from "lucide-react/dynamic";
+import { cn } from "~/lib/utils";
 
 type CategoryIconProps = {
   color?: string;

@@ -1,8 +1,8 @@
+import { motion } from "framer-motion";
 import type { ComponentPropsWithoutRef, PropsWithChildren } from "react";
 import { forwardRef, useRef } from "react";
 import { useResizeObserver } from "~/hooks/use-resize-observer";
 import { cn } from "~/lib/utils";
-import { motion } from "framer-motion";
 
 type AnimatedSizeContainerProps = PropsWithChildren<{
   width?: boolean;

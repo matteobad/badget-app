@@ -1,8 +1,8 @@
 "use client";
 
+import { PlusIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useTagParams } from "~/hooks/use-tag-params";
-import { PlusIcon } from "lucide-react";
 
 export function TagsActions() {
   const { setParams } = useTagParams();

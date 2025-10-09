@@ -1,10 +1,10 @@
 "use client";
 
+import { Command as CommandPrimitive, useCommandState } from "cmdk";
+import { X } from "lucide-react";
 import * as React from "react";
 import { forwardRef, useEffect } from "react";
 import { cn } from "~/lib/utils";
-import { Command as CommandPrimitive, useCommandState } from "cmdk";
-import { X } from "lucide-react";
 
 import { Badge } from "./badge";
 import { Command, CommandGroup, CommandItem, CommandList } from "./command";
@@ -352,7 +352,6 @@ const MultipleSelector = React.forwardRef<
       };
 
       void exec();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedSearchTerm, groupBy, open, triggerSearchOnFocus]);
 
     const CreatableItem = () => {
@@ -563,7 +562,7 @@ const MultipleSelector = React.forwardRef<
               }}
             >
               {isLoading ? (
-                <>{loadingIndicator}</>
+                loadingIndicator
               ) : (
                 <>
                   {EmptyItem()}

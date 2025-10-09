@@ -1,9 +1,16 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import type { TransactionFrequencyType } from "~/shared/constants/enum";
-import { memo, useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
+import {
+  MoreHorizontalIcon,
+  ReceiptTextIcon,
+  ShareIcon,
+  SplitIcon,
+  TrashIcon,
+} from "lucide-react";
+import { memo, useCallback } from "react";
+import { toast } from "sonner";
 import { FormatAmount } from "~/components/format-amount";
 import { Spinner } from "~/components/load-more";
 import { CategoryBadge } from "~/components/transaction-category/category-badge";
@@ -25,18 +32,10 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import { formatDate } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import {
-  MoreHorizontalIcon,
-  ReceiptTextIcon,
-  ShareIcon,
-  SplitIcon,
-  TrashIcon,
-} from "lucide-react";
-import { toast } from "sonner";
-
-import type { ColumnDef } from "@tanstack/react-table";
 import { SimilarTransactionsUpdateToast } from "../similar-transactions-update-toast";
 import { TransactionInfoTooltips } from "../transaction-info-tooltips";
 
@@ -255,6 +254,7 @@ const CategoryCell = memo(
     if (transaction.splits.length >= 2) {
       return (
         <button
+          type="button"
           className="flex items-center gap-2"
           onClick={(e) => {
             e.stopPropagation();
@@ -415,29 +415,29 @@ const ActionsCell = memo(
             <ShareIcon className="size-3.5" />
             Share URL
           </DropdownMenuItem>
-          <>
-            {(transaction.splits.length > 0 ||
-              transaction.source !== "api") && <DropdownMenuSeparator />}
 
-            {transaction.splits.length > 0 && (
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={handleDeleteTransactionSplit}
-              >
-                <TrashIcon className="size-3.5" />
-                Elimina Splits
-              </DropdownMenuItem>
-            )}
-            {transaction.source !== "api" && (
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={handleDeleteTransaction}
-              >
-                <TrashIcon className="size-3.5" />
-                Delete
-              </DropdownMenuItem>
-            )}
-          </>
+          {(transaction.splits.length > 0 || transaction.source !== "api") && (
+            <DropdownMenuSeparator />
+          )}
+
+          {transaction.splits.length > 0 && (
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={handleDeleteTransactionSplit}
+            >
+              <TrashIcon className="size-3.5" />
+              Elimina Splits
+            </DropdownMenuItem>
+          )}
+          {transaction.source !== "api" && (
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={handleDeleteTransaction}
+            >
+              <TrashIcon className="size-3.5" />
+              Delete
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     );

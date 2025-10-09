@@ -1,8 +1,8 @@
 "use client";
 
+import { XIcon } from "lucide-react";
 import { useDocumentParams } from "~/hooks/use-document-params";
 import { formatSize } from "~/shared/helpers/format";
-import { XIcon } from "lucide-react";
 
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";

@@ -25,10 +25,7 @@ export const institution_table = pgTable("institution_table", (d) => ({
   provider: bankProviderEnum().notNull(),
   availableHistory: d.integer(),
   popularity: d.integer().default(0),
-  countries: d
-    .text()
-    .array()
-    .default(sql`ARRAY[]::text[]`),
+  countries: d.text().array().default(sql`ARRAY[]::text[]`),
 
   ...timestamps,
 }));

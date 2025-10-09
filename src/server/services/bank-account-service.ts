@@ -1,3 +1,4 @@
+import type z from "zod";
 import type {
   createManualBankAccountSchema,
   deleteBankAccountSchema,
@@ -6,7 +7,6 @@ import type {
   updateBankAccountBalanceSchema,
   updateBankAccountSchema,
 } from "~/shared/validators/bank-account.schema";
-import type z from "zod";
 
 import type { DBClient } from "../db";
 import {

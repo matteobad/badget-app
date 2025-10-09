@@ -1,11 +1,11 @@
+import { and, desc, eq, inArray, lte, ne } from "drizzle-orm";
+import type { SQL } from "drizzle-orm/sql/sql";
 import type { DBClient } from "~/server/db";
 import type {
   activityStatusEnum,
   activityTypeEnum,
 } from "~/server/db/schema/notifications";
-import type { SQL } from "drizzle-orm/sql/sql";
 import { activity_table } from "~/server/db/schema/notifications";
-import { and, desc, eq, inArray, lte, ne } from "drizzle-orm";
 
 type CreateActivityParams = {
   organizationId: string;

@@ -1,3 +1,7 @@
+import { tasks } from "@trigger.dev/sdk";
+// import { updateOrCreateRule } from "~/utils/categorization";
+import { eq } from "drizzle-orm";
+import type z from "zod/v4";
 import type {
   categorizeTransactionSchema,
   createManualTransactionSchema,
@@ -9,14 +13,8 @@ import type {
   updateTransactionSchema,
   updateTransactionsSchema,
 } from "~/shared/validators/transaction.schema";
-import type z from "zod/v4";
-import { tasks } from "@trigger.dev/sdk";
-// import { updateOrCreateRule } from "~/utils/categorization";
-import { eq } from "drizzle-orm";
 
 import type { DBClient } from "../db";
-import type { NormalizedTx } from "../domain/transaction/utils";
-import type { embedTransactionsTask } from "../jobs/tasks/embed-transactions";
 import { db } from "../db";
 import { account_table } from "../db/schema/accounts";
 import { transaction_table } from "../db/schema/transactions";
@@ -33,12 +31,14 @@ import {
   getTransactionsQuery,
   getTransactionTagCountsQuery,
 } from "../domain/transaction/queries";
+import type { NormalizedTx } from "../domain/transaction/utils";
 import {
   calculateFingerprint,
   generateTransferId,
   normalizeDescription,
   validateTransferBalance,
 } from "../domain/transaction/utils";
+import type { embedTransactionsTask } from "../jobs/tasks/embed-transactions";
 import {
   adjustBalanceOffsets,
   recalculateSnapshots,

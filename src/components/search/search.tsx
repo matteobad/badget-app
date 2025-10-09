@@ -1,15 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useDocumentParams } from "~/hooks/use-document-params";
-import { useTransactionParams } from "~/hooks/use-transaction-params";
-import { useUserQuery } from "~/hooks/use-user";
-import { useSearchStore } from "~/lib/stores/search";
-import { formatDate } from "~/shared/helpers/format";
-import { useTRPC } from "~/shared/helpers/trpc/client";
 import {
   ArrowUpRightIcon,
   CopyCheckIcon,
@@ -18,8 +9,17 @@ import {
   Layers2Icon,
   ReceiptIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useCopyToClipboard, useDebounceValue } from "usehooks-ts";
+import { useDocumentParams } from "~/hooks/use-document-params";
+import { useTransactionParams } from "~/hooks/use-transaction-params";
+import { useUserQuery } from "~/hooks/use-user";
+import { useSearchStore } from "~/lib/stores/search";
+import { formatDate } from "~/shared/helpers/format";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import { FormatAmount } from "../format-amount";
 import {

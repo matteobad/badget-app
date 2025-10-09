@@ -1,8 +1,6 @@
 "use client";
 
 import { ReferenceLine, Tooltip } from "recharts";
-
-import type { BaseChartProps } from "./chart-utils";
 import {
   BaseChart,
   ChartLegend,
@@ -12,6 +10,7 @@ import {
   StyledXAxis,
   StyledYAxis,
 } from "./base-charts";
+import type { BaseChartProps } from "./chart-utils";
 
 interface RevenueData {
   month: string;

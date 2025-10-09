@@ -15,23 +15,18 @@ concurrency:
 #   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
 jobs:
-  build-lint:
+  quality:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Install dependencies & tooling
-        uses: ./.github/workflows/setup
-
-      - run: cp .env.example .env
-
-      - name: 🔦 Lint
-        run: pnpm run lint
-
-      - name: 🪐 Typecheck
-        run: pnpm run typecheck
-
-      - name: 💼 Format
-        run: pnpm run format:check
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: latest
+      - name: Run Biome
+        run: biome ci .

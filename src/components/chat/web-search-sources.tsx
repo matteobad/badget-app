@@ -1,9 +1,9 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import type { ComponentProps } from "react";
 import { useEffect, useState } from "react";
 import { cn } from "~/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {

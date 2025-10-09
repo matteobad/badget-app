@@ -1,9 +1,9 @@
 "use client";
 
+import { ImageOffIcon } from "lucide-react";
+import { default as NextImage } from "next/image";
 import { useEffect, useState } from "react";
 import { cn } from "~/lib/utils";
-import { ImageOffIcon } from "lucide-react";
-
 import { Skeleton } from "../ui/skeleton";
 import { FilePreviewIcon } from "./file-preview-icon";
 
@@ -66,9 +66,7 @@ export function FilePreview({ mimeType, filePath }: Props) {
   return (
     <div className="relative h-full w-full">
       {isLoading && <Skeleton className="absolute inset-0 h-full w-full" />}
-
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <NextImage
         src={src}
         alt="File Preview"
         className={cn(

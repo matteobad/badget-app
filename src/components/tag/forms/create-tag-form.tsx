@@ -2,6 +2,9 @@
 
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { z } from "zod";
 import { SubmitButton } from "~/components/submit-button";
 import {
   Form,
@@ -15,9 +18,6 @@ import { Input } from "~/components/ui/input";
 import { useTagParams } from "~/hooks/use-tag-params";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createTagSchema } from "~/shared/validators/tag.schema";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { type z } from "zod";
 
 export default function CreateTagForm() {
   const { setParams } = useTagParams();

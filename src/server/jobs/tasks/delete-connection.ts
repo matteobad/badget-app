@@ -1,8 +1,8 @@
 import { schemaTask } from "@trigger.dev/sdk";
+import { and, eq } from "drizzle-orm";
 import { db } from "~/server/db";
 import { connection_table } from "~/server/db/schema/open-banking";
 import { deleteConnectionSchema } from "~/shared/validators/tasks.schema";
-import { and, eq } from "drizzle-orm";
 
 export const deleteConnection = schemaTask({
   id: "delete-connection",

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { signIn } from "~/shared/helpers/better-auth/auth-client";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { signIn } from "~/shared/helpers/better-auth/auth-client";
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";

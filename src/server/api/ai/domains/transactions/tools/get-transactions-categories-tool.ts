@@ -1,6 +1,6 @@
-import { getTransactionCategories } from "~/server/services/transaction-category";
 import { tool } from "ai";
 import z from "zod";
+import { getTransactionCategories } from "~/server/services/transaction-category";
 
 import { getContext } from "../../../context";
 
@@ -12,7 +12,7 @@ export const getTransacationsCategoriesTool = tool({
   description:
     "Search and retrieve transaction categories from the database. Use this tool when a user asks for a list of categories, wants to find a category by name, or needs information about available transaction categories for organizing or analyzing.",
   inputSchema: getTransactionsCategoriesSchema,
-  execute: async function ({ q }) {
+  execute: async ({ q }) => {
     try {
       const context = getContext();
 

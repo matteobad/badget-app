@@ -1,11 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import type { ComponentProps } from "react";
 import { memo } from "react";
-import Link from "next/link";
+import { Streamdown } from "streamdown";
 import { cn } from "~/lib/utils";
 import { getUrl } from "~/shared/helpers/get-url";
-import { Streamdown } from "streamdown";
 
 import { Table } from "../ui/table";
 

@@ -1,3 +1,4 @@
+import { RocketIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CreateSpaceForm } from "~/components/organization/forms/create-org-form";
@@ -5,7 +6,6 @@ import {
   getCountryCode,
   getCurrency,
 } from "~/server/services/location-service";
-import { RocketIcon } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Create Space | Badget.",

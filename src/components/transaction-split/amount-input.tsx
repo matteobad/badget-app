@@ -1,11 +1,10 @@
-import type { Path } from "react-hook-form";
-import type { NumericFormatProps } from "react-number-format";
 import { useState } from "react";
-import { cn } from "~/lib/utils";
+import type { Path } from "react-hook-form";
 import { useController, useFormContext } from "react-hook-form";
-
-import type { SplitFormValues } from "./form-context";
+import type { NumericFormatProps } from "react-number-format";
+import { cn } from "~/lib/utils";
 import { CurrencyInput } from "../custom/currency-input";
+import type { SplitFormValues } from "./form-context";
 
 type AmountInputProps<P extends Path<SplitFormValues>> = Omit<
   NumericFormatProps,

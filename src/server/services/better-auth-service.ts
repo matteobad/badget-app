@@ -1,15 +1,14 @@
+import { schedules } from "@trigger.dev/sdk";
+import { nanoid } from "nanoid";
+import { headers } from "next/headers";
+import type z from "zod";
 import type {
   createOrganizationSchema,
   deleteSpaceSchema,
   updateSpaceByIdSchema,
 } from "~/shared/validators/organization.schema";
-import type z from "zod";
-import { headers } from "next/headers";
-import { schedules } from "@trigger.dev/sdk";
-import { nanoid } from "nanoid";
-
-import type { DBClient } from "../db";
 import { auth } from "../../shared/helpers/better-auth/auth";
+import type { DBClient } from "../db";
 import { createDefaultCategoriesForSpace } from "../domain/transaction-category/mutations";
 import { getUserByIdQuery } from "../domain/user/queries";
 import { getBankAccountProvider } from "../integrations/open-banking";

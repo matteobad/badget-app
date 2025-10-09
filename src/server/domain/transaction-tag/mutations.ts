@@ -1,8 +1,8 @@
 "server-only";
 
+import { and, eq } from "drizzle-orm";
 import type { DBClient } from "~/server/db";
 import { transaction_to_tag_table } from "~/server/db/schema/transactions";
-import { and, eq } from "drizzle-orm";
 
 type CreateTransactionTagParams = {
   organizationId: string;

@@ -1,17 +1,17 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useChatInterface } from "~/hooks/use-chat-interface";
-import { cn } from "~/lib/utils";
-import { useTRPC } from "~/shared/helpers/trpc/client";
 import {
   BanknoteArrowUpIcon,
   LineChartIcon,
   ReceiptIcon,
   ShapesIcon,
 } from "lucide-react";
+import { useChatInterface } from "~/hooks/use-chat-interface";
+import { cn } from "~/lib/utils";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import { Skeleton } from "./ui/skeleton";
 

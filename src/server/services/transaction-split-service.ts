@@ -1,11 +1,11 @@
+import { and, desc, eq } from "drizzle-orm";
+import type z from "zod/v4";
 import type { SplitFormValues } from "~/components/transaction-split/form-context";
 import type {
   addTransactionSplitsSchema,
   deleteTransactionSplitSchema,
   getTransactionSplitsSchema,
 } from "~/shared/validators/transaction-split.schema";
-import type z from "zod/v4";
-import { and, desc, eq } from "drizzle-orm";
 
 import type { DBClient } from "../db";
 import { account_table } from "../db/schema/accounts";
@@ -74,7 +74,7 @@ export async function getTransactionSplits(
     )
     .orderBy(desc(transaction_split_table.amount));
 
-  const subtotal = splits.reduce((tot, value) => (tot += value.amount), 0);
+  const subtotal = splits.reduce((tot, value) => tot + value.amount, 0);
 
   return {
     transaction: {

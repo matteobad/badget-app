@@ -1,6 +1,15 @@
 "use client";
 
 import type { ChatStatus, FileUIPart } from "ai";
+import {
+  ArrowUpIcon,
+  PaperclipIcon,
+  PlusIcon,
+  StopCircleIcon,
+  XIcon,
+} from "lucide-react";
+import { nanoid } from "nanoid";
+import Image from "next/image";
 import type {
   ChangeEventHandler,
   ComponentProps,
@@ -23,15 +32,6 @@ import {
   useState,
 } from "react";
 import { cn } from "~/lib/utils";
-import {
-  ArrowUpIcon,
-  PaperclipIcon,
-  PlusIcon,
-  StopCircleIcon,
-  XIcon,
-} from "lucide-react";
-import { nanoid } from "nanoid";
-
 import { Button } from "./button";
 import {
   DropdownMenu,
@@ -90,7 +90,7 @@ export function PromptInputAttachment({
       {...props}
     >
       {data.mediaType?.startsWith("image/") && data.url ? (
-        <img
+        <Image
           alt={data.filename ?? "attachment"}
           className="size-full object-cover"
           height={56}

@@ -1,5 +1,5 @@
-import { transactionCategoryFilterParamsSchema } from "~/shared/validators/transaction-category.schema";
 import { useQueryStates } from "nuqs";
+import { transactionCategoryFilterParamsSchema } from "~/shared/validators/transaction-category.schema";
 
 export function useTransactionCategoryFilterParams() {
   const [filters, setFilters] = useQueryStates(

@@ -1,10 +1,10 @@
 "server-only";
 
+import { and, eq } from "drizzle-orm";
 import type { DBClient } from "~/server/db";
 import type { DB_TransactionCategoryInsertType } from "~/server/db/schema/transactions";
 import { transaction_category_table } from "~/server/db/schema/transactions";
 import { CATEGORIES } from "~/shared/constants/categories";
-import { and, eq } from "drizzle-orm";
 
 import { generateCategoryEmbedding } from "./helpers";
 

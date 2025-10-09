@@ -1,10 +1,10 @@
 import { z } from "@hono/zod-openapi";
+import { parseAsString, parseAsStringLiteral } from "nuqs/server";
 import {
   ACCOUNT_SUBTYPE,
   ACCOUNT_TYPE,
   BANK_PROVIDER,
 } from "~/shared/constants/enum";
-import { parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 export const getBankConnectionsSchema = z
   .object({ enabled: z.boolean().optional() })

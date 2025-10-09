@@ -1,7 +1,7 @@
-import type { updateUserSchema } from "~/shared/validators/user.schema";
-import type z from "zod/v4";
 import { headers } from "next/headers";
+import type z from "zod/v4";
 import { auth } from "~/shared/helpers/better-auth/auth";
+import type { updateUserSchema } from "~/shared/validators/user.schema";
 
 import type { DBClient } from "../db";
 import { getUserByIdQuery } from "../domain/user/queries";

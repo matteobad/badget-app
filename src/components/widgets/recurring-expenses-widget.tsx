@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { CalendarSyncIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { useUserQuery } from "~/hooks/use-user";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
@@ -10,7 +11,6 @@ import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { getWidgetPeriodDates } from "~/shared/helpers/widget-period";
 import { useScopedI18n } from "~/shared/locales/client";
-import { CalendarSyncIcon } from "lucide-react";
 
 import { AnimatedNumber } from "../animated-number";
 import { BaseWidget, WidgetSkeleton } from "./base";

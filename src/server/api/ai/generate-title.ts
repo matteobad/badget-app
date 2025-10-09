@@ -1,8 +1,8 @@
-import type { ChatUserContext } from "~/server/cache/chat-cache";
 import { google } from "@ai-sdk/google";
 import { TZDate } from "@date-fns/tz";
 import { generateObject } from "ai";
 import { z } from "zod";
+import type { ChatUserContext } from "~/server/cache/chat-cache";
 
 import { safeValue } from "./utils/safe-value";
 

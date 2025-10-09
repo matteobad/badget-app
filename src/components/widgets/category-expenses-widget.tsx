@@ -1,10 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { useQuery } from "@tanstack/react-query";
-import { useChatInterface } from "~/hooks/use-chat-interface";
+import { ShapesIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { useUserQuery } from "~/hooks/use-user";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
@@ -12,8 +11,6 @@ import { formatCompactAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { getWidgetPeriodDates } from "~/shared/helpers/widget-period";
 import { useScopedI18n } from "~/shared/locales/client";
-import { format } from "date-fns";
-import { ShapesIcon } from "lucide-react";
 
 import { BaseWidget, WidgetSkeleton } from "./base";
 import { ConfigurableWidget } from "./configurable-widget";

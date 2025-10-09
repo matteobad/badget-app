@@ -1,11 +1,11 @@
 import { useCallback, useEffect } from "react";
+import { useFormContext, useWatch } from "react-hook-form";
 import { useUserQuery } from "~/hooks/use-user";
 import { cn } from "~/lib/utils";
-import { useFormContext, useWatch } from "react-hook-form";
 
 import { AnimatedNumber } from "../animated-number";
 import { FormatAmount } from "../format-amount";
-import { type SplitFormValues } from "./form-context";
+import type { SplitFormValues } from "./form-context";
 
 export function Summary() {
   const { control, setValue } = useFormContext<SplitFormValues>();
@@ -33,7 +33,7 @@ export function Summary() {
   });
 
   const subTotal =
-    lineItems?.reduce((tot, value) => (tot += value.amount), 0) ?? 0;
+    lineItems?.reduce((tot, value) => tot + value.amount, 0) ?? 0;
 
   const updateFormValues = useCallback(() => {
     setValue("subtotal", subTotal, { shouldValidate: true });

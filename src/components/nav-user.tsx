@@ -1,5 +1,6 @@
 "use client";
 
+import { LifeBuoyIcon, LogOut, UserIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -15,7 +16,6 @@ import {
 import { useUserQuery } from "~/hooks/use-user";
 import { signOut } from "~/shared/helpers/better-auth/auth-client";
 import { getInitials } from "~/shared/helpers/format";
-import { LifeBuoyIcon, LogOut, UserIcon, UsersIcon } from "lucide-react";
 
 import { ThemeSelect } from "./theme-select";
 import { Skeleton } from "./ui/skeleton";

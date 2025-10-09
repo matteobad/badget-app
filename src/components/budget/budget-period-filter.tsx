@@ -1,22 +1,5 @@
 "use client";
 
-import * as React from "react";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 import {
   addMonths,
   addQuarters,
@@ -38,6 +21,23 @@ import {
   startOfYear,
 } from "date-fns";
 import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import * as React from "react";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { useBudgetFilterParams } from "~/hooks/use-budget-filter-params";
 
 type PickerMode = "month" | "week" | "quarter" | "year";
 
@@ -247,7 +247,7 @@ function WeekPicker({
           const isSelected = isSameWeek(selectedDate, weekStart);
           return (
             <Button
-              key={index}
+              key={`${weekStart.getTime()}`}
               variant={isSelected ? "default" : "ghost"}
               className="h-auto w-full justify-start p-3"
               onClick={() => onSelect(weekStart)}
@@ -277,9 +277,10 @@ function formatDateRange(range: DateRange | undefined, mode: PickerMode) {
       return format(from, "MMMM yyyy");
     case "week":
       return `Week of ${format(from, "MMM d, yyyy")}`;
-    case "quarter":
+    case "quarter": {
       const quarter = Math.floor(from.getMonth() / 3) + 1;
       return `Q${quarter} ${format(from, "yyyy")}`;
+    }
     case "year":
       return format(from, "yyyy");
     default:
@@ -295,18 +296,22 @@ function navigateRange(
   const multiplier = direction === "next" ? 1 : -1;
 
   switch (mode) {
-    case "month":
+    case "month": {
       const newMonth = addMonths(currentRange.from, multiplier);
       return { from: startOfMonth(newMonth), to: endOfMonth(newMonth) };
-    case "week":
+    }
+    case "week": {
       const newWeek = addWeeks(currentRange.from, multiplier);
       return { from: startOfWeek(newWeek), to: endOfWeek(newWeek) };
-    case "quarter":
+    }
+    case "quarter": {
       const newQuarter = addQuarters(currentRange.from, multiplier);
       return { from: startOfQuarter(newQuarter), to: endOfQuarter(newQuarter) };
-    case "year":
+    }
+    case "year": {
       const newYear = addYears(currentRange.from, multiplier);
       return { from: startOfYear(newYear), to: endOfYear(newYear) };
+    }
     default:
       return currentRange;
   }

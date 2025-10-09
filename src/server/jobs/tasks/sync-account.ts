@@ -1,4 +1,6 @@
 import { logger, schemaTask } from "@trigger.dev/sdk";
+import { subDays } from "date-fns";
+import { eq } from "drizzle-orm";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import {
@@ -7,8 +9,6 @@ import {
 } from "~/server/domain/transaction/utils";
 import { getBankAccountProvider } from "~/server/integrations/open-banking";
 import { syncAccountSchema } from "~/shared/validators/tasks.schema";
-import { subDays } from "date-fns";
-import { eq } from "drizzle-orm";
 
 import { parseAPIError } from "../utils/parse-error";
 import { recalculateSnapshotsTask } from "./recalculate-snapshots";
@@ -83,7 +83,7 @@ export const syncAccount = schemaTask({
         accountId,
         // accountType: classification,
         // If the transactions are being synced manually, we want to get all transactions
-        latest: manualSync ? false : true,
+        latest: !manualSync,
       });
 
       if (!transactionsData) {

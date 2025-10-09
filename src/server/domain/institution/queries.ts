@@ -1,8 +1,8 @@
 "server-only";
 
+import { and, arrayContains, desc, eq, ilike } from "drizzle-orm";
 import type { DBClient } from "~/server/db";
 import { institution_table } from "~/server/db/schema/open-banking";
-import { and, arrayContains, desc, eq, ilike } from "drizzle-orm";
 
 export type GetInstitutionsParams = {
   q?: string;

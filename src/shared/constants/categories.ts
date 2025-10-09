@@ -1,5 +1,5 @@
-import type { CategoryHierarchy } from "../types/category-types";
 import { getCategoryColor, getCategoryIcon } from "../helpers/categories";
+import type { CategoryHierarchy } from "../types/category-types";
 
 // Raw category definitions without colors
 const RAW_CATEGORIES = [

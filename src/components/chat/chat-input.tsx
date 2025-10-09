@@ -1,15 +1,14 @@
 "use client";
 
-import { useRef } from "react";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
+import { useRef } from "react";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { useChatStore } from "~/lib/stores/chat";
 import { cn } from "~/lib/utils";
 import { useScopedI18n } from "~/shared/locales/client";
-
-import type { PromptInputMessage } from "../ui/prompt-input";
 import { SuggestedActionsButton } from "../suggested-actions-button";
+import type { PromptInputMessage } from "../ui/prompt-input";
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -119,112 +118,110 @@ export function ChatInput() {
   };
 
   return (
-    <>
-      <div
-        className={cn(
-          "fixed bottom-6 left-[70px] z-20 px-6 transition-all duration-300 ease-in-out",
-          isCanvasVisible ? "right-[603px]" : "right-0",
-        )}
-      >
-        <div className="relative mx-auto w-full max-w-[770px] pt-2">
-          <FollowupQuestions />
+    <div
+      className={cn(
+        "fixed bottom-6 left-[70px] z-20 px-6 transition-all duration-300 ease-in-out",
+        isCanvasVisible ? "right-[603px]" : "right-0",
+      )}
+    >
+      <div className="relative mx-auto w-full max-w-[770px] pt-2">
+        <FollowupQuestions />
 
-          {/* Command Suggestions Menu */}
-          <CommandMenu />
+        {/* Command Suggestions Menu */}
+        <CommandMenu />
 
-          <PromptInput onSubmit={handleSubmit} globalDrop multiple>
-            <PromptInputBody>
-              <PromptInputAttachments>
-                {(attachment) => <PromptInputAttachment data={attachment} />}
-              </PromptInputAttachments>
-              <PromptInputTextarea
-                ref={textareaRef}
-                autoFocus
-                onChange={handleInputChange}
-                onKeyDown={(e) => {
-                  // Handle Enter key for commands
-                  if (e.key === "Enter" && showCommands) {
-                    e.preventDefault();
-                    const selectedCommand =
-                      filteredCommands[selectedCommandIndex];
-                    if (selectedCommand) {
-                      // Execute command through the store
-                      if (!chatId) return;
+        <PromptInput onSubmit={handleSubmit} globalDrop multiple>
+          <PromptInputBody>
+            <PromptInputAttachments>
+              {(attachment) => <PromptInputAttachment data={attachment} />}
+            </PromptInputAttachments>
+            <PromptInputTextarea
+              ref={textareaRef}
+              autoFocus
+              onChange={handleInputChange}
+              onKeyDown={(e) => {
+                // Handle Enter key for commands
+                if (e.key === "Enter" && showCommands) {
+                  e.preventDefault();
+                  const selectedCommand =
+                    filteredCommands[selectedCommandIndex];
+                  if (selectedCommand) {
+                    // Execute command through the store
+                    if (!chatId) return;
 
-                      setChatId(chatId);
+                    setChatId(chatId);
 
-                      void sendMessage({
-                        role: "user",
-                        parts: [{ type: "text", text: selectedCommand.title }],
-                        metadata: {
-                          toolCall: {
-                            toolName: selectedCommand.toolName,
-                            toolParams: selectedCommand.toolParams,
-                          },
+                    void sendMessage({
+                      role: "user",
+                      parts: [{ type: "text", text: selectedCommand.title }],
+                      metadata: {
+                        toolCall: {
+                          toolName: selectedCommand.toolName,
+                          toolParams: selectedCommand.toolParams,
                         },
-                      });
+                      },
+                    });
 
-                      setInput("");
-                      resetCommandState();
-                    }
-                    return;
+                    setInput("");
+                    resetCommandState();
                   }
-
-                  // Handle Enter key for normal messages
-                  if (e.key === "Enter" && !showCommands) {
-                    e.preventDefault();
-                    if (input.trim()) {
-                      // Set chat ID to ensure proper URL routing
-                      if (chatId) {
-                        setChatId(chatId);
-                      }
-
-                      void sendMessage({
-                        text: input,
-                        files: [],
-                        metadata: {
-                          webSearch: isWebSearch,
-                        },
-                      });
-
-                      setInput("");
-                      resetCommandState();
-                    }
-                    return;
-                  }
-
-                  // Handle other keys normally
-                  handleKeyDown(e);
-                }}
-                value={input}
-                placeholder={
-                  isWebSearch ? t("placeholder_web") : t("placeholder_ask")
+                  return;
                 }
-              />
-            </PromptInputBody>
-            <PromptInputToolbar>
-              <PromptInputTools>
-                <PromptInputActionAddAttachments />
-                <SuggestedActionsButton />
-                <WebSearchButton />
-              </PromptInputTools>
 
-              <PromptInputTools>
-                <RecordButton size={16} />
-                <PromptInputSubmit
-                  disabled={
-                    (!input && !status) ||
-                    isUploading ||
-                    isRecording ||
-                    isProcessing
+                // Handle Enter key for normal messages
+                if (e.key === "Enter" && !showCommands) {
+                  e.preventDefault();
+                  if (input.trim()) {
+                    // Set chat ID to ensure proper URL routing
+                    if (chatId) {
+                      setChatId(chatId);
+                    }
+
+                    void sendMessage({
+                      text: input,
+                      files: [],
+                      metadata: {
+                        webSearch: isWebSearch,
+                      },
+                    });
+
+                    setInput("");
+                    resetCommandState();
                   }
-                  status={status}
-                />
-              </PromptInputTools>
-            </PromptInputToolbar>
-          </PromptInput>
-        </div>
+                  return;
+                }
+
+                // Handle other keys normally
+                handleKeyDown(e);
+              }}
+              value={input}
+              placeholder={
+                isWebSearch ? t("placeholder_web") : t("placeholder_ask")
+              }
+            />
+          </PromptInputBody>
+          <PromptInputToolbar>
+            <PromptInputTools>
+              <PromptInputActionAddAttachments />
+              <SuggestedActionsButton />
+              <WebSearchButton />
+            </PromptInputTools>
+
+            <PromptInputTools>
+              <RecordButton size={16} />
+              <PromptInputSubmit
+                disabled={
+                  (!input && !status) ||
+                  isUploading ||
+                  isRecording ||
+                  isProcessing
+                }
+                status={status}
+              />
+            </PromptInputTools>
+          </PromptInputToolbar>
+        </PromptInput>
       </div>
-    </>
+    </div>
   );
 }

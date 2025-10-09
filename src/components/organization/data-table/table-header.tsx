@@ -1,11 +1,10 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import type { Table } from "@tanstack/react-table";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-
-import type { Table } from "@tanstack/react-table";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 
 type Props = {
   table?: Table<RouterOutput["organization"]["list"][number]>;

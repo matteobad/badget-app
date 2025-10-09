@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { DeleteIcon, Loader2 } from "lucide-react";
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +24,6 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { DeleteIcon, Loader2 } from "lucide-react";
 
 type Props = {
   connectionId: string;

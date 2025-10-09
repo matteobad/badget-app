@@ -1,6 +1,6 @@
-import { getInstitutions } from "~/server/services/institution-service";
 import { tool } from "ai";
 import z from "zod";
+import { getInstitutions } from "~/server/services/institution-service";
 
 import { getContext } from "../../../context";
 
@@ -22,7 +22,7 @@ export const getInstitutionsTool = tool({
   description:
     "Search and retrieve financial institutions (such as banks) by name or country code. Use this tool when users request a list of available institutions, want to search for a specific institution, or need details about supported institutions in a particular country.",
   inputSchema: getInstitutionsSchema,
-  execute: async function ({ q, countryCode }) {
+  execute: async ({ q, countryCode }) => {
     try {
       const context = getContext();
 

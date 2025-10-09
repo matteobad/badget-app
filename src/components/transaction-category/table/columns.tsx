@@ -1,6 +1,14 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import type { ColumnDef } from "@tanstack/react-table";
+import {
+  ChevronDown,
+  ChevronRight,
+  GitBranchPlus,
+  MoreHorizontalIcon,
+  SquarePenIcon,
+  TrashIcon,
+} from "lucide-react";
 import type { IconName } from "lucide-react/dynamic";
 import { memo, useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -18,17 +26,8 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useI18n } from "~/shared/locales/client";
-import {
-  ChevronDown,
-  ChevronRight,
-  GitBranchPlus,
-  MoreHorizontalIcon,
-  SquarePenIcon,
-  TrashIcon,
-} from "lucide-react";
-
-import type { ColumnDef } from "@tanstack/react-table";
 import { CategoryBadge } from "../category-badge";
 import { CreateSubCategoryModal } from "../modals/create-transaction-subcategory-modal";
 import { EditCategoryModal } from "../modals/edit-transaction-category-modal";

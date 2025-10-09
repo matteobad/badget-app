@@ -1,4 +1,3 @@
-import type { AccountSubtype, AccountType } from "~/shared/constants/enum";
 import {
   Select,
   SelectContent,
@@ -8,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import type { AccountSubtype, AccountType } from "~/shared/constants/enum";
 import { ACCOUNT_SUBTYPE, ACCOUNT_TYPE } from "~/shared/constants/enum";
 import { useScopedI18n } from "~/shared/locales/client";
 

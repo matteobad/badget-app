@@ -1,9 +1,11 @@
 "use client";
 
-import { use } from "react";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { use } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod/v4";
 import { CountrySelector } from "~/components/country-selector";
 import { SelectCurrency } from "~/components/select-currency";
 import { SubmitButton } from "~/components/submit-button";
@@ -20,8 +22,6 @@ import { Input } from "~/components/ui/input";
 import { uniqueCurrencies } from "~/shared/constants/currencies";
 import { useSession } from "~/shared/helpers/better-auth/auth-client";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { useForm } from "react-hook-form";
-import { z } from "zod/v4";
 
 const formSchema = z.object({
   name: z.string().min(2, {

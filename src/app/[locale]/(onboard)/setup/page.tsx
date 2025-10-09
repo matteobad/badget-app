@@ -1,3 +1,4 @@
+import { RocketIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -5,7 +6,6 @@ import { redirect } from "next/navigation";
 import { auth } from "~/shared/helpers/better-auth/auth";
 // import { SetupForm } from "@/components/setup-form";
 import { HydrateClient } from "~/shared/helpers/trpc/server";
-import { RocketIcon } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Setup account | Badget.",
@@ -36,7 +36,7 @@ export default async function Page() {
           </div>
 
           <HydrateClient>
-            <></>
+            <div />
             {/* <SetupForm /> */}
           </HydrateClient>
         </div>

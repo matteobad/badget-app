@@ -1,6 +1,5 @@
 import { env } from "~/env";
 import { redis } from "~/server/cache/redis";
-
 import type {
   GC_AccessTokenResponse,
   GC_CreateAgreementRequest,
@@ -18,11 +17,8 @@ import type {
   GC_GetInstitutionsResponse,
   GC_GetRequisitionByIdRequest,
   GC_GetRequisitionByIdResponse,
-  GC_RefreshTokenResponse,
-} from "./gocardless-types";
-import {
-  type GC_GetTransactionsRequest,
-  type GC_GetTransactionsResponse,
+  GC_GetTransactionsRequest,
+  GC_GetTransactionsResponse,
 } from "./gocardless-types";
 
 export interface ErrorResponse {
@@ -95,23 +91,6 @@ async function getAccessToken() {
 
   await redis.set(ACCESS_KEY, access, { ex: access_expires });
   await redis.set(REFRESH_KEY, refresh, { ex: refresh_expires });
-
-  return access;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function getRefreshToken(refreshToken: string) {
-  const response = await fetch(`${BASE_URL}/token/refresh/`, {
-    method: "POST",
-    body: JSON.stringify({ refresh: refreshToken }),
-    headers: { "Content-Type": "application/json" },
-  });
-
-  if (!response.ok) throw new Error("Failed to refresh token");
-
-  const data = (await response.json()) as GC_RefreshTokenResponse;
-  const { access, access_expires } = data;
-  await redis.set(ACCESS_KEY, access, { ex: access_expires });
 
   return access;
 }

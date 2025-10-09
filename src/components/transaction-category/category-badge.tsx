@@ -1,6 +1,6 @@
 import type { IconName } from "lucide-react/dynamic";
-import { getCategoryColors } from "~/shared/helpers/categories";
 import { DynamicIcon } from "lucide-react/dynamic";
+import { getCategoryColors } from "~/shared/helpers/categories";
 
 import { Badge } from "../ui/badge";
 

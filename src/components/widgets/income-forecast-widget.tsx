@@ -1,12 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useSpaceQuery } from "~/hooks/use-space";
-import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
-import { useTRPC } from "~/shared/helpers/trpc/client";
 import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 import { TrendingUpDownIcon } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
+import { useSpaceQuery } from "~/hooks/use-space";
+import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import { FormatAmount } from "../format-amount";
 import { BaseWidget } from "./base";

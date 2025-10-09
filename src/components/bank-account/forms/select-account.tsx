@@ -1,7 +1,6 @@
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import type { AccountType } from "~/shared/constants/enum";
-import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronsUpDownIcon, Wallet2Icon } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Spinner } from "~/components/load-more";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -18,8 +17,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import type { AccountType } from "~/shared/constants/enum";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { ChevronsUpDownIcon, Wallet2Icon } from "lucide-react";
 
 export type BankAccount = RouterOutput["bankAccount"]["get"][number];
 

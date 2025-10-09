@@ -1,9 +1,9 @@
 "use client";
 
+import { ZapIcon } from "lucide-react";
 import type React from "react";
 import { useChatStore } from "~/lib/stores/chat";
 import { cn } from "~/lib/utils";
-import { ZapIcon } from "lucide-react";
 
 export function SuggestedActionsButton() {
   const { showCommands, setShowCommands } = useChatStore();

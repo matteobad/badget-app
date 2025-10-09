@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { reconnectGocardlessLinkAction } from "~/server/domain/bank-connection/actions";
-import { getUrl } from "~/shared/helpers/get-url";
 import { LinkIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
 import { toast } from "sonner";
+import { reconnectGocardlessLinkAction } from "~/server/domain/bank-connection/actions";
+import { getUrl } from "~/shared/helpers/get-url";
 
 import { Spinner } from "../load-more";
 import { Button } from "../ui/button";

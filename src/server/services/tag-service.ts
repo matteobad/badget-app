@@ -1,9 +1,9 @@
+import type z from "zod";
 import type {
   createTagSchema,
   deleteTagSchema,
   updateTagSchema,
 } from "~/shared/validators/tag.schema";
-import type z from "zod";
 
 import type { DBClient } from "../db";
 import {
@@ -39,7 +39,7 @@ export async function deleteTag(
 
 export async function getTags(
   db: DBClient,
-  input: z.infer<typeof getTagsQuery>,
+  _input: z.infer<typeof getTagsQuery>,
   organizationId: string,
 ) {
   return await getTagsQuery(db, { organizationId });

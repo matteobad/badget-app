@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { parseAsArrayOf, parseAsInteger, useQueryState } from "nuqs";
+import { useEffect, useRef } from "react";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Slider } from "~/components/ui/slider";
 import { useSliderWithInput } from "~/hooks/use-slider-with-input";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { parseAsArrayOf, parseAsInteger, useQueryState } from "nuqs";
 
 export function TransactionAmountFilter() {
   const minInputRef = useRef<HTMLInputElement>(null);

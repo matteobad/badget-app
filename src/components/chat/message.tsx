@@ -1,10 +1,9 @@
 import type { UIMessage } from "ai";
 import type { ComponentProps, HTMLAttributes } from "react";
 import { cn } from "~/lib/utils";
-
-import type { SupportedToolName } from "../ui/tool-call-indicator";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { TextShimmer } from "../ui/text-shimmer";
+import type { SupportedToolName } from "../ui/tool-call-indicator";
 import { ToolCallIndicator } from "../ui/tool-call-indicator";
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {

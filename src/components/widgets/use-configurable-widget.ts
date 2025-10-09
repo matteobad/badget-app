@@ -1,9 +1,9 @@
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import type {
   WidgetConfig,
   WidgetType,
 } from "~/server/cache/widget-preferences-cache";
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import { useWidgetActions, useWidgetConfig } from "./widget-provider";

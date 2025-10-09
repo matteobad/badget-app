@@ -1,7 +1,7 @@
+import { ArrowRightIcon } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "~/shared/helpers/better-auth/auth";
-import { ArrowRightIcon } from "lucide-react";
 
 import { Button } from "../ui/button";
 import { HeroImage } from "./hero-image";

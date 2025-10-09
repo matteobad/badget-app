@@ -69,7 +69,7 @@ export async function getCountry() {
   const country = await getCountryCode();
 
   // Type guard to ensure country is a key of flags
-  if (country && Object.prototype.hasOwnProperty.call(countryFlags, country)) {
+  if (country && Object.hasOwn(countryFlags, country)) {
     return countryFlags[country as keyof typeof countryFlags];
   }
 

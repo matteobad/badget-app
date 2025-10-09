@@ -1,9 +1,9 @@
+import type z from "zod/v4";
 import type {
   createBankConnectionSchema,
   deleteBankConnectionSchema,
   getBankConnectionsSchema,
 } from "~/shared/validators/bank-connection.schema";
-import type z from "zod/v4";
 
 import { db, withTransaction } from "../db";
 import { createBankAccountMutation } from "../domain/bank-account/mutations";

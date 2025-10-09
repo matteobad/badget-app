@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { cn } from "~/lib/utils";
 import logoDark from "public/logo-dark.svg";
 import logoLight from "public/logo-light.svg";
+import { useState } from "react";
+import { cn } from "~/lib/utils";
 
 import { OrganizationSwitcher } from "../organization/org-switcher";
 import { MainMenu } from "./main-menu";

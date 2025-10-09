@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { CircleDashed } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { useUserQuery } from "~/hooks/use-user";
@@ -9,7 +10,6 @@ import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
-import { CircleDashed } from "lucide-react";
 
 import { BaseWidget, WidgetSkeleton } from "./base";
 

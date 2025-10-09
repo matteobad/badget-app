@@ -1,12 +1,12 @@
 "server-only";
 
-import type { DBClient } from "~/server/db";
-import type { AccountSubtype, AccountType } from "~/shared/constants/enum";
 import type { SQL } from "drizzle-orm";
+import { and, asc, desc, eq, getTableColumns, or, sql } from "drizzle-orm";
+import type { DBClient } from "~/server/db";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { institution_table } from "~/server/db/schema/open-banking";
-import { and, asc, desc, eq, getTableColumns, or, sql } from "drizzle-orm";
+import type { AccountSubtype, AccountType } from "~/shared/constants/enum";
 
 type GetBankAccountsQuery = {
   q?: string;
@@ -147,7 +147,7 @@ export async function getCombinedAccountBalanceQuery(
     );
 
   const totalBalance = accounts.reduce(
-    (tot, account) => (tot += account.balance),
+    (tot, account) => tot + account.balance,
     0,
   );
 

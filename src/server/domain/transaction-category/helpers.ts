@@ -1,9 +1,9 @@
+import { eq, inArray } from "drizzle-orm";
 import type { DBClient } from "~/server/db";
 import {
   transaction_category_embeddings_table,
   transaction_category_table,
 } from "~/server/db/schema/transactions";
-import { eq, inArray } from "drizzle-orm";
 
 import { CategoryEmbeddings } from "../transaction-category-embeddings/helpers";
 import { upsertCategoryEmbedding } from "../transaction-category-embeddings/mutations";

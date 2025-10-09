@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { ArrowLeftIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import { cn } from "~/lib/utils";
 import { chatTitleArtifact } from "~/shared/validators/artifacts/chat-title";
-import { ArrowLeftIcon } from "lucide-react";
 
 import { Button } from "../ui/button";
 import { TextEffect } from "../ui/text-effect";

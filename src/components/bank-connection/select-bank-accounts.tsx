@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { ArrowLeftIcon, Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import z from "zod/v4";
 import { useConnectParams } from "~/hooks/use-connect-params";
 import { getInitials } from "~/lib/utils";
 import { sendSupportAction } from "~/server/domain/bank-connection/actions";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createBankConnectionSchema } from "~/shared/validators/bank-connection.schema";
-import { ArrowLeftIcon, Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import z from "zod/v4";
 
 import { FormatAmount } from "../format-amount";
 import { SubmitButton } from "../submit-button";
@@ -226,127 +226,123 @@ export function SelectBankAccountsModal() {
         <div className="p-4">
           <Tabs defaultValue="select-accounts" value={activeTab}>
             <TabsContent value="select-accounts">
-              <>
-                <DialogHeader className="mb-8">
-                  <DialogTitle>Select Accounts</DialogTitle>
-                  <DialogDescription>
-                    Select the accounts to receive transactions. You can enable
-                    or disable them later in settings if needed. Note: Initial
-                    loading may take some time.
-                  </DialogDescription>
-                </DialogHeader>
+              <DialogHeader className="mb-8">
+                <DialogTitle>Select Accounts</DialogTitle>
+                <DialogDescription>
+                  Select the accounts to receive transactions. You can enable or
+                  disable them later in settings if needed. Note: Initial
+                  loading may take some time.
+                </DialogDescription>
+              </DialogHeader>
 
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="scrollbar-hide relative h-[300px] space-y-6 overflow-auto pb-[100px]"
-                  >
-                    {isLoading && <RowsSkeleton />}
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="scrollbar-hide relative h-[300px] space-y-6 overflow-auto pb-[100px]"
+                >
+                  {isLoading && <RowsSkeleton />}
 
-                    {data?.map((account) => (
-                      <FormField
-                        key={account.externalId}
-                        control={form.control}
-                        name="accounts"
-                        render={({ field }) => {
-                          return (
-                            <FormItem
-                              key={account.externalId}
-                              className="flex items-center justify-between"
-                            >
-                              <FormLabel className="mr-8 flex w-full items-center space-x-4">
-                                <Avatar className="size-[34px]">
-                                  <AvatarImage
-                                    src={account.logoUrl ?? ""}
-                                    alt={`${account.name} logo`}
-                                  />
-                                  <AvatarFallback className="text-xs">
-                                    {getInitials(account.name)}
-                                  </AvatarFallback>
-                                </Avatar>
+                  {data?.map((account) => (
+                    <FormField
+                      key={account.externalId}
+                      control={form.control}
+                      name="accounts"
+                      render={({ field }) => {
+                        return (
+                          <FormItem
+                            key={account.externalId}
+                            className="flex items-center justify-between"
+                          >
+                            <FormLabel className="mr-8 flex w-full items-center space-x-4">
+                              <Avatar className="size-[34px]">
+                                <AvatarImage
+                                  src={account.logoUrl ?? ""}
+                                  alt={`${account.name} logo`}
+                                />
+                                <AvatarFallback className="text-xs">
+                                  {getInitials(account.name)}
+                                </AvatarFallback>
+                              </Avatar>
 
-                                <div className="flex w-full items-center justify-between">
-                                  <div className="flex flex-col">
-                                    <p className="mb-1 text-sm leading-none font-medium">
-                                      {account.name}
-                                    </p>
-                                    <span className="text-xs font-normal text-[#878787]">
-                                      {/* {t(`account_type.${account.type}`)} */}
-                                      {account.type}
-                                    </span>
-                                  </div>
-
-                                  <span className="text-sm text-[#878787]">
-                                    <FormatAmount
-                                      amount={account.balance}
-                                      currency={account.currency}
-                                    />
+                              <div className="flex w-full items-center justify-between">
+                                <div className="flex flex-col">
+                                  <p className="mb-1 text-sm leading-none font-medium">
+                                    {account.name}
+                                  </p>
+                                  <span className="text-xs font-normal text-[#878787]">
+                                    {/* {t(`account_type.${account.type}`)} */}
+                                    {account.type}
                                   </span>
                                 </div>
-                              </FormLabel>
 
-                              <div className="flex h-[34px] items-center">
-                                <FormControl>
-                                  <Switch
-                                    checked={
-                                      field.value?.find(
-                                        (value) =>
-                                          value.accountId ===
-                                          account.externalId,
-                                      )?.enabled
-                                    }
-                                    onCheckedChange={(checked) => {
-                                      return field.onChange(
-                                        field.value.map((value) => {
-                                          if (
-                                            value.accountId ===
-                                            account.externalId
-                                          ) {
-                                            return {
-                                              ...value,
-                                              enabled: checked,
-                                            };
-                                          }
-
-                                          return value;
-                                        }),
-                                      );
-                                    }}
+                                <span className="text-sm text-[#878787]">
+                                  <FormatAmount
+                                    amount={account.balance}
+                                    currency={account.currency}
                                   />
-                                </FormControl>
+                                </span>
                               </div>
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    ))}
+                            </FormLabel>
 
-                    <div className="fixed right-0 bottom-0 left-0 z-10 rounded-b-lg bg-background px-6 pt-4 pb-6">
-                      <SubmitButton
-                        className="w-full"
-                        type="submit"
-                        isSubmitting={connectBankConnectionMutation.isPending}
-                        disabled={
-                          connectBankConnectionMutation.isPending ||
-                          !form.formState.isValid
-                        }
+                            <div className="flex h-[34px] items-center">
+                              <FormControl>
+                                <Switch
+                                  checked={
+                                    field.value?.find(
+                                      (value) =>
+                                        value.accountId === account.externalId,
+                                    )?.enabled
+                                  }
+                                  onCheckedChange={(checked) => {
+                                    return field.onChange(
+                                      field.value.map((value) => {
+                                        if (
+                                          value.accountId === account.externalId
+                                        ) {
+                                          return {
+                                            ...value,
+                                            enabled: checked,
+                                          };
+                                        }
+
+                                        return value;
+                                      }),
+                                    );
+                                  }}
+                                />
+                              </FormControl>
+                            </div>
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  ))}
+
+                  <div className="fixed right-0 bottom-0 left-0 z-10 rounded-b-lg bg-background px-6 pt-4 pb-6">
+                    <SubmitButton
+                      className="w-full"
+                      type="submit"
+                      isSubmitting={connectBankConnectionMutation.isPending}
+                      disabled={
+                        connectBankConnectionMutation.isPending ||
+                        !form.formState.isValid
+                      }
+                    >
+                      Save
+                    </SubmitButton>
+
+                    <div className="mt-4 flex justify-center">
+                      <button
+                        type="button"
+                        className="text-xs text-[#878787]"
+                        onClick={() => setActiveTab("support")}
                       >
-                        Save
-                      </SubmitButton>
-
-                      <div className="mt-4 flex justify-center">
-                        <button
-                          type="button"
-                          className="text-xs text-[#878787]"
-                          onClick={() => setActiveTab("support")}
-                        >
-                          Need support
-                        </button>
-                      </div>
+                        Need support
+                      </button>
                     </div>
-                  </form>
-                </Form>
-              </>
+                  </div>
+                </form>
+              </Form>
             </TabsContent>
 
             <TabsContent value="loading">

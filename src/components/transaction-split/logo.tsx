@@ -1,9 +1,8 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-
-import type { SplitFormValues } from "./form-context";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import type { SplitFormValues } from "./form-context";
 
 export function Logo() {
   const { watch } = useFormContext<SplitFormValues>();

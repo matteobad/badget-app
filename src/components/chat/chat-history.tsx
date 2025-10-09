@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useTRPC } from "~/shared/helpers/trpc/client";
 import { formatDistanceToNow } from "date-fns";
 import { MenuIcon, SearchIcon, TrashIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -113,7 +113,7 @@ export function ChatHistory() {
     setIsOpen(false);
   };
 
-  const handleDeleteChat = (e: React.MouseEvent, chatId: string) => {
+  const handleDeleteChat = (_e: React.MouseEvent, chatId: string) => {
     deleteChatMutation.mutate({ chatId });
   };
 

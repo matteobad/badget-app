@@ -1,8 +1,8 @@
-import { unauthorized } from "next/navigation";
 import { google } from "@ai-sdk/google";
+import { streamObject } from "ai";
+import { unauthorized } from "next/navigation";
 import { auth } from "~/shared/helpers/better-auth/auth";
 import { generateTransactionFiltersSchema } from "~/shared/validators/transaction.schema";
-import { streamObject } from "ai";
 
 export async function POST(req: Request) {
   const session = await auth.api.getSession({

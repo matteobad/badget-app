@@ -1,10 +1,10 @@
-import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { LandmarkIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
-import { LandmarkIcon } from "lucide-react";
 
 import { AnimatedNumber } from "../animated-number";
 import { BaseWidget, WidgetSkeleton } from "./base";

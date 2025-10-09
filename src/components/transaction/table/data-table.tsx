@@ -1,16 +1,21 @@
 "use client";
 
-import { use, useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
   useMutation,
   useQueryClient,
   useSuspenseInfiniteQuery,
 } from "@tanstack/react-query";
+import type { VisibilityState } from "@tanstack/react-table";
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { AnimatePresence } from "framer-motion";
+import { use, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import { useInView } from "react-intersection-observer";
+import { toast } from "sonner";
 import { LoadMore } from "~/components/load-more";
 import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table";
 import { Tooltip, TooltipProvider } from "~/components/ui/tooltip";
@@ -24,12 +29,6 @@ import { cn } from "~/lib/utils";
 import { updateColumnVisibilityAction } from "~/server/actions";
 import { Cookies } from "~/shared/constants/cookies";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { AnimatePresence } from "framer-motion";
-import { useHotkeys } from "react-hotkeys-hook";
-import { useInView } from "react-intersection-observer";
-import { toast } from "sonner";
-
-import type { VisibilityState } from "@tanstack/react-table";
 import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";

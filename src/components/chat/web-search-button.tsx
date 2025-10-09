@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
+import { GlobeIcon } from "lucide-react";
 import { useChatStore } from "~/lib/stores/chat";
 import { cn } from "~/lib/utils";
-import { GlobeIcon } from "lucide-react";
 
 export function WebSearchButton() {
   const { isWebSearch, setIsWebSearch } = useChatStore();

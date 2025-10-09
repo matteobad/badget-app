@@ -1,5 +1,8 @@
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { z } from "zod/v4";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { SubmitButton } from "~/components/submit-button";
 import {
@@ -21,9 +24,6 @@ import {
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createManualBankAccountSchema } from "~/shared/validators/bank-account.schema";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { type z } from "zod/v4";
 
 import { AccountTypeSelect } from "./account-type-select";
 

@@ -1,7 +1,6 @@
+import type { VisibilityState } from "@tanstack/react-table";
 import { useCallback, useMemo } from "react";
 import { cn } from "~/lib/utils";
-
-import type { VisibilityState } from "@tanstack/react-table";
 
 interface TableColumn {
   id: string;

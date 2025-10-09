@@ -1,6 +1,6 @@
-import { getDocuments } from "~/server/services/document-service";
 import { tool } from "ai";
 import z from "zod";
+import { getDocuments } from "~/server/services/document-service";
 
 import { getContext } from "../../../context";
 
@@ -57,7 +57,7 @@ export const getDocumentsTool = tool({
   description:
     "Query the transaction tags table to search for and retrieve transaction tags. Use this tool when users request a list of tags, want to search for a specific tag by name, or need details about available transaction tags.",
   inputSchema: getDocumentsSchema,
-  execute: async function (input) {
+  execute: async (input) => {
     try {
       const context = getContext();
 

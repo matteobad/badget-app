@@ -1,6 +1,6 @@
-import { getTags } from "~/server/services/tag-service";
 import { tool } from "ai";
 import z from "zod";
+import { getTags } from "~/server/services/tag-service";
 
 import { cached } from "../../../cache";
 import { getContext } from "../../../context";
@@ -35,7 +35,7 @@ export const getTransacationsTagsTool = cached(
   `,
     inputSchema: toolInputSchema,
     outputSchema: toolOutputSchema,
-    execute: async function (input) {
+    execute: async (input) => {
       const context = getContext();
 
       try {

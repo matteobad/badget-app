@@ -1,9 +1,9 @@
-import type { CreateTransactionEmbeddingParams } from "~/server/domain/transaction/mutations";
 import { logger, schemaTask } from "@trigger.dev/sdk";
+import { z } from "zod/v4";
 import { db } from "~/server/db";
+import type { CreateTransactionEmbeddingParams } from "~/server/domain/transaction/mutations";
 import { createTransactionEmbeddings } from "~/server/domain/transaction/mutations";
 import { getTransactionsForEmbedding } from "~/server/domain/transaction/queries";
-import { z } from "zod/v4";
 
 import { generateEmbeddings } from "../utils/embeddings";
 import { processBatch } from "../utils/process-batch";

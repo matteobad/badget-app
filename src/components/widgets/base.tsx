@@ -1,6 +1,6 @@
+import { GripVerticalIcon, SettingsIcon } from "lucide-react";
 import { useLongPress } from "~/hooks/use-long-press";
 import { cn } from "~/lib/utils";
-import { GripVerticalIcon, SettingsIcon } from "lucide-react";
 
 import { Skeleton } from "../ui/skeleton";
 import { useIsCustomizing, useWidgetActions } from "./widget-provider";

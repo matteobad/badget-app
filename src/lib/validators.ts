@@ -1,9 +1,8 @@
-import type { ExtendedSortingState } from "~/utils/data-table";
-import { dataTableConfig } from "~/utils/data-table";
+import type { Row } from "@tanstack/react-table";
 import { createParser } from "nuqs/server";
 import { z } from "zod";
-
-import type { Row } from "@tanstack/react-table";
+import type { ExtendedSortingState } from "~/utils/data-table";
+import { dataTableConfig } from "~/utils/data-table";
 
 export const sortingItemSchema = z.object({
   id: z.string(),

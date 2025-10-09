@@ -1,11 +1,10 @@
 import { z } from "@hono/zod-openapi"; // Extended Zod instance
-
-import { transaction_category_table } from "~/server/db/schema/transactions";
 import {
   createInsertSchema,
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
+import { transaction_category_table } from "~/server/db/schema/transactions";
 
 import { getBudgetsSchema } from "./budget.schema";
 

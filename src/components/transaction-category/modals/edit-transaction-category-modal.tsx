@@ -1,7 +1,8 @@
-import type { IconName } from "lucide-react/dynamic";
-import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { IconName } from "lucide-react/dynamic";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
 import { SubmitButton } from "~/components/submit-button";
 import { InputColorIcon } from "~/components/transaction-category/input-color-icon";
 import {
@@ -23,7 +24,6 @@ import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { updateTransactionCategorySchema } from "~/shared/validators/transaction-category.schema";
-import { useForm } from "react-hook-form";
 
 type Props = {
   id: string;

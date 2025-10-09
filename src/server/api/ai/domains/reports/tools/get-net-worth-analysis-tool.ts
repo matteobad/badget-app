@@ -1,12 +1,4 @@
 import { google } from "@ai-sdk/google";
-import {
-  getAssetsQuery,
-  getLiabilitiesQuery,
-} from "~/server/domain/bank-account/queries";
-import { getNetWorthTrend } from "~/server/services/reports-service";
-import { formatAmount } from "~/shared/helpers/format";
-import { followupQuestionsArtifact } from "~/shared/validators/artifacts/followup-questions";
-import { netWorthArtifact } from "~/shared/validators/artifacts/net-worth-artifact";
 import { generateText, smoothStream, streamText, tool } from "ai";
 import {
   eachDayOfInterval,
@@ -18,6 +10,14 @@ import {
   subMonths,
 } from "date-fns";
 import z from "zod";
+import {
+  getAssetsQuery,
+  getLiabilitiesQuery,
+} from "~/server/domain/bank-account/queries";
+import { getNetWorthTrend } from "~/server/services/reports-service";
+import { formatAmount } from "~/shared/helpers/format";
+import { followupQuestionsArtifact } from "~/shared/validators/artifacts/followup-questions";
+import { netWorthArtifact } from "~/shared/validators/artifacts/net-worth-artifact";
 
 import { getContext } from "../../../context";
 import { generateFollowupQuestions } from "../../../utils/generate-followup-questions";

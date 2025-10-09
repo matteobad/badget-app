@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { type dynamicIconImports } from "lucide-react/dynamic";
+import type { dynamicIconImports } from "lucide-react/dynamic";
 import Papa from "papaparse";
 
 import type { DB_TransactionCategoryInsertType } from "../schema/transactions";
@@ -19,7 +19,7 @@ type CSV_CategoryType = {
 
 const mapParsedRow = (row: CSV_CategoryType) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { depth, ...rest } = row;
+  const { depth: _, ...rest } = row;
 
   return {
     ...rest,

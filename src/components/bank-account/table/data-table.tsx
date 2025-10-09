@@ -1,7 +1,5 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   flexRender,
@@ -9,10 +7,12 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useState } from "react";
 import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table";
 import { useBankAccountFilterParams } from "~/hooks/use-bank-account-filter-params";
 import { useBankAccountParams } from "~/hooks/use-bank-account-params";
 import { cn } from "~/lib/utils";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import { columns } from "./columns";

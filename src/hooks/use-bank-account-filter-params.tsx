@@ -1,6 +1,6 @@
-import { useCallback } from "react";
 import { useQueryStates } from "nuqs";
 import { parseAsString } from "nuqs/server";
+import { useCallback } from "react";
 
 // Default empty filter state
 export const EMPTY_FILTER_STATE = {

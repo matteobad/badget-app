@@ -1,6 +1,6 @@
-import { type DB_AccountType } from "~/server/db/schema/accounts";
-import { type DB_InstitutionInsertType } from "~/server/db/schema/open-banking";
-import { type DB_TransactionInsertType } from "~/server/db/schema/transactions";
+import type { DB_AccountType } from "~/server/db/schema/accounts";
+import type { DB_InstitutionInsertType } from "~/server/db/schema/open-banking";
+import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
 
 import { GoCardlessProvider } from "./gocardless";
 

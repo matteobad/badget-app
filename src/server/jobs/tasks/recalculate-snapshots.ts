@@ -1,10 +1,10 @@
 import { logger, schemaTask } from "@trigger.dev/sdk";
+import { z } from "zod/v4";
 import { db } from "~/server/db";
 import {
   adjustBalanceOffsets,
   recalculateSnapshots,
 } from "~/server/services/balance-snapshots-service";
-import { z } from "zod/v4";
 
 /**
  * Task to recalculate daily balance snapshots for a bank account.

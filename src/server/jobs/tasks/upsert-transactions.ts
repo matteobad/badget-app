@@ -1,4 +1,6 @@
 import { logger, schemaTask } from "@trigger.dev/sdk";
+import { sql } from "drizzle-orm";
+import { z } from "zod/v4";
 import { db } from "~/server/db";
 import { transaction_table } from "~/server/db/schema/transactions";
 import {
@@ -6,8 +8,6 @@ import {
   TRANSACTION_SOURCE,
   TRANSACTION_STATUS,
 } from "~/shared/constants/enum";
-import { sql } from "drizzle-orm";
-import { z } from "zod/v4";
 
 import { embedTransactionsTask } from "./embed-transactions";
 

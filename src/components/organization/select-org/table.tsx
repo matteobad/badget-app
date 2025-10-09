@@ -1,7 +1,7 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { Table, TableBody } from "~/components/ui/table";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 
 import { TableRow } from "./table-row";
 

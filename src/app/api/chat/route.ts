@@ -1,3 +1,10 @@
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  validateUIMessages,
+} from "ai";
+import { HTTPException } from "hono/http-exception";
 import { unauthorized } from "next/navigation";
 import { NextResponse } from "next/server";
 import { setContext } from "~/server/api/ai/context";
@@ -16,13 +23,6 @@ import {
 import { auth } from "~/shared/helpers/better-auth/auth";
 import { chatTitleArtifact } from "~/shared/validators/artifacts/chat-title";
 import { chatRequestSchema } from "~/shared/validators/chat.schema";
-import {
-  convertToModelMessages,
-  createUIMessageStream,
-  createUIMessageStreamResponse,
-  validateUIMessages,
-} from "ai";
-import { HTTPException } from "hono/http-exception";
 
 const MAX_MESSAGES_IN_CONTEXT = 20;
 
@@ -212,7 +212,6 @@ export async function POST(req: Request) {
               chatId: id,
               organizationId,
               userId,
-              // @ts-ignore
               message: responseMessage,
             });
           }

@@ -1,5 +1,3 @@
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import React, { useRef, useState } from "react";
 import { arrayMove } from "@dnd-kit/helpers";
 import {
   DragDropProvider,
@@ -9,8 +7,11 @@ import {
 } from "@dnd-kit/react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { useMutation } from "@tanstack/react-query";
-import { useTRPC } from "~/shared/helpers/trpc/client";
+import type React from "react";
+import { useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 
 import { AccountBalancesWidget } from "./account-balances-widget";
 import { CashFlowWidget } from "./cash-flow-widget";

@@ -1,9 +1,9 @@
 "server-only";
 
-import type { DBClient } from "~/server/db";
-import { transaction_category_table } from "~/server/db/schema/transactions";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import type { DBClient } from "~/server/db";
+import { transaction_category_table } from "~/server/db/schema/transactions";
 
 export type GetTransactionCategoriesParams = {
   organizationId: string;

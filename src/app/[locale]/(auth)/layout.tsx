@@ -1,14 +1,14 @@
+import { RocketIcon } from "lucide-react";
 import type { Metadata } from "next";
-import type { PropsWithChildren } from "react";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+import backgroundLight from "public/assets/bg-login.jpg";
+import backgroundDark from "public/assets/bg-login-dark.jpg";
+import type { PropsWithChildren } from "react";
 import { ConsentBanner } from "~/components/consent-banner";
 import { isEU } from "~/server/services/location-service";
 import { Cookies } from "~/shared/constants/cookies";
-import { RocketIcon } from "lucide-react";
-import backgroundDark from "public/assets/bg-login-dark.jpg";
-import backgroundLight from "public/assets/bg-login.jpg";
 
 export const metadata: Metadata = {
   title: "Login | Badget.",

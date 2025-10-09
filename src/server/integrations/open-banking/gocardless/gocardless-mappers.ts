@@ -1,13 +1,14 @@
-import { BANK_PROVIDER, CONNECTION_STATUS } from "~/shared/constants/enum";
 import { capitalCase } from "change-case";
 import { addDays, formatISO, parseISO, subDays } from "date-fns";
-
+import { BANK_PROVIDER, CONNECTION_STATUS } from "~/shared/constants/enum";
 import type {
   ConnectionStatus,
   GetAccountsRequest,
   GetAccountsResponse,
   GetInstitutionsRequest,
   GetInstitutionsResponse,
+  GetTransactionsRequest,
+  GetTransactionsResponse,
 } from "..";
 import type {
   GC_CreateAgreementResponse,
@@ -21,11 +22,8 @@ import type {
   GC_GetInstitutionsRequest,
   GC_GetInstitutionsResponse,
   GC_GetRequisitionByIdResponse,
-} from "./gocardless-types";
-import { type GetTransactionsRequest, type GetTransactionsResponse } from "..";
-import {
-  type GC_GetTransactionsRequest,
-  type GC_Transaction,
+  GC_GetTransactionsRequest,
+  GC_Transaction,
 } from "./gocardless-types";
 
 export const mapInstitutionsRequest = (params: GetInstitutionsRequest) => {
@@ -82,7 +80,7 @@ export const mapAccountsRequest = (params: GetAccountsRequest) => {
 export const mapAccountsResponse = (
   requisitionId: string,
   accountId: string,
-  metadataData: GC_GetAccountMetadataResponse,
+  _metadataData: GC_GetAccountMetadataResponse,
   detailsData: GC_GetAccountDetailsResponse,
   balancesData: GC_GetAccountBalancesResponse,
   institutionData: GC_GetInstitutionByIdResponse,

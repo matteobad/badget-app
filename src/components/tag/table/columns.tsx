@@ -1,7 +1,7 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import * as React from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { EllipsisIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -16,9 +16,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
-import { EllipsisIcon } from "lucide-react";
-
-import type { ColumnDef } from "@tanstack/react-table";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 
 export type Tag = RouterOutput["tag"]["get"][number];
 

@@ -1,8 +1,8 @@
+import type z from "zod/v4";
 import type {
   getInstitutionsSchema,
   updateInstitutionUsageSchema,
 } from "~/shared/validators/institution.schema";
-import type z from "zod/v4";
 
 import type { DBClient } from "../db";
 import { db } from "../db";

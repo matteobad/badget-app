@@ -1,6 +1,5 @@
-import { create } from "zustand";
-
 import type { Column, RowSelectionState, Updater } from "@tanstack/react-table";
+import { create } from "zustand";
 
 interface TransactionsState {
   canDelete?: boolean;

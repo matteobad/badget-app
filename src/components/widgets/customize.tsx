@@ -1,8 +1,8 @@
 "use client";
 
+import { CheckIcon, LayoutGridIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useScopedI18n } from "~/shared/locales/client";
-import { CheckIcon, LayoutGridIcon } from "lucide-react";
 
 import { Button } from "../ui/button";
 import { useIsCustomizing, useWidgetActions } from "./widget-provider";

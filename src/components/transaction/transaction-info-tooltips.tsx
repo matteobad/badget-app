@@ -1,5 +1,5 @@
-import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import { CalendarSyncIcon, EyeOffIcon, SplitIcon } from "lucide-react";
+import type { TransactionFrequencyType } from "~/shared/constants/enum";
 
 import {
   Tooltip,

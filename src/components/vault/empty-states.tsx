@@ -1,7 +1,7 @@
 "use client";
 
-import { useDocumentFilterParams } from "~/hooks/use-document-filter-params";
 import { FileIcon } from "lucide-react";
+import { useDocumentFilterParams } from "~/hooks/use-document-filter-params";
 
 import { Button } from "../ui/button";
 

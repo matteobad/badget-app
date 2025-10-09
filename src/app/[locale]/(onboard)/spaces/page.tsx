@@ -1,3 +1,4 @@
+import { RocketIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -10,7 +11,6 @@ import {
   HydrateClient,
   trpc,
 } from "~/shared/helpers/trpc/server";
-import { RocketIcon } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Spaces | Badget.",

@@ -1,10 +1,10 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
+import { CheckIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Spinner } from "~/components/load-more";
 import { cn } from "~/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { CheckIcon } from "lucide-react";
 
 interface ProgressToastProps {
   isVisible: boolean;

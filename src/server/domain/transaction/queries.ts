@@ -1,25 +1,7 @@
 "server-only";
 
-import type { DBClient } from "~/server/db";
-import type { TransactionFrequencyType } from "~/shared/constants/enum";
-import type { getTransactionTagsSchema } from "~/shared/validators/tag.schema";
-import type { getTransactionsSchema } from "~/shared/validators/transaction.schema";
-import type { SQL } from "drizzle-orm";
-import type z from "zod";
-import { db } from "~/server/db";
-import { account_table } from "~/server/db/schema/accounts";
-import { connection_table } from "~/server/db/schema/open-banking";
-import {
-  tag_table,
-  transaction_attachment_table,
-  transaction_category_table,
-  transaction_embeddings_table,
-  transaction_split_table,
-  transaction_table,
-  transaction_to_tag_table,
-} from "~/server/db/schema/transactions";
-import { buildSearchQuery } from "~/server/db/utils";
 import { eachMonthOfInterval, format } from "date-fns";
+import type { SQL } from "drizzle-orm";
 import {
   and,
   asc,
@@ -38,6 +20,24 @@ import {
   or,
   sql,
 } from "drizzle-orm";
+import type z from "zod";
+import type { DBClient } from "~/server/db";
+import { db } from "~/server/db";
+import { account_table } from "~/server/db/schema/accounts";
+import { connection_table } from "~/server/db/schema/open-banking";
+import {
+  tag_table,
+  transaction_attachment_table,
+  transaction_category_table,
+  transaction_embeddings_table,
+  transaction_split_table,
+  transaction_table,
+  transaction_to_tag_table,
+} from "~/server/db/schema/transactions";
+import { buildSearchQuery } from "~/server/db/utils";
+import type { TransactionFrequencyType } from "~/shared/constants/enum";
+import type { getTransactionTagsSchema } from "~/shared/validators/tag.schema";
+import type { getTransactionsSchema } from "~/shared/validators/transaction.schema";
 
 export async function getTransactionsQuery(
   params: z.infer<typeof getTransactionsSchema>,

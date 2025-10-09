@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { MessageCircleWarningIcon } from "lucide-react";
+import Link from "next/link";
 import { cn } from "~/lib/utils";
 import { getConnectionsStatus } from "~/shared/helpers/connection-status";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { MessageCircleWarningIcon } from "lucide-react";
 
 import { Button } from "../ui/button";
 import {

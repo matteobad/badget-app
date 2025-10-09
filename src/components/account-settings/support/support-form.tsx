@@ -1,7 +1,10 @@
 "use client";
 
-import type z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAction } from "next-safe-action/hooks";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type z from "zod";
 import { SubmitButton } from "~/components/submit-button";
 import {
   Form,
@@ -23,9 +26,6 @@ import { Textarea } from "~/components/ui/textarea";
 import { useUserQuery } from "~/hooks/use-user";
 import { submitFeedbackAction } from "~/server/actions";
 import { sendSupportSchema } from "~/shared/validators/support.schema";
-import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 export function SupportForm() {
   const { data: user } = useUserQuery();

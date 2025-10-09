@@ -1,7 +1,6 @@
 import { useFormContext } from "react-hook-form";
-
-import type { SplitFormValues } from "./form-context";
 import { DialogHeader, DialogTitle } from "../ui/dialog";
+import type { SplitFormValues } from "./form-context";
 
 export function Meta() {
   const { watch } = useFormContext<SplitFormValues>();

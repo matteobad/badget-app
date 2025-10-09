@@ -1,7 +1,7 @@
-import { createGocardlessLinkAction } from "~/server/domain/bank-connection/actions";
-import { getUrl } from "~/shared/helpers/get-url";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
+import { createGocardlessLinkAction } from "~/server/domain/bank-connection/actions";
+import { getUrl } from "~/shared/helpers/get-url";
 
 import { BankConnectButton } from "./bank-connect-button";
 

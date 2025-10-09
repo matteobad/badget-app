@@ -1,15 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSpaceQuery } from "~/hooks/use-space";
-import { useUserQuery } from "~/hooks/use-user";
-import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
-import { formatAmount } from "~/shared/helpers/format";
-import { useTRPC } from "~/shared/helpers/trpc/client";
-import { getWidgetPeriodDates } from "~/shared/helpers/widget-period";
-import { useScopedI18n } from "~/shared/locales/client";
 import { PiggyBankIcon } from "lucide-react";
+import { useMemo } from "react";
 import {
   Bar,
   ComposedChart,
@@ -18,6 +11,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useSpaceQuery } from "~/hooks/use-space";
+import { useUserQuery } from "~/hooks/use-user";
+import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
+import { formatAmount } from "~/shared/helpers/format";
+import { useTRPC } from "~/shared/helpers/trpc/client";
+import { getWidgetPeriodDates } from "~/shared/helpers/widget-period";
+import { useScopedI18n } from "~/shared/locales/client";
 
 import { BaseWidget, WidgetSkeleton } from "./base";
 

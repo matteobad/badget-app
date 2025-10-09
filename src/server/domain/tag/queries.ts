@@ -1,9 +1,9 @@
 "server-only";
 
-import type { DBClient } from "~/server/db";
 import type { SQL } from "drizzle-orm";
-import { tag_table } from "~/server/db/schema/transactions";
 import { and, eq, sql } from "drizzle-orm";
+import type { DBClient } from "~/server/db";
+import { tag_table } from "~/server/db/schema/transactions";
 
 export type GetTagsParams = {
   q?: string;

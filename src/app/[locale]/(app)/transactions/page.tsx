@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
+import { createLoader } from "nuqs/server";
 import { Suspense } from "react";
-import { TransactionSplitDialog } from "~/components/transaction-split/transaction-split-dialog";
+import { ErrorBoundary } from "react-error-boundary";
 import { TransactionsSearchFilter } from "~/components/transaction/filters/transactions-search-filter";
 import { DataTable } from "~/components/transaction/table/data-table";
 import { Loading } from "~/components/transaction/table/loading";
 import { TransactionsActions } from "~/components/transaction/transactions-actions";
+import { TransactionSplitDialog } from "~/components/transaction-split/transaction-split-dialog";
 import { loadSortParams } from "~/hooks/use-sort-params";
 import { getInitialTransactionsColumnVisibility } from "~/server/domain/transaction/helpers";
 import {
@@ -14,8 +16,6 @@ import {
   trpc,
 } from "~/shared/helpers/trpc/server";
 import { transactionFilterParamsSchema } from "~/shared/validators/transaction.schema";
-import { createLoader } from "nuqs/server";
-import { ErrorBoundary } from "react-error-boundary";
 
 export const metadata: Metadata = {
   title: "Transactions | Badget.",

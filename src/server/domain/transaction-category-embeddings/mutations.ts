@@ -1,6 +1,6 @@
+import { eq, sql } from "drizzle-orm";
 import type { DBClient } from "~/server/db";
 import { transaction_category_embeddings_table } from "~/server/db/schema/transactions";
-import { eq, sql } from "drizzle-orm";
 
 export type GetCategoryEmbeddingParams = {
   name: string;

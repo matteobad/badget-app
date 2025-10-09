@@ -1,9 +1,9 @@
 "server-only";
 
+import { eq } from "drizzle-orm";
 import type { DBClient } from "~/server/db";
 import type { DB_UserInsertType } from "~/server/db/schema/auth";
 import { user as user_table } from "~/server/db/schema/auth";
-import { eq } from "drizzle-orm";
 
 export async function updateUserMutation(
   client: DBClient,

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { BellDotIcon, SettingsIcon } from "lucide-react";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ErrorFallback } from "~/components/error-fallback";
 import { Button } from "~/components/ui/button";
 import {
@@ -13,7 +14,6 @@ import {
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useNotifications } from "~/hooks/use-notifications";
-import { BellDotIcon, SettingsIcon } from "lucide-react";
 
 import { EmptyState } from "./empty-state";
 import { NotificationItem } from "./notification-item";

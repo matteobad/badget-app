@@ -1,9 +1,9 @@
+import type z from "zod";
 import type {
   bulkUpdateNotificationSettingsSchema,
   getNotificationSettingsSchema,
   updateNotificationSettingSchema,
 } from "~/shared/validators/notification-settings.schema";
-import type z from "zod";
 
 import type { DBClient } from "../db";
 import {

@@ -1,10 +1,10 @@
 import { z } from "@hono/zod-openapi";
+import { parseAsBoolean, parseAsString } from "nuqs/server";
 import {
   ACCOUNT_SUBTYPE,
   ACCOUNT_TYPE,
   BANK_PROVIDER,
 } from "~/shared/constants/enum";
-import { parseAsBoolean, parseAsString } from "nuqs/server";
 
 export const getBankAccountsSchema = z.object({
   q: z.string().optional().openapi({

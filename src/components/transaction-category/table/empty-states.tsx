@@ -1,10 +1,10 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ReceiptIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { useTransactionCategoryFilterParams } from "~/hooks/use-transaction-category-filter-params";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { ReceiptIcon } from "lucide-react";
 
 export function NoResults() {
   const { clearAllFilters } = useTransactionCategoryFilterParams();

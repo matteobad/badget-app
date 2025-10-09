@@ -1,5 +1,3 @@
-import { cn } from "~/lib/utils";
-import { formatAmount } from "~/shared/helpers/format";
 import {
   Area,
   CartesianGrid,
@@ -10,6 +8,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { cn } from "~/lib/utils";
+import { formatAmount } from "~/shared/helpers/format";
 
 import type { BaseChartProps } from "./chart-utils";
 import { createCompactTickFormatter, useChartMargin } from "./chart-utils";

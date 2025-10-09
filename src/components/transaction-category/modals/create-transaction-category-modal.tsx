@@ -1,7 +1,10 @@
-import type { IconName } from "lucide-react/dynamic";
-import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { MinusIcon, PlusIcon } from "lucide-react";
+import type { IconName } from "lucide-react/dynamic";
+import { useEffect } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import z from "zod";
 import { SubmitButton } from "~/components/submit-button";
 import { InputColorIcon } from "~/components/transaction-category/input-color-icon";
 import {
@@ -22,9 +25,6 @@ import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createManyTransactionCategorySchema } from "~/shared/validators/transaction-category.schema";
-import { MinusIcon, PlusIcon } from "lucide-react";
-import { useFieldArray, useForm } from "react-hook-form";
-import z from "zod";
 
 type Props = {
   onOpenChange: (isOpen: boolean) => void;

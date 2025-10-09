@@ -1,5 +1,5 @@
-import type React from "react";
 import { Button as ReactEmailButton } from "@react-email/components";
+import type React from "react";
 
 import { getEmailInlineStyles, getEmailThemeClasses } from "./theme";
 

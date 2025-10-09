@@ -1,20 +1,20 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import { useEffect, useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { differenceInDays, formatDistanceToNow } from "date-fns";
+import { MessageCircleWarningIcon, WandSparklesIcon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { parseAsString, useQueryStates } from "nuqs";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useSyncStatus } from "~/hooks/use-sync-status";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import {
   manualSyncTransactionsAction,
   reconnectConnectionAction,
 } from "~/server/domain/bank-connection/actions";
 import { connectionStatus } from "~/shared/helpers/connection-status";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-import { differenceInDays, formatDistanceToNow } from "date-fns";
-import { MessageCircleWarningIcon, WandSparklesIcon } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryStates } from "nuqs";
-import { toast } from "sonner";
 
 import { BankAccount } from "../bank-account/bank-account";
 import { BankLogo } from "../bank-logo";

@@ -1,9 +1,9 @@
 "use client";
 
+import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { cn } from "~/lib/utils";
 import { trackingConsentAction } from "~/server/actions";
-import { useAction } from "next-safe-action/hooks";
 
 import { Button } from "./ui/button";
 

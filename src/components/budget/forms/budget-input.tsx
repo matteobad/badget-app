@@ -1,6 +1,7 @@
 "use client";
 
-import type { BudgetRecurrenceType } from "~/shared/constants/enum";
+import { AnimatePresence, motion } from "framer-motion";
+import { Calendar, Clock, RotateCcw, Settings } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "~/components/ui/badge";
@@ -13,8 +14,7 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { Calendar, Clock, RotateCcw, Settings } from "lucide-react";
+import type { BudgetRecurrenceType } from "~/shared/constants/enum";
 
 interface BudgetInputProps {
   value: number;

@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "~/components/ui/button";
 import { RocketIcon } from "lucide-react";
+import { Button } from "~/components/ui/button";
 
 export function RecurringContributionChoice() {
   return (

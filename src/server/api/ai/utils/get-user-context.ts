@@ -1,9 +1,9 @@
+import { HTTPException } from "hono/http-exception";
 import type { ChatUserContext } from "~/server/cache/chat-cache";
-import type { DBClient } from "~/server/db";
 import { chatCache } from "~/server/cache/chat-cache";
+import type { DBClient } from "~/server/db";
 import { getSpaceById } from "~/server/services/better-auth-service";
 import { getUserById } from "~/server/services/user-service";
-import { HTTPException } from "hono/http-exception";
 
 interface GetUserContextParams {
   db: DBClient;

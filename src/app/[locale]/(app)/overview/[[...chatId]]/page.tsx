@@ -1,8 +1,8 @@
+import { Provider as ChatProvider } from "@ai-sdk-tools/store";
+import { geolocation } from "@vercel/functions";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Provider as ChatProvider } from "@ai-sdk-tools/store";
-import { geolocation } from "@vercel/functions";
 import { ChatInterface } from "~/components/chat/chat-interface";
 import { Widgets } from "~/components/widgets";
 import {

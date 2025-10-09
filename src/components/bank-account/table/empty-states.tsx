@@ -1,9 +1,9 @@
 "use client";
 
+import { ReceiptIcon } from "lucide-react";
 import { AddAccountButton } from "~/components/bank-connection/add-account-button";
 import { Button } from "~/components/ui/button";
 import { useBankAccountFilterParams } from "~/hooks/use-bank-account-filter-params";
-import { ReceiptIcon } from "lucide-react";
 
 export function NoResults() {
   const { clearAllFilters } = useBankAccountFilterParams();

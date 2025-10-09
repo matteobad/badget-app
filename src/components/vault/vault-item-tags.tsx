@@ -1,7 +1,7 @@
 "use client";
 
-import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { useDocumentFilterParams } from "~/hooks/use-document-filter-params";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 
 import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";

@@ -1,3 +1,5 @@
+import { addDays, format } from "date-fns";
+import type z from "zod/v4";
 import type {
   budgetFilterSchema,
   createBudgetSchema,
@@ -5,10 +7,6 @@ import type {
   getBudgetsSchema,
   updateBudgetSchema,
 } from "~/shared/validators/budget.schema";
-import type z from "zod/v4";
-import { addDays, format } from "date-fns";
-
-import type { getTransactionCategoriesQuery } from "../domain/transaction-category/queries";
 import { db, withTransaction } from "../db";
 import {
   buildValidity,
@@ -27,6 +25,7 @@ import {
   getBudgetsQuery,
   getMaterializedBudgetsQuery,
 } from "../domain/budget/queries";
+import type { getTransactionCategoriesQuery } from "../domain/transaction-category/queries";
 
 export type CategoryType = Awaited<
   ReturnType<typeof getTransactionCategoriesQuery>
@@ -77,7 +76,7 @@ export function findBudgetWarnings(
         startOfWeek,
       });
       const childrenEffectiveTotal = getEffectiveChildrenTotal(id);
-      return (tot += Math.max(budgetTotal, childrenEffectiveTotal));
+      return tot + Math.max(budgetTotal, childrenEffectiveTotal);
     }, 0);
   }
 

@@ -1,11 +1,11 @@
 import type { SQL } from "drizzle-orm";
-import type { PgSelect, PgTable } from "drizzle-orm/pg-core";
 import { getTableColumns, sql } from "drizzle-orm";
+import type { PgSelect, PgTable } from "drizzle-orm/pg-core";
 import { customType, timestamp } from "drizzle-orm/pg-core";
-import { type SQLiteTable } from "drizzle-orm/sqlite-core";
+import type { SQLiteTable } from "drizzle-orm/sqlite-core";
 import {
-  Range,
   RANGE_LB_INC,
+  Range,
   parse as rangeParse,
   serialize as rangeSerialize,
 } from "postgres-range";

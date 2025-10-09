@@ -1,10 +1,10 @@
 "server-only";
 
+import { and, eq, sql } from "drizzle-orm";
 import type { DBClient } from "~/server/db";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { connection_table } from "~/server/db/schema/open-banking";
-import { and, eq, sql } from "drizzle-orm";
 
 export async function getBankConnectionByIdQuery(id: string) {
   const [result] = await db
