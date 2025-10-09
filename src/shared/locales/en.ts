@@ -78,9 +78,9 @@ export default {
       action: "View analysis",
     },
     "category-expenses": {
-      title: "Category expenses",
+      title: "Spending",
       description: "No expenses tracked yet",
-      action: "See detailed graph",
+      action: "See details",
     },
     "monthly-spending": {
       title: "Expenses",

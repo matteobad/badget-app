@@ -81,9 +81,9 @@ export default {
       action: "Approfondisci l’andamento",
     },
     "category-expenses": {
-      title: "Spese per categoria",
+      title: "Spese",
       description: "Non hai movimenti nel periodo selezionato",
-      action: "Vedi grafico dettagliato",
+      action: "Vedi dettaglio",
     },
     "monthly-spending": {
       title: "Uscite",

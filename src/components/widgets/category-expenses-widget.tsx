@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { useQuery } from "@tanstack/react-query";
 import { useChatInterface } from "~/hooks/use-chat-interface";
@@ -14,24 +15,22 @@ import { useScopedI18n } from "~/shared/locales/client";
 import { format } from "date-fns";
 import { ShapesIcon } from "lucide-react";
 
-import { BaseWidget } from "./base";
+import { BaseWidget, WidgetSkeleton } from "./base";
 import { ConfigurableWidget } from "./configurable-widget";
 import { useConfigurableWidget } from "./use-configurable-widget";
 import { WidgetSettings } from "./widget-settings";
 
 export function CategoryExpensesWidget() {
-  const { sendMessage } = useChatActions();
-  const { setChatId } = useChatInterface();
-
-  const chatId = useChatId();
-
   const tScoped = useScopedI18n("widgets.category-expenses");
+  const tSettings = useScopedI18n("widgets.settings");
+
   const trpc = useTRPC();
+  const router = useRouter();
 
   const { data: space } = useSpaceQuery();
   const { data: user } = useUserQuery();
 
-  const { config, isConfiguring, setIsConfiguring, saveConfig } =
+  const { config, isConfiguring, setIsConfiguring, saveConfig, isUpdating } =
     useConfigurableWidget("category-expenses");
 
   const { from, to } = useMemo(() => {
@@ -39,10 +38,10 @@ export function CategoryExpensesWidget() {
     return getWidgetPeriodDates(period, 1, user?.weekStartsOnMonday ? 1 : 0);
   }, [config?.period, user?.weekStartsOnMonday]);
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getCategoryExpenses.queryOptions({
-      from: format(from, "yyyy-MM-dd"),
-      to: format(to, "yyyy-MM-dd"),
+      from,
+      to,
       currency: space?.baseCurrency ?? "EUR",
       limit: 3,
     }),
@@ -55,23 +54,34 @@ export function CategoryExpensesWidget() {
 
   const hasCategories = categoryData && categories.length > 0;
 
-  const handleClick = () => {
-    if (!chatId || !data?.toolCall) return;
-
-    setChatId(chatId);
-
-    void sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: "Category expenses breakdown" }],
-      metadata: {
-        toolCall: data?.toolCall,
-      },
-    });
-
-    // router.push(
-    //   `/transactions?categories=${categories.map((category) => category.slug).join(",")}&start=${from}&end=${to}`,
-    // );
+  const getTitle = () => {
+    const periodLabel = tSettings(
+      `widget_period.${config?.period ?? "this_month"}`,
+    );
+    return `${tScoped("title")} ${periodLabel}`;
   };
+
+  const handleClick = () => {
+    // if (!chatId || !data?.toolCall) return;
+
+    // setChatId(chatId);
+
+    // void sendMessage({
+    //   role: "user",
+    //   parts: [{ type: "text", text: "Category expenses breakdown" }],
+    //   metadata: {
+    //     toolCall: data?.toolCall,
+    //   },
+    // });
+
+    router.push(
+      `/transactions?categories=${categories.map((category) => category.slug).join(",")}&start=${from}&end=${to}`,
+    );
+  };
+
+  if (isLoading || isUpdating) {
+    return <WidgetSkeleton />;
+  }
 
   return (
     <ConfigurableWidget
@@ -87,7 +97,7 @@ export function CategoryExpensesWidget() {
       }
     >
       <BaseWidget
-        title={tScoped("title")}
+        title={getTitle()}
         description={
           hasCategories ? (
             <div className="flex w-full flex-col gap-2">

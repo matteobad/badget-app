@@ -9,7 +9,7 @@ import type {
 } from "~/shared/validators/widgets.schema";
 import type z from "zod";
 import { UTCDate } from "@date-fns/utc";
-import { endOfMonth, format, parseISO } from "date-fns";
+import { eachMonthOfInterval, endOfMonth, format, parseISO } from "date-fns";
 import { and, eq, gte, lte, not, sql } from "drizzle-orm";
 
 import type { DBClient } from "../db";
@@ -81,25 +81,27 @@ export async function getNetWorthTrend(
   return netWorthData;
 }
 
+interface SavingResultItem {
+  value: string;
+  date: string;
+  currency: string;
+}
+
 export async function getSavingsByMonth(
   db: DBClient,
   params: z.infer<typeof getSavingAnalysisSchema>,
   organizationId: string,
 ) {
-  const { from, to, currency } = params;
+  const { from, to, currency: inputCurrency } = params;
 
-  const result = await db
+  // Generate month series for complete results
+  const monthSeries = eachMonthOfInterval({ start: from, end: to });
+
+  // Execute the aggregated query
+  const monthlyData = await db
     .select({
-      month: sql<Date>`date_trunc('month', ${transaction_table.date})`,
-      saving: sql`sum(${transaction_table.amount})`.mapWith(Number),
-      income:
-        sql`ABS(sum(case when ${transaction_table.amount} > 0 then ${transaction_table.amount} else 0 end))`.mapWith(
-          Number,
-        ),
-      expenses:
-        sql`ABS(sum(case when ${transaction_table.amount} < 0 then ${transaction_table.amount} else 0 end))`.mapWith(
-          Number,
-        ),
+      month: sql<string>`DATE_TRUNC('month', ${transaction_table.date})::date`,
+      value: sql<number>`sum(${transaction_table.amount})`.mapWith(Number),
     })
     .from(transaction_table)
     .leftJoin(
@@ -121,36 +123,69 @@ export async function getSavingsByMonth(
         not(transaction_category_table.excluded),
       ),
     )
-    .groupBy(sql`date_trunc('month', ${transaction_table.date})`)
-    .orderBy(sql`date_trunc('month', ${transaction_table.date})`);
+    .groupBy(sql`DATE_TRUNC('month', ${transaction_table.date})`)
+    .orderBy(sql`DATE_TRUNC('month', ${transaction_table.date}) ASC`);
+
+  // Create a map of month data for quick lookup
+  const dataMap = new Map(
+    monthlyData.map((item) => [item.month, { value: item.value }]),
+  );
+
+  // Generate complete results for all months in the series
+  const rawData: SavingResultItem[] = monthSeries.map((monthStart) => {
+    const monthKey = format(monthStart, "yyyy-MM-dd");
+    const monthData = dataMap.get(monthKey) ?? {
+      value: 0,
+    };
+
+    return {
+      date: monthKey,
+      value: monthData.value.toString(),
+      currency: inputCurrency ?? "EUR",
+    };
+  });
 
   // Compute total savings (savings = income - expenses) over the result set
-  const totalSavings = result.reduce(
-    (sum, row) => sum + ((row.income ?? 0) - (row.expenses ?? 0)),
+  const totalSavings = rawData.reduce(
+    (sum, row) => sum + Number.parseFloat(row.value ?? "0"),
     0,
   );
 
   // Compute average delta (savings = income - expenses) over the result set
-  let averageSavings = 0;
-  if (result && result.length > 0) {
-    averageSavings =
-      result.reduce(
-        (sum, row) => sum + ((row.income ?? 0) - (row.expenses ?? 0)),
-        0,
-      ) / result.length;
-  }
+  const averageSavings =
+    rawData && rawData.length > 0
+      ? Number(
+          (
+            rawData.reduce(
+              (sum, item) => sum + Number.parseFloat(item.value ?? "0"),
+              0,
+            ) / rawData.length
+          ).toFixed(2),
+        )
+      : 0;
 
   return {
     summary: {
       totalSavings,
       averageSavings,
-      currency,
+      currency: inputCurrency,
     },
     meta: {
       type: "saving-analysis",
-      currency,
+      currency: inputCurrency,
     },
-    result,
+    result: rawData?.map((item) => {
+      const value = Number.parseFloat(
+        Number.parseFloat(item.value || "0").toFixed(2),
+      );
+
+      return {
+        date: item.date,
+        value,
+        currency: item.currency,
+        total: Number(value.toFixed(2)),
+      };
+    }),
   };
 }
 
