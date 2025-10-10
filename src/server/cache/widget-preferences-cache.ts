@@ -74,7 +74,7 @@ export const DEFAULT_WIDGET_CONFIGS: Record<string, WidgetConfig> = {
   "recurring-expenses": {},
   "uncategorized-transactions": {},
   "recent-documents": {},
-  "income-forecast": {},
+  "income-forecast": { period: "last_12_months" },
 };
 
 export const DEFAULT_WIDGET_PREFERENCES: WidgetPreferences = {

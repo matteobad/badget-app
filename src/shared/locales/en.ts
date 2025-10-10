@@ -113,6 +113,12 @@ export default {
       description_default: "Track your incomes",
       action: "View details",
     },
+    "income-forecast": {
+      title: "Income forecast",
+      description: "Next month projection",
+      description_empty: "Not enough data for a projection",
+      action: "See details",
+    },
     "recurring-expenses": {
       title: "Recurring expenses",
       description: {

@@ -116,6 +116,13 @@ export default {
       description_default: "Tieni traccia delle tue entrate",
       action: "Vedi dettaglio",
     },
+    "income-forecast": {
+      title: "Entrate previste",
+      description: "La proiezione per il prossimo mese è di",
+      description_empty:
+        "Non ci sono abbastanza dati per una previsione accurata",
+      action: "Vedi dettaglio",
+    },
     "recurring-expenses": {
       title: "Spese ricorrenti",
       description: {

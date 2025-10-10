@@ -1,45 +1,72 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import { format } from "date-fns";
 import { TrendingUpDownIcon } from "lucide-react";
-import { Line, LineChart, ResponsiveContainer } from "recharts";
+import { useMemo } from "react";
+import {
+  Line,
+  LineChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useSpaceQuery } from "~/hooks/use-space";
+import { useUserQuery } from "~/hooks/use-user";
 import { WIDGET_POLLING_CONFIG } from "~/shared/constants/widgets";
+import { formatAmount } from "~/shared/helpers/format";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-
-import { FormatAmount } from "../format-amount";
-import { BaseWidget } from "./base";
+import { getWidgetPeriodDates } from "~/shared/helpers/widget-period";
+import { useScopedI18n } from "~/shared/locales/client";
+import { BaseWidget, WidgetSkeleton } from "./base";
+import { ConfigurableWidget } from "./configurable-widget";
+import { useConfigurableWidget } from "./use-configurable-widget";
+import { WidgetSettings } from "./widget-settings";
 
 export function IncomeForecastWidget() {
+  const tForecast = useScopedI18n("widgets.income-forecast");
+
   const trpc = useTRPC();
+
   const { data: space } = useSpaceQuery();
+  const { data: user } = useUserQuery();
 
-  // Get 12 months of historical data and forecast 6 months ahead
-  // 12 months captures full year cycle and seasonality for better accuracy
-  const historicalMonths = 12;
-  const forecastMonths = 6;
+  const { config, isConfiguring, setIsConfiguring, saveConfig, isUpdating } =
+    useConfigurableWidget("income-forecast");
 
-  const getDateRange = () => {
-    const to = endOfMonth(new Date());
-    const from = startOfMonth(subMonths(to, historicalMonths - 1));
-    return {
-      from: from.toISOString(),
-      to: to.toISOString(),
-    };
-  };
-
-  const dateRange = getDateRange();
+  const { from, to } = useMemo(() => {
+    const period = config?.period ?? "last_12_months";
+    return getWidgetPeriodDates(period, 1, user?.weekStartsOnMonday ? 1 : 0);
+  }, [config?.period, user?.weekStartsOnMonday]);
 
   const { data, isLoading } = useQuery({
     ...trpc.widgets.getIncomeForecast.queryOptions({
-      from: dateRange.from,
-      to: dateRange.to,
-      forecastMonths,
+      from,
+      to,
+      forecastMonths: 6, // TODO: configure this config?.forecastMonths ?? 6,
       currency: space?.baseCurrency ?? "EUR",
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  const getDescription = () => {
+    if (!data || data.result.summary.nextMonthProjection === 0) {
+      return tForecast("description_empty");
+    }
+
+    const projection = formatAmount({
+      amount: data.result.summary.nextMonthProjection,
+      currency: data.result.summary.currency,
+    });
+
+    return (
+      <div className="text-sm text-muted-foreground">
+        <span>{tForecast("description")} </span>
+        <span className="font-medium text-primary">{projection}</span>
+      </div>
+    );
+  };
 
   const handleViewDetails = () => {
     // TODO: Navigate to detailed forecast page
@@ -65,36 +92,70 @@ export function IncomeForecastWidget() {
       ]
     : [];
 
-  const nextMonthProjection = data?.result.summary.nextMonthProjection ?? 0;
-  const currency =
-    data?.result.summary.currency ?? space?.baseCurrency ?? "EUR";
+  if (isLoading || isUpdating) {
+    return <WidgetSkeleton />;
+  }
 
   return (
-    <BaseWidget
-      title="Income Forecast"
-      icon={<TrendingUpDownIcon className="size-4" />}
-      description={
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-[#666666]">
-            Next month projection{" "}
-            <span className="font-medium text-foreground">
-              +<FormatAmount amount={nextMonthProjection} currency={currency} />
-            </span>
-          </p>
-
+    <ConfigurableWidget
+      isConfiguring={isConfiguring}
+      settings={
+        <WidgetSettings
+          config={config}
+          onSave={saveConfig}
+          onCancel={() => setIsConfiguring(false)}
+          showPeriod
+          showRevenueType={false}
+        />
+      }
+    >
+      <BaseWidget
+        title={tForecast("title")}
+        icon={<TrendingUpDownIcon className="size-4" />}
+        description={getDescription()}
+        actions={data && tForecast("action")}
+        onClick={data && handleViewDetails}
+      >
+        <div className="flex flex-1 items-end gap-2">
           {/* Simple trend line chart */}
           {!isLoading && chartData.length > 0 ? (
-            <div className="h-12 w-full">
+            <div className="h-14 w-full pb-2 [&_svg]:cursor-pointer">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={chartData}
                   margin={{ top: 0, right: 0, left: 0, bottom: 1 }}
                 >
+                  <XAxis dataKey="month" hide />
+                  <YAxis hide />
+
+                  {/* Reference line at zero */}
+                  <ReferenceLine
+                    y={0}
+                    stroke="var(--border)"
+                    strokeDasharray="2 2"
+                  />
+
+                  {/* Reference line at present */}
+                  <ReferenceLine
+                    x={format(new Date(), "MMM")}
+                    stroke="var(--border)"
+                  />
+
                   <Line
                     type="monotone"
                     dataKey="value"
                     stroke="var(--foreground)"
                     strokeWidth={2}
+                    dot={false}
+                    isAnimationActive={false}
+                  />
+
+                  <Line
+                    type="monotone"
+                    dataKey="prediction"
+                    stroke="var(--foreground)"
+                    strokeWidth={2}
+                    strokeDasharray="2 2"
                     dot={false}
                     isAnimationActive={false}
                   />
@@ -109,11 +170,7 @@ export function IncomeForecastWidget() {
             </div>
           )}
         </div>
-      }
-      actions="View forecast details"
-      onClick={handleViewDetails}
-    >
-      <div />
-    </BaseWidget>
+      </BaseWidget>
+    </ConfigurableWidget>
   );
 }
