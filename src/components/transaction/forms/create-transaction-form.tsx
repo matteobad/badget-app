@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatISO } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { nanoid } from "nanoid";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
@@ -13,6 +13,7 @@ import { SelectAccount } from "~/components/bank-account/forms/select-account";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { SubmitButton } from "~/components/submit-button";
 import { TransactionAttachments } from "~/components/transaction-attachment/transaction-attachment";
+import { CategoryLabel } from "~/components/transaction-category/category-badge";
 import { SelectCategory } from "~/components/transaction-category/select-category";
 import {
   Accordion,
@@ -23,6 +24,11 @@ import {
 import { Button } from "~/components/ui/button";
 import { ButtonGroup } from "~/components/ui/button-group";
 import { Calendar } from "~/components/ui/calendar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import {
   Field,
   FieldContent,
@@ -42,7 +48,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { useSpaceQuery } from "~/hooks/use-space";
@@ -50,9 +55,17 @@ import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
 import { uniqueCurrencies } from "~/shared/constants/currencies";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { useScopedI18n } from "~/shared/locales/client";
 import { createManualTransactionSchema } from "~/shared/validators/transaction.schema";
 
 export default function CreateTransactionForm() {
+  const [selectedCategory, setSelectedCategory] = useState<{
+    name: string;
+    color?: string | null;
+    icon?: string | null;
+  }>();
+
+  const t = useScopedI18n("transactions");
   const { setParams } = useTransactionParams();
 
   const trpc = useTRPC();
@@ -120,6 +133,7 @@ export default function CreateTransactionForm() {
   const attachments = form.watch("attachments");
   const bankAccountId = form.watch("accountId");
   const currency = form.watch("currency");
+  const transactionType = form.watch("transactionType");
 
   const onSubmit = (data: z.infer<typeof createManualTransactionSchema>) => {
     // Amount is already stored with correct sign (negative for expense, positive for income)
@@ -145,7 +159,9 @@ export default function CreateTransactionForm() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>Transaction Type</FieldLabel>
+              <FieldLabel htmlFor={field.name}>
+                {t("transaction_type_lbl")}
+              </FieldLabel>
               <div className="flex w-full border border-border bg-muted">
                 <Button
                   type="button"
@@ -171,7 +187,7 @@ export default function CreateTransactionForm() {
                     }
                   }}
                 >
-                  Expense
+                  {t("transaction_type_val.expense")}
                 </Button>
                 <Button
                   type="button"
@@ -198,13 +214,10 @@ export default function CreateTransactionForm() {
                     }
                   }}
                 >
-                  Income
+                  {t("transaction_type_val.income")}
                 </Button>
               </div>
-              <FieldDescription>
-                Select whether this is money coming in (income) or going out
-                (expense)
-              </FieldDescription>
+              <FieldDescription>{t("transaction_type_msg")}</FieldDescription>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -215,7 +228,9 @@ export default function CreateTransactionForm() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+              <FieldLabel htmlFor={field.name}>
+                {t("description_lbl")}
+              </FieldLabel>
               <Input
                 {...field}
                 id={field.name}
@@ -233,9 +248,7 @@ export default function CreateTransactionForm() {
                   // });
                 }}
               />
-              <FieldDescription>
-                A brief description of what this transaction is for
-              </FieldDescription>
+              <FieldDescription>{t("description_msg")}</FieldDescription>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -247,7 +260,7 @@ export default function CreateTransactionForm() {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Importo</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t("amount_lbl")}</FieldLabel>
                 <ButtonGroup>
                   <Select
                     value={currency}
@@ -265,24 +278,23 @@ export default function CreateTransactionForm() {
                     </SelectContent>
                   </Select>
                   <CurrencyInput
-                    value={field.value}
+                    value={field.value ? Math.abs(field.value) : undefined}
+                    placeholder="0.00"
+                    allowNegative={false}
                     onValueChange={(values) => {
-                      field.onChange(values.floatValue);
-
-                      if (form.getFieldState("categorySlug").isDirty) return;
-
-                      if (
-                        values.floatValue !== undefined &&
-                        values.floatValue < 0
-                      ) {
-                        form.setValue("categorySlug", "uncategorized");
+                      if (values.floatValue !== undefined) {
+                        // Store signed value based on transaction type
+                        const positiveValue = Math.abs(values.floatValue);
+                        const signedValue =
+                          transactionType === "expense"
+                            ? -positiveValue
+                            : positiveValue;
+                        field.onChange(signedValue);
                       }
                     }}
                   />
                 </ButtonGroup>
-                <FieldDescription>
-                  Enter the transaction amount
-                </FieldDescription>
+                <FieldDescription>{t("amount_msg")}</FieldDescription>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -294,13 +306,13 @@ export default function CreateTransactionForm() {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Data</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t("date_lbl")}</FieldLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full pl-3 text-left font-normal ring-inset",
+                        "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground",
                       )}
                     >
@@ -328,9 +340,7 @@ export default function CreateTransactionForm() {
                     />
                   </PopoverContent>
                 </Popover>
-                <FieldDescription>
-                  When this transaction occurred
-                </FieldDescription>
+                <FieldDescription>{t("date_msg")}</FieldDescription>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -345,7 +355,7 @@ export default function CreateTransactionForm() {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Account</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t("account_lbl")}</FieldLabel>
                 <SelectAccount
                   align="start"
                   className="w-full"
@@ -354,9 +364,7 @@ export default function CreateTransactionForm() {
                     field.onChange(value.id);
                   }}
                 />
-                <FieldDescription>
-                  The account this transaction belongs to
-                </FieldDescription>
+                <FieldDescription>{t("account_msg")}</FieldDescription>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -368,16 +376,50 @@ export default function CreateTransactionForm() {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Category</FieldLabel>
-                <SelectCategory
-                  hideLoading
-                  align="start"
-                  selected={field.value}
-                  onChange={(selected) => field.onChange(selected.slug)}
-                />
-                <FieldDescription>
-                  Help organize and track your transactions
-                </FieldDescription>
+                <FieldLabel htmlFor={field.name}>
+                  {t("category_lbl")}
+                </FieldLabel>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground",
+                      )}
+                    >
+                      {field.value ? (
+                        <CategoryLabel
+                          category={{
+                            name: selectedCategory?.name ?? "uncategorized",
+                            color: selectedCategory?.color ?? null,
+                            icon: selectedCategory?.icon ?? null,
+                          }}
+                        />
+                      ) : (
+                        <span>Select a category</span>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="max-h-[210px] w-(--radix-dropdown-menu-trigger-width) overflow-y-auto p-0"
+                    sideOffset={8}
+                  >
+                    <SelectCategory
+                      headless
+                      hideLoading
+                      align="start"
+                      selected={field.value}
+                      onChange={(selected) => {
+                        setSelectedCategory(selected);
+                        console.log(selected);
+                        field.onChange(selected.slug);
+                      }}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <FieldDescription>{t("category_msg")}</FieldDescription>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -414,7 +456,7 @@ export default function CreateTransactionForm() {
 
         <AccordionItem value="internal">
           <AccordionTrigger className="px-1">
-            Exclude from analytics
+            {t("exclude_lbl")}
           </AccordionTrigger>
           <AccordionContent className="px-1">
             <Controller
@@ -427,13 +469,9 @@ export default function CreateTransactionForm() {
                 >
                   <FieldContent>
                     <FieldLabel htmlFor={field.name} className="sr-only">
-                      Exclude from analytics
+                      {t("exclude_lbl")}
                     </FieldLabel>
-                    <FieldDescription>
-                      Exclude this transaction from analytics like profit,
-                      expense and revenue. This is useful for internal transfers
-                      between accounts to avoid double-counting.
-                    </FieldDescription>
+                    <FieldDescription>{t("exclude_msg")}</FieldDescription>
                   </FieldContent>
                   <Switch
                     id={field.name}

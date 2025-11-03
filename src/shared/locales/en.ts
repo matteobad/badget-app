@@ -169,6 +169,32 @@ export default {
     no_account: "Don't have an account yet?",
   },
 
+  transactions: {
+    create_transaction: "Create transaction",
+    transaction_type_lbl: "Transaction Type",
+    transaction_type_msg:
+      "Select whether this is money coming in (income) or going out (expense)",
+    transaction_type_val: {
+      income: "Income",
+      expense: "Expense",
+    },
+    description_lbl: "Description",
+    description_msg: "A brief description of what this transaction is for",
+    amount_lbl: "Amount",
+    amount_msg: "The amount of money for this transaction",
+    currency_lbl: "Currency",
+    currency_msg: "The currency of this transaction",
+    date_lbl: "Date",
+    date_msg: "The date of this transaction",
+    account_lbl: "Account",
+    account_msg: "The account this transaction belongs to",
+    category_lbl: "Category",
+    category_msg: "The category of this transaction",
+    exclude_lbl: "Exclude from analytics",
+    exclude_msg:
+      "Exclude this transaction from analytics like profit, expense and revenue. This is useful for internal transfers between accounts to avoid double-counting.",
+  },
+
   charts: {
     stacked_bar_chart: {
       total: "Total",

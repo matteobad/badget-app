@@ -135,6 +135,7 @@ export function SelectCategory({
             name: data.name,
             color: data.color,
             slug: data.slug,
+            icon: data.icon,
           });
         }
       },
@@ -192,6 +193,7 @@ export function SelectCategory({
                     name: foundItem.label,
                     color: foundItem.color,
                     slug: foundItem.slug,
+                    icon: foundItem.icon,
                   });
                   setOpen(false);
                 }}

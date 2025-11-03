@@ -210,6 +210,7 @@ export async function createTransfer(
         counterparty: toAccount.name,
         transferId: transferId,
         currency: "EUR",
+        transactionType: "expense",
       },
       organizationId,
     );
@@ -226,6 +227,7 @@ export async function createTransfer(
         counterparty: fromAccount.name,
         transferId: transferId,
         currency: "EUR",
+        transactionType: "income",
       },
       organizationId,
     );

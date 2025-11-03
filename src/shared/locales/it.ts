@@ -173,6 +173,34 @@ export default {
     no_account: "Non hai ancora un account?",
   },
 
+  transactions: {
+    create_transaction: "Crea transazione",
+    transaction_type_lbl: "Tipo di transazione",
+    transaction_type_income: "Entrate",
+    transaction_type_expense: "Uscite",
+    transaction_type_msg:
+      "Seleziona se questo è denaro che entra (entrate) o che esce (uscite)",
+    transaction_type_val: {
+      income: "Entrate",
+      expense: "Uscite",
+    },
+    description_lbl: "Descrizione",
+    description_msg: "Una breve descrizione di cosa è questa transazione",
+    amount_lbl: "Importo",
+    amount_msg: "L'importo della transazione",
+    currency_lbl: "Valuta",
+    currency_msg: "La valuta della transazione",
+    date_lbl: "Data",
+    date_msg: "La data della transazione",
+    account_lbl: "Conto",
+    account_msg: "Il conto della transazione",
+    category_lbl: "Categoria",
+    category_msg: "La categoria della transazione",
+    exclude_lbl: "Escludi dalle analisi",
+    exclude_msg:
+      "Escludi questa transazione dalle analisi come profit, spese e ricavi. Questo è utile per i trasferimenti interni tra conti per evitare doppi conteggi.",
+  },
+
   charts: {
     stacked_bar_chart: {
       total: "Totale",
