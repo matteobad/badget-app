@@ -1,12 +1,12 @@
 "use client";
 
-import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, formatISO } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
 import { SelectAccount } from "~/components/bank-account/forms/select-account";
@@ -21,17 +21,17 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
+import { ButtonGroup } from "~/components/ui/button-group";
 import { Calendar } from "~/components/ui/calendar";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "~/components/ui/field";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -45,9 +45,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
-import { Textarea } from "~/components/ui/textarea";
+import { useSpaceQuery } from "~/hooks/use-space";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
+import { uniqueCurrencies } from "~/shared/constants/currencies";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { createManualTransactionSchema } from "~/shared/validators/transaction.schema";
 
@@ -56,6 +57,8 @@ export default function CreateTransactionForm() {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+
+  const { data: space } = useSpaceQuery();
 
   const { data: accounts } = useQuery(
     trpc.bankAccount.get.queryOptions({
@@ -102,34 +105,26 @@ export default function CreateTransactionForm() {
   );
 
   const form = useForm<z.infer<typeof createManualTransactionSchema>>({
-    resolver: standardSchemaResolver(createManualTransactionSchema),
+    resolver: zodResolver(createManualTransactionSchema),
     defaultValues: {
       categorySlug: "uncategorized",
-      date: format(new Date(), "yyyy-MM-dd"),
+      date: formatISO(new Date(), { representation: "date" }),
       description: "",
-      currency: "EUR",
+      currency: space?.baseCurrency ?? "EUR",
       accountId: accounts?.at(0)?.id,
       attachments: undefined,
-      method: "unknown",
-      status: "posted",
+      transactionType: "expense" as const,
     },
   });
 
   const attachments = form.watch("attachments");
   const bankAccountId = form.watch("accountId");
+  const currency = form.watch("currency");
 
-  const handleSubmit = (
-    data: z.infer<typeof createManualTransactionSchema>,
-  ) => {
-    createTransactionMutation.mutate(data);
-  };
-
-  const onError = (errors: typeof form.formState.errors) => {
-    // raccogli tutti i messaggi di errore
-    const messages = Object.values(errors).map((err) => err?.message);
-
-    messages.forEach((msg) => {
-      if (msg) toast.error(msg);
+  const onSubmit = (data: z.infer<typeof createManualTransactionSchema>) => {
+    // Amount is already stored with correct sign (negative for expense, positive for income)
+    createTransactionMutation.mutate({
+      ...data,
     });
   };
 
@@ -140,55 +135,135 @@ export default function CreateTransactionForm() {
         form.setValue("accountId", firstAccountId);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts, bankAccountId]);
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit, onError)}
-        className="space-y-4 p-[3px]"
-      >
-        {/* <pre>
-          <code>{JSON.stringify(form.formState.errors, null, 2)}</code>
-        </pre> */}
-
-        <FormField
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <FieldGroup className="p-1">
+        <Controller
+          name="transactionType"
           control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  autoComplete="off"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  className="bg-background"
-                  onBlur={(event) => {
-                    if (event.target.value.length < 3) return;
-                    // categorizeTransactionMutation.mutate({
-                    //   name: event.target.value,
-                    // });
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Transaction Type</FieldLabel>
+              <div className="flex w-full border border-border bg-muted">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className={cn(
+                    "h-6 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
+                    field.value === "expense"
+                      ? "bg-transparent"
+                      : "bg-background font-medium",
+                  )}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    field.onChange("expense");
+                    // Clear income category if switching to expense
+                    if (form.getValues("categorySlug") === "income") {
+                      form.setValue("categorySlug", undefined);
+                    }
+                    // Update amount to negative if there's an amount
+                    const currentAmount = form.getValues("amount");
+                    if (currentAmount && currentAmount > 0) {
+                      form.setValue("amount", -Math.abs(currentAmount));
+                    }
                   }}
-                />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
+                >
+                  Expense
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className={cn(
+                    "h-6 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
+                    field.value === "income"
+                      ? "bg-transparent"
+                      : "bg-background font-medium",
+                  )}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    field.onChange("income");
+                    // Update amount to positive if there's an amount
+                    const currentAmount = form.getValues("amount");
+                    if (currentAmount) {
+                      const positiveAmount = Math.abs(currentAmount);
+                      form.setValue("amount", positiveAmount);
+                      // Auto-select income category if amount is positive
+                      if (positiveAmount > 0) {
+                        form.setValue("categorySlug", "income");
+                      }
+                    }
+                  }}
+                >
+                  Income
+                </Button>
+              </div>
+              <FieldDescription>
+                Select whether this is money coming in (income) or going out
+                (expense)
+              </FieldDescription>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
         />
 
-        <div className="mt-4 flex space-x-4">
-          <FormField
-            control={form.control}
+        <Controller
+          name="name"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+              <Input
+                {...field}
+                id={field.name}
+                aria-invalid={fieldState.invalid}
+                className="bg-background"
+                placeholder="e.g., Office supplies, Invoice payment"
+                autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck="false"
+                onBlur={(event) => {
+                  if (event.target.value.length < 3) return;
+                  // categorizeTransactionMutation.mutate({
+                  //   name: event.target.value,
+                  // });
+                }}
+              />
+              <FieldDescription>
+                A brief description of what this transaction is for
+              </FieldDescription>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <Controller
             name="amount"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Importo</FormLabel>
-                <FormControl>
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Importo</FieldLabel>
+                <ButtonGroup>
+                  <Select
+                    value={currency}
+                    onValueChange={(value) => form.setValue("currency", value)}
+                  >
+                    <SelectTrigger className="font-mono bg-background">
+                      {currency}
+                    </SelectTrigger>
+                    <SelectContent className="min-w-24">
+                      {uniqueCurrencies.map((currency) => (
+                        <SelectItem key={currency} value={currency}>
+                          {currency}{" "}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <CurrencyInput
                     value={field.value}
                     onValueChange={(values) => {
@@ -200,83 +275,42 @@ export default function CreateTransactionForm() {
                         values.floatValue !== undefined &&
                         values.floatValue < 0
                       ) {
-                        form.setValue("categorySlug", undefined);
+                        form.setValue("categorySlug", "uncategorized");
                       }
                     }}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+                </ButtonGroup>
+                <FieldDescription>
+                  Enter the transaction amount
+                </FieldDescription>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
-          <FormField
-            control={form.control}
-            name="currency"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Valuta</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <SelectTrigger className="w-full bg-background">
-                    <SelectValue placeholder="Seleziona valuta" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EUR">EUR</SelectItem>
-                    <SelectItem value="USD">USD</SelectItem>
-                    <SelectItem value="GBP">GBP</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="mt-4 flex space-x-4">
-          <FormField
-            control={form.control}
-            name="accountId"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Conto</FormLabel>
-                <SelectAccount
-                  align="start"
-                  className="w-full"
-                  selected={field.value}
-                  onChange={(account) => {
-                    field.onChange(account.id);
-                  }}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
+          <Controller
             name="date"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Data</FormLabel>
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Data</FieldLabel>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full pl-3 text-left font-normal ring-inset",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "dd MMMM yyyy")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full pl-3 text-left font-normal ring-inset",
+                        !field.value && "text-muted-foreground",
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "dd MMMM yyyy")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
                   </PopoverTrigger>
                   <PopoverContent
                     className="w-auto overflow-hidden p-0"
@@ -294,120 +328,164 @@ export default function CreateTransactionForm() {
                     />
                   </PopoverContent>
                 </Popover>
-                <FormMessage />
-              </FormItem>
+                <FieldDescription>
+                  When this transaction occurred
+                </FieldDescription>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
         </div>
 
-        <div className="mt-4 flex space-x-4">
-          <FormField
+        <div className="grid grid-cols-2 gap-4">
+          <Controller
+            name="accountId"
             control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Account</FieldLabel>
+                <SelectAccount
+                  align="start"
+                  className="w-full"
+                  selected={field.value}
+                  onChange={(value) => {
+                    field.onChange(value.id);
+                  }}
+                />
+                <FieldDescription>
+                  The account this transaction belongs to
+                </FieldDescription>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          <Controller
             name="categorySlug"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Categoria</FormLabel>
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Category</FieldLabel>
                 <SelectCategory
                   hideLoading
                   align="start"
                   selected={field.value}
                   onChange={(selected) => field.onChange(selected.slug)}
                 />
-                <FormMessage />
-              </FormItem>
+                <FieldDescription>
+                  Help organize and track your transactions
+                </FieldDescription>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
             )}
           />
         </div>
+      </FieldGroup>
 
-        <Accordion type="single" collapsible>
-          <AccordionItem value="attchament">
-            <AccordionTrigger>Allegati</AccordionTrigger>
-            <AccordionContent className="space-y-2">
-              <TransactionAttachments
-                // NOTE: For manual attachments, we need to generate a unique id
-                id={nanoid()}
-                data={attachments?.map((attachment) => ({
-                  ...attachment,
-                  id: nanoid(),
-                  filename: attachment.name,
-                  path: attachment.path.join("/"),
-                }))}
-                onUpload={(files) => {
-                  // @ts-expect-error possible undefined
-                  form.setValue("attachments", files);
-                }}
-              />
-            </AccordionContent>
-          </AccordionItem>
+      <Accordion
+        type="multiple"
+        defaultValue={["attachments"]}
+        className="mt-2"
+      >
+        <AccordionItem value="attachments">
+          <AccordionTrigger className="px-1">Allegati</AccordionTrigger>
+          <AccordionContent className="space-y-2 p-1">
+            <TransactionAttachments
+              // NOTE: For manual attachments, we need to generate a unique id
+              id={nanoid()}
+              data={attachments?.map((attachment) => ({
+                ...attachment,
+                id: nanoid(),
+                filename: attachment.name,
+                path: attachment.path.join("/"),
+              }))}
+              onUpload={(files) => {
+                // @ts-expect-error possible undefined
+                form.setValue("attachments", files);
+              }}
+            />
+          </AccordionContent>
+        </AccordionItem>
 
-          {/* <AccordionItem value="general">
-            <AccordionTrigger>General</AccordionTrigger>
-            <AccordionContent className="select-text"> */}
-          <div className="mt-6 mb-4">
-            <Label
-              htmlFor="settings"
-              className="mb-2 block text-sm font-medium"
-            >
-              Exclude from analytics
-            </Label>
-            <div className="flex flex-row items-center justify-between">
-              <div className="space-y-0.5 pr-4">
-                <p className="text-xs text-muted-foreground">
-                  Exclude this transaction from analytics like profit, expense
-                  and revenue. This is useful for internal transfers between
-                  accounts to avoid double-counting.
-                </p>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="internal"
-                render={({ field }) => (
+        <AccordionItem value="internal">
+          <AccordionTrigger className="px-1">
+            Exclude from analytics
+          </AccordionTrigger>
+          <AccordionContent className="px-1">
+            <Controller
+              name="internal"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field
+                  orientation="horizontal"
+                  data-invalid={fieldState.invalid}
+                >
+                  <FieldContent>
+                    <FieldLabel htmlFor={field.name} className="sr-only">
+                      Exclude from analytics
+                    </FieldLabel>
+                    <FieldDescription>
+                      Exclude this transaction from analytics like profit,
+                      expense and revenue. This is useful for internal transfers
+                      between accounts to avoid double-counting.
+                    </FieldDescription>
+                  </FieldContent>
                   <Switch
+                    id={field.name}
                     checked={field.value ?? false}
                     onCheckedChange={(checked) => {
                       field.onChange(checked);
                     }}
                   />
-                )}
-              />
-            </div>
-          </div>
-          {/* </AccordionContent>
-          </AccordionItem> */}
+                </Field>
+              )}
+            />
+          </AccordionContent>
+        </AccordionItem>
 
-          <AccordionItem value="note">
-            <AccordionTrigger>Note</AccordionTrigger>
-            <AccordionContent>
-              <FormField
-                control={form.control}
-                name="note"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormControl>
-                      <Textarea
-                        placeholder="Informazioni aggiuntive"
-                        className="min-h-[100px] resize-none bg-background"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <AccordionItem value="note">
+          <AccordionTrigger className="px-1">Note</AccordionTrigger>
+          <AccordionContent className="p-1">
+            <Controller
+              name="note"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name} className="sr-only">
+                    Note
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    placeholder="Note"
+                    className="min-h-[100px] resize-none"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  <FieldDescription>
+                    Add any additional details or context about this transaction
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
-        <div className="fixed right-8 bottom-8 w-full sm:max-w-[455px]">
-          <SubmitButton
-            isSubmitting={createTransactionMutation.isPending}
-            className="w-full"
-          >
-            Create
-          </SubmitButton>
-        </div>
-      </form>
-    </Form>
+      <div className="fixed right-8 bottom-8 w-full sm:max-w-[455px]">
+        <SubmitButton
+          isSubmitting={createTransactionMutation.isPending}
+          className="w-full"
+        >
+          Create
+        </SubmitButton>
+      </div>
+    </form>
   );
 }

@@ -40,7 +40,9 @@ export const createTransactionSchema = createInsertSchema(transaction_table, {
   });
 
 export const createManualTransactionSchema = z.object({
-  amount: z.number(),
+  amount: z.number().refine((val) => Math.abs(val) > 0, {
+    message: "Amount must be greater than 0",
+  }),
   currency: z.string(),
   date: z.iso.date(),
   name: z.string().min(1),
@@ -66,6 +68,7 @@ export const createManualTransactionSchema = z.object({
     )
     .optional(),
   tags: z.array(z.object({ id: z.string(), text: z.string() })).optional(),
+  transactionType: z.enum(["income", "expense"]),
 });
 
 export const createTransferSchema = z.object({
@@ -77,19 +80,47 @@ export const createTransferSchema = z.object({
 });
 
 export const updateTransactionSchema = z.object({
-  id: z.uuid(),
-  amount: z.number().optional(),
-  date: z.iso.date().optional(),
-  description: z.string().optional(),
-  counterparty: z.string().optional(),
-  status: z.enum(TRANSACTION_STATUS).optional(),
-  categoryId: z.uuid().optional(),
-  categorySlug: z.string().optional(),
+  id: z.uuid().openapi({
+    description: "Transaction ID (UUID).",
+    param: {
+      in: "path",
+      name: "id",
+    },
+  }),
+  status: z.enum(TRANSACTION_STATUS).optional().openapi({
+    description: "Status of the transaction.",
+  }),
+  categorySlug: z.string().optional().openapi({
+    description: "Category slug for the transaction.",
+  }),
   method: z.enum(TRANSACTION_METHOD).optional(),
-  note: z.string().optional(),
-  frequency: z.enum(TRANSACTION_FREQUENCY).optional(),
-  recurring: z.boolean().optional(),
-  internal: z.boolean().optional(),
+  note: z.string().optional().openapi({
+    description: "Note for the transaction.",
+  }),
+  frequency: z.enum(TRANSACTION_FREQUENCY).optional().openapi({
+    description: "Recurring frequency of the transaction.",
+  }),
+  recurring: z.boolean().optional().openapi({
+    description: "Whether the transaction is recurring.",
+  }),
+  internal: z.boolean().optional().openapi({
+    description: "Whether the transaction is internal.",
+  }),
+  name: z.string().optional().openapi({
+    description: "Name/description of the transaction.",
+  }),
+  amount: z.number().optional().openapi({
+    description: "Amount of the transaction.",
+  }),
+  currency: z.string().optional().openapi({
+    description: "Currency of the transaction.",
+  }),
+  date: z.iso.date().optional().openapi({
+    description: "Date of the transaction (ISO 8601).",
+  }),
+  bankAccountId: z.string().optional().openapi({
+    description: "Bank account ID associated with the transaction.",
+  }),
 });
 
 export const deleteTransactionSchema = z.object({
