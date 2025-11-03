@@ -17,6 +17,7 @@ import {
   lt,
   lte,
   ne,
+  not,
   or,
   sql,
 } from "drizzle-orm";
@@ -61,6 +62,7 @@ export async function getTransactionsQuery(
     amount_range: filterAmountRange,
     type,
     reports,
+    manual: filterManual,
   } = params;
 
   // Always start with orgId filter
@@ -217,6 +219,13 @@ export async function getTransactionsQuery(
     } else if (operator === "lte") {
       whereConditions.push(lte(transaction_table.amount, Number(value)));
     }
+  }
+
+  // Manual filter
+  if (filterManual === "include") {
+    whereConditions.push(not(eq(transaction_table.source, "api")));
+  } else if (filterManual === "exclude") {
+    whereConditions.push(eq(transaction_table.source, "api"));
   }
 
   const finalWhereConditions = whereConditions.filter((c) => c !== undefined);

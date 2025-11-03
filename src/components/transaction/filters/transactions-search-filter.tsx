@@ -9,6 +9,7 @@ import {
   ChartSplineIcon,
   EuroIcon,
   FilterIcon,
+  ImportIcon,
   LandmarkIcon,
   Repeat1Icon,
   SearchIcon,
@@ -47,6 +48,7 @@ type AttachmentFilter = "include" | "exclude";
 type RecurringFilter = "all" | "weekly" | "monthly" | "annually";
 type StatusFilter = "completed" | "uncompleted" | "archived" | "excluded";
 type ReportsFilter = "included" | "excluded";
+type ManualFilter = "include" | "exclude";
 
 interface BaseFilterItem {
   name: string;
@@ -83,6 +85,7 @@ const defaultSearch = {
   tags: null,
   amount_range: null,
   reports: null,
+  manual: null,
 };
 
 const PLACEHOLDERS = [
@@ -120,6 +123,11 @@ const recurringFilters: FilterItem<RecurringFilter>[] = [
 const reportsFilters: FilterItem<ReportsFilter>[] = [
   { id: "included", name: "Included in reports" },
   { id: "excluded", name: "Excluded from reports" },
+];
+
+const manualFilters: FilterItem<ManualFilter>[] = [
+  { id: "include", name: "Manual" },
+  { id: "exclude", name: "Bank connection" },
 ];
 
 // Reusable components
@@ -338,6 +346,7 @@ export function TransactionsSearchFilter() {
         accounts: filter.accounts ?? undefined,
         statuses: filter.statuses ?? undefined,
         recurring: filter.recurring ?? undefined,
+        manual: filter.manual ?? undefined,
       }).filter(([_, value]) => value !== undefined && value !== null),
     );
   };
@@ -404,6 +413,7 @@ export function TransactionsSearchFilter() {
           attachmentsFilters={attachmentsFilters}
           tags={tags}
           recurringFilters={recurringFilters}
+          manualFilters={manualFilters}
           amountRange={getAmountRange()}
           reportsFilters={reportsFilters}
         />
@@ -528,6 +538,22 @@ export function TransactionsSearchFilter() {
               />
             ))}
           </div>
+        </FilterMenuItem>
+
+        <FilterMenuItem icon={ImportIcon} label="Source">
+          {manualFilters.map(({ id, name }) => (
+            <FilterCheckboxItem
+              key={id}
+              id={id}
+              name={name}
+              checked={filter?.manual === id}
+              onCheckedChange={() => {
+                setFilter({
+                  manual: id,
+                });
+              }}
+            />
+          ))}
         </FilterMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -29,6 +29,7 @@ export const transactionFilterParamsSchema = {
     ] as const),
   ),
   reports: parseAsStringLiteral(["excluded", "included"] as const),
+  manual: parseAsStringLiteral(["exclude", "include"] as const),
 };
 
 export function useTransactionFilterParams() {

@@ -255,6 +255,18 @@ export const getTransactionsSchema = z.object({
       },
     }),
   reports: z.enum(["included", "excluded"]).nullable().optional(),
+  manual: z
+    .enum(["include", "exclude"])
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "Filter transactions based on whether they were manually imported. 'include' returns only manual transactions, 'exclude' returns only non-manual transactions",
+      example: "include",
+      param: {
+        in: "query",
+      },
+    }),
 });
 
 export const generateTransactionFiltersSchema = z.object({
