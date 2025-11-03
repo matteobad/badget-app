@@ -20,8 +20,12 @@
     "noEmit": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "jsx": "preserve",
-    "plugins": [{ "name": "next" }],
+    "jsx": "react-jsx",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "incremental": true,
 
     /* Path Aliases */
@@ -40,6 +44,7 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.js",
+    ".next/dev/types/**/*.ts",
     ".next/types/**/*.ts",
     "trigger.config.ts"
   ],

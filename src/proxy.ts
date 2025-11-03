@@ -11,7 +11,7 @@ const I18nMiddleware = createI18nMiddleware({
   urlMappingStrategy: "rewrite",
 });
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = I18nMiddleware(request);
   const sessionCookie = getSessionCookie(request);
   const nextUrl = request.nextUrl;
