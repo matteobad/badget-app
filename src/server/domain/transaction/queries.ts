@@ -75,7 +75,6 @@ export async function getTransactionsQuery(
   }
   if (end) {
     const endDate = new Date(end);
-    endDate.setDate(endDate.getDate() + 1);
     whereConditions.push(lte(transaction_table.date, endDate.toISOString()));
   }
 
