@@ -24,10 +24,12 @@ import { useStickyColumns } from "~/hooks/use-sticky-columns";
 import { useTableScroll } from "~/hooks/use-table-scroll";
 import { useTransactionFilterParamsWithPersistence } from "~/hooks/use-transaction-filter-params-with-persistence";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
+import { useUpdateTransactionCategory } from "~/hooks/use-update-transaction-category";
 import { useTransactionsStore } from "~/lib/stores/transaction";
 import { cn } from "~/lib/utils";
 import { updateColumnVisibilityAction } from "~/server/actions";
 import { Cookies } from "~/shared/constants/cookies";
+import type { TransactionStatusType } from "~/shared/constants/enum";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
@@ -78,6 +80,15 @@ export function DataTable({
   const { data, fetchNextPage, hasNextPage, refetch } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
 
+  const updateTransactionMutation = useMutation(
+    trpc.transaction.updateTransaction.mutationOptions({
+      onSuccess: () => {
+        refetch();
+        toast.success("Transaction updated");
+      },
+    }),
+  );
+
   const deleteTransactionSplitMutation = useMutation(
     trpc.transaction.deleteSplit.mutationOptions({
       onSuccess: async (_, variables) => {
@@ -99,6 +110,12 @@ export function DataTable({
       },
     }),
   );
+
+  const { updateCategory } = useUpdateTransactionCategory({
+    onSuccess: () => {
+      refetch();
+    },
+  });
 
   useEffect(() => {
     if (inView) {
@@ -167,6 +184,49 @@ export function DataTable({
         } catch {
           toast.error("Failed to copy transaction URL to clipboard");
         }
+      },
+      updateTransaction: (data: {
+        id: string;
+        status?: string;
+        categorySlug?: string | null;
+        categoryName?: string;
+        assignedId?: string | null;
+      }) => {
+        // If updating category, use the hook that checks for similar transactions
+        if (
+          data.categorySlug !== undefined &&
+          data.categorySlug !== null &&
+          data.categoryName
+        ) {
+          const transaction = tableData.find((t) => t.id === data.id);
+          if (transaction) {
+            updateCategory(transaction.id, transaction.name, {
+              name: data.categoryName,
+              slug: data.categorySlug, // TypeScript now knows this is string (not null)
+            });
+          }
+          return;
+        }
+
+        // Handle null category (uncategorizing)
+        if (data.categorySlug === null) {
+          updateTransactionMutation.mutate({
+            id: data.id,
+            categorySlug: "uncategorized",
+          });
+          return;
+        }
+
+        // For other updates (status, assignedId), use the regular mutation
+        updateTransactionMutation.mutate({
+          id: data.id,
+          ...(data.status && {
+            status: data.status as TransactionStatusType,
+          }),
+          ...(data.assignedId !== undefined && {
+            assignedId: data.assignedId,
+          }),
+        });
       },
       splitTransaction: (id: string) => {
         void setParams({ splitTransaction: id });
@@ -300,9 +360,13 @@ export function DataTable({
                                 cell.column.id !== "select" &&
                                 cell.column.id !== "actions"
                               ) {
-                                void setParams({
-                                  transactionId: row.original.id,
-                                });
+                                if (row.original.source !== "api") {
+                                  setParams({
+                                    editTransaction: row.original.id,
+                                  });
+                                } else {
+                                  setParams({ transactionId: row.original.id });
+                                }
                               }
                             }}
                           >

@@ -1,6 +1,5 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   MoreHorizontalIcon,
@@ -10,11 +9,9 @@ import {
   TrashIcon,
 } from "lucide-react";
 import { memo, useCallback } from "react";
-import { toast } from "sonner";
 import { FormatAmount } from "~/components/format-amount";
 import { Spinner } from "~/components/load-more";
-import { CategoryBadge } from "~/components/transaction-category/category-badge";
-import { SelectCategory } from "~/components/transaction-category/select-category";
+import { InlineSelectCategory } from "~/components/transaction-category/inline-select-category";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -35,8 +32,6 @@ import { cn } from "~/lib/utils";
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import { formatDate } from "~/shared/helpers/format";
-import { useTRPC } from "~/shared/helpers/trpc/client";
-import { SimilarTransactionsUpdateToast } from "../similar-transactions-update-toast";
 import { TransactionInfoTooltips } from "../transaction-info-tooltips";
 
 type Transaction = RouterOutput["transaction"]["get"]["data"][number];
@@ -185,132 +180,6 @@ const AmountCell = memo(
 );
 
 AmountCell.displayName = "AmountCell";
-
-const CategoryCell = memo(
-  ({
-    transaction,
-    onSplitTransaction,
-  }: {
-    transaction: Transaction;
-    onSplitTransaction?: (id: string) => void;
-  }) => {
-    const queryClient = useQueryClient();
-    const trpc = useTRPC();
-
-    const updateTransactionCategoryMutation = useMutation(
-      trpc.transaction.updateTransaction.mutationOptions({
-        onSuccess: () => {
-          void queryClient.invalidateQueries({
-            queryKey: trpc.transaction.get.infiniteQueryKey(),
-          });
-        },
-      }),
-    );
-
-    const handleTransactionCategoryUpdate = async (category?: {
-      id: string;
-      slug: string;
-      name: string;
-    }) => {
-      updateTransactionCategoryMutation.mutate({
-        id: transaction.id,
-        categorySlug: category?.slug,
-      });
-
-      const similarTransactions = await queryClient.fetchQuery(
-        trpc.transaction.getSimilarTransactions.queryOptions(
-          {
-            transactionId: transaction.id,
-            name: transaction.name,
-            categorySlug: category?.slug,
-          },
-          { enabled: !!category },
-        ),
-      );
-
-      if (
-        category &&
-        similarTransactions?.length &&
-        similarTransactions.length > 1
-      ) {
-        toast.custom(
-          (t) => (
-            <SimilarTransactionsUpdateToast
-              toastId={t}
-              similarTransactions={similarTransactions}
-              transactionId={transaction.id}
-              category={category}
-            />
-          ),
-          { duration: 6000 },
-        );
-      }
-    };
-
-    const handleSplitTransaction = useCallback(() => {
-      onSplitTransaction?.(transaction.id);
-    }, [transaction.id, onSplitTransaction]);
-
-    if (transaction.splits.length >= 2) {
-      return (
-        <button
-          type="button"
-          className="flex items-center gap-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleSplitTransaction();
-          }}
-        >
-          <CategoryBadge
-            category={{
-              name: `${transaction.splits.length} Categorie`,
-              icon: "shapes",
-              color: "#606060",
-            }}
-          />
-        </button>
-      );
-    }
-
-    // Show analyzing state when enrichment is not completed
-    if (!transaction.category && !transaction.enrichmentCompleted) {
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex cursor-help items-center space-x-2">
-              <Spinner size={14} className="stroke-primary" />
-              <span className="text-sm text-muted-foreground">Analyzing</span>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent
-            className="max-w-[280px] px-3 py-1.5 text-xs"
-            side="top"
-            sideOffset={5}
-          >
-            Analyzing transaction details to determine the best category.
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
-
-    return (
-      <div className="flex items-center gap-2">
-        <SelectCategory
-          align="start"
-          placeholder="Seleziona categoria..."
-          selected={transaction.category?.slug}
-          onChange={async (category) => {
-            await handleTransactionCategoryUpdate(category);
-          }}
-        />
-
-        {updateTransactionCategoryMutation.isPending && <Spinner />}
-      </div>
-    );
-  },
-);
-
-CategoryCell.displayName = "CategoryCell";
 
 const TagsCell = memo(
   ({ tags }: { tags?: { id: string; name: string | null }[] }) => (
@@ -501,15 +370,52 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "category",
     header: "Category",
-    meta: {
-      className: "border-l border-border",
+    cell: ({ row, table }) => {
+      // Show analyzing state when enrichment is not completed
+      if (!row.original.enrichmentCompleted) {
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center space-x-2 cursor-help">
+                <Spinner size={14} className="stroke-primary" />
+                <span className="text-[#878787] text-sm">Analyzing</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent
+              className="px-3 py-1.5 text-xs max-w-[280px]"
+              side="top"
+              sideOffset={5}
+            >
+              Analyzing transaction details to determine the best category.
+            </TooltipContent>
+          </Tooltip>
+        );
+      }
+
+      const meta = table.options.meta;
+
+      return (
+        <InlineSelectCategory
+          selected={
+            row.original.category
+              ? {
+                  id: row.original.category.id,
+                  name: row.original.category.name,
+                  color: row.original.category.color,
+                  slug: row.original.category.slug ?? "",
+                }
+              : undefined
+          }
+          onChange={(category) => {
+            meta?.updateTransaction?.({
+              id: row.original.id,
+              categorySlug: category.slug,
+              categoryName: category.name,
+            });
+          }}
+        />
+      );
     },
-    cell: ({ row, table }) => (
-      <CategoryCell
-        transaction={row.original}
-        onSplitTransaction={table.options.meta?.splitTransaction}
-      />
-    ),
   },
   {
     accessorKey: "tags",

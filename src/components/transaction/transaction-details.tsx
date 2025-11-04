@@ -22,16 +22,15 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
+import { useUpdateTransactionCategory } from "~/hooks/use-update-transaction-category";
 import { cn } from "~/lib/utils";
 import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import { TRANSACTION_FREQUENCY } from "~/shared/constants/enum";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
-
 import { SelectTags } from "../tag/forms/select-tag";
 import { TransactionAttachments } from "../transaction-attachment/transaction-attachment";
 import { SelectCategory } from "../transaction-category/select-category";
-import { SimilarTransactionsUpdateToast } from "./similar-transactions-update-toast";
 import { TransactionBankAccount } from "./transaction-bank-account";
 import { TransactionShortcuts } from "./transaction-shortcuts";
 
@@ -43,6 +42,14 @@ export function TransactionDetails() {
 
   const queryClient = useQueryClient();
   const trpc = useTRPC();
+
+  const { updateCategory } = useUpdateTransactionCategory({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: trpc.transaction.getById.queryKey({ id: transactionId! }),
+      });
+    },
+  });
 
   const { data, isLoading } = useQuery(
     trpc.transaction.getById.queryOptions(
@@ -222,48 +229,6 @@ export function TransactionDetails() {
     }),
   );
 
-  const handleTransactionCategoryUpdate = async (category?: {
-    id: string;
-    slug: string;
-    name: string;
-  }) => {
-    if (!data) return;
-
-    updateTransactionMutation.mutate({
-      id: transactionId,
-      categorySlug: category?.slug,
-    });
-
-    const similarTransactions = await queryClient.fetchQuery(
-      trpc.transaction.getSimilarTransactions.queryOptions(
-        {
-          transactionId: data.id,
-          name: data.name,
-          categorySlug: category?.slug,
-        },
-        { enabled: !!category },
-      ),
-    );
-
-    if (
-      category &&
-      similarTransactions?.length &&
-      similarTransactions.length > 1
-    ) {
-      toast.custom(
-        (t) => (
-          <SimilarTransactionsUpdateToast
-            toastId={t}
-            similarTransactions={similarTransactions}
-            transactionId={data.id}
-            category={category}
-          />
-        ),
-        { duration: 6000 },
-      );
-    }
-  };
-
   const handleTransactionFrequencyUpdate = async (
     frequency?: TransactionFrequencyType,
   ) => {
@@ -412,7 +377,13 @@ export function TransactionDetails() {
                       align="end"
                       selected={data.category?.slug}
                       onChange={async (category) => {
-                        await handleTransactionCategoryUpdate(category);
+                        if (category && data?.id && data?.name) {
+                          await updateCategory(data.id, data.name, {
+                            id: category.id,
+                            name: category.name,
+                            slug: category.slug,
+                          });
+                        }
                       }}
                     />
                   </div>
