@@ -4,6 +4,7 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
@@ -22,9 +23,9 @@ export default function CreateTransactionSheet() {
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="p-4">
+      <SheetContent>
         <div className="flex h-full flex-col">
-          <SheetHeader className="mb-6 p-[3px]">
+          <SheetHeader className="mb-8 p-[3px]">
             <SheetTitle>Crea transazione</SheetTitle>
           </SheetHeader>
 

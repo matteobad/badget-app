@@ -50,7 +50,7 @@ export function TransactionEditSheet() {
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetContent>
-        <SheetHeader className="mb-8">
+        <SheetHeader className="mb-8 p-1">
           <SheetTitle>Edit Transaction</SheetTitle>
         </SheetHeader>
 

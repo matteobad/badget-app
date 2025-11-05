@@ -9,6 +9,7 @@ import { SelectAccount } from "~/components/bank-account/forms/select-account";
 import { CurrencyInput } from "~/components/custom/currency-input";
 import { SelectCurrency } from "~/components/select-currency";
 import { TransactionAttachments } from "~/components/transaction-attachment/transaction-attachment";
+import { CategoryLabel } from "~/components/transaction-category/category-badge";
 import { SelectCategory } from "~/components/transaction-category/select-category";
 import {
   Accordion,
@@ -17,7 +18,13 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
+import { ButtonGroup } from "~/components/ui/button-group";
 import { Calendar } from "~/components/ui/calendar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
@@ -33,6 +40,7 @@ import { cn } from "~/lib/utils";
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 import { uniqueCurrencies } from "~/shared/constants/currencies";
 import { useTRPC } from "~/shared/helpers/trpc/client";
+import { useScopedI18n } from "~/shared/locales/client";
 
 type Transaction = RouterOutput["transaction"]["getById"];
 
@@ -42,11 +50,24 @@ type Props = {
 
 export function TransactionEditForm({ transaction }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  // Local state only for debounced inputs
+  const [name, setName] = useState(transaction.name);
+  // Store amount with correct sign (negative for expense, positive for income)
+  const [amount, setAmount] = useState(Math.abs(transaction.amount));
+  const [note, setNote] = useState(transaction.note ?? "");
+
+  // Debounce text inputs
+  const [debouncedName] = useDebounceValue(name, 500);
+  const [debouncedAmount] = useDebounceValue(amount, 500);
+  const [debouncedNote] = useDebounceValue(note, 500);
+
+  const t = useScopedI18n("transactions");
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   const { data: user } = useUserQuery();
+
   const { data: accounts } = useQuery(
     trpc.bankAccount.get.queryOptions({
       enabled: true,
@@ -176,28 +197,8 @@ export function TransactionEditForm({ transaction }: Props) {
   // Determine type: use amount sign as primary indicator
   // Negative amounts = expense, positive amounts = income
   let transactionType: "income" | "expense";
-
-  // Primary check: use amount sign
-  if (transactionAmount > 0) {
-    transactionType = "income";
-  } else if (transactionAmount < 0) {
-    transactionType = "expense";
-  } else {
-    // Amount is 0, check category as fallback
-    transactionType =
-      transaction.category?.slug === "income" ? "income" : "expense";
-  }
-
-  // Local state only for debounced inputs
-  const [name, setName] = useState(transaction.name);
-  // Store amount with correct sign (negative for expense, positive for income)
-  const [amount, setAmount] = useState(Math.abs(transaction.amount));
-  const [note, setNote] = useState(transaction.note ?? "");
-
-  // Debounce text inputs
-  const [debouncedName] = useDebounceValue(name, 500);
-  const [debouncedAmount] = useDebounceValue(amount, 500);
-  const [debouncedNote] = useDebounceValue(note, 500);
+  if (transactionAmount > 0) transactionType = "income";
+  else transactionType = "expense";
 
   // Sync local state with transaction prop when it changes
   useEffect(() => {
@@ -250,9 +251,10 @@ export function TransactionEditForm({ transaction }: Props) {
     if (transaction.category) {
       return {
         id: transaction.category.id,
+        slug: transaction.category.slug,
         name: transaction.category.name,
         color: transaction.category.color ?? "",
-        slug: transaction.category.slug ?? "",
+        icon: transaction.category.icon ?? "",
       };
     }
 
@@ -260,17 +262,17 @@ export function TransactionEditForm({ transaction }: Props) {
   }, [transaction.category]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-1">
       <div>
         <Label htmlFor="transactionType" className="mb-2 block">
-          Transaction Type
+          {t("transaction_type_lbl")}
         </Label>
-        <div className="flex w-full border border-border bg-muted">
+        <div className="flex w-full border border-border bg-muted shadow-xs">
           <Button
             type="button"
             variant="ghost"
             className={cn(
-              "h-6 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
+              "h-8 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
               transactionType === "expense"
                 ? "bg-transparent"
                 : "bg-background font-medium",
@@ -293,13 +295,13 @@ export function TransactionEditForm({ transaction }: Props) {
               });
             }}
           >
-            Expense
+            {t("transaction_type_val.expense")}
           </Button>
           <Button
             type="button"
             variant="ghost"
             className={cn(
-              "h-6 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
+              "h-8 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
               transactionType === "income"
                 ? "bg-transparent"
                 : "bg-background font-medium",
@@ -315,17 +317,17 @@ export function TransactionEditForm({ transaction }: Props) {
               });
             }}
           >
-            Income
+            {t("transaction_type_val.income")}
           </Button>
         </div>
         <p className="text-[0.8rem] text-muted-foreground mt-2">
-          Select whether this is money coming in (income) or going out (expense)
+          {t("transaction_type_msg")}
         </p>
       </div>
 
       <div>
         <Label htmlFor="name" className="mb-2 block">
-          Description
+          {t("description_lbl")}
         </Label>
         <Input
           id="name"
@@ -336,102 +338,78 @@ export function TransactionEditForm({ transaction }: Props) {
           autoCapitalize="none"
           autoCorrect="off"
           spellCheck="false"
+          className="bg-background"
         />
         <p className="text-[0.8rem] text-muted-foreground mt-2">
-          A brief description of what this transaction is for
+          {t("description_msg")}
         </p>
       </div>
 
       <div className="flex space-x-4">
         <div className="w-full">
           <Label htmlFor="amount" className="mb-2 block">
-            Amount
+            {t("amount_lbl")}
           </Label>
-          <CurrencyInput
-            value={amount}
-            placeholder="0.00"
-            allowNegative={false}
-            onValueChange={(values) => {
-              if (values.floatValue !== undefined) {
-                const positiveValue = Math.abs(values.floatValue);
-                setAmount(positiveValue);
+          <ButtonGroup className="[&_button]:max-w-24">
+            <SelectCurrency
+              currencies={uniqueCurrencies}
+              onChange={(value) => {
+                updateTransactionMutation.mutate({
+                  id: transaction.id,
+                  currency: value,
+                });
+              }}
+              value={transaction.currency}
+            />
+            <CurrencyInput
+              value={amount}
+              placeholder="0.00"
+              allowNegative={false}
+              onValueChange={(values) => {
+                if (values.floatValue !== undefined) {
+                  const positiveValue = Math.abs(values.floatValue);
+                  setAmount(positiveValue);
 
-                // Update amount with correct sign based on transaction type
-                const finalAmount =
-                  transactionType === "expense"
-                    ? -positiveValue
-                    : positiveValue;
+                  // Update amount with correct sign based on transaction type
+                  const finalAmount =
+                    transactionType === "expense"
+                      ? -positiveValue
+                      : positiveValue;
 
-                // Ensure we're comparing numbers
-                const currentAmount = Number(transaction.amount);
-                if (finalAmount !== currentAmount) {
-                  updateTransactionMutation.mutate({
-                    id: transaction.id,
-                    amount: finalAmount,
-                  });
+                  // Ensure we're comparing numbers
+                  const currentAmount = Number(transaction.amount);
+                  if (finalAmount !== currentAmount) {
+                    updateTransactionMutation.mutate({
+                      id: transaction.id,
+                      amount: finalAmount,
+                    });
+                  }
                 }
-              }
-            }}
-          />
+              }}
+            />
+          </ButtonGroup>
           <p className="text-[0.8rem] text-muted-foreground mt-2">
-            Enter the transaction amount
-          </p>
-        </div>
-
-        <div className="w-full">
-          <Label htmlFor="currency" className="mb-2 block">
-            Currency
-          </Label>
-          <SelectCurrency
-            className="w-full"
-            currencies={uniqueCurrencies}
-            onChange={(value) => {
-              updateTransactionMutation.mutate({
-                id: transaction.id,
-                currency: value,
-              });
-            }}
-            value={transaction.currency}
-          />
-          <p className="text-[0.8rem] text-muted-foreground mt-2">
-            The currency for this transaction
-          </p>
-        </div>
-      </div>
-
-      <div className="flex space-x-4">
-        <div className="w-full">
-          <Label htmlFor="account" className="mb-2 block">
-            Account
-          </Label>
-          <SelectAccount
-            onChange={(value) => {
-              updateTransactionMutation.mutate({
-                id: transaction.id,
-                bankAccountId: value.id,
-              });
-            }}
-            selected={transaction.account?.id ?? accounts?.at(0)?.id ?? ""}
-          />
-          <p className="text-[0.8rem] text-muted-foreground mt-2">
-            The account this transaction belongs to
+            {t("amount_msg")}
           </p>
         </div>
 
         <div className="w-full">
           <Label htmlFor="date" className="mb-2 block">
-            Date
+            {t("date_lbl")}
           </Label>
           <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
               <Button
                 type="button"
                 variant="outline"
-                className="w-full justify-start"
+                className="w-full pl-3 justify-start font-normal"
                 onClick={() => setIsOpen(true)}
               >
                 {transaction.date ? (
-                  format(utc(transaction.date), user?.dateFormat ?? "PPP")
+                  format(
+                    utc(transaction.date),
+                    user?.dateFormat ?? "dd MMMM yyyy",
+                  )
                 ) : (
                   <span>Select date</span>
                 )}
@@ -455,50 +433,104 @@ export function TransactionEditForm({ transaction }: Props) {
                     });
                   }
                 }}
-                initialFocus
-                toDate={new Date()}
+                disabled={(date) => date < new Date("1900-01-01")}
+                captionLayout="dropdown"
+                required // allow selecting same date
               />
             </PopoverContent>
           </Popover>
           <p className="text-[0.8rem] text-muted-foreground mt-2">
-            When this transaction occurred
+            {t("date_msg")}
           </p>
         </div>
       </div>
 
       <div className="flex space-x-4">
         <div className="w-full">
-          <Label htmlFor="category" className="mb-2 block">
-            Category
+          <Label htmlFor="account" className="mb-2 block">
+            {t("account_lbl")}
           </Label>
-          <SelectCategory
-            onChange={async (value) => {
-              if (value && transaction.name) {
-                await updateCategory(transaction.id, transaction.name, {
-                  id: value.id,
-                  name: value.name,
-                  slug: value.slug,
-                });
-              } else if (!value && transaction.name) {
-                await updateCategory(transaction.id, transaction.name, {
-                  id: "",
-                  name: "",
-                  slug: "",
-                });
-              }
+          <SelectAccount
+            onChange={(value) => {
+              updateTransactionMutation.mutate({
+                id: transaction.id,
+                bankAccountId: value.id,
+              });
             }}
-            hideLoading
-            selected={selectedCategory?.slug}
+            selected={transaction.account?.id ?? accounts?.at(0)?.id ?? ""}
           />
           <p className="text-[0.8rem] text-muted-foreground mt-2">
-            Help organize and track your transactions
+            {t("account_msg")}
+          </p>
+        </div>
+
+        <div className="w-full">
+          <Label htmlFor="category" className="mb-2 block">
+            {t("category_lbl")}
+          </Label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full pl-3 text-left font-normal",
+                  !transaction.category && "text-muted-foreground",
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                {transaction.category ? (
+                  <CategoryLabel
+                    category={{
+                      name: selectedCategory?.name ?? "uncategorized",
+                      color: selectedCategory?.color ?? null,
+                      icon: selectedCategory?.icon ?? null,
+                    }}
+                  />
+                ) : (
+                  <span>Select a category</span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="max-h-[210px] w-(--radix-dropdown-menu-trigger-width) overflow-y-auto p-0"
+              sideOffset={8}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <SelectCategory
+                headless
+                onChange={async (value) => {
+                  if (value && transaction.name) {
+                    await updateCategory(transaction.id, transaction.name, {
+                      id: value.id,
+                      name: value.name,
+                      slug: value.slug,
+                    });
+                  } else if (!value && transaction.name) {
+                    await updateCategory(transaction.id, transaction.name, {
+                      id: "",
+                      name: "",
+                      slug: "",
+                    });
+                  }
+                }}
+                hideLoading
+                selected={selectedCategory?.slug}
+              />
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <p className="text-[0.8rem] text-muted-foreground mt-2">
+            {t("category_msg")}
           </p>
         </div>
       </div>
 
-      <Accordion type="multiple" defaultValue={["attachment"]}>
-        <AccordionItem value="attachment">
-          <AccordionTrigger>Attachment</AccordionTrigger>
+      <Accordion type="multiple" defaultValue={["attachments"]}>
+        <AccordionItem value="attachments">
+          <AccordionTrigger>Allegati</AccordionTrigger>
           <AccordionContent>
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">
@@ -513,30 +545,28 @@ export function TransactionEditForm({ transaction }: Props) {
           </AccordionContent>
         </AccordionItem>
 
-        <div className="mt-6 mb-4">
-          <Label htmlFor="settings" className="mb-2 block font-medium text-md">
-            Exclude from analytics
-          </Label>
-          <div className="flex flex-row items-center justify-between">
-            <div className="space-y-0.5 pr-4">
-              <p className="text-xs text-muted-foreground">
-                Exclude this transaction from analytics like profit, expense and
-                revenue. This is useful for internal transfers between accounts
-                to avoid double-counting.
-              </p>
-            </div>
+        <AccordionItem value="internal">
+          <AccordionTrigger>{t("exclude_lbl")}</AccordionTrigger>
+          <AccordionContent className="px-1">
+            <div className="flex flex-row items-center justify-between">
+              <div className="space-y-0.5 pr-4">
+                <p className="text-xs text-muted-foreground">
+                  {t("exclude_msg")}
+                </p>
+              </div>
 
-            <Switch
-              checked={transaction.internal ?? false}
-              onCheckedChange={(checked) => {
-                updateTransactionMutation.mutate({
-                  id: transaction.id,
-                  internal: checked,
-                });
-              }}
-            />
-          </div>
-        </div>
+              <Switch
+                checked={transaction.internal ?? false}
+                onCheckedChange={(checked) => {
+                  updateTransactionMutation.mutate({
+                    id: transaction.id,
+                    internal: checked,
+                  });
+                }}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
 
         <AccordionItem value="note">
           <AccordionTrigger>Note</AccordionTrigger>
@@ -547,7 +577,7 @@ export function TransactionEditForm({ transaction }: Props) {
               </p>
               <Textarea
                 placeholder="Note"
-                className="min-h-[100px] resize-none"
+                className="min-h-[100px] resize-none bg-background"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
               />

@@ -1,5 +1,6 @@
 "use client";
 
+import { utc } from "@date-fns/utc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatISO } from "date-fns";
@@ -53,6 +54,7 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
+import { useUserQuery } from "~/hooks/use-user";
 import { cn } from "~/lib/utils";
 import { uniqueCurrencies } from "~/shared/constants/currencies";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -72,6 +74,7 @@ export default function CreateTransactionForm() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
+  const { data: user } = useUserQuery();
   const { data: space } = useSpaceQuery();
 
   const { data: accounts } = useQuery(
@@ -318,9 +321,12 @@ export default function CreateTransactionForm() {
                       )}
                     >
                       {field.value ? (
-                        format(field.value, "dd MMMM yyyy")
+                        format(
+                          utc(field.value),
+                          user?.dateFormat ?? "dd MMMM yyyy",
+                        )
                       ) : (
-                        <span>Pick a date</span>
+                        <span>Select date</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -388,6 +394,9 @@ export default function CreateTransactionForm() {
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground",
                       )}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
                     >
                       {field.value ? (
                         <CategoryLabel
@@ -405,15 +414,15 @@ export default function CreateTransactionForm() {
                   <DropdownMenuContent
                     className="max-h-[210px] w-(--radix-dropdown-menu-trigger-width) overflow-y-auto p-0"
                     sideOffset={8}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
                   >
                     <SelectCategory
                       headless
-                      hideLoading
-                      align="start"
                       selected={field.value}
                       onChange={(selected) => {
                         setSelectedCategory(selected);
-                        console.log(selected);
                         field.onChange(selected.slug);
                       }}
                     />
