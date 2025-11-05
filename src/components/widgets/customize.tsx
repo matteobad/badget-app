@@ -23,7 +23,7 @@ export function Customize() {
   return (
     <Button
       variant="outline"
-      className="space-x-2"
+      className="hidden md:flex space-x-2"
       onClick={() => setIsCustomizing(!isCustomizing)}
       type="button"
     >

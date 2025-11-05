@@ -7,7 +7,7 @@ import { BaseWidget } from "./base";
 
 export function Insights() {
   return (
-    <div className="relative">
+    <div className="relative h-[200px]">
       {Array.from({ length: 5 }).map((_, i) => (
         <BaseWidget
           key={i}

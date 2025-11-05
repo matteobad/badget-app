@@ -120,7 +120,7 @@ export function ChatInput() {
   return (
     <div
       className={cn(
-        "fixed bottom-6 left-[70px] z-20 px-6 transition-all duration-300 ease-in-out",
+        "fixed bottom-6 left-0 md:left-[70px] z-20 px-6 transition-all duration-300 ease-in-out",
         isCanvasVisible ? "right-[603px]" : "right-0",
       )}
     >

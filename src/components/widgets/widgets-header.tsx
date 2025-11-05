@@ -59,23 +59,23 @@ export function WidgetsHeader() {
   }, [user?.timezone, getTimeBasedGreeting]);
 
   return (
-    <div className="mb-8 flex items-start justify-between">
-      <div>
-        <h1 className="mb-1 font-serif text-[30px] leading-normal">
+    <div className="mb-8 flex flex-col items-start justify-between gap-1">
+      <div className="flex justify-between items-center w-full">
+        <h1 className="font-serif text-[30px] leading-normal">
           <span>{greeting} </span>
           <span className="text-muted-foreground">
             {user?.name?.split(" ")[0]},
           </span>
         </h1>
-        <p className="text-[14px] text-muted-foreground">
-          {isCustomizing ? t("message_customize") : t("message_default")}
-        </p>
+        <div className="flex items-center space-x-4" data-no-close>
+          <Customize />
+          <ChatHistory />
+        </div>
       </div>
 
-      <div className="flex items-center space-x-4" data-no-close>
-        <Customize />
-        <ChatHistory />
-      </div>
+      <p className="text-[14px] text-muted-foreground">
+        {isCustomizing ? t("message_customize") : t("message_default")}
+      </p>
     </div>
   );
 }
