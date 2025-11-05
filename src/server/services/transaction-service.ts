@@ -263,11 +263,6 @@ export async function updateTransaction(
     throw new Error("Transaction not found");
   }
 
-  // Validate transaction can be updated
-  if (existing.source === "api") {
-    throw new Error("Transaction not manual");
-  }
-
   // Update fingerprint -> amount || date || name - change
   console.debug("[transaction-service] computing transaction fingerprint");
   const fingerprint = calculateFingerprint({
