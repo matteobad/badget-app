@@ -1,11 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import {
-  parseAsArrayOf,
-  parseAsBoolean,
-  parseAsInteger,
-  parseAsString,
-} from "nuqs/server";
+import { parseAsArrayOf, parseAsInteger, parseAsString } from "nuqs/server";
 import { getSortingStateParser } from "~/lib/validators";
 import type {
   DB_TransactionInsertType,
@@ -341,16 +336,4 @@ export const transactionFilterParamsSchema = {
   categoryId: parseAsArrayOf(parseAsString).withDefault([]),
   tags: parseAsArrayOf(parseAsString).withDefault([]),
   accountId: parseAsArrayOf(parseAsString).withDefault([]),
-};
-
-// Search params for sheets
-export const transactionParamsSchema = {
-  transactionId: parseAsString,
-  splitTransaction: parseAsString,
-  createTransaction: parseAsBoolean,
-  importTransaction: parseAsBoolean,
-  step: parseAsString,
-  accountId: parseAsString,
-  type: parseAsString,
-  hide: parseAsBoolean.withDefault(false),
 };

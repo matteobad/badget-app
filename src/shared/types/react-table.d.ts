@@ -11,9 +11,17 @@ declare module "@tanstack/react-table" {
     hasSorting?: boolean;
     setOpen?: (id: string) => void;
     copyUrl?: (id: string) => void;
+    updateTransaction?: (data: {
+      id: string;
+      status?: string;
+      categorySlug?: string | null;
+      categoryName?: string;
+      assignedId?: string | null;
+    }) => void;
     splitTransaction?: (id: string) => void;
     deleteTransactionSplit?: (id: string) => void;
     deleteTransaction?: (id: string) => void;
+    editTransaction?: (id: string) => void;
 
     // Categories table meta
     createSubCategory?: (id: string) => void;

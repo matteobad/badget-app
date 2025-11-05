@@ -1,5 +1,6 @@
 "use client";
 
+import { utc } from "@date-fns/utc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatISO } from "date-fns";
@@ -50,8 +51,10 @@ import {
   SelectTrigger,
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
+import { Textarea } from "~/components/ui/textarea";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
+import { useUserQuery } from "~/hooks/use-user";
 import { cn } from "~/lib/utils";
 import { uniqueCurrencies } from "~/shared/constants/currencies";
 import { useTRPC } from "~/shared/helpers/trpc/client";
@@ -71,6 +74,7 @@ export default function CreateTransactionForm() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
+  const { data: user } = useUserQuery();
   const { data: space } = useSpaceQuery();
 
   const { data: accounts } = useQuery(
@@ -95,24 +99,24 @@ export default function CreateTransactionForm() {
       onError: (error) => {
         toast.error(error.message);
       },
-      onSuccess: (_data) => {
+      onSuccess: () => {
         toast.success("Transazione creata");
 
-        void queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: trpc.transaction.get.infiniteQueryKey(),
         });
 
-        void queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: trpc.transaction.getAmountRange.queryKey(),
         });
 
         // Invalidate global search
-        void queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: trpc.search.global.queryKey(),
         });
 
         form.reset();
-        void setParams({ createTransaction: null });
+        setParams({ createTransaction: null });
       },
     }),
   );
@@ -162,12 +166,12 @@ export default function CreateTransactionForm() {
               <FieldLabel htmlFor={field.name}>
                 {t("transaction_type_lbl")}
               </FieldLabel>
-              <div className="flex w-full border border-border bg-muted">
+              <div className="flex w-full border border-border bg-muted shadow-xs">
                 <Button
                   type="button"
                   variant="ghost"
                   className={cn(
-                    "h-6 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
+                    "h-8 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
                     field.value === "expense"
                       ? "bg-transparent"
                       : "bg-background font-medium",
@@ -193,7 +197,7 @@ export default function CreateTransactionForm() {
                   type="button"
                   variant="ghost"
                   className={cn(
-                    "h-6 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
+                    "h-8 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
                     field.value === "income"
                       ? "bg-transparent"
                       : "bg-background font-medium",
@@ -317,9 +321,12 @@ export default function CreateTransactionForm() {
                       )}
                     >
                       {field.value ? (
-                        format(field.value, "dd MMMM yyyy")
+                        format(
+                          utc(field.value),
+                          user?.dateFormat ?? "dd MMMM yyyy",
+                        )
                       ) : (
-                        <span>Pick a date</span>
+                        <span>Select date</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -387,6 +394,9 @@ export default function CreateTransactionForm() {
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground",
                       )}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
                     >
                       {field.value ? (
                         <CategoryLabel
@@ -404,15 +414,15 @@ export default function CreateTransactionForm() {
                   <DropdownMenuContent
                     className="max-h-[210px] w-(--radix-dropdown-menu-trigger-width) overflow-y-auto p-0"
                     sideOffset={8}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
                   >
                     <SelectCategory
                       headless
-                      hideLoading
-                      align="start"
                       selected={field.value}
                       onChange={(selected) => {
                         setSelectedCategory(selected);
-                        console.log(selected);
                         field.onChange(selected.slug);
                       }}
                     />
@@ -497,10 +507,10 @@ export default function CreateTransactionForm() {
                   <FieldLabel htmlFor={field.name} className="sr-only">
                     Note
                   </FieldLabel>
-                  <Input
+                  <Textarea
                     {...field}
                     placeholder="Note"
-                    className="min-h-[100px] resize-none"
+                    className="min-h-[100px] resize-none bg-background"
                     aria-invalid={fieldState.invalid}
                   />
                   <FieldDescription>

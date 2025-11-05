@@ -7,6 +7,7 @@ import { SelectBankAccountsModal } from "./bank-connection/select-bank-accounts"
 import { SearchModal } from "./search/search-modal";
 import { ImportTransactionsModal } from "./transaction/import-csv/import-transactions-modal";
 import CreateTransactionSheet from "./transaction/sheets/create-transaction-sheet";
+import { TransactionEditSheet } from "./transaction/sheets/transaction-edit-sheet";
 import TransactionSheet from "./transaction/sheets/transaction-sheet";
 
 export function GlobalSheets() {
@@ -20,6 +21,7 @@ export function GlobalSheets() {
 
       <CreateTransactionSheet />
       <ImportTransactionsModal />
+      <TransactionEditSheet />
       <TransactionSheet />
 
       <SearchModal />

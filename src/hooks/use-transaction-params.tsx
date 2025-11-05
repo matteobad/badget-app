@@ -1,8 +1,18 @@
 import { useQueryStates } from "nuqs";
-import { transactionParamsSchema } from "~/shared/validators/transaction.schema";
+import { parseAsBoolean, parseAsString } from "nuqs/server";
 
 export function useTransactionParams() {
-  const [params, setParams] = useQueryStates(transactionParamsSchema);
+  const [params, setParams] = useQueryStates({
+    transactionId: parseAsString,
+    splitTransaction: parseAsString,
+    createTransaction: parseAsBoolean,
+    editTransaction: parseAsString,
+    importTransaction: parseAsBoolean,
+    step: parseAsString,
+    accountId: parseAsString,
+    type: parseAsString,
+    hide: parseAsBoolean.withDefault(false),
+  });
 
   return {
     params,

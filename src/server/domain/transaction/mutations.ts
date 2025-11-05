@@ -36,9 +36,14 @@ type UpdateTransactionData = {
   status?: TransactionStatusType;
   internal?: boolean;
   note?: string | null;
-  assignedId?: string | null;
   recurring?: boolean;
   frequency?: TransactionFrequencyType | null;
+  name?: string;
+  amount?: number;
+  currency?: string;
+  date?: string;
+  bankAccountId?: string;
+  fingerprint?: string;
 };
 
 export async function updateTransactionMutation(
