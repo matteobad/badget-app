@@ -247,6 +247,10 @@ export async function updateTransaction(
   input: z.infer<typeof updateTransactionSchema>,
   organizationId: string,
 ) {
+  // TODO: update fingerprint -> amount || date || name - change
+  // TODO: recalculate snpshots -> date || amount - change
+  // TODO: update balance -> amount - change
+  // TODO: update embedding -> name - change
   return await updateTransactionMutation(client, { ...input, organizationId });
 }
 
