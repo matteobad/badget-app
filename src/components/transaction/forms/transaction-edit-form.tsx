@@ -432,7 +432,9 @@ export function TransactionEditForm({ transaction }: Props) {
                     });
                   }
                 }}
-                disabled={(date) => date < new Date("1900-01-01")}
+                disabled={(date) =>
+                  date < new Date("1900-01-01") || date > new Date()
+                }
                 captionLayout="dropdown"
                 required // allow selecting same date
               />

@@ -1,4 +1,5 @@
 import { tasks } from "@trigger.dev/sdk";
+import { min } from "date-fns";
 // import { updateOrCreateRule } from "~/utils/categorization";
 import { eq } from "drizzle-orm";
 import type z from "zod/v4";
@@ -13,7 +14,6 @@ import type {
   updateTransactionSchema,
   updateTransactionsSchema,
 } from "~/shared/validators/transaction.schema";
-
 import type { DBClient } from "../db";
 import { db } from "../db";
 import { account_table } from "../db/schema/accounts";
@@ -243,15 +243,91 @@ export async function createTransfer(
  * Update a transaction
  */
 export async function updateTransaction(
-  client: DBClient,
+  db: DBClient,
   input: z.infer<typeof updateTransactionSchema>,
   organizationId: string,
 ) {
-  // TODO: update fingerprint -> amount || date || name - change
-  // TODO: recalculate snpshots -> date || amount - change
-  // TODO: update balance -> amount - change
-  // TODO: update embedding -> name - change
-  return await updateTransactionMutation(client, { ...input, organizationId });
+  // Get existing transaction
+  const [existing] = await db
+    .select()
+    .from(transaction_table)
+    .where(eq(transaction_table.id, input.id))
+    .limit(1);
+
+  if (!existing) {
+    throw new Error(`Transaction ${input.id} not found`);
+  }
+
+  // Validate organization ownership
+  if (existing.organizationId !== organizationId) {
+    throw new Error("Transaction not found");
+  }
+
+  // Validate transaction can be updated
+  if (existing.source === "api") {
+    throw new Error("Transaction not manual");
+  }
+
+  // Update fingerprint -> amount || date || name - change
+  console.debug("[transaction-service] computing transaction fingerprint");
+  const fingerprint = calculateFingerprint({
+    accountId: input.bankAccountId ?? existing.accountId,
+    amount: input.amount ?? existing.amount,
+    date: new Date(input.date ?? existing.date),
+    descriptionNormalized: normalizeDescription(input.name ?? existing.name),
+  });
+
+  return await db.transaction(async (tx) => {
+    console.debug("[transaction-service] updating transaction");
+    const updated = await updateTransactionMutation(db, {
+      ...input,
+      fingerprint,
+      organizationId,
+    });
+
+    if (input.date || (input.amount && input.amount !== existing.amount)) {
+      // Recalculate snpshots -> date || amount - change
+      const affectedDate = min([
+        input.date ? new Date(input.date) : new Date(),
+        new Date(existing.date),
+      ]);
+
+      // Check if offset adjustment is needed
+      console.debug("[transaction-service] adjusting balance offset");
+      await adjustBalanceOffsets(
+        tx,
+        {
+          accountId: input.bankAccountId ?? existing.accountId,
+          fromDate: affectedDate,
+        },
+        organizationId,
+      );
+
+      console.debug("[transaction-service] recalculating snapshots");
+      await recalculateSnapshots(
+        tx,
+        {
+          accountId: input.bankAccountId ?? existing.accountId,
+          fromDate: affectedDate,
+        },
+        organizationId,
+      );
+    }
+
+    if (input.amount && input.amount !== existing.amount) {
+      // Update balance -> amount - change
+      console.debug("[transaction-service] updating account balance");
+      await updateAccountBalance(
+        tx,
+        { accountId: input.bankAccountId ?? existing.accountId },
+        organizationId,
+      );
+    }
+
+    // TODO: update embedding -> name - change
+
+    return updated;
+  });
 }
 
 /**

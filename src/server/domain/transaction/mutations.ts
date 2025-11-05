@@ -43,6 +43,7 @@ type UpdateTransactionData = {
   currency?: string;
   date?: string;
   bankAccountId?: string;
+  fingerprint?: string;
 };
 
 export async function updateTransactionMutation(
