@@ -400,9 +400,10 @@ export const columns: ColumnDef<Transaction>[] = [
             row.original.category
               ? {
                   id: row.original.category.id,
+                  slug: row.original.category.slug,
                   name: row.original.category.name,
                   color: row.original.category.color,
-                  slug: row.original.category.slug ?? "",
+                  icon: row.original.category.icon,
                 }
               : undefined
           }

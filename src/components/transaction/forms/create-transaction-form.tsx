@@ -50,6 +50,7 @@ import {
   SelectTrigger,
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
+import { Textarea } from "~/components/ui/textarea";
 import { useSpaceQuery } from "~/hooks/use-space";
 import { useTransactionParams } from "~/hooks/use-transaction-params";
 import { cn } from "~/lib/utils";
@@ -95,24 +96,24 @@ export default function CreateTransactionForm() {
       onError: (error) => {
         toast.error(error.message);
       },
-      onSuccess: (_data) => {
+      onSuccess: () => {
         toast.success("Transazione creata");
 
-        void queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: trpc.transaction.get.infiniteQueryKey(),
         });
 
-        void queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: trpc.transaction.getAmountRange.queryKey(),
         });
 
         // Invalidate global search
-        void queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: trpc.search.global.queryKey(),
         });
 
         form.reset();
-        void setParams({ createTransaction: null });
+        setParams({ createTransaction: null });
       },
     }),
   );
@@ -162,12 +163,12 @@ export default function CreateTransactionForm() {
               <FieldLabel htmlFor={field.name}>
                 {t("transaction_type_lbl")}
               </FieldLabel>
-              <div className="flex w-full border border-border bg-muted">
+              <div className="flex w-full border border-border bg-muted shadow-xs">
                 <Button
                   type="button"
                   variant="ghost"
                   className={cn(
-                    "h-6 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
+                    "h-8 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
                     field.value === "expense"
                       ? "bg-transparent"
                       : "bg-background font-medium",
@@ -193,7 +194,7 @@ export default function CreateTransactionForm() {
                   type="button"
                   variant="ghost"
                   className={cn(
-                    "h-6 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
+                    "h-8 px-2 flex-1 rounded-none text-xs border-r border-border last:border-r-0",
                     field.value === "income"
                       ? "bg-transparent"
                       : "bg-background font-medium",
@@ -497,10 +498,10 @@ export default function CreateTransactionForm() {
                   <FieldLabel htmlFor={field.name} className="sr-only">
                     Note
                   </FieldLabel>
-                  <Input
+                  <Textarea
                     {...field}
                     placeholder="Note"
-                    className="min-h-[100px] resize-none"
+                    className="min-h-[100px] resize-none bg-background"
                     aria-invalid={fieldState.invalid}
                   />
                   <FieldDescription>

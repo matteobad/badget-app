@@ -142,7 +142,7 @@ export async function createManualTransaction(
 
     // Trigger embedding for the newly created manual transaction
     if (transaction?.id) {
-      void tasks.trigger<typeof embedTransactionsTask>("embed-transactions", {
+      tasks.trigger<typeof embedTransactionsTask>("embed-transactions", {
         transactionIds: [transaction.id],
         organizationId,
       });

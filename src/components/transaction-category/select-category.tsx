@@ -169,7 +169,7 @@ export function SelectCategory({
         value={inputValue}
         onValueChange={setInputValue}
         placeholder={"Search category..."}
-        className="px-1"
+        className="px-3"
       />
 
       <CommandGroup>
