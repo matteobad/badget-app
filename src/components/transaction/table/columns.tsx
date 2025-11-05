@@ -12,8 +12,8 @@ import { memo, useCallback } from "react";
 import { FormatAmount } from "~/components/format-amount";
 import { Spinner } from "~/components/load-more";
 import { InlineSelectCategory } from "~/components/transaction-category/inline-select-category";
+import { InlineSelectTags } from "~/components/transaction-category/inline-select-tags";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
@@ -180,27 +180,6 @@ const AmountCell = memo(
 );
 
 AmountCell.displayName = "AmountCell";
-
-const TagsCell = memo(
-  ({ tags }: { tags?: { id: string; name: string | null }[] }) => (
-    <div className="relative w-full">
-      <div className="scrollbar-hide flex items-center space-x-2 overflow-x-auto">
-        {tags?.map(({ id, name }) => (
-          <Badge
-            key={id}
-            variant="tag-rounded"
-            className="flex-shrink-0 whitespace-nowrap"
-          >
-            {name}
-          </Badge>
-        ))}
-      </div>
-      <div className="pointer-events-none top-0 right-0 bottom-0 z-10 w-8 bg-gradient-to-l from-background to-transparent group-hover:hidden" />
-    </div>
-  ),
-);
-
-TagsCell.displayName = "TagsCell";
 
 const AccountCell = memo(
   ({
@@ -422,9 +401,14 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "tags",
     header: "Tags",
     meta: {
-      className: "w-[280px] max-w-[280px]",
+      className: "w-[280px] min-w-[280px] max-w-[280px]",
     },
-    cell: ({ row }) => <TagsCell tags={row.original.tags} />,
+    cell: ({ row }) => (
+      <InlineSelectTags
+        transactionId={row.original.id}
+        tags={row.original.tags}
+      />
+    ),
   },
   {
     accessorKey: "bank_account",
