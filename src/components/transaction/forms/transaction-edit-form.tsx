@@ -369,21 +369,20 @@ export function TransactionEditForm({ transaction }: Props) {
                 if (values.floatValue !== undefined) {
                   const positiveValue = Math.abs(values.floatValue);
                   setAmount(positiveValue);
+                }
+              }}
+              onBlur={() => {
+                // Update amount with correct sign based on transaction type
+                const finalAmount =
+                  transactionType === "expense" ? -amount : amount;
 
-                  // Update amount with correct sign based on transaction type
-                  const finalAmount =
-                    transactionType === "expense"
-                      ? -positiveValue
-                      : positiveValue;
-
-                  // Ensure we're comparing numbers
-                  const currentAmount = Number(transaction.amount);
-                  if (finalAmount !== currentAmount) {
-                    updateTransactionMutation.mutate({
-                      id: transaction.id,
-                      amount: finalAmount,
-                    });
-                  }
+                // Ensure we're comparing numbers
+                const currentAmount = Number(transaction.amount);
+                if (finalAmount !== currentAmount) {
+                  updateTransactionMutation.mutate({
+                    id: transaction.id,
+                    amount: finalAmount,
+                  });
                 }
               }}
             />
