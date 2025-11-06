@@ -267,6 +267,10 @@ export const getTransactionsSchema = z.object({
   reporting: z.enum(["include", "exclude"]).nullable().optional(),
 });
 
+export const getTransactionByIdSchema = z.object({
+  id: z.uuid(),
+});
+
 export const generateTransactionFiltersSchema = z.object({
   name: z.string().optional().describe("The name to search for"),
   start: z.iso

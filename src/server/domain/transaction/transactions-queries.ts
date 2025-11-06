@@ -1,3 +1,5 @@
+"server-only";
+
 import {
   and,
   asc,
@@ -15,6 +17,7 @@ import {
 } from "drizzle-orm";
 import type { DBClient } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
+import { connection_table } from "~/server/db/schema/open-banking";
 import {
   tag_table,
   transaction_attachment_table,
@@ -182,8 +185,6 @@ export async function getTransactionsQuery(
       ),
     );
   }
-
-  console.log(filterAmount, filterAmountRange);
 
   // Amount range filter
   if (
@@ -428,5 +429,156 @@ export async function getTransactionsQuery(
       hasNextPage: hasNextPage,
     },
     data: processedData,
+  };
+}
+
+type GetTransactionByIdParams = {
+  id: string;
+  organizationId: string;
+};
+
+export async function getTransactionByIdQuery(
+  db: DBClient,
+  params: GetTransactionByIdParams,
+) {
+  const { id, organizationId } = params;
+
+  const [result] = await db
+    .select({
+      id: transaction_table.id,
+      date: transaction_table.date,
+      amount: transaction_table.amount,
+      currency: transaction_table.currency,
+      note: transaction_table.note,
+      source: transaction_table.source,
+      internal: transaction_table.internal,
+      recurring: transaction_table.recurring,
+      frequency: transaction_table.frequency,
+      counterpartyName: transaction_table.counterpartyName,
+      name: transaction_table.name,
+      description: transaction_table.description,
+      createdAt: transaction_table.createdAt,
+      enrichmentCompleted: transaction_table.enrichmentCompleted,
+      category: {
+        id: transaction_category_table.id,
+        slug: transaction_category_table.slug,
+        name: transaction_category_table.name,
+        color: transaction_category_table.color,
+        icon: transaction_category_table.icon,
+        excluded: transaction_category_table.excluded,
+      },
+      account: {
+        id: account_table.id,
+        name: account_table.name,
+        currency: account_table.currency,
+        logoUrl: account_table.logoUrl,
+      },
+      connection: {
+        id: connection_table.id,
+        name: connection_table.name,
+        logoUrl: connection_table.logoUrl,
+      },
+      tags: sql<
+        Array<{ id: string; name: string }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tag_table.id}, 'name', ${tag_table.name})) FILTER (WHERE ${tag_table.id} IS NOT NULL), '[]'::json)`.as(
+        "tags",
+      ),
+      attachments: sql<
+        Array<{
+          id: string;
+          filename: string | null;
+          path: string | null;
+          type: string;
+          size: number;
+        }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transaction_attachment_table.id}, 'filename', ${transaction_attachment_table.name}, 'path', ${transaction_attachment_table.path}, 'type', ${transaction_attachment_table.type}, 'size', ${transaction_attachment_table.size})) FILTER (WHERE ${transaction_attachment_table.id} IS NOT NULL), '[]'::json)`.as(
+        "attachments",
+      ),
+    })
+    .from(transaction_table)
+    .leftJoin(
+      transaction_category_table,
+      and(
+        eq(transaction_table.categorySlug, transaction_category_table.slug),
+        eq(transaction_category_table.organizationId, organizationId),
+      ),
+    )
+    .leftJoin(
+      account_table,
+      and(
+        eq(transaction_table.accountId, account_table.id),
+        eq(account_table.organizationId, organizationId),
+      ),
+    )
+    .leftJoin(
+      connection_table,
+      eq(account_table.connectionId, connection_table.id),
+    )
+    .leftJoin(
+      transaction_to_tag_table,
+      and(eq(transaction_to_tag_table.transactionId, transaction_table.id)),
+    )
+    .leftJoin(
+      tag_table,
+      and(
+        eq(tag_table.id, transaction_to_tag_table.tagId),
+        eq(tag_table.organizationId, organizationId),
+      ),
+    )
+    .leftJoin(
+      transaction_attachment_table,
+      and(
+        eq(transaction_attachment_table.transactionId, transaction_table.id),
+        eq(transaction_attachment_table.organizationId, organizationId),
+      ),
+    )
+    .where(
+      and(
+        eq(transaction_table.id, id),
+        eq(transaction_table.organizationId, organizationId),
+      ),
+    )
+    .groupBy(
+      transaction_table.id,
+      transaction_table.date,
+      transaction_table.amount,
+      transaction_table.currency,
+      transaction_table.note,
+      transaction_table.source,
+      transaction_table.recurring,
+      transaction_table.frequency,
+      transaction_table.description,
+      transaction_table.createdAt,
+      transaction_category_table.id,
+      transaction_category_table.name,
+      transaction_category_table.color,
+      transaction_category_table.slug,
+      account_table.id,
+      connection_table.id,
+    )
+    .limit(1);
+
+  if (!result) {
+    return null;
+  }
+
+  const { account, connection, ...rest } = result;
+
+  const newAccount = account?.id
+    ? {
+        ...account,
+        connection: connection?.id
+          ? {
+              id: connection.id,
+              name: connection.name,
+              logoUrl: connection.logoUrl,
+            }
+          : null,
+      }
+    : null;
+
+  return {
+    ...rest,
+    account: newAccount,
   };
 }

@@ -9,8 +9,9 @@ import {
   TRANSACTION_METHOD,
   TRANSACTION_STATUS,
 } from "../../shared/constants/enum";
-import { db, schema } from ".";
+import { db } from ".";
 import { categoriesIds, categoriesMap } from "./data/categories";
+import { schema } from "./schema";
 
 async function main() {
   const { transaction_category_table, ...rest } = schema;

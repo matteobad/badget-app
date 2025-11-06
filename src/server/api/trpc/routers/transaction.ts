@@ -1,6 +1,9 @@
 import * as z from "zod";
 import { getSimilarTransactions } from "~/server/domain/transaction/queries";
-import { getTransactions } from "~/server/domain/transaction/transactions-service";
+import {
+  getTransactionById,
+  getTransactions,
+} from "~/server/domain/transaction/transactions-service";
 import {
   createManualTransaction,
   createTransfer,
@@ -9,7 +12,6 @@ import {
   deleteTransfer,
   getTransactionAccountCounts,
   getTransactionAmountRange,
-  getTransactionById,
   getTransactionCategoryCounts,
   getTransactionTagsCounts,
   updateManyTransactions,
@@ -48,9 +50,8 @@ export const transactionRouter = createTRPCRouter({
 
   getById: protectedProcedure
     .input(z.object({ id: z.uuid() }))
-    .query(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-      return await getTransactionById(input.id, orgId);
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      return await getTransactionById(db, input, orgId!);
     }),
 
   // Transaction Filters Helpers

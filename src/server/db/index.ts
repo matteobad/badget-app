@@ -1,18 +1,11 @@
 import "dotenv/config";
 
-import { neon, neonConfig, Pool } from "@neondatabase/serverless";
-import { drizzle as drizzleHttp } from "drizzle-orm/neon-http";
+import { neonConfig, Pool } from "@neondatabase/serverless";
+// import { drizzle as drizzleHttp } from "drizzle-orm/neon-http";
 import { drizzle as drizzleWs } from "drizzle-orm/neon-serverless";
 import ws from "ws";
 import { env } from "~/env";
-
-import * as accounts from "./schema/accounts";
-import * as auth from "./schema/auth";
-import * as chats from "./schema/chats";
-import * as documents from "./schema/documents";
-import * as notifications from "./schema/notifications";
-import * as openBanking from "./schema/open-banking";
-import * as transactions from "./schema/transactions";
+import { schema } from "./schema";
 
 let connectionString = env.DATABASE_URL;
 
@@ -37,18 +30,8 @@ if (env.NODE_ENV === "development") {
   neonConfig.webSocketConstructor = ws;
 }
 
-const sql = neon(connectionString);
+// const sql = neon(connectionString);
 const pool = new Pool({ connectionString });
-
-export const schema = {
-  ...auth,
-  ...accounts,
-  ...chats,
-  ...documents,
-  ...openBanking,
-  ...transactions,
-  ...notifications,
-};
 
 // Drizzle supports both HTTP and WebSocket clients. Choose the one that fits your needs:
 // HTTP Client:
@@ -56,12 +39,12 @@ export const schema = {
 // - Ideal for stateless operations and quick queries
 // - Lower overhead for single queries
 // - Better for applications with sporadic database access
-export const drizzleClientHttp = drizzleHttp({
-  client: sql,
-  schema,
-  logger: false, // env.NODE_ENV !== "production",
-  casing: "snake_case",
-});
+// export const drizzleClientHttp = drizzleHttp({
+//   client: sql,
+//   schema,
+//   logger: false, // env.NODE_ENV !== "production",
+//   casing: "snake_case",
+// });
 
 // WebSocket Client:
 // - Best for long-running applications (like servers)

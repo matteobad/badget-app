@@ -25,7 +25,6 @@ import {
 import {
   getTransactionAccountCountsQuery,
   getTransactionAmountRangeQuery,
-  getTransactionByIdQuery,
   getTransactionCategoryCountsQuery,
   getTransactionTagCountsQuery,
 } from "../domain/transaction/queries";
@@ -42,10 +41,6 @@ import {
   recalculateSnapshots,
   updateAccountBalance,
 } from "./balance-snapshots-service";
-
-export async function getTransactionById(id: string, orgId: string) {
-  return await getTransactionByIdQuery(id, orgId);
-}
 
 export async function getTransactionAmountRange(orgId: string) {
   return await getTransactionAmountRangeQuery(orgId);
