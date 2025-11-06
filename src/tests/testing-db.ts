@@ -1,33 +1,27 @@
 import { afterAll, afterEach, beforeEach, mock } from "bun:test";
-import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
+import type { StartedPostgreSqlContainer } from "@testcontainers/postgresql";
+import { PostgreSqlContainer } from "@testcontainers/postgresql";
 import { migrate } from "drizzle-orm/pglite/migrator";
+import { drizzle } from "drizzle-orm/postgres-js";
 import { reset } from "drizzle-seed";
-
-import { db } from "../server/db";
+import postgres from "postgres";
+import { db } from "~/server/db";
 import { schema } from "../server/db/schema";
 
-let client: PGlite;
+let container: StartedPostgreSqlContainer;
 
 // Replace the database with a new in-memory database
-await mock.module("../server/db", () => {
-  client = new PGlite();
-  const db = drizzle({
-    client,
-    schema,
-    logger: false,
-    casing: "snake_case",
-  });
+await mock.module("../server/db", async () => {
+  console.log("starting testcontainer");
+  container = await new PostgreSqlContainer("postgres:17").start();
+  console.log("testcontainer started");
+  const connectionString = container.getConnectionUri();
+  const client = postgres(connectionString);
+  const db = drizzle(client, { logger: false, schema });
+  console.log("drizzle db client created");
+
   return { client, db };
 });
-
-// await mock.module("next/router", () => ({
-//   useRouter: mock(() => ({
-//     locale: "it",
-//     defaultLocale: "it",
-//     locales: ["it", "en"],
-//   })),
-// }));
 
 // Apply migrations before each test
 beforeEach(async () => {
@@ -41,5 +35,5 @@ afterEach(async () => {
 
 // Free up resources after all tests are done
 afterAll(async () => {
-  await client.close();
+  await container.stop();
 });
