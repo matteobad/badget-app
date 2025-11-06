@@ -1,7 +1,6 @@
 import { tool } from "ai";
-import z from "zod";
-import { getTransactions } from "~/server/services/transaction-service";
-
+import * as z from "zod";
+import { getTransactions } from "~/server/domain/transaction/transactions-service";
 import { cached } from "../../../cache";
 import { getContext } from "../../../context";
 
@@ -86,7 +85,7 @@ export const getTransactionsSchema = z.object({
     .describe(
       "Filter transactions by attachment presence. 'include' returns only transactions with attachments, 'exclude' returns only those without.",
     ),
-  amount_range: z
+  amountRange: z
     .array(z.coerce.number())
     .nullable()
     .optional()
@@ -261,6 +260,7 @@ export const getTransactionsTool = cached(
 
       try {
         const result = await getTransactions(
+          context.db,
           input,
           context.user.organizationId,
         );

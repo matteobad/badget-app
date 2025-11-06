@@ -24,32 +24,28 @@ const itemVariant = {
 };
 
 type FilterKey =
-  | "start"
-  | "end"
-  | "amount_range"
-  | "statuses"
-  | "attachments"
-  | "recurring"
   | "categories"
   | "tags"
   | "accounts"
   | "type"
-  | "reports"
-  | "manual";
+  | "start"
+  | "end"
+  | "recurring"
+  | "amountRange"
+  | "manual"
+  | "reporting";
 
 type FilterValue = {
-  start: string;
-  end: string;
-  amount_range: string;
-  statuses: string[];
-  attachments: string;
-  recurring: string[];
   categories: string[];
   tags: string[];
   accounts: string[];
   type: string;
-  reports: string;
+  start: string;
+  end: string;
+  amountRange: string;
+  recurring: string[];
   manual: string;
+  reporting: string;
 };
 
 interface FilterValueProps {
@@ -62,15 +58,13 @@ interface Props {
   loading: boolean;
   onRemove: (filters: Record<string, null>) => void;
   categories?: { id: string; name: string; slug: string | null }[];
+  tags?: { id: string; text: string; slug?: string }[];
   accounts?: { id: string; name: string; currency: string }[];
   typeFilters?: { id: string; name: string }[];
-  attachmentsFilters?: { id: string; name: string }[];
   recurringFilters?: { id: string; name: string }[];
-  manualFilters?: { id: string; name: string }[];
-  tags?: { id: string; text: string; slug?: string }[];
   amountRange?: [number, number];
-  statusFilters?: { id: string; name: string }[];
-  reportsFilters?: { id: string; name: string }[];
+  manualFilters?: { id: string; name: string }[];
+  reportingFilters?: { id: string; name: string }[];
 }
 
 export function FilterList({
@@ -78,72 +72,16 @@ export function FilterList({
   loading,
   onRemove,
   categories,
-  accounts,
   tags,
+  accounts,
   typeFilters,
-  attachmentsFilters,
   recurringFilters,
-  manualFilters,
   amountRange,
-  reportsFilters,
+  manualFilters,
+  reportingFilters,
 }: Props) {
   const renderFilter = ({ key, value }: FilterValueProps) => {
     switch (key) {
-      case "start": {
-        const startValue = value as FilterValue["start"];
-        if (startValue && filters.end) {
-          return formatDateRange(new Date(startValue), new Date(filters.end), {
-            includeTime: false,
-          });
-        }
-
-        return startValue && format(new Date(startValue), "MMM d, yyyy");
-      }
-
-      case "amount_range": {
-        return `${amountRange?.[0]?.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })} - ${amountRange?.[1]?.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}`;
-      }
-
-      case "reports": {
-        const reportValue = value as FilterValue["reports"];
-        return reportsFilters?.find((filter) => filter.id === reportValue)
-          ?.name;
-      }
-
-      case "attachments": {
-        const attachmentValue = value as FilterValue["attachments"];
-        return attachmentsFilters?.find(
-          (filter) => filter.id === attachmentValue,
-        )?.name;
-      }
-
-      case "recurring": {
-        const recurringValue = value as FilterValue["recurring"];
-        return recurringValue
-          ?.map(
-            (slug) =>
-              recurringFilters?.find((filter) => filter.id === slug)?.name,
-          )
-          .join(", ");
-      }
-
-      case "manual": {
-        const manualValue = value as FilterValue["manual"];
-        return manualFilters?.find((filter) => filter.id === manualValue)?.name;
-      }
-
-      case "type": {
-        const typeValue = value as FilterValue["type"];
-        if (!typeValue) return null;
-        return typeFilters?.find((filter) => filter.id === typeValue)?.name;
-      }
-
       case "categories": {
         const categoriesValue = value as FilterValue["categories"];
         if (!categoriesValue) return null;
@@ -175,6 +113,54 @@ export function FilterList({
             });
           })
           .join(", ");
+      }
+
+      case "type": {
+        const typeValue = value as FilterValue["type"];
+        if (!typeValue) return null;
+        return typeFilters?.find((filter) => filter.id === typeValue)?.name;
+      }
+
+      case "start": {
+        const startValue = value as FilterValue["start"];
+        if (startValue && filters.end) {
+          return formatDateRange(new Date(startValue), new Date(filters.end), {
+            includeTime: false,
+          });
+        }
+
+        return startValue && format(new Date(startValue), "MMM d, yyyy");
+      }
+
+      case "recurring": {
+        const recurringValue = value as FilterValue["recurring"];
+        return recurringValue
+          ?.map(
+            (slug) =>
+              recurringFilters?.find((filter) => filter.id === slug)?.name,
+          )
+          .join(", ");
+      }
+
+      case "amountRange": {
+        return `${amountRange?.[0]?.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })} - ${amountRange?.[1]?.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`;
+      }
+
+      case "manual": {
+        const manualValue = value as FilterValue["manual"];
+        return manualFilters?.find((filter) => filter.id === manualValue)?.name;
+      }
+
+      case "reporting": {
+        const reportValue = value as FilterValue["reporting"];
+        return reportingFilters?.find((filter) => filter.id === reportValue)
+          ?.name;
       }
 
       default:

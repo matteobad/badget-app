@@ -10,7 +10,6 @@ import type {
   deleteManyTransactionsSchema,
   deleteTranferSchema,
   deleteTransactionSchema,
-  getTransactionsSchema,
   updateTransactionSchema,
   updateTransactionsSchema,
 } from "~/shared/validators/transaction.schema";
@@ -28,7 +27,6 @@ import {
   getTransactionAmountRangeQuery,
   getTransactionByIdQuery,
   getTransactionCategoryCountsQuery,
-  getTransactionsQuery,
   getTransactionTagCountsQuery,
 } from "../domain/transaction/queries";
 import type { NormalizedTx } from "../domain/transaction/utils";
@@ -44,13 +42,6 @@ import {
   recalculateSnapshots,
   updateAccountBalance,
 } from "./balance-snapshots-service";
-
-export async function getTransactions(
-  filters: z.infer<typeof getTransactionsSchema>,
-  orgId: string,
-) {
-  return await getTransactionsQuery(filters, orgId);
-}
 
 export async function getTransactionById(id: string, orgId: string) {
   return await getTransactionByIdQuery(id, orgId);

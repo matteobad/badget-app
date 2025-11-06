@@ -35,20 +35,18 @@ import { Input } from "~/components/ui/input";
 import { useTransactionFilterParams } from "~/hooks/use-transaction-filter-params";
 import { useTransactionFilterParamsWithPersistence } from "~/hooks/use-transaction-filter-params-with-persistence";
 import { cn } from "~/lib/utils";
+import type { TransactionFrequencyType } from "~/shared/constants/enum";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { generateTransactionFiltersSchema } from "~/shared/validators/transaction.schema";
-
 import { FilterList } from "./filter-list";
 import { TransactionAccountFilter } from "./transaction-account-filter";
 import { TransactionAmountFilter } from "./transaction-amount-filter";
 import { TransactionTagFilter } from "./transaction-tag-filter";
 
 type TypeFilter = "income" | "expense";
-type AttachmentFilter = "include" | "exclude";
-type RecurringFilter = "all" | "weekly" | "monthly" | "annually";
-type StatusFilter = "completed" | "uncompleted" | "archived" | "excluded";
-type ReportsFilter = "included" | "excluded";
+type RecurringFilter = TransactionFrequencyType | "all";
 type ManualFilter = "include" | "exclude";
+type ReportingFilter = "include" | "exclude";
 
 interface BaseFilterItem {
   name: string;
@@ -75,17 +73,17 @@ interface FilterCheckboxItemProps {
 // Static data
 const defaultSearch = {
   q: null,
-  attachments: null,
+  categories: null,
+  tags: null,
+  accounts: null,
+  type: null,
   start: null,
   end: null,
-  categories: null,
-  accounts: null,
-  statuses: null,
   recurring: null,
-  tags: null,
-  amount_range: null,
-  reports: null,
+  amountRange: null,
+  amount: null,
   manual: null,
+  reporting: null,
 };
 
 const PLACEHOLDERS = [
@@ -96,21 +94,9 @@ const PLACEHOLDERS = [
   "Revolut this month",
 ];
 
-const statusFilters: FilterItem<StatusFilter>[] = [
-  { id: "completed", name: "Completed" },
-  { id: "uncompleted", name: "Uncompleted" },
-  { id: "archived", name: "Archived" },
-  { id: "excluded", name: "Excluded" },
-];
-
 const typeFilters: FilterItem<TypeFilter>[] = [
   { id: "income", name: "Income" },
   { id: "expense", name: "Expenses" },
-];
-
-const attachmentsFilters: FilterItem<AttachmentFilter>[] = [
-  { id: "include", name: "Has attachments" },
-  { id: "exclude", name: "No attachments" },
 ];
 
 const recurringFilters: FilterItem<RecurringFilter>[] = [
@@ -120,14 +106,14 @@ const recurringFilters: FilterItem<RecurringFilter>[] = [
   { id: "annually", name: "Annually recurring" },
 ];
 
-const reportsFilters: FilterItem<ReportsFilter>[] = [
-  { id: "included", name: "Included in reports" },
-  { id: "excluded", name: "Excluded from reports" },
-];
-
 const manualFilters: FilterItem<ManualFilter>[] = [
   { id: "include", name: "Manual" },
   { id: "exclude", name: "Bank connection" },
+];
+
+const reportingFilters: FilterItem<ReportingFilter>[] = [
+  { id: "include", name: "Included in reports" },
+  { id: "exclude", name: "Excluded from reports" },
 ];
 
 // Reusable components
@@ -203,11 +189,20 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
       name: bankAccount.name ?? "",
       currency: bankAccount.currency ?? "",
     })),
-    categories: categoriesData?.map((category) => ({
-      id: category.id,
-      name: category.name,
-      slug: category.slug,
-    })),
+    categories: categoriesData?.flatMap((category) => [
+      // Include parent category
+      {
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+      },
+      // Include all child categories
+      ...(category.children?.map((child) => ({
+        id: child.id,
+        name: child.name,
+        slug: child.slug,
+      })) || []),
+    ]),
   };
 }
 
@@ -275,7 +270,7 @@ export function TransactionsSearchFilter() {
         recurring: object?.recurring ?? null,
         q: object?.name ?? null,
         // @ts-expect-error find a way to better type this
-        amount_range: object?.amount_range ?? null,
+        amountRange: object?.amountRange ?? null,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -335,31 +330,34 @@ export function TransactionsSearchFilter() {
     return Object.fromEntries(
       Object.entries({
         ...validFilters,
-        start: filter.start ?? undefined,
-        end: filter.end ?? undefined,
-        amount_range: filter.amount_range
-          ? `${filter.amount_range[0]}-${filter.amount_range[1]}`
-          : undefined,
-        attachments: filter.attachments ?? undefined,
         categories: filter.categories ?? undefined,
         tags: filter.tags ?? undefined,
         accounts: filter.accounts ?? undefined,
-        statuses: filter.statuses ?? undefined,
+        type: filter.type ?? undefined,
+        start: filter.start ?? undefined,
+        end: filter.end ?? undefined,
         recurring: filter.recurring ?? undefined,
+        amountRange: filter.amountRange
+          ? `${filter.amountRange[0]}-${filter.amountRange[1]}`
+          : undefined,
+        amount: filter.amount
+          ? `${filter.amount[0]}-${filter.amount[1]}`
+          : undefined,
         manual: filter.manual ?? undefined,
+        reporting: filter.reporting ?? undefined,
       }).filter(([_, value]) => value !== undefined && value !== null),
     );
   };
 
   const getAmountRange = () => {
     if (
-      !filter.amount_range ||
-      !Array.isArray(filter.amount_range) ||
-      filter.amount_range.length < 2
+      !filter.amountRange ||
+      !Array.isArray(filter.amountRange) ||
+      filter.amountRange.length < 2
     ) {
       return undefined;
     }
-    return [filter.amount_range[0], filter.amount_range[1]] as [number, number];
+    return [filter.amountRange[0], filter.amountRange[1]] as [number, number];
   };
 
   return (
@@ -407,15 +405,13 @@ export function TransactionsSearchFilter() {
           loading={isStreaming}
           onRemove={setFilter}
           categories={categories}
+          tags={tags}
           accounts={accounts}
           typeFilters={typeFilters}
-          statusFilters={statusFilters}
-          attachmentsFilters={attachmentsFilters}
-          tags={tags}
           recurringFilters={recurringFilters}
-          manualFilters={manualFilters}
           amountRange={getAmountRange()}
-          reportsFilters={reportsFilters}
+          manualFilters={manualFilters}
+          reportingFilters={reportingFilters}
         />
       </div>
 
@@ -460,15 +456,15 @@ export function TransactionsSearchFilter() {
 
         <FilterMenuItem icon={ChartSplineIcon} label="Reports">
           <div className="max-h-[280px] w-[200px] p-1">
-            {reportsFilters.map(({ id, name }) => (
+            {reportingFilters.map(({ id, name }) => (
               <FilterCheckboxItem
                 key={id}
                 id={id}
                 name={name}
-                checked={filter?.reports === id}
+                checked={filter?.reporting === id}
                 onCheckedChange={() => {
                   setFilter({
-                    reports: id,
+                    reporting: id,
                   });
                 }}
               />

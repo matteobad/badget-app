@@ -1,6 +1,6 @@
-// import { categorizeUserTransaction } from "~/utils/categorization";
-import { z } from "zod/v4";
+import * as z from "zod";
 import { getSimilarTransactions } from "~/server/domain/transaction/queries";
+import { getTransactions } from "~/server/domain/transaction/transactions-service";
 import {
   createManualTransaction,
   createTransfer,
@@ -11,7 +11,6 @@ import {
   getTransactionAmountRange,
   getTransactionById,
   getTransactionCategoryCounts,
-  getTransactions,
   getTransactionTagsCounts,
   updateManyTransactions,
   updateTransaction,
@@ -37,16 +36,14 @@ import {
   deleteTransactionSplitSchema,
   getTransactionSplitsSchema,
 } from "~/shared/validators/transaction-split.schema";
-
 import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const transactionRouter = createTRPCRouter({
   // Transaction List Management
   get: protectedProcedure
     .input(getTransactionsSchema)
-    .query(async ({ ctx, input }) => {
-      const orgId = ctx.orgId!;
-      return await getTransactions(input, orgId);
+    .query(async ({ ctx: { db, orgId }, input }) => {
+      return await getTransactions(db, input, orgId!);
     }),
 
   getById: protectedProcedure

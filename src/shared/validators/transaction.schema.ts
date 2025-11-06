@@ -1,11 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { parseAsArrayOf, parseAsInteger, parseAsString } from "nuqs/server";
-import { getSortingStateParser } from "~/lib/validators";
-import type {
-  DB_TransactionInsertType,
-  DB_TransactionType,
-} from "~/server/db/schema/transactions";
+import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
 import { transaction_table } from "~/server/db/schema/transactions";
 import {
   TRANSACTION_FREQUENCY,
@@ -253,46 +248,23 @@ export type CSVRowParsed = DB_TransactionInsertType;
 
 // Query filter schema
 export const getTransactionsSchema = z.object({
+  // pagination
   cursor: z.string().nullable().optional(),
   sort: z.array(z.string()).min(2).max(2).nullable().optional(),
   pageSize: z.coerce.number().min(1).max(10000).optional(),
-
+  // filters
   q: z.string().nullable().optional(),
   categories: z.array(z.string()).nullable().optional(),
   tags: z.array(z.string()).nullable().optional(),
+  accounts: z.array(z.string()).nullable().optional(),
+  type: z.enum(["income", "expense"]).nullable().optional(),
   start: z.string().nullable().optional(),
   end: z.string().nullable().optional(),
-  accounts: z.array(z.string()).nullable().optional(),
-  statuses: z.array(z.string()).nullable().optional(),
   recurring: z.array(z.string()).nullable().optional(),
-  attachments: z.enum(["include", "exclude"]).nullable().optional(),
-  amount_range: z.array(z.coerce.number()).nullable().optional(),
+  amountRange: z.array(z.coerce.number()).nullable().optional(),
   amount: z.array(z.string()).nullable().optional(),
-  type: z
-    .enum(["income", "expense"])
-    .nullable()
-    .optional()
-    .openapi({
-      description:
-        "Transaction type to filter by. 'income' for money received, 'expense' for money spent",
-      example: "expense",
-      param: {
-        in: "query",
-      },
-    }),
-  reports: z.enum(["included", "excluded"]).nullable().optional(),
-  manual: z
-    .enum(["include", "exclude"])
-    .nullable()
-    .optional()
-    .openapi({
-      description:
-        "Filter transactions based on whether they were manually imported. 'include' returns only manual transactions, 'exclude' returns only non-manual transactions",
-      example: "include",
-      param: {
-        in: "query",
-      },
-    }),
+  manual: z.enum(["include", "exclude"]).nullable().optional(),
+  reporting: z.enum(["include", "exclude"]).nullable().optional(),
 });
 
 export const generateTransactionFiltersSchema = z.object({
@@ -316,24 +288,8 @@ export const generateTransactionFiltersSchema = z.object({
     .array(z.enum(["all", "weekly", "monthly", "annually"]))
     .optional()
     .describe("The recurring to filter by"),
-  amount_range: z
+  amountRange: z
     .array(z.number())
     .optional()
     .describe("The amount range to filter by"),
 });
-
-// Search params filter schema
-export const transactionFilterParamsSchema = {
-  page: parseAsInteger.withDefault(1),
-  perPage: parseAsInteger.withDefault(10),
-  sort: getSortingStateParser<DB_TransactionType>().withDefault([
-    { id: "date", desc: true },
-  ]),
-  date: parseAsArrayOf(parseAsString).withDefault([]),
-  description: parseAsString.withDefault(""),
-  amount_range: parseAsArrayOf(parseAsInteger).withDefault([]),
-  amount: parseAsArrayOf(parseAsString).withDefault([]),
-  categoryId: parseAsArrayOf(parseAsString).withDefault([]),
-  tags: parseAsArrayOf(parseAsString).withDefault([]),
-  accountId: parseAsArrayOf(parseAsString).withDefault([]),
-};

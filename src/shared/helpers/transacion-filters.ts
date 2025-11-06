@@ -1,20 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { TransactionFrequencyType } from "../constants/enum";
+
 // Type for transaction filters based on the schema
 export type TransactionFilters = {
   q?: string | null;
-  attachments?: "exclude" | "include" | null;
-  start?: string | null;
-  end?: string | null;
   categories?: string[] | null;
   tags?: string[] | null;
   accounts?: string[] | null;
-  assignees?: string[] | null;
-  amount_range?: number[] | null;
+  type?: "income" | "expense" | null;
+  start?: string | null;
+  end?: string | null;
+  recurring?: (TransactionFrequencyType | "all")[] | null;
+  amountRange?: number[] | null;
   amount?: string[] | null;
-  recurring?: ("all" | "weekly" | "monthly" | "annually")[] | null;
-  statuses?: ("completed" | "uncompleted" | "archived" | "excluded")[] | null;
-  reports?: "included" | "excluded" | null;
   manual?: "include" | "exclude" | null;
+  reporting?: "include" | "exclude" | null;
 };
 
 // Generic filter state type
@@ -31,17 +30,17 @@ export type FilterHookReturn<T = FilterState> = {
 // Default empty filter state
 export const EMPTY_FILTER_STATE: TransactionFilters = {
   q: null,
-  attachments: null,
-  start: null,
-  end: null,
   categories: null,
   tags: null,
   accounts: null,
-  amount_range: null,
-  amount: null,
+  type: null,
+  start: null,
+  end: null,
   recurring: null,
-  statuses: null,
+  amountRange: null,
+  amount: null,
   manual: null,
+  reporting: null,
 };
 
 /**

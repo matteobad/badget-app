@@ -21,7 +21,7 @@ export function TransactionAmountFilter() {
   );
 
   const [amountRange, setAmountRange] = useQueryState(
-    "amount_range",
+    "amountRange",
     parseAsArrayOf(parseAsInteger),
   );
 

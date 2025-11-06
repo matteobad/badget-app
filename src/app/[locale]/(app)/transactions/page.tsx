@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
-import { createLoader } from "nuqs/server";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { TransactionsSearchFilter } from "~/components/transaction/filters/transactions-search-filter";
@@ -9,13 +8,13 @@ import { Loading } from "~/components/transaction/table/loading";
 import { TransactionsActions } from "~/components/transaction/transactions-actions";
 import { TransactionSplitDialog } from "~/components/transaction-split/transaction-split-dialog";
 import { loadSortParams } from "~/hooks/use-sort-params";
+import { loadTransactionFilterParams } from "~/hooks/use-transaction-filter-params";
 import { getInitialTransactionsColumnVisibility } from "~/server/domain/transaction/helpers";
 import {
   getQueryClient,
   HydrateClient,
   trpc,
 } from "~/shared/helpers/trpc/server";
-import { transactionFilterParamsSchema } from "~/shared/validators/transaction.schema";
 
 export const metadata: Metadata = {
   title: "Transactions | Badget.",
@@ -29,14 +28,13 @@ export default async function TransactionsPage(props: PageProps) {
   const queryClient = getQueryClient();
   const searchParams = await props.searchParams;
 
-  const loadFilterParams = createLoader(transactionFilterParamsSchema);
-  const filter = loadFilterParams(searchParams);
+  const filter = loadTransactionFilterParams(searchParams);
   const { sort } = loadSortParams(searchParams);
 
   const columnVisibility = getInitialTransactionsColumnVisibility();
 
   // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
-  await queryClient.fetchInfiniteQuery(
+  await queryClient.prefetchInfiniteQuery(
     trpc.transaction.get.infiniteQueryOptions({
       ...filter,
       sort,
