@@ -34,7 +34,11 @@ jobs:
       - name: Install dependencies & tooling
         uses: ./.github/workflows/setup
       - name: Run Checks
-        run: NODE_ENV=test pnpm dlx next typegen && pnpm run typecheck
+        run: |
+          touch .env
+          echo SKIP_ENV_VALIDATION=1 >> .env
+          echo DATABASE_URL=postgres://postgres:postgres@db.localtest.me:5432/main >> .env
+          pnpm dlx next typegen && pnpm run typecheck
 
   # test:
   #   name: "Test"
