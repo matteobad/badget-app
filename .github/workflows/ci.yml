@@ -34,10 +34,7 @@ jobs:
       - name: Install dependencies & tooling
         uses: ./.github/workflows/setup
       - name: Run Checks
-        run: |
-          touch .env
-          echo SKIP_ENV_VALIDATION=1 >> .env
-          pnpm dlx next typegen && pnpm run typecheck
+        run: NODE_ENV=test pnpm dlx next typegen && pnpm run typecheck
 
   # test:
   #   name: "Test"
