@@ -27,6 +27,12 @@ export default {
     placeholder: "Select timezone",
   },
 
+  roles: {
+    admin: "Admin",
+    owner: "Owner",
+    member: "Member",
+  },
+
   chat: {
     placeholder_ask: "Ask anything",
     placeholder_web: "Search the web",

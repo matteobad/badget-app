@@ -1,6 +1,6 @@
 // TODO: Remove this import once we have a better way to type the table meta
-// biome-ignore lint: disable biome
-import type { RouterOutputs } from "@/trpc/client";
+
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 
 declare module "@tanstack/react-table" {
   // biome-ignore lint: disable biome
@@ -34,6 +34,10 @@ declare module "@tanstack/react-table" {
 
     // Tag table meta
     deleteTag?: (id: string) => void;
+
+    // Members table meta
+    currentUser?: RouterOutput["space"]["listMembers"]["members"][number];
+    totalOwners?: number;
   }
 
   // biome-ignore lint: disable biome

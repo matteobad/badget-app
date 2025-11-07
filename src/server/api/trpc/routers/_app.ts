@@ -14,6 +14,7 @@ import { notificationsRouter } from "./notification";
 import { notificationSettingsRouter } from "./notification-settings";
 import { organizationRouter } from "./organization";
 import { searchRouter } from "./search";
+import { spacesRouter } from "./spaces";
 import { suggestedActionsRouter } from "./suggested-actions";
 import { tagRouter } from "./tag";
 import { transactionRouter } from "./transaction";
@@ -35,6 +36,7 @@ export const appRouter = createTRPCRouter({
   widgets: widgetsRouter,
   user: userRouter,
   organization: organizationRouter,
+  space: spacesRouter,
   metrics: metricsRouter,
   notifications: notificationsRouter,
   notificationSettings: notificationSettingsRouter,
