@@ -32,18 +32,22 @@ export function InlineSelectCategory({ selected, onChange }: Props) {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="w-full text-left hover:opacity-70 transition-opacity"
+          className="w-full text-left hover:opacity-70 transition-opacity text-muted-foreground"
           onClick={(e) => {
             e.stopPropagation();
           }}
         >
-          <CategoryBadge
-            category={{
-              name: selected?.name ?? "uncategorized",
-              color: selected?.color ?? null,
-              icon: selected?.icon ?? null,
-            }}
-          />
+          {selected && selected.slug !== "uncategorized" ? (
+            <CategoryBadge
+              category={{
+                name: selected?.name ?? "uncategorized",
+                color: selected?.color ?? null,
+                icon: selected?.icon ?? null,
+              }}
+            />
+          ) : (
+            "Seleziona categoria..."
+          )}
         </button>
       </PopoverTrigger>
       <PopoverContent
