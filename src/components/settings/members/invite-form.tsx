@@ -37,19 +37,17 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const createInvitationMutation = useMutation(
-    trpc.space.createInvitation.mutationOptions({
+  const createInvitationsMutation = useMutation(
+    trpc.space.createInvitations.mutationOptions({
       onSuccess: (data) => {
         queryClient.invalidateQueries({
           queryKey: trpc.space.listInvitations.queryKey(),
         });
 
         // Show appropriate feedback based on results
-        if (data.status === "pending") {
-          toast.success("Invites sent", {
-            description: `${data.sent} invite${data.sent > 1 ? "s" : ""} sent successfully`,
-          });
-        }
+        toast.success("Invites sent", {
+          description: `${data.length} invite${data.length > 1 ? "s" : ""} sent successfully`,
+        });
 
         onSuccess?.();
       },
@@ -69,7 +67,7 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
   });
 
   const onSubmit = form.handleSubmit((data) => {
-    createInvitationMutation.mutate(
+    createInvitationsMutation.mutate(
       data.invites.filter((invite) => invite.email !== ""),
     );
   });
@@ -167,8 +165,8 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
 
             <SubmitButton
               type="submit"
-              isSubmitting={createInvitationMutation.isPending}
-              disabled={createInvitationMutation.isPending}
+              isSubmitting={createInvitationsMutation.isPending}
+              disabled={createInvitationsMutation.isPending}
             >
               Send invites
             </SubmitButton>

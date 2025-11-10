@@ -1,7 +1,11 @@
 import {
+  acceptInvitation,
   cancelInvitation,
   createInvitation,
+  getInvitation,
   getSpaceInvitations,
+  getUserInvitations,
+  rejectInvitation,
 } from "~/server/domain/spaces/invitations-service";
 import {
   getSpaceMembers,
@@ -9,15 +13,29 @@ import {
   removeMember,
   updateMemberRole,
 } from "~/server/domain/spaces/members-service";
+import { getSpace } from "~/server/domain/spaces/spaces-service";
 import {
+  acceptInvitationSchema,
   cancelInvitationSchema,
   createInvitationSchema,
+  createInvitationsSchema,
+  getInvitationSchema,
+  getSpaceSchema,
+  getUserInvitationsSchema,
+  rejectInvitationSchema,
   removeMemberSchema,
   updateMemberRoleSchema,
 } from "~/shared/validators/space.schema";
 import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const spacesRouter = createTRPCRouter({
+  // Spaces
+  getSpace: protectedProcedure
+    .input(getSpaceSchema)
+    .query(async ({ ctx: { headers }, input }) => {
+      return await getSpace(input, headers);
+    }),
+
   // Members
   listMembers: protectedProcedure.query(async ({ ctx: { headers, orgId } }) => {
     return await getSpaceMembers(headers, orgId!);
@@ -46,15 +64,47 @@ export const spacesRouter = createTRPCRouter({
       return await createInvitation(input, orgId!);
     }),
 
+  createInvitations: protectedProcedure
+    .input(createInvitationsSchema)
+    .mutation(async ({ ctx: { orgId }, input }) => {
+      return await Promise.all(
+        input.map((invitation) => createInvitation(invitation, orgId!)),
+      );
+    }),
+
   listInvitations: protectedProcedure.query(
     async ({ ctx: { headers, orgId } }) => {
       return await getSpaceInvitations(headers, orgId!);
     },
   ),
 
+  listUserInvitations: protectedProcedure
+    .input(getUserInvitationsSchema)
+    .query(async ({ ctx: { headers }, input }) => {
+      return await getUserInvitations(headers, input);
+    }),
+
+  getInvitation: protectedProcedure
+    .input(getInvitationSchema)
+    .query(async ({ ctx: { headers }, input }) => {
+      return await getInvitation(headers, input);
+    }),
+
   cancelInvitation: protectedProcedure
     .input(cancelInvitationSchema)
     .mutation(async ({ ctx: { orgId }, input }) => {
       return cancelInvitation(input, orgId!);
+    }),
+
+  acceptInvitation: protectedProcedure
+    .input(acceptInvitationSchema)
+    .mutation(async ({ ctx: { headers }, input }) => {
+      return await acceptInvitation(input, headers);
+    }),
+
+  rejectInvitation: protectedProcedure
+    .input(rejectInvitationSchema)
+    .mutation(async ({ ctx: { headers }, input }) => {
+      return rejectInvitation(input, headers);
     }),
 });

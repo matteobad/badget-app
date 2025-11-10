@@ -1,8 +1,12 @@
 import type z from "zod";
 import { auth } from "~/shared/helpers/better-auth/auth";
 import type {
+  acceptInvitationSchema,
   cancelInvitationSchema,
   createInvitationSchema,
+  getInvitationSchema,
+  getUserInvitationsSchema,
+  rejectInvitationSchema,
 } from "~/shared/validators/space.schema";
 
 export async function getSpaceInvitations(
@@ -13,6 +17,34 @@ export async function getSpaceInvitations(
     headers,
     query: {
       organizationId,
+    },
+  });
+
+  return data;
+}
+
+export async function getUserInvitations(
+  headers: Headers,
+  params: z.infer<typeof getUserInvitationsSchema>,
+) {
+  const data = await auth.api.listUserInvitations({
+    headers,
+    query: {
+      email: params.email,
+    },
+  });
+
+  return data;
+}
+
+export async function getInvitation(
+  headers: Headers,
+  params: z.infer<typeof getInvitationSchema>,
+) {
+  const data = await auth.api.getInvitation({
+    headers,
+    query: {
+      id: params.id, // required
     },
   });
 
@@ -44,4 +76,32 @@ export async function cancelInvitation(
       invitationId: params.invitationId,
     },
   });
+}
+
+export async function acceptInvitation(
+  params: z.infer<typeof acceptInvitationSchema>,
+  headers: Headers,
+) {
+  const data = await auth.api.acceptInvitation({
+    headers,
+    body: {
+      invitationId: params.invitationId, // required
+    },
+  });
+
+  return data;
+}
+
+export async function rejectInvitation(
+  params: z.infer<typeof rejectInvitationSchema>,
+  headers: Headers,
+) {
+  const data = await auth.api.rejectInvitation({
+    headers,
+    body: {
+      invitationId: params.invitationId, // required
+    },
+  });
+
+  return data;
 }

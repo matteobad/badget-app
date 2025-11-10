@@ -1,14 +1,20 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useUserQuery } from "~/hooks/use-user";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { TeamInvite } from "./space-invite";
 
 export function TeamInvites() {
   const trpc = useTRPC();
 
+  const { data: user } = useUserQuery();
+
   const { data: invites } = useSuspenseQuery(
-    trpc.space.invitesByEmail.queryOptions(),
+    trpc.space.listUserInvitations.queryOptions(
+      { email: user!.email },
+      { enabled: !!user },
+    ),
   );
 
   return (

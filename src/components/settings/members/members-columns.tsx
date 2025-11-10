@@ -143,6 +143,7 @@ export const columns: ColumnDef<TeamMember>[] = [
               >
                 <SelectTrigger>
                   <SelectValue
+                    // @ts-expect-error role is enum
                     placeholder={t(`roles.${row.original.role || "member"}`)}
                   />
                 </SelectTrigger>
@@ -154,6 +155,7 @@ export const columns: ColumnDef<TeamMember>[] = [
               </Select>
             ) : (
               <span className="text-sm text-[#606060]">
+                {/* @ts-expect-error role is enum */}
                 {t(`roles.${row.original.role || "member"}`)}
               </span>
             )}

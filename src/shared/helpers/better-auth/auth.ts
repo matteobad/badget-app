@@ -11,6 +11,7 @@ import { resend } from "~/lib/resend";
 import { db } from "~/server/db";
 import { getUserByIdQuery } from "~/server/domain/user/queries";
 import WelcomeEmail from "~/shared/emails/emails/welcome-email";
+import { getUrl } from "../get-url";
 
 export const auth = betterAuth({
   advanced: {
@@ -65,7 +66,7 @@ export const auth = betterAuth({
       enabled: true,
       sendChangeEmailVerification: async ({ user, url }) => {
         await resend.emails.send({
-          from: "Matteo from Badget <onboarding@resend.dev>",
+          from: "Matteo from Badget <noreply@badget.xyz>",
           to: user.email, // verification email must be sent to the current user email to approve the change
           subject: "Approve email change",
           text: `Click the link to approve the change: ${url}`,
@@ -76,7 +77,7 @@ export const auth = betterAuth({
       enabled: true,
       sendDeleteAccountVerification: async ({ user, url }) => {
         await resend.emails.send({
-          from: "Matteo from Badget <onboarding@resend.dev>",
+          from: "Matteo from Badget <noreply@badget.xyz>",
           to: user.email, // verification email must be sent to the current user email to approve the change
           subject: "Delete account",
           text: `Click the link to confirm account deletion: ${url}`,
@@ -107,7 +108,7 @@ export const auth = betterAuth({
           await resend.emails.send({
             to: user.email,
             subject: "Welcome to Badget",
-            from: "Matteo from Badget <onboarding@resend.dev>",
+            from: "Matteo from Badget <noreply@badget.xyz>",
             html: await render(
               WelcomeEmail({
                 fullName: user.name,
@@ -139,7 +140,7 @@ export const auth = betterAuth({
     // it sends the reset password token using resend to your email
     sendResetPassword: async ({ user, url }) => {
       const { data, error } = await resend.emails.send({
-        from: "Acme <onboarding@resend.dev>",
+        from: "Badget <noreply@badget.xyz>",
         to: user.email,
         subject: "Reset your password",
         html: `Click the link to reset your password: ${url}`,
@@ -189,6 +190,19 @@ export const auth = betterAuth({
             },
           },
         },
+      },
+      async sendInvitationEmail({ email, organization }) {
+        const url = `${getUrl()}/spaces`;
+
+        const { data, error } = await resend.emails.send({
+          from: "Badget <noreply@badget.xyz>",
+          to: email,
+          subject: `Invitation to join ${organization.name}`,
+          html: `Click the link to join the ${organization.name} space: ${url}`,
+        });
+
+        console.debug(data);
+        console.error(error);
       },
     }),
     username(),
