@@ -5,20 +5,28 @@ import type {
   cancelInvitationSchema,
   createInvitationSchema,
   getInvitationSchema,
+  getInvitationsSchema,
   getUserInvitationsSchema,
   rejectInvitationSchema,
 } from "~/shared/validators/space.schema";
 
 export async function getSpaceInvitations(
   headers: Headers,
+  input: z.infer<typeof getInvitationsSchema>,
   organizationId: string,
 ) {
-  const data = await auth.api.listInvitations({
+  let data = await auth.api.listInvitations({
     headers,
     query: {
       organizationId,
     },
   });
+
+  if (input?.status) {
+    data = data.filter((invitation) =>
+      input.status?.includes(invitation.status),
+    );
+  }
 
   return data;
 }

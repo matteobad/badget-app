@@ -21,7 +21,9 @@ export function DataTable() {
   const trpc = useTRPC();
 
   const { data } = useSuspenseQuery({
-    ...trpc.space.listInvitations.queryOptions(),
+    ...trpc.space.listInvitations.queryOptions({
+      status: ["pending"],
+    }),
   });
 
   const table = useReactTable({

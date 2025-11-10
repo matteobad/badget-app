@@ -20,6 +20,7 @@ import {
   createInvitationSchema,
   createInvitationsSchema,
   getInvitationSchema,
+  getInvitationsSchema,
   getSpaceSchema,
   getUserInvitationsSchema,
   rejectInvitationSchema,
@@ -80,11 +81,11 @@ export const spacesRouter = createTRPCRouter({
       );
     }),
 
-  listInvitations: protectedProcedure.query(
-    async ({ ctx: { headers, orgId } }) => {
-      return await getSpaceInvitations(headers, orgId!);
-    },
-  ),
+  listInvitations: protectedProcedure
+    .input(getInvitationsSchema)
+    .query(async ({ ctx: { headers, orgId }, input }) => {
+      return await getSpaceInvitations(headers, input, orgId!);
+    }),
 
   listUserInvitations: protectedProcedure
     .input(getUserInvitationsSchema)

@@ -17,6 +17,14 @@ export const updateMemberRoleSchema = z.object({
 });
 
 // Invitations
+export const getInvitationsSchema = z
+  .object({
+    status: z
+      .array(z.enum(["accepted", "rejected", "pending", "canceled"]))
+      .optional(),
+  })
+  .optional();
+
 export const getUserInvitationsSchema = z.object({
   email: z.email(),
 });
