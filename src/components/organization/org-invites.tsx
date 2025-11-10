@@ -3,7 +3,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
-// import { TeamInvite } from "./team-invite";
+import { TeamInvite } from "./team-invite";
 
 export function OrganizationInvites() {
   const trpc = useTRPC();
@@ -17,8 +17,7 @@ export function OrganizationInvites() {
 
       <div className="mt-6 space-y-4">
         {invites.map((invite) => (
-          <div key={invite.id}></div>
-          // <TeamInvite key={invite.id} invite={invite} />
+          <TeamInvite key={invite.id} invite={invite} />
         ))}
       </div>
     </div>

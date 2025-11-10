@@ -1,100 +1,105 @@
-// "use client";
+"use client";
 
-// import { useTRPC } from "@/trpc/client";
-// import type { RouterOutputs } from "@api/trpc/routers/_app";
-// import { Avatar, AvatarFallback } from "@midday/ui/avatar";
-// import { AvatarImage } from "@midday/ui/avatar";
-// import { SubmitButton } from "@midday/ui/submit-button";
-// import { useMutation, useQueryClient } from "@tanstack/react-query";
-// import { useRouter } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { SubmitButton } from "~/components/submit-button";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import type { RouterOutput } from "~/server/api/trpc/routers/_app";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 
-// type Props = {
-//   invite: RouterOutputs["team"]["invitesByEmail"][number];
-// };
+type Props = {
+  invite: RouterOutput["space"]["listUserInvitations"][number];
+};
 
-// export function TeamInvite({ invite }: Props) {
-//   const trpc = useTRPC();
-//   const queryClient = useQueryClient();
-//   const router = useRouter();
+export function TeamInvite({ invite }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
-//   const updateUserMutation = useMutation(
-//     trpc.user.update.mutationOptions({
-//       onSuccess: async () => {
-//         await queryClient.invalidateQueries();
-//         router.push("/");
-//       },
-//     }),
-//   );
+  const { data: space } = useQuery(
+    trpc.space.getSpace.queryOptions({
+      id: invite.organizationId,
+    }),
+  );
 
-//   const acceptInviteMutation = useMutation(
-//     trpc.team.acceptInvite.mutationOptions({
-//       onSuccess: (data) => {
-//         if (!data.teamId) {
-//           return;
-//         }
+  const updateUserMutation = useMutation(
+    trpc.user.update.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries();
+        router.push("/overview");
+      },
+    }),
+  );
 
-//         // Update the user's teamId
-//         updateUserMutation.mutate({
-//           teamId: data.teamId,
-//         });
-//       },
-//     }),
-//   );
+  const acceptInviteMutation = useMutation(
+    trpc.space.acceptInvitation.mutationOptions({
+      onSuccess: (data) => {
+        if (!data?.invitation.organizationId) {
+          return;
+        }
 
-//   const declineInviteMutation = useMutation(
-//     trpc.team.declineInvite.mutationOptions({
-//       onSuccess: () => {
-//         queryClient.invalidateQueries({
-//           queryKey: trpc.team.invitesByEmail.queryKey(),
-//         });
-//       },
-//     }),
-//   );
+        // Update the user's teamId
+        updateUserMutation.mutate({
+          defaultOrganizationId: data?.invitation.organizationId,
+        });
+      },
+    }),
+  );
 
-//   return (
-//     <div className="flex justify-between items-center">
-//       <div className="flex items-center gap-4">
-//         <Avatar className="size-8 rounded-none">
-//           <AvatarImage
-//             src={invite.team?.logoUrl ?? ""}
-//             className="rounded-none"
-//             width={32}
-//             height={32}
-//           />
-//           <AvatarFallback className="rounded-none">
-//             <span className="text-xs">
-//               {invite.team?.name?.charAt(0)?.toUpperCase()}
-//             </span>
-//           </AvatarFallback>
-//         </Avatar>
+  const declineInviteMutation = useMutation(
+    trpc.space.rejectInvitation.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.space.listUserInvitations.queryKey(),
+        });
+      },
+    }),
+  );
 
-//         <span className="text-sm font-medium">{invite.team?.name}</span>
-//       </div>
+  return (
+    <div className="flex justify-between items-center">
+      <div className="flex items-center gap-4">
+        <Avatar className="size-8 rounded-none">
+          <AvatarImage
+            src={space?.logo ?? ""}
+            className="rounded-none"
+            width={32}
+            height={32}
+          />
+          <AvatarFallback className="rounded-none">
+            <span className="text-xs">
+              {space?.name?.charAt(0)?.toUpperCase()}
+            </span>
+          </AvatarFallback>
+        </Avatar>
 
-//       <div className="flex gap-2">
-//         <SubmitButton
-//           isSubmitting={acceptInviteMutation.isPending}
-//           variant="outline"
-//           onClick={() =>
-//             acceptInviteMutation.mutate({
-//               id: invite.id,
-//             })
-//           }
-//         >
-//           Accept
-//         </SubmitButton>
-//         <SubmitButton
-//           isSubmitting={declineInviteMutation.isPending}
-//           variant="outline"
-//           onClick={() =>
-//             declineInviteMutation.mutate({
-//               id: invite.id,
-//             })
-//           }
-//         >
-//           Decline
-//         </SubmitButton>
-//       </div>
-//     </div>
-//   );
-// }
+        <span className="text-sm font-medium">{space?.name}</span>
+      </div>
+
+      <div className="flex gap-2">
+        <SubmitButton
+          isSubmitting={acceptInviteMutation.isPending}
+          variant="outline"
+          onClick={() =>
+            acceptInviteMutation.mutate({
+              invitationId: invite.id,
+            })
+          }
+        >
+          Accept
+        </SubmitButton>
+        <SubmitButton
+          isSubmitting={declineInviteMutation.isPending}
+          variant="outline"
+          onClick={() =>
+            declineInviteMutation.mutate({
+              invitationId: invite.id,
+            })
+          }
+        >
+          Decline
+        </SubmitButton>
+      </div>
+    </div>
+  );
+}

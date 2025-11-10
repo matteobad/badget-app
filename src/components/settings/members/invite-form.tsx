@@ -39,6 +39,10 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
 
   const createInvitationsMutation = useMutation(
     trpc.space.createInvitations.mutationOptions({
+      onError: (error) => {
+        console.error(error);
+        toast.error(error.message);
+      },
       onSuccess: (data) => {
         queryClient.invalidateQueries({
           queryKey: trpc.space.listInvitations.queryKey(),

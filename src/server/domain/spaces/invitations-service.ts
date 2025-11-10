@@ -52,10 +52,12 @@ export async function getInvitation(
 }
 
 export async function createInvitation(
+  headers: Headers,
   params: z.infer<typeof createInvitationSchema>,
   organizationId: string, // TODO: check permission to cancel invitation
 ) {
   const data = await auth.api.createInvitation({
+    headers,
     body: {
       email: params.email, // required
       role: params.role, // required

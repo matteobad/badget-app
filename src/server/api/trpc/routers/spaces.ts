@@ -13,7 +13,7 @@ import {
   removeMember,
   updateMemberRole,
 } from "~/server/domain/spaces/members-service";
-import { getSpace } from "~/server/domain/spaces/spaces-service";
+import { getFullSpace, getSpace } from "~/server/domain/spaces/spaces-service";
 import {
   acceptInvitationSchema,
   cancelInvitationSchema,
@@ -32,8 +32,14 @@ export const spacesRouter = createTRPCRouter({
   // Spaces
   getSpace: protectedProcedure
     .input(getSpaceSchema)
+    .query(async ({ ctx: { db }, input }) => {
+      return await getSpace(db, input);
+    }),
+
+  getFullSpace: protectedProcedure
+    .input(getSpaceSchema)
     .query(async ({ ctx: { headers }, input }) => {
-      return await getSpace(input, headers);
+      return await getFullSpace(input, headers);
     }),
 
   // Members
@@ -60,15 +66,17 @@ export const spacesRouter = createTRPCRouter({
   // Invitations
   createInvitation: protectedProcedure
     .input(createInvitationSchema)
-    .mutation(async ({ ctx: { orgId }, input }) => {
-      return await createInvitation(input, orgId!);
+    .mutation(async ({ ctx: { orgId, headers }, input }) => {
+      return await createInvitation(headers, input, orgId!);
     }),
 
   createInvitations: protectedProcedure
     .input(createInvitationsSchema)
-    .mutation(async ({ ctx: { orgId }, input }) => {
+    .mutation(async ({ ctx: { orgId, headers }, input }) => {
       return await Promise.all(
-        input.map((invitation) => createInvitation(invitation, orgId!)),
+        input.map((invitation) =>
+          createInvitation(headers, invitation, orgId!),
+        ),
       );
     }),
 
