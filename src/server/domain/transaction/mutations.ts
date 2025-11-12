@@ -2,7 +2,7 @@
 
 import { and, eq, inArray, ne } from "drizzle-orm";
 import type z from "zod";
-import type { DBClient, TXType } from "~/server/db";
+import type { DBClient } from "~/server/db";
 import { db } from "~/server/db";
 import {
   transaction_embeddings_table,
@@ -13,21 +13,7 @@ import type {
   TransactionFrequencyType,
   TransactionStatusType,
 } from "~/shared/constants/enum";
-import type {
-  createTransactionSchema,
-  deleteTransactionSchema,
-} from "~/shared/validators/transaction.schema";
-
-export async function createTransactionMutation(
-  tx: TXType,
-  input: z.infer<typeof createTransactionSchema>,
-  orgId: string,
-) {
-  return await tx
-    .insert(transaction_table)
-    .values({ ...input, organizationId: orgId })
-    .returning();
-}
+import type { deleteTransactionSchema } from "~/shared/validators/transaction.schema";
 
 type UpdateTransactionData = {
   id: string;

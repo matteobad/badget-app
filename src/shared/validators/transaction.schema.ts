@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { createSelectSchema } from "drizzle-zod";
 import type { DB_TransactionInsertType } from "~/server/db/schema/transactions";
 import { transaction_table } from "~/server/db/schema/transactions";
 import {
@@ -11,25 +11,7 @@ import {
 
 export const selectTransactionSchema = createSelectSchema(transaction_table);
 
-export const createTransactionSchema = createInsertSchema(transaction_table, {
-  note: z.string().optional(),
-  method: z.enum(TRANSACTION_METHOD),
-  status: z.enum(TRANSACTION_STATUS),
-  frequency: z.enum(TRANSACTION_FREQUENCY).optional(),
-  source: z.enum(TRANSACTION_SOURCE).optional(),
-})
-  .extend({
-    attachment_ids: z.array(z.string()).optional(),
-    tags: z.array(z.object({ id: z.string(), text: z.string() })).optional(),
-  })
-  .omit({
-    id: true,
-    createdAt: true,
-    updatedAt: true,
-    organizationId: true,
-  });
-
-export const createManualTransactionSchema = z.object({
+export const createTransactionSchema = z.object({
   amount: z.number().refine((val) => Math.abs(val) > 0, {
     message: "Amount must be greater than 0",
   }),
@@ -39,12 +21,12 @@ export const createManualTransactionSchema = z.object({
   description: z.string(),
   counterparty: z.string().optional(),
   status: z.enum(TRANSACTION_STATUS).optional(),
-  source: z.enum(TRANSACTION_SOURCE).optional(),
-  method: z.enum(TRANSACTION_METHOD).optional(),
+  source: z.enum(TRANSACTION_SOURCE),
+  method: z.enum(TRANSACTION_METHOD),
   frequency: z.enum(TRANSACTION_FREQUENCY).optional(),
   internal: z.boolean().optional(),
   note: z.string().optional(),
-  accountId: z.uuid(),
+  bankAccountId: z.uuid(),
   transferId: z.uuid().optional(),
   categorySlug: z.string().optional(),
   attachments: z
@@ -59,14 +41,6 @@ export const createManualTransactionSchema = z.object({
     .optional(),
   tags: z.array(z.object({ id: z.string(), text: z.string() })).optional(),
   transactionType: z.enum(["income", "expense"]),
-});
-
-export const createTransferSchema = z.object({
-  fromAccountId: z.uuid(),
-  toAccountId: z.uuid(),
-  amount: z.number(),
-  date: z.iso.date(),
-  description: z.string().min(1),
 });
 
 export const updateTransactionSchema = z.object({
@@ -114,10 +88,6 @@ export const updateTransactionSchema = z.object({
 });
 
 export const deleteTransactionSchema = z.object({
-  id: z.uuid(),
-});
-
-export const deleteTranferSchema = z.object({
   id: z.uuid(),
 });
 

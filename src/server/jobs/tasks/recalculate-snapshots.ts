@@ -1,10 +1,7 @@
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod/v4";
 import { db } from "~/server/db";
-import {
-  adjustBalanceOffsets,
-  recalculateSnapshots,
-} from "~/server/services/balance-snapshots-service";
+import { recalculateSnapshots } from "~/server/services/balance-snapshots-service";
 
 /**
  * Task to recalculate daily balance snapshots for a bank account.
@@ -22,8 +19,6 @@ export const recalculateSnapshotsTask = schemaTask({
   }),
   run: async ({ accountId, fromDate, organizationId }) => {
     try {
-      // Adjust balance offsets for manual accounts
-      await adjustBalanceOffsets(db, { accountId, fromDate }, organizationId);
       // Recalculate snapshots from the affected date
       await recalculateSnapshots(db, { accountId, fromDate }, organizationId);
     } catch (error) {

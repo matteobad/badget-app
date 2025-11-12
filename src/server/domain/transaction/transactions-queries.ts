@@ -1,5 +1,6 @@
 "server-only";
 
+import { tasks } from "@trigger.dev/sdk";
 import {
   and,
   asc,
@@ -27,7 +28,13 @@ import {
   transaction_to_tag_table,
 } from "~/server/db/schema/transactions";
 import { buildSearchQuery } from "~/server/db/utils";
-import type { TransactionFrequencyType } from "~/shared/constants/enum";
+import type { embedTransactionsTask } from "~/server/jobs/tasks/embed-transactions";
+import type {
+  TransactionFrequencyType,
+  TransactionMethodType,
+  TransactionSourceType,
+} from "~/shared/constants/enum";
+import { calculateFingerprint, normalizeDescription } from "./utils";
 
 export type GetTransactionsParams = {
   // ownership
@@ -581,4 +588,81 @@ export async function getTransactionByIdQuery(
     ...rest,
     account: newAccount,
   };
+}
+
+// Helper function to get full transaction data by ID with the same structure as getTransactionById
+async function getFullTransactionData(
+  db: DBClient,
+  transactionId: string,
+  organizationId: string,
+) {
+  return getTransactionByIdQuery(db, { id: transactionId, organizationId });
+}
+
+type CreateTransactionParams = {
+  organizationId: string;
+  bankAccountId: string;
+  amount: number;
+  currency: string;
+  date: string;
+  name: string;
+  method: TransactionMethodType;
+  categorySlug?: string;
+  note?: string | null;
+  internal?: boolean;
+  source?: TransactionSourceType;
+  notified?: boolean;
+  attachments?: Attachment[];
+};
+
+export async function createTransactionMutation(
+  db: DBClient,
+  params: CreateTransactionParams,
+) {
+  const { organizationId, attachments, bankAccountId, categorySlug, ...rest } =
+    params;
+
+  // Create normalized transaction for fingerprint calculation
+  const fingerprint = calculateFingerprint({
+    accountId: bankAccountId,
+    amount: params.amount,
+    date: new Date(params.date),
+    descriptionNormalized: normalizeDescription(params.name),
+  });
+
+  const [inserted] = await db
+    .insert(transaction_table)
+    .values({
+      ...rest,
+      organizationId,
+      categorySlug,
+      fingerprint,
+      accountId: bankAccountId,
+      status: "posted",
+    })
+    .returning({
+      id: transaction_table.id,
+    });
+
+  if (!inserted) {
+    return null;
+  }
+
+  if (attachments) {
+    await db.insert(transaction_attachment_table).values(
+      attachments.map((attachment) => ({
+        ...attachment,
+        transactionId: inserted.id,
+        organizationId,
+      })),
+    );
+  }
+
+  // generate transaction embeddings in background
+  tasks.trigger<typeof embedTransactionsTask>("embed-transactions", {
+    transactionIds: [inserted.id],
+    organizationId,
+  });
+
+  return getFullTransactionData(db, inserted.id, organizationId);
 }

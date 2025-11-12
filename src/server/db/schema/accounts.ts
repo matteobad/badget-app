@@ -1,4 +1,4 @@
-import { index, pgEnum, unique, uniqueIndex } from "drizzle-orm/pg-core";
+import { index, pgEnum, unique } from "drizzle-orm/pg-core";
 
 import type {
   AccountSubtype,
@@ -104,40 +104,6 @@ export const balance_snapshot_table = pgTable(
 export type DB_BalanceSnapshotType = typeof balance_snapshot_table.$inferSelect;
 export type DB_BalanceSnapshotInsertType =
   typeof balance_snapshot_table.$inferInsert;
-
-// Table for balance offsets (for manual accounts)
-export const balance_offset_table = pgTable(
-  "balance_offset_table",
-  (d) => ({
-    id: d.uuid().defaultRandom().primaryKey().notNull(),
-
-    organizationId: d
-      .uuid()
-      .references(() => organization_table.id, { onDelete: "cascade" })
-      .notNull(),
-    accountId: d
-      .uuid()
-      .references(() => account_table.id, { onDelete: "cascade" })
-      .notNull(),
-
-    effectiveDatetime: d
-      .timestamp({ withTimezone: true, mode: "string" })
-      .notNull(),
-    amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
-
-    ...timestamps,
-  }),
-  (t) => [
-    uniqueIndex("balance_offset_account_datetime_idx").on(
-      t.accountId,
-      t.effectiveDatetime.desc(),
-    ),
-  ],
-);
-
-export type DB_BalanceOffsetType = typeof balance_offset_table.$inferSelect;
-export type DB_BalanceOffsetInsertType =
-  typeof balance_offset_table.$inferInsert;
 
 // Table for import tracking
 export const import_table = pgTable(

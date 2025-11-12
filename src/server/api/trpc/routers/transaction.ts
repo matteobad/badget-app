@@ -5,11 +5,9 @@ import {
   getTransactions,
 } from "~/server/domain/transaction/transactions-service";
 import {
-  createManualTransaction,
-  createTransfer,
+  createTransaction,
   deleteManyTransactions,
   deleteTransaction,
-  deleteTransfer,
   getTransactionAccountCounts,
   getTransactionAmountRange,
   getTransactionCategoryCounts,
@@ -23,10 +21,8 @@ import {
   getTransactionSplits,
 } from "~/server/services/transaction-split-service";
 import {
-  createManualTransactionSchema,
-  createTransferSchema,
+  createTransactionSchema,
   deleteManyTransactionsSchema,
-  deleteTranferSchema,
   deleteTransactionSchema,
   getSimilarTransactionsSchema,
   getTransactionsSchema,
@@ -88,16 +84,10 @@ export const transactionRouter = createTRPCRouter({
     }),
 
   // Manual Transaction Management
-  createManualTransaction: protectedProcedure
-    .input(createManualTransactionSchema)
+  create: protectedProcedure
+    .input(createTransactionSchema)
     .mutation(async ({ ctx: { db, orgId }, input }) => {
-      return await createManualTransaction(db, input, orgId!);
-    }),
-
-  createTransfer: protectedProcedure
-    .input(createTransferSchema)
-    .mutation(async ({ ctx: { db, orgId }, input }) => {
-      return await createTransfer(db, input, orgId!);
+      return await createTransaction(db, input, orgId!);
     }),
 
   updateTransaction: protectedProcedure
@@ -110,12 +100,6 @@ export const transactionRouter = createTRPCRouter({
     .input(deleteTransactionSchema)
     .mutation(async ({ ctx: { db, orgId }, input }) => {
       return await deleteTransaction(db, input, orgId!);
-    }),
-
-  deleteTransfer: protectedProcedure
-    .input(deleteTranferSchema)
-    .mutation(async ({ ctx: { db, orgId }, input }) => {
-      return await deleteTransfer(db, input, orgId!);
     }),
 
   // Other Transaction Management

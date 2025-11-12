@@ -1,21 +1,24 @@
-import { tasks } from "@trigger.dev/sdk";
-import { min } from "date-fns";
-// import { updateOrCreateRule } from "~/utils/categorization";
-import { eq } from "drizzle-orm";
-import type z from "zod/v4";
+import {
+  addDays,
+  eachDayOfInterval,
+  format,
+  isAfter,
+  min,
+  subDays,
+} from "date-fns";
+import { and, asc, eq, lte, sql } from "drizzle-orm";
+import type z from "zod";
 import type {
   categorizeTransactionSchema,
-  createManualTransactionSchema,
-  createTransferSchema,
+  createTransactionSchema,
   deleteManyTransactionsSchema,
-  deleteTranferSchema,
   deleteTransactionSchema,
   updateTransactionSchema,
   updateTransactionsSchema,
 } from "~/shared/validators/transaction.schema";
 import type { DBClient } from "../db";
 import { db } from "../db";
-import { account_table } from "../db/schema/accounts";
+import { account_table, balance_snapshot_table } from "../db/schema/accounts";
 import { transaction_table } from "../db/schema/transactions";
 import {
   deleteManyTransactionsMutation,
@@ -28,16 +31,11 @@ import {
   getTransactionCategoryCountsQuery,
   getTransactionTagCountsQuery,
 } from "../domain/transaction/queries";
-import type { NormalizedTx } from "../domain/transaction/utils";
 import {
   calculateFingerprint,
-  generateTransferId,
   normalizeDescription,
-  validateTransferBalance,
 } from "../domain/transaction/utils";
-import type { embedTransactionsTask } from "../jobs/tasks/embed-transactions";
 import {
-  adjustBalanceOffsets,
   recalculateSnapshots,
   updateAccountBalance,
 } from "./balance-snapshots-service";
@@ -61,168 +59,136 @@ export async function getTransactionAccountCounts(orgId: string) {
 /**
  * Create a manual transaction
  */
-export async function createManualTransaction(
-  client: DBClient,
-  input: z.infer<typeof createManualTransactionSchema>,
+export async function createTransaction(
+  db: DBClient,
+  params: z.infer<typeof createTransactionSchema>,
   organizationId: string,
 ) {
-  return client.transaction(async (tx) => {
-    // Get account details
-    const [account] = await tx
+  const { bankAccountId, ...rest } = params;
+
+  const [bankAccount] = await db
+    .select()
+    .from(account_table)
+    .where(eq(account_table.id, bankAccountId))
+    .limit(1);
+
+  if (!bankAccount) {
+    throw new Error("ACCOUNT_NOT_FOUND");
+  }
+
+  if (bankAccount.organizationId !== organizationId) {
+    throw new Error("INVALID_ACCOUNT_PERMISSION");
+  }
+
+  const transactionDate = new Date(params.date);
+  const accountDate = new Date(bankAccount.t0Datetime!);
+
+  if (
+    params.source !== "api" &&
+    !bankAccount.manual &&
+    isAfter(transactionDate, accountDate)
+  ) {
+    throw new Error("INVALID_TRANSACTION_CONNECTED_ACCOUNT");
+  }
+
+  const fingerprint = calculateFingerprint({
+    accountId: bankAccountId,
+    amount: params.amount,
+    date: transactionDate,
+    descriptionNormalized: normalizeDescription(params.name),
+  });
+
+  const [existing] = await db
+    .select()
+    .from(transaction_table)
+    .where(eq(transaction_table.fingerprint, fingerprint))
+    .limit(1);
+
+  if (existing) {
+    throw new Error("TRANSACTION_FINGERPRINT_CONFLICT");
+  }
+
+  const [transaction] = await db
+    .insert(transaction_table)
+    .values({
+      ...rest,
+      accountId: bankAccountId,
+      fingerprint,
+      organizationId,
+    })
+    .returning();
+
+  if (!transaction) {
+    throw new Error("TRANSACTION_INSERT_ERROR");
+  }
+
+  if (!bankAccount.manual) {
+    const [snapshot] = await db
       .select()
-      .from(account_table)
-      .where(eq(account_table.id, input.accountId))
+      .from(balance_snapshot_table)
+      .where(
+        and(
+          eq(transaction_table.organizationId, organizationId),
+          eq(transaction_table.accountId, bankAccountId),
+          eq(transaction_table.date, format(accountDate, "yyyy-MM-dd")),
+        ),
+      )
       .limit(1);
 
-    if (!account) {
-      throw new Error(`Account ${input.accountId} not found`);
-    }
-
-    // Validate account allows manual transactions
-    if (!account.manual) {
-      throw new Error("Manual transactions not allowed for connected accounts");
-    }
-
-    // Create normalized transaction for fingerprint calculation
-    const date = new Date(input.date);
-    const normalizedTx: NormalizedTx = {
-      accountId: input.accountId,
-      amount: input.amount,
-      date: new Date(input.date),
-      descriptionNormalized: normalizeDescription(input.name),
-    };
-
-    const fingerprint = calculateFingerprint(normalizedTx);
-
-    // Check for duplicates
-    const existing = await tx
-      .select({ id: transaction_table.id })
+    const transactions = await db
+      .select()
       .from(transaction_table)
-      .where(eq(transaction_table.fingerprint, fingerprint))
-      .limit(1);
+      .where(
+        and(
+          eq(transaction_table.organizationId, organizationId),
+          eq(transaction_table.accountId, bankAccountId),
+          lte(transaction_table.date, format(accountDate, "yyyy-MM-dd")),
+        ),
+      )
+      .orderBy(asc(transaction_table.date));
 
-    if (existing.length > 0) {
-      throw new Error("Transaction with this fingerprint already exists");
-    }
+    const initialBalance = snapshot!.closingBalance;
+    const firstTransactionDate = new Date(transactions[0]!.date);
+    const snapshotsInterval = eachDayOfInterval({
+      start: subDays(firstTransactionDate, 1),
+      end: subDays(accountDate, 1),
+    });
 
-    // Insert the transaction
-    const [transaction] = await tx
-      .insert(transaction_table)
-      .values({
+    let closingBalance = initialBalance;
+    const snapshots = snapshotsInterval.map((date) => {
+      const dateString = format(addDays(date, 1), "yyyy-MM-dd");
+      const txs = transactions.filter((t) => t.date === dateString);
+      const txsBalance = txs.reduce((tot, t) => tot + t.amount, 0);
+      closingBalance = closingBalance - txsBalance;
+
+      return {
         organizationId,
-        accountId: input.accountId,
-        amount: input.amount,
-        currency: account.currency,
-        date: input.date,
-        name: input.name,
-        description: input.description,
-        method: input.method ?? "other",
-        status: input.status ?? "posted",
-        source: input.source ?? "manual",
-        transferId: input.transferId,
-        categorySlug: input.categorySlug,
-        note: input.note,
-        fingerprint,
-      })
-      .returning({ id: transaction_table.id });
+        accountId: bankAccountId,
+        date: dateString,
+        closingBalance: closingBalance,
+        currency: bankAccount.currency,
+      };
+    });
 
-    // Trigger embedding for the newly created manual transaction
-    if (transaction?.id) {
-      tasks.trigger<typeof embedTransactionsTask>("embed-transactions", {
-        transactionIds: [transaction.id],
-        organizationId,
+    await db
+      .insert(balance_snapshot_table)
+      .values(snapshots)
+      .onConflictDoUpdate({
+        target: [balance_snapshot_table.accountId, balance_snapshot_table.date],
+        set: {
+          closingBalance: sql.raw(
+            `excluded.${balance_snapshot_table.closingBalance}`,
+          ),
+          source: "derived",
+        },
       });
-    }
+  }
 
-    // Check if offset adjustment is needed
-    await adjustBalanceOffsets(
-      tx,
-      { accountId: input.accountId, fromDate: date },
-      organizationId,
-    );
+  if (bankAccount.manual && isAfter(transactionDate, accountDate)) {
+    // TODO: update balance and snapshots for manual account
+  }
 
-    // Recalculate snapshots from the affected date
-    await recalculateSnapshots(
-      tx,
-      { accountId: input.accountId, fromDate: date },
-      organizationId,
-    );
-
-    // Update account balance
-    await updateAccountBalance(
-      tx,
-      { accountId: input.accountId },
-      organizationId,
-    );
-
-    return { id: transaction!.id, fingerprint };
-  });
-}
-
-/**
- * Create a transfer (double-entry transaction)
- */
-export async function createTransfer(
-  client: DBClient,
-  input: z.infer<typeof createTransferSchema>,
-  organizationId: string,
-) {
-  return client.transaction(async (tx) => {
-    // Validate accounts exist and belong to organization
-    const accounts = await tx
-      .select()
-      .from(account_table)
-      .where(eq(account_table.organizationId, organizationId));
-
-    const fromAccount = accounts.find((a) => a.id === input.fromAccountId);
-    const toAccount = accounts.find((a) => a.id === input.toAccountId);
-
-    if (!fromAccount || !toAccount) {
-      throw new Error("One or both accounts not found");
-    }
-
-    // Generate transfer ID
-    const transferId = generateTransferId();
-
-    // Create outgoing transaction
-    const fromTransaction = await createManualTransaction(
-      tx,
-      {
-        accountId: input.fromAccountId,
-        amount: -input.amount, // Negative for outgoing
-        date: input.date,
-        description: `Transfer to ${toAccount.name}: ${input.description}`,
-        name: `Transfer to ${toAccount.name}: ${input.description}`,
-        counterparty: toAccount.name,
-        transferId: transferId,
-        currency: "EUR",
-        transactionType: "expense",
-      },
-      organizationId,
-    );
-
-    // Create incoming transaction
-    const toTransaction = await createManualTransaction(
-      tx,
-      {
-        accountId: input.toAccountId,
-        amount: input.amount, // Positive for incoming
-        date: input.date,
-        description: `Transfer from ${fromAccount.name}: ${input.description}`,
-        name: `Transfer to ${toAccount.name}: ${input.description}`,
-        counterparty: fromAccount.name,
-        transferId: transferId,
-        currency: "EUR",
-        transactionType: "income",
-      },
-      organizationId,
-    );
-
-    return {
-      fromTransactionId: fromTransaction.id,
-      toTransactionId: toTransaction.id,
-    };
-  });
+  return transaction;
 }
 
 /**
@@ -272,17 +238,6 @@ export async function updateTransaction(
         input.date ? new Date(input.date) : new Date(),
         new Date(existing.date),
       ]);
-
-      // Check if offset adjustment is needed
-      console.debug("[transaction-service] adjusting balance offset");
-      await adjustBalanceOffsets(
-        tx,
-        {
-          accountId: input.bankAccountId ?? existing.accountId,
-          fromDate: affectedDate,
-        },
-        organizationId,
-      );
 
       console.debug("[transaction-service] recalculating snapshots");
       await recalculateSnapshots(
@@ -376,61 +331,6 @@ export async function deleteTransaction(
       { accountId: existingTransaction.accountId },
       organizationId,
     );
-  });
-}
-
-/**
- * Delete an entire transfer
- */
-export async function deleteTransfer(
-  client: DBClient,
-  input: z.infer<typeof deleteTranferSchema>,
-  organizationId: string,
-) {
-  return client.transaction(async (tx) => {
-    // Get all transactions in the transfer
-    const transferTransactions = await tx
-      .select()
-      .from(transaction_table)
-      .where(eq(transaction_table.transferId, input.id));
-
-    if (!transferTransactions[0]) {
-      throw new Error(`Transfer ${input.id} not found`);
-    }
-
-    // Validate organization ownership
-    const firstTransaction = transferTransactions[0];
-    if (firstTransaction.organizationId !== organizationId) {
-      throw new Error("Transfer not found");
-    }
-
-    // Validate transfer balance
-    const balanceValidation = validateTransferBalance(transferTransactions);
-    if (!balanceValidation.valid) {
-      console.warn(
-        `Transfer ${input.id} has invalid balance: ${balanceValidation.total}`,
-      );
-    }
-
-    // Get the earliest date for snapshot recalculation
-    const dates = transferTransactions.map((t) => new Date(t.date));
-    const earliestDate = new Date(Math.min(...dates.map((d) => d.getTime())));
-
-    // Delete all transactions in the transfer
-    await tx
-      .delete(transaction_table)
-      .where(eq(transaction_table.transferId, input.id));
-
-    // Recalculate snapshots for all affected accounts
-    const accountIds = [
-      ...new Set(transferTransactions.map((t) => t.accountId)),
-    ];
-
-    for (const accountId of accountIds) {
-      const input = { accountId, fromDate: earliestDate };
-      await recalculateSnapshots(tx, input, organizationId);
-      await updateAccountBalance(tx, { accountId }, organizationId);
-    }
   });
 }
 

@@ -59,7 +59,7 @@ import { cn } from "~/lib/utils";
 import { uniqueCurrencies } from "~/shared/constants/currencies";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 import { useScopedI18n } from "~/shared/locales/client";
-import { createManualTransactionSchema } from "~/shared/validators/transaction.schema";
+import { createTransactionSchema } from "~/shared/validators/transaction.schema";
 
 export default function CreateTransactionForm() {
   const [selectedCategory, setSelectedCategory] = useState<{
@@ -95,7 +95,7 @@ export default function CreateTransactionForm() {
   // );
 
   const createTransactionMutation = useMutation(
-    trpc.transaction.createManualTransaction.mutationOptions({
+    trpc.transaction.create.mutationOptions({
       onError: (error) => {
         toast.error(error.message);
       },
@@ -121,25 +121,26 @@ export default function CreateTransactionForm() {
     }),
   );
 
-  const form = useForm<z.infer<typeof createManualTransactionSchema>>({
-    resolver: zodResolver(createManualTransactionSchema),
+  const form = useForm<z.infer<typeof createTransactionSchema>>({
+    resolver: zodResolver(createTransactionSchema),
     defaultValues: {
-      categorySlug: "uncategorized",
       date: formatISO(new Date(), { representation: "date" }),
       description: "",
       currency: space?.baseCurrency ?? "EUR",
-      accountId: accounts?.at(0)?.id,
+      bankAccountId: accounts?.at(0)?.id,
       attachments: undefined,
       transactionType: "expense" as const,
+      source: "manual",
+      method: "unknown",
     },
   });
 
   const attachments = form.watch("attachments");
-  const bankAccountId = form.watch("accountId");
+  const bankAccountId = form.watch("bankAccountId");
   const currency = form.watch("currency");
   const transactionType = form.watch("transactionType");
 
-  const onSubmit = (data: z.infer<typeof createManualTransactionSchema>) => {
+  const onSubmit = (data: z.infer<typeof createTransactionSchema>) => {
     // Amount is already stored with correct sign (negative for expense, positive for income)
     createTransactionMutation.mutate({
       ...data,
@@ -150,7 +151,7 @@ export default function CreateTransactionForm() {
     if (!bankAccountId && accounts?.length) {
       const firstAccountId = accounts.at(0)?.id;
       if (firstAccountId) {
-        form.setValue("accountId", firstAccountId);
+        form.setValue("bankAccountId", firstAccountId);
       }
     }
   }, [accounts, bankAccountId]);
@@ -358,7 +359,7 @@ export default function CreateTransactionForm() {
 
         <div className="grid grid-cols-2 gap-4">
           <Controller
-            name="accountId"
+            name="bankAccountId"
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>

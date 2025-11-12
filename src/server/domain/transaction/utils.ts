@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import { endOfDay, startOfDay } from "date-fns";
+import { endOfDay, isAfter, startOfDay } from "date-fns";
 import type { DB_TransactionType } from "~/server/db/schema/transactions";
-
+import type { TransactionSourceType } from "~/shared/constants/enum";
 import type { DB_AccountType } from "../../db/schema/accounts";
 
 // Types for the robust transaction system
@@ -38,35 +38,6 @@ export function normalizeDescription(description: string) {
     .trim()
     .replace(/\s+/g, " ") // Replace multiple spaces with single space
     .replace(/[^\w\s]/g, ""); // Remove special characters
-}
-
-/**
- * Apply offset for manual accounts when transactions are added before t0
- * Creates or updates an offset transaction at t0 to maintain balance consistency
- */
-export function applyOffset(
-  accountId: string,
-  t0: Date,
-  openingBalance: number,
-  transactionsBeforeT0: Array<{ amount: number; date: Date }>,
-) {
-  // Calculate the sum of all transactions before t0
-  const sumBeforeT0 = transactionsBeforeT0.reduce(
-    (sum, tx) => sum + tx.amount,
-    0,
-  );
-
-  // The offset should make the balance at t0 equal to opening_balance
-  // Balance(t0) = opening_balance + sum_before_t0 + offset
-  // Therefore: offset = opening_balance - sum_before_t0
-  const offsetAmount = openingBalance - sumBeforeT0;
-
-  return {
-    id: crypto.randomUUID(),
-    accountId: accountId,
-    effectiveDatetime: t0,
-    amount: offsetAmount,
-  };
 }
 
 /**
@@ -166,16 +137,6 @@ export function validateTransaction(
     };
   }
 
-  // Connected accounts: CSV import only before authoritative_from
-  if (!account.manual && isCsvImport && account.authoritativeFrom) {
-    if (transaction.date >= new Date(account.authoritativeFrom)) {
-      return {
-        valid: false,
-        reason: `CSV import not allowed after ${new Date(account.authoritativeFrom).toISOString()}`,
-      };
-    }
-  }
-
   // Manual accounts: validate t0_datetime is set
   if (account.manual && !account.t0Datetime) {
     return { valid: false, reason: "Manual account must have t0_datetime set" };
@@ -208,36 +169,24 @@ export function shouldAdjustOffset(
   return txStartOfDay < t0StartOfDay;
 }
 
-/**
- * Generate unique transfer ID for double-entry transactions
- */
-export function generateTransferId() {
-  return crypto.randomUUID();
-}
+type CanCreateTransactionParams = {
+  date: string;
+  source: TransactionSourceType;
+  isManualAccount: boolean;
+  accountCreationDate: string;
+};
 
-/**
- * Check if transaction is a transfer (has transfer_id)
- */
-export function isTransfer(transaction: DB_TransactionType) {
-  return transaction.transferId !== null;
-}
+export function canCreateTransaction(params: CanCreateTransactionParams) {
+  const { date, source, accountCreationDate, isManualAccount } = params;
 
-/**
- * Get all transactions in a transfer
- */
-export function getTransferTransactions(
-  transferId: string,
-  transactions: DB_TransactionType[],
-) {
-  return transactions.filter((tx) => tx.transferId === transferId);
-}
+  const transactionDate = new Date(date);
+  const accountT0Date = new Date(accountCreationDate);
 
-/**
- * Validate transfer balance (should sum to zero)
- */
-export function validateTransferBalance(
-  transferTransactions: DB_TransactionType[],
-) {
-  const total = transferTransactions.reduce((sum, tx) => sum + tx.amount, 0);
-  return { valid: Math.abs(total) < 0.01, total };
+  if (
+    !isManualAccount &&
+    source !== "api" &&
+    isAfter(transactionDate, accountT0Date)
+  ) {
+    throw new Error("Cannot create manual transaction in connected account");
+  }
 }

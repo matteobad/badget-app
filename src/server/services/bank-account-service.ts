@@ -21,7 +21,6 @@ import {
 import {
   recalculateSnapshots,
   updateAccountBalance,
-  upsertBalanceOffsets,
 } from "./balance-snapshots-service";
 
 export async function getBankAccounts(
@@ -83,17 +82,6 @@ export async function updateManualBankAccountBalance(
   organizationId: string,
 ) {
   await db.transaction(async (tx) => {
-    // Upsert balance offset from provided date
-    await upsertBalanceOffsets(
-      tx,
-      {
-        accountId: input.id,
-        fromDate: new Date(input.date),
-        targetBalance: input.balance,
-      },
-      organizationId,
-    );
-
     // Recalculate snapshots from the affected date
     await recalculateSnapshots(
       tx,
