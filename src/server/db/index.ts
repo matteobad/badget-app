@@ -42,7 +42,7 @@ const pool = new Pool({ connectionString });
 // export const drizzleClientHttp = drizzleHttp({
 //   client: sql,
 //   schema,
-//   logger: false, // env.NODE_ENV !== "production",
+//   logger: process.env.LOG_LEVEL === "debug",
 //   casing: "snake_case",
 // });
 
@@ -54,7 +54,7 @@ const pool = new Pool({ connectionString });
 export const drizzleClientWs = drizzleWs({
   client: pool,
   schema,
-  logger: false, // env.NODE_ENV !== "production",
+  logger: process.env.LOG_LEVEL === "debug",
   casing: "snake_case",
 });
 

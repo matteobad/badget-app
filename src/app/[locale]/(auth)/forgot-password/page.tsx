@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { ForgotPassword } from "~/components/auth/forgot-password";
+import { auth } from "~/shared/helpers/better-auth/auth";
 
 export const metadata: Metadata = {
   title: "Forgot Password | Badget.",
 };
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (session) return redirect("/overview");
+
   return (
     <div className="p-2">
       {/* Welcome Section */}

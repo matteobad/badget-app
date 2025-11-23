@@ -1,18 +1,24 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { APIError } from "better-auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useState } from "react";
+import { toast } from "sonner";
 import { signIn } from "~/shared/helpers/better-auth/auth-client";
-
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { Spinner } from "../ui/spinner";
 
 export function PasswordSignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [returnTo] = useQueryState("return_to");
+  const router = useRouter();
 
   return (
     <div className="grid gap-4">
@@ -56,28 +62,38 @@ export function PasswordSignIn() {
         className="w-full"
         disabled={loading}
         onClick={async () => {
-          await signIn.email(
-            {
-              email,
-              password,
-              callbackURL: "/overview",
-            },
-            {
-              onRequest: (_ctx) => {
-                setLoading(true);
+          try {
+            // Call the authClient's forgetPassword method, passing the email and a redirect URL.
+            await signIn.email(
+              {
+                email,
+                password,
               },
-              onResponse: (_ctx) => {
-                setLoading(false);
+              {
+                onRequest: () => {
+                  setLoading(true);
+                },
+                onResponse: () => {
+                  setLoading(false);
+                },
+                onError: (ctx) => {
+                  toast.error(ctx.error.message);
+                },
+                onSuccess: (ctx) => {
+                  if (ctx.data.twoFactorRedirect) router.push("/2fa");
+                  else router.push(returnTo ? `/${returnTo}` : "/");
+                },
               },
-            },
-          );
+            );
+          } catch (error) {
+            if (error instanceof APIError) {
+              console.log(error.message, error.status);
+              toast.error(error.message);
+            }
+          }
         }}
       >
-        {loading ? (
-          <Loader2 size={16} className="animate-spin" />
-        ) : (
-          <p> Login </p>
-        )}
+        {loading ? <Spinner /> : <p> Login </p>}
       </Button>
     </div>
   );

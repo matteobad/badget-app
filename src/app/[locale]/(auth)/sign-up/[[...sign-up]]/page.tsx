@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { SignUp } from "~/components/auth/sign-up";
+import { auth } from "~/shared/helpers/better-auth/auth";
 
 export const metadata: Metadata = {
   title: "Signup | Badget.",
 };
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (session) return redirect("/overview");
+
   const preferredSignInOption = <SignUp />;
 
   return (

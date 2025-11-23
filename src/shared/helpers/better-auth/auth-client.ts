@@ -1,9 +1,10 @@
+import { passkeyClient } from "@better-auth/passkey/client";
 import {
   adminClient,
   inferAdditionalFields,
   inferOrgAdditionalFields,
   organizationClient,
-  passkeyClient,
+  twoFactorClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
@@ -16,6 +17,7 @@ const authClient = createAuthClient({
     inferAdditionalFields<typeof auth>(),
     adminClient(),
     passkeyClient(),
+    twoFactorClient(),
     organizationClient({
       schema: inferOrgAdditionalFields<typeof auth>(),
     }),
@@ -26,9 +28,10 @@ export const {
   signIn,
   signOut,
   signUp,
-  forgetPassword,
+  requestPasswordReset,
   resetPassword,
   useSession,
   useActiveOrganization,
   organization,
+  twoFactor,
 } = authClient;

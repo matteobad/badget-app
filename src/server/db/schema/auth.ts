@@ -1,158 +1,296 @@
-import {
-  boolean,
-  integer,
-  jsonb,
-  text,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core";
-
+import { relations, sql } from "drizzle-orm";
+import { index } from "drizzle-orm/pg-core";
 import { numericCasted } from "../utils";
 import { pgTable } from "./_table";
 
-export const user = pgTable("user", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified")
-    .$defaultFn(() => false)
-    .notNull(),
-  image: text("image"),
-  createdAt: timestamp("created_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
-  role: text("role"),
-  banned: boolean("banned"),
-  banReason: text("ban_reason"),
-  banExpires: timestamp("ban_expires"),
-  twoFactorEnabled: boolean("two_factor_enabled"),
-  username: text("username").unique(),
-  displayUsername: text("display_username"),
+export const user = pgTable(
+  "user",
+  (d) => ({
+    id: d.uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+    createdAt: d.timestamp("created_at").defaultNow().notNull(),
+    updatedAt: d
+      .timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
 
-  // custom
-  defaultOrganizationId: text("default_organization_id").notNull().default(""),
-  locale: text().default("it-IT"),
-  weekStartsOnMonday: boolean("week_starts_on_monday").default(false),
-  timezone: text(),
-  timezoneAutoSync: boolean("timezone_auto_sync").default(true),
-  timeFormat: numericCasted("time_format").default(24),
-  dateFormat: text("date_format"),
-});
+    name: d.text("name").notNull(),
+    email: d.text("email").notNull().unique(),
+    emailVerified: d.boolean("email_verified").default(false).notNull(),
+    image: d.text("image"),
+    twoFactorEnabled: d.boolean("two_factor_enabled").default(false),
+    role: d.text("role"),
+    banned: d.boolean("banned").default(false),
+    banReason: d.text("ban_reason"),
+    banExpires: d.timestamp("ban_expires"),
+    username: d.text("username").unique(),
+    displayUsername: d.text("display_username"),
 
-export const session = pgTable("session", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  expiresAt: timestamp("expires_at").notNull(),
-  token: text("token").notNull().unique(),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  impersonatedBy: text("impersonated_by"),
-  activeOrganizationId: text("active_organization_id"),
-});
+    // additional fields
+    defaultOrganizationId: d
+      .text("default_organization_id")
+      .notNull()
+      .default(""),
+    locale: d.text().default("it-IT"),
+    weekStartsOnMonday: d.boolean("week_starts_on_monday").default(false),
+    timezone: d.text(),
+    timezoneAutoSync: d.boolean("timezone_auto_sync").default(true),
+    timeFormat: numericCasted("time_format").default(24),
+    dateFormat: d.text("date_format"),
+  }),
+  (t) => [index("user_email_idx").on(t.email)],
+);
 
-export const account = pgTable("account", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  idToken: text("id_token"),
-  accessTokenExpiresAt: timestamp("access_token_expires_at"),
-  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
-  scope: text("scope"),
-  password: text("password"),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
-});
+export const session = pgTable(
+  "session",
+  (d) => ({
+    id: d.uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+    createdAt: d.timestamp("created_at").defaultNow().notNull(),
+    updatedAt: d
+      .timestamp("updated_at")
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
 
-export const verification = pgTable("verification", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").$defaultFn(
-    () => /* @__PURE__ */ new Date(),
-  ),
-  updatedAt: timestamp("updated_at").$defaultFn(
-    () => /* @__PURE__ */ new Date(),
-  ),
-});
+    userId: d
+      .uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
 
-export const passkey = pgTable("passkey", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: text("name"),
-  publicKey: text("public_key").notNull(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  credentialID: text("credential_i_d").notNull(),
-  counter: integer("counter").notNull(),
-  deviceType: text("device_type").notNull(),
-  backedUp: boolean("backed_up").notNull(),
-  transports: text("transports"),
-  createdAt: timestamp("created_at"),
-  aaguid: text("aaguid"),
-});
+    expiresAt: d.timestamp("expires_at").notNull(),
+    token: d.text("token").notNull().unique(),
+    ipAddress: d.text("ip_address"),
+    userAgent: d.text("user_agent"),
+    impersonatedBy: d.text("impersonated_by"),
 
-export const twoFactor = pgTable("two_factor", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  secret: text("secret").notNull(),
-  backupCodes: text("backup_codes").notNull(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-});
+    // additional fields
+    activeOrganizationId: d.text("active_organization_id"),
+  }),
+  (t) => [
+    index("session_user_id_idx").on(t.userId),
+    index("session_token_idx").on(t.token),
+  ],
+);
 
-export const organization = pgTable("organization", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").unique(),
-  logo: text("logo"),
-  baseCurrency: text("base_currency"),
-  countryCode: text("country_code"),
-  email: text("email"),
-  createdAt: timestamp("created_at").notNull(),
-  metadata: text("metadata"),
+export const account = pgTable(
+  "account",
+  (d) => ({
+    id: d.uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+    createdAt: d.timestamp("created_at").defaultNow().notNull(),
+    updatedAt: d
+      .timestamp("updated_at")
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
 
-  // custom
-  exportSettings: jsonb("export_settings"),
-});
+    userId: d
+      .uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
 
-export const member = pgTable("member", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  organizationId: uuid("organization_id")
-    .notNull()
-    .references(() => organization.id, { onDelete: "cascade" }),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  role: text("role").default("member").notNull(),
-  createdAt: timestamp("created_at").notNull(),
-});
+    accountId: d.text("account_id").notNull(),
+    providerId: d.text("provider_id").notNull(),
+    accessToken: d.text("access_token"),
+    refreshToken: d.text("refresh_token"),
+    idToken: d.text("id_token"),
+    accessTokenExpiresAt: d.timestamp("access_token_expires_at"),
+    refreshTokenExpiresAt: d.timestamp("refresh_token_expires_at"),
+    scope: d.text("scope"),
+    password: d.text("password"),
+  }),
+  (t) => [index("account_user_id_idx").on(t.userId)],
+);
 
-export const invitation = pgTable("invitation", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  organizationId: uuid("organization_id")
-    .notNull()
-    .references(() => organization.id, { onDelete: "cascade" }),
-  email: text("email").notNull(),
-  role: text("role"),
-  status: text("status").default("pending").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  inviterId: uuid("inviter_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-});
+export const verification = pgTable(
+  "verification",
+  (d) => ({
+    id: d.uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+    createdAt: d.timestamp("created_at").defaultNow().notNull(),
+    updatedAt: d
+      .timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+
+    identifier: d.text("identifier").notNull(),
+    value: d.text("value").notNull(),
+    expiresAt: d.timestamp("expires_at").notNull(),
+  }),
+  (t) => [index("verification_identifier_idx").on(t.identifier)],
+);
+
+export const passkey = pgTable(
+  "passkey",
+  (d) => ({
+    id: d.uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+    createdAt: d.timestamp("created_at"),
+
+    userId: d
+      .uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+
+    name: d.text("name"),
+    publicKey: d.text("public_key").notNull(),
+    credentialID: d.text("credential_id").notNull(),
+    counter: d.integer("counter").notNull(),
+    deviceType: d.text("device_type").notNull(),
+    backedUp: d.boolean("backed_up").notNull(),
+    transports: d.text("transports"),
+    aaguid: d.text("aaguid"),
+  }),
+  (t) => [
+    index("passkey_user_id_idx").on(t.userId),
+    index("passkey_credential_id_idx").on(t.credentialID),
+  ],
+);
+
+export const twoFactor = pgTable(
+  "two_factor",
+  (d) => ({
+    id: d.uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+
+    userId: d
+      .uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+
+    secret: d.text("secret").notNull(),
+    backupCodes: d.text("backup_codes").notNull(),
+  }),
+  (t) => [
+    index("two_factor_secret_idx").on(t.secret),
+    index("twoFactor_user_id_idx").on(t.userId),
+  ],
+);
+
+export const organization = pgTable(
+  "organization",
+  (d) => ({
+    id: d.uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+    createdAt: d.timestamp("created_at").notNull(),
+
+    name: d.text("name").notNull(),
+    slug: d.text("slug").unique(),
+    logo: d.text("logo"),
+    metadata: d.text("metadata"),
+
+    // additional fields
+    baseCurrency: d.text("base_currency"),
+    countryCode: d.text("country_code"),
+    email: d.text("email"),
+    exportSettings: d.jsonb("export_settings"),
+  }),
+  (t) => [index("organization_slug_idx").on(t.slug)],
+);
+
+export const member = pgTable(
+  "member",
+  (d) => ({
+    id: d.uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+    createdAt: d.timestamp("created_at").notNull(),
+
+    organizationId: d
+      .uuid("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    userId: d
+      .uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+
+    role: d.text("role").default("member").notNull(),
+  }),
+  (t) => [
+    index("member_user_id_idx").on(t.userId),
+    index("member_organization_id_idx").on(t.organizationId),
+  ],
+);
+
+export const invitation = pgTable(
+  "invitation",
+  (d) => ({
+    id: d.uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+
+    inviterId: d
+      .uuid("inviter_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    organizationId: d
+      .uuid("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+
+    email: d.text("email").notNull(),
+    role: d.text("role"),
+    status: d.text("status").default("pending").notNull(),
+    expiresAt: d.timestamp("expires_at").notNull(),
+  }),
+  (t) => [
+    index("invitation_email_idx").on(t.email),
+    index("invitation_organization_id_idx").on(t.organizationId),
+  ],
+);
+
+export const userRelations = relations(user, ({ many }) => ({
+  sessions: many(session),
+  accounts: many(account),
+  passkeys: many(passkey),
+  twoFactors: many(twoFactor),
+}));
+
+export const sessionRelations = relations(session, ({ one }) => ({
+  user: one(user, {
+    fields: [session.userId],
+    references: [user.id],
+  }),
+}));
+
+export const accountRelations = relations(account, ({ one }) => ({
+  user: one(user, {
+    fields: [account.userId],
+    references: [user.id],
+  }),
+}));
+
+export const passkeyRelations = relations(passkey, ({ one }) => ({
+  user: one(user, {
+    fields: [passkey.userId],
+    references: [user.id],
+  }),
+}));
+
+export const twoFactorRelations = relations(twoFactor, ({ one }) => ({
+  user: one(user, {
+    fields: [twoFactor.userId],
+    references: [user.id],
+  }),
+}));
+
+export const organizationRelations = relations(organization, ({ many }) => ({
+  members: many(member),
+  invitations: many(invitation),
+}));
+
+export const memberRelations = relations(member, ({ one }) => ({
+  organization: one(organization, {
+    fields: [member.organizationId],
+    references: [organization.id],
+  }),
+  user: one(user, {
+    fields: [member.userId],
+    references: [user.id],
+  }),
+}));
+
+export const invitationRelations = relations(invitation, ({ one }) => ({
+  organization: one(organization, {
+    fields: [invitation.organizationId],
+    references: [organization.id],
+  }),
+  user: one(user, {
+    fields: [invitation.inviterId],
+    references: [user.id],
+  }),
+}));
 
 export type DB_UserType = typeof user.$inferSelect;
 export type DB_UserInsertType = typeof user.$inferInsert;

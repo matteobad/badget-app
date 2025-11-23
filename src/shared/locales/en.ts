@@ -241,6 +241,119 @@ export default {
   },
 
   account: {
+    security: {
+      change_password: {
+        title: "Change Password",
+        description: "Update your password for improved security.",
+        message: "New password should be different",
+        current_password_fld: "Current Password",
+        new_password_fld: "New Password",
+        new_password_msg: "Must be at least 8 characters long.",
+        revoke_fld: "Log out other sessions",
+        submit: "Save",
+      },
+
+      two_factor: {
+        title: "Two-Factor Authentication",
+        description:
+          "Manage two-factor authentication to further protect your account.",
+        info: "Learn more about 2FA",
+        enable: "Enable 2FA",
+        disable: "Disable 2FA",
+        code_fld: "Code",
+        code_msg:
+          "Scan this QR code with your authenticator app and enter the code below",
+        verify: "Verify",
+        backup_msg:
+          "Save these backup codes in a safe place. You can use them to access your account.",
+        download: "Download",
+        copy: "Dopy",
+        done: "Done",
+        status: {
+          enabled_title: "Enabled",
+          disabled_title: "Disabled",
+          enabled_description:
+            "Two-factor authentication is currently enabled for your account.",
+          disabled_description:
+            "Two-factor authentication is currently disabled for your account.",
+        },
+        access: {
+          title: "Two-Factor Authentication",
+          description:
+            "Enter a 6-digit code from your authenticator app, or use a backup code if you cannot access your authenticator.",
+          app_tab: "Autenticator App",
+          backup_tab: "Backup Code",
+        },
+      },
+
+      passkey: {
+        title: "Passkeys",
+        description:
+          "Manage your passkeys for secure, passwordless authentication.",
+        info: "Learn more about passkeys",
+        new_btn: "New Passkey",
+        new_title: "Add New Passkey",
+        new_description:
+          "Create a new passkey for secure, passwordless authentication.",
+        new_submit: "Add Passkey",
+        created: "Created {value}",
+        delete_title: "Are you absolutely sure?",
+        delete_decription:
+          "This action cannot be undone. This will permanently delete your passkey.",
+        delete_cancel: "Cancel",
+        delete_confirm: "Delete Passkey",
+
+        empty: {
+          title: "No Passkeys Yet",
+          description:
+            "You haven'&apos;'t created any passkeys yet. Get started by creating your first passkey.",
+        },
+      },
+    },
+    api_keys: {
+      title: "API Keys",
+      description: "Manage your API keys for secure access.",
+      message: "Generate API keys to access your account programmatically.",
+      dialog_title: "API Key",
+      dialog_description:
+        "Please enter a unique name for your API key to distinguish it from others.",
+      name_fld: "Nome",
+      expires_fld: "Scade",
+      create_btn: "Create Key",
+      key_lbl: "API Key",
+      key_msg:
+        "Please copy your API key and store it in a safe place. For security reasons we cannot show it again.",
+      done_btn: "Done",
+
+      created: "Created {date}",
+      expires: "Expires {distance}",
+
+      expirations: {
+        NO_EXPIRATION: "No Expiration",
+        ONE_DAY: "1 day",
+        SEVEN_DAYS: "7 days",
+        ONE_MONTH: "1 month",
+        TWO_MONTHS: "2 months",
+        THREE_MONTHS: "3 months",
+        SIX_MONTHS: "6 months",
+        ONE_YEAR: "1 year",
+      },
+
+      empty: {
+        title: "No Api Key Yet",
+        description:
+          "You haven'&apos;'t created any api key yet. Get started by creating your first api key.",
+      },
+
+      delete: {
+        title: "Are you absolutely sure?",
+        description:
+          "This action cannot be undone. This will permanently delete your API key.",
+        cancel_btn: "Cancel",
+        submit_btn: "Continue",
+      },
+    },
+
     actions: {
       add: "Add account",
       connect: "Connect account",

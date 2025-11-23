@@ -11,6 +11,16 @@ const I18nMiddleware = createI18nMiddleware({
   urlMappingStrategy: "rewrite",
 });
 
+const AUTH_ROUTES = [
+  "/sign-in",
+  "/sign-up",
+  "/forgot-password",
+  "/reset-password",
+  "/2fa",
+];
+
+const PUBLIC_ROUTES = ["/", "/privacy", "/terms", ...AUTH_ROUTES];
+
 export async function proxy(request: NextRequest) {
   const response = I18nMiddleware(request);
   const sessionCookie = getSessionCookie(request);
@@ -30,14 +40,7 @@ export async function proxy(request: NextRequest) {
   }`;
 
   // 1. Not authenticated
-  if (
-    !sessionCookie &&
-    newUrl.pathname !== "/" &&
-    newUrl.pathname !== "/sign-in" &&
-    newUrl.pathname !== "/sign-up" &&
-    newUrl.pathname !== "/privacy" &&
-    newUrl.pathname !== "/terms"
-  ) {
+  if (!sessionCookie && !PUBLIC_ROUTES.includes(newUrl.pathname)) {
     const url = new URL("/sign-in", request.url);
 
     if (encodedSearchParams) {

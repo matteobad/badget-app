@@ -1,11 +1,11 @@
 "server-only";
 
+import { passkey } from "@better-auth/passkey";
 import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { admin, organization, twoFactor, username } from "better-auth/plugins";
-import { passkey } from "better-auth/plugins/passkey";
 import { env } from "~/env";
 import { resend } from "~/lib/resend";
 import { db } from "~/server/db";
@@ -14,11 +14,17 @@ import WelcomeEmail from "~/shared/emails/emails/welcome-email";
 import { getUrl } from "../get-url";
 
 export const auth = betterAuth({
+  experimental: {
+    joins: true,
+  },
   advanced: {
     database: {
-      generateId: false,
+      generateId: "uuid",
     },
   },
+  database: drizzleAdapter(db, {
+    provider: "pg", // or "mysql", "sqlite"
+  }),
   user: {
     additionalFields: {
       defaultOrganizationId: {
@@ -88,9 +94,6 @@ export const auth = betterAuth({
       // },
     },
   },
-  database: drizzleAdapter(db, {
-    provider: "pg", // or "sqlite" or "mysql"
-  }),
   databaseHooks: {
     user: {
       create: {
