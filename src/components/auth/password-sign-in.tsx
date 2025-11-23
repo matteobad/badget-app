@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
 import { toast } from "sonner";
-import { signIn } from "~/shared/helpers/better-auth/auth-client";
+import { authClient } from "~/shared/helpers/better-auth/auth-client";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -64,7 +64,7 @@ export function PasswordSignIn() {
         onClick={async () => {
           try {
             // Call the authClient's forgetPassword method, passing the email and a redirect URL.
-            await signIn.email(
+            await authClient.signIn.email(
               {
                 email,
                 password,

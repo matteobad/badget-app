@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type z from "zod";
-import { twoFactor } from "~/shared/helpers/better-auth/auth-client";
+import { authClient } from "~/shared/helpers/better-auth/auth-client";
 import { useScopedI18n } from "~/shared/locales/client";
 import { verifyTotpSchema } from "~/shared/validators/user.schema";
 import { Button } from "../ui/button";
@@ -28,7 +28,7 @@ export function VerifyTotpForm() {
 
   const onSubmit = async (data: z.infer<typeof verifyTotpSchema>) => {
     try {
-      await twoFactor.verifyTotp(data, {
+      await authClient.twoFactor.verifyTotp(data, {
         onRequest: () => {
           setLoading(true);
         },

@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { useUserQuery } from "~/hooks/use-user";
-import { signOut } from "~/shared/helpers/better-auth/auth-client";
+import { authClient } from "~/shared/helpers/better-auth/auth-client";
 import { getInitials } from "~/shared/helpers/format";
 
 import { ThemeSelect } from "./theme-select";
@@ -91,7 +91,7 @@ export function NavUser() {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => {
-            void signOut({
+            void authClient.signOut({
               fetchOptions: {
                 onSuccess: () => {
                   router.push("/sign-in"); // redirect to login page

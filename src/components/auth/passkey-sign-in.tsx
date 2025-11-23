@@ -3,7 +3,7 @@
 import { KeyIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { signIn } from "~/shared/helpers/better-auth/auth-client";
+import { authClient } from "~/shared/helpers/better-auth/auth-client";
 
 import { Button } from "../ui/button";
 
@@ -17,7 +17,7 @@ export function PasskeySignIn() {
       disabled={loading}
       className="w-full"
       onClick={async () => {
-        await signIn.passkey({
+        await authClient.signIn.passkey({
           // email: "example@gmail.com", // required
           autoFill: true,
           fetchOptions: {

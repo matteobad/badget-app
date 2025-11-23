@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod/v4";
-import { requestPasswordReset } from "~/shared/helpers/better-auth/auth-client";
+import { authClient } from "~/shared/helpers/better-auth/auth-client";
 
 import { SubmitButton } from "../submit-button";
 import {
@@ -37,7 +37,7 @@ export const ForgotPassword = () => {
   const onSubmit = async (values: z.infer<typeof forgotPasswordSchema>) => {
     try {
       // Call the authClient's forgetPassword method, passing the email and a redirect URL.
-      await requestPasswordReset(
+      await authClient.requestPasswordReset(
         {
           email: values.email, // Email to which the reset password link should be sent.
           redirectTo: "/reset-password", // URL to redirect the user after resetting the password.

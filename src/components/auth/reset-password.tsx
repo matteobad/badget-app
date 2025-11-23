@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod/v4";
-import { resetPassword } from "~/shared/helpers/better-auth/auth-client";
+import { authClient } from "~/shared/helpers/better-auth/auth-client";
 
 import { SubmitButton } from "../submit-button";
 import {
@@ -53,7 +53,7 @@ export const ResetPassword = ({ token }: { token: string }) => {
   const onSubmit = async (values: z.infer<typeof resetPasswordSchema>) => {
     try {
       // Call the authClient's reset password method, passing the email and a redirect URL.
-      await resetPassword(
+      await authClient.resetPassword(
         {
           newPassword: values.password, // new password given by user
           token,

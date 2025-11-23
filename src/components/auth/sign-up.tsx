@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { signUp } from "~/shared/helpers/better-auth/auth-client";
+import { authClient } from "~/shared/helpers/better-auth/auth-client";
 
 export function SignUp() {
   const [firstName, setFirstName] = useState("");
@@ -134,7 +134,7 @@ export function SignUp() {
         className="w-full"
         disabled={loading}
         onClick={async () => {
-          await signUp.email({
+          await authClient.signUp.email({
             email,
             password,
             name: `${firstName} ${lastName}`,

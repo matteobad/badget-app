@@ -20,7 +20,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { uniqueCurrencies } from "~/shared/constants/currencies";
-import { useSession } from "~/shared/helpers/better-auth/auth-client";
+import { authClient } from "~/shared/helpers/better-auth/auth-client";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
 const formSchema = z.object({
@@ -47,7 +47,7 @@ export function CreateSpaceForm({
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { data } = useSession();
+  const { data } = authClient.useSession();
   const name = data?.user.name;
 
   const createOrganizationMutation = useMutation(

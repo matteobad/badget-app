@@ -24,7 +24,7 @@ import { useSyncStatus } from "~/hooks/use-sync-status";
 import { useUpload } from "~/hooks/use-upload";
 import { importTransactionsAction } from "~/server/domain/transaction/actions";
 import { uniqueCurrencies } from "~/shared/constants/currencies";
-import { useActiveOrganization } from "~/shared/helpers/better-auth/auth-client";
+import { authClient } from "~/shared/helpers/better-auth/auth-client";
 import { stripSpecialCharacters } from "~/shared/helpers/documents";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
@@ -51,7 +51,7 @@ export function ImportTransactionsModal() {
   const [pageNumber, setPageNumber] = useState<number>(0);
   const page = pages[pageNumber];
 
-  const { data: activeOrganization } = useActiveOrganization();
+  const { data: activeOrganization } = authClient.useActiveOrganization();
   const { uploadFile } = useUpload();
 
   const { status, setStatus } = useSyncStatus({ runId, accessToken });

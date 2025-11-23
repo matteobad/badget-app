@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import * as z from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { twoFactor } from "~/shared/helpers/better-auth/auth-client";
+import { authClient } from "~/shared/helpers/better-auth/auth-client";
 import { Field, FieldError, FieldLabel } from "../ui/field";
 import { Spinner } from "../ui/spinner";
 
@@ -31,7 +31,7 @@ export function BackupCodeForm() {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      await twoFactor.verifyBackupCode(data, {
+      await authClient.twoFactor.verifyBackupCode(data, {
         onRequest: () => {
           setLoading(true);
         },

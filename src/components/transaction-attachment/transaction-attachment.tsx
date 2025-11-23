@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useUpload } from "~/hooks/use-upload";
 import { cn } from "~/lib/utils";
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
-import { useActiveOrganization } from "~/shared/helpers/better-auth/auth-client";
+import { authClient } from "~/shared/helpers/better-auth/auth-client";
 import { stripSpecialCharacters } from "~/shared/helpers/documents";
 import { useTRPC } from "~/shared/helpers/trpc/client";
 
@@ -29,7 +29,7 @@ type Props = {
 
 export function TransactionAttachments({ id, data, onUpload }: Props) {
   const [files, setFiles] = useState<Attachment[]>([]);
-  const { data: activeOrganization } = useActiveOrganization();
+  const { data: activeOrganization } = authClient.useActiveOrganization();
   const { uploadFile } = useUpload();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
