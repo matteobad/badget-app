@@ -5,7 +5,7 @@ import {
   getSpaceById,
   updateSpaceById,
 } from "~/server/services/better-auth-service";
-import { updateUser } from "~/server/services/user-service";
+import { updateUserInformation } from "~/server/services/user-service";
 import { auth } from "~/shared/helpers/better-auth/auth";
 import {
   createOrganizationSchema,
@@ -45,11 +45,13 @@ export const organizationRouter = createTRPCRouter({
 
   setActive: protectedProcedure
     .input(setActiveOrganizationSchema)
-    .mutation(async ({ input }) => {
-      await updateUser({ defaultOrganizationId: input.organizationId });
+    .mutation(async ({ ctx: { headers }, input }) => {
+      await updateUserInformation(headers, {
+        defaultOrganizationId: input.organizationId,
+      });
 
       await auth.api.setActiveOrganization({
-        headers: await headers(),
+        headers,
         body: {
           organizationId: input.organizationId,
           organizationSlug: input.organizationSlug,

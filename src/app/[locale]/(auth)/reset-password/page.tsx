@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { createLoader, parseAsString } from "nuqs/server";
-import { ResetPassword } from "~/components/auth/reset-password";
+import { ResetPasswordForm } from "~/components/auth/reset-password-form";
 
 export const metadata: Metadata = {
   title: "Reset Password | Badget.",
@@ -32,9 +32,8 @@ export default async function ResetPasswordPage(props: PageProps) {
         </p>
       </div>
 
-      {/* Sign In Options */}
       <div className="space-y-4">
-        <ResetPassword token={params.token} />
+        <ResetPasswordForm token={params.token} />
       </div>
     </div>
   );

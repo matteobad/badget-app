@@ -21,7 +21,7 @@ export function DateFormatSettings() {
   const updateUserMutation = useUserMutation();
 
   return (
-    <Card className="flex items-center justify-between">
+    <Card>
       <CardHeader>
         <CardTitle>Date Display Format</CardTitle>
         <CardDescription>

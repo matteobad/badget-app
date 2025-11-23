@@ -21,7 +21,7 @@ export function TimeFormatSettings() {
   const { data: user } = useUserQuery();
 
   return (
-    <Card className="flex items-center justify-between">
+    <Card>
       <CardHeader>
         <CardTitle>Time Display Format</CardTitle>
         <CardDescription>

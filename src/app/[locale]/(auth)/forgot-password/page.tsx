@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ForgotPassword } from "~/components/auth/forgot-password";
+import { ForgotPasswordForm } from "~/components/auth/forgot-password-form";
 import { auth } from "~/shared/helpers/better-auth/auth";
+import { getScopedI18n } from "~/shared/locales/server";
 
 export const metadata: Metadata = {
   title: "Forgot Password | Badget.",
@@ -11,6 +13,8 @@ export const metadata: Metadata = {
 export default async function ForgotPasswordPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (session) return redirect("/overview");
+
+  const t = await getScopedI18n("auth");
 
   return (
     <div className="p-2">
@@ -22,9 +26,15 @@ export default async function ForgotPasswordPage() {
         </p>
       </div>
 
-      {/* Sign In Options */}
       <div className="space-y-4">
-        <ForgotPassword />
+        <ForgotPasswordForm />
+
+        <div className="w-full text-center text-sm">
+          {t("account")}{" "}
+          <Link href="/sign-in" className="text-primary underline">
+            {t("signin.submit")}
+          </Link>
+        </div>
       </div>
     </div>
   );

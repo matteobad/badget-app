@@ -46,6 +46,30 @@ export const updateUserSchema = z.object({
   }),
 });
 
+export const changeEmailSchema = z.object({
+  email: z.email().openapi({
+    description: "Email address of the user",
+    example: "john.doe@example.com",
+  }),
+});
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z
+      .string() // check if it is string type
+      .min(8, { message: "Password must be at least 8 characters long" }) // checks for character length
+      .max(20, { message: "Password must be at most 20 characters long" }),
+    newPassword: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters long" })
+      .max(20, { message: "Password must be at most 20 characters long" }),
+    revokeOtherSessions: z.boolean(),
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: "Passwords cannot match",
+    path: ["newPassword"],
+  });
+
 export const twoFactorSchema = z.object({
   password: z
     .string()

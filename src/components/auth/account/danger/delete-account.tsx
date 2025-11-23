@@ -4,8 +4,6 @@ import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useTRPC } from "~/shared/helpers/trpc/client";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,17 +14,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../ui/alert-dialog";
-import { Button } from "../ui/button";
+} from "~/components/ui/alert-dialog";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../ui/card";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+} from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { useTRPC } from "~/shared/helpers/trpc/client";
 
 export function DeleteAccount() {
   const trpc = useTRPC();

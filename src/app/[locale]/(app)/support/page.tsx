@@ -7,10 +7,8 @@ export const metadata: Metadata = {
 
 export default function Support() {
   return (
-    <div className="space-y-12">
-      <div className="max-w-[450px]">
-        <SupportForm />
-      </div>
+    <div className="space-y-4">
+      <SupportForm />
     </div>
   );
 }

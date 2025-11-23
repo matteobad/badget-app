@@ -24,7 +24,7 @@ export function LocaleSettings() {
   }));
 
   return (
-    <Card className="flex items-center justify-between">
+    <Card>
       <CardHeader>
         <CardTitle>{t("locale.title")}</CardTitle>
         <CardDescription>{t("locale.description")}</CardDescription>

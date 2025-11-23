@@ -5,7 +5,13 @@ import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { admin, organization, twoFactor, username } from "better-auth/plugins";
+import {
+  admin,
+  lastLoginMethod,
+  organization,
+  twoFactor,
+  username,
+} from "better-auth/plugins";
 import { env } from "~/env";
 import { resend } from "~/lib/resend";
 import { db } from "~/server/db";
@@ -167,6 +173,7 @@ export const auth = betterAuth({
     admin(),
     passkey(),
     twoFactor(),
+    lastLoginMethod(),
     organization({
       schema: {
         organization: {

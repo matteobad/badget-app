@@ -3,6 +3,54 @@ export default {
   "hello.world": "Ciao mondo!",
   welcome: "Benvenuto {name}!",
 
+  // auth
+  "auth.account": "Hai già un account?",
+  "auth.no_account": "Non hai ancora un account?",
+  "auth.signin.title": "Accedi",
+  "auth.signin.subtitle": "Inserisci i dati per accedere al tuo account",
+  "auth.signin.forgot": "Password dimenticata?",
+  "auth.signin.submit": "Accedi",
+  "auth.signup.title": "Registrati",
+  "auth.signup.subtitle": "Inserisci le tue info per creare un account",
+  "auth.signup.submit": "Registrati",
+  "auth.forgot.title": "Password dimenticata",
+  "auth.forgot.subtitle": "Inserisci la tua email per resettare la password",
+  "auth.forgot.submit": "Invia link di reset",
+  "auth.reset.title": "Reset password",
+  "auth.reset.subtitle": "Crea e confera la tua nuova password",
+  "auth.reset.submit": "Resetta password",
+  "auth.reset.error": "Link invalido",
+  "auth.reset.invalid": "Il link usato è invalido o scaduto",
+  "auth.reset.back": "Torna al login",
+
+  // account
+  "account.profile": "Profilo",
+  "account.date_and_locale": "Data e lingua",
+  "account.security": "Sicurezza",
+  "account.api_keys": "Chiavi API",
+  "account.danger": "Pericolo",
+
+  // account profile
+  "account.save": "Salva",
+  "account.avatar": "Avatar",
+  "account.avatar.description":
+    "Clicca sull'avatar per caricarne uno personalizzato dai tuoi file.",
+  "account.avatar.message": "Un avatar è opzionale ma fortemente consigliato.",
+  "account.name": "Nome",
+  "account.name.description":
+    "Inserisci il tuo nome completo, oppure un nome visualizzato.",
+  "account.name.message": "Utilizza un massimo di 32 caratteri.",
+  "account.email": "Email",
+  "account.email.description":
+    "Inserisci l'indirizzo email che vuoi usare per accedere.",
+  "account.email.message": "Per favore inserisci un indirizzo email valido.",
+  "account.session": "Sessioni",
+  "account.session.description":
+    "Gestisci le tue sessioni attive e revoca l'accesso.",
+  "account.session.current": "Session corrente",
+  "account.session.revoke": "Revoca",
+  "account.session.logout": "Esci",
+
   language: {
     title: "Languages",
     description: "Change the language used in the user interface.",

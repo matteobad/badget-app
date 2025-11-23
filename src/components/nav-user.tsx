@@ -1,6 +1,12 @@
 "use client";
 
-import { LifeBuoyIcon, LogOut, UserIcon, UsersIcon } from "lucide-react";
+import {
+  LifeBuoyIcon,
+  LogOut,
+  SunMoonIcon,
+  UserIcon,
+  UsersIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -17,7 +23,7 @@ import { useUserQuery } from "~/hooks/use-user";
 import { authClient } from "~/shared/helpers/better-auth/auth-client";
 import { getInitials } from "~/shared/helpers/format";
 
-import { ThemeSelect } from "./theme-select";
+import { ThemeToggle } from "./theme-toggle";
 import { Skeleton } from "./ui/skeleton";
 
 export function NavUser() {
@@ -39,7 +45,7 @@ export function NavUser() {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+        className="w-(--radix-dropdown-menu-trigger-width) min-w-56"
         side="top"
         align="end"
         sideOffset={4}
@@ -71,7 +77,7 @@ export function NavUser() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/account/support">
+            <Link href="/support">
               <LifeBuoyIcon />
               Support
             </Link>
@@ -84,10 +90,15 @@ export function NavUser() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <div className="flex flex-row items-center justify-between p-2">
-          <p className="text-sm">Theme</p>
-          <ThemeSelect />
-        </div>
+        <DropdownMenuGroup>
+          <DropdownMenuItem className="focus:bg-transparent justify-between [&_svg:not([class*='text-'])]:text-inherit">
+            <div className="flex items-center gap-2">
+              <SunMoonIcon className="text-muted-foreground" />
+              Theme
+            </div>
+            <ThemeToggle />
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => {

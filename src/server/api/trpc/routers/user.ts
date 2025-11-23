@@ -1,9 +1,15 @@
 import {
+  changeEmail,
+  changePassword,
   deleteUser,
   getUserById,
-  updateUser,
+  updateUserInformation,
 } from "~/server/services/user-service";
-import { updateUserSchema } from "~/shared/validators/user.schema";
+import {
+  changeEmailSchema,
+  changePasswordSchema,
+  updateUserSchema,
+} from "~/shared/validators/user.schema";
 
 import { createTRPCRouter, protectedProcedure } from "../init";
 
@@ -15,8 +21,20 @@ export const userRouter = createTRPCRouter({
 
   update: protectedProcedure
     .input(updateUserSchema)
-    .mutation(async ({ input }) => {
-      return await updateUser(input);
+    .mutation(async ({ ctx: { headers }, input }) => {
+      return await updateUserInformation(headers, input);
+    }),
+
+  changeEmail: protectedProcedure
+    .input(changeEmailSchema)
+    .mutation(async ({ ctx: { headers }, input }) => {
+      return await changeEmail(headers, input);
+    }),
+
+  changePassword: protectedProcedure
+    .input(changePasswordSchema)
+    .mutation(async ({ ctx: { headers }, input }) => {
+      return await changePassword(headers, input);
     }),
 
   delete: protectedProcedure.mutation(async () => {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { SignUp } from "~/components/auth/sign-up";
+import { SignUpForm } from "~/components/auth/sign-up-form";
 import { auth } from "~/shared/helpers/better-auth/auth";
 
 export const metadata: Metadata = {
@@ -12,8 +12,6 @@ export const metadata: Metadata = {
 export default async function SignUpPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (session) return redirect("/overview");
-
-  const preferredSignInOption = <SignUp />;
 
   return (
     <div className="p-2">
@@ -28,7 +26,9 @@ export default async function SignUpPage() {
       {/* Sign In Options */}
       <div className="space-y-4">
         {/* Primary Sign In Option */}
-        <div className="space-y-3">{preferredSignInOption}</div>
+        <div className="space-y-3">
+          <SignUpForm />
+        </div>
         <div className="flex items-center justify-center">
           <span className="text-sm text-[#878787]">Or</span>
         </div>
