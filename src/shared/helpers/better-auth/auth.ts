@@ -2,8 +2,8 @@
 
 import { passkey } from "@better-auth/passkey";
 import { render } from "@react-email/components";
-import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { betterAuth } from "better-auth/minimal";
 import { nextCookies } from "better-auth/next-js";
 import {
   admin,
@@ -14,6 +14,7 @@ import {
 } from "better-auth/plugins";
 import { env } from "~/env";
 import { resend } from "~/lib/resend";
+import { redis } from "~/server/cache/redis";
 import { db } from "~/server/db";
 import { getUserByIdQuery } from "~/server/domain/user/queries";
 import WelcomeEmail from "~/shared/emails/emails/welcome-email";
@@ -31,6 +32,24 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg", // or "mysql", "sqlite"
   }),
+  secondaryStorage: {
+    get: async (key) => {
+      return await redis.get(key);
+    },
+    set: async (key, value, ttl) => {
+      if (ttl) await redis.set(key, value, { ex: ttl });
+      else await redis.set(key, value);
+    },
+    delete: async (key) => {
+      await redis.del(key);
+    },
+  },
+  // session: {
+  //   cookieCache: {
+  //     enabled: true,
+  //     maxAge: 5 * 60, // Cache duration in seconds
+  //   },
+  // },
   user: {
     additionalFields: {
       defaultOrganizationId: {
@@ -168,7 +187,6 @@ export const auth = betterAuth({
   //     console.log(user, url);
   //   },
   // },
-
   plugins: [
     admin(),
     passkey(),

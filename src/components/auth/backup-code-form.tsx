@@ -42,7 +42,7 @@ export function BackupCodeForm() {
           toast.error(error.error.message || "Failed to verify code");
         },
         onSuccess: () => {
-          router.push("/");
+          router.push("/overview");
         },
       });
     } catch (error) {
