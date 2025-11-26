@@ -1,16 +1,24 @@
 "use client";
 
-import { ReferenceLine, Tooltip } from "recharts";
 import {
-  BaseChart,
-  ChartLegend,
-  StyledBar,
-  StyledLine,
-  StyledTooltip,
-  StyledXAxis,
-  StyledYAxis,
-} from "./base-charts";
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { formatAmount } from "~/shared/helpers/format";
+import { ChartLegend } from "./base-charts";
 import type { BaseChartProps } from "./chart-utils";
+import {
+  commonChartConfig,
+  createYAxisTickFormatter,
+  useChartMargin,
+} from "./chart-utils";
 
 interface CashFlowData {
   month: string;
@@ -24,14 +32,24 @@ interface CashFlowChartProps extends BaseChartProps {
   data: CashFlowData[];
   showCumulative?: boolean;
   showLegend?: boolean;
+  currency?: string;
+  locale?: string;
 }
 
 // Custom formatter for cash flow tooltip
 const cashFlowTooltipFormatter = (
   value: any,
   name: string,
+  currency = "USD",
+  locale?: string,
 ): [string, string] => {
-  const formattedValue = `$${value.toLocaleString()}`;
+  const formattedValue =
+    formatAmount({
+      amount: value,
+      currency,
+      locale: locale ?? undefined,
+      maximumFractionDigits: 0,
+    }) || `${currency}${value.toLocaleString()}`;
   const displayName =
     name === "inflow"
       ? "Cash Inflow"
@@ -49,7 +67,21 @@ export function CashFlowChart({
   className = "",
   showCumulative = true,
   showLegend = true,
+  currency = "USD",
+  locale,
 }: CashFlowChartProps) {
+  const tickFormatter = createYAxisTickFormatter(currency, locale);
+  // Calculate margin based on the maximum value across all data points
+  const maxValues = data.map((d) => ({
+    maxValue: Math.max(
+      Math.abs(d.inflow),
+      Math.abs(d.outflow),
+      Math.abs(d.netFlow),
+      Math.abs(d.cumulativeFlow),
+    ),
+  }));
+  const { marginLeft } = useChartMargin(maxValues, "maxValue", tickFormatter);
+
   return (
     <div className={`w-full ${className}`}>
       {/* Legend */}
@@ -68,32 +100,129 @@ export function CashFlowChart({
       )}
 
       {/* Chart */}
-      <BaseChart data={data} height={height}>
-        <StyledXAxis dataKey="month" />
-        <StyledYAxis
-          tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
-        />
+      <div style={{ height }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart
+            data={data}
+            margin={{ top: 0, right: 6, left: -marginLeft, bottom: 0 }}
+          >
+            <defs>
+              <pattern
+                id="outflowPattern"
+                x="0"
+                y="0"
+                width="8"
+                height="8"
+                patternUnits="userSpaceOnUse"
+              >
+                <rect width="8" height="8" fill="var(--chart-pattern-bg)" />
+                <path
+                  d="M0,0 L8,8 M-2,6 L6,16 M-4,4 L4,12"
+                  stroke="var(--chart-pattern-stroke)"
+                  strokeWidth="0.8"
+                  opacity="0.6"
+                />
+              </pattern>
+            </defs>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="var(--chart-grid-stroke)"
+            />
+            <XAxis
+              dataKey="month"
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: "var(--chart-axis-text)",
+                fontSize: 10,
+                fontFamily: commonChartConfig.fontFamily,
+              }}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: "var(--chart-axis-text)",
+                fontSize: 10,
+                fontFamily: commonChartConfig.fontFamily,
+              }}
+              tickFormatter={tickFormatter}
+            />
 
-        <Tooltip
-          content={<StyledTooltip formatter={cashFlowTooltipFormatter} />}
-          wrapperStyle={{ zIndex: 9999 }}
-        />
+            <Tooltip
+              content={({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                  return (
+                    <div className="p-2 text-[10px] font-sans border bg-white dark:bg-[#0c0c0c] border-gray-200 dark:border-[#1d1d1d] text-black dark:text-white">
+                      <p className="mb-1 text-gray-500 dark:text-[#666666]">
+                        {label}
+                      </p>
+                      {payload.map((entry, index) => {
+                        const value =
+                          typeof entry.value === "number" ? entry.value : 0;
+                        const [formattedValue, name] = cashFlowTooltipFormatter(
+                          value,
+                          entry.dataKey as string,
+                          currency,
+                          locale,
+                        );
+                        return (
+                          <p
+                            key={`${entry.dataKey}-${index}`}
+                            className="text-black dark:text-white"
+                          >
+                            {name}: {formattedValue}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+                return null;
+              }}
+              wrapperStyle={{ zIndex: 9999 }}
+            />
 
-        <StyledBar dataKey="inflow" usePattern={false} />
-        <StyledBar dataKey="outflow" usePattern />
-        <StyledBar dataKey="netFlow" usePattern={false} />
+            {/* Income bars */}
+            <Bar
+              dataKey="inflow"
+              fill="var(--chart-bar-fill)"
+              isAnimationActive={false}
+            />
+            {/* Expenses bars with pattern */}
+            <Bar
+              dataKey="outflow"
+              fill="url(#outflowPattern)"
+              isAnimationActive={false}
+            />
+            {/* Net flow bars */}
+            <Bar
+              dataKey="netFlow"
+              fill="var(--chart-actual-line)"
+              isAnimationActive={false}
+            />
 
-        {showCumulative && (
-          <StyledLine dataKey="cumulativeFlow" strokeDasharray="5 5" />
-        )}
+            {showCumulative && (
+              <Line
+                type="monotone"
+                dataKey="cumulativeFlow"
+                stroke="var(--chart-line-secondary)"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+                isAnimationActive={false}
+              />
+            )}
 
-        {/* Reference line at zero */}
-        <ReferenceLine
-          y={0}
-          stroke="hsl(var(--border))"
-          strokeDasharray="2 2"
-        />
-      </BaseChart>
+            {/* Reference line at zero */}
+            <ReferenceLine
+              y={0}
+              stroke="hsl(var(--border))"
+              strokeDasharray="2 2"
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

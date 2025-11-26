@@ -4,13 +4,13 @@ import type { InferUITools, UIMessage } from "ai";
 import { Experimental_Agent as Agent, stepCountIs } from "ai";
 import type { ChatUserContext } from "~/server/cache/chat-cache";
 
-import { getAccountsTool } from "./domains/accounts/tools/get-accounts-tool";
-import { getInstitutionsTool } from "./domains/accounts/tools/get-institutions-tool";
-import { getExpensesBreakdownTool } from "./domains/reports/tools/get-expenses-breakdown-tool";
-import { getNetWorthAnalysisTool } from "./domains/reports/tools/get-net-worth-analysis-tool";
-import { getTransacationsCategoriesTool } from "./domains/transactions/tools/get-transactions-categories-tool";
-import { getTransacationsTagsTool } from "./domains/transactions/tools/get-transactions-tags-tool";
-import { getTransactionsTool } from "./domains/transactions/tools/get-transactions-tool";
+// import { getAccountsTool } from "./domains/accounts/tools/get-accounts-tool";
+// import { getInstitutionsTool } from "./domains/accounts/tools/get-institutions-tool";
+// import { getExpensesBreakdownTool } from "./domains/reports/tools/get-expenses-breakdown-tool";
+// import { getNetWorthAnalysisTool } from "./domains/reports/tools/get-net-worth-analysis-tool";
+// import { getTransacationsCategoriesTool } from "./domains/transactions/tools/get-transactions-categories-tool";
+// import { getTransacationsTagsTool } from "./domains/transactions/tools/get-transactions-tags-tool";
+// import { getTransactionsTool } from "./domains/transactions/tools/get-transactions-tool";
 import { safeValue } from "./utils/safe-value";
 import { shouldForceStop } from "./utils/streaming-utils";
 
@@ -19,7 +19,7 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
   const tzDate = new TZDate(new Date(), userTimezone);
   const firstName = safeValue(userContext.fullName?.split(" ")[0]);
 
-  return `You are a helpful AI assistant for Badget, a **personal financial management platform**. 
+  return `You are a helpful AI assistant for Badget, a **personal financial management platform**.
     You help users with:
     - Tracking and analyzing expenses and income
     - Managing transactions and accounts
@@ -29,7 +29,7 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
     - General personal finance education and advice
 
     IMPORTANT: You have access to tools that can retrieve real financial data from the user's accounts, budgets, and categories.
-    
+
     TOOL USAGE GUIDELINES:
     - ALWAYS use tools proactively when users ask questions that can be answered with their financial data
     - Tools have defaults – use them without parameters when appropriate
@@ -66,7 +66,7 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
     - When tools provide structured data (tables, lists, breakdowns), use appropriate markdown formatting
 
     Be helpful, professional, and conversational in your responses while keeping the user motivated and confident in their personal financial journey.
-    
+
     Current date and time: ${tzDate.toISOString()}
     User full name: ${safeValue(userContext.fullName)}
     User current city: ${safeValue(userContext.city)}
@@ -115,16 +115,16 @@ export const mainAgent = new Agent({
     return shouldForceStop(step);
   },
   tools: {
-    getAccounts: getAccountsTool,
-    // getDocuments: getDocumentsTool,
-    getInstitutions: getInstitutionsTool,
-    getTransactions: getTransactionsTool,
-    getTransactionsCategories: getTransacationsCategoriesTool,
-    getTransactionsTags: getTransacationsTagsTool,
-    // getForecast: getForecastTool,
-    // reposts tools
-    getNetWorthAnalysis: getNetWorthAnalysisTool,
-    getExpensesBreakdown: getExpensesBreakdownTool,
+    // getAccounts: getAccountsTool,
+    // // getDocuments: getDocumentsTool,
+    // getInstitutions: getInstitutionsTool,
+    // getTransactions: getTransactionsTool,
+    // getTransactionsCategories: getTransacationsCategoriesTool,
+    // getTransactionsTags: getTransacationsTagsTool,
+    // // getForecast: getForecastTool,
+    // // reposts tools
+    // getNetWorthAnalysis: getNetWorthAnalysisTool,
+    // getExpensesBreakdown: getExpensesBreakdownTool,
   },
 });
 

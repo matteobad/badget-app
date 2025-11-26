@@ -143,6 +143,8 @@ export const reconnectGocardlessLinkAction = authActionClient
         redirect: link.toString(),
         agreement: agreementData.id,
         user_language: "IT",
+        // In the reconnect flow we need the reference based on the team
+        // so we can find the correct requestion id on success and update the current reference
         reference,
       });
 

@@ -1,42 +1,56 @@
 "use client";
 
-import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
-import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
+import {
+  useChatActions,
+  useChatId,
+  useChatStatus,
+  useDataPart,
+} from "@ai-sdk-tools/store";
+import { parseAsString, useQueryState } from "nuqs";
 import { useRef } from "react";
-import { useChatInterface } from "~/hooks/use-chat-interface";
-import { useChatStore } from "~/lib/stores/chat";
-import { cn } from "~/lib/utils";
-import { useScopedI18n } from "~/shared/locales/client";
-import { SuggestedActionsButton } from "../suggested-actions-button";
-import type { PromptInputMessage } from "../ui/prompt-input";
+import { CommandMenu } from "~/components/chat/command-menu";
+import { RecordButton } from "~/components/chat/record-button";
+import { SuggestedActionsButton } from "~/components/suggested-actions-button";
 import {
   PromptInput,
   PromptInputActionAddAttachments,
   PromptInputAttachment,
   PromptInputAttachments,
   PromptInputBody,
+  type PromptInputMessage,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputToolbar,
   PromptInputTools,
-} from "../ui/prompt-input";
-import { CommandMenu } from "./command-menu";
-import { FollowupQuestions } from "./followup-questions";
-import { RecordButton } from "./record-button";
+} from "~/components/ui/prompt-input";
+import { useChatInterface } from "~/hooks/use-chat-interface";
+import { useChatStore } from "~/lib/stores/chat";
+import { cn } from "~/lib/utils";
+import { SuggestedPrompts } from "./suggested-prompts";
 import { WebSearchButton } from "./web-search-button";
 
+export interface ChatInputMessage extends PromptInputMessage {
+  metadata?: {
+    agentChoice?: string;
+    toolChoice?: string;
+  };
+}
+
 export function ChatInput() {
-  const t = useScopedI18n("chat");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const status = useChatStatus();
-  const { sendMessage } = useChatActions();
+  const { sendMessage, stop } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { current } = useArtifacts({
-    exclude: ["chat-title", "followup-questions"],
-  });
-  const isCanvasVisible = !!current;
+
+  const [, clearSuggestions] = useDataPart<{ prompts: string[] }>(
+    "suggestions",
+  );
+
+  const [selectedType] = useQueryState("artifact-type", parseAsString);
+
+  const isCanvasVisible = !!selectedType;
 
   const {
     input,
@@ -48,13 +62,12 @@ export function ChatInput() {
     selectedCommandIndex,
     filteredCommands,
     setInput,
-    setIsUploading,
     handleInputChange,
     handleKeyDown,
     resetCommandState,
   } = useChatStore();
 
-  const handleSubmit = async (message: PromptInputMessage) => {
+  const handleSubmit = (message: ChatInputMessage) => {
     const hasText = Boolean(message.text);
     const hasAttachments = Boolean(message.files?.length);
 
@@ -62,57 +75,28 @@ export function ChatInput() {
       return;
     }
 
-    let processedFiles = message.files;
-
-    // Convert blob URLs to data URLs for server compatibility
-    if (message.files && message.files.length > 0) {
-      setIsUploading(true);
-      try {
-        processedFiles = await Promise.all(
-          message.files.map(async (file) => {
-            // If it's a blob URL, convert to data URL
-            if (file.url.startsWith("blob:")) {
-              const response = await fetch(file.url);
-              const blob = await response.blob();
-
-              // Convert blob to data URL
-              const dataUrl = await new Promise<string>((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.readAsDataURL(blob);
-              });
-
-              return {
-                ...file,
-                url: dataUrl,
-              };
-            }
-
-            // Return file as-is if not a blob URL
-            return file;
-          }),
-        );
-      } catch (error) {
-        console.error("Failed to process files:", error);
-        setIsUploading(false);
-        return;
-      }
-      setIsUploading(false);
+    // If currently streaming, stop the current stream first
+    if (status === "streaming" || status === "submitted") {
+      stop?.();
+      // Continue to send the new message after stopping
     }
+
+    // Clear old suggestions before sending new message
+    clearSuggestions();
 
     // Set chat ID to ensure proper URL routing
     if (chatId) {
       setChatId(chatId);
     }
 
-    void sendMessage({
-      text: message.text ?? "Sent with attachments",
-      files: processedFiles,
+    sendMessage({
+      text: message.text || "Sent with attachments",
+      files: message.files,
       metadata: {
-        webSearch: isWebSearch,
+        agentChoice: message.metadata?.agentChoice,
+        toolChoice: message.metadata?.toolChoice,
       },
     });
-
     setInput("");
     resetCommandState();
   };
@@ -120,14 +104,13 @@ export function ChatInput() {
   return (
     <div
       className={cn(
-        "fixed bottom-6 left-0 md:left-[70px] z-20 px-6 transition-all duration-300 ease-in-out",
-        isCanvasVisible ? "right-[603px]" : "right-0",
+        "fixed bottom-6 z-20 transition-all duration-300 ease-in-out",
+        "left-0 md:left-[70px] px-4 md:px-6",
+        isCanvasVisible ? "right-0 md:right-[603px]" : "right-0",
       )}
     >
-      <div className="relative mx-auto w-full max-w-[770px] pt-2">
-        <FollowupQuestions />
-
-        {/* Command Suggestions Menu */}
+      <div className="mx-auto w-full pt-2 max-w-full md:max-w-[770px] relative">
+        <SuggestedPrompts />
         <CommandMenu />
 
         <PromptInput onSubmit={handleSubmit} globalDrop multiple>
@@ -149,9 +132,12 @@ export function ChatInput() {
                     // Execute command through the store
                     if (!chatId) return;
 
+                    // Clear old suggestions before sending new message
+                    clearSuggestions();
+
                     setChatId(chatId);
 
-                    void sendMessage({
+                    sendMessage({
                       role: "user",
                       parts: [{ type: "text", text: selectedCommand.title }],
                       metadata: {
@@ -168,25 +154,17 @@ export function ChatInput() {
                   return;
                 }
 
-                // Handle Enter key for normal messages
-                if (e.key === "Enter" && !showCommands) {
+                // Handle Enter key for normal messages - trigger form submission
+                if (e.key === "Enter" && !showCommands && !e.shiftKey) {
+                  // Don't submit if IME composition is in progress
+                  if (e.nativeEvent.isComposing) {
+                    return;
+                  }
+
                   e.preventDefault();
-                  if (input.trim()) {
-                    // Set chat ID to ensure proper URL routing
-                    if (chatId) {
-                      setChatId(chatId);
-                    }
-
-                    void sendMessage({
-                      text: input,
-                      files: [],
-                      metadata: {
-                        webSearch: isWebSearch,
-                      },
-                    });
-
-                    setInput("");
-                    resetCommandState();
+                  const form = e.currentTarget.form;
+                  if (form) {
+                    form.requestSubmit();
                   }
                   return;
                 }
@@ -195,9 +173,7 @@ export function ChatInput() {
                 handleKeyDown(e);
               }}
               value={input}
-              placeholder={
-                isWebSearch ? t("placeholder_web") : t("placeholder_ask")
-              }
+              placeholder={isWebSearch ? "Search the web" : "Ask anything"}
             />
           </PromptInputBody>
           <PromptInputToolbar>

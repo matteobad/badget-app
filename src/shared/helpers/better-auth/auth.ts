@@ -1,7 +1,6 @@
 "server-only";
 
 import { passkey } from "@better-auth/passkey";
-import { render } from "@react-email/components";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { betterAuth } from "better-auth/minimal";
 import { nextCookies } from "better-auth/next-js";
@@ -137,11 +136,9 @@ export const auth = betterAuth({
             to: user.email,
             subject: "Welcome to Badget",
             from: "Matteo from Badget <noreply@badget.xyz>",
-            html: await render(
-              WelcomeEmail({
-                fullName: user.name,
-              }),
-            ),
+            react: WelcomeEmail({
+              fullName: user.name,
+            }),
           });
         },
       },

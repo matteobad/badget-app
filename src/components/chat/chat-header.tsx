@@ -1,60 +1,24 @@
 "use client";
 
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { ArrowLeftIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useChatInterface } from "~/hooks/use-chat-interface";
-import { cn } from "~/lib/utils";
-import { chatTitleArtifact } from "~/shared/validators/artifacts/chat-title";
-
-import { Button } from "../ui/button";
-import { TextEffect } from "../ui/text-effect";
 import { ChatHistory } from "./chat-history";
-import { NewChat } from "./new-chat";
+import { ChatNavigation } from "./chat-navigation";
+import { ChatTitle } from "./chat-title";
+import { NewChatButton } from "./new-chat-button";
 
 export function ChatHeader() {
-  const router = useRouter();
   const { isHome } = useChatInterface();
-  const { data } = useArtifact(chatTitleArtifact);
-
-  if (isHome) {
-    return null;
-  }
 
   return (
-    <div className="relative z-10 flex w-full justify-between bg-background px-6 py-6">
-      <div className="flex items-center">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => router.push("/overview")}
-        >
-          <ArrowLeftIcon size={16} />
-        </Button>
-      </div>
-
-      <div
-        className={cn(
-          "flex items-center justify-center transition-all duration-300 ease-in-out",
-        )}
-      >
-        {data && (
-          <TextEffect
-            per="char"
-            preset="fade"
-            speedReveal={3}
-            speedSegment={2}
-            className="font-regular truncate text-sm"
-          >
-            {data.title}
-          </TextEffect>
-        )}
-      </div>
-
-      <div className="flex items-center space-x-4 transition-all duration-300 ease-in-out">
-        <NewChat />
-        <ChatHistory />
-      </div>
+    <div className="flex items-center justify-center relative h-8">
+      <ChatNavigation />
+      <ChatTitle />
+      {!isHome && (
+        <div className="absolute right-0 flex items-center gap-4">
+          <NewChatButton />
+          <ChatHistory />
+        </div>
+      )}
     </div>
   );
 }

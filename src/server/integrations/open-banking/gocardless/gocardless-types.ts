@@ -104,11 +104,24 @@ export type GC_CreateRequisitionRequest = {
 
 export type GC_CreateRequisitionResponse = GC_Requisition;
 
+export type GC_GetRequisitionsResponse = {
+  count: number;
+  next: string;
+  previous: string;
+  results: GC_Requisition[];
+};
+
 export type GC_GetRequisitionByIdRequest = {
   id: string;
 };
 
 export type GC_GetRequisitionByIdResponse = GC_Requisition;
+
+export type GC_GetRequisitionByReferenceRequest = {
+  reference: string;
+};
+
+export type GC_GetRequisitionByReferenceResponse = GC_Requisition;
 
 export type GC_DeleteRequisitionByIdRequest = {
   id: string;

@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "~/lib/utils";
-
 import { SkeletonGrid } from "./skeleton";
 
 export type GridLayout = "1/1" | "2/2" | "2/3" | "4/4";
@@ -60,12 +59,12 @@ export function CanvasGrid({
         {displayItems.map((item) => (
           <div
             key={item.id}
-            className="border border-[#e6e6e6] bg-white p-3 dark:border-[#1d1d1d] dark:bg-[#0c0c0c]"
+            className="border p-3 bg-white dark:bg-[#0c0c0c] border-[#e6e6e6] dark:border-[#1d1d1d]"
           >
-            <div className="mb-1 text-[12px] text-[#707070] dark:text-[#666666]">
+            <div className="text-[12px] text-[#707070] dark:text-[#666666] mb-1">
               {item.title}
             </div>
-            <div className="font-hedvig-sans-slashed-zero mb-1 text-[18px] font-normal text-black dark:text-white">
+            <div className="text-[18px] font-normal font-sans text-black dark:text-white mb-1">
               {item.value}
             </div>
             {item.subtitle && (
@@ -76,7 +75,7 @@ export function CanvasGrid({
             {item.trend && (
               <div
                 className={cn(
-                  "mt-1 text-[10px]",
+                  "text-[10px] mt-1",
                   item.trend.isPositive
                     ? "text-green-600 dark:text-green-400"
                     : "text-red-600 dark:text-red-400",

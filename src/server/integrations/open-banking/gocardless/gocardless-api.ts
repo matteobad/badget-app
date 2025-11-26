@@ -17,6 +17,8 @@ import type {
   GC_GetInstitutionsResponse,
   GC_GetRequisitionByIdRequest,
   GC_GetRequisitionByIdResponse,
+  GC_GetRequisitionByReferenceRequest,
+  GC_GetRequisitionsResponse,
   GC_GetTransactionsRequest,
   GC_GetTransactionsResponse,
 } from "./gocardless-types";
@@ -147,6 +149,24 @@ export const gocardlessClient = {
   getRequisitionById: async (params: GC_GetRequisitionByIdRequest) => {
     const url = `/api/v2/requisitions/${params.id}/`;
     return await fetchWithAuth<GC_GetRequisitionByIdResponse>(url);
+  },
+
+  getRequisitionByReference: async (
+    params: GC_GetRequisitionByReferenceRequest,
+  ) => {
+    const url = `/api/v2/requisitions/`;
+    const response = await fetchWithAuth<GC_GetRequisitionsResponse>(url);
+
+    // Reference is in the format of id:generatedId for unique requisition
+    const id = params.reference.split(":").at(0);
+
+    // Find the requisition with the same id and status of linked
+    return response.results?.find((requisition) => {
+      return (
+        requisition.reference?.split(":").at(0) === id &&
+        requisition.status === "LN"
+      );
+    });
   },
 
   deleteRequisitionById: async (params: GC_DeleteRequisitionByIdRequest) => {
