@@ -43,7 +43,7 @@ export const reconnectConnection = schemaTask({
           .set({
             referenceId: referenceId,
           })
-          .where(eq(connection_table.referenceId, referenceId));
+          .where(eq(connection_table.id, connection.id));
       }
 
       // The account_ids can be different between the old and new connection

@@ -2,7 +2,7 @@
 
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
-import { MessageCircleWarningIcon, WandSparklesIcon } from "lucide-react";
+import { StopCircleIcon, TriangleAlertIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
@@ -15,7 +15,6 @@ import {
 } from "~/server/domain/bank-connection/actions";
 import { connectionStatus } from "~/shared/helpers/connection-status";
 import { useTRPC } from "~/shared/helpers/trpc/client";
-
 import { BankAccount } from "../bank-account/bank-account";
 import { BankLogo } from "../bank-logo";
 import {
@@ -64,7 +63,7 @@ function ConnectionState({
 
   if (isSyncing) {
     return (
-      <div className="flex items-center space-x-1 text-xs font-normal">
+      <div className="text-xs font-normal flex items-center space-x-1">
         <span>Syncing...</span>
       </div>
     );
@@ -73,13 +72,13 @@ function ConnectionState({
   if (connection.status === "disconnected") {
     return (
       <>
-        <div className="flex items-center space-x-1 text-xs font-normal text-[#c33839]">
-          <MessageCircleWarningIcon />
+        <div className="text-xs font-normal flex items-center space-x-1 text-[#c33839]">
+          <TriangleAlertIcon className="size-4" />
           <span>Connection issue</span>
         </div>
 
         <TooltipContent
-          className="max-w-[430px] px-3 py-1.5 text-xs"
+          className="px-3 py-1.5 text-xs max-w-[430px]"
           sideOffset={20}
           side="left"
         >
@@ -92,14 +91,14 @@ function ConnectionState({
   if (show) {
     return (
       <>
-        <div className="flex items-center space-x-1 text-xs font-normal text-[#FFD02B]">
-          <MessageCircleWarningIcon />
+        <div className="text-xs font-normal flex items-center space-x-1 text-[#FFD02B]">
+          <TriangleAlertIcon className="size-4" />
           <span>Connection expires soon</span>
         </div>
 
         {connection.expiresAt && (
           <TooltipContent
-            className="max-w-[430px] px-3 py-1.5 text-xs"
+            className="px-3 py-1.5 text-xs max-w-[430px]"
             sideOffset={20}
             side="left"
           >
@@ -114,8 +113,8 @@ function ConnectionState({
 
   if (expired) {
     return (
-      <div className="flex items-center space-x-1 text-xs font-normal text-[#c33839]">
-        <WandSparklesIcon />
+      <div className="text-xs font-normal flex items-center space-x-1 text-[#c33839]">
+        <StopCircleIcon className="size-4" />
         <span>Connection expired</span>
       </div>
     );
@@ -123,7 +122,7 @@ function ConnectionState({
 
   if (connection.lastAccessed) {
     return (
-      <div className="flex items-center space-x-1 text-xs font-normal">
+      <div className="text-xs font-normal flex items-center space-x-1">
         <span className="text-xs font-normal">{`Updated ${formatDistanceToNow(
           new Date(connection.lastAccessed),
           {
@@ -141,6 +140,7 @@ function ConnectionState({
 export function BankConnection({ connection }: { connection: BankConnection }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const [toastId, setToastId] = useState<string | number>();
   const [runId, setRunId] = useState<string | undefined>();
   const [accessToken, setAccessToken] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
@@ -171,6 +171,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
   });
 
   const reconnectConnection = useAction(reconnectConnectionAction, {
+    onExecute: () => setSyncing(true),
     onSuccess: ({ data }) => {
       if (data) {
         setRunId(data.id);
@@ -178,33 +179,47 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
       }
     },
     onError: () => {
+      setSyncing(false);
       setRunId(undefined);
       setStatus("FAILED");
+
       toast.error("Something went wrong please try again.");
     },
   });
 
   useEffect(() => {
-    if (status === "COMPLETED") {
-      setRunId(undefined);
+    if (isSyncing) {
+      const id = toast.info("Syncing...", {
+        description: "We're connecting to your bank, please wait.",
+        duration: Number.POSITIVE_INFINITY,
+      });
 
-      void queryClient.invalidateQueries({
+      setToastId(id);
+    }
+  }, [isSyncing, setToastId]);
+
+  useEffect(() => {
+    if (status === "COMPLETED") {
+      toast.dismiss(toastId);
+      setRunId(undefined);
+      setSyncing(false);
+
+      queryClient.invalidateQueries({
         queryKey: trpc.bankConnection.get.queryKey(),
       });
 
-      void queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: trpc.bankAccount.get.queryKey(),
       });
 
-      void queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: trpc.transaction.get.queryKey(),
       });
 
-      void queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: trpc.transaction.get.infiniteQueryKey(),
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   useEffect(() => {
@@ -212,46 +227,32 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
       setSyncing(false);
       setRunId(undefined);
 
-      void queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: trpc.bankConnection.get.queryKey(),
       });
 
-      void queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: trpc.bankAccount.get.queryKey(),
       });
 
       toast.error("Something went wrong please try again.");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   // NOTE: GoCardLess reconnect flow (redirect from API route)
   useEffect(() => {
     if (params.step === "reconnect" && params.id) {
-      const promise = reconnectConnection.executeAsync({
+      reconnectConnection.execute({
+        orgId: "placeholder", // populated on backend
         connectionId: params.id,
         provider: connection.provider,
-        orgId: "placeholder", // populated on backend
-      });
-
-      toast.promise(promise, {
-        loading: "We're connecting to your bank, please wait.",
-        success: "Bank is connected",
-        error: "Error",
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
   const handleManualSync = () => {
-    const promise = manualSyncTransactions.executeAsync({
+    manualSyncTransactions.execute({
       connectionId: connection.id,
-    });
-
-    toast.promise(promise, {
-      loading: "Synincing transactions, please wait.",
-      success: "Transactions are synced",
-      error: "Error",
     });
   };
 

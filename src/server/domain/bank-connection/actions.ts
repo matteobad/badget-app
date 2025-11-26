@@ -1,10 +1,13 @@
 "use server";
 
-import { createId } from "@paralleldrive/cuid2";
 import { tasks } from "@trigger.dev/sdk";
+import { eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import z from "zod/v4";
 import { authActionClient } from "~/lib/safe-action";
+import { db } from "~/server/db";
+import { institution_table } from "~/server/db/schema/open-banking";
 import { gocardlessClient } from "~/server/integrations/open-banking/gocardless/gocardless-api";
 import type { reconnectConnection } from "~/server/jobs/tasks/reconnect-connection";
 import type { syncConnection } from "~/server/jobs/tasks/sync-connection";
@@ -99,13 +102,24 @@ export const reconnectGocardlessLinkAction = authActionClient
       parsedInput: { id, institutionId, redirectTo },
       ctx: { orgId },
     }) => {
-      const reference = `${orgId}:${createId()}`;
+      const reference = `${orgId}:${nanoid()}`;
+      console.log("new reference:", reference);
 
       const link = new URL(redirectTo);
       link.searchParams.append("id", id);
 
+      const [institution] = await db
+        .select()
+        .from(institution_table)
+        .where(eq(institution_table.id, institutionId))
+        .limit(1);
+
+      if (!institution) {
+        console.error("Failed to get institution");
+        return;
+      }
       const institutionData = await gocardlessClient.getInstitutionById({
-        id: institutionId,
+        id: institution.originalId,
       });
 
       if (!institutionData) {
@@ -125,8 +139,8 @@ export const reconnectGocardlessLinkAction = authActionClient
       }
 
       const requisition = await gocardlessClient.createRequisition({
-        institution_id: institutionId,
-        redirect: redirectTo.toString(),
+        institution_id: institutionData.id,
+        redirect: link.toString(),
         agreement: agreementData.id,
         user_language: "IT",
         reference,

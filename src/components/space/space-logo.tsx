@@ -9,6 +9,7 @@ import { Spinner } from "../load-more";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
   Card,
+  CardAction,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -39,44 +40,43 @@ export function SpaceLogo() {
 
   return (
     <Card>
-      <div className="flex items-center justify-between pr-6">
-        <CardHeader>
-          <CardTitle>Space logo</CardTitle>
-          <CardDescription>
-            This is your space&apos;s logo. Click on the logo to upload a custom
-            one from your files.
-          </CardDescription>
-        </CardHeader>
+      <CardHeader>
+        <CardTitle>Space logo</CardTitle>
+        <CardDescription>
+          This is your space&apos;s logo. Click on the logo to upload a custom
+          one from your files.
+        </CardDescription>
+        <CardAction>
+          <Avatar
+            className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-none bg-accent"
+            onClick={() => inputRef?.current?.click()}
+          >
+            {isLoading ? (
+              <Spinner className="h-4 w-4" />
+            ) : (
+              <>
+                <AvatarImage
+                  src={data?.logo ?? undefined}
+                  alt={data?.name ?? undefined}
+                  width={64}
+                  height={64}
+                />
+                <AvatarFallback>
+                  <span className="text-md">{data?.name?.charAt(0)}</span>
+                </AvatarFallback>
+              </>
+            )}
 
-        <Avatar
-          className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-none bg-accent"
-          onClick={() => inputRef?.current?.click()}
-        >
-          {isLoading ? (
-            <Spinner className="h-4 w-4" />
-          ) : (
-            <>
-              <AvatarImage
-                src={data?.logo ?? undefined}
-                alt={data?.name ?? undefined}
-                width={64}
-                height={64}
-              />
-              <AvatarFallback>
-                <span className="text-md">{data?.name?.charAt(0)}</span>
-              </AvatarFallback>
-            </>
-          )}
-
-          <input
-            ref={inputRef}
-            type="file"
-            style={{ display: "none" }}
-            multiple={false}
-            onChange={handleUpload}
-          />
-        </Avatar>
-      </div>
+            <input
+              ref={inputRef}
+              type="file"
+              style={{ display: "none" }}
+              multiple={false}
+              onChange={handleUpload}
+            />
+          </Avatar>
+        </CardAction>
+      </CardHeader>
       <CardFooter>An avatar is optional but strongly recommended.</CardFooter>
     </Card>
   );
