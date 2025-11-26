@@ -1,100 +1,176 @@
 "use client";
 
-import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
-import { AIDevtools } from "@ai-sdk-tools/devtools";
-import { useChat, useChatActions } from "@ai-sdk-tools/store";
+import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
+import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useMemo, useRef } from "react";
+import { Canvas } from "~/components/canvas";
 import { useChatInterface } from "~/hooks/use-chat-interface";
+import { useChatStatus } from "~/hooks/use-chat-status";
 import { cn } from "~/lib/utils";
 import type { UIChatMessage } from "~/server/api/ai/main-agent";
-import { Canvas } from "../canvas/canvas";
 import { ChatHeader } from "./chat-header";
-import { ChatInput } from "./chat-input";
-import { Messages } from "./messages";
+import { ChatInput, type ChatInputMessage } from "./chat-input";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "./conversation";
 
 type Props = {
-  id?: string | null;
   geo?: Geo;
 };
 
-export function ChatInterface({ id, geo }: Props) {
-  const { current } = useArtifacts({
-    exclude: ["chat-title", "followup-questions"],
-  });
-  const isCanvasVisible = !!current;
-  const { isHome, isChatPage, chatId: routeChatId } = useChatInterface();
-  const { setMessages } = useChatActions();
+export function ChatInterface({ geo }: Props) {
+  const { chatId: routeChatId, isHome } = useChatInterface();
+  const chatId = useMemo(() => routeChatId ?? generateId(), [routeChatId]);
+  const { reset } = useChatActions();
   const prevChatIdRef = useRef<string | null>(routeChatId);
+  const [, clearSuggestions] = useDataPart<{ prompts: string[] }>(
+    "suggestions",
+  );
 
-  // Use provided id, or get from route, or generate new one
-  const providedId = id ?? routeChatId;
-
-  // Generate a consistent chat ID - use provided ID or generate one
-  const chatId = useMemo(() => providedId ?? generateId(), [providedId]);
-
-  // Clear messages when navigating back from a chat to home
+  // Reset chat state when navigating away from a chat (sidebar, browser back, etc.)
   useEffect(() => {
     const prevChatId = prevChatIdRef.current;
+    const currentChatId = routeChatId;
 
-    if (prevChatId && !routeChatId) {
-      // Navigated from chat to home - reset messages
-      setMessages([]);
+    // If we had a chatId before and now we don't (navigated away), reset
+    // Or if we're switching to a different chatId, reset
+    if (prevChatId && prevChatId !== currentChatId) {
+      reset();
+      clearSuggestions();
     }
 
-    prevChatIdRef.current = routeChatId;
-  }, [routeChatId, setMessages]);
+    // Update the ref for next comparison
+    prevChatIdRef.current = currentChatId;
+  }, [routeChatId, reset, clearSuggestions]);
 
-  useChat<UIChatMessage>({
+  const { messages, status } = useChat<UIChatMessage>({
     id: chatId,
     transport: new DefaultChatTransport({
-      api: "/api/chat",
-      prepareSendMessagesRequest({ messages }) {
+      api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
+      prepareSendMessagesRequest({ messages, id }) {
+        const lastMessage = messages[messages.length - 1] as ChatInputMessage;
+
+        const agentChoice = lastMessage.metadata?.agentChoice;
+        const toolChoice = lastMessage.metadata?.toolChoice;
+
         return {
           body: {
-            id: chatId,
-            message: messages[messages.length - 1],
+            id,
             country: geo?.country,
             city: geo?.city,
-            timezone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
+            message: lastMessage,
+            agentChoice,
+            toolChoice,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           },
         };
       },
     }),
   });
 
+  const {
+    agentStatus,
+    currentToolCall,
+    artifactStage,
+    artifactType,
+    currentSection,
+    bankAccountRequired,
+  } = useChatStatus(messages, status);
+
+  const [selectedType] = useQueryState("artifact-type", parseAsString);
+
+  const hasMessages = messages.length > 0;
+
+  const [suggestions] = useDataPart<{ prompts: string[] }>("suggestions");
+  const hasSuggestions = suggestions?.prompts && suggestions.prompts.length > 0;
+  const showCanvas = Boolean(selectedType);
+
   return (
-    <div className="relative z-10 h-full w-full overflow-hidden">
+    <div
+      className={cn(
+        "relative flex size-full overflow-hidden",
+        isHome && "h-[calc(100vh-764px)]",
+        !isHome && "h-[calc(100vh-88px)]",
+      )}
+    >
+      {/* Canvas slides in from right when artifacts are present */}
       <div
         className={cn(
-          "relative h-full w-full transition-all duration-300 ease-in-out",
-          isHome && "h-[calc(100vh-764px)]",
-          isChatPage && "h-[calc(100vh-88px)]",
-          isCanvasVisible && "pr-[603px]",
+          "fixed right-0 top-0 bottom-0 z-20",
+          showCanvas ? "translate-x-0" : "translate-x-full",
+          hasMessages && "transition-transform duration-300 ease-in-out",
+          "md:z-20 z-40",
         )}
       >
-        <ChatHeader />
+        <Canvas />
+      </div>
 
-        <div className="relative w-full">
-          <Messages />
+      {/* Main chat area - container that slides left when canvas opens */}
+      <div
+        className={cn(
+          "relative flex-1",
+          hasMessages && "transition-all duration-300 ease-in-out",
+          showCanvas && "mr-0 md:mr-[600px]",
+          !hasMessages && "flex items-center justify-center",
+        )}
+      >
+        {hasMessages && (
+          <>
+            {/* Conversation view - messages with absolute positioning for proper height */}
+            <div className="absolute inset-0 flex flex-col">
+              <div
+                className={cn(
+                  "sticky top-0 left-0 z-10 shrink-0",
+                  hasMessages && "transition-all duration-300 ease-in-out",
+                  showCanvas ? "right-0 md:right-[600px]" : "right-0",
+                )}
+              >
+                <div className="bg-background/80 dark:bg-background/50 backdrop-blur-sm pt-6">
+                  <ChatHeader />
+                </div>
+              </div>
+              <Conversation>
+                <ConversationContent className="pb-48 pt-14">
+                  <div className="max-w-2xl mx-auto w-full">
+                    <ChatMessages
+                      messages={messages}
+                      isStreaming={
+                        status === "streaming" || status === "submitted"
+                      }
+                    />
+                    <ChatStatusIndicators
+                      agentStatus={agentStatus}
+                      currentToolCall={currentToolCall}
+                      status={status}
+                      artifactStage={artifactStage}
+                      artifactType={artifactType}
+                      currentSection={currentSection}
+                      bankAccountRequired={bankAccountRequired}
+                    />
+                  </div>
+                </ConversationContent>
+                <ConversationScrollButton
+                  className={cn(hasSuggestions ? "bottom-40" : "bottom-32")}
+                />
+              </Conversation>
+            </div>
+          </>
+        )}
+
+        <div
+          className={cn(
+            "fixed bottom-0 left-0",
+            hasMessages && "transition-all duration-300 ease-in-out",
+            showCanvas ? "right-0 md:right-[600px]" : "right-0",
+          )}
+        >
           <ChatInput />
         </div>
       </div>
-
-      <Canvas />
-
-      {process.env.NODE_ENV === "development" && (
-        <AIDevtools
-          config={{
-            streamCapture: {
-              enabled: true,
-              endpoint: "/api/chat",
-              autoConnect: true,
-            },
-          }}
-        />
-      )}
     </div>
   );
 }

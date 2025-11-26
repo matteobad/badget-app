@@ -136,7 +136,6 @@ export function NetWorthWidget() {
             showLegend={false}
             showXAxis={false}
             showYAxis={false}
-            showTooltip={false}
           />
         </div>
       </BaseWidget>

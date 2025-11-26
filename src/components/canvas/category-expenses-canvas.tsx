@@ -1,126 +1,142 @@
 "use client";
 
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { parseAsInteger, useQueryState } from "nuqs";
+import {
+  BaseCanvas,
+  CanvasChart,
+  CanvasGrid,
+  CanvasHeader,
+  CanvasSection,
+} from "~/components/canvas/base";
+import { CanvasContent } from "~/components/canvas/base/canvas-content";
+import {
+  formatCurrencyAmount,
+  shouldShowChart,
+  shouldShowMetricsSkeleton,
+  shouldShowSummarySkeleton,
+} from "~/components/canvas/utils";
+import { CategoryExpenseDonutChart } from "~/components/charts/category-expense-donut-chart";
 import { useUserQuery } from "~/hooks/use-user";
-import { formatAmount } from "~/shared/helpers/format";
-import { expensesBreakdownArtifact } from "~/shared/validators/artifacts/expenses-breakdown";
-
-import { ExpensesChart } from "../charts";
-import { BaseCanvas } from "./base/base-canvas";
-import { CanvasChart } from "./base/canvas-chart";
-import { CanvasContent } from "./base/canvas-content";
-import { CanvasGrid } from "./base/canvas-grid";
-import { CanvasHeader } from "./base/canvas-header";
-import { CanvasSection } from "./base/canvas-section";
+import { expensesArtifact } from "~/shared/validators/artifacts/expenses-breakdown";
 
 export function CategoryExpensesCanvas() {
-  const { data, status } = useArtifact(expensesBreakdownArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(expensesArtifact, { version });
+  const { data } = artifact;
   const { data: user } = useUserQuery();
-
-  const isLoading = status === "loading";
   const stage = data?.stage;
+  const currency = data?.currency || "USD";
+  const locale = user?.locale ?? undefined;
+  const categoryData = data?.chart?.categoryData || [];
+  const metrics = data?.metrics;
 
-  // Use artifact data or fallback to empty/default values
-  const categoryData =
-    data?.chart?.categoryData.map((item) => {
-      return {
-        name: item.name,
-        value: item.amount,
-        color: item.color,
-      };
-    }) ?? [];
+  // Categories are already sorted by amount (largest first) from the database
+  // Get the largest expense categories for the chart
+  const largestCategories = categoryData.slice(0, 10); // Top 10 categories
 
-  const expensesBreakdownMetrics = data?.metrics
-    ? [
-        {
-          id: "total-expenses",
-          title: "Total Expenses",
-          value: formatAmount({
-            currency: data.currency,
-            amount: data.metrics.total || 0,
-            locale: user?.locale,
-          }),
-          subtitle: "No change data",
-        },
-        {
-          id: "top-category",
-          title: "Top Category",
-          value: formatAmount({
-            currency: data.currency,
-            amount: data.metrics.topCategory?.amount || 0,
-            locale: user?.locale,
-          }),
-          subtitle: `${data.metrics.topCategory?.percentage || 0}%`,
-        },
-        {
-          id: "recurring-expenses",
-          title: "Recurring Expenses",
-          value: formatAmount({
-            currency: data.currency,
-            amount: data.metrics.recurringExpenses?.amount || 0,
-            locale: user?.locale,
-          }),
-          subtitle: `${data.metrics.recurringExpenses?.percentage || 0}%`,
-        },
-        {
-          id: "uncategorized-transactions",
-          title: "Uncategorized Transactions",
-          value: formatAmount({
-            currency: data.currency,
-            amount: data.metrics.uncategorizedTransactions?.amount || 0,
-            locale: user?.locale,
-          }),
-          subtitle: `${data.metrics.uncategorizedTransactions?.percentage || 0}%`,
-        },
-      ]
-    : [];
+  // Gray shades for legend (matching the chart)
+  const grayShades = [
+    "#ffffff", // White for first
+    "#707070", // Gray for second
+    "#A0A0A0", // Light gray for third
+    "#606060", // Dark gray for fourth
+  ];
 
-  const legendItems = categoryData.map((item) => ({
-    label: item.name,
+  // Prepare chart data (colors will be handled by the chart component)
+  const chartDataWithColors = largestCategories;
+
+  // Prepare legend items - show top 3 largest categories with gray shades
+  const legendItems = chartDataWithColors.slice(0, 3).map((item, index) => ({
+    label: item.category,
     type: "solid" as const,
-    color: item.color,
+    color: grayShades[index % grayShades.length],
   }));
 
-  const showChart =
-    stage &&
-    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
-      stage,
-    );
+  // Get top 4 categories for metrics cards
+  const topCategories = largestCategories.slice(0, 4);
+  const categoryCoverage = metrics?.categoryCoverage;
+  const optimizationPotential = metrics?.optimizationPotential;
 
-  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+  // Prepare metrics cards dynamically from largest categories
+  const expenseMetrics: Array<{
+    id: string;
+    title: string;
+    value: string;
+    subtitle: string;
+  }> = topCategories.map((category, index) => ({
+    id: `category-${index}`,
+    title: index === 0 ? "Top Category" : category.category,
+    value:
+      index === 0
+        ? category.category
+        : formatCurrencyAmount(category.amount, currency, locale),
+    subtitle:
+      index === 0
+        ? `${formatCurrencyAmount(category.amount, currency, locale)} this month`
+        : `${category.percentage.toFixed(1)}% of total`,
+  }));
+
+  // If we have fewer than 4 categories, add general metrics
+  if (topCategories.length < 4) {
+    if (categoryCoverage !== undefined) {
+      expenseMetrics.push({
+        id: "category-coverage",
+        title: "Category Coverage",
+        value: `${Math.round(categoryCoverage)}%`,
+        subtitle: "Tagged transactions",
+      });
+    }
+    if (
+      optimizationPotential !== undefined &&
+      optimizationPotential > 0 &&
+      expenseMetrics.length < 4
+    ) {
+      expenseMetrics.push({
+        id: "optimization-potential",
+        title: "Optimization Potential",
+        value: formatCurrencyAmount(optimizationPotential, currency, locale),
+        subtitle: "Quick wins this month",
+      });
+    }
+  }
+
+  const showChart = shouldShowChart(stage);
+  const showSummarySkeleton = shouldShowSummarySkeleton(stage);
 
   return (
     <BaseCanvas>
-      <CanvasHeader title="Analysis" isLoading={isLoading} />
+      <CanvasHeader title="Analysis" />
 
       <CanvasContent>
         <div className="space-y-8">
-          {/* Show chart as soon as we have net worth data */}
+          {/* Chart Section */}
           {showChart && (
             <CanvasChart
               title="Category Expense Breakdown"
-              legend={{ items: legendItems }}
+              legend={{
+                items: legendItems,
+              }}
               isLoading={stage === "loading"}
               height="20rem"
             >
-              <ExpensesChart
-                data={[]}
-                categoryData={categoryData}
+              <CategoryExpenseDonutChart
+                data={chartDataWithColors}
+                currency={currency}
+                locale={locale}
                 height={320}
-                showLegend={false}
-                chartType="pie"
               />
             </CanvasChart>
           )}
 
-          {/* Always show metrics section */}
+          {/* Metrics Grid */}
           <CanvasGrid
-            items={expensesBreakdownMetrics}
+            items={expenseMetrics}
             layout="2/2"
-            isLoading={stage === "loading" || stage === "chart_ready"}
+            isLoading={shouldShowMetricsSkeleton(stage)}
           />
 
-          {/* Always show summary section */}
+          {/* Summary Section */}
           <CanvasSection title="Summary" isLoading={showSummarySkeleton}>
             {data?.analysis?.summary}
           </CanvasSection>

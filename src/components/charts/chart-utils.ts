@@ -24,10 +24,6 @@ export const commonChartConfig = {
 } as const;
 
 // Utility functions
-export const formatCurrency = (value: number): string => {
-  return `$${(value / 1000).toFixed(0)}k`;
-};
-
 export const formatPercentage = (value: number): string => {
   return `${value.toFixed(1)}%`;
 };
@@ -52,6 +48,54 @@ export const createCompactTickFormatter = () => {
       return `${(value / 1000).toFixed(0)}k`;
     }
     return value.toString();
+  };
+};
+
+// Currency-aware Y-axis tick formatter (e.g., "14k", "16k") - no currency symbol
+export const createYAxisTickFormatter = (
+  _currency: string,
+  _locale?: string,
+) => {
+  return (value: number): string => {
+    if (value >= 1000000) {
+      return `${(value / 1000000).toFixed(1)}M`;
+    }
+    if (value >= 1000) {
+      return `${(value / 1000).toFixed(0)}k`;
+    }
+    return value.toString();
+  };
+};
+
+// Calculate Y-axis domain and ticks for forecast charts
+export const calculateYAxisDomain = <
+  T extends { actual?: number; forecasted?: number },
+>(
+  data: T[],
+) => {
+  const allValues = data
+    .flatMap((d) => [d.actual ?? 0, d.forecasted ?? 0])
+    .filter((v) => v > 0);
+
+  if (allValues.length === 0) return { min: 0, max: 10000, ticks: [] };
+
+  const min = Math.min(...allValues);
+  const max = Math.max(...allValues);
+
+  // Round to nearest 2k for nice increments
+  const minRounded = Math.floor(min / 2000) * 2000;
+  const maxRounded = Math.ceil(max / 2000) * 2000;
+
+  // Generate ticks in 2k increments
+  const ticks: number[] = [];
+  for (let i = minRounded; i <= maxRounded; i += 2000) {
+    ticks.push(i);
+  }
+
+  return {
+    min: minRounded,
+    max: maxRounded,
+    ticks,
   };
 };
 
@@ -108,39 +152,4 @@ export interface BaseChartProps {
   height?: number;
   className?: string;
   showAnimation?: boolean;
-  showTooltip?: boolean;
 }
-
-// Sample data generators for development
-export const generateSampleData = {
-  burnRate: () => [
-    { month: "Oct", amount: 4500, average: 6000 },
-    { month: "Nov", amount: 5200, average: 6000 },
-    { month: "Dec", amount: 5800, average: 6000 },
-    { month: "Jan", amount: 6200, average: 6000 },
-    { month: "Feb", amount: 6800, average: 6000 },
-    { month: "Mar", amount: 7100, average: 6000 },
-    { month: "Apr", amount: 7500, average: 6000 },
-  ],
-
-  revenue: () =>
-    Array.from({ length: 12 }, (_, i) => ({
-      month: new Date(2024, i).toLocaleDateString("en-US", { month: "short" }),
-      revenue: Math.floor(Math.random() * 15000) + 5000,
-      target: 12000,
-    })),
-
-  profit: () =>
-    Array.from({ length: 12 }, (_, i) => ({
-      month: new Date(2024, i).toLocaleDateString("en-US", { month: "short" }),
-      profit: Math.floor(Math.random() * 8000) - 2000,
-      expenses: Math.floor(Math.random() * 5000) + 3000,
-    })),
-
-  expenses: () =>
-    Array.from({ length: 12 }, (_, i) => ({
-      month: new Date(2024, i).toLocaleDateString("en-US", { month: "short" }),
-      amount: Math.floor(Math.random() * 7000) + 2000,
-      category: ["Marketing", "Operations", "Salaries", "Office"][i % 4],
-    })),
-};

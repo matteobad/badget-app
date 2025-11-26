@@ -1,14 +1,9 @@
 "use client";
 
-import { Suspense } from "react";
 import { useChatInterface } from "~/hooks/use-chat-interface";
 import type { RouterOutput } from "~/server/api/trpc/routers/_app";
 
-import {
-  SuggestedActions,
-  SuggestedActionsSkeleton,
-} from "../suggested-actions";
-import { useIsCustomizing, WidgetProvider } from "./widget-provider";
+import { WidgetProvider } from "./widget-provider";
 import { WidgetsGrid } from "./widgets-grid";
 import { WidgetsHeader } from "./widgets-header";
 
@@ -16,7 +11,7 @@ type WidgetPreferences = RouterOutput["widgets"]["getWidgetPreferences"];
 
 function WidgetsContent() {
   const { isChatPage } = useChatInterface();
-  const isCustomizing = useIsCustomizing();
+  // const isCustomizing = useIsCustomizing();
 
   if (isChatPage) {
     return null;
@@ -26,11 +21,11 @@ function WidgetsContent() {
     <div className="mt-6 flex flex-col">
       <WidgetsHeader />
       <WidgetsGrid />
-      {!isCustomizing && (
+      {/* {!isCustomizing && (
         <Suspense fallback={<SuggestedActionsSkeleton />}>
           <SuggestedActions />
         </Suspense>
-      )}
+      )} */}
     </div>
   );
 }

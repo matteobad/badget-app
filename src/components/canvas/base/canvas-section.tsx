@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "~/lib/utils";
-
 import { Skeleton } from "./skeleton";
 
 interface CanvasSectionProps {
@@ -33,11 +32,11 @@ export function CanvasSection({
   return (
     <div className={cn("mt-8 mb-4", className)}>
       {title && (
-        <h3 className="mb-3 text-[12px] leading-normal text-[#707070] dark:text-[#666666]">
+        <h3 className="text-[12px] leading-normal mb-3 text-[#707070] dark:text-[#666666]">
           {title}
         </h3>
       )}
-      <div className="font-hedvig-sans-slashed-zero text-[12px] leading-[17px] text-black dark:text-white">
+      <div className="text-[12px] leading-[17px] font-sans text-black dark:text-white">
         {children}
       </div>
     </div>
