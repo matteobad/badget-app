@@ -1,11 +1,11 @@
 import { logger, schemaTask } from "@trigger.dev/sdk";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "~/server/db";
 import { account_table } from "~/server/db/schema/accounts";
 import { connection_table } from "~/server/db/schema/open-banking";
 import { getBankAccountProvider } from "~/server/integrations/open-banking";
+import { gocardlessClient } from "~/server/integrations/open-banking/gocardless/gocardless-api";
 import { reconnectConnectionSchema } from "~/shared/validators/bank-connection.schema";
-
 import { syncConnection } from "./sync-connection";
 
 export const reconnectConnection = schemaTask({
@@ -18,21 +18,15 @@ export const reconnectConnection = schemaTask({
   run: async ({ orgId, connectionId, provider }) => {
     if (provider === "gocardless") {
       // We need to update the reference of the connection
-      const [connection] = await db
-        .select()
-        .from(connection_table)
-        .where(
-          and(
-            eq(connection_table.id, connectionId),
-            eq(connection_table.organizationId, orgId),
-          ),
-        );
+      const requisition = await gocardlessClient.getRequisitionByReference({
+        reference: orgId,
+      });
 
-      if (!connection) {
-        throw new Error("Connection not found");
+      if (!requisition) {
+        throw new Error("Requisition not found");
       }
 
-      const referenceId = connection.id;
+      const referenceId = requisition.id;
 
       // Update the reference_id of the new connection
       if (referenceId) {
@@ -43,7 +37,7 @@ export const reconnectConnection = schemaTask({
           .set({
             referenceId: referenceId,
           })
-          .where(eq(connection_table.id, connection.id));
+          .where(eq(connection_table.id, connectionId));
       }
 
       // The account_ids can be different between the old and new connection

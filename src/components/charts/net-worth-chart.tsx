@@ -27,6 +27,7 @@ interface NetWorthChartProps extends BaseChartProps {
   showYAxis?: boolean;
   currency?: string;
   locale?: string;
+  showTooltip?: boolean;
 }
 
 // Custom tooltip component
