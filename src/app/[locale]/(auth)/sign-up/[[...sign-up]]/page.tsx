@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SignUpForm } from "~/components/auth/sign-up-form";
 import { auth } from "~/shared/helpers/better-auth/auth";
+import { getScopedI18n } from "~/shared/locales/server";
 
 export const metadata: Metadata = {
   title: "Signup | Badget.",
@@ -13,11 +14,13 @@ export default async function SignUpPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (session) return redirect("/overview");
 
+  const t = await getScopedI18n("auth");
+
   return (
-    <div className="p-2">
+    <div className="space-y-4">
       {/* Welcome Section */}
       <div className="text-center">
-        <h1 className="mb-4 font-serif text-lg">Welcome to Badget.</h1>
+        <h1 className="mb-2 font-serif text-lg">Welcome to Badget.</h1>
         <p className="mb-8 text-sm text-[#878787]">
           New here? Register an account to continue
         </p>
@@ -26,19 +29,17 @@ export default async function SignUpPage() {
       {/* Sign In Options */}
       <div className="space-y-4">
         {/* Primary Sign In Option */}
-        <div className="space-y-3">
-          <SignUpForm />
-        </div>
-        <div className="flex items-center justify-center">
-          <span className="text-sm text-[#878787]">Or</span>
-        </div>
-        {/* Sign-in Options */}
-        <Link
-          href="/sign-in"
-          className="ml-auto inline-block w-full text-center text-sm underline"
-        >
-          Go to Sign-in
-        </Link>
+        <SignUpForm />
+      </div>
+
+      {/* Sign-in Options */}
+      <div className="flex justify-center">
+        <span className="text-sm text-muted-foreground">
+          {t("already_have_account")}{" "}
+          <Link href="/sign-in" className="text-primary underline">
+            {t("signin.submit_btn")}
+          </Link>
+        </span>
       </div>
     </div>
   );

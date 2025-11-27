@@ -14,13 +14,13 @@ export default async function ForgotPasswordPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (session) return redirect("/overview");
 
-  const t = await getScopedI18n("auth");
+  const t = await getScopedI18n("auth.forgot_password");
 
   return (
-    <div className="p-2">
+    <div className="space-y-4">
       {/* Welcome Section */}
       <div className="text-center">
-        <h1 className="mb-4 font-serif text-lg">Welcome to Badget.</h1>
+        <h1 className="mb-2 font-serif text-lg">Welcome to Badget.</h1>
         <p className="mb-8 text-sm text-[#878787]">
           Forgot your password? Enter your email to reset it.
         </p>
@@ -28,13 +28,14 @@ export default async function ForgotPasswordPage() {
 
       <div className="space-y-4">
         <ForgotPasswordForm />
+      </div>
 
-        <div className="w-full text-center text-sm">
-          {t("account")}{" "}
+      <div className="w-full text-center text-sm">
+        <span className="text-sm text-muted-foreground">
           <Link href="/sign-in" className="text-primary underline">
-            {t("signin.submit")}
+            {t("back_btn")}
           </Link>
-        </div>
+        </span>
       </div>
     </div>
   );

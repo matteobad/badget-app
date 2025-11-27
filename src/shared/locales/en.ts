@@ -4,24 +4,50 @@ export default {
   welcome: "Hello {name}!",
 
   // auth
-  "auth.account": "Already have an account?",
-  "auth.no_account": "Don't have an account?",
-  "auth.signin.title": "Sign In",
-  "auth.signin.subtitle": "Enter your email below to login to your account",
-  "auth.signin.forgot": "Forgot your password?",
-  "auth.signin.submit": "Login",
-  "auth.signup.title": "Sign Up",
-  "auth.signup.subtitle": "Enter your information to create an account",
-  "auth.signup.submit": "Sign Up",
-  "auth.forgot.title": "Forgot password",
-  "auth.forgot.subtitle": "Enter your email to reset your password",
-  "auth.forgot.submit": "Send reset link",
-  "auth.reset.title": "Password reset",
-  "auth.reset.subtitle": "Create and confirm your new password",
-  "auth.reset.submit": "Reset password",
-  "auth.reset.error": "Invalid reset link",
-  "auth.reset.invalid": "The password reset link is invalid or expired",
-  "auth.reset.back": "Back to login",
+  auth: {
+    already_have_account: "Already have an account?",
+    no_account: "Don't have an account?",
+
+    signup: {
+      title: "Sign Up",
+      subtitle: "Enter your information to create an account",
+      first_name_fld: "First name",
+      last_name_fld: "Last name",
+      email_fld: "Email",
+      password_fld: "Password",
+      password_confirmation_fld: "Confirm password",
+      image_fld: "Profile image (optional)",
+      submit_btn: "Sign Up",
+    },
+
+    signin: {
+      title: "Welcome to Badget.",
+      subtitle: "Enter your email below to login to your account",
+      email_fld: "Email",
+      password_fld: "Password",
+      forgot_link: "Forgot your password?",
+      submit_btn: "Sign In",
+    },
+
+    forgot_password: {
+      title: "Forgot password",
+      subtitle: "Enter your email to reset your password",
+      back_btn: "Back to login",
+      email_fld: "Email",
+      submit_btn: "Send reset link",
+    },
+
+    reset_password: {
+      title: "Password reset",
+      subtitle: "Create and confirm your new password",
+      back_btn: "Back to login",
+      password_fld: "Password",
+      password_confirmation_fld: "Confirm password",
+      submit_btn: "Reset password",
+      invalid_link_title: "Invalid reset link",
+      invalid_link_description: "The password reset link is invalid or expired",
+    },
+  },
 
   // account
   "account.profile": "Profile",
@@ -214,12 +240,6 @@ export default {
         last_12_months: "Last 12 months",
       },
     },
-  },
-
-  auth: {
-    signin_title: "Welcome to Badget.",
-    signin_subtitle: "New here or coming back? Choose how you want to continue",
-    no_account: "Don't have an account yet?",
   },
 
   transactions: {

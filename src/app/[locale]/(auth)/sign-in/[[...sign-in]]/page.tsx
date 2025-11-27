@@ -4,12 +4,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PasskeyButton } from "~/components/auth/passkey-button";
 import { SignInForm } from "~/components/auth/sign-in-form";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "~/components/ui/accordion";
 import { auth } from "~/shared/helpers/better-auth/auth";
 import { getScopedI18n } from "~/shared/locales/server";
 
@@ -21,48 +15,30 @@ export default async function SignIn() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (session) return redirect("/overview");
 
-  const tScoped = await getScopedI18n("auth");
-  const preferredSignInOption = <SignInForm />;
-  const moreSignInOptions = <PasskeyButton />;
+  const t = await getScopedI18n("auth");
 
   return (
-    <div className="p-2">
+    <div className="space-y-4">
       {/* Welcome Section */}
       <div className="text-center">
-        <h1 className="mb-4 font-serif text-lg">{tScoped("signin_title")}</h1>
-        <p className="mb-8 text-sm text-[#878787]">
-          {tScoped("signin_subtitle")}
-        </p>
+        <h1 className="mb-2 font-serif text-lg">{t("signin.title")}</h1>
+        <p className="mb-8 text-sm text-[#878787]">{t("signin.subtitle")}</p>
       </div>
 
       {/* Sign In Options */}
       <div className="space-y-4">
-        {/* Primary Sign In Option */}
-        <div className="space-y-3">{preferredSignInOption}</div>
+        <SignInForm />
+        <PasskeyButton />
+      </div>
 
-        <div className="flex items-center justify-center">
-          <span className="text-sm text-[#878787]">Or</span>
-        </div>
-
-        {/* More Options Accordion */}
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="item-1" className="border-0">
-            <AccordionTrigger className="flex items-center justify-center py-2 text-sm hover:no-underline">
-              <span>Other options</span>
-            </AccordionTrigger>
-            <AccordionContent className="pt-4">
-              <div className="space-y-3">{moreSignInOptions}</div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-
-        {/* Sign-up Option */}
-        <div className="w-full text-center text-sm">
-          {tScoped("no_account")}{" "}
-          <Link href="/sign-up" className="ml-auto inline-block underline">
-            Sign-up
+      {/* Sign-up Option */}
+      <div className="flex justify-center">
+        <span className="text-sm text-muted-foreground">
+          {t("no_account")}{" "}
+          <Link href="/sign-up" className="text-primary underline">
+            {t("signup.submit_btn")}
           </Link>
-        </div>
+        </span>
       </div>
     </div>
   );

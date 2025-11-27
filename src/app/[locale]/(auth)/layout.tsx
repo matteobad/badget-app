@@ -57,7 +57,7 @@ export default async function Layout({ children }: PropsWithChildren) {
 
               {/* Terms and Privacy */}
               <div className="absolute right-0 bottom-4 left-0 text-center">
-                <p className="font-mono text-xs leading-relaxed text-[#878787]">
+                <p className="text-xs leading-relaxed text-muted-foreground">
                   By signing in you agree to our{" "}
                   <Link href="/terms" className="underline">
                     Terms of service

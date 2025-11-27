@@ -5,7 +5,7 @@ import { APIError } from "better-auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
-import { useState } from "react";
+import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -19,10 +19,11 @@ import { Spinner } from "../ui/spinner";
 const formSchema = z.object({
   email: z.email(),
   password: z.string(),
+  rememberMe: z.boolean().optional(),
 });
 
 export const SignInForm = () => {
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [returnTo] = useQueryState("return_to");
 
   const router = useRouter();
@@ -36,35 +37,30 @@ export const SignInForm = () => {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    try {
-      // Call the authClient's forgetPassword method, passing the email and a redirect URL.
-      await authClient.signIn.email(
-        {
-          ...data,
-        },
-        {
-          onRequest: () => {
-            setLoading(true);
-          },
-          onResponse: () => {
-            setLoading(false);
-          },
-          onError: (ctx) => {
-            toast.error(ctx.error.message);
-          },
-          onSuccess: (ctx) => {
-            if (ctx.data.twoFactorRedirect) router.push("/2fa");
-            else router.push(returnTo ? `/${returnTo}` : "/overview");
-          },
-        },
-      );
-    } catch (error) {
-      if (error instanceof APIError) {
-        console.log(error.message, error.status);
-        toast.error(error.message);
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    startTransition(async () => {
+      try {
+        const { data, error } = await authClient.signIn.email({
+          email: values.email,
+          password: values.password,
+          rememberMe: values.rememberMe,
+        });
+
+        if (error) {
+          console.log(error.message, error.status);
+          toast.error(error.message);
+          return;
+        }
+
+        if ("twoFactorRedirect" in data) router.push("/2fa");
+        else router.push(returnTo ? `/${returnTo}` : "/overview");
+      } catch (error) {
+        if (error instanceof APIError) {
+          console.log(error.message, error.status);
+          toast.error(error.message);
+        }
       }
-    }
+    });
   };
 
   return (
@@ -75,7 +71,7 @@ export const SignInForm = () => {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <FieldLabel htmlFor="email">{t("email_fld")}</FieldLabel>
               <Input
                 {...field}
                 id="email"
@@ -94,12 +90,12 @@ export const SignInForm = () => {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <div className="flex items-center">
-                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <FieldLabel htmlFor="password">{t("password_fld")}</FieldLabel>
                 <Link
                   href="/forgot-password"
                   className="ml-auto inline-block text-sm underline"
                 >
-                  {t("forgot")}
+                  {t("forgot_link")}
                 </Link>
               </div>
               <Input
@@ -107,7 +103,7 @@ export const SignInForm = () => {
                 id="password"
                 aria-invalid={fieldState.invalid}
                 type="password"
-                placeholder="password"
+                placeholder="********"
                 autoComplete="current-password webauthn"
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -115,8 +111,8 @@ export const SignInForm = () => {
           )}
         />
 
-        <Button type="submit" className="w-full mt-2" disabled={loading}>
-          {loading ? <Spinner /> : <p> {t("submit")} </p>}
+        <Button type="submit" className="w-full mt-2" disabled={isPending}>
+          {isPending ? <Spinner /> : <p> {t("submit_btn")} </p>}
         </Button>
       </FieldGroup>
     </form>

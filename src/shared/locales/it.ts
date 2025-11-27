@@ -4,24 +4,50 @@ export default {
   welcome: "Benvenuto {name}!",
 
   // auth
-  "auth.account": "Hai già un account?",
-  "auth.no_account": "Non hai ancora un account?",
-  "auth.signin.title": "Accedi",
-  "auth.signin.subtitle": "Inserisci i dati per accedere al tuo account",
-  "auth.signin.forgot": "Password dimenticata?",
-  "auth.signin.submit": "Accedi",
-  "auth.signup.title": "Registrati",
-  "auth.signup.subtitle": "Inserisci le tue info per creare un account",
-  "auth.signup.submit": "Registrati",
-  "auth.forgot.title": "Password dimenticata",
-  "auth.forgot.subtitle": "Inserisci la tua email per resettare la password",
-  "auth.forgot.submit": "Invia link di reset",
-  "auth.reset.title": "Reset password",
-  "auth.reset.subtitle": "Crea e confera la tua nuova password",
-  "auth.reset.submit": "Resetta password",
-  "auth.reset.error": "Link invalido",
-  "auth.reset.invalid": "Il link usato è invalido o scaduto",
-  "auth.reset.back": "Torna al login",
+  auth: {
+    already_have_account: "Hai già un account?",
+    no_account: "Non hai ancora un account?",
+
+    signup: {
+      title: "Registrati",
+      subtitle: "Inserisci le tue info per creare un account",
+      first_name_fld: "Nome",
+      last_name_fld: "Cognome",
+      email_fld: "Email",
+      password_fld: "Password",
+      password_confirmation_fld: "Conferma password",
+      image_fld: "Immagine di profilo (opzionale)",
+      submit_btn: "Registrati",
+    },
+
+    signin: {
+      title: "Bentornato in Badget.",
+      subtitle: "Inserisci i tuoi dati per accedere al tuo account",
+      email_fld: "Email",
+      password_fld: "Password",
+      forgot_link: "Password dimenticata?",
+      submit_btn: "Accedi",
+    },
+
+    forgot_password: {
+      title: "Password dimenticata",
+      subtitle: "Inserisci la tua email per resettare la password",
+      back_btn: "Torna al login",
+      email_fld: "Email",
+      submit_btn: "Invia link di reset",
+    },
+
+    reset_password: {
+      invalid_link_title: "Link invalido",
+      invalid_link_description: "Il link usato è invalido o scaduto",
+      title: "Reset password",
+      subtitle: "Crea e confera la tua nuova password",
+      back_btn: "Torna al login",
+      password_fld: "Password",
+      password_confirmation_fld: "Conferma password",
+      submit_btn: "Resetta password",
+    },
+  },
 
   // account
   "account.profile": "Profilo",
@@ -219,12 +245,6 @@ export default {
         last_12_months: "Ultimi 12 mesi",
       },
     },
-  },
-
-  auth: {
-    signin_title: "Benvenuto in Badget.",
-    signin_subtitle: "Nuovo qui o stai tornando? Scegli come vuoi continuare",
-    no_account: "Non hai ancora un account?",
   },
 
   transactions: {
