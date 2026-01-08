@@ -50,14 +50,14 @@ export const spacesRouter = createTRPCRouter({
 
   removeMember: protectedProcedure
     .input(removeMemberSchema)
-    .mutation(async ({ ctx: { orgId }, input }) => {
-      return await removeMember(input, orgId!);
+    .mutation(async ({ ctx: { headers, orgId }, input }) => {
+      return await removeMember(input, headers, orgId!);
     }),
 
   updateMemberRole: protectedProcedure
     .input(updateMemberRoleSchema)
-    .mutation(async ({ ctx: { orgId }, input }) => {
-      return await updateMemberRole(input, orgId!);
+    .mutation(async ({ ctx: { headers, orgId }, input }) => {
+      return await updateMemberRole(input, headers, orgId!);
     }),
 
   leave: protectedProcedure.mutation(async ({ ctx: { orgId, headers } }) => {
@@ -101,8 +101,8 @@ export const spacesRouter = createTRPCRouter({
 
   cancelInvitation: protectedProcedure
     .input(cancelInvitationSchema)
-    .mutation(async ({ ctx: { orgId }, input }) => {
-      return cancelInvitation(input, orgId!);
+    .mutation(async ({ ctx: { headers, orgId }, input }) => {
+      return cancelInvitation(input, headers, orgId!);
     }),
 
   acceptInvitation: protectedProcedure

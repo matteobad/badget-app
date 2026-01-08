@@ -79,9 +79,11 @@ export async function createInvitation(
 
 export async function cancelInvitation(
   params: z.infer<typeof cancelInvitationSchema>,
+  headers: Headers,
   _organizationId: string, // TODO: check permission to cancel invitation
 ) {
   await auth.api.cancelInvitation({
+    headers,
     body: {
       invitationId: params.invitationId,
     },

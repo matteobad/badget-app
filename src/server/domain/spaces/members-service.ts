@@ -22,9 +22,11 @@ export async function getSpaceMembers(
 
 export async function removeMember(
   params: z.infer<typeof removeMemberSchema>,
+  headers: Headers,
   organizationId: string,
 ) {
   const data = await auth.api.removeMember({
+    headers,
     body: {
       memberIdOrEmail: params.memberIdOrEmail, // required
       organizationId,
@@ -36,9 +38,11 @@ export async function removeMember(
 
 export async function updateMemberRole(
   params: z.infer<typeof updateMemberRoleSchema>,
+  headers: Headers,
   organizationId: string,
 ) {
   await auth.api.updateMemberRole({
+    headers,
     body: {
       role: params.role, // required
       memberId: params.memberId, // required
